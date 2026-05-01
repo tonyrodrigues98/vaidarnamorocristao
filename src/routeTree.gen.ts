@@ -9,15 +9,33 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as OnboardingEtapa2RouteImport } from './routes/onboarding/etapa-2'
+import { Route as OnboardingEtapa1RouteImport } from './routes/onboarding/etapa-1'
 import { Route as AuthSignupRouteImport } from './routes/auth/signup'
 import { Route as AuthResetPasswordRouteImport } from './routes/auth/reset-password'
 import { Route as AuthLoginRouteImport } from './routes/auth/login'
 import { Route as AuthForgotPasswordRouteImport } from './routes/auth/forgot-password'
 
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OnboardingEtapa2Route = OnboardingEtapa2RouteImport.update({
+  id: '/onboarding/etapa-2',
+  path: '/onboarding/etapa-2',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OnboardingEtapa1Route = OnboardingEtapa1RouteImport.update({
+  id: '/onboarding/etapa-1',
+  path: '/onboarding/etapa-1',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthSignupRoute = AuthSignupRouteImport.update({
@@ -43,65 +61,107 @@ const AuthForgotPasswordRoute = AuthForgotPasswordRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/auth/signup': typeof AuthSignupRoute
+  '/onboarding/etapa-1': typeof OnboardingEtapa1Route
+  '/onboarding/etapa-2': typeof OnboardingEtapa2Route
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/auth/signup': typeof AuthSignupRoute
+  '/onboarding/etapa-1': typeof OnboardingEtapa1Route
+  '/onboarding/etapa-2': typeof OnboardingEtapa2Route
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/auth/signup': typeof AuthSignupRoute
+  '/onboarding/etapa-1': typeof OnboardingEtapa1Route
+  '/onboarding/etapa-2': typeof OnboardingEtapa2Route
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/dashboard'
     | '/auth/forgot-password'
     | '/auth/login'
     | '/auth/reset-password'
     | '/auth/signup'
+    | '/onboarding/etapa-1'
+    | '/onboarding/etapa-2'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/dashboard'
     | '/auth/forgot-password'
     | '/auth/login'
     | '/auth/reset-password'
     | '/auth/signup'
+    | '/onboarding/etapa-1'
+    | '/onboarding/etapa-2'
   id:
     | '__root__'
     | '/'
+    | '/dashboard'
     | '/auth/forgot-password'
     | '/auth/login'
     | '/auth/reset-password'
     | '/auth/signup'
+    | '/onboarding/etapa-1'
+    | '/onboarding/etapa-2'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  DashboardRoute: typeof DashboardRoute
   AuthForgotPasswordRoute: typeof AuthForgotPasswordRoute
   AuthLoginRoute: typeof AuthLoginRoute
   AuthResetPasswordRoute: typeof AuthResetPasswordRoute
   AuthSignupRoute: typeof AuthSignupRoute
+  OnboardingEtapa1Route: typeof OnboardingEtapa1Route
+  OnboardingEtapa2Route: typeof OnboardingEtapa2Route
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/onboarding/etapa-2': {
+      id: '/onboarding/etapa-2'
+      path: '/onboarding/etapa-2'
+      fullPath: '/onboarding/etapa-2'
+      preLoaderRoute: typeof OnboardingEtapa2RouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/onboarding/etapa-1': {
+      id: '/onboarding/etapa-1'
+      path: '/onboarding/etapa-1'
+      fullPath: '/onboarding/etapa-1'
+      preLoaderRoute: typeof OnboardingEtapa1RouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth/signup': {
@@ -137,10 +197,13 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  DashboardRoute: DashboardRoute,
   AuthForgotPasswordRoute: AuthForgotPasswordRoute,
   AuthLoginRoute: AuthLoginRoute,
   AuthResetPasswordRoute: AuthResetPasswordRoute,
   AuthSignupRoute: AuthSignupRoute,
+  OnboardingEtapa1Route: OnboardingEtapa1Route,
+  OnboardingEtapa2Route: OnboardingEtapa2Route,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
