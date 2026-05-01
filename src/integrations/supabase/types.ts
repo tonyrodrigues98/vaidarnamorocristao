@@ -77,6 +77,7 @@ export type Database = {
           created_at: string
           edited_at: string | null
           id: string
+          reply_to_id: string | null
           sender_id: string
         }
         Insert: {
@@ -84,6 +85,7 @@ export type Database = {
           created_at?: string
           edited_at?: string | null
           id?: string
+          reply_to_id?: string | null
           sender_id: string
         }
         Update: {
@@ -91,9 +93,18 @@ export type Database = {
           created_at?: string
           edited_at?: string | null
           id?: string
+          reply_to_id?: string | null
           sender_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "global_messages_reply_to_id_fkey"
+            columns: ["reply_to_id"]
+            isOneToOne: false
+            referencedRelation: "global_messages"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       interests: {
         Row: {
@@ -145,6 +156,7 @@ export type Database = {
           id: string
           match_id: string
           read_at: string | null
+          reply_to_id: string | null
           sender_id: string
         }
         Insert: {
@@ -154,6 +166,7 @@ export type Database = {
           id?: string
           match_id: string
           read_at?: string | null
+          reply_to_id?: string | null
           sender_id: string
         }
         Update: {
@@ -163,6 +176,7 @@ export type Database = {
           id?: string
           match_id?: string
           read_at?: string | null
+          reply_to_id?: string | null
           sender_id?: string
         }
         Relationships: [
@@ -171,6 +185,13 @@ export type Database = {
             columns: ["match_id"]
             isOneToOne: false
             referencedRelation: "matches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_reply_to_id_fkey"
+            columns: ["reply_to_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
             referencedColumns: ["id"]
           },
         ]
