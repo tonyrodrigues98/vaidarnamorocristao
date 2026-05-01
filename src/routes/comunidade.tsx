@@ -35,13 +35,6 @@ function Comunidade() {
   const [replyTo, setReplyTo] = useState<GMsg | null>(null);
   const [highlightId, setHighlightId] = useState<string | null>(null);
   const messageRefs = useRef<Record<string, HTMLDivElement | null>>({});
-  const [blockedIds, setBlockedIds] = useState<Set<string>>(new Set());
-
-  useEffect(() => {
-    if (!user) return;
-    supabase.from("blocks").select("blocked_id").eq("blocker_id", user.id)
-      .then(({ data }) => setBlockedIds(new Set((data ?? []).map((b) => b.blocked_id as string))));
-  }, [user]);
 
   useEffect(() => {
     if (!user) return;
@@ -201,7 +194,6 @@ function Comunidade() {
               </div>
             ) : (
               messages
-                .filter((m) => !blockedIds.has(m.sender_id) || m.sender_id === user?.id)
                 .map((m) => {
                 const p = profiles[m.sender_id];
                 const mine = user && m.sender_id === user.id;
