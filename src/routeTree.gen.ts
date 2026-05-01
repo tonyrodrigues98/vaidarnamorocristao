@@ -9,38 +9,179 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PretendentesIndexRouteImport } from './routes/pretendentes/index'
+import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as PretendentesIdRouteImport } from './routes/pretendentes/$id'
+import { Route as OnboardingEtapa2RouteImport } from './routes/onboarding/etapa-2'
+import { Route as OnboardingEtapa1RouteImport } from './routes/onboarding/etapa-1'
+import { Route as AuthSignupRouteImport } from './routes/auth/signup'
+import { Route as AuthResetPasswordRouteImport } from './routes/auth/reset-password'
+import { Route as AuthLoginRouteImport } from './routes/auth/login'
+import { Route as AuthForgotPasswordRouteImport } from './routes/auth/forgot-password'
 
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PretendentesIndexRoute = PretendentesIndexRouteImport.update({
+  id: '/pretendentes/',
+  path: '/pretendentes/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/admin/',
+  path: '/admin/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PretendentesIdRoute = PretendentesIdRouteImport.update({
+  id: '/pretendentes/$id',
+  path: '/pretendentes/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OnboardingEtapa2Route = OnboardingEtapa2RouteImport.update({
+  id: '/onboarding/etapa-2',
+  path: '/onboarding/etapa-2',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OnboardingEtapa1Route = OnboardingEtapa1RouteImport.update({
+  id: '/onboarding/etapa-1',
+  path: '/onboarding/etapa-1',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthSignupRoute = AuthSignupRouteImport.update({
+  id: '/auth/signup',
+  path: '/auth/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthResetPasswordRoute = AuthResetPasswordRouteImport.update({
+  id: '/auth/reset-password',
+  path: '/auth/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthLoginRoute = AuthLoginRouteImport.update({
+  id: '/auth/login',
+  path: '/auth/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthForgotPasswordRoute = AuthForgotPasswordRouteImport.update({
+  id: '/auth/forgot-password',
+  path: '/auth/forgot-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardRoute
+  '/auth/forgot-password': typeof AuthForgotPasswordRoute
+  '/auth/login': typeof AuthLoginRoute
+  '/auth/reset-password': typeof AuthResetPasswordRoute
+  '/auth/signup': typeof AuthSignupRoute
+  '/onboarding/etapa-1': typeof OnboardingEtapa1Route
+  '/onboarding/etapa-2': typeof OnboardingEtapa2Route
+  '/pretendentes/$id': typeof PretendentesIdRoute
+  '/admin/': typeof AdminIndexRoute
+  '/pretendentes/': typeof PretendentesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardRoute
+  '/auth/forgot-password': typeof AuthForgotPasswordRoute
+  '/auth/login': typeof AuthLoginRoute
+  '/auth/reset-password': typeof AuthResetPasswordRoute
+  '/auth/signup': typeof AuthSignupRoute
+  '/onboarding/etapa-1': typeof OnboardingEtapa1Route
+  '/onboarding/etapa-2': typeof OnboardingEtapa2Route
+  '/pretendentes/$id': typeof PretendentesIdRoute
+  '/admin': typeof AdminIndexRoute
+  '/pretendentes': typeof PretendentesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardRoute
+  '/auth/forgot-password': typeof AuthForgotPasswordRoute
+  '/auth/login': typeof AuthLoginRoute
+  '/auth/reset-password': typeof AuthResetPasswordRoute
+  '/auth/signup': typeof AuthSignupRoute
+  '/onboarding/etapa-1': typeof OnboardingEtapa1Route
+  '/onboarding/etapa-2': typeof OnboardingEtapa2Route
+  '/pretendentes/$id': typeof PretendentesIdRoute
+  '/admin/': typeof AdminIndexRoute
+  '/pretendentes/': typeof PretendentesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/dashboard'
+    | '/auth/forgot-password'
+    | '/auth/login'
+    | '/auth/reset-password'
+    | '/auth/signup'
+    | '/onboarding/etapa-1'
+    | '/onboarding/etapa-2'
+    | '/pretendentes/$id'
+    | '/admin/'
+    | '/pretendentes/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/dashboard'
+    | '/auth/forgot-password'
+    | '/auth/login'
+    | '/auth/reset-password'
+    | '/auth/signup'
+    | '/onboarding/etapa-1'
+    | '/onboarding/etapa-2'
+    | '/pretendentes/$id'
+    | '/admin'
+    | '/pretendentes'
+  id:
+    | '__root__'
+    | '/'
+    | '/dashboard'
+    | '/auth/forgot-password'
+    | '/auth/login'
+    | '/auth/reset-password'
+    | '/auth/signup'
+    | '/onboarding/etapa-1'
+    | '/onboarding/etapa-2'
+    | '/pretendentes/$id'
+    | '/admin/'
+    | '/pretendentes/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  DashboardRoute: typeof DashboardRoute
+  AuthForgotPasswordRoute: typeof AuthForgotPasswordRoute
+  AuthLoginRoute: typeof AuthLoginRoute
+  AuthResetPasswordRoute: typeof AuthResetPasswordRoute
+  AuthSignupRoute: typeof AuthSignupRoute
+  OnboardingEtapa1Route: typeof OnboardingEtapa1Route
+  OnboardingEtapa2Route: typeof OnboardingEtapa2Route
+  PretendentesIdRoute: typeof PretendentesIdRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+  PretendentesIndexRoute: typeof PretendentesIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,11 +189,84 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/pretendentes/': {
+      id: '/pretendentes/'
+      path: '/pretendentes'
+      fullPath: '/pretendentes/'
+      preLoaderRoute: typeof PretendentesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/admin'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pretendentes/$id': {
+      id: '/pretendentes/$id'
+      path: '/pretendentes/$id'
+      fullPath: '/pretendentes/$id'
+      preLoaderRoute: typeof PretendentesIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/onboarding/etapa-2': {
+      id: '/onboarding/etapa-2'
+      path: '/onboarding/etapa-2'
+      fullPath: '/onboarding/etapa-2'
+      preLoaderRoute: typeof OnboardingEtapa2RouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/onboarding/etapa-1': {
+      id: '/onboarding/etapa-1'
+      path: '/onboarding/etapa-1'
+      fullPath: '/onboarding/etapa-1'
+      preLoaderRoute: typeof OnboardingEtapa1RouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/signup': {
+      id: '/auth/signup'
+      path: '/auth/signup'
+      fullPath: '/auth/signup'
+      preLoaderRoute: typeof AuthSignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/reset-password': {
+      id: '/auth/reset-password'
+      path: '/auth/reset-password'
+      fullPath: '/auth/reset-password'
+      preLoaderRoute: typeof AuthResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/login': {
+      id: '/auth/login'
+      path: '/auth/login'
+      fullPath: '/auth/login'
+      preLoaderRoute: typeof AuthLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/forgot-password': {
+      id: '/auth/forgot-password'
+      path: '/auth/forgot-password'
+      fullPath: '/auth/forgot-password'
+      preLoaderRoute: typeof AuthForgotPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  DashboardRoute: DashboardRoute,
+  AuthForgotPasswordRoute: AuthForgotPasswordRoute,
+  AuthLoginRoute: AuthLoginRoute,
+  AuthResetPasswordRoute: AuthResetPasswordRoute,
+  AuthSignupRoute: AuthSignupRoute,
+  OnboardingEtapa1Route: OnboardingEtapa1Route,
+  OnboardingEtapa2Route: OnboardingEtapa2Route,
+  PretendentesIdRoute: PretendentesIdRoute,
+  AdminIndexRoute: AdminIndexRoute,
+  PretendentesIndexRoute: PretendentesIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
