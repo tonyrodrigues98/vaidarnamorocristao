@@ -1,4 +1,4 @@
-import { createFileRoute, Navigate } from "@tanstack/react-router";
+import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -35,6 +35,13 @@ function Comunidade() {
   const [replyTo, setReplyTo] = useState<GMsg | null>(null);
   const [highlightId, setHighlightId] = useState<string | null>(null);
   const messageRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const [blockedIds, setBlockedIds] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    if (!user) return;
+    supabase.from("blocks").select("blocked_id").eq("blocker_id", user.id)
+      .then(({ data }) => setBlockedIds(new Set((data ?? []).map((b) => b.blocked_id as string))));
+  }, [user]);
 
   useEffect(() => {
     if (!user) return;
