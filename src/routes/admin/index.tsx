@@ -6,21 +6,28 @@ import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Check, X, Ban, ShieldAlert, Flag } from "lucide-react";
+import { Check, X, Ban, ShieldAlert, Flag, Newspaper, Trash2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import type { Database } from "@/integrations/supabase/types";
 
 type Row = Database["public"]["Tables"]["profiles"]["Row"];
 type ProfileUpdate = Database["public"]["Tables"]["profiles"]["Update"];
 type Report = Database["public"]["Tables"]["reports"]["Row"];
+type DailyPost = { id: string; title: string; content: string; published: boolean; published_at: string };
 
 export const Route = createFileRoute("/admin/")({ component: Admin });
 
 function Admin() {
   const { user, isAdmin, loading } = useAuth();
   const [rows, setRows] = useState<Row[]>([]);
-  const [tab, setTab] = useState<"pending" | "approved" | "rejected" | "banned" | "reports">("pending");
+  const [tab, setTab] = useState<"pending" | "approved" | "rejected" | "banned" | "reports" | "posts">("pending");
   const [busy, setBusy] = useState<string | null>(null);
   const [reports, setReports] = useState<Array<Report & { reporter?: { full_name: string | null }; reported?: { full_name: string | null; id: string } }>>([]);
+  const [posts, setPosts] = useState<DailyPost[]>([]);
+  const [newTitle, setNewTitle] = useState("");
+  const [newContent, setNewContent] = useState("");
+  const [postBusy, setPostBusy] = useState(false);
 
   async function load(status: typeof tab) {
     if (status === "reports") {
@@ -30,6 +37,15 @@ function Admin() {
       const { data: profs } = ids.length ? await supabase.from("profiles").select("id, full_name").in("id", ids) : { data: [] as { id: string; full_name: string | null }[] };
       const map = new Map((profs ?? []).map((p) => [p.id, p]));
       setReports((rs ?? []).map((r) => ({ ...r, reporter: map.get(r.reporter_id) ?? undefined, reported: map.get(r.reported_id) ? { id: r.reported_id, full_name: map.get(r.reported_id)!.full_name } : undefined })));
+      return;
+    }
+    if (status === "posts") {
+      const { data, error } = await supabase
+        .from("daily_posts")
+        .select("id, title, content, published, published_at")
+        .order("published_at", { ascending: false });
+      if (error) { toast.error(error.message); return; }
+      setPosts((data ?? []) as DailyPost[]);
       return;
     }
     const { data, error } = await supabase
@@ -60,13 +76,37 @@ function Admin() {
     load(tab);
   }
 
+  async function createPost() {
+    if (!user) return;
+    const t = newTitle.trim(); const c = newContent.trim();
+    if (!t || !c) { toast.error("Preencha título e conteúdo"); return; }
+    setPostBusy(true);
+    const { error } = await supabase.from("daily_posts").insert({ author_id: user.id, title: t, content: c, published: true });
+    setPostBusy(false);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Publicado");
+    setNewTitle(""); setNewContent("");
+    load("posts");
+  }
+
+  async function togglePublish(p: DailyPost) {
+    const { error } = await supabase.from("daily_posts").update({ published: !p.published }).eq("id", p.id);
+    if (error) toast.error(error.message); else load("posts");
+  }
+
+  async function deletePost(id: string) {
+    if (!confirm("Excluir esta publicação?")) return;
+    const { error } = await supabase.from("daily_posts").delete().eq("id", id);
+    if (error) toast.error(error.message); else load("posts");
+  }
+
   return (
     <div className="min-h-screen">
       <Header />
       <main className="mx-auto max-w-6xl px-4 py-10">
         <div className="animate-fade-up">
           <h1 className="text-4xl font-semibold">Painel administrativo</h1>
-          <p className="mt-1 text-muted-foreground">Aprovação de perfis</p>
+          <p className="mt-1 text-muted-foreground">Aprovação de perfis, denúncias e conteúdo</p>
         </div>
 
         <Tabs value={tab} onValueChange={(v) => setTab(v as typeof tab)} className="mt-8">
@@ -76,10 +116,49 @@ function Admin() {
             <TabsTrigger value="rejected">Rejeitados</TabsTrigger>
             <TabsTrigger value="banned">Banidos</TabsTrigger>
             <TabsTrigger value="reports"><Flag className="mr-1 h-3 w-3" /> Denúncias</TabsTrigger>
+            <TabsTrigger value="posts"><Newspaper className="mr-1 h-3 w-3" /> Texto Diário</TabsTrigger>
           </TabsList>
 
           <TabsContent value={tab} className="mt-6">
-            {tab === "reports" ? (
+            {tab === "posts" ? (
+              <div className="space-y-6">
+                <div className="glass rounded-2xl p-5 shadow-soft">
+                  <h3 className="text-lg font-semibold">Nova publicação</h3>
+                  <Input className="mt-3" placeholder="Título" value={newTitle} onChange={(e) => setNewTitle(e.target.value)} maxLength={200} />
+                  <Textarea className="mt-2 min-h-[140px]" placeholder="Escreva o texto diário, reflexão ou aviso..." value={newContent} onChange={(e) => setNewContent(e.target.value)} maxLength={10000} />
+                  <div className="mt-3 flex justify-end">
+                    <Button onClick={createPost} disabled={postBusy}>Publicar</Button>
+                  </div>
+                </div>
+                {posts.length === 0 ? (
+                  <div className="glass rounded-2xl p-10 text-center text-muted-foreground shadow-soft">Nenhuma publicação.</div>
+                ) : (
+                  <div className="grid gap-3">
+                    {posts.map((p) => (
+                      <div key={p.id} className="glass rounded-2xl p-5 shadow-soft">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex-1 min-w-0">
+                            <div className="text-xs text-muted-foreground">
+                              {new Date(p.published_at).toLocaleString("pt-BR")} · {p.published ? "publicado" : "rascunho"}
+                            </div>
+                            <h4 className="mt-1 text-lg font-semibold">{p.title}</h4>
+                            <p className="mt-1 line-clamp-3 whitespace-pre-wrap text-sm text-muted-foreground">{p.content}</p>
+                          </div>
+                          <div className="flex flex-col gap-2">
+                            <Button size="sm" variant="outline" onClick={() => togglePublish(p)}>
+                              {p.published ? "Despublicar" : "Publicar"}
+                            </Button>
+                            <Button size="sm" variant="ghost" onClick={() => deletePost(p.id)}>
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ) : tab === "reports" ? (
               reports.length === 0 ? (
                 <div className="glass rounded-2xl p-10 text-center text-muted-foreground shadow-soft">Nenhuma denúncia.</div>
               ) : (
