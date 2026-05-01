@@ -157,14 +157,30 @@ function Chat() {
       <Header />
       <div className="glass mx-auto flex w-full max-w-3xl items-center gap-3 px-4 py-3 shadow-soft">
         <Link to="/conversas" className="text-muted-foreground hover:text-foreground"><ArrowLeft className="h-5 w-5" /></Link>
-        <div className="h-10 w-10 overflow-hidden rounded-full bg-muted">
-          {partner?.photo_url ? <img src={partner.photo_url} alt="" className="h-full w-full object-cover" /> :
-            <div className="flex h-full w-full items-center justify-center bg-gradient-love text-sm text-white">{partner?.full_name?.charAt(0) ?? "?"}</div>}
-        </div>
-        <div className="flex-1">
-          <h2 className="font-semibold leading-none">{partner?.full_name?.split(" ")[0] ?? "—"}</h2>
-          <p className="text-[11px] text-muted-foreground">match com propósito</p>
-        </div>
+        {partner ? (
+          <Link
+            to="/pretendentes/$id"
+            params={{ id: partner.id }}
+            className="flex flex-1 items-center gap-3 rounded-lg -mx-1 px-1 py-1 transition hover:bg-accent/50"
+          >
+            <div className="h-10 w-10 overflow-hidden rounded-full bg-muted">
+              {partner.photo_url ? <img src={partner.photo_url} alt="" className="h-full w-full object-cover" /> :
+                <div className="flex h-full w-full items-center justify-center bg-gradient-love text-sm text-white">{partner.full_name?.charAt(0) ?? "?"}</div>}
+            </div>
+            <div className="flex-1">
+              <h2 className="font-semibold leading-none hover:underline">{partner.full_name?.split(" ")[0] ?? "—"}</h2>
+              <p className="text-[11px] text-muted-foreground">ver perfil</p>
+            </div>
+          </Link>
+        ) : (
+          <div className="flex flex-1 items-center gap-3">
+            <div className="h-10 w-10 rounded-full bg-muted" />
+            <div className="flex-1">
+              <h2 className="font-semibold leading-none">—</h2>
+              <p className="text-[11px] text-muted-foreground">match com propósito</p>
+            </div>
+          </div>
+        )}
       </div>
 
       {actionsOpenId && (
