@@ -1,15 +1,17 @@
-import { useRef, useCallback } from "react";
+import { useRef, useCallback, useState } from "react";
 
 export function useLongPress(onLongPress: () => void, delay = 450) {
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const triggered = useRef(false);
   const startPos = useRef<{ x: number; y: number } | null>(null);
+  const [pressing, setPressing] = useState(false);
 
   const clear = useCallback(() => {
     if (timer.current) {
       clearTimeout(timer.current);
       timer.current = null;
     }
+    setPressing(false);
   }, []);
 
   const start = useCallback(
@@ -26,8 +28,14 @@ export function useLongPress(onLongPress: () => void, delay = 450) {
           : { x: (e as React.PointerEvent).clientX, y: (e as React.PointerEvent).clientY };
       startPos.current = point;
       clear();
+      setPressing(true);
       timer.current = setTimeout(() => {
         triggered.current = true;
+        setPressing(false);
+        // Haptic feedback on supported devices
+        if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+          try { navigator.vibrate?.(30); } catch { /* noop */ }
+        }
         onLongPress();
       }, delay);
     },
@@ -54,13 +62,15 @@ export function useLongPress(onLongPress: () => void, delay = 450) {
   }, [clear]);
 
   return {
-    onTouchStart: start,
-    onTouchMove: move,
-    onTouchEnd: end,
-    onTouchCancel: end,
-    onContextMenu: (e: React.MouseEvent) => {
-      // Prevent native context menu on long-press (mobile browsers)
-      if (triggered.current) e.preventDefault();
+    pressing,
+    handlers: {
+      onTouchStart: start,
+      onTouchMove: move,
+      onTouchEnd: end,
+      onTouchCancel: end,
+      onContextMenu: (e: React.MouseEvent) => {
+        if (triggered.current) e.preventDefault();
+      },
     },
   };
 }
