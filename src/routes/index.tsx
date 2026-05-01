@@ -2,70 +2,131 @@ import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
-import { Heart, Shield, Sparkles, Users } from "lucide-react";
+import { Heart, Shield, Sparkles, Users, ArrowRight } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   component: Landing,
   head: () => ({
     meta: [
-      { title: "Encontros de Fé — Onde a fé encontra o amor" },
+      { title: "Encontros — Onde a fé encontra o amor" },
       { name: "description", content: "A plataforma cristã de relacionamentos sérios. Conheça pretendentes que vivem e compartilham a sua fé." },
     ],
   }),
 });
+
+const HEADLINE = ["Onde", "a", "fé", "encontra"];
 
 function Landing() {
   const { user, loading } = useAuth();
   if (!loading && user) return <Navigate to="/dashboard" />;
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-background">
       <Header />
       <main>
-        <section className="relative mx-auto max-w-5xl px-4 pt-20 pb-24 text-center md:pt-32 md:pb-32">
-          <div className="animate-fade-up">
-            <span className="mb-6 inline-flex items-center gap-2 rounded-full border border-[var(--gold-soft)] bg-card/60 px-4 py-1.5 text-xs font-medium text-[var(--gold)] shadow-soft">
-              <Sparkles className="h-3 w-3" /> Plataforma cristã de relacionamentos sérios
+        {/* HERO */}
+        <section className="relative overflow-hidden">
+          <div className="pointer-events-none absolute -top-40 left-1/2 h-[520px] w-[820px] -translate-x-1/2 rounded-full bg-[var(--petal)] opacity-60 blur-3xl" />
+          <div className="pointer-events-none absolute top-40 right-0 h-[320px] w-[420px] rounded-full bg-[var(--coral)]/15 blur-3xl" />
+
+          <div className="relative mx-auto max-w-6xl px-6 pt-24 pb-20 text-center md:pt-36 md:pb-28">
+            <span
+              className="animate-reveal mb-8 inline-flex items-center gap-2 rounded-full border border-[var(--rose)]/15 bg-[var(--petal)]/60 px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--rose)]"
+              style={{ animationDelay: "0ms" }}
+            >
+              <Sparkles className="h-3 w-3" /> Plataforma cristã de relacionamentos
             </span>
-            <h1 className="font-serif text-5xl font-semibold leading-[1.05] tracking-tight md:text-7xl">
-              Onde a fé <em className="text-gradient-gold not-italic">encontra</em> o amor.
+
+            <h1 className="mx-auto max-w-4xl text-5xl font-extrabold leading-[1.05] tracking-tight md:text-7xl lg:text-[5.5rem]">
+              {HEADLINE.map((w, i) => (
+                <span key={i} className="animate-letter mr-3 md:mr-5" style={{ animationDelay: `${120 + i * 90}ms` }}>
+                  {w}
+                </span>
+              ))}
+              <br />
+              <span className="animate-letter text-gradient" style={{ animationDelay: "560ms" }}>
+                o&nbsp;amor.
+              </span>
             </h1>
-            <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground md:text-xl">
+
+            <p
+              className="animate-reveal mx-auto mt-7 max-w-2xl text-lg leading-relaxed text-muted-foreground md:text-xl"
+              style={{ animationDelay: "780ms" }}
+            >
               Um espaço sereno e seguro para cristãos solteiros e divorciados que buscam um relacionamento com propósito eterno.
             </p>
-            <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
-              <Button size="lg" asChild className="shadow-glow">
-                <Link to="/auth/signup">Começar minha jornada</Link>
+
+            <div className="animate-reveal mt-10 flex flex-wrap items-center justify-center gap-3" style={{ animationDelay: "920ms" }}>
+              <Button size="lg" asChild className="h-12 rounded-full px-8 shadow-glow">
+                <Link to="/auth/signup">
+                  Começar minha jornada <ArrowRight className="ml-1 h-4 w-4" />
+                </Link>
               </Button>
-              <Button size="lg" variant="outline" asChild>
+              <Button size="lg" variant="outline" asChild className="h-12 rounded-full border-[var(--rose)]/20 bg-card px-8 hover:bg-[var(--petal)]/40">
                 <Link to="/auth/login">Já tenho conta</Link>
               </Button>
             </div>
+
+            <p className="animate-reveal mt-8 text-xs text-muted-foreground" style={{ animationDelay: "1080ms" }}>
+              Sem propaganda. Sem swipe. Apenas conexões com propósito.
+            </p>
           </div>
         </section>
 
-        <section className="mx-auto grid max-w-5xl gap-6 px-4 pb-24 md:grid-cols-3">
-          {[
-            { icon: Shield, title: "Aprovação manual", text: "Cada perfil é revisado individualmente por nossa equipe antes de aparecer publicamente." },
-            { icon: Heart, title: "Conexões intencionais", text: "Demonstre interesse e converse apenas quando o sentimento for recíproco." },
-            { icon: Users, title: "Comunidade na fé", text: "Pessoas comprometidas com Cristo, sua igreja e um relacionamento sério." },
-          ].map((f, i) => (
-            <div key={i} className="glass animate-fade-up rounded-2xl p-6 shadow-soft" style={{ animationDelay: `${i * 80}ms` }}>
-              <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-[var(--gold-soft)] to-[var(--gold)]">
-                <f.icon className="h-5 w-5 text-white" />
+        {/* FEATURES */}
+        <section className="border-y border-border bg-gradient-warm">
+          <div className="mx-auto grid max-w-6xl gap-6 px-6 py-20 md:grid-cols-3">
+            {[
+              { icon: Shield, title: "Aprovação manual", text: "Cada perfil é revisado individualmente pela nossa equipe antes de aparecer publicamente." },
+              { icon: Heart, title: "Conexões intencionais", text: "Demonstre interesse e converse apenas quando o sentimento for recíproco." },
+              { icon: Users, title: "Comunidade na fé", text: "Pessoas comprometidas com Cristo, sua igreja e um relacionamento sério." },
+            ].map((f, i) => (
+              <div
+                key={i}
+                className="hover-lift animate-fade-up rounded-3xl border border-border bg-card p-7 shadow-soft"
+                style={{ animationDelay: `${i * 100}ms` }}
+              >
+                <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-2xl bg-[var(--petal)]">
+                  <f.icon className="h-5 w-5 text-[var(--rose)]" />
+                </div>
+                <h3 className="text-lg font-bold tracking-tight">{f.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{f.text}</p>
               </div>
-              <h3 className="font-serif text-xl font-semibold">{f.title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{f.text}</p>
-            </div>
-          ))}
+            ))}
+          </div>
         </section>
 
-        <section className="mx-auto max-w-3xl px-4 pb-24 text-center">
-          <p className="font-serif text-2xl italic leading-relaxed text-foreground/80 md:text-3xl">
-            "Acima de tudo, porém, revistam-se do amor, que é o elo perfeito."
+        {/* QUOTE */}
+        <section className="mx-auto max-w-3xl px-6 py-24 text-center">
+          <p className="text-2xl font-medium leading-relaxed text-foreground/85 md:text-3xl">
+            "Acima de tudo, porém, revistam-se do <span className="text-gradient font-bold">amor</span>, que é o elo perfeito."
           </p>
-          <p className="mt-3 text-sm uppercase tracking-[0.2em] text-[var(--gold)]">Colossenses 3:14</p>
+          <p className="mt-4 text-[11px] font-bold uppercase tracking-[0.25em] text-[var(--rose)]">
+            Colossenses 3:14
+          </p>
         </section>
+
+        {/* CTA */}
+        <section className="mx-auto max-w-6xl px-6 pb-24">
+          <div className="relative overflow-hidden rounded-[2rem] bg-gradient-love p-10 text-center text-white shadow-elegant md:p-16">
+            <div className="pointer-events-none absolute -top-20 -right-20 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
+            <h2 className="mx-auto max-w-2xl text-3xl font-extrabold tracking-tight md:text-5xl">
+              Sua próxima história começa com uma escolha.
+            </h2>
+            <p className="mx-auto mt-4 max-w-xl text-white/80">
+              Crie seu perfil hoje. A aprovação leva até 48h e é totalmente gratuita.
+            </p>
+            <Button size="lg" asChild className="mt-8 h-12 rounded-full bg-white px-8 font-semibold text-[var(--rose)] hover:bg-white/90">
+              <Link to="/auth/signup">
+                Criar conta gratuita <ArrowRight className="ml-1 h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
+        </section>
+
+        <footer className="border-t border-border py-10 text-center text-xs text-muted-foreground">
+          © {new Date().getFullYear()} Encontros · Feito com fé e cuidado.
+        </footer>
       </main>
     </div>
   );
