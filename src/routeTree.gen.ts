@@ -11,6 +11,9 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PretendentesIndexRouteImport } from './routes/pretendentes/index'
+import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as PretendentesIdRouteImport } from './routes/pretendentes/$id'
 import { Route as OnboardingEtapa2RouteImport } from './routes/onboarding/etapa-2'
 import { Route as OnboardingEtapa1RouteImport } from './routes/onboarding/etapa-1'
 import { Route as AuthSignupRouteImport } from './routes/auth/signup'
@@ -26,6 +29,21 @@ const DashboardRoute = DashboardRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PretendentesIndexRoute = PretendentesIndexRouteImport.update({
+  id: '/pretendentes/',
+  path: '/pretendentes/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/admin/',
+  path: '/admin/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PretendentesIdRoute = PretendentesIdRouteImport.update({
+  id: '/pretendentes/$id',
+  path: '/pretendentes/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OnboardingEtapa2Route = OnboardingEtapa2RouteImport.update({
@@ -68,6 +86,9 @@ export interface FileRoutesByFullPath {
   '/auth/signup': typeof AuthSignupRoute
   '/onboarding/etapa-1': typeof OnboardingEtapa1Route
   '/onboarding/etapa-2': typeof OnboardingEtapa2Route
+  '/pretendentes/$id': typeof PretendentesIdRoute
+  '/admin/': typeof AdminIndexRoute
+  '/pretendentes/': typeof PretendentesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -78,6 +99,9 @@ export interface FileRoutesByTo {
   '/auth/signup': typeof AuthSignupRoute
   '/onboarding/etapa-1': typeof OnboardingEtapa1Route
   '/onboarding/etapa-2': typeof OnboardingEtapa2Route
+  '/pretendentes/$id': typeof PretendentesIdRoute
+  '/admin': typeof AdminIndexRoute
+  '/pretendentes': typeof PretendentesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -89,6 +113,9 @@ export interface FileRoutesById {
   '/auth/signup': typeof AuthSignupRoute
   '/onboarding/etapa-1': typeof OnboardingEtapa1Route
   '/onboarding/etapa-2': typeof OnboardingEtapa2Route
+  '/pretendentes/$id': typeof PretendentesIdRoute
+  '/admin/': typeof AdminIndexRoute
+  '/pretendentes/': typeof PretendentesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -101,6 +128,9 @@ export interface FileRouteTypes {
     | '/auth/signup'
     | '/onboarding/etapa-1'
     | '/onboarding/etapa-2'
+    | '/pretendentes/$id'
+    | '/admin/'
+    | '/pretendentes/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -111,6 +141,9 @@ export interface FileRouteTypes {
     | '/auth/signup'
     | '/onboarding/etapa-1'
     | '/onboarding/etapa-2'
+    | '/pretendentes/$id'
+    | '/admin'
+    | '/pretendentes'
   id:
     | '__root__'
     | '/'
@@ -121,6 +154,9 @@ export interface FileRouteTypes {
     | '/auth/signup'
     | '/onboarding/etapa-1'
     | '/onboarding/etapa-2'
+    | '/pretendentes/$id'
+    | '/admin/'
+    | '/pretendentes/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -132,6 +168,9 @@ export interface RootRouteChildren {
   AuthSignupRoute: typeof AuthSignupRoute
   OnboardingEtapa1Route: typeof OnboardingEtapa1Route
   OnboardingEtapa2Route: typeof OnboardingEtapa2Route
+  PretendentesIdRoute: typeof PretendentesIdRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+  PretendentesIndexRoute: typeof PretendentesIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -148,6 +187,27 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pretendentes/': {
+      id: '/pretendentes/'
+      path: '/pretendentes'
+      fullPath: '/pretendentes/'
+      preLoaderRoute: typeof PretendentesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/admin'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pretendentes/$id': {
+      id: '/pretendentes/$id'
+      path: '/pretendentes/$id'
+      fullPath: '/pretendentes/$id'
+      preLoaderRoute: typeof PretendentesIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/onboarding/etapa-2': {
@@ -204,6 +264,9 @@ const rootRouteChildren: RootRouteChildren = {
   AuthSignupRoute: AuthSignupRoute,
   OnboardingEtapa1Route: OnboardingEtapa1Route,
   OnboardingEtapa2Route: OnboardingEtapa2Route,
+  PretendentesIdRoute: PretendentesIdRoute,
+  AdminIndexRoute: AdminIndexRoute,
+  PretendentesIndexRoute: PretendentesIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
