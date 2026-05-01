@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
+import { useRouter } from "@tanstack/react-router";
 
 /**
  * Subscribes to realtime events and shows toasts for:
@@ -12,6 +13,7 @@ import { useAuth } from "@/lib/auth";
  */
 export function useRealtimeNotifications() {
   const { user } = useAuth();
+  const router = useRouter();
   const mountedAt = useRef<number>(Date.now());
 
   useEffect(() => {
@@ -42,6 +44,10 @@ export function useRealtimeNotifications() {
             .maybeSingle();
           toast("✨ Novo interesse!", {
             description: `${prof?.full_name?.split(" ")[0] ?? "Alguém"} demonstrou interesse em você.`,
+            action: {
+              label: "Ver",
+              onClick: () => router.navigate({ to: "/interesses" }),
+            },
           });
         }
       )
@@ -59,6 +65,10 @@ export function useRealtimeNotifications() {
             .maybeSingle();
           toast.success("💗 É um match!", {
             description: `Você e ${prof?.full_name?.split(" ")[0] ?? "alguém"} podem conversar agora.`,
+            action: {
+              label: "Conversar",
+              onClick: () => router.navigate({ to: "/conversas/$matchId", params: { matchId: m.id } }),
+            },
           });
           refreshMatches();
         }
@@ -81,6 +91,11 @@ export function useRealtimeNotifications() {
             .maybeSingle();
           toast("💬 Nova mensagem", {
             description: `${prof?.full_name?.split(" ")[0] ?? "Alguém"}: ${m.content.slice(0, 60)}`,
+            action: {
+              label: "Abrir",
+              onClick: () =>
+                router.navigate({ to: "/conversas/$matchId", params: { matchId: m.match_id } }),
+            },
           });
         }
       )
