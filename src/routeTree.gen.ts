@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as PerfilRouteImport } from './routes/perfil'
+import { Route as NoticiasRouteImport } from './routes/noticias'
 import { Route as MatchesRouteImport } from './routes/matches'
 import { Route as InteressesRouteImport } from './routes/interesses'
 import { Route as DashboardRouteImport } from './routes/dashboard'
@@ -30,6 +31,11 @@ import { Route as AuthForgotPasswordRouteImport } from './routes/auth/forgot-pas
 const PerfilRoute = PerfilRouteImport.update({
   id: '/perfil',
   path: '/perfil',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NoticiasRoute = NoticiasRouteImport.update({
+  id: '/noticias',
+  path: '/noticias',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MatchesRoute = MatchesRouteImport.update({
@@ -119,6 +125,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRoute
   '/interesses': typeof InteressesRoute
   '/matches': typeof MatchesRoute
+  '/noticias': typeof NoticiasRoute
   '/perfil': typeof PerfilRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
@@ -138,6 +145,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardRoute
   '/interesses': typeof InteressesRoute
   '/matches': typeof MatchesRoute
+  '/noticias': typeof NoticiasRoute
   '/perfil': typeof PerfilRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
@@ -158,6 +166,7 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/interesses': typeof InteressesRoute
   '/matches': typeof MatchesRoute
+  '/noticias': typeof NoticiasRoute
   '/perfil': typeof PerfilRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
@@ -179,6 +188,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/interesses'
     | '/matches'
+    | '/noticias'
     | '/perfil'
     | '/auth/forgot-password'
     | '/auth/login'
@@ -198,6 +208,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/interesses'
     | '/matches'
+    | '/noticias'
     | '/perfil'
     | '/auth/forgot-password'
     | '/auth/login'
@@ -217,6 +228,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/interesses'
     | '/matches'
+    | '/noticias'
     | '/perfil'
     | '/auth/forgot-password'
     | '/auth/login'
@@ -237,6 +249,7 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   InteressesRoute: typeof InteressesRoute
   MatchesRoute: typeof MatchesRoute
+  NoticiasRoute: typeof NoticiasRoute
   PerfilRoute: typeof PerfilRoute
   AuthForgotPasswordRoute: typeof AuthForgotPasswordRoute
   AuthLoginRoute: typeof AuthLoginRoute
@@ -258,6 +271,13 @@ declare module '@tanstack/react-router' {
       path: '/perfil'
       fullPath: '/perfil'
       preLoaderRoute: typeof PerfilRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/noticias': {
+      id: '/noticias'
+      path: '/noticias'
+      fullPath: '/noticias'
+      preLoaderRoute: typeof NoticiasRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/matches': {
@@ -381,6 +401,7 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRoute,
   InteressesRoute: InteressesRoute,
   MatchesRoute: MatchesRoute,
+  NoticiasRoute: NoticiasRoute,
   PerfilRoute: PerfilRoute,
   AuthForgotPasswordRoute: AuthForgotPasswordRoute,
   AuthLoginRoute: AuthLoginRoute,
