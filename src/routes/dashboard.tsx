@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
-import { Clock, CheckCircle2, XCircle, Users, Heart, MessageCircle, Sparkles } from "lucide-react";
+import { Clock, CheckCircle2, XCircle, Users, Heart, MessageCircle, Sparkles, Globe, Newspaper } from "lucide-react";
 
 type Profile = { status: "pending" | "approved" | "rejected" | "banned"; full_name: string | null; rejection_reason: string | null };
 
@@ -66,7 +66,9 @@ function Dashboard() {
           <DashCard to="/matches" Icon={Heart} title="Matches" desc="Conexões com reciprocidade" />
           <DashCard to="/conversas" Icon={MessageCircle} title="Conversas" desc="Suas mensagens privadas" />
         </div>
-        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+        <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <DashCard to="/comunidade" Icon={Globe} title="Comunidade" desc="Chat global em tempo real" />
+          <DashCard to="/noticias" Icon={Newspaper} title="Notícias & Texto Diário" desc="Reflexões e avisos" />
           <DashCard to="/perfil" Icon={Heart} title="Meu perfil" desc="Edite seus dados e preferências" />
         </div>
       </main>
