@@ -75,7 +75,7 @@ function List() {
                   {p.photo_url ? (
                     <img src={p.photo_url} alt={p.full_name} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
                   ) : (
-                    <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[var(--rose-soft)] to-[var(--accent)]">
+                    <div className="flex h-full w-full items-center justify-center bg-gradient-love">
                       <span className="text-5xl text-white">{p.full_name.charAt(0)}</span>
                     </div>
                   )}

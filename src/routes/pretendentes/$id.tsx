@@ -49,7 +49,7 @@ function Detail() {
               {profile.photo_url ? (
                 <img src={profile.photo_url} alt={profile.full_name} className="h-full w-full object-cover" />
               ) : (
-                <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[var(--rose-soft)] to-[var(--accent)]">
+                <div className="flex h-full w-full items-center justify-center bg-gradient-love">
                   <span className="text-7xl text-white">{profile.full_name.charAt(0)}</span>
                 </div>
               )}

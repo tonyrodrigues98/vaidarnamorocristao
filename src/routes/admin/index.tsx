@@ -75,7 +75,7 @@ function Admin() {
                   <div key={r.id} className="glass flex flex-col gap-4 rounded-2xl p-5 shadow-soft sm:flex-row">
                     <div className="h-24 w-24 shrink-0 overflow-hidden rounded-2xl bg-muted">
                       {r.photo_url ? <img src={r.photo_url} alt="" className="h-full w-full object-cover" /> :
-                        <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[var(--rose-soft)] to-[var(--accent)] text-2xl text-white">{r.full_name.charAt(0)}</div>}
+                        <div className="flex h-full w-full items-center justify-center bg-gradient-love text-2xl text-white">{r.full_name.charAt(0)}</div>}
                     </div>
                     <div className="flex-1">
                       <h3 className="text-lg font-semibold">{r.full_name}, {r.age}</h3>
