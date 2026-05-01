@@ -211,7 +211,10 @@ function Detail() {
                       {prefs.location_scope === "same_city" ? "Mesma cidade"
                         : prefs.location_scope === "same_state" ? "Mesmo estado"
                         : prefs.location_scope === "any" ? "Qualquer lugar"
-                        : prefs.location_scope === "custom_states" ? `Estados: ${(prefs.custom_states ?? []).join(", ") || "—"}`
+                        : prefs.location_scope === "custom_states"
+                          ? ((prefs.custom_states ?? []).length > 0
+                              ? (prefs.custom_states ?? []).join(", ")
+                              : "—")
                         : prefs.location_scope}
                     </dd>
                   </div>
