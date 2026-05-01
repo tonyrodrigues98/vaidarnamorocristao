@@ -14,16 +14,142 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      profile_preferences: {
+        Row: {
+          accepts_children: boolean
+          age_max: number
+          age_min: number
+          created_at: string
+          custom_states: string[] | null
+          desired_quality: string | null
+          location_scope: Database["public"]["Enums"]["location_scope"]
+          looking_for_bio: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          accepts_children?: boolean
+          age_max: number
+          age_min: number
+          created_at?: string
+          custom_states?: string[] | null
+          desired_quality?: string | null
+          location_scope: Database["public"]["Enums"]["location_scope"]
+          looking_for_bio?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          accepts_children?: boolean
+          age_max?: number
+          age_min?: number
+          created_at?: string
+          custom_states?: string[] | null
+          desired_quality?: string | null
+          location_scope?: Database["public"]["Enums"]["location_scope"]
+          looking_for_bio?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          age: number
+          bio: string | null
+          church: string
+          city: string
+          created_at: string
+          full_name: string
+          height_cm: number | null
+          id: string
+          marital: Database["public"]["Enums"]["marital_status"]
+          photo_url: string | null
+          rejection_reason: string | null
+          sex: Database["public"]["Enums"]["sex_type"]
+          state: string
+          status: Database["public"]["Enums"]["profile_status"]
+          updated_at: string
+          years_baptized: number
+        }
+        Insert: {
+          age: number
+          bio?: string | null
+          church: string
+          city: string
+          created_at?: string
+          full_name: string
+          height_cm?: number | null
+          id: string
+          marital: Database["public"]["Enums"]["marital_status"]
+          photo_url?: string | null
+          rejection_reason?: string | null
+          sex: Database["public"]["Enums"]["sex_type"]
+          state: string
+          status?: Database["public"]["Enums"]["profile_status"]
+          updated_at?: string
+          years_baptized: number
+        }
+        Update: {
+          age?: number
+          bio?: string | null
+          church?: string
+          city?: string
+          created_at?: string
+          full_name?: string
+          height_cm?: number | null
+          id?: string
+          marital?: Database["public"]["Enums"]["marital_status"]
+          photo_url?: string | null
+          rejection_reason?: string | null
+          sex?: Database["public"]["Enums"]["sex_type"]
+          state?: string
+          status?: Database["public"]["Enums"]["profile_status"]
+          updated_at?: string
+          years_baptized?: number
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
+      location_scope: "regiao" | "brasil" | "mundo" | "personalizado"
+      marital_status: "solteiro" | "divorciado"
+      profile_status: "pending" | "approved" | "rejected" | "banned"
+      sex_type: "masculino" | "feminino"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +276,12 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+      location_scope: ["regiao", "brasil", "mundo", "personalizado"],
+      marital_status: ["solteiro", "divorciado"],
+      profile_status: ["pending", "approved", "rejected", "banned"],
+      sex_type: ["masculino", "feminino"],
+    },
   },
 } as const
