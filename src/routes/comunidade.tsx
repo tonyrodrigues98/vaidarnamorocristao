@@ -6,7 +6,7 @@ import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Send, Trash2, Users, Pencil, Check, X } from "lucide-react";
+import { Send, Trash2, Users, Pencil, Check, X, Reply } from "lucide-react";
 import { useLongPress } from "@/hooks/use-long-press";
 
 type GMsg = {
@@ -15,6 +15,7 @@ type GMsg = {
   content: string;
   created_at: string;
   edited_at?: string | null;
+  reply_to_id?: string | null;
 };
 type Profile = { id: string; full_name: string; photo_url: string | null };
 
@@ -31,6 +32,9 @@ function Comunidade() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editText, setEditText] = useState("");
   const [actionsOpenId, setActionsOpenId] = useState<string | null>(null);
+  const [replyTo, setReplyTo] = useState<GMsg | null>(null);
+  const [highlightId, setHighlightId] = useState<string | null>(null);
+  const messageRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   useEffect(() => {
     if (!user) return;
@@ -119,10 +123,15 @@ function Comunidade() {
     const content = text.trim();
     if (!content || !user) return;
     setSending(true);
-    const { error } = await supabase.from("global_messages").insert({ sender_id: user.id, content });
+    const { error } = await supabase.from("global_messages").insert({
+      sender_id: user.id,
+      content,
+      reply_to_id: replyTo?.id ?? null,
+    });
     setSending(false);
     if (error) { toast.error(error.message); return; }
     setText("");
+    setReplyTo(null);
   }
 
   async function remove(id: string) {
@@ -148,6 +157,14 @@ function Comunidade() {
     cancelEdit();
   }
 
+  function jumpToMessage(id: string) {
+    const el = messageRefs.current[id];
+    if (!el) return;
+    el.scrollIntoView({ behavior: "smooth", block: "center" });
+    setHighlightId(id);
+    setTimeout(() => setHighlightId((cur) => (cur === id ? null : cur)), 1600);
+  }
+
   return (
     <div className="flex min-h-screen flex-col">
       <Header />
@@ -163,6 +180,13 @@ function Comunidade() {
         </div>
 
         <div className="glass mt-6 flex flex-1 flex-col overflow-hidden rounded-3xl shadow-soft">
+          {actionsOpenId && (
+            <div
+              className="fixed inset-0 z-30 bg-foreground/5 backdrop-blur-[1px] md:hidden"
+              onClick={() => setActionsOpenId(null)}
+              aria-hidden="true"
+            />
+          )}
           <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto p-4 sm:p-6" style={{ maxHeight: "calc(100vh - 280px)" }}>
             {messages.length === 0 ? (
               <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
@@ -177,9 +201,18 @@ function Comunidade() {
                 const isEditing = editingId === m.id;
                 const name = p?.full_name?.split(" ")[0] ?? "Alguém";
                 const showActions = actionsOpenId === m.id;
-                const enableLongPress = !isEditing && (canEdit || canDelete);
+                const enableLongPress = !isEditing;
+                const replied = m.reply_to_id ? messages.find((x) => x.id === m.reply_to_id) : null;
+                const repliedName = replied
+                  ? (profiles[replied.sender_id]?.full_name?.split(" ")[0] ?? "Alguém")
+                  : "";
+                const isFlash = highlightId === m.id;
                 return (
-                  <div key={m.id} className="group flex items-start gap-3">
+                  <div
+                    key={m.id}
+                    ref={(el) => { messageRefs.current[m.id] = el; }}
+                    className={`group relative flex scroll-mt-24 items-start gap-3 rounded-xl transition-colors duration-500 ${isFlash ? "bg-primary/10" : ""}`}
+                  >
                     <div className="h-9 w-9 shrink-0 overflow-hidden rounded-full bg-muted">
                       {p?.photo_url ? (
                         <img src={p.photo_url} alt="" className="h-full w-full object-cover" />
@@ -192,7 +225,7 @@ function Comunidade() {
                     <BubbleWrap
                       enableLongPress={!!enableLongPress}
                       onLongPress={() => setActionsOpenId(m.id)}
-                      highlighted={showActions}
+                      highlighted={showActions || isFlash}
                     >
                       <div className="flex items-baseline gap-2">
                         <span className="text-sm font-semibold">{name}</span>
@@ -201,6 +234,19 @@ function Comunidade() {
                           {m.edited_at ? " · editado" : ""}
                         </span>
                       </div>
+                      {replied && !isEditing && (
+                        <button
+                          type="button"
+                          onClick={() => jumpToMessage(replied.id)}
+                          className="mt-1 flex w-full items-stretch gap-2 rounded-md bg-foreground/5 px-2 py-1 text-left text-xs hover:bg-foreground/10"
+                        >
+                          <span className="w-0.5 shrink-0 rounded bg-primary" />
+                          <span className="min-w-0 flex-1">
+                            <span className="block font-semibold text-primary">{repliedName}</span>
+                            <span className="line-clamp-2 text-muted-foreground">{replied.content}</span>
+                          </span>
+                        </button>
+                      )}
                       {isEditing ? (
                         <div className="mt-1 flex flex-col gap-2">
                           <textarea
@@ -224,28 +270,34 @@ function Comunidade() {
                         <p className="mt-0.5 whitespace-pre-wrap break-words text-sm text-foreground/90">{m.content}</p>
                       )}
                     </BubbleWrap>
-                    {!isEditing && (canEdit || canDelete) && (
+                    {!isEditing && showActions && (
                       <div
-                        className={`flex shrink-0 items-center gap-1 transition-opacity ${
-                          showActions ? "opacity-100" : "opacity-0 pointer-events-none"
-                        } md:opacity-0 md:pointer-events-auto md:group-hover:opacity-100 md:focus-within:opacity-100`}
+                        className="absolute right-0 -top-10 z-40 flex items-center gap-1 rounded-full border border-border bg-popover px-1 py-1 shadow-lg"
+                        onClick={(e) => e.stopPropagation()}
                       >
+                        <button
+                          onClick={() => { setReplyTo(m); setActionsOpenId(null); }}
+                          className="flex items-center gap-1 rounded-full px-2 py-1 text-xs text-foreground hover:bg-accent"
+                          aria-label="Responder"
+                        >
+                          <Reply className="h-4 w-4" /> Responder
+                        </button>
                         {canEdit && (
                           <button
                             onClick={() => { setActionsOpenId(null); startEdit(m); }}
-                            className="rounded-full p-2 text-muted-foreground hover:text-primary"
+                            className="flex items-center gap-1 rounded-full px-2 py-1 text-xs text-foreground hover:bg-accent"
                             aria-label="Editar"
                           >
-                            <Pencil className="h-4 w-4" />
+                            <Pencil className="h-4 w-4" /> Editar
                           </button>
                         )}
                         {canDelete && (
                           <button
                             onClick={() => { setActionsOpenId(null); remove(m.id); }}
-                            className="rounded-full p-2 text-muted-foreground hover:text-[var(--rose)]"
+                            className="flex items-center gap-1 rounded-full px-2 py-1 text-xs text-destructive hover:bg-destructive/10"
                             aria-label="Apagar"
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <Trash2 className="h-4 w-4" /> Excluir
                           </button>
                         )}
                       </div>
@@ -256,18 +308,39 @@ function Comunidade() {
             )}
           </div>
 
-          <form onSubmit={send} className="flex items-center gap-2 border-t border-border bg-background/60 p-3">
-            <Input
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              placeholder={approved === false ? "Aguardando aprovação para enviar mensagens" : "Escreva uma mensagem para a comunidade..."}
-              maxLength={2000}
-              disabled={!approved || sending}
-              className="flex-1"
-            />
-            <Button type="submit" disabled={!approved || sending || !text.trim()} size="icon" className="rounded-full">
-              <Send className="h-4 w-4" />
-            </Button>
+          <form onSubmit={send} className="flex flex-col gap-2 border-t border-border bg-background/60 p-3">
+            {replyTo && (
+              <div className="flex items-stretch gap-2 rounded-lg border border-border bg-muted/40 px-3 py-2">
+                <span className="w-1 shrink-0 rounded bg-primary" />
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-semibold text-primary">
+                    Respondendo a {profiles[replyTo.sender_id]?.full_name?.split(" ")[0] ?? "Alguém"}
+                  </p>
+                  <p className="line-clamp-1 text-xs text-muted-foreground">{replyTo.content}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setReplyTo(null)}
+                  className="rounded-full p-1 text-muted-foreground hover:text-foreground"
+                  aria-label="Cancelar resposta"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            )}
+            <div className="flex items-center gap-2">
+              <Input
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                placeholder={approved === false ? "Aguardando aprovação para enviar mensagens" : "Escreva uma mensagem para a comunidade..."}
+                maxLength={2000}
+                disabled={!approved || sending}
+                className="flex-1"
+              />
+              <Button type="submit" disabled={!approved || sending || !text.trim()} size="icon" className="rounded-full">
+                <Send className="h-4 w-4" />
+              </Button>
+            </div>
           </form>
         </div>
       </main>
