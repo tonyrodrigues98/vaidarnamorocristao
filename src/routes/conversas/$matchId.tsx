@@ -166,7 +166,7 @@ function Chat() {
 
       {actionsOpenId && (
         <div
-          className="fixed inset-0 z-30 bg-foreground/5 backdrop-blur-[1px] md:hidden"
+          className="fixed inset-0 z-30"
           onClick={() => setActionsOpenId(null)}
           aria-hidden="true"
         />
