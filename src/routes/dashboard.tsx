@@ -41,7 +41,7 @@ function Dashboard() {
       <main className="mx-auto max-w-4xl px-4 py-12">
         <div className="animate-fade-up">
           <p className="text-sm text-muted-foreground">Olá,</p>
-          <h1 className="font-serif text-4xl font-semibold">{profile.full_name?.split(" ")[0] ?? "Bem-vindo(a)"}</h1>
+          <h1 className="text-4xl font-semibold">{profile.full_name?.split(" ")[0] ?? "Bem-vindo(a)"}</h1>
         </div>
 
         <div className={`glass animate-fade-up mt-8 flex items-start gap-4 rounded-3xl p-6 shadow-soft`}>
@@ -49,7 +49,7 @@ function Dashboard() {
             <Icon className={`h-6 w-6 ${statusInfo.color}`} />
           </div>
           <div className="flex-1">
-            <h2 className="font-serif text-xl font-semibold">{statusInfo.title}</h2>
+            <h2 className="text-xl font-semibold">{statusInfo.title}</h2>
             <p className="mt-1 text-sm text-muted-foreground">{statusInfo.text}</p>
             {profile.status === "approved" && (
               <Button asChild className="mt-4"><Link to="/pretendentes">Ver pretendentes</Link></Button>
@@ -62,13 +62,13 @@ function Dashboard() {
 
         <div className="mt-10 grid gap-4 sm:grid-cols-2">
           <Link to="/pretendentes" className="glass group animate-fade-up rounded-2xl p-6 shadow-soft transition hover:shadow-elegant">
-            <Users className="mb-3 h-6 w-6 text-[var(--gold)]" />
-            <h3 className="font-serif text-lg font-semibold">Pretendentes</h3>
+            <Users className="mb-3 h-6 w-6 text-[var(--rose)]" />
+            <h3 className="text-lg font-semibold">Pretendentes</h3>
             <p className="text-sm text-muted-foreground">Conheça pessoas que compartilham sua fé</p>
           </Link>
           <Link to="/onboarding/etapa-1" className="glass group animate-fade-up rounded-2xl p-6 shadow-soft transition hover:shadow-elegant">
-            <Heart className="mb-3 h-6 w-6 text-[var(--gold)]" />
-            <h3 className="font-serif text-lg font-semibold">Meu perfil</h3>
+            <Heart className="mb-3 h-6 w-6 text-[var(--rose)]" />
+            <h3 className="text-lg font-semibold">Meu perfil</h3>
             <p className="text-sm text-muted-foreground">Edite suas informações</p>
           </Link>
         </div>

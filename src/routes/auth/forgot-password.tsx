@@ -31,7 +31,7 @@ function Forgot() {
       <Header />
       <main className="mx-auto flex max-w-md flex-col px-4 py-12">
         <div className="glass animate-fade-up rounded-3xl p-8 shadow-elegant">
-          <h1 className="font-serif text-3xl font-semibold">Recuperar senha</h1>
+          <h1 className="text-3xl font-semibold">Recuperar senha</h1>
           <p className="mt-1 text-sm text-muted-foreground">Enviaremos um link de redefinição para seu email.</p>
           {sent ? (
             <p className="mt-6 rounded-xl bg-accent/50 p-4 text-sm">Verifique sua caixa de entrada e siga o link recebido.</p>
@@ -47,7 +47,7 @@ function Forgot() {
             </form>
           )}
           <p className="mt-6 text-center text-sm text-muted-foreground">
-            <Link to="/auth/login" className="font-medium text-[var(--gold)] hover:underline">Voltar para login</Link>
+            <Link to="/auth/login" className="font-medium text-[var(--rose)] hover:underline">Voltar para login</Link>
           </p>
         </div>
       </main>

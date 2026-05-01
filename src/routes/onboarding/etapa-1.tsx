@@ -104,14 +104,14 @@ function Etapa1() {
       <Header />
       <main className="mx-auto max-w-2xl px-4 py-10">
         <div className="mb-6 animate-fade-up">
-          <p className="text-xs uppercase tracking-[0.2em] text-[var(--gold)]">Etapa 1 de 2</p>
-          <h1 className="mt-2 font-serif text-4xl font-semibold">Sobre você</h1>
+          <p className="text-xs uppercase tracking-[0.2em] text-[var(--rose)]">Etapa 1 de 2</p>
+          <h1 className="mt-2 text-4xl font-semibold">Sobre você</h1>
           <Progress value={50} className="mt-4 h-1.5" />
         </div>
 
         <form onSubmit={handleSubmit} className="glass animate-fade-up space-y-6 rounded-3xl p-8 shadow-elegant">
           <div className="flex flex-col items-center gap-3">
-            <label className="group relative h-32 w-32 cursor-pointer overflow-hidden rounded-full border-2 border-dashed border-[var(--gold-soft)] bg-card/60 shadow-soft transition hover:border-[var(--gold)]">
+            <label className="group relative h-32 w-32 cursor-pointer overflow-hidden rounded-full border-2 border-dashed border-[var(--rose-soft)] bg-card/60 shadow-soft transition hover:border-[var(--rose)]">
               {photoPreview ? (
                 <img src={photoPreview} alt="" className="h-full w-full object-cover" />
               ) : (

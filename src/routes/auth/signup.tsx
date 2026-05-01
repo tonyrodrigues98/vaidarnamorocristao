@@ -42,7 +42,7 @@ function Signup() {
       <Header />
       <main className="mx-auto flex max-w-md flex-col px-4 py-12">
         <div className="glass animate-fade-up rounded-3xl p-8 shadow-elegant">
-          <h1 className="font-serif text-3xl font-semibold">Criar conta</h1>
+          <h1 className="text-3xl font-semibold">Criar conta</h1>
           <p className="mt-1 text-sm text-muted-foreground">Comece sua jornada em poucos passos.</p>
           <form onSubmit={handleSubmit} className="mt-6 space-y-4">
             <div className="space-y-2">
@@ -59,7 +59,7 @@ function Signup() {
             </Button>
           </form>
           <p className="mt-6 text-center text-sm text-muted-foreground">
-            Já tem conta? <Link to="/auth/login" className="font-medium text-[var(--gold)] hover:underline">Entrar</Link>
+            Já tem conta? <Link to="/auth/login" className="font-medium text-[var(--rose)] hover:underline">Entrar</Link>
           </p>
         </div>
       </main>

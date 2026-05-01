@@ -87,8 +87,8 @@ function Etapa2() {
       <Header />
       <main className="mx-auto max-w-2xl px-4 py-10">
         <div className="mb-6 animate-fade-up">
-          <p className="text-xs uppercase tracking-[0.2em] text-[var(--gold)]">Etapa 2 de 2</p>
-          <h1 className="mt-2 font-serif text-4xl font-semibold">O que você busca</h1>
+          <p className="text-xs uppercase tracking-[0.2em] text-[var(--rose)]">Etapa 2 de 2</p>
+          <h1 className="mt-2 text-4xl font-semibold">O que você busca</h1>
           <Progress value={100} className="mt-4 h-1.5" />
         </div>
 
@@ -113,7 +113,7 @@ function Etapa2() {
                 { v: "mundo", l: "Qualquer lugar do mundo" },
                 { v: "personalizado", l: "Personalizado (selecionar estados)" },
               ].map((o) => (
-                <label key={o.v} className="flex cursor-pointer items-center gap-3 rounded-xl border border-border bg-card/40 p-3 transition hover:border-[var(--gold-soft)]">
+                <label key={o.v} className="flex cursor-pointer items-center gap-3 rounded-xl border border-border bg-card/40 p-3 transition hover:border-[var(--rose-soft)]">
                   <RadioGroupItem value={o.v} />
                   <span className="text-sm">{o.l}</span>
                 </label>
@@ -129,8 +129,8 @@ function Etapa2() {
                   <button type="button" key={s} onClick={() => toggleState(s)}
                     className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
                       form.custom_states.includes(s)
-                        ? "border-[var(--gold)] bg-[var(--gold)] text-white"
-                        : "border-border bg-card/60 text-muted-foreground hover:border-[var(--gold-soft)]"
+                        ? "border-[var(--rose)] bg-[var(--rose)] text-white"
+                        : "border-border bg-card/60 text-muted-foreground hover:border-[var(--rose-soft)]"
                     }`}>{s}</button>
                 ))}
               </div>
