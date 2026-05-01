@@ -6,7 +6,7 @@ import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, Send, Trash2, Pencil, Check, X, Reply } from "lucide-react";
+import { ArrowLeft, Send, Trash2, Pencil, Check, X, Reply, MoreHorizontal } from "lucide-react";
 import { useLongPress } from "@/hooks/use-long-press";
 
 type Msg = {
@@ -244,6 +244,16 @@ function Chat() {
                     </>
                   )}
                 </BubbleContent>
+                {!isEditing && !showActions && (
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); setActionsOpenId(m.id); }}
+                    aria-label="Mais opções"
+                    className="hidden md:flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-muted-foreground opacity-0 transition-opacity hover:bg-accent hover:text-foreground group-hover:opacity-100 focus:opacity-100"
+                  >
+                    <MoreHorizontal className="h-4 w-4" />
+                  </button>
+                )}
                 {!isEditing && showActions && (
                   <div
                     className={`absolute z-40 flex items-center gap-1 rounded-full border border-border bg-popover px-1 py-1 shadow-lg ${
