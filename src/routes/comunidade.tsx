@@ -201,7 +201,6 @@ function Comunidade() {
               </div>
             ) : (
               messages
-                .filter((m) => !blockedIds.has(m.sender_id) || m.sender_id === user?.id)
                 .map((m) => {
                 const p = profiles[m.sender_id];
                 const mine = user && m.sender_id === user.id;
