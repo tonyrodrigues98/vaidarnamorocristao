@@ -155,6 +155,7 @@ function Chat() {
                   isMine={!!mine}
                   enableLongPress={!!mine && !isEditing}
                   onLongPress={() => setActionsOpenId(m.id)}
+                  highlighted={showActions}
                 >
                   {isEditing ? (
                     <div className="flex flex-col gap-2">
@@ -231,22 +232,26 @@ function BubbleContent({
   mine,
   enableLongPress,
   onLongPress,
+  highlighted,
   children,
 }: {
   mine: boolean;
   isMine: boolean;
   enableLongPress: boolean;
   onLongPress: () => void;
+  highlighted: boolean;
   children: React.ReactNode;
 }) {
-  const lp = useLongPress(onLongPress, 450);
-  const handlers = enableLongPress ? lp : {};
+  const { pressing, handlers } = useLongPress(onLongPress, 450);
+  const bound = enableLongPress ? handlers : {};
   return (
     <div
-      {...handlers}
-      className={`rounded-2xl px-4 py-2 text-sm shadow-soft ${
+      {...bound}
+      className={`relative rounded-2xl px-4 py-2 text-sm shadow-soft transition-all duration-200 ${
         mine ? "bg-gradient-love text-white" : "glass text-foreground"
-      } ${enableLongPress ? "select-none md:select-text touch-none" : ""}`}
+      } ${enableLongPress ? "select-none md:select-text touch-none" : ""} ${
+        pressing ? "scale-[0.97] ring-2 ring-primary/40" : ""
+      } ${highlighted ? "ring-2 ring-primary shadow-glow" : ""}`}
       style={enableLongPress ? { WebkitUserSelect: "none", WebkitTouchCallout: "none" } : undefined}
     >
       {children}
