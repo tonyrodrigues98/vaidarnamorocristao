@@ -9,18 +9,26 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as InteressesRouteImport } from './routes/interesses'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PretendentesIndexRouteImport } from './routes/pretendentes/index'
+import { Route as ConversasIndexRouteImport } from './routes/conversas/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as PretendentesIdRouteImport } from './routes/pretendentes/$id'
 import { Route as OnboardingEtapa2RouteImport } from './routes/onboarding/etapa-2'
 import { Route as OnboardingEtapa1RouteImport } from './routes/onboarding/etapa-1'
+import { Route as ConversasMatchIdRouteImport } from './routes/conversas/$matchId'
 import { Route as AuthSignupRouteImport } from './routes/auth/signup'
 import { Route as AuthResetPasswordRouteImport } from './routes/auth/reset-password'
 import { Route as AuthLoginRouteImport } from './routes/auth/login'
 import { Route as AuthForgotPasswordRouteImport } from './routes/auth/forgot-password'
 
+const InteressesRoute = InteressesRouteImport.update({
+  id: '/interesses',
+  path: '/interesses',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -34,6 +42,11 @@ const IndexRoute = IndexRouteImport.update({
 const PretendentesIndexRoute = PretendentesIndexRouteImport.update({
   id: '/pretendentes/',
   path: '/pretendentes/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConversasIndexRoute = ConversasIndexRouteImport.update({
+  id: '/conversas/',
+  path: '/conversas/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
@@ -54,6 +67,11 @@ const OnboardingEtapa2Route = OnboardingEtapa2RouteImport.update({
 const OnboardingEtapa1Route = OnboardingEtapa1RouteImport.update({
   id: '/onboarding/etapa-1',
   path: '/onboarding/etapa-1',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConversasMatchIdRoute = ConversasMatchIdRouteImport.update({
+  id: '/conversas/$matchId',
+  path: '/conversas/$matchId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthSignupRoute = AuthSignupRouteImport.update({
@@ -80,41 +98,50 @@ const AuthForgotPasswordRoute = AuthForgotPasswordRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
+  '/interesses': typeof InteressesRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/auth/signup': typeof AuthSignupRoute
+  '/conversas/$matchId': typeof ConversasMatchIdRoute
   '/onboarding/etapa-1': typeof OnboardingEtapa1Route
   '/onboarding/etapa-2': typeof OnboardingEtapa2Route
   '/pretendentes/$id': typeof PretendentesIdRoute
   '/admin/': typeof AdminIndexRoute
+  '/conversas/': typeof ConversasIndexRoute
   '/pretendentes/': typeof PretendentesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
+  '/interesses': typeof InteressesRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/auth/signup': typeof AuthSignupRoute
+  '/conversas/$matchId': typeof ConversasMatchIdRoute
   '/onboarding/etapa-1': typeof OnboardingEtapa1Route
   '/onboarding/etapa-2': typeof OnboardingEtapa2Route
   '/pretendentes/$id': typeof PretendentesIdRoute
   '/admin': typeof AdminIndexRoute
+  '/conversas': typeof ConversasIndexRoute
   '/pretendentes': typeof PretendentesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
+  '/interesses': typeof InteressesRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/auth/signup': typeof AuthSignupRoute
+  '/conversas/$matchId': typeof ConversasMatchIdRoute
   '/onboarding/etapa-1': typeof OnboardingEtapa1Route
   '/onboarding/etapa-2': typeof OnboardingEtapa2Route
   '/pretendentes/$id': typeof PretendentesIdRoute
   '/admin/': typeof AdminIndexRoute
+  '/conversas/': typeof ConversasIndexRoute
   '/pretendentes/': typeof PretendentesIndexRoute
 }
 export interface FileRouteTypes {
@@ -122,59 +149,78 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/dashboard'
+    | '/interesses'
     | '/auth/forgot-password'
     | '/auth/login'
     | '/auth/reset-password'
     | '/auth/signup'
+    | '/conversas/$matchId'
     | '/onboarding/etapa-1'
     | '/onboarding/etapa-2'
     | '/pretendentes/$id'
     | '/admin/'
+    | '/conversas/'
     | '/pretendentes/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/dashboard'
+    | '/interesses'
     | '/auth/forgot-password'
     | '/auth/login'
     | '/auth/reset-password'
     | '/auth/signup'
+    | '/conversas/$matchId'
     | '/onboarding/etapa-1'
     | '/onboarding/etapa-2'
     | '/pretendentes/$id'
     | '/admin'
+    | '/conversas'
     | '/pretendentes'
   id:
     | '__root__'
     | '/'
     | '/dashboard'
+    | '/interesses'
     | '/auth/forgot-password'
     | '/auth/login'
     | '/auth/reset-password'
     | '/auth/signup'
+    | '/conversas/$matchId'
     | '/onboarding/etapa-1'
     | '/onboarding/etapa-2'
     | '/pretendentes/$id'
     | '/admin/'
+    | '/conversas/'
     | '/pretendentes/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DashboardRoute: typeof DashboardRoute
+  InteressesRoute: typeof InteressesRoute
   AuthForgotPasswordRoute: typeof AuthForgotPasswordRoute
   AuthLoginRoute: typeof AuthLoginRoute
   AuthResetPasswordRoute: typeof AuthResetPasswordRoute
   AuthSignupRoute: typeof AuthSignupRoute
+  ConversasMatchIdRoute: typeof ConversasMatchIdRoute
   OnboardingEtapa1Route: typeof OnboardingEtapa1Route
   OnboardingEtapa2Route: typeof OnboardingEtapa2Route
   PretendentesIdRoute: typeof PretendentesIdRoute
   AdminIndexRoute: typeof AdminIndexRoute
+  ConversasIndexRoute: typeof ConversasIndexRoute
   PretendentesIndexRoute: typeof PretendentesIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/interesses': {
+      id: '/interesses'
+      path: '/interesses'
+      fullPath: '/interesses'
+      preLoaderRoute: typeof InteressesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dashboard': {
       id: '/dashboard'
       path: '/dashboard'
@@ -194,6 +240,13 @@ declare module '@tanstack/react-router' {
       path: '/pretendentes'
       fullPath: '/pretendentes/'
       preLoaderRoute: typeof PretendentesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/conversas/': {
+      id: '/conversas/'
+      path: '/conversas'
+      fullPath: '/conversas/'
+      preLoaderRoute: typeof ConversasIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/': {
@@ -222,6 +275,13 @@ declare module '@tanstack/react-router' {
       path: '/onboarding/etapa-1'
       fullPath: '/onboarding/etapa-1'
       preLoaderRoute: typeof OnboardingEtapa1RouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/conversas/$matchId': {
+      id: '/conversas/$matchId'
+      path: '/conversas/$matchId'
+      fullPath: '/conversas/$matchId'
+      preLoaderRoute: typeof ConversasMatchIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth/signup': {
@@ -258,14 +318,17 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DashboardRoute: DashboardRoute,
+  InteressesRoute: InteressesRoute,
   AuthForgotPasswordRoute: AuthForgotPasswordRoute,
   AuthLoginRoute: AuthLoginRoute,
   AuthResetPasswordRoute: AuthResetPasswordRoute,
   AuthSignupRoute: AuthSignupRoute,
+  ConversasMatchIdRoute: ConversasMatchIdRoute,
   OnboardingEtapa1Route: OnboardingEtapa1Route,
   OnboardingEtapa2Route: OnboardingEtapa2Route,
   PretendentesIdRoute: PretendentesIdRoute,
   AdminIndexRoute: AdminIndexRoute,
+  ConversasIndexRoute: ConversasIndexRoute,
   PretendentesIndexRoute: PretendentesIndexRoute,
 }
 export const routeTree = rootRouteImport

@@ -1,4 +1,4 @@
-import { createFileRoute, Navigate } from "@tanstack/react-router";
+import { createFileRoute, Navigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -6,23 +6,34 @@ import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Check, X, Ban, ShieldAlert } from "lucide-react";
+import { Check, X, Ban, ShieldAlert, Flag } from "lucide-react";
 import type { Database } from "@/integrations/supabase/types";
 
 type Row = Database["public"]["Tables"]["profiles"]["Row"];
 type ProfileUpdate = Database["public"]["Tables"]["profiles"]["Update"];
+type Report = Database["public"]["Tables"]["reports"]["Row"];
 
 export const Route = createFileRoute("/admin/")({ component: Admin });
 
 function Admin() {
   const { user, isAdmin, loading } = useAuth();
   const [rows, setRows] = useState<Row[]>([]);
-  const [tab, setTab] = useState<"pending" | "approved" | "rejected" | "banned">("pending");
+  const [tab, setTab] = useState<"pending" | "approved" | "rejected" | "banned" | "reports">("pending");
   const [busy, setBusy] = useState<string | null>(null);
+  const [reports, setReports] = useState<Array<Report & { reporter?: { full_name: string | null }; reported?: { full_name: string | null; id: string } }>>([]);
 
   async function load(status: typeof tab) {
+    if (status === "reports") {
+      const { data: rs, error } = await supabase.from("reports").select("*").order("created_at", { ascending: false });
+      if (error) { toast.error(error.message); return; }
+      const ids = Array.from(new Set([...(rs ?? []).map((r) => r.reporter_id), ...(rs ?? []).map((r) => r.reported_id)]));
+      const { data: profs } = ids.length ? await supabase.from("profiles").select("id, full_name").in("id", ids) : { data: [] as { id: string; full_name: string | null }[] };
+      const map = new Map((profs ?? []).map((p) => [p.id, p]));
+      setReports((rs ?? []).map((r) => ({ ...r, reporter: map.get(r.reporter_id) ?? undefined, reported: map.get(r.reported_id) ? { id: r.reported_id, full_name: map.get(r.reported_id)!.full_name } : undefined })));
+      return;
+    }
     const { data, error } = await supabase
-      .from("profiles").select("*").eq("status", status).order("created_at", { ascending: false });
+      .from("profiles").select("*").eq("status", status as "pending" | "approved" | "rejected" | "banned").order("created_at", { ascending: false });
     if (error) toast.error(error.message);
     setRows((data ?? []) as Row[]);
   }
@@ -64,10 +75,50 @@ function Admin() {
             <TabsTrigger value="approved">Aprovados</TabsTrigger>
             <TabsTrigger value="rejected">Rejeitados</TabsTrigger>
             <TabsTrigger value="banned">Banidos</TabsTrigger>
+            <TabsTrigger value="reports"><Flag className="mr-1 h-3 w-3" /> Denúncias</TabsTrigger>
           </TabsList>
 
           <TabsContent value={tab} className="mt-6">
-            {rows.length === 0 ? (
+            {tab === "reports" ? (
+              reports.length === 0 ? (
+                <div className="glass rounded-2xl p-10 text-center text-muted-foreground shadow-soft">Nenhuma denúncia.</div>
+              ) : (
+                <div className="grid gap-4">
+                  {reports.map((r) => (
+                    <div key={r.id} className="glass rounded-2xl p-5 shadow-soft">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex-1">
+                          <div className="text-xs text-muted-foreground">
+                            {new Date(r.created_at).toLocaleString("pt-BR")} · status: <span className="font-semibold">{r.status}</span>
+                          </div>
+                          <p className="mt-1"><strong>{r.reporter?.full_name ?? r.reporter_id}</strong> denunciou <strong>{r.reported?.full_name ?? r.reported_id}</strong></p>
+                          <p className="mt-2 rounded-lg bg-muted p-3 text-sm">{r.reason}</p>
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          {r.reported && (
+                            <Button asChild size="sm" variant="outline">
+                              <Link to="/pretendentes/$id" params={{ id: r.reported.id }}>Ver perfil</Link>
+                            </Button>
+                          )}
+                          {r.status === "open" && (
+                            <>
+                              <Button size="sm" onClick={async () => {
+                                await supabase.from("reports").update({ status: "reviewed" }).eq("id", r.id);
+                                toast.success("Marcada como revisada"); load("reports");
+                              }}>Revisar</Button>
+                              <Button size="sm" variant="ghost" onClick={async () => {
+                                await supabase.from("reports").update({ status: "dismissed" }).eq("id", r.id);
+                                load("reports");
+                              }}>Descartar</Button>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )
+            ) : rows.length === 0 ? (
               <div className="glass rounded-2xl p-10 text-center text-muted-foreground shadow-soft">Nenhum perfil aqui.</div>
             ) : (
               <div className="grid gap-4">

@@ -1,10 +1,13 @@
-import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
+import { createFileRoute, Link, Navigate, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, MapPin, Church, Heart } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { ArrowLeft, MapPin, Church, Heart, Flag, Ban, MessageCircle, Check } from "lucide-react";
 
 type Full = {
   id: string; full_name: string; age: number; height_cm: number | null;
@@ -17,12 +20,68 @@ export const Route = createFileRoute("/pretendentes/$id")({ component: Detail })
 function Detail() {
   const { id } = Route.useParams();
   const { user, loading } = useAuth();
+  const navigate = useNavigate();
   const [profile, setProfile] = useState<Full | null | undefined>(undefined);
+  const [interestSent, setInterestSent] = useState(false);
+  const [matchId, setMatchId] = useState<string | null>(null);
+  const [blocked, setBlocked] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
+  const [reportReason, setReportReason] = useState("");
 
   useEffect(() => {
     supabase.from("profiles").select("*").eq("id", id).eq("status", "approved").maybeSingle()
       .then(({ data }) => setProfile(data as Full | null));
   }, [id]);
+
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      const [intRes, matchRes, blockRes] = await Promise.all([
+        supabase.from("interests").select("id").eq("sender_id", user.id).eq("receiver_id", id).maybeSingle(),
+        supabase.from("matches").select("id").or(`and(user_a.eq.${user.id},user_b.eq.${id}),and(user_a.eq.${id},user_b.eq.${user.id})`).maybeSingle(),
+        supabase.from("blocks").select("id").eq("blocker_id", user.id).eq("blocked_id", id).maybeSingle(),
+      ]);
+      setInterestSent(!!intRes.data);
+      setMatchId(matchRes.data?.id ?? null);
+      setBlocked(!!blockRes.data);
+    })();
+  }, [user, id]);
+
+  async function demonstrarInteresse() {
+    if (!user) return;
+    setBusy(true);
+    const { error } = await supabase.from("interests").insert({ sender_id: user.id, receiver_id: id });
+    setBusy(false);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Interesse enviado 💗");
+    setInterestSent(true);
+    // refresh match
+    const { data: m } = await supabase.from("matches").select("id").or(`and(user_a.eq.${user.id},user_b.eq.${id}),and(user_a.eq.${id},user_b.eq.${user.id})`).maybeSingle();
+    if (m) setMatchId(m.id);
+  }
+
+  async function bloquear() {
+    if (!user) return;
+    if (!confirm("Bloquear este perfil? Vocês não aparecerão mais um para o outro.")) return;
+    setBusy(true);
+    await supabase.from("blocks").insert({ blocker_id: user.id, blocked_id: id });
+    setBusy(false);
+    toast.success("Perfil bloqueado");
+    navigate({ to: "/pretendentes" });
+  }
+
+  async function enviarDenuncia() {
+    if (!user || reportReason.trim().length < 3) { toast.error("Descreva o motivo (mín. 3 caracteres)"); return; }
+    setBusy(true);
+    const { error } = await supabase.from("reports").insert({
+      reporter_id: user.id, reported_id: id, reason: reportReason.trim().slice(0, 1000),
+    });
+    setBusy(false);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Denúncia enviada. Nossa equipe vai analisar.");
+    setReportReason(""); setReportOpen(false);
+  }
 
   if (!loading && !user) return <Navigate to="/auth/login" />;
   if (profile === undefined) return <div className="min-h-screen"><Header /></div>;
@@ -74,9 +133,41 @@ function Detail() {
               </div>
             )}
 
-            <Button size="lg" className="w-full shadow-glow" disabled>
-              <Heart className="mr-2 h-4 w-4" /> + Interesse (em breve)
-            </Button>
+            <div className="space-y-2">
+              {matchId ? (
+                <Button size="lg" className="w-full shadow-glow" asChild>
+                  <Link to="/conversas/$matchId" params={{ matchId }}><MessageCircle className="mr-2 h-4 w-4" /> Conversar</Link>
+                </Button>
+              ) : interestSent ? (
+                <Button size="lg" className="w-full" variant="outline" disabled>
+                  <Check className="mr-2 h-4 w-4" /> Interesse enviado
+                </Button>
+              ) : (
+                <Button size="lg" className="w-full shadow-glow" disabled={busy} onClick={demonstrarInteresse}>
+                  <Heart className="mr-2 h-4 w-4" /> Demonstrar interesse
+                </Button>
+              )}
+
+              <div className="flex gap-2">
+                <Dialog open={reportOpen} onOpenChange={setReportOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" size="sm" className="flex-1"><Flag className="mr-1 h-4 w-4" /> Denunciar</Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader><DialogTitle>Denunciar perfil</DialogTitle></DialogHeader>
+                    <Textarea rows={4} maxLength={1000} value={reportReason} onChange={(e) => setReportReason(e.target.value)}
+                      placeholder="Conte o que aconteceu..." />
+                    <DialogFooter>
+                      <Button variant="outline" onClick={() => setReportOpen(false)}>Cancelar</Button>
+                      <Button onClick={enviarDenuncia} disabled={busy}>Enviar denúncia</Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+                <Button variant="outline" size="sm" className="flex-1" disabled={busy || blocked} onClick={bloquear}>
+                  <Ban className="mr-1 h-4 w-4" /> {blocked ? "Bloqueado" : "Bloquear"}
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
       </main>
