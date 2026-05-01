@@ -14,7 +14,7 @@ import type { Database } from "@/integrations/supabase/types";
 type Row = Database["public"]["Tables"]["profiles"]["Row"];
 type ProfileUpdate = Database["public"]["Tables"]["profiles"]["Update"];
 type Report = Database["public"]["Tables"]["reports"]["Row"];
-type DailyPost = { id: string; title: string; content: string; published: boolean; published_at: string };
+type DailyPost = { id: string; title: string; content: string; published: boolean; published_at: string; kind: "news" | "devotional" };
 
 export const Route = createFileRoute("/admin/")({ component: Admin });
 
@@ -27,6 +27,7 @@ function Admin() {
   const [posts, setPosts] = useState<DailyPost[]>([]);
   const [newTitle, setNewTitle] = useState("");
   const [newContent, setNewContent] = useState("");
+  const [newKind, setNewKind] = useState<"news" | "devotional">("news");
   const [postBusy, setPostBusy] = useState(false);
 
   async function load(status: typeof tab) {
@@ -42,7 +43,7 @@ function Admin() {
     if (status === "posts") {
       const { data, error } = await supabase
         .from("daily_posts")
-        .select("id, title, content, published, published_at")
+        .select("id, title, content, published, published_at, kind")
         .order("published_at", { ascending: false });
       if (error) { toast.error(error.message); return; }
       setPosts((data ?? []) as DailyPost[]);
@@ -81,7 +82,7 @@ function Admin() {
     const t = newTitle.trim(); const c = newContent.trim();
     if (!t || !c) { toast.error("Preencha título e conteúdo"); return; }
     setPostBusy(true);
-    const { error } = await supabase.from("daily_posts").insert({ author_id: user.id, title: t, content: c, published: true });
+    const { error } = await supabase.from("daily_posts").insert({ author_id: user.id, title: t, content: c, published: true, kind: newKind });
     setPostBusy(false);
     if (error) { toast.error(error.message); return; }
     toast.success("Publicado");
@@ -124,8 +125,28 @@ function Admin() {
               <div className="space-y-6">
                 <div className="glass rounded-2xl p-5 shadow-soft">
                   <h3 className="text-lg font-semibold">Nova publicação</h3>
+                  <div className="mt-3 flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setNewKind("news")}
+                      className={`rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-wide transition ${
+                        newKind === "news" ? "bg-foreground text-background" : "bg-muted text-muted-foreground hover:bg-muted/70"
+                      }`}
+                    >
+                      Feed (Notícia)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setNewKind("devotional")}
+                      className={`rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-wide transition ${
+                        newKind === "devotional" ? "bg-[var(--rose)] text-white" : "bg-muted text-muted-foreground hover:bg-muted/70"
+                      }`}
+                    >
+                      Devocional
+                    </button>
+                  </div>
                   <Input className="mt-3" placeholder="Título" value={newTitle} onChange={(e) => setNewTitle(e.target.value)} maxLength={200} />
-                  <Textarea className="mt-2 min-h-[140px]" placeholder="Escreva o texto diário, reflexão ou aviso..." value={newContent} onChange={(e) => setNewContent(e.target.value)} maxLength={10000} />
+                  <Textarea className="mt-2 min-h-[140px]" placeholder={newKind === "devotional" ? "Escreva uma reflexão devocional..." : "Escreva uma notícia ou aviso para a comunidade..."} value={newContent} onChange={(e) => setNewContent(e.target.value)} maxLength={10000} />
                   <div className="mt-3 flex justify-end">
                     <Button onClick={createPost} disabled={postBusy}>Publicar</Button>
                   </div>
@@ -139,6 +160,9 @@ function Admin() {
                         <div className="flex items-start justify-between gap-3">
                           <div className="flex-1 min-w-0">
                             <div className="text-xs text-muted-foreground">
+                              <span className={`mr-2 inline-block rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase ${p.kind === "devotional" ? "bg-[var(--rose)] text-white" : "bg-foreground/10 text-foreground/70"}`}>
+                                {p.kind === "devotional" ? "Devocional" : "Feed"}
+                              </span>
                               {new Date(p.published_at).toLocaleString("pt-BR")} · {p.published ? "publicado" : "rascunho"}
                             </div>
                             <h4 className="mt-1 text-lg font-semibold">{p.title}</h4>
