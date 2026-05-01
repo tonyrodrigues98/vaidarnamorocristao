@@ -6,7 +6,7 @@ import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Send, Trash2, Users, Pencil, Check, X } from "lucide-react";
+import { Send, Trash2, Users, Pencil, Check, X, Reply } from "lucide-react";
 import { useLongPress } from "@/hooks/use-long-press";
 
 type GMsg = {
@@ -15,6 +15,7 @@ type GMsg = {
   content: string;
   created_at: string;
   edited_at?: string | null;
+  reply_to_id?: string | null;
 };
 type Profile = { id: string; full_name: string; photo_url: string | null };
 
@@ -31,6 +32,9 @@ function Comunidade() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editText, setEditText] = useState("");
   const [actionsOpenId, setActionsOpenId] = useState<string | null>(null);
+  const [replyTo, setReplyTo] = useState<GMsg | null>(null);
+  const [highlightId, setHighlightId] = useState<string | null>(null);
+  const messageRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   useEffect(() => {
     if (!user) return;
