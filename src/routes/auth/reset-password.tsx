@@ -30,7 +30,7 @@ function Reset() {
       <Header />
       <main className="mx-auto flex max-w-md flex-col px-4 py-12">
         <div className="glass animate-fade-up rounded-3xl p-8 shadow-elegant">
-          <h1 className="font-serif text-3xl font-semibold">Nova senha</h1>
+          <h1 className="text-3xl font-semibold">Nova senha</h1>
           <form onSubmit={handleSubmit} className="mt-6 space-y-4">
             <div className="space-y-2">
               <Label htmlFor="password">Nova senha</Label>

@@ -49,8 +49,8 @@ function Detail() {
               {profile.photo_url ? (
                 <img src={profile.photo_url} alt={profile.full_name} className="h-full w-full object-cover" />
               ) : (
-                <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[var(--gold-soft)] to-[var(--accent)]">
-                  <span className="font-serif text-7xl text-white">{profile.full_name.charAt(0)}</span>
+                <div className="flex h-full w-full items-center justify-center bg-gradient-love">
+                  <span className="text-7xl text-white">{profile.full_name.charAt(0)}</span>
                 </div>
               )}
             </div>
@@ -58,18 +58,18 @@ function Detail() {
 
           <div className="animate-fade-up space-y-6" style={{ animationDelay: "80ms" }}>
             <div>
-              <h1 className="font-serif text-4xl font-semibold">{profile.full_name}, {profile.age}</h1>
+              <h1 className="text-4xl font-semibold">{profile.full_name}, {profile.age}</h1>
               <p className="mt-1 text-muted-foreground">{profile.marital === "solteiro" ? "Solteiro(a)" : "Divorciado(a)"} {profile.height_cm ? `· ${profile.height_cm} cm` : ""}</p>
             </div>
 
             <div className="space-y-3 text-sm">
-              <div className="flex items-center gap-2"><MapPin className="h-4 w-4 text-[var(--gold)]" /> {profile.city}, {profile.state}</div>
-              <div className="flex items-center gap-2"><Church className="h-4 w-4 text-[var(--gold)]" /> {profile.church} · {profile.years_baptized} anos de batismo</div>
+              <div className="flex items-center gap-2"><MapPin className="h-4 w-4 text-[var(--rose)]" /> {profile.city}, {profile.state}</div>
+              <div className="flex items-center gap-2"><Church className="h-4 w-4 text-[var(--rose)]" /> {profile.church} · {profile.years_baptized} anos de batismo</div>
             </div>
 
             {profile.bio && (
               <div className="glass rounded-2xl p-5 shadow-soft">
-                <h3 className="font-serif text-lg font-semibold">Sobre</h3>
+                <h3 className="text-lg font-semibold">Sobre</h3>
                 <p className="mt-2 leading-relaxed text-foreground/80">{profile.bio}</p>
               </div>
             )}

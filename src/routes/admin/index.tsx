@@ -34,7 +34,7 @@ function Admin() {
     <div className="min-h-screen"><Header />
       <main className="mx-auto max-w-md px-4 py-20 text-center">
         <ShieldAlert className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
-        <h1 className="font-serif text-2xl">Acesso restrito</h1>
+        <h1 className="text-2xl">Acesso restrito</h1>
         <p className="mt-2 text-sm text-muted-foreground">Esta página é apenas para administradores.</p>
       </main>
     </div>
@@ -54,7 +54,7 @@ function Admin() {
       <Header />
       <main className="mx-auto max-w-6xl px-4 py-10">
         <div className="animate-fade-up">
-          <h1 className="font-serif text-4xl font-semibold">Painel administrativo</h1>
+          <h1 className="text-4xl font-semibold">Painel administrativo</h1>
           <p className="mt-1 text-muted-foreground">Aprovação de perfis</p>
         </div>
 
@@ -75,10 +75,10 @@ function Admin() {
                   <div key={r.id} className="glass flex flex-col gap-4 rounded-2xl p-5 shadow-soft sm:flex-row">
                     <div className="h-24 w-24 shrink-0 overflow-hidden rounded-2xl bg-muted">
                       {r.photo_url ? <img src={r.photo_url} alt="" className="h-full w-full object-cover" /> :
-                        <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[var(--gold-soft)] to-[var(--accent)] font-serif text-2xl text-white">{r.full_name.charAt(0)}</div>}
+                        <div className="flex h-full w-full items-center justify-center bg-gradient-love text-2xl text-white">{r.full_name.charAt(0)}</div>}
                     </div>
                     <div className="flex-1">
-                      <h3 className="font-serif text-lg font-semibold">{r.full_name}, {r.age}</h3>
+                      <h3 className="text-lg font-semibold">{r.full_name}, {r.age}</h3>
                       <p className="text-sm text-muted-foreground">{r.sex} · {r.city}/{r.state} · {r.church}</p>
                       {r.bio && <p className="mt-2 text-sm text-foreground/80">{r.bio}</p>}
                     </div>

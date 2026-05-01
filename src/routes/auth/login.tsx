@@ -38,7 +38,7 @@ function Login() {
       <Header />
       <main className="mx-auto flex max-w-md flex-col px-4 py-12">
         <div className="glass animate-fade-up rounded-3xl p-8 shadow-elegant">
-          <h1 className="font-serif text-3xl font-semibold">Bem-vindo de volta</h1>
+          <h1 className="text-3xl font-semibold">Bem-vindo de volta</h1>
           <p className="mt-1 text-sm text-muted-foreground">Entre para continuar sua jornada.</p>
           <form onSubmit={handleSubmit} className="mt-6 space-y-4">
             <div className="space-y-2">
@@ -48,7 +48,7 @@ function Login() {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="password">Senha</Label>
-                <Link to="/auth/forgot-password" className="text-xs text-[var(--gold)] hover:underline">Esqueci a senha</Link>
+                <Link to="/auth/forgot-password" className="text-xs text-[var(--rose)] hover:underline">Esqueci a senha</Link>
               </div>
               <Input id="password" type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} required />
             </div>
@@ -57,7 +57,7 @@ function Login() {
             </Button>
           </form>
           <p className="mt-6 text-center text-sm text-muted-foreground">
-            Novo por aqui? <Link to="/auth/signup" className="font-medium text-[var(--gold)] hover:underline">Criar conta</Link>
+            Novo por aqui? <Link to="/auth/signup" className="font-medium text-[var(--rose)] hover:underline">Criar conta</Link>
           </p>
         </div>
       </main>
