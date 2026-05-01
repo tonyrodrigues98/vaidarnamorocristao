@@ -131,9 +131,9 @@ function Chat() {
                     type="button"
                     onClick={() => handleDelete(m.id)}
                     aria-label="Apagar mensagem"
-                    className="opacity-0 transition-opacity group-hover:opacity-100 focus:opacity-100 text-muted-foreground hover:text-destructive p-1"
+                    className="shrink-0 rounded-full p-2 text-muted-foreground hover:text-destructive active:text-destructive transition-colors md:opacity-0 md:group-hover:opacity-100 md:focus-visible:opacity-100"
                   >
-                    <Trash2 className="h-3.5 w-3.5" />
+                    <Trash2 className="h-4 w-4" />
                   </button>
                 )}
               </div>
