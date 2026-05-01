@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import {
   Heart, LogOut, Shield, MessageCircle, Sparkles, Menu, X,
-  User as UserIcon, Users, Newspaper, Globe,
+  User as UserIcon, Users, Newspaper, Globe, Ban,
 } from "lucide-react";
 
 export function Header() {
@@ -90,6 +90,9 @@ export function Header() {
               <Button variant="ghost" size="sm" asChild>
                 <Link to="/perfil"><UserIcon className="mr-1 h-4 w-4" /> Perfil</Link>
               </Button>
+              <Button variant="ghost" size="sm" asChild>
+                <Link to="/bloqueados"><Ban className="mr-1 h-4 w-4" /> Bloqueados</Link>
+              </Button>
               {isAdmin && (
                 <Button variant="ghost" size="sm" asChild>
                   <Link to="/admin"><Shield className="mr-1 h-4 w-4" /> Admin</Link>
@@ -144,6 +147,9 @@ export function Header() {
                 </MobileItem>
                 <MobileItem to="/perfil" onClick={close}>
                   <span className="flex items-center gap-2"><UserIcon className="h-4 w-4" /> Perfil</span>
+                </MobileItem>
+                <MobileItem to="/bloqueados" onClick={close}>
+                  <span className="flex items-center gap-2"><Ban className="h-4 w-4" /> Bloqueados</span>
                 </MobileItem>
                 {isAdmin && (
                   <MobileItem to="/admin" onClick={close}>
