@@ -1,6 +1,7 @@
 import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
 import { AuthProvider } from "@/lib/auth";
 import { Toaster } from "@/components/ui/sonner";
+import { NotificationsBridge } from "@/lib/useRealtimeNotifications";
 
 import appCss from "../styles.css?url";
 
@@ -74,6 +75,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
 function RootComponent() {
   return (
     <AuthProvider>
+      <NotificationsBridge />
       <Outlet />
       <Toaster richColors position="top-right" />
     </AuthProvider>

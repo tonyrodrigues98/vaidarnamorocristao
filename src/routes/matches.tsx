@@ -1,0 +1,139 @@
+import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/lib/auth";
+import { Header } from "@/components/layout/Header";
+import { Button } from "@/components/ui/button";
+import { Heart, MessageCircle, User as UserIcon } from "lucide-react";
+
+type MatchItem = {
+  matchId: string;
+  createdAt: string;
+  partner: {
+    id: string;
+    full_name: string;
+    age: number;
+    city: string;
+    state: string;
+    photo_url: string | null;
+  };
+};
+
+export const Route = createFileRoute("/matches")({ component: MatchesPage });
+
+function MatchesPage() {
+  const { user, loading } = useAuth();
+  const [items, setItems] = useState<MatchItem[]>([]);
+  const [loadingList, setLoadingList] = useState(true);
+
+  async function load() {
+    if (!user) return;
+    const { data: matches } = await supabase
+      .from("matches").select("id, user_a, user_b, created_at")
+      .or(`user_a.eq.${user.id},user_b.eq.${user.id}`)
+      .order("created_at", { ascending: false });
+    if (!matches?.length) { setItems([]); setLoadingList(false); return; }
+    const partnerIds = matches.map((m) => (m.user_a === user.id ? m.user_b : m.user_a));
+    const { data: profs } = await supabase
+      .from("profiles")
+      .select("id, full_name, age, city, state, photo_url")
+      .in("id", partnerIds);
+    const map = new Map((profs ?? []).map((p) => [p.id, p]));
+    const list: MatchItem[] = matches
+      .map((m) => {
+        const pid = m.user_a === user.id ? m.user_b : m.user_a;
+        const p = map.get(pid);
+        if (!p) return null;
+        return {
+          matchId: m.id,
+          createdAt: m.created_at,
+          partner: p,
+        } satisfies MatchItem;
+      })
+      .filter((x): x is MatchItem => !!x);
+    setItems(list);
+    setLoadingList(false);
+  }
+
+  useEffect(() => {
+    if (!user) return;
+    load();
+    const ch = supabase.channel("matches-list")
+      .on("postgres_changes", { event: "*", schema: "public", table: "matches" }, load)
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
+
+  if (!loading && !user) return <Navigate to="/auth/login" />;
+
+  return (
+    <div className="min-h-screen">
+      <Header />
+      <main className="mx-auto max-w-6xl px-4 py-10">
+        <div className="animate-fade-up flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h1 className="text-3xl font-semibold sm:text-4xl">Seus matches</h1>
+            <p className="mt-1 text-sm text-muted-foreground">Conexões com interesse mútuo. Cuide bem delas. 💗</p>
+          </div>
+          <span className="rounded-full bg-[var(--petal)] px-3 py-1 text-xs font-medium text-[var(--rose)]">
+            {items.length} {items.length === 1 ? "match" : "matches"}
+          </span>
+        </div>
+
+        {loadingList ? (
+          <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="glass h-80 animate-pulse rounded-2xl" />
+            ))}
+          </div>
+        ) : items.length === 0 ? (
+          <div className="glass animate-fade-up mt-10 rounded-3xl p-12 text-center shadow-soft">
+            <Heart className="mx-auto mb-3 h-8 w-8 text-[var(--rose)]" />
+            <p className="text-muted-foreground">Você ainda não tem matches. Demonstre interesse em alguém — quando for recíproco, aparece aqui.</p>
+            <Button asChild className="mt-5"><Link to="/pretendentes">Ver pretendentes</Link></Button>
+          </div>
+        ) : (
+          <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {items.map((it) => (
+              <article key={it.matchId} className="glass animate-fade-up overflow-hidden rounded-2xl shadow-soft hover-lift">
+                <Link to="/pretendentes/$id" params={{ id: it.partner.id }} className="block">
+                  <div className="relative aspect-[4/5] overflow-hidden bg-muted">
+                    {it.partner.photo_url ? (
+                      <img src={it.partner.photo_url} alt={it.partner.full_name} className="h-full w-full object-cover" />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center bg-gradient-love text-5xl text-white">
+                        {it.partner.full_name.charAt(0)}
+                      </div>
+                    )}
+                    <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-[var(--rose)] shadow-soft backdrop-blur">
+                      <Heart className="h-3 w-3" fill="currentColor" /> Match
+                    </span>
+                  </div>
+                </Link>
+                <div className="space-y-3 p-4">
+                  <div>
+                    <h3 className="text-lg font-semibold">{it.partner.full_name.split(" ")[0]}, {it.partner.age}</h3>
+                    <p className="text-xs text-muted-foreground">{it.partner.city} · {it.partner.state}</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button asChild size="sm" className="flex-1">
+                      <Link to="/conversas/$matchId" params={{ matchId: it.matchId }}>
+                        <MessageCircle className="mr-1 h-4 w-4" /> Conversar
+                      </Link>
+                    </Button>
+                    <Button asChild size="sm" variant="outline">
+                      <Link to="/pretendentes/$id" params={{ id: it.partner.id }}>
+                        <UserIcon className="h-4 w-4" />
+                      </Link>
+                    </Button>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
+      </main>
+    </div>
+  );
+}
