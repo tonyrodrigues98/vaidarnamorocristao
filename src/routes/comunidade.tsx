@@ -1,4 +1,4 @@
-import { createFileRoute, Navigate } from "@tanstack/react-router";
+import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -35,6 +35,13 @@ function Comunidade() {
   const [replyTo, setReplyTo] = useState<GMsg | null>(null);
   const [highlightId, setHighlightId] = useState<string | null>(null);
   const messageRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const [blockedIds, setBlockedIds] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    if (!user) return;
+    supabase.from("blocks").select("blocked_id").eq("blocker_id", user.id)
+      .then(({ data }) => setBlockedIds(new Set((data ?? []).map((b) => b.blocked_id as string))));
+  }, [user]);
 
   useEffect(() => {
     if (!user) return;
@@ -193,7 +200,9 @@ function Comunidade() {
                 Nenhuma mensagem ainda. Seja o primeiro!
               </div>
             ) : (
-              messages.map((m) => {
+              messages
+                .filter((m) => !blockedIds.has(m.sender_id) || m.sender_id === user?.id)
+                .map((m) => {
                 const p = profiles[m.sender_id];
                 const mine = user && m.sender_id === user.id;
                 const canDelete = mine || isAdmin;
@@ -213,22 +222,49 @@ function Comunidade() {
                     ref={(el) => { messageRefs.current[m.id] = el; }}
                     className={`group relative flex scroll-mt-24 items-start gap-3 rounded-xl transition-colors duration-500 ${isFlash ? "bg-primary/10" : ""}`}
                   >
-                    <div className="h-9 w-9 shrink-0 overflow-hidden rounded-full bg-muted">
-                      {p?.photo_url ? (
-                        <img src={p.photo_url} alt="" className="h-full w-full object-cover" />
-                      ) : (
-                        <div className="flex h-full w-full items-center justify-center bg-gradient-love text-sm font-semibold text-white">
-                          {name.charAt(0).toUpperCase()}
-                        </div>
-                      )}
-                    </div>
+                    {mine ? (
+                      <div className="h-9 w-9 shrink-0 overflow-hidden rounded-full bg-muted">
+                        {p?.photo_url ? (
+                          <img src={p.photo_url} alt="" className="h-full w-full object-cover" />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center bg-gradient-love text-sm font-semibold text-white">
+                            {name.charAt(0).toUpperCase()}
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <Link
+                        to="/pretendentes/$id"
+                        params={{ id: m.sender_id }}
+                        className="h-9 w-9 shrink-0 overflow-hidden rounded-full bg-muted ring-0 transition hover:ring-2 hover:ring-primary/40"
+                        aria-label={`Ver perfil de ${name}`}
+                      >
+                        {p?.photo_url ? (
+                          <img src={p.photo_url} alt="" className="h-full w-full object-cover" />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center bg-gradient-love text-sm font-semibold text-white">
+                            {name.charAt(0).toUpperCase()}
+                          </div>
+                        )}
+                      </Link>
+                    )}
                     <BubbleWrap
                       enableLongPress={!!enableLongPress}
                       onLongPress={() => setActionsOpenId(m.id)}
                       highlighted={showActions || isFlash}
                     >
                       <div className="flex items-baseline gap-2">
-                        <span className="text-sm font-semibold">{name}</span>
+                        {mine ? (
+                          <span className="text-sm font-semibold">{name}</span>
+                        ) : (
+                          <Link
+                            to="/pretendentes/$id"
+                            params={{ id: m.sender_id }}
+                            className="text-sm font-semibold text-foreground hover:text-primary hover:underline"
+                          >
+                            {name}
+                          </Link>
+                        )}
                         <span className="text-[11px] text-muted-foreground">
                           {new Date(m.created_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
                           {m.edited_at ? " · editado" : ""}

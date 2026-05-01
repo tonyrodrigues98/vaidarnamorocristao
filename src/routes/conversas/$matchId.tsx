@@ -43,8 +43,11 @@ function Chat() {
     (async () => {
       const { data: m } = await supabase.from("matches").select("user_a, user_b").eq("id", matchId).maybeSingle();
       if (!m || (m.user_a !== user.id && m.user_b !== user.id)) { setAuthorized(false); return; }
-      setAuthorized(true);
       const partnerId = m.user_a === user.id ? m.user_b : m.user_a;
+      const { data: blk } = await supabase.from("blocks").select("id")
+        .eq("blocker_id", user.id).eq("blocked_id", partnerId).maybeSingle();
+      if (blk) { setAuthorized(false); return; }
+      setAuthorized(true);
       const { data: p } = await supabase.from("profiles").select("id,full_name,photo_url").eq("id", partnerId).maybeSingle();
       setPartner(p as Partner | null);
       const { data: msgs } = await supabase.from("messages").select("*").eq("match_id", matchId).order("created_at");
