@@ -182,7 +182,7 @@ function Comunidade() {
         <div className="glass mt-6 flex flex-1 flex-col overflow-hidden rounded-3xl shadow-soft">
           {actionsOpenId && (
             <div
-              className="fixed inset-0 z-30 bg-foreground/5 backdrop-blur-[1px] md:hidden"
+              className="fixed inset-0 z-30"
               onClick={() => setActionsOpenId(null)}
               aria-hidden="true"
             />
