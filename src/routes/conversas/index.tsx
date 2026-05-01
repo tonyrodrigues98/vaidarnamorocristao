@@ -22,15 +22,22 @@ function List() {
 
   async function load() {
     if (!user) return;
+    const { data: bl } = await supabase.from("blocks").select("blocked_id").eq("blocker_id", user.id);
+    const blockedSet = new Set((bl ?? []).map((b) => b.blocked_id as string));
     const { data: matches } = await supabase
       .from("matches").select("id, user_a, user_b, created_at")
       .or(`user_a.eq.${user.id},user_b.eq.${user.id}`)
       .order("created_at", { ascending: false });
     if (!matches?.length) { setItems([]); setLoadingList(false); return; }
-    const partnerIds = matches.map((m) => (m.user_a === user.id ? m.user_b : m.user_a));
+    const visibleMatches = matches.filter((m) => {
+      const partnerId = m.user_a === user.id ? m.user_b : m.user_a;
+      return !blockedSet.has(partnerId);
+    });
+    if (!visibleMatches.length) { setItems([]); setLoadingList(false); return; }
+    const partnerIds = visibleMatches.map((m) => (m.user_a === user.id ? m.user_b : m.user_a));
     const { data: profs } = await supabase.from("profiles").select("id,full_name,photo_url,city,state").in("id", partnerIds);
     const profMap = new Map((profs ?? []).map((p) => [p.id, p]));
-    const list: Item[] = await Promise.all(matches.map(async (m) => {
+    const list: Item[] = await Promise.all(visibleMatches.map(async (m) => {
       const partnerId = m.user_a === user.id ? m.user_b : m.user_a;
       const { data: msgs } = await supabase
         .from("messages").select("content, sender_id, created_at, read_at")
