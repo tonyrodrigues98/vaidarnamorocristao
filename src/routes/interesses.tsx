@@ -26,29 +26,23 @@ function Page() {
 
   async function load() {
     if (!user) return;
-    const [rec, snt, mts] = await Promise.all([
-      supabase.from("interests").select("id, created_at, sender:profiles!interests_sender_id_fkey(id,full_name,age,city,state,church,photo_url)").eq("receiver_id", user.id).order("created_at", { ascending: false }),
-      supabase.from("interests").select("id, created_at, receiver:profiles!interests_receiver_id_fkey(id,full_name,age,city,state,church,photo_url)").eq("sender_id", user.id).order("created_at", { ascending: false }),
+    const [r, s, mts] = await Promise.all([
+      supabase.from("interests").select("id, created_at, sender_id").eq("receiver_id", user.id).order("created_at", { ascending: false }),
+      supabase.from("interests").select("id, created_at, receiver_id").eq("sender_id", user.id).order("created_at", { ascending: false }),
       supabase.from("matches").select("user_a, user_b").or(`user_a.eq.${user.id},user_b.eq.${user.id}`),
     ]);
-    // The FK names may not exist for the join. Fallback: do manual fetch if shapes missing
-    if (rec.error || snt.error) {
-      // manual fetch fallback
-      const r = await supabase.from("interests").select("id, created_at, sender_id").eq("receiver_id", user.id).order("created_at", { ascending: false });
-      const s = await supabase.from("interests").select("id, created_at, receiver_id").eq("sender_id", user.id).order("created_at", { ascending: false });
-      const ids = Array.from(new Set([...(r.data ?? []).map((x: any) => x.sender_id), ...(s.data ?? []).map((x: any) => x.receiver_id)]));
-      const profsRes = ids.length
-        ? await supabase.from("profiles").select("id,full_name,age,city,state,church,photo_url").in("id", ids)
-        : { data: [] as ProfileLite[] };
-      const map = new Map<string, ProfileLite>((profsRes.data ?? []).map((p: any) => [p.id, p]));
-      setReceived((r.data ?? []).map((x: any) => ({ id: x.id, created_at: x.created_at, sender: map.get(x.sender_id) ?? null })));
-      setSent((s.data ?? []).map((x: any) => ({ id: x.id, created_at: x.created_at, receiver: map.get(x.receiver_id) ?? null })));
-    } else {
-      setReceived((rec.data ?? []) as unknown as ReceivedRow[]);
-      setSent((snt.data ?? []) as unknown as SentRow[]);
-    }
+    const ids = Array.from(new Set<string>([
+      ...(r.data ?? []).map((x) => x.sender_id),
+      ...(s.data ?? []).map((x) => x.receiver_id),
+    ]));
+    const profsRes = ids.length
+      ? await supabase.from("profiles").select("id,full_name,age,city,state,church,photo_url").in("id", ids)
+      : { data: [] as ProfileLite[] };
+    const map = new Map<string, ProfileLite>((profsRes.data ?? []).map((p) => [p.id, p as ProfileLite]));
+    setReceived((r.data ?? []).map((x) => ({ id: x.id, created_at: x.created_at, sender: map.get(x.sender_id) ?? null })));
+    setSent((s.data ?? []).map((x) => ({ id: x.id, created_at: x.created_at, receiver: map.get(x.receiver_id) ?? null })));
     const matched = new Set<string>();
-    (mts.data ?? []).forEach((m: any) => matched.add(m.user_a === user.id ? m.user_b : m.user_a));
+    (mts.data ?? []).forEach((m) => matched.add(m.user_a === user.id ? m.user_b : m.user_a));
     setMatchedIds(matched);
   }
 
