@@ -7,12 +7,10 @@ import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Check, X, Ban, ShieldAlert } from "lucide-react";
+import type { Database } from "@/integrations/supabase/types";
 
-type Row = {
-  id: string; full_name: string; age: number; city: string; state: string;
-  church: string; sex: string; bio: string | null; photo_url: string | null;
-  status: "pending" | "approved" | "rejected" | "banned"; created_at: string;
-};
+type Row = Database["public"]["Tables"]["profiles"]["Row"];
+type ProfileUpdate = Database["public"]["Tables"]["profiles"]["Update"];
 
 export const Route = createFileRoute("/admin/")({ component: Admin });
 
@@ -42,7 +40,7 @@ function Admin() {
     </div>
   );
 
-  async function update(id: string, patch: Partial<Row>) {
+  async function update(id: string, patch: ProfileUpdate) {
     setBusy(id);
     const { error } = await supabase.from("profiles").update(patch).eq("id", id);
     setBusy(null);
