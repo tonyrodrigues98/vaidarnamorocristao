@@ -6,13 +6,14 @@ import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Send, Trash2, Users } from "lucide-react";
+import { Send, Trash2, Users, Pencil, Check, X } from "lucide-react";
 
 type GMsg = {
   id: string;
   sender_id: string;
   content: string;
   created_at: string;
+  edited_at?: string | null;
 };
 type Profile = { id: string; full_name: string; photo_url: string | null };
 
@@ -26,6 +27,8 @@ function Comunidade() {
   const [sending, setSending] = useState(false);
   const [approved, setApproved] = useState<boolean | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editText, setEditText] = useState("");
 
   useEffect(() => {
     if (!user) return;
@@ -94,6 +97,14 @@ function Comunidade() {
           setMessages((prev) => prev.filter((m) => m.id !== old.id));
         }
       )
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "global_messages" },
+        (payload) => {
+          const updated = payload.new as GMsg;
+          setMessages((prev) => prev.map((m) => (m.id === updated.id ? { ...m, ...updated } : m)));
+        }
+      )
       .subscribe();
     return () => { ignore = true; supabase.removeChannel(ch); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -115,6 +126,24 @@ function Comunidade() {
   async function remove(id: string) {
     const { error } = await supabase.from("global_messages").delete().eq("id", id);
     if (error) toast.error(error.message);
+  }
+
+  function startEdit(m: GMsg) {
+    setEditingId(m.id);
+    setEditText(m.content);
+  }
+  function cancelEdit() {
+    setEditingId(null);
+    setEditText("");
+  }
+  async function saveEdit(id: string) {
+    const content = editText.trim().slice(0, 2000);
+    if (!content) return;
+    const original = messages.find((m) => m.id === id);
+    if (original && original.content === content) { cancelEdit(); return; }
+    const { error } = await supabase.from("global_messages").update({ content }).eq("id", id);
+    if (error) { toast.error("Não foi possível editar."); return; }
+    cancelEdit();
   }
 
   return (
@@ -142,6 +171,8 @@ function Comunidade() {
                 const p = profiles[m.sender_id];
                 const mine = user && m.sender_id === user.id;
                 const canDelete = mine || isAdmin;
+                const canEdit = mine;
+                const isEditing = editingId === m.id;
                 const name = p?.full_name?.split(" ")[0] ?? "Alguém";
                 return (
                   <div key={m.id} className="group flex items-start gap-3">
@@ -159,18 +190,53 @@ function Comunidade() {
                         <span className="text-sm font-semibold">{name}</span>
                         <span className="text-[11px] text-muted-foreground">
                           {new Date(m.created_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+                          {m.edited_at ? " · editado" : ""}
                         </span>
                       </div>
-                      <p className="mt-0.5 whitespace-pre-wrap break-words text-sm text-foreground/90">{m.content}</p>
+                      {isEditing ? (
+                        <div className="mt-1 flex flex-col gap-2">
+                          <textarea
+                            value={editText}
+                            onChange={(e) => setEditText(e.target.value)}
+                            rows={2}
+                            maxLength={2000}
+                            autoFocus
+                            className="w-full resize-none rounded-md border border-border bg-background p-2 text-sm outline-none focus:ring-2 focus:ring-primary/50"
+                          />
+                          <div className="flex gap-2">
+                            <Button type="button" size="sm" onClick={() => saveEdit(m.id)}>
+                              <Check className="mr-1 h-3.5 w-3.5" /> Salvar
+                            </Button>
+                            <Button type="button" size="sm" variant="outline" onClick={cancelEdit}>
+                              <X className="mr-1 h-3.5 w-3.5" /> Cancelar
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <p className="mt-0.5 whitespace-pre-wrap break-words text-sm text-foreground/90">{m.content}</p>
+                      )}
                     </div>
-                    {canDelete && (
-                      <button
-                        onClick={() => remove(m.id)}
-                        className="opacity-0 transition group-hover:opacity-100"
-                        aria-label="Apagar"
-                      >
-                        <Trash2 className="h-4 w-4 text-muted-foreground hover:text-[var(--rose)]" />
-                      </button>
+                    {!isEditing && (canEdit || canDelete) && (
+                      <div className="flex shrink-0 items-center gap-1 md:opacity-0 md:transition md:group-hover:opacity-100 md:focus-within:opacity-100">
+                        {canEdit && (
+                          <button
+                            onClick={() => startEdit(m)}
+                            className="rounded-full p-2 text-muted-foreground hover:text-primary"
+                            aria-label="Editar"
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </button>
+                        )}
+                        {canDelete && (
+                          <button
+                            onClick={() => remove(m.id)}
+                            className="rounded-full p-2 text-muted-foreground hover:text-[var(--rose)]"
+                            aria-label="Apagar"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        )}
+                      </div>
                     )}
                   </div>
                 );
