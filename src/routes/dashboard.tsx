@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
-import { Clock, CheckCircle2, XCircle, Users, Heart } from "lucide-react";
+import { Clock, CheckCircle2, XCircle, Users, Heart, MessageCircle, Sparkles } from "lucide-react";
 
 type Profile = { status: "pending" | "approved" | "rejected" | "banned"; full_name: string | null; rejection_reason: string | null };
 
@@ -60,19 +60,28 @@ function Dashboard() {
           </div>
         </div>
 
-        <div className="mt-10 grid gap-4 sm:grid-cols-2">
-          <Link to="/pretendentes" className="glass group animate-fade-up rounded-2xl p-6 shadow-soft transition hover:shadow-elegant">
-            <Users className="mb-3 h-6 w-6 text-[var(--rose)]" />
-            <h3 className="text-lg font-semibold">Pretendentes</h3>
-            <p className="text-sm text-muted-foreground">Conheça pessoas que compartilham sua fé</p>
-          </Link>
-          <Link to="/onboarding/etapa-1" className="glass group animate-fade-up rounded-2xl p-6 shadow-soft transition hover:shadow-elegant">
-            <Heart className="mb-3 h-6 w-6 text-[var(--rose)]" />
-            <h3 className="text-lg font-semibold">Meu perfil</h3>
-            <p className="text-sm text-muted-foreground">Edite suas informações</p>
-          </Link>
+        <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <DashCard to="/pretendentes" Icon={Users} title="Pretendentes" desc="Conheça pessoas com a mesma fé" />
+          <DashCard to="/interesses" Icon={Sparkles} title="Interesses" desc="Quem demonstrou interesse" />
+          <DashCard to="/matches" Icon={Heart} title="Matches" desc="Conexões com reciprocidade" />
+          <DashCard to="/conversas" Icon={MessageCircle} title="Conversas" desc="Suas mensagens privadas" />
+        </div>
+        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+          <DashCard to="/perfil" Icon={Heart} title="Meu perfil" desc="Edite seus dados e preferências" />
         </div>
       </main>
     </div>
+  );
+}
+
+function DashCard({
+  to, Icon, title, desc,
+}: { to: string; Icon: typeof Users; title: string; desc: string }) {
+  return (
+    <Link to={to} className="glass group animate-fade-up rounded-2xl p-6 shadow-soft transition hover:shadow-elegant">
+      <Icon className="mb-3 h-6 w-6 text-[var(--rose)]" />
+      <h3 className="text-lg font-semibold">{title}</h3>
+      <p className="text-sm text-muted-foreground">{desc}</p>
+    </Link>
   );
 }
