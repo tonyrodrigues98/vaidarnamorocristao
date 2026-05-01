@@ -7,6 +7,7 @@ import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Send, Trash2, Users, Pencil, Check, X } from "lucide-react";
+import { useLongPress } from "@/hooks/use-long-press";
 
 type GMsg = {
   id: string;
@@ -29,6 +30,7 @@ function Comunidade() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editText, setEditText] = useState("");
+  const [actionsOpenId, setActionsOpenId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -174,6 +176,8 @@ function Comunidade() {
                 const canEdit = mine;
                 const isEditing = editingId === m.id;
                 const name = p?.full_name?.split(" ")[0] ?? "Alguém";
+                const showActions = actionsOpenId === m.id;
+                const enableLongPress = !isEditing && (canEdit || canDelete);
                 return (
                   <div key={m.id} className="group flex items-start gap-3">
                     <div className="h-9 w-9 shrink-0 overflow-hidden rounded-full bg-muted">
@@ -185,7 +189,10 @@ function Comunidade() {
                         </div>
                       )}
                     </div>
-                    <div className="flex-1 min-w-0">
+                    <BubbleWrap
+                      enableLongPress={!!enableLongPress}
+                      onLongPress={() => setActionsOpenId(m.id)}
+                    >
                       <div className="flex items-baseline gap-2">
                         <span className="text-sm font-semibold">{name}</span>
                         <span className="text-[11px] text-muted-foreground">
@@ -215,12 +222,16 @@ function Comunidade() {
                       ) : (
                         <p className="mt-0.5 whitespace-pre-wrap break-words text-sm text-foreground/90">{m.content}</p>
                       )}
-                    </div>
+                    </BubbleWrap>
                     {!isEditing && (canEdit || canDelete) && (
-                      <div className="flex shrink-0 items-center gap-1 md:opacity-0 md:transition md:group-hover:opacity-100 md:focus-within:opacity-100">
+                      <div
+                        className={`flex shrink-0 items-center gap-1 transition-opacity ${
+                          showActions ? "opacity-100" : "opacity-0 pointer-events-none"
+                        } md:opacity-0 md:pointer-events-auto md:group-hover:opacity-100 md:focus-within:opacity-100`}
+                      >
                         {canEdit && (
                           <button
-                            onClick={() => startEdit(m)}
+                            onClick={() => { setActionsOpenId(null); startEdit(m); }}
                             className="rounded-full p-2 text-muted-foreground hover:text-primary"
                             aria-label="Editar"
                           >
@@ -229,7 +240,7 @@ function Comunidade() {
                         )}
                         {canDelete && (
                           <button
-                            onClick={() => remove(m.id)}
+                            onClick={() => { setActionsOpenId(null); remove(m.id); }}
                             className="rounded-full p-2 text-muted-foreground hover:text-[var(--rose)]"
                             aria-label="Apagar"
                           >
@@ -259,6 +270,28 @@ function Comunidade() {
           </form>
         </div>
       </main>
+    </div>
+  );
+}
+
+function BubbleWrap({
+  enableLongPress,
+  onLongPress,
+  children,
+}: {
+  enableLongPress: boolean;
+  onLongPress: () => void;
+  children: React.ReactNode;
+}) {
+  const lp = useLongPress(onLongPress, 450);
+  const handlers = enableLongPress ? lp : {};
+  return (
+    <div
+      {...handlers}
+      className={`flex-1 min-w-0 ${enableLongPress ? "select-none md:select-text" : ""}`}
+      style={enableLongPress ? { WebkitUserSelect: "none", WebkitTouchCallout: "none" } : undefined}
+    >
+      {children}
     </div>
   );
 }
