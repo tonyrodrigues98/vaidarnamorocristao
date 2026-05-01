@@ -6,9 +6,9 @@ import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, Send, Trash2 } from "lucide-react";
+import { ArrowLeft, Send, Trash2, Pencil, Check, X } from "lucide-react";
 
-type Msg = { id: string; sender_id: string; content: string; created_at: string; read_at: string | null };
+type Msg = { id: string; sender_id: string; content: string; created_at: string; read_at: string | null; edited_at?: string | null };
 type Partner = { id: string; full_name: string; photo_url: string | null };
 
 export const Route = createFileRoute("/conversas/$matchId")({ component: Chat });
@@ -22,6 +22,8 @@ function Chat() {
   const [sending, setSending] = useState(false);
   const [authorized, setAuthorized] = useState<boolean | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editText, setEditText] = useState("");
 
   useEffect(() => {
     if (!user) return;
@@ -52,6 +54,12 @@ function Chat() {
         (payload) => {
           const removed = payload.old as { id: string };
           setMessages((prev) => prev.filter((m) => m.id !== removed.id));
+        }
+      )
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "messages", filter: `match_id=eq.${matchId}` },
+        (payload) => {
+          const updated = payload.new as Msg;
+          setMessages((prev) => prev.map((m) => (m.id === updated.id ? { ...m, ...updated } : m)));
         }
       )
       .subscribe();
@@ -94,6 +102,26 @@ function Chat() {
     }
   }
 
+  function startEdit(m: Msg) {
+    setEditingId(m.id);
+    setEditText(m.content);
+  }
+
+  function cancelEdit() {
+    setEditingId(null);
+    setEditText("");
+  }
+
+  async function saveEdit(messageId: string) {
+    const content = editText.trim().slice(0, 2000);
+    if (!content) return;
+    const original = messages.find((m) => m.id === messageId);
+    if (original && original.content === content) { cancelEdit(); return; }
+    const { error } = await supabase.from("messages").update({ content }).eq("id", messageId);
+    if (error) { toast.error("Não foi possível editar."); return; }
+    cancelEdit();
+  }
+
   return (
     <div className="flex min-h-screen flex-col">
       <Header />
@@ -115,26 +143,61 @@ function Chat() {
         )}
         {messages.map((m) => {
           const mine = m.sender_id === user?.id;
+          const isEditing = editingId === m.id;
           return (
             <div key={m.id} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
               <div className={`group flex max-w-[75%] items-end gap-1 ${mine ? "flex-row-reverse" : "flex-row"}`}>
                 <div className={`rounded-2xl px-4 py-2 text-sm shadow-soft ${
                   mine ? "bg-gradient-love text-white" : "glass text-foreground"
                 }`}>
-                  <p className="whitespace-pre-wrap break-words">{m.content}</p>
-                  <p className={`mt-1 text-[10px] ${mine ? "text-white/70" : "text-muted-foreground"}`}>
-                    {new Date(m.created_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
-                  </p>
+                  {isEditing ? (
+                    <div className="flex flex-col gap-2">
+                      <textarea
+                        value={editText}
+                        onChange={(e) => setEditText(e.target.value)}
+                        rows={2}
+                        maxLength={2000}
+                        autoFocus
+                        className={`w-full resize-none rounded-md bg-white/20 p-1.5 text-sm outline-none ring-1 ring-white/40 ${mine ? "text-white placeholder:text-white/60" : "text-foreground bg-background ring-border"}`}
+                      />
+                      <div className="flex justify-end gap-1">
+                        <button type="button" onClick={cancelEdit} aria-label="Cancelar" className="rounded-full p-1 hover:bg-white/20">
+                          <X className="h-3.5 w-3.5" />
+                        </button>
+                        <button type="button" onClick={() => saveEdit(m.id)} aria-label="Salvar" className="rounded-full p-1 hover:bg-white/20">
+                          <Check className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <p className="whitespace-pre-wrap break-words">{m.content}</p>
+                      <p className={`mt-1 text-[10px] ${mine ? "text-white/70" : "text-muted-foreground"}`}>
+                        {new Date(m.created_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+                        {m.edited_at ? " · editado" : ""}
+                      </p>
+                    </>
+                  )}
                 </div>
-                {mine && (
-                  <button
-                    type="button"
-                    onClick={() => handleDelete(m.id)}
-                    aria-label="Apagar mensagem"
-                    className="shrink-0 rounded-full p-2 text-muted-foreground hover:text-destructive active:text-destructive transition-colors md:opacity-0 md:group-hover:opacity-100 md:focus-visible:opacity-100"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
+                {mine && !isEditing && (
+                  <div className="flex shrink-0 flex-col gap-1 md:flex-row md:opacity-0 md:group-hover:opacity-100 md:focus-within:opacity-100">
+                    <button
+                      type="button"
+                      onClick={() => startEdit(m)}
+                      aria-label="Editar mensagem"
+                      className="rounded-full p-2 text-muted-foreground hover:text-primary active:text-primary transition-colors"
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDelete(m.id)}
+                      aria-label="Apagar mensagem"
+                      className="rounded-full p-2 text-muted-foreground hover:text-destructive active:text-destructive transition-colors"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
                 )}
               </div>
             </div>
