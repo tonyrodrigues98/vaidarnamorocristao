@@ -6,7 +6,7 @@ import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Send, Trash2, Users, Pencil, Check, X, Reply } from "lucide-react";
+import { Send, Trash2, Users, Pencil, Check, X, Reply, MoreHorizontal } from "lucide-react";
 import { useLongPress } from "@/hooks/use-long-press";
 
 type GMsg = {
@@ -270,6 +270,16 @@ function Comunidade() {
                         <p className="mt-0.5 whitespace-pre-wrap break-words text-sm text-foreground/90">{m.content}</p>
                       )}
                     </BubbleWrap>
+                    {!isEditing && !showActions && (
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); setActionsOpenId(m.id); }}
+                        aria-label="Mais opções"
+                        className="hidden md:flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-muted-foreground opacity-0 transition-opacity hover:bg-accent hover:text-foreground group-hover:opacity-100 focus:opacity-100"
+                      >
+                        <MoreHorizontal className="h-4 w-4" />
+                      </button>
+                    )}
                     {!isEditing && showActions && (
                       <div
                         className="absolute right-0 -top-10 z-40 flex items-center gap-1 rounded-full border border-border bg-popover px-1 py-1 shadow-lg"
