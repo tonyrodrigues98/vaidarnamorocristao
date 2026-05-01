@@ -1,10 +1,23 @@
 import { useRef, useCallback, useState } from "react";
 
+/**
+ * Long-press for touch AND mouse, with right-click also triggering the menu.
+ * Works on mobile (touch) and desktop (hold left-click ~450ms or right-click).
+ */
 export function useLongPress(onLongPress: () => void, delay = 450) {
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const triggered = useRef(false);
   const startPos = useRef<{ x: number; y: number } | null>(null);
   const [pressing, setPressing] = useState(false);
+
+  const fire = useCallback(() => {
+    triggered.current = true;
+    setPressing(false);
+    if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+      try { (navigator as Navigator).vibrate?.(30); } catch { /* noop */ }
+    }
+    onLongPress();
+  }, [onLongPress]);
 
   const clear = useCallback(() => {
     if (timer.current) {
@@ -14,49 +27,55 @@ export function useLongPress(onLongPress: () => void, delay = 450) {
     setPressing(false);
   }, []);
 
-  const start = useCallback(
-    (e: React.TouchEvent | React.PointerEvent) => {
-      // Only trigger long-press for touch input
-      const isTouch =
-        ("touches" in e) ||
-        ((e as React.PointerEvent).pointerType === "touch");
-      if (!isTouch) return;
+  const startTouch = useCallback(
+    (e: React.TouchEvent) => {
       triggered.current = false;
-      const point =
-        "touches" in e
-          ? { x: e.touches[0].clientX, y: e.touches[0].clientY }
-          : { x: (e as React.PointerEvent).clientX, y: (e as React.PointerEvent).clientY };
-      startPos.current = point;
+      startPos.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
       clear();
       setPressing(true);
-      timer.current = setTimeout(() => {
-        triggered.current = true;
-        setPressing(false);
-        // Haptic feedback on supported devices
-        if (typeof navigator !== "undefined" && "vibrate" in navigator) {
-          try { navigator.vibrate?.(30); } catch { /* noop */ }
-        }
-        onLongPress();
-      }, delay);
+      timer.current = setTimeout(fire, delay);
     },
-    [onLongPress, delay, clear]
+    [delay, clear, fire]
   );
 
-  const move = useCallback(
-    (e: React.TouchEvent | React.PointerEvent) => {
+  const moveTouch = useCallback(
+    (e: React.TouchEvent) => {
       if (!startPos.current) return;
-      const point =
-        "touches" in e
-          ? { x: e.touches[0].clientX, y: e.touches[0].clientY }
-          : { x: (e as React.PointerEvent).clientX, y: (e as React.PointerEvent).clientY };
-      const dx = point.x - startPos.current.x;
-      const dy = point.y - startPos.current.y;
+      const dx = e.touches[0].clientX - startPos.current.x;
+      const dy = e.touches[0].clientY - startPos.current.y;
       if (Math.abs(dx) > 10 || Math.abs(dy) > 10) clear();
     },
     [clear]
   );
 
-  const end = useCallback(() => {
+  const endTouch = useCallback(() => {
+    clear();
+    startPos.current = null;
+  }, [clear]);
+
+  const startMouse = useCallback(
+    (e: React.MouseEvent) => {
+      if (e.button !== 0) return; // only left button
+      triggered.current = false;
+      startPos.current = { x: e.clientX, y: e.clientY };
+      clear();
+      setPressing(true);
+      timer.current = setTimeout(fire, delay);
+    },
+    [delay, clear, fire]
+  );
+
+  const moveMouse = useCallback(
+    (e: React.MouseEvent) => {
+      if (!startPos.current) return;
+      const dx = e.clientX - startPos.current.x;
+      const dy = e.clientY - startPos.current.y;
+      if (Math.abs(dx) > 10 || Math.abs(dy) > 10) clear();
+    },
+    [clear]
+  );
+
+  const endMouse = useCallback(() => {
     clear();
     startPos.current = null;
   }, [clear]);
@@ -64,12 +83,19 @@ export function useLongPress(onLongPress: () => void, delay = 450) {
   return {
     pressing,
     handlers: {
-      onTouchStart: start,
-      onTouchMove: move,
-      onTouchEnd: end,
-      onTouchCancel: end,
+      onTouchStart: startTouch,
+      onTouchMove: moveTouch,
+      onTouchEnd: endTouch,
+      onTouchCancel: endTouch,
+      onMouseDown: startMouse,
+      onMouseMove: moveMouse,
+      onMouseUp: endMouse,
+      onMouseLeave: endMouse,
       onContextMenu: (e: React.MouseEvent) => {
-        if (triggered.current) e.preventDefault();
+        // Right-click → open the menu instead of native context menu
+        e.preventDefault();
+        clear();
+        fire();
       },
     },
   };
