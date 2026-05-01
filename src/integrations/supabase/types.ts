@@ -41,6 +41,7 @@ export type Database = {
           content: string
           created_at: string
           id: string
+          kind: Database["public"]["Enums"]["daily_post_kind"]
           published: boolean
           published_at: string
           title: string
@@ -51,6 +52,7 @@ export type Database = {
           content: string
           created_at?: string
           id?: string
+          kind?: Database["public"]["Enums"]["daily_post_kind"]
           published?: boolean
           published_at?: string
           title: string
@@ -61,6 +63,7 @@ export type Database = {
           content?: string
           created_at?: string
           id?: string
+          kind?: Database["public"]["Enums"]["daily_post_kind"]
           published?: boolean
           published_at?: string
           title?: string
@@ -331,6 +334,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user"
+      daily_post_kind: "news" | "devotional"
       location_scope: "regiao" | "brasil" | "mundo" | "personalizado"
       marital_status: "solteiro" | "divorciado"
       profile_status: "pending" | "approved" | "rejected" | "banned"
@@ -464,6 +468,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user"],
+      daily_post_kind: ["news", "devotional"],
       location_scope: ["regiao", "brasil", "mundo", "personalizado"],
       marital_status: ["solteiro", "divorciado"],
       profile_status: ["pending", "approved", "rejected", "banned"],
