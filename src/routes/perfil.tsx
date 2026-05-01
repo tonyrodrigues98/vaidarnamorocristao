@@ -117,7 +117,7 @@ function PerfilPage() {
       const { data: pub } = supabase.storage.from("profile-photos").getPublicUrl(path);
       photo_url = `${pub.publicUrl}?t=${Date.now()}`;
     }
-    const payload: Record<string, unknown> = {
+    const payload = {
       id: user.id,
       full_name: parsed.data.full_name,
       age: parsed.data.age,
@@ -128,10 +128,9 @@ function PerfilPage() {
       church: parsed.data.church,
       years_baptized: parsed.data.years_baptized,
       bio: parsed.data.bio || null,
+      ...(typeof parsed.data.height_cm === "number" ? { height_cm: parsed.data.height_cm } : {}),
+      ...(photo_url ? { photo_url } : {}),
     };
-    if (parsed.data.height_cm && parsed.data.height_cm !== "") payload.height_cm = parsed.data.height_cm;
-    if (photo_url) payload.photo_url = photo_url;
-
     const { error } = await supabase.from("profiles").upsert(payload);
     setSavingProfile(false);
     if (error) { toast.error(error.message); return; }
