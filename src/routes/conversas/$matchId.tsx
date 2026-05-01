@@ -6,7 +6,7 @@ import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, Send } from "lucide-react";
+import { ArrowLeft, Send, Trash2 } from "lucide-react";
 
 type Msg = { id: string; sender_id: string; content: string; created_at: string; read_at: string | null };
 type Partner = { id: string; full_name: string; photo_url: string | null };
@@ -48,6 +48,12 @@ function Chat() {
           }
         }
       )
+      .on("postgres_changes", { event: "DELETE", schema: "public", table: "messages", filter: `match_id=eq.${matchId}` },
+        (payload) => {
+          const removed = payload.old as { id: string };
+          setMessages((prev) => prev.filter((m) => m.id !== removed.id));
+        }
+      )
       .subscribe();
     return () => { supabase.removeChannel(ch); };
   }, [matchId, user]);
@@ -77,6 +83,17 @@ function Chat() {
     setInput("");
   }
 
+  async function handleDelete(messageId: string) {
+    if (!confirm("Apagar esta mensagem? Essa ação não pode ser desfeita.")) return;
+    const prev = messages;
+    setMessages((m) => m.filter((x) => x.id !== messageId));
+    const { error } = await supabase.from("messages").delete().eq("id", messageId);
+    if (error) {
+      setMessages(prev);
+      toast.error("Não foi possível apagar a mensagem.");
+    }
+  }
+
   return (
     <div className="flex min-h-screen flex-col">
       <Header />
@@ -100,13 +117,25 @@ function Chat() {
           const mine = m.sender_id === user?.id;
           return (
             <div key={m.id} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
-              <div className={`max-w-[75%] rounded-2xl px-4 py-2 text-sm shadow-soft ${
-                mine ? "bg-gradient-love text-white" : "glass text-foreground"
-              }`}>
-                <p className="whitespace-pre-wrap break-words">{m.content}</p>
-                <p className={`mt-1 text-[10px] ${mine ? "text-white/70" : "text-muted-foreground"}`}>
-                  {new Date(m.created_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
-                </p>
+              <div className={`group flex max-w-[75%] items-end gap-1 ${mine ? "flex-row-reverse" : "flex-row"}`}>
+                <div className={`rounded-2xl px-4 py-2 text-sm shadow-soft ${
+                  mine ? "bg-gradient-love text-white" : "glass text-foreground"
+                }`}>
+                  <p className="whitespace-pre-wrap break-words">{m.content}</p>
+                  <p className={`mt-1 text-[10px] ${mine ? "text-white/70" : "text-muted-foreground"}`}>
+                    {new Date(m.created_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+                  </p>
+                </div>
+                {mine && (
+                  <button
+                    type="button"
+                    onClick={() => handleDelete(m.id)}
+                    aria-label="Apagar mensagem"
+                    className="opacity-0 transition-opacity group-hover:opacity-100 focus:opacity-100 text-muted-foreground hover:text-destructive p-1"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                )}
               </div>
             </div>
           );
