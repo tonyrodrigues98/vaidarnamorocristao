@@ -10,9 +10,11 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as PerfilRouteImport } from './routes/perfil'
+import { Route as NoticiasRouteImport } from './routes/noticias'
 import { Route as MatchesRouteImport } from './routes/matches'
 import { Route as InteressesRouteImport } from './routes/interesses'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as ComunidadeRouteImport } from './routes/comunidade'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PretendentesIndexRouteImport } from './routes/pretendentes/index'
 import { Route as ConversasIndexRouteImport } from './routes/conversas/index'
@@ -31,6 +33,11 @@ const PerfilRoute = PerfilRouteImport.update({
   path: '/perfil',
   getParentRoute: () => rootRouteImport,
 } as any)
+const NoticiasRoute = NoticiasRouteImport.update({
+  id: '/noticias',
+  path: '/noticias',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MatchesRoute = MatchesRouteImport.update({
   id: '/matches',
   path: '/matches',
@@ -44,6 +51,11 @@ const InteressesRoute = InteressesRouteImport.update({
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ComunidadeRoute = ComunidadeRouteImport.update({
+  id: '/comunidade',
+  path: '/comunidade',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -109,9 +121,11 @@ const AuthForgotPasswordRoute = AuthForgotPasswordRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/comunidade': typeof ComunidadeRoute
   '/dashboard': typeof DashboardRoute
   '/interesses': typeof InteressesRoute
   '/matches': typeof MatchesRoute
+  '/noticias': typeof NoticiasRoute
   '/perfil': typeof PerfilRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
@@ -127,9 +141,11 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/comunidade': typeof ComunidadeRoute
   '/dashboard': typeof DashboardRoute
   '/interesses': typeof InteressesRoute
   '/matches': typeof MatchesRoute
+  '/noticias': typeof NoticiasRoute
   '/perfil': typeof PerfilRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
@@ -146,9 +162,11 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/comunidade': typeof ComunidadeRoute
   '/dashboard': typeof DashboardRoute
   '/interesses': typeof InteressesRoute
   '/matches': typeof MatchesRoute
+  '/noticias': typeof NoticiasRoute
   '/perfil': typeof PerfilRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
@@ -166,9 +184,11 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/comunidade'
     | '/dashboard'
     | '/interesses'
     | '/matches'
+    | '/noticias'
     | '/perfil'
     | '/auth/forgot-password'
     | '/auth/login'
@@ -184,9 +204,11 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/comunidade'
     | '/dashboard'
     | '/interesses'
     | '/matches'
+    | '/noticias'
     | '/perfil'
     | '/auth/forgot-password'
     | '/auth/login'
@@ -202,9 +224,11 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/comunidade'
     | '/dashboard'
     | '/interesses'
     | '/matches'
+    | '/noticias'
     | '/perfil'
     | '/auth/forgot-password'
     | '/auth/login'
@@ -221,9 +245,11 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ComunidadeRoute: typeof ComunidadeRoute
   DashboardRoute: typeof DashboardRoute
   InteressesRoute: typeof InteressesRoute
   MatchesRoute: typeof MatchesRoute
+  NoticiasRoute: typeof NoticiasRoute
   PerfilRoute: typeof PerfilRoute
   AuthForgotPasswordRoute: typeof AuthForgotPasswordRoute
   AuthLoginRoute: typeof AuthLoginRoute
@@ -247,6 +273,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PerfilRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/noticias': {
+      id: '/noticias'
+      path: '/noticias'
+      fullPath: '/noticias'
+      preLoaderRoute: typeof NoticiasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/matches': {
       id: '/matches'
       path: '/matches'
@@ -266,6 +299,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/comunidade': {
+      id: '/comunidade'
+      path: '/comunidade'
+      fullPath: '/comunidade'
+      preLoaderRoute: typeof ComunidadeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -357,9 +397,11 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ComunidadeRoute: ComunidadeRoute,
   DashboardRoute: DashboardRoute,
   InteressesRoute: InteressesRoute,
   MatchesRoute: MatchesRoute,
+  NoticiasRoute: NoticiasRoute,
   PerfilRoute: PerfilRoute,
   AuthForgotPasswordRoute: AuthForgotPasswordRoute,
   AuthLoginRoute: AuthLoginRoute,

@@ -35,6 +35,60 @@ export type Database = {
         }
         Relationships: []
       }
+      daily_posts: {
+        Row: {
+          author_id: string
+          content: string
+          created_at: string
+          id: string
+          published: boolean
+          published_at: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          author_id: string
+          content: string
+          created_at?: string
+          id?: string
+          published?: boolean
+          published_at?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string
+          content?: string
+          created_at?: string
+          id?: string
+          published?: boolean
+          published_at?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      global_messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          sender_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          sender_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          sender_id?: string
+        }
+        Relationships: []
+      }
       interests: {
         Row: {
           created_at: string
