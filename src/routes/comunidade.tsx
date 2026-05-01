@@ -192,6 +192,7 @@ function Comunidade() {
                     <BubbleWrap
                       enableLongPress={!!enableLongPress}
                       onLongPress={() => setActionsOpenId(m.id)}
+                      highlighted={showActions}
                     >
                       <div className="flex items-baseline gap-2">
                         <span className="text-sm font-semibold">{name}</span>
@@ -277,18 +278,24 @@ function Comunidade() {
 function BubbleWrap({
   enableLongPress,
   onLongPress,
+  highlighted,
   children,
 }: {
   enableLongPress: boolean;
   onLongPress: () => void;
+  highlighted: boolean;
   children: React.ReactNode;
 }) {
-  const lp = useLongPress(onLongPress, 450);
-  const handlers = enableLongPress ? lp : {};
+  const { pressing, handlers } = useLongPress(onLongPress, 450);
+  const bound = enableLongPress ? handlers : {};
   return (
     <div
-      {...handlers}
-      className={`flex-1 min-w-0 ${enableLongPress ? "select-none md:select-text" : ""}`}
+      {...bound}
+      className={`flex-1 min-w-0 rounded-xl transition-all duration-200 ${
+        enableLongPress ? "select-none md:select-text" : ""
+      } ${pressing ? "scale-[0.98] bg-primary/5 ring-2 ring-primary/30 px-2 -mx-2" : ""} ${
+        highlighted ? "bg-primary/10 ring-2 ring-primary/50 px-2 -mx-2" : ""
+      }`}
       style={enableLongPress ? { WebkitUserSelect: "none", WebkitTouchCallout: "none" } : undefined}
     >
       {children}
