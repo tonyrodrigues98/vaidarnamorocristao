@@ -7,6 +7,7 @@ import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ArrowLeft, Send, Trash2, Pencil, Check, X } from "lucide-react";
+import { useLongPress } from "@/hooks/use-long-press";
 
 type Msg = { id: string; sender_id: string; content: string; created_at: string; read_at: string | null; edited_at?: string | null };
 type Partner = { id: string; full_name: string; photo_url: string | null };
@@ -24,6 +25,7 @@ function Chat() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editText, setEditText] = useState("");
+  const [actionsOpenId, setActionsOpenId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -144,12 +146,16 @@ function Chat() {
         {messages.map((m) => {
           const mine = m.sender_id === user?.id;
           const isEditing = editingId === m.id;
+          const showActions = actionsOpenId === m.id;
           return (
             <div key={m.id} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
               <div className={`group flex max-w-[75%] items-end gap-1 ${mine ? "flex-row-reverse" : "flex-row"}`}>
-                <div className={`rounded-2xl px-4 py-2 text-sm shadow-soft ${
-                  mine ? "bg-gradient-love text-white" : "glass text-foreground"
-                }`}>
+                <BubbleContent
+                  mine={mine}
+                  isMine={!!mine}
+                  enableLongPress={!!mine && !isEditing}
+                  onLongPress={() => setActionsOpenId(m.id)}
+                >
                   {isEditing ? (
                     <div className="flex flex-col gap-2">
                       <textarea
@@ -178,12 +184,16 @@ function Chat() {
                       </p>
                     </>
                   )}
-                </div>
+                </BubbleContent>
                 {mine && !isEditing && (
-                  <div className="flex shrink-0 flex-col gap-1 md:flex-row md:opacity-0 md:group-hover:opacity-100 md:focus-within:opacity-100">
+                  <div
+                    className={`flex shrink-0 flex-col gap-1 md:flex-row transition-opacity ${
+                      showActions ? "opacity-100" : "opacity-0 pointer-events-none"
+                    } md:opacity-0 md:pointer-events-auto md:group-hover:opacity-100 md:focus-within:opacity-100`}
+                  >
                     <button
                       type="button"
-                      onClick={() => startEdit(m)}
+                      onClick={() => { setActionsOpenId(null); startEdit(m); }}
                       aria-label="Editar mensagem"
                       className="rounded-full p-2 text-muted-foreground hover:text-primary active:text-primary transition-colors"
                     >
@@ -191,7 +201,7 @@ function Chat() {
                     </button>
                     <button
                       type="button"
-                      onClick={() => handleDelete(m.id)}
+                      onClick={() => { setActionsOpenId(null); handleDelete(m.id); }}
                       aria-label="Apagar mensagem"
                       className="rounded-full p-2 text-muted-foreground hover:text-destructive active:text-destructive transition-colors"
                     >
@@ -213,6 +223,33 @@ function Chat() {
           </Button>
         </div>
       </form>
+    </div>
+  );
+}
+
+function BubbleContent({
+  mine,
+  enableLongPress,
+  onLongPress,
+  children,
+}: {
+  mine: boolean;
+  isMine: boolean;
+  enableLongPress: boolean;
+  onLongPress: () => void;
+  children: React.ReactNode;
+}) {
+  const lp = useLongPress(onLongPress, 450);
+  const handlers = enableLongPress ? lp : {};
+  return (
+    <div
+      {...handlers}
+      className={`rounded-2xl px-4 py-2 text-sm shadow-soft ${
+        mine ? "bg-gradient-love text-white" : "glass text-foreground"
+      } ${enableLongPress ? "select-none md:select-text touch-none" : ""}`}
+      style={enableLongPress ? { WebkitUserSelect: "none", WebkitTouchCallout: "none" } : undefined}
+    >
+      {children}
     </div>
   );
 }
