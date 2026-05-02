@@ -485,7 +485,7 @@ function UsersPanel({
 }
 
 function PreCadastrosPanel({
-  items, editing, draft, setDraft, onEdit, onCancel, onSave, onDelete, busy,
+  items, editing, draft, setDraft, onEdit, onCancel, onSave, onDelete, busy, currentUserId, isSuperAdmin,
 }: {
   items: PreCadastro[];
   editing: PreCadastro | null;
@@ -496,6 +496,8 @@ function PreCadastrosPanel({
   onSave: () => void;
   onDelete: (id: string) => void;
   busy: boolean;
+  currentUserId: string | null;
+  isSuperAdmin: boolean;
 }) {
   const set = <K extends keyof PreCadastro>(k: K, v: PreCadastro[K] | null) =>
     setDraft({ ...draft, [k]: v });
@@ -503,16 +505,48 @@ function PreCadastrosPanel({
   const [uploading, setUploading] = useState(false);
   const [viewing, setViewing] = useState<PreCadastro | null>(null);
   const [search, setSearch] = useState("");
+  const [creating, setCreating] = useState(false);
+  const [filterMatches, setFilterMatches] = useState(false);
+  const [matches, setMatches] = useState<PreMatchRow[]>([]);
+  const [matchTarget, setMatchTarget] = useState<PreCadastro | null>(null);
+  const [editingMatch, setEditingMatch] = useState<PreMatchRow | null>(null);
+
+  const isFormOpen = creating || !!editing;
+
+  const loadMatches = async () => {
+    const { data, error } = await supabase
+      .from("pre_cadastro_matches")
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (error) { toast.error(error.message); return; }
+    setMatches((data ?? []) as PreMatchRow[]);
+  };
+
+  useEffect(() => { loadMatches(); }, [items]);
+
+  const matchesByPC = useMemo(() => {
+    const map = new Map<string, PreMatchRow[]>();
+    for (const m of matches) {
+      const arr = map.get(m.pre_cadastro_id) ?? [];
+      arr.push(m);
+      map.set(m.pre_cadastro_id, arr);
+    }
+    return map;
+  }, [matches]);
 
   const filteredItems = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return items;
-    return items.filter((p) => {
-      const name = (p.full_name ?? "").toLowerCase();
-      const tk = ((p as { tiktok_user?: string | null }).tiktok_user ?? "").toLowerCase();
-      return name.includes(q) || tk.includes(q);
-    });
-  }, [items, search]);
+    let list = items;
+    if (filterMatches) list = list.filter((p) => matchesByPC.has(p.id));
+    if (q) {
+      list = list.filter((p) => {
+        const name = (p.full_name ?? "").toLowerCase();
+        const tk = ((p as { tiktok_user?: string | null }).tiktok_user ?? "").toLowerCase();
+        return name.includes(q) || tk.includes(q);
+      });
+    }
+    return list;
+  }, [items, search, filterMatches, matchesByPC]);
 
   async function handlePhotoUpload(file: File) {
     setUploading(true);
@@ -531,12 +565,36 @@ function PreCadastrosPanel({
     }
   }
 
+  const handleCancel = () => {
+    setCreating(false);
+    onCancel();
+  };
+  const handleSave = async () => {
+    await onSave();
+    setCreating(false);
+  };
+  const startCreate = () => {
+    setDraft({});
+    setCreating(true);
+  };
+
   return (
     <div className="space-y-6">
-      <div className="glass rounded-2xl p-5 shadow-soft">
-        <h3 className="text-lg font-semibold">{editing ? "Editar pré-cadastro" : "Novo pré-cadastro"}</h3>
-        <p className="mt-1 text-xs text-muted-foreground">Nenhum campo é obrigatório. Preencha o que tiver.</p>
-        <div className="mt-4 flex items-center gap-4">
+      <div className="glass flex flex-wrap items-center justify-between gap-3 rounded-2xl p-5 shadow-soft">
+        <div>
+          <h3 className="text-lg font-semibold">Pré-cadastros</h3>
+          <p className="text-xs text-muted-foreground">Cadastre fichas, registre matches e acompanhe o casal.</p>
+        </div>
+        <Button onClick={startCreate}><Plus className="mr-1 h-4 w-4" /> Cadastrar Ficha</Button>
+      </div>
+
+      <Dialog open={isFormOpen} onOpenChange={(o) => { if (!o) handleCancel(); }}>
+        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>{editing ? "Editar pré-cadastro" : "Novo pré-cadastro"}</DialogTitle>
+            <DialogDescription>Nenhum campo é obrigatório. Preencha o que tiver.</DialogDescription>
+          </DialogHeader>
+          <div className="mt-4 flex items-center gap-4">
           <div className="h-20 w-20 shrink-0 overflow-hidden rounded-2xl bg-muted">
             {draft.photo_url ? (
               <img src={draft.photo_url} alt="" className="h-full w-full object-cover" />
@@ -642,11 +700,12 @@ function PreCadastrosPanel({
           <div className="space-y-1 sm:col-span-2"><Label>Sobre o que procura</Label><Textarea value={draft.pref_looking_for_bio ?? ""} onChange={(e) => set("pref_looking_for_bio", e.target.value || null)} /></div>
           <div className="space-y-1 sm:col-span-2"><Label>Notas internas</Label><Textarea value={draft.notes ?? ""} onChange={(e) => set("notes", e.target.value || null)} /></div>
         </div>
-        <div className="mt-4 flex gap-2">
-          <Button onClick={onSave} disabled={busy}>{editing ? "Salvar alterações" : "Adicionar"}</Button>
-          {editing && <Button variant="outline" onClick={onCancel}>Cancelar</Button>}
-        </div>
-      </div>
+          <DialogFooter className="mt-4">
+            <Button variant="outline" onClick={handleCancel}>Cancelar</Button>
+            <Button onClick={handleSave} disabled={busy}>{editing ? "Salvar alterações" : "Adicionar"}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <div className="glass rounded-2xl p-4 shadow-soft">
         <Label htmlFor="pc-search" className="text-xs text-muted-foreground">Buscar</Label>
@@ -657,9 +716,20 @@ function PreCadastrosPanel({
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
-        <p className="mt-2 text-xs text-muted-foreground">
-          {filteredItems.length} de {items.length} pré-cadastro{items.length === 1 ? "" : "s"}
-        </p>
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+          <button
+            type="button"
+            onClick={() => setFilterMatches((v) => !v)}
+            className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold transition ${
+              filterMatches ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/70"
+            }`}
+          >
+            <Heart className="h-3 w-3" /> Matches
+          </button>
+          <p className="text-xs text-muted-foreground">
+            {filteredItems.length} de {items.length} pré-cadastro{items.length === 1 ? "" : "s"}
+          </p>
+        </div>
       </div>
 
       {items.length === 0 ? (
@@ -669,7 +739,26 @@ function PreCadastrosPanel({
       ) : (
         <div className="grid gap-3">
           {filteredItems.map((p) => (
-            <div key={p.id} className="glass rounded-2xl p-4 shadow-soft">
+            <PreCadastroCard
+              key={p.id}
+              p={p}
+              matches={matchesByPC.get(p.id) ?? []}
+              onView={setViewing}
+              onEdit={onEdit}
+              onDelete={onDelete}
+              onMatch={() => setMatchTarget(p)}
+              onEditMatch={(m) => setEditingMatch(m)}
+              onDeleteMatch={async (m) => {
+                if (!confirm("Remover este match?")) return;
+                const { error } = await supabase.from("pre_cadastro_matches").delete().eq("id", m.id);
+                if (error) { toast.error(error.message); return; }
+                toast.success("Match removido");
+                loadMatches();
+              }}
+            />
+          ))}
+          {/* swallow original card rendering */}
+          {false && <div>
               <div className="flex items-start gap-3">
                 <button
                   type="button"
@@ -677,30 +766,9 @@ function PreCadastrosPanel({
                   className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-muted transition hover:opacity-80"
                   aria-label="Ver detalhes"
                 >
-                  {p.photo_url ? (
-                    <img src={p.photo_url} alt="" className="h-full w-full object-cover" />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center bg-gradient-love text-lg text-white">
-                      {(p.full_name ?? "?").charAt(0).toUpperCase()}
-                    </div>
-                  )}
                 </button>
-                <div className="min-w-0 flex-1">
-                  <h4 className="font-semibold">{p.full_name ?? "(sem nome)"}{p.age ? `, ${p.age}` : ""}</h4>
-                  <p className="text-xs text-muted-foreground">
-                    {[p.sex, p.marital, p.city && p.state ? `${p.city}/${p.state}` : p.city || p.state, p.church].filter(Boolean).join(" · ")}
-                  </p>
-                  {p.bio && <p className="mt-2 line-clamp-2 text-sm text-foreground/80">{p.bio}</p>}
-                  {p.notes && <p className="mt-1 text-xs italic text-muted-foreground">📝 {p.notes}</p>}
-                </div>
-                <div className="flex flex-col gap-1">
-                  <Button size="sm" variant="outline" onClick={() => setViewing(p)}>Visualizar</Button>
-                  <Button size="sm" variant="outline" onClick={() => onEdit(p)}>Editar</Button>
-                  <Button size="sm" variant="ghost" onClick={() => onDelete(p.id)}><Trash2 className="h-4 w-4" /></Button>
-                </div>
               </div>
-            </div>
-          ))}
+          </div>}
         </div>
       )}
 
