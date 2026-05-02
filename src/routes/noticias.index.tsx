@@ -113,10 +113,7 @@ function Noticias() {
                   >
                     {p.content}
                   </p>
-                  <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-[var(--rose)]">
-                    Ler artigo completo <ArrowRight className="h-3 w-3" />
-                  </span>
-                </Link>
+                </article>
               ))
             )}
           </TabsContent>
