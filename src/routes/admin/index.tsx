@@ -628,8 +628,7 @@ function PreCadastrosPanel({
                 <Field label="Estado" value={viewing.state} />
                 <Field label="Igreja" value={viewing.church} />
                 <Field label="Anos batismo" value={viewing.years_baptized?.toString()} />
-                <Field label="Email" value={viewing.email} />
-                <Field label="Telefone" value={viewing.phone} />
+                <Field label="TikTok" value={(viewing as { tiktok_user?: string | null }).tiktok_user} />
               </div>
               {viewing.bio && (
                 <div>
