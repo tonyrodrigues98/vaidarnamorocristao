@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import type { Database } from "@/integrations/supabase/types";
 import { ROLE_CONFIG, ROLE_PRIORITY, type AppRole } from "@/lib/roles";
 import { RoleBadge } from "@/components/RoleBadge";
@@ -479,11 +480,59 @@ function PreCadastrosPanel({
   const set = <K extends keyof PreCadastro>(k: K, v: PreCadastro[K] | null) =>
     setDraft({ ...draft, [k]: v });
   const numOrNull = (s: string) => (s.trim() === "" ? null : Number(s));
+  const [uploading, setUploading] = useState(false);
+  const [viewing, setViewing] = useState<PreCadastro | null>(null);
+
+  async function handlePhotoUpload(file: File) {
+    setUploading(true);
+    try {
+      const ext = file.name.split(".").pop() || "jpg";
+      const path = `pre-cadastros/${crypto.randomUUID()}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from("profile-photos")
+        .upload(path, file, { upsert: false, contentType: file.type });
+      if (upErr) { toast.error(upErr.message); return; }
+      const { data } = supabase.storage.from("profile-photos").getPublicUrl(path);
+      setDraft({ ...draft, photo_url: data.publicUrl });
+      toast.success("Foto enviada");
+    } finally {
+      setUploading(false);
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="glass rounded-2xl p-5 shadow-soft">
         <h3 className="text-lg font-semibold">{editing ? "Editar pré-cadastro" : "Novo pré-cadastro"}</h3>
         <p className="mt-1 text-xs text-muted-foreground">Nenhum campo é obrigatório. Preencha o que tiver.</p>
+        <div className="mt-4 flex items-center gap-4">
+          <div className="h-20 w-20 shrink-0 overflow-hidden rounded-2xl bg-muted">
+            {draft.photo_url ? (
+              <img src={draft.photo_url} alt="" className="h-full w-full object-cover" />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center text-xs text-muted-foreground">Sem foto</div>
+            )}
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="pc-photo" className="text-xs text-muted-foreground">Foto (opcional)</Label>
+            <Input
+              id="pc-photo"
+              type="file"
+              accept="image/*"
+              disabled={uploading}
+              onChange={(e) => { const f = e.target.files?.[0]; if (f) handlePhotoUpload(f); }}
+            />
+            {draft.photo_url && (
+              <button
+                type="button"
+                className="self-start text-xs text-muted-foreground underline hover:text-foreground"
+                onClick={() => set("photo_url", null)}
+              >
+                Remover foto
+              </button>
+            )}
+          </div>
+        </div>
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           <div className="space-y-1 sm:col-span-2"><Label>Nome completo</Label><Input value={draft.full_name ?? ""} onChange={(e) => set("full_name", e.target.value || null)} /></div>
           <div className="space-y-1"><Label>Email</Label><Input value={draft.email ?? ""} onChange={(e) => set("email", e.target.value || null)} /></div>
@@ -516,7 +565,21 @@ function PreCadastrosPanel({
         <div className="grid gap-3">
           {items.map((p) => (
             <div key={p.id} className="glass rounded-2xl p-4 shadow-soft">
-              <div className="flex items-start justify-between gap-3">
+              <div className="flex items-start gap-3">
+                <button
+                  type="button"
+                  onClick={() => setViewing(p)}
+                  className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-muted transition hover:opacity-80"
+                  aria-label="Ver detalhes"
+                >
+                  {p.photo_url ? (
+                    <img src={p.photo_url} alt="" className="h-full w-full object-cover" />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center bg-gradient-love text-lg text-white">
+                      {(p.full_name ?? "?").charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                </button>
                 <div className="min-w-0 flex-1">
                   <h4 className="font-semibold">{p.full_name ?? "(sem nome)"}{p.age ? `, ${p.age}` : ""}</h4>
                   <p className="text-xs text-muted-foreground">
@@ -526,6 +589,7 @@ function PreCadastrosPanel({
                   {p.notes && <p className="mt-1 text-xs italic text-muted-foreground">📝 {p.notes}</p>}
                 </div>
                 <div className="flex flex-col gap-1">
+                  <Button size="sm" variant="outline" onClick={() => setViewing(p)}>Visualizar</Button>
                   <Button size="sm" variant="outline" onClick={() => onEdit(p)}>Editar</Button>
                   <Button size="sm" variant="ghost" onClick={() => onDelete(p.id)}><Trash2 className="h-4 w-4" /></Button>
                 </div>
@@ -534,6 +598,70 @@ function PreCadastrosPanel({
           ))}
         </div>
       )}
+
+      <Dialog open={!!viewing} onOpenChange={(o) => !o && setViewing(null)}>
+        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>{viewing?.full_name ?? "Pré-cadastro"}</DialogTitle>
+          </DialogHeader>
+          {viewing && (
+            <div className="space-y-4">
+              {viewing.photo_url && (
+                <img src={viewing.photo_url} alt="" className="w-full rounded-xl object-cover" />
+              )}
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <Field label="Idade" value={viewing.age?.toString()} />
+                <Field label="Altura" value={viewing.height_cm ? `${viewing.height_cm} cm` : null} />
+                <Field label="Sexo" value={viewing.sex} />
+                <Field label="Estado civil" value={viewing.marital} />
+                <Field label="Cidade" value={viewing.city} />
+                <Field label="Estado" value={viewing.state} />
+                <Field label="Igreja" value={viewing.church} />
+                <Field label="Anos batismo" value={viewing.years_baptized?.toString()} />
+                <Field label="Email" value={viewing.email} />
+                <Field label="Telefone" value={viewing.phone} />
+              </div>
+              {viewing.bio && (
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Sobre</p>
+                  <p className="mt-1 whitespace-pre-wrap text-sm">{viewing.bio}</p>
+                </div>
+              )}
+              <div className="rounded-xl bg-muted/50 p-3">
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Preferências</p>
+                <div className="mt-2 grid grid-cols-2 gap-2 text-sm">
+                  <Field label="Idade mín" value={viewing.pref_age_min?.toString()} />
+                  <Field label="Idade máx" value={viewing.pref_age_max?.toString()} />
+                  <Field label="Localização" value={viewing.pref_location_scope} />
+                  <Field label="Aceita filhos" value={viewing.pref_accepts_children == null ? null : viewing.pref_accepts_children ? "Sim" : "Não"} />
+                </div>
+                {viewing.pref_desired_quality && (
+                  <p className="mt-2 text-sm"><span className="text-muted-foreground">Qualidade: </span>{viewing.pref_desired_quality}</p>
+                )}
+                {viewing.pref_looking_for_bio && (
+                  <p className="mt-1 whitespace-pre-wrap text-sm"><span className="text-muted-foreground">Procura: </span>{viewing.pref_looking_for_bio}</p>
+                )}
+              </div>
+              {viewing.notes && (
+                <div className="rounded-xl border border-dashed p-3">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">📝 Notas internas</p>
+                  <p className="mt-1 whitespace-pre-wrap text-sm">{viewing.notes}</p>
+                </div>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+function Field({ label, value }: { label: string; value: string | null | undefined }) {
+  if (!value) return null;
+  return (
+    <div>
+      <p className="text-xs text-muted-foreground">{label}</p>
+      <p className="font-medium">{value}</p>
     </div>
   );
 }
