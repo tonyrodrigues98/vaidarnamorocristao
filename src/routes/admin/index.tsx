@@ -554,25 +554,74 @@ function PreCadastrosPanel({
           <div className="space-y-1 sm:col-span-2"><Label>Usuário do TikTok</Label><Input value={(draft as { tiktok_user?: string | null }).tiktok_user ?? ""} onChange={(e) => setDraft({ ...draft, tiktok_user: e.target.value || null } as Partial<PreCadastro>)} placeholder="@usuario" /></div>
           <div className="space-y-1"><Label>Idade</Label><Input type="number" value={draft.age ?? ""} onChange={(e) => set("age", numOrNull(e.target.value))} /></div>
           <div className="space-y-1"><Label>Altura (cm)</Label><Input type="number" value={draft.height_cm ?? ""} onChange={(e) => set("height_cm", numOrNull(e.target.value))} /></div>
-          <div className="space-y-1"><Label>Sexo</Label><Input value={draft.sex ?? ""} onChange={(e) => set("sex", e.target.value || null)} placeholder="masculino / feminino" /></div>
-          <div className="space-y-1"><Label>Estado civil</Label><Input value={draft.marital ?? ""} onChange={(e) => set("marital", e.target.value || null)} placeholder="solteiro / divorciado" /></div>
+          <div className="space-y-1">
+            <Label>Sexo</Label>
+            <Select value={draft.sex ?? ""} onValueChange={(v) => set("sex", v || null)}>
+              <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="masculino">Masculino</SelectItem>
+                <SelectItem value="feminino">Feminino</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-1">
+            <Label>Estado civil</Label>
+            <Select value={draft.marital ?? ""} onValueChange={(v) => set("marital", v || null)}>
+              <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="solteiro">Solteiro</SelectItem>
+                <SelectItem value="divorciado">Divorciado</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           <div className="space-y-1"><Label>Cidade</Label><Input value={draft.city ?? ""} onChange={(e) => set("city", e.target.value || null)} /></div>
           <div className="space-y-1"><Label>Estado (UF)</Label><Input value={draft.state ?? ""} onChange={(e) => set("state", e.target.value || null)} maxLength={2} /></div>
           <div className="space-y-1 sm:col-span-2"><Label>Igreja</Label><Input value={draft.church ?? ""} onChange={(e) => set("church", e.target.value || null)} /></div>
-          <div className="space-y-1"><Label>Anos de batismo</Label><Input type="number" value={draft.years_baptized ?? ""} onChange={(e) => set("years_baptized", numOrNull(e.target.value))} /></div>
           <div className="space-y-1 sm:col-span-2"><Label>Sobre</Label><Textarea value={draft.bio ?? ""} onChange={(e) => set("bio", e.target.value || null)} /></div>
           <div className="space-y-1"><Label>Idade desejada (mín)</Label><Input type="number" value={draft.pref_age_min ?? ""} onChange={(e) => set("pref_age_min", numOrNull(e.target.value))} /></div>
           <div className="space-y-1"><Label>Idade desejada (máx)</Label><Input type="number" value={draft.pref_age_max ?? ""} onChange={(e) => set("pref_age_max", numOrNull(e.target.value))} /></div>
-          <div className="space-y-1 sm:col-span-2"><Label>Localização desejada</Label><Input value={draft.pref_location_scope ?? ""} onChange={(e) => set("pref_location_scope", e.target.value || null)} placeholder="regiao / brasil / mundo / personalizado" /></div>
           <div className="flex items-center justify-between rounded-xl border border-border/50 bg-muted/30 p-3 sm:col-span-2">
             <div>
-              <Label className="text-sm">Aceita ter filhos</Label>
-              <p className="text-xs text-muted-foreground">Marque se a pessoa aceita ter ou já tem filhos</p>
+              <Label className="text-sm">Tem problema com distância?</Label>
+              <p className="text-xs text-muted-foreground">Ative se a distância <strong>não</strong> é problema</p>
             </div>
             <Switch
-              checked={draft.pref_accepts_children ?? false}
-              onCheckedChange={(v) => set("pref_accepts_children", v)}
+              checked={draft.pref_distance_ok ?? false}
+              onCheckedChange={(v) => set("pref_distance_ok", v)}
             />
+          </div>
+          <div className="rounded-xl border border-border/50 bg-muted/30 p-3 sm:col-span-2 space-y-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <Label className="text-sm">Tem filhos?</Label>
+                <p className="text-xs text-muted-foreground">Indique se a pessoa já tem filhos</p>
+              </div>
+              <Switch
+                checked={draft.has_children ?? false}
+                onCheckedChange={(v) => setDraft({ ...draft, has_children: v, children_count: v ? draft.children_count ?? null : null })}
+              />
+            </div>
+            {draft.has_children && (
+              <div className="space-y-1">
+                <Label className="text-xs">Quantidade de filhos</Label>
+                <Input
+                  type="number"
+                  min={1}
+                  value={draft.children_count ?? ""}
+                  onChange={(e) => set("children_count", numOrNull(e.target.value))}
+                />
+              </div>
+            )}
+            <div className="flex items-center justify-between border-t border-border/40 pt-3">
+              <div>
+                <Label className="text-sm">Aceita pessoa com filhos?</Label>
+                <p className="text-xs text-muted-foreground">Aceitaria um(a) parceiro(a) que já tem filhos</p>
+              </div>
+              <Switch
+                checked={draft.accepts_partner_with_children ?? false}
+                onCheckedChange={(v) => set("accepts_partner_with_children", v)}
+              />
+            </div>
           </div>
           <div className="space-y-1 sm:col-span-2"><Label>Qualidade que busca</Label><Input value={draft.pref_desired_quality ?? ""} onChange={(e) => set("pref_desired_quality", e.target.value || null)} /></div>
           <div className="space-y-1 sm:col-span-2"><Label>Sobre o que procura</Label><Textarea value={draft.pref_looking_for_bio ?? ""} onChange={(e) => set("pref_looking_for_bio", e.target.value || null)} /></div>
