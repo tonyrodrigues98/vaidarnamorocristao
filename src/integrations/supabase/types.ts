@@ -199,6 +199,87 @@ export type Database = {
           },
         ]
       }
+      pre_cadastros: {
+        Row: {
+          age: number | null
+          bio: string | null
+          church: string | null
+          city: string | null
+          created_at: string
+          created_by: string
+          email: string | null
+          full_name: string | null
+          height_cm: number | null
+          id: string
+          marital: string | null
+          notes: string | null
+          phone: string | null
+          pref_accepts_children: boolean | null
+          pref_age_max: number | null
+          pref_age_min: number | null
+          pref_custom_states: string[] | null
+          pref_desired_quality: string | null
+          pref_location_scope: string | null
+          pref_looking_for_bio: string | null
+          sex: string | null
+          state: string | null
+          updated_at: string
+          years_baptized: number | null
+        }
+        Insert: {
+          age?: number | null
+          bio?: string | null
+          church?: string | null
+          city?: string | null
+          created_at?: string
+          created_by: string
+          email?: string | null
+          full_name?: string | null
+          height_cm?: number | null
+          id?: string
+          marital?: string | null
+          notes?: string | null
+          phone?: string | null
+          pref_accepts_children?: boolean | null
+          pref_age_max?: number | null
+          pref_age_min?: number | null
+          pref_custom_states?: string[] | null
+          pref_desired_quality?: string | null
+          pref_location_scope?: string | null
+          pref_looking_for_bio?: string | null
+          sex?: string | null
+          state?: string | null
+          updated_at?: string
+          years_baptized?: number | null
+        }
+        Update: {
+          age?: number | null
+          bio?: string | null
+          church?: string | null
+          city?: string | null
+          created_at?: string
+          created_by?: string
+          email?: string | null
+          full_name?: string | null
+          height_cm?: number | null
+          id?: string
+          marital?: string | null
+          notes?: string | null
+          phone?: string | null
+          pref_accepts_children?: boolean | null
+          pref_age_max?: number | null
+          pref_age_min?: number | null
+          pref_custom_states?: string[] | null
+          pref_desired_quality?: string | null
+          pref_location_scope?: string | null
+          pref_looking_for_bio?: string | null
+          sex?: string | null
+          state?: string | null
+          updated_at?: string
+          years_baptized?: number | null
+        }
+        Relationships: []
+      }
       profile_preferences: {
         Row: {
           accepts_children: boolean
@@ -360,20 +441,26 @@ export type Database = {
       }
       user_roles: {
         Row: {
+          badge_color: string | null
           created_at: string
           id: string
+          public_listing: boolean
           role: Database["public"]["Enums"]["app_role"]
           user_id: string
         }
         Insert: {
+          badge_color?: string | null
           created_at?: string
           id?: string
+          public_listing?: boolean
           role?: Database["public"]["Enums"]["app_role"]
           user_id: string
         }
         Update: {
+          badge_color?: string | null
           created_at?: string
           id?: string
+          public_listing?: boolean
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
         }
@@ -385,6 +472,11 @@ export type Database = {
     }
     Functions: {
       get_admin_ids: { Args: never; Returns: string[] }
+      get_hidden_staff_ids: { Args: never; Returns: string[] }
+      get_user_primary_role: {
+        Args: { _user_id: string }
+        Returns: Database["public"]["Enums"]["app_role"]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -392,6 +484,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_staff: { Args: { _user_id: string }; Returns: boolean }
       unmatch: { Args: { _match_id: string }; Returns: undefined }
     }
     Enums: {
