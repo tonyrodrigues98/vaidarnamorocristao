@@ -37,7 +37,8 @@ async function shareSite() {
 }
 
 export function Header() {
-  const { user, isAdmin, signOut } = useAuth();
+  const { user, isAdmin, role, signOut } = useAuth();
+  const canSeeAdminPanel = isAdmin || role === "apresentador" || role === "moderador";
   const navigate = useNavigate();
   const { theme, toggle: toggleTheme } = useTheme();
   const [interestCount, setInterestCount] = useState(0);
