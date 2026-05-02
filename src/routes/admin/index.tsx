@@ -536,8 +536,7 @@ function PreCadastrosPanel({
         </div>
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           <div className="space-y-1 sm:col-span-2"><Label>Nome completo</Label><Input value={draft.full_name ?? ""} onChange={(e) => set("full_name", e.target.value || null)} /></div>
-          <div className="space-y-1"><Label>Email</Label><Input value={draft.email ?? ""} onChange={(e) => set("email", e.target.value || null)} /></div>
-          <div className="space-y-1"><Label>Telefone</Label><Input value={draft.phone ?? ""} onChange={(e) => set("phone", e.target.value || null)} /></div>
+          <div className="space-y-1 sm:col-span-2"><Label>Usuário do TikTok</Label><Input value={(draft as { tiktok_user?: string | null }).tiktok_user ?? ""} onChange={(e) => setDraft({ ...draft, tiktok_user: e.target.value || null } as Partial<PreCadastro>)} placeholder="@usuario" /></div>
           <div className="space-y-1"><Label>Idade</Label><Input type="number" value={draft.age ?? ""} onChange={(e) => set("age", numOrNull(e.target.value))} /></div>
           <div className="space-y-1"><Label>Altura (cm)</Label><Input type="number" value={draft.height_cm ?? ""} onChange={(e) => set("height_cm", numOrNull(e.target.value))} /></div>
           <div className="space-y-1"><Label>Sexo</Label><Input value={draft.sex ?? ""} onChange={(e) => set("sex", e.target.value || null)} placeholder="masculino / feminino" /></div>
@@ -550,6 +549,16 @@ function PreCadastrosPanel({
           <div className="space-y-1"><Label>Idade desejada (mín)</Label><Input type="number" value={draft.pref_age_min ?? ""} onChange={(e) => set("pref_age_min", numOrNull(e.target.value))} /></div>
           <div className="space-y-1"><Label>Idade desejada (máx)</Label><Input type="number" value={draft.pref_age_max ?? ""} onChange={(e) => set("pref_age_max", numOrNull(e.target.value))} /></div>
           <div className="space-y-1 sm:col-span-2"><Label>Localização desejada</Label><Input value={draft.pref_location_scope ?? ""} onChange={(e) => set("pref_location_scope", e.target.value || null)} placeholder="regiao / brasil / mundo / personalizado" /></div>
+          <div className="flex items-center justify-between rounded-xl border border-border/50 bg-muted/30 p-3 sm:col-span-2">
+            <div>
+              <Label className="text-sm">Aceita ter filhos</Label>
+              <p className="text-xs text-muted-foreground">Marque se a pessoa aceita ter ou já tem filhos</p>
+            </div>
+            <Switch
+              checked={draft.pref_accepts_children ?? false}
+              onCheckedChange={(v) => set("pref_accepts_children", v)}
+            />
+          </div>
           <div className="space-y-1 sm:col-span-2"><Label>Qualidade que busca</Label><Input value={draft.pref_desired_quality ?? ""} onChange={(e) => set("pref_desired_quality", e.target.value || null)} /></div>
           <div className="space-y-1 sm:col-span-2"><Label>Sobre o que procura</Label><Textarea value={draft.pref_looking_for_bio ?? ""} onChange={(e) => set("pref_looking_for_bio", e.target.value || null)} /></div>
           <div className="space-y-1 sm:col-span-2"><Label>Notas internas</Label><Textarea value={draft.notes ?? ""} onChange={(e) => set("notes", e.target.value || null)} /></div>
