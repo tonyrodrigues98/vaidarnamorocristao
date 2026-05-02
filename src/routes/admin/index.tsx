@@ -757,18 +757,6 @@ function PreCadastrosPanel({
               }}
             />
           ))}
-          {/* swallow original card rendering */}
-          {false && <div>
-              <div className="flex items-start gap-3">
-                <button
-                  type="button"
-                  onClick={() => setViewing(p)}
-                  className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-muted transition hover:opacity-80"
-                  aria-label="Ver detalhes"
-                >
-                </button>
-              </div>
-          </div>}
         </div>
       )}
 
