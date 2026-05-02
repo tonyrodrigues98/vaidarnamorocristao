@@ -68,6 +68,31 @@ function Detail() {
     })();
   }, [user, id]);
 
+  // Register a profile view (throttled to once per 30 min per pair, viewer-side).
+  useEffect(() => {
+    if (!user || user.id === id) return;
+    const key = `pv:${user.id}:${id}`;
+    const last = typeof window !== "undefined" ? Number(window.sessionStorage.getItem(key) ?? 0) : 0;
+    if (Date.now() - last < 30 * 60 * 1000) return;
+    (async () => {
+      const { data: me } = await supabase
+        .from("profiles")
+        .select("age, city, state")
+        .eq("id", user.id)
+        .maybeSingle();
+      const { error } = await supabase.from("profile_views").insert({
+        viewer_id: user.id,
+        viewed_id: id,
+        viewer_age: me?.age ?? null,
+        viewer_city: me?.city ?? null,
+        viewer_state: me?.state ?? null,
+      });
+      if (!error && typeof window !== "undefined") {
+        window.sessionStorage.setItem(key, String(Date.now()));
+      }
+    })();
+  }, [user, id]);
+
   async function demonstrarInteresse() {
     if (!user) return;
     setBusy(true);
