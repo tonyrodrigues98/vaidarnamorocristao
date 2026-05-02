@@ -371,6 +371,13 @@ function Comunidade() {
               </div>
             ) : (
               messages
+                .filter((m) => {
+                  // Mensagens sinalizadas: visíveis ao autor e a staff; ocultas para os demais
+                  if (!flaggedIds.has(m.id)) return true;
+                  if (isStaffViewer) return true;
+                  if (user && m.sender_id === user.id) return true;
+                  return false;
+                })
                 .map((m) => {
                 const p = profiles[m.sender_id];
                 const mine = user && m.sender_id === user.id;
@@ -388,11 +395,13 @@ function Comunidade() {
                 const senderStaff = staffMap[m.sender_id];
                 const senderIsAdmin = !!senderStaff && (senderStaff.role === "admin" || senderStaff.role === "super_admin") && (senderStaff.color ?? "gold") === "gold";
                 const senderIsStaff = !!senderStaff;
+                const isFlagged = flaggedIds.has(m.id);
+                const myFlag = myFlags[m.id];
                 return (
                   <div
                     key={m.id}
                     ref={(el) => { messageRefs.current[m.id] = el; }}
-                    className={`group relative flex scroll-mt-24 items-start gap-3 rounded-xl transition-colors duration-500 ${isFlash ? "bg-primary/10" : ""}`}
+                    className={`group relative flex scroll-mt-24 items-start gap-3 rounded-xl transition-colors duration-500 ${isFlash ? "bg-primary/10" : ""} ${isFlagged && isStaffViewer ? "bg-destructive/5 ring-1 ring-destructive/30 px-2 py-1" : ""}`}
                   >
                     {mine ? (
                       <div className={`h-9 w-9 shrink-0 overflow-hidden rounded-full bg-muted ${senderIsAdmin ? "ring-2 ring-[var(--gold)] ring-offset-2 ring-offset-background" : senderIsStaff ? "ring-2 ring-primary/40 ring-offset-2 ring-offset-background" : ""}`}>
