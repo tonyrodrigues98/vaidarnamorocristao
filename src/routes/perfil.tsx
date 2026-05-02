@@ -1,5 +1,5 @@
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,7 +10,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -48,6 +52,23 @@ function PerfilPage() {
 
   const isStaff = role !== "user";
   const roleCfg = ROLE_CONFIG[role];
+
+  const loadRoleSettingsFromDb = useCallback(async () => {
+    if (!user || !isStaff) return null;
+    const { data, error } = await supabase
+      .from("user_roles")
+      .select("badge_color, public_listing")
+      .eq("user_id", user.id)
+      .eq("role", role)
+      .maybeSingle();
+    if (error) throw error;
+    if (data) {
+      setLocalColor((data.badge_color as RoleColor | null) ?? null);
+      setLocalPublic(!!data.public_listing);
+    }
+    return data;
+  }, [isStaff, role, user]);
+
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [savingProfile, setSavingProfile] = useState(false);
@@ -55,13 +76,21 @@ function PerfilPage() {
   const [status, setStatus] = useState<"pending" | "approved" | "rejected" | "banned" | null>(null);
 
   const [profile, setProfile] = useState({
-    full_name: "", age: "", height_cm: "", sex: "" as "" | "masculino" | "feminino",
+    full_name: "",
+    age: "",
+    height_cm: "",
+    sex: "" as "" | "masculino" | "feminino",
     marital: "" as "" | "solteiro" | "divorciado",
-    city: "", state: "", church: "", years_baptized: "", bio: "",
+    city: "",
+    state: "",
+    church: "",
+    years_baptized: "",
+    bio: "",
   });
 
   const [prefs, setPrefs] = useState({
-    age_min: "25", age_max: "45",
+    age_min: "25",
+    age_max: "45",
     location_scope: "brasil" as "regiao" | "brasil" | "mundo" | "personalizado",
     custom_states: [] as string[],
     desired_quality: "",
@@ -106,29 +135,44 @@ function PerfilPage() {
     })();
   }, [user]);
 
+  useEffect(() => {
+    if (!user || !isStaff) return;
+    loadRoleSettingsFromDb().catch(() => {
+      setLocalColor(badgeColor);
+      setLocalPublic(publicListing);
+    });
+  }, [badgeColor, isStaff, loadRoleSettingsFromDb, publicListing, user]);
+
   if (!loading && !user) return <Navigate to="/auth/login" />;
 
   async function saveRoleSettings() {
     if (!user || !isStaff) return;
     setSavingRole(true);
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from("user_roles")
       .update({
         badge_color: localColor ?? roleCfg.defaultColor,
         public_listing: localPublic,
       })
       .eq("user_id", user.id)
-      .eq("role", role);
+      .eq("role", role)
+      .select("badge_color, public_listing");
+    if (error || !data || data.length === 0) {
+      setSavingRole(false);
+      toast.error(error?.message ?? "Não foi possível salvar as configurações do cargo");
+      return;
+    }
+    await loadRoleSettingsFromDb();
+    await refreshRole();
     setSavingRole(false);
-    if (error) { toast.error(error.message); return; }
     toast.success("Configurações de cargo atualizadas");
-    refreshRole();
   }
 
   async function togglePublicListing(next: boolean) {
     if (!user || !isStaff) return;
     const prev = localPublic;
     setLocalPublic(next);
+    setSavingRole(true);
     const { data, error } = await supabase
       .from("user_roles")
       .update({ public_listing: next })
@@ -137,16 +181,28 @@ function PerfilPage() {
       .select("public_listing");
     if (error || !data || data.length === 0) {
       setLocalPublic(prev);
+      setSavingRole(false);
       toast.error(error?.message ?? "Não foi possível salvar a preferência");
       return;
     }
+    const fresh = await loadRoleSettingsFromDb();
+    await refreshRole();
+    setSavingRole(false);
+    if (!fresh || fresh.public_listing !== next) {
+      setLocalPublic(prev);
+      toast.error("A preferência não foi confirmada no banco. Tente novamente.");
+      return;
+    }
     toast.success(next ? "Aparecendo em Pretendentes" : "Oculto de Pretendentes");
-    refreshRole();
   }
 
   function handlePhoto(e: React.ChangeEvent<HTMLInputElement>) {
-    const f = e.target.files?.[0]; if (!f) return;
-    if (f.size > 5 * 1024 * 1024) { toast.error("Foto até 5MB"); return; }
+    const f = e.target.files?.[0];
+    if (!f) return;
+    if (f.size > 5 * 1024 * 1024) {
+      toast.error("Foto até 5MB");
+      return;
+    }
     setPhotoFile(f);
     setPhotoPreview(URL.createObjectURL(f));
   }
@@ -155,15 +211,23 @@ function PerfilPage() {
     e.preventDefault();
     if (!user) return;
     const parsed = profileSchema.safeParse(profile);
-    if (!parsed.success) { toast.error(parsed.error.issues[0].message); return; }
+    if (!parsed.success) {
+      toast.error(parsed.error.issues[0].message);
+      return;
+    }
     setSavingProfile(true);
     let photo_url: string | undefined;
     if (photoFile) {
       const ext = photoFile.name.split(".").pop() ?? "jpg";
       const path = `${user.id}/avatar.${ext}`;
-      const { error: upErr } = await supabase.storage.from("profile-photos")
+      const { error: upErr } = await supabase.storage
+        .from("profile-photos")
         .upload(path, photoFile, { upsert: true, contentType: photoFile.type });
-      if (upErr) { toast.error("Falha ao enviar foto"); setSavingProfile(false); return; }
+      if (upErr) {
+        toast.error("Falha ao enviar foto");
+        setSavingProfile(false);
+        return;
+      }
       const { data: pub } = supabase.storage.from("profile-photos").getPublicUrl(path);
       photo_url = `${pub.publicUrl}?t=${Date.now()}`;
     }
@@ -183,7 +247,10 @@ function PerfilPage() {
     };
     const { error } = await supabase.from("profiles").upsert(payload);
     setSavingProfile(false);
-    if (error) { toast.error(error.message); return; }
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     toast.success("Perfil atualizado!");
     setPhotoFile(null);
   }
@@ -193,7 +260,10 @@ function PerfilPage() {
     if (!user) return;
     const min = Number(prefs.age_min);
     const max = Number(prefs.age_max);
-    if (max < min) { toast.error("Idade máxima deve ser maior que mínima"); return; }
+    if (max < min) {
+      toast.error("Idade máxima deve ser maior que mínima");
+      return;
+    }
     setSavingPrefs(true);
     const { error } = await supabase.from("profile_preferences").upsert({
       user_id: user.id,
@@ -206,16 +276,22 @@ function PerfilPage() {
       looking_for_bio: prefs.looking_for_bio || null,
     });
     setSavingPrefs(false);
-    if (error) { toast.error(error.message); return; }
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     toast.success("Preferências salvas!");
   }
 
   const setP = <K extends keyof typeof profile>(k: K, v: (typeof profile)[K]) =>
     setProfile((p) => ({ ...p, [k]: v }));
-  const togglePrefState = (s: string) => setPrefs((p) => ({
-    ...p,
-    custom_states: p.custom_states.includes(s) ? p.custom_states.filter((x) => x !== s) : [...p.custom_states, s],
-  }));
+  const togglePrefState = (s: string) =>
+    setPrefs((p) => ({
+      ...p,
+      custom_states: p.custom_states.includes(s)
+        ? p.custom_states.filter((x) => x !== s)
+        : [...p.custom_states, s],
+    }));
 
   return (
     <div className="min-h-screen">
@@ -224,23 +300,34 @@ function PerfilPage() {
         <div className="animate-fade-up flex items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-semibold sm:text-4xl">Meu perfil</h1>
-            <p className="mt-1 text-sm text-muted-foreground">Edite suas informações e preferências de match.</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Edite suas informações e preferências de match.
+            </p>
           </div>
           <StatusPill status={status} />
         </div>
 
         <Tabs defaultValue="profile" className="mt-8">
           <TabsList className="w-full sm:w-auto">
-            <TabsTrigger value="profile" className="flex-1 sm:flex-none">Sobre mim</TabsTrigger>
-            <TabsTrigger value="prefs" className="flex-1 sm:flex-none">Preferências</TabsTrigger>
+            <TabsTrigger value="profile" className="flex-1 sm:flex-none">
+              Sobre mim
+            </TabsTrigger>
+            <TabsTrigger value="prefs" className="flex-1 sm:flex-none">
+              Preferências
+            </TabsTrigger>
             {isStaff && (
-              <TabsTrigger value="role" className="flex-1 sm:flex-none">Cargo</TabsTrigger>
+              <TabsTrigger value="role" className="flex-1 sm:flex-none">
+                Cargo
+              </TabsTrigger>
             )}
           </TabsList>
 
           {/* Profile tab */}
           <TabsContent value="profile" className="mt-6">
-            <form onSubmit={saveProfile} className="glass animate-fade-up space-y-6 rounded-3xl p-6 shadow-elegant sm:p-8">
+            <form
+              onSubmit={saveProfile}
+              className="glass animate-fade-up space-y-6 rounded-3xl p-6 shadow-elegant sm:p-8"
+            >
               <div className="flex flex-col items-center gap-3">
                 <label className="group relative h-32 w-32 cursor-pointer overflow-hidden rounded-full border-2 border-dashed border-[var(--rose-soft)] bg-card/60 shadow-soft transition hover:border-[var(--rose)]">
                   {photoPreview ? (
@@ -259,20 +346,42 @@ function PerfilPage() {
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2 sm:col-span-2">
                   <Label>Nome completo</Label>
-                  <Input value={profile.full_name} onChange={(e) => setP("full_name", e.target.value)} required />
+                  <Input
+                    value={profile.full_name}
+                    onChange={(e) => setP("full_name", e.target.value)}
+                    required
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label>Idade</Label>
-                  <Input type="number" min={18} max={110} value={profile.age} onChange={(e) => setP("age", e.target.value)} required />
+                  <Input
+                    type="number"
+                    min={18}
+                    max={110}
+                    value={profile.age}
+                    onChange={(e) => setP("age", e.target.value)}
+                    required
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label>Altura (cm)</Label>
-                  <Input type="number" min={120} max={230} value={profile.height_cm} onChange={(e) => setP("height_cm", e.target.value)} />
+                  <Input
+                    type="number"
+                    min={120}
+                    max={230}
+                    value={profile.height_cm}
+                    onChange={(e) => setP("height_cm", e.target.value)}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label>Sexo</Label>
-                  <Select value={profile.sex} onValueChange={(v) => setP("sex", v as "masculino" | "feminino")}>
-                    <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                  <Select
+                    value={profile.sex}
+                    onValueChange={(v) => setP("sex", v as "masculino" | "feminino")}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione" />
+                    </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="masculino">Masculino</SelectItem>
                       <SelectItem value="feminino">Feminino</SelectItem>
@@ -281,8 +390,13 @@ function PerfilPage() {
                 </div>
                 <div className="space-y-2">
                   <Label>Estado civil</Label>
-                  <Select value={profile.marital} onValueChange={(v) => setP("marital", v as "solteiro" | "divorciado")}>
-                    <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                  <Select
+                    value={profile.marital}
+                    onValueChange={(v) => setP("marital", v as "solteiro" | "divorciado")}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione" />
+                    </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="solteiro">Solteiro(a)</SelectItem>
                       <SelectItem value="divorciado">Divorciado(a)</SelectItem>
@@ -291,28 +405,54 @@ function PerfilPage() {
                 </div>
                 <div className="space-y-2">
                   <Label>Cidade</Label>
-                  <Input value={profile.city} onChange={(e) => setP("city", e.target.value)} required />
+                  <Input
+                    value={profile.city}
+                    onChange={(e) => setP("city", e.target.value)}
+                    required
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label>Estado</Label>
                   <Select value={profile.state} onValueChange={(v) => setP("state", v)}>
-                    <SelectTrigger><SelectValue placeholder="UF" /></SelectTrigger>
+                    <SelectTrigger>
+                      <SelectValue placeholder="UF" />
+                    </SelectTrigger>
                     <SelectContent>
-                      {BR_STATES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                      {BR_STATES.map((s) => (
+                        <SelectItem key={s} value={s}>
+                          {s}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2 sm:col-span-2">
                   <Label>Igreja que frequenta</Label>
-                  <Input value={profile.church} onChange={(e) => setP("church", e.target.value)} required />
+                  <Input
+                    value={profile.church}
+                    onChange={(e) => setP("church", e.target.value)}
+                    required
+                  />
                 </div>
                 <div className="space-y-2 sm:col-span-2">
                   <Label>Anos de batismo</Label>
-                  <Input type="number" min={0} max={100} value={profile.years_baptized} onChange={(e) => setP("years_baptized", e.target.value)} required />
+                  <Input
+                    type="number"
+                    min={0}
+                    max={100}
+                    value={profile.years_baptized}
+                    onChange={(e) => setP("years_baptized", e.target.value)}
+                    required
+                  />
                 </div>
                 <div className="space-y-2 sm:col-span-2">
                   <Label>Sobre você</Label>
-                  <Textarea rows={4} maxLength={600} value={profile.bio} onChange={(e) => setP("bio", e.target.value)} />
+                  <Textarea
+                    rows={4}
+                    maxLength={600}
+                    value={profile.bio}
+                    onChange={(e) => setP("bio", e.target.value)}
+                  />
                 </div>
               </div>
 
@@ -324,28 +464,53 @@ function PerfilPage() {
 
           {/* Preferences tab */}
           <TabsContent value="prefs" className="mt-6">
-            <form onSubmit={savePrefs} className="glass animate-fade-up space-y-6 rounded-3xl p-6 shadow-elegant sm:p-8">
+            <form
+              onSubmit={savePrefs}
+              className="glass animate-fade-up space-y-6 rounded-3xl p-6 shadow-elegant sm:p-8"
+            >
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label>Idade mínima</Label>
-                  <Input type="number" min={18} max={110} value={prefs.age_min} onChange={(e) => setPrefs({ ...prefs, age_min: e.target.value })} required />
+                  <Input
+                    type="number"
+                    min={18}
+                    max={110}
+                    value={prefs.age_min}
+                    onChange={(e) => setPrefs({ ...prefs, age_min: e.target.value })}
+                    required
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label>Idade máxima</Label>
-                  <Input type="number" min={18} max={110} value={prefs.age_max} onChange={(e) => setPrefs({ ...prefs, age_max: e.target.value })} required />
+                  <Input
+                    type="number"
+                    min={18}
+                    max={110}
+                    value={prefs.age_max}
+                    onChange={(e) => setPrefs({ ...prefs, age_max: e.target.value })}
+                    required
+                  />
                 </div>
               </div>
 
               <div className="space-y-3">
                 <Label>Localização desejada</Label>
-                <RadioGroup value={prefs.location_scope} onValueChange={(v) => setPrefs({ ...prefs, location_scope: v as typeof prefs.location_scope })}>
+                <RadioGroup
+                  value={prefs.location_scope}
+                  onValueChange={(v) =>
+                    setPrefs({ ...prefs, location_scope: v as typeof prefs.location_scope })
+                  }
+                >
                   {[
                     { v: "regiao", l: "Minha região" },
                     { v: "brasil", l: "Qualquer lugar do Brasil" },
                     { v: "mundo", l: "Qualquer lugar do mundo" },
                     { v: "personalizado", l: "Personalizado (estados)" },
                   ].map((o) => (
-                    <label key={o.v} className="flex cursor-pointer items-center gap-3 rounded-xl border border-border bg-card/40 p-3 transition hover:border-[var(--rose-soft)]">
+                    <label
+                      key={o.v}
+                      className="flex cursor-pointer items-center gap-3 rounded-xl border border-border bg-card/40 p-3 transition hover:border-[var(--rose-soft)]"
+                    >
                       <RadioGroupItem value={o.v} />
                       <span className="text-sm">{o.l}</span>
                     </label>
@@ -358,12 +523,18 @@ function PerfilPage() {
                   <Label>Estados</Label>
                   <div className="flex flex-wrap gap-2">
                     {BR_STATES.map((s) => (
-                      <button type="button" key={s} onClick={() => togglePrefState(s)}
+                      <button
+                        type="button"
+                        key={s}
+                        onClick={() => togglePrefState(s)}
                         className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
                           prefs.custom_states.includes(s)
                             ? "border-[var(--rose)] bg-[var(--rose)] text-white"
                             : "border-border bg-card/60 text-muted-foreground hover:border-[var(--rose-soft)]"
-                        }`}>{s}</button>
+                        }`}
+                      >
+                        {s}
+                      </button>
                     ))}
                   </div>
                 </div>
@@ -371,12 +542,22 @@ function PerfilPage() {
 
               <div className="space-y-2">
                 <Label>Qualidade que busca</Label>
-                <Input value={prefs.desired_quality} onChange={(e) => setPrefs({ ...prefs, desired_quality: e.target.value })} placeholder="Ex: temor a Deus, integridade..." />
+                <Input
+                  value={prefs.desired_quality}
+                  onChange={(e) => setPrefs({ ...prefs, desired_quality: e.target.value })}
+                  placeholder="Ex: temor a Deus, integridade..."
+                />
               </div>
 
               <div className="space-y-3">
                 <Label>Aceita pessoa com filhos?</Label>
-                <RadioGroup value={prefs.accepts_children} onValueChange={(v) => setPrefs({ ...prefs, accepts_children: v as "sim" | "nao" })} className="flex gap-3">
+                <RadioGroup
+                  value={prefs.accepts_children}
+                  onValueChange={(v) =>
+                    setPrefs({ ...prefs, accepts_children: v as "sim" | "nao" })
+                  }
+                  className="flex gap-3"
+                >
                   <label className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl border border-border bg-card/40 p-3">
                     <RadioGroupItem value="sim" /> Sim
                   </label>
@@ -388,11 +569,17 @@ function PerfilPage() {
 
               <div className="space-y-2">
                 <Label>Sobre o que procura</Label>
-                <Textarea rows={4} maxLength={600} value={prefs.looking_for_bio} onChange={(e) => setPrefs({ ...prefs, looking_for_bio: e.target.value })} />
+                <Textarea
+                  rows={4}
+                  maxLength={600}
+                  value={prefs.looking_for_bio}
+                  onChange={(e) => setPrefs({ ...prefs, looking_for_bio: e.target.value })}
+                />
               </div>
 
               <Button type="submit" size="lg" className="w-full" disabled={savingPrefs}>
-                <Save className="mr-2 h-4 w-4" /> {savingPrefs ? "Salvando..." : "Salvar preferências"}
+                <Save className="mr-2 h-4 w-4" />{" "}
+                {savingPrefs ? "Salvando..." : "Salvar preferências"}
               </Button>
             </form>
           </TabsContent>
@@ -413,7 +600,12 @@ function PerfilPage() {
                 <div className="space-y-3">
                   <Label>Pré-visualização</Label>
                   <div className="rounded-xl border border-border bg-card/40 p-4">
-                    <RoleBadge role={role} color={localColor ?? roleCfg.defaultColor} size="md" showDescription />
+                    <RoleBadge
+                      role={role}
+                      color={localColor ?? roleCfg.defaultColor}
+                      size="md"
+                      showDescription
+                    />
                   </div>
                 </div>
 
@@ -432,7 +624,10 @@ function PerfilPage() {
                             className={`flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium transition ${selected ? "border-foreground" : "border-border"}`}
                             style={selected ? { boxShadow: `0 0 0 2px ${hex.ring}` } : undefined}
                           >
-                            <span className="h-4 w-4 rounded-full" style={{ backgroundColor: hex.bg }} />
+                            <span
+                              className="h-4 w-4 rounded-full"
+                              style={{ backgroundColor: hex.bg }}
+                            />
                             {hex.name}
                           </button>
                         );
@@ -445,13 +640,23 @@ function PerfilPage() {
                   <div className="pr-4">
                     <p className="font-medium">Aparecer em Pretendentes</p>
                     <p className="text-xs text-muted-foreground">
-                      Ligado por padrão. Desative para ocultar seu perfil da busca de pretendentes — suas preferências são salvas automaticamente.
+                      Ligado por padrão. Desative para ocultar seu perfil da busca de pretendentes —
+                      suas preferências são salvas automaticamente.
                     </p>
                   </div>
-                  <Switch checked={localPublic} onCheckedChange={togglePublicListing} />
+                  <Switch
+                    checked={localPublic}
+                    disabled={savingRole}
+                    onCheckedChange={togglePublicListing}
+                  />
                 </div>
 
-                <Button onClick={saveRoleSettings} disabled={savingRole} size="lg" className="w-full">
+                <Button
+                  onClick={saveRoleSettings}
+                  disabled={savingRole}
+                  size="lg"
+                  className="w-full"
+                >
                   <Save className="mr-2 h-4 w-4" /> {savingRole ? "Salvando..." : "Salvar cargo"}
                 </Button>
               </div>
@@ -460,7 +665,9 @@ function PerfilPage() {
         </Tabs>
 
         <div className="mt-6 text-center text-xs text-muted-foreground">
-          <Link to="/dashboard" className="hover:text-[var(--rose)]">← Voltar ao início</Link>
+          <Link to="/dashboard" className="hover:text-[var(--rose)]">
+            ← Voltar ao início
+          </Link>
         </div>
       </main>
     </div>
@@ -477,7 +684,9 @@ function StatusPill({ status }: { status: "pending" | "approved" | "rejected" | 
   }[status];
   const { Icon } = map;
   return (
-    <span className={`hidden items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium sm:inline-flex ${map.cls}`}>
+    <span
+      className={`hidden items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium sm:inline-flex ${map.cls}`}
+    >
       <Icon className="h-3.5 w-3.5" /> {map.label}
     </span>
   );
