@@ -1,5 +1,5 @@
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
@@ -48,6 +48,23 @@ function PerfilPage() {
 
   const isStaff = role !== "user";
   const roleCfg = ROLE_CONFIG[role];
+
+  const loadRoleSettingsFromDb = useCallback(async () => {
+    if (!user || !isStaff) return null;
+    const { data, error } = await supabase
+      .from("user_roles")
+      .select("badge_color, public_listing")
+      .eq("user_id", user.id)
+      .eq("role", role)
+      .maybeSingle();
+    if (error) throw error;
+    if (data) {
+      setLocalColor((data.badge_color as RoleColor | null) ?? null);
+      setLocalPublic(!!data.public_listing);
+    }
+    return data;
+  }, [isStaff, role, user]);
+
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [savingProfile, setSavingProfile] = useState(false);
@@ -106,29 +123,44 @@ function PerfilPage() {
     })();
   }, [user]);
 
+  useEffect(() => {
+    if (!user || !isStaff) return;
+    loadRoleSettingsFromDb().catch(() => {
+      setLocalColor(badgeColor);
+      setLocalPublic(publicListing);
+    });
+  }, [badgeColor, isStaff, loadRoleSettingsFromDb, publicListing, user]);
+
   if (!loading && !user) return <Navigate to="/auth/login" />;
 
   async function saveRoleSettings() {
     if (!user || !isStaff) return;
     setSavingRole(true);
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from("user_roles")
       .update({
         badge_color: localColor ?? roleCfg.defaultColor,
         public_listing: localPublic,
       })
       .eq("user_id", user.id)
-      .eq("role", role);
+      .eq("role", role)
+      .select("badge_color, public_listing");
+    if (error || !data || data.length === 0) {
+      setSavingRole(false);
+      toast.error(error?.message ?? "Não foi possível salvar as configurações do cargo");
+      return;
+    }
+    await loadRoleSettingsFromDb();
+    await refreshRole();
     setSavingRole(false);
-    if (error) { toast.error(error.message); return; }
     toast.success("Configurações de cargo atualizadas");
-    refreshRole();
   }
 
   async function togglePublicListing(next: boolean) {
     if (!user || !isStaff) return;
     const prev = localPublic;
     setLocalPublic(next);
+    setSavingRole(true);
     const { data, error } = await supabase
       .from("user_roles")
       .update({ public_listing: next })
@@ -137,11 +169,19 @@ function PerfilPage() {
       .select("public_listing");
     if (error || !data || data.length === 0) {
       setLocalPublic(prev);
+      setSavingRole(false);
       toast.error(error?.message ?? "Não foi possível salvar a preferência");
       return;
     }
+    const fresh = await loadRoleSettingsFromDb();
+    await refreshRole();
+    setSavingRole(false);
+    if (!fresh || fresh.public_listing !== next) {
+      setLocalPublic(prev);
+      toast.error("A preferência não foi confirmada no banco. Tente novamente.");
+      return;
+    }
     toast.success(next ? "Aparecendo em Pretendentes" : "Oculto de Pretendentes");
-    refreshRole();
   }
 
   function handlePhoto(e: React.ChangeEvent<HTMLInputElement>) {
