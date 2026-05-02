@@ -8,6 +8,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ArrowLeft, Send, Trash2, Pencil, Check, X, Reply, MoreHorizontal, CheckCheck } from "lucide-react";
 import { useLongPress } from "@/hooks/use-long-press";
+import { useRestrictedWords, findRestrictedWord } from "@/lib/profanity";
+import { ShieldAlert } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 type Msg = {
   id: string;
@@ -37,6 +40,8 @@ function Chat() {
   const [replyTo, setReplyTo] = useState<Msg | null>(null);
   const [highlightId, setHighlightId] = useState<string | null>(null);
   const messageRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const restrictedWords = useRestrictedWords();
+  const [warning, setWarning] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -100,6 +105,11 @@ function Chat() {
     e.preventDefault();
     if (!user || !input.trim()) return;
     const content = input.trim().slice(0, 2000);
+    const hit = findRestrictedWord(content, restrictedWords);
+    if (hit) {
+      setWarning(hit);
+      return;
+    }
     setSending(true);
     const { error } = await supabase.from("messages").insert({
       match_id: matchId,
@@ -356,6 +366,22 @@ function Chat() {
           </div>
         </div>
       </form>
+      <Dialog open={!!warning} onOpenChange={(o) => !o && setWarning(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-destructive/10">
+              <ShieldAlert className="h-7 w-7 text-destructive" />
+            </div>
+            <DialogTitle className="text-center">Mensagem bloqueada</DialogTitle>
+            <DialogDescription className="text-center">
+              A palavra <span className="font-semibold text-foreground">"{warning}"</span> fere as diretrizes da comunidade. Por favor, reescreva sua mensagem com respeito e cuidado.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-center pt-2">
+            <Button onClick={() => setWarning(null)}>Entendi</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
