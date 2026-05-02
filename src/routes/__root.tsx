@@ -1,8 +1,6 @@
 import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
 import { AuthProvider } from "@/lib/auth";
 import { Toaster } from "@/components/ui/sonner";
-import { NotificationsBridge } from "@/lib/useRealtimeNotifications";
-import { ThemeProvider } from "@/lib/theme";
 
 import appCss from "../styles.css?url";
 
@@ -33,20 +31,24 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "VaiDarNamoro — Plataforma Cristã de Relacionamentos" },
+      { title: "Encontros de Fé — Plataforma Cristã de Relacionamentos" },
       { name: "description", content: "Plataforma cristã de relacionamentos sérios. Conheça pretendentes que compartilham sua fé." },
-      { property: "og:title", content: "VaiDarNamoro" },
-      { property: "og:description", content: "Onde a fé encontra o amor." },
+      { property: "og:title", content: "Encontros de Fé — Plataforma Cristã de Relacionamentos" },
+      { property: "og:description", content: "Plataforma cristã de relacionamentos sérios. Conheça pretendentes que compartilham sua fé." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "Encontros de Fé — Plataforma Cristã de Relacionamentos" },
+      { name: "twitter:description", content: "Plataforma cristã de relacionamentos sérios. Conheça pretendentes que compartilham sua fé." },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/GKTUFlq77iPwT8Pw4jhZzy7Szyp2/social-images/social-1777686877752-Design_sem_nome.webp" },
+      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/GKTUFlq77iPwT8Pw4jhZzy7Szyp2/social-images/social-1777686877752-Design_sem_nome.webp" },
     ],
     links: [
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap",
       },
       {
         rel: "stylesheet",
@@ -65,10 +67,8 @@ function RootShell({ children }: { children: React.ReactNode }) {
       <head>
         <HeadContent />
       </head>
-      <body className="overflow-x-hidden">
-        <div className="min-h-screen w-full overflow-x-hidden">
-          {children}
-        </div>
+      <body>
+        {children}
         <Scripts />
       </body>
     </html>
@@ -77,12 +77,9 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   return (
-    <ThemeProvider>
-      <AuthProvider>
-        <NotificationsBridge />
-        <Outlet />
-        <Toaster richColors position="top-right" />
-      </AuthProvider>
-    </ThemeProvider>
+    <AuthProvider>
+      <Outlet />
+      <Toaster richColors position="top-right" />
+    </AuthProvider>
   );
 }
