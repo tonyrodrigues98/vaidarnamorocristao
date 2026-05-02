@@ -10,7 +10,6 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as PerfilRouteImport } from './routes/perfil'
-import { Route as NoticiasRouteImport } from './routes/noticias'
 import { Route as MatchesRouteImport } from './routes/matches'
 import { Route as InteressesRouteImport } from './routes/interesses'
 import { Route as DashboardRouteImport } from './routes/dashboard'
@@ -18,6 +17,7 @@ import { Route as ComunidadeRouteImport } from './routes/comunidade'
 import { Route as BloqueadosRouteImport } from './routes/bloqueados'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PretendentesIndexRouteImport } from './routes/pretendentes/index'
+import { Route as NoticiasIndexRouteImport } from './routes/noticias.index'
 import { Route as ConversasIndexRouteImport } from './routes/conversas/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as PretendentesIdRouteImport } from './routes/pretendentes/$id'
@@ -28,16 +28,10 @@ import { Route as AuthSignupRouteImport } from './routes/auth/signup'
 import { Route as AuthResetPasswordRouteImport } from './routes/auth/reset-password'
 import { Route as AuthLoginRouteImport } from './routes/auth/login'
 import { Route as AuthForgotPasswordRouteImport } from './routes/auth/forgot-password'
-import { Route as NoticiasRouteImport } from './routes/noticias.'
 
 const PerfilRoute = PerfilRouteImport.update({
   id: '/perfil',
   path: '/perfil',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const NoticiasRoute = NoticiasRouteImport.update({
-  id: '/noticias',
-  path: '/noticias',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MatchesRoute = MatchesRouteImport.update({
@@ -73,6 +67,11 @@ const IndexRoute = IndexRouteImport.update({
 const PretendentesIndexRoute = PretendentesIndexRouteImport.update({
   id: '/pretendentes/',
   path: '/pretendentes/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NoticiasIndexRoute = NoticiasIndexRouteImport.update({
+  id: '/noticias/',
+  path: '/noticias/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ConversasIndexRoute = ConversasIndexRouteImport.update({
@@ -125,11 +124,6 @@ const AuthForgotPasswordRoute = AuthForgotPasswordRouteImport.update({
   path: '/auth/forgot-password',
   getParentRoute: () => rootRouteImport,
 } as any)
-const NoticiasRoute = NoticiasRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => NoticiasRoute,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -138,9 +132,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRoute
   '/interesses': typeof InteressesRoute
   '/matches': typeof MatchesRoute
-  '/noticias': typeof NoticiasRouteWithChildren
   '/perfil': typeof PerfilRoute
-  '/noticias/': typeof NoticiasRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
@@ -151,6 +143,7 @@ export interface FileRoutesByFullPath {
   '/pretendentes/$id': typeof PretendentesIdRoute
   '/admin/': typeof AdminIndexRoute
   '/conversas/': typeof ConversasIndexRoute
+  '/noticias/': typeof NoticiasIndexRoute
   '/pretendentes/': typeof PretendentesIndexRoute
 }
 export interface FileRoutesByTo {
@@ -161,7 +154,6 @@ export interface FileRoutesByTo {
   '/interesses': typeof InteressesRoute
   '/matches': typeof MatchesRoute
   '/perfil': typeof PerfilRoute
-  '/noticias': typeof NoticiasRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
@@ -172,6 +164,7 @@ export interface FileRoutesByTo {
   '/pretendentes/$id': typeof PretendentesIdRoute
   '/admin': typeof AdminIndexRoute
   '/conversas': typeof ConversasIndexRoute
+  '/noticias': typeof NoticiasIndexRoute
   '/pretendentes': typeof PretendentesIndexRoute
 }
 export interface FileRoutesById {
@@ -182,9 +175,7 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/interesses': typeof InteressesRoute
   '/matches': typeof MatchesRoute
-  '/noticias': typeof NoticiasRouteWithChildren
   '/perfil': typeof PerfilRoute
-  '/noticias/': typeof NoticiasRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
@@ -195,6 +186,7 @@ export interface FileRoutesById {
   '/pretendentes/$id': typeof PretendentesIdRoute
   '/admin/': typeof AdminIndexRoute
   '/conversas/': typeof ConversasIndexRoute
+  '/noticias/': typeof NoticiasIndexRoute
   '/pretendentes/': typeof PretendentesIndexRoute
 }
 export interface FileRouteTypes {
@@ -206,9 +198,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/interesses'
     | '/matches'
-    | '/noticias'
     | '/perfil'
-    | '/noticias/'
     | '/auth/forgot-password'
     | '/auth/login'
     | '/auth/reset-password'
@@ -219,6 +209,7 @@ export interface FileRouteTypes {
     | '/pretendentes/$id'
     | '/admin/'
     | '/conversas/'
+    | '/noticias/'
     | '/pretendentes/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -229,7 +220,6 @@ export interface FileRouteTypes {
     | '/interesses'
     | '/matches'
     | '/perfil'
-    | '/noticias'
     | '/auth/forgot-password'
     | '/auth/login'
     | '/auth/reset-password'
@@ -240,6 +230,7 @@ export interface FileRouteTypes {
     | '/pretendentes/$id'
     | '/admin'
     | '/conversas'
+    | '/noticias'
     | '/pretendentes'
   id:
     | '__root__'
@@ -249,9 +240,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/interesses'
     | '/matches'
-    | '/noticias'
     | '/perfil'
-    | '/noticias/'
     | '/auth/forgot-password'
     | '/auth/login'
     | '/auth/reset-password'
@@ -262,6 +251,7 @@ export interface FileRouteTypes {
     | '/pretendentes/$id'
     | '/admin/'
     | '/conversas/'
+    | '/noticias/'
     | '/pretendentes/'
   fileRoutesById: FileRoutesById
 }
@@ -272,7 +262,6 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   InteressesRoute: typeof InteressesRoute
   MatchesRoute: typeof MatchesRoute
-  NoticiasRoute: typeof NoticiasRouteWithChildren
   PerfilRoute: typeof PerfilRoute
   AuthForgotPasswordRoute: typeof AuthForgotPasswordRoute
   AuthLoginRoute: typeof AuthLoginRoute
@@ -284,6 +273,7 @@ export interface RootRouteChildren {
   PretendentesIdRoute: typeof PretendentesIdRoute
   AdminIndexRoute: typeof AdminIndexRoute
   ConversasIndexRoute: typeof ConversasIndexRoute
+  NoticiasIndexRoute: typeof NoticiasIndexRoute
   PretendentesIndexRoute: typeof PretendentesIndexRoute
 }
 
@@ -294,13 +284,6 @@ declare module '@tanstack/react-router' {
       path: '/perfil'
       fullPath: '/perfil'
       preLoaderRoute: typeof PerfilRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/noticias': {
-      id: '/noticias'
-      path: '/noticias'
-      fullPath: '/noticias'
-      preLoaderRoute: typeof NoticiasRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/matches': {
@@ -350,6 +333,13 @@ declare module '@tanstack/react-router' {
       path: '/pretendentes'
       fullPath: '/pretendentes/'
       preLoaderRoute: typeof PretendentesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/noticias/': {
+      id: '/noticias/'
+      path: '/noticias'
+      fullPath: '/noticias/'
+      preLoaderRoute: typeof NoticiasIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/conversas/': {
@@ -422,27 +412,8 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthForgotPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/noticias/': {
-      id: '/noticias/'
-      path: '/'
-      fullPath: '/noticias/'
-      preLoaderRoute: typeof NoticiasRouteImport
-      parentRoute: typeof NoticiasRoute
-    }
   }
 }
-
-interface NoticiasRouteChildren {
-  NoticiasRoute: typeof NoticiasRoute
-}
-
-const NoticiasRouteChildren: NoticiasRouteChildren = {
-  NoticiasRoute: NoticiasRoute,
-}
-
-const NoticiasRouteWithChildren = NoticiasRoute._addFileChildren(
-  NoticiasRouteChildren,
-)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -451,7 +422,6 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRoute,
   InteressesRoute: InteressesRoute,
   MatchesRoute: MatchesRoute,
-  NoticiasRoute: NoticiasRouteWithChildren,
   PerfilRoute: PerfilRoute,
   AuthForgotPasswordRoute: AuthForgotPasswordRoute,
   AuthLoginRoute: AuthLoginRoute,
@@ -463,6 +433,7 @@ const rootRouteChildren: RootRouteChildren = {
   PretendentesIdRoute: PretendentesIdRoute,
   AdminIndexRoute: AdminIndexRoute,
   ConversasIndexRoute: ConversasIndexRoute,
+  NoticiasIndexRoute: NoticiasIndexRoute,
   PretendentesIndexRoute: PretendentesIndexRoute,
 }
 export const routeTree = rootRouteImport
