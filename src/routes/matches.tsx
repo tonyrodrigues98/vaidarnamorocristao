@@ -1,10 +1,15 @@
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
-import { Heart, MessageCircle, User as UserIcon } from "lucide-react";
+import { Heart, MessageCircle, User as UserIcon, HeartCrack } from "lucide-react";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 type MatchItem = {
   matchId: string;
@@ -25,6 +30,7 @@ function MatchesPage() {
   const { user, loading } = useAuth();
   const [items, setItems] = useState<MatchItem[]>([]);
   const [loadingList, setLoadingList] = useState(true);
+  const [busy, setBusy] = useState<string | null>(null);
 
   async function load() {
     if (!user) return;
@@ -66,6 +72,15 @@ function MatchesPage() {
   }, [user]);
 
   if (!loading && !user) return <Navigate to="/auth/login" />;
+
+  async function unmatch(matchId: string) {
+    setBusy(matchId);
+    const { error } = await supabase.rpc("unmatch", { _match_id: matchId });
+    setBusy(null);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Match desfeito.");
+    setItems((prev) => prev.filter((i) => i.matchId !== matchId));
+  }
 
   return (
     <div className="min-h-screen">
@@ -127,6 +142,25 @@ function MatchesPage() {
                         <UserIcon className="h-4 w-4" />
                       </Link>
                     </Button>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button size="sm" variant="outline" disabled={busy === it.matchId} title="Desfazer match">
+                          <HeartCrack className="h-4 w-4" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Desfazer match com {it.partner.full_name.split(" ")[0]}?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Esta ação remove o match, apaga as mensagens trocadas e os interesses entre vocês. Não é possível desfazer.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                          <AlertDialogAction onClick={() => unmatch(it.matchId)}>Desfazer match</AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   </div>
                 </div>
               </article>

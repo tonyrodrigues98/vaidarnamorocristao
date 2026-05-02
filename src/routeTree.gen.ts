@@ -28,6 +28,7 @@ import { Route as AuthSignupRouteImport } from './routes/auth/signup'
 import { Route as AuthResetPasswordRouteImport } from './routes/auth/reset-password'
 import { Route as AuthLoginRouteImport } from './routes/auth/login'
 import { Route as AuthForgotPasswordRouteImport } from './routes/auth/forgot-password'
+import { Route as NoticiasRouteImport } from './routes/noticias.'
 
 const PerfilRoute = PerfilRouteImport.update({
   id: '/perfil',
@@ -124,6 +125,11 @@ const AuthForgotPasswordRoute = AuthForgotPasswordRouteImport.update({
   path: '/auth/forgot-password',
   getParentRoute: () => rootRouteImport,
 } as any)
+const NoticiasRoute = NoticiasRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => NoticiasRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -132,8 +138,9 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRoute
   '/interesses': typeof InteressesRoute
   '/matches': typeof MatchesRoute
-  '/noticias': typeof NoticiasRoute
+  '/noticias': typeof NoticiasRouteWithChildren
   '/perfil': typeof PerfilRoute
+  '/noticias/': typeof NoticiasRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
@@ -153,8 +160,8 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardRoute
   '/interesses': typeof InteressesRoute
   '/matches': typeof MatchesRoute
-  '/noticias': typeof NoticiasRoute
   '/perfil': typeof PerfilRoute
+  '/noticias': typeof NoticiasRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
@@ -175,8 +182,9 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/interesses': typeof InteressesRoute
   '/matches': typeof MatchesRoute
-  '/noticias': typeof NoticiasRoute
+  '/noticias': typeof NoticiasRouteWithChildren
   '/perfil': typeof PerfilRoute
+  '/noticias/': typeof NoticiasRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
@@ -200,6 +208,7 @@ export interface FileRouteTypes {
     | '/matches'
     | '/noticias'
     | '/perfil'
+    | '/noticias/'
     | '/auth/forgot-password'
     | '/auth/login'
     | '/auth/reset-password'
@@ -219,8 +228,8 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/interesses'
     | '/matches'
-    | '/noticias'
     | '/perfil'
+    | '/noticias'
     | '/auth/forgot-password'
     | '/auth/login'
     | '/auth/reset-password'
@@ -242,6 +251,7 @@ export interface FileRouteTypes {
     | '/matches'
     | '/noticias'
     | '/perfil'
+    | '/noticias/'
     | '/auth/forgot-password'
     | '/auth/login'
     | '/auth/reset-password'
@@ -262,7 +272,7 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   InteressesRoute: typeof InteressesRoute
   MatchesRoute: typeof MatchesRoute
-  NoticiasRoute: typeof NoticiasRoute
+  NoticiasRoute: typeof NoticiasRouteWithChildren
   PerfilRoute: typeof PerfilRoute
   AuthForgotPasswordRoute: typeof AuthForgotPasswordRoute
   AuthLoginRoute: typeof AuthLoginRoute
@@ -412,8 +422,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthForgotPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/noticias/': {
+      id: '/noticias/'
+      path: '/'
+      fullPath: '/noticias/'
+      preLoaderRoute: typeof NoticiasRouteImport
+      parentRoute: typeof NoticiasRoute
+    }
   }
 }
+
+interface NoticiasRouteChildren {
+  NoticiasRoute: typeof NoticiasRoute
+}
+
+const NoticiasRouteChildren: NoticiasRouteChildren = {
+  NoticiasRoute: NoticiasRoute,
+}
+
+const NoticiasRouteWithChildren = NoticiasRoute._addFileChildren(
+  NoticiasRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -422,7 +451,7 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRoute,
   InteressesRoute: InteressesRoute,
   MatchesRoute: MatchesRoute,
-  NoticiasRoute: NoticiasRoute,
+  NoticiasRoute: NoticiasRouteWithChildren,
   PerfilRoute: PerfilRoute,
   AuthForgotPasswordRoute: AuthForgotPasswordRoute,
   AuthLoginRoute: AuthLoginRoute,

@@ -361,6 +361,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      unmatch: { Args: { _match_id: string }; Returns: undefined }
     }
     Enums: {
       app_role: "admin" | "user"

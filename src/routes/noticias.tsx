@@ -1,11 +1,11 @@
-import { createFileRoute, Navigate } from "@tanstack/react-router";
+import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { markSeen } from "@/lib/lastSeen";
 import { Header } from "@/components/layout/Header";
-import { Newspaper, BookHeart } from "lucide-react";
+import { Newspaper, BookHeart, ArrowRight } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 type Post = {
@@ -76,9 +76,11 @@ function Noticias() {
               </div>
             ) : (
               filtered.map((p) => (
-                <article
+                <Link
                   key={p.id}
-                  className={`animate-fade-up rounded-3xl p-6 shadow-soft sm:p-8 ${
+                  to="/noticias/$id"
+                  params={{ id: p.id }}
+                  className={`animate-fade-up block rounded-3xl p-6 shadow-soft transition-shadow hover:shadow-elegant sm:p-7 ${
                     p.kind === "devotional"
                       ? "border border-[var(--rose)]/20 bg-[var(--petal)]/40"
                       : "glass"
@@ -99,17 +101,24 @@ function Noticias() {
                       {new Date(p.published_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" })}
                     </span>
                   </div>
-                  <h2 className={`mt-3 font-semibold ${p.kind === "devotional" ? "text-2xl italic" : "text-2xl"}`}>
+                  <h2
+                    className={`mt-3 line-clamp-2 font-semibold ${
+                      p.kind === "devotional" ? "text-xl italic" : "text-xl"
+                    }`}
+                  >
                     {p.title}
                   </h2>
-                  <div
-                    className={`mt-3 whitespace-pre-wrap leading-relaxed text-foreground/85 ${
-                      p.kind === "devotional" ? "text-[15px] font-serif italic" : "text-[15px]"
+                  <p
+                    className={`mt-2 line-clamp-3 leading-relaxed text-foreground/75 ${
+                      p.kind === "devotional" ? "text-[14px] font-serif italic" : "text-[14px]"
                     }`}
                   >
                     {p.content}
-                  </div>
-                </article>
+                  </p>
+                  <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-[var(--rose)]">
+                    Ler artigo completo <ArrowRight className="h-3 w-3" />
+                  </span>
+                </Link>
               ))
             )}
           </TabsContent>
