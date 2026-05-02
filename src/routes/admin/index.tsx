@@ -264,7 +264,7 @@ function Admin() {
                 editing={editingPC}
                 draft={pcDraft}
                 setDraft={setPcDraft}
-                onEdit={(p) => { setEditingPC(p); setPcDraft(p); }}
+                onEdit={(p: PreCadastro) => { setEditingPC(p); setPcDraft(p); }}
                 onCancel={() => { setEditingPC(null); setPcDraft({}); }}
                 onSave={savePreCadastro}
                 onDelete={deletePreCadastro}
@@ -414,6 +414,126 @@ function Admin() {
           </TabsContent>
         </Tabs>
       </main>
+    </div>
+  );
+}
+
+function UsersPanel({
+  users, busy, onChangeRole,
+}: {
+  users: AdminUserRow[];
+  busy: string | null;
+  onChangeRole: (userId: string, newRole: AppRole, currentRole: AppRole) => void;
+}) {
+  if (users.length === 0) {
+    return <div className="glass rounded-2xl p-10 text-center text-muted-foreground shadow-soft">Nenhum usuário.</div>;
+  }
+  return (
+    <div className="grid gap-3">
+      {users.map((u) => (
+        <div key={u.id} className="glass flex flex-col gap-3 rounded-2xl p-4 shadow-soft sm:flex-row sm:items-center">
+          <div className="h-14 w-14 shrink-0 overflow-hidden rounded-full bg-muted">
+            {u.photo_url ? <img src={u.photo_url} alt="" className="h-full w-full object-cover" /> :
+              <div className="flex h-full w-full items-center justify-center bg-gradient-love text-white">{u.full_name.charAt(0)}</div>}
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <h3 className="font-semibold">{u.full_name}, {u.age}</h3>
+              <RoleBadge role={u.primaryRole} />
+            </div>
+            <p className="truncate text-xs text-muted-foreground">{u.sex} · {u.city}/{u.state} · {u.status}</p>
+          </div>
+          <div className="w-full sm:w-52">
+            <Select
+              value={u.primaryRole}
+              onValueChange={(v) => onChangeRole(u.id, v as AppRole, u.primaryRole)}
+              disabled={busy === u.id}
+            >
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {(Object.keys(ROLE_CONFIG) as AppRole[]).map((r) => (
+                  <SelectItem key={r} value={r}>{ROLE_CONFIG[r].label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function PreCadastrosPanel({
+  items, editing, draft, setDraft, onEdit, onCancel, onSave, onDelete, busy,
+}: {
+  items: PreCadastro[];
+  editing: PreCadastro | null;
+  draft: Partial<PreCadastro>;
+  setDraft: (d: Partial<PreCadastro>) => void;
+  onEdit: (p: PreCadastro) => void;
+  onCancel: () => void;
+  onSave: () => void;
+  onDelete: (id: string) => void;
+  busy: boolean;
+}) {
+  const set = <K extends keyof PreCadastro>(k: K, v: PreCadastro[K] | null) =>
+    setDraft({ ...draft, [k]: v });
+  const numOrNull = (s: string) => (s.trim() === "" ? null : Number(s));
+  return (
+    <div className="space-y-6">
+      <div className="glass rounded-2xl p-5 shadow-soft">
+        <h3 className="text-lg font-semibold">{editing ? "Editar pré-cadastro" : "Novo pré-cadastro"}</h3>
+        <p className="mt-1 text-xs text-muted-foreground">Nenhum campo é obrigatório. Preencha o que tiver.</p>
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          <div className="space-y-1 sm:col-span-2"><Label>Nome completo</Label><Input value={draft.full_name ?? ""} onChange={(e) => set("full_name", e.target.value || null)} /></div>
+          <div className="space-y-1"><Label>Email</Label><Input value={draft.email ?? ""} onChange={(e) => set("email", e.target.value || null)} /></div>
+          <div className="space-y-1"><Label>Telefone</Label><Input value={draft.phone ?? ""} onChange={(e) => set("phone", e.target.value || null)} /></div>
+          <div className="space-y-1"><Label>Idade</Label><Input type="number" value={draft.age ?? ""} onChange={(e) => set("age", numOrNull(e.target.value))} /></div>
+          <div className="space-y-1"><Label>Altura (cm)</Label><Input type="number" value={draft.height_cm ?? ""} onChange={(e) => set("height_cm", numOrNull(e.target.value))} /></div>
+          <div className="space-y-1"><Label>Sexo</Label><Input value={draft.sex ?? ""} onChange={(e) => set("sex", e.target.value || null)} placeholder="masculino / feminino" /></div>
+          <div className="space-y-1"><Label>Estado civil</Label><Input value={draft.marital ?? ""} onChange={(e) => set("marital", e.target.value || null)} placeholder="solteiro / divorciado" /></div>
+          <div className="space-y-1"><Label>Cidade</Label><Input value={draft.city ?? ""} onChange={(e) => set("city", e.target.value || null)} /></div>
+          <div className="space-y-1"><Label>Estado (UF)</Label><Input value={draft.state ?? ""} onChange={(e) => set("state", e.target.value || null)} maxLength={2} /></div>
+          <div className="space-y-1 sm:col-span-2"><Label>Igreja</Label><Input value={draft.church ?? ""} onChange={(e) => set("church", e.target.value || null)} /></div>
+          <div className="space-y-1"><Label>Anos de batismo</Label><Input type="number" value={draft.years_baptized ?? ""} onChange={(e) => set("years_baptized", numOrNull(e.target.value))} /></div>
+          <div className="space-y-1 sm:col-span-2"><Label>Sobre</Label><Textarea value={draft.bio ?? ""} onChange={(e) => set("bio", e.target.value || null)} /></div>
+          <div className="space-y-1"><Label>Idade desejada (mín)</Label><Input type="number" value={draft.pref_age_min ?? ""} onChange={(e) => set("pref_age_min", numOrNull(e.target.value))} /></div>
+          <div className="space-y-1"><Label>Idade desejada (máx)</Label><Input type="number" value={draft.pref_age_max ?? ""} onChange={(e) => set("pref_age_max", numOrNull(e.target.value))} /></div>
+          <div className="space-y-1 sm:col-span-2"><Label>Localização desejada</Label><Input value={draft.pref_location_scope ?? ""} onChange={(e) => set("pref_location_scope", e.target.value || null)} placeholder="regiao / brasil / mundo / personalizado" /></div>
+          <div className="space-y-1 sm:col-span-2"><Label>Qualidade que busca</Label><Input value={draft.pref_desired_quality ?? ""} onChange={(e) => set("pref_desired_quality", e.target.value || null)} /></div>
+          <div className="space-y-1 sm:col-span-2"><Label>Sobre o que procura</Label><Textarea value={draft.pref_looking_for_bio ?? ""} onChange={(e) => set("pref_looking_for_bio", e.target.value || null)} /></div>
+          <div className="space-y-1 sm:col-span-2"><Label>Notas internas</Label><Textarea value={draft.notes ?? ""} onChange={(e) => set("notes", e.target.value || null)} /></div>
+        </div>
+        <div className="mt-4 flex gap-2">
+          <Button onClick={onSave} disabled={busy}>{editing ? "Salvar alterações" : "Adicionar"}</Button>
+          {editing && <Button variant="outline" onClick={onCancel}>Cancelar</Button>}
+        </div>
+      </div>
+
+      {items.length === 0 ? (
+        <div className="glass rounded-2xl p-10 text-center text-muted-foreground shadow-soft">Nenhum pré-cadastro ainda.</div>
+      ) : (
+        <div className="grid gap-3">
+          {items.map((p) => (
+            <div key={p.id} className="glass rounded-2xl p-4 shadow-soft">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0 flex-1">
+                  <h4 className="font-semibold">{p.full_name ?? "(sem nome)"}{p.age ? `, ${p.age}` : ""}</h4>
+                  <p className="text-xs text-muted-foreground">
+                    {[p.sex, p.marital, p.city && p.state ? `${p.city}/${p.state}` : p.city || p.state, p.church].filter(Boolean).join(" · ")}
+                  </p>
+                  {p.bio && <p className="mt-2 line-clamp-2 text-sm text-foreground/80">{p.bio}</p>}
+                  {p.notes && <p className="mt-1 text-xs italic text-muted-foreground">📝 {p.notes}</p>}
+                </div>
+                <div className="flex flex-col gap-1">
+                  <Button size="sm" variant="outline" onClick={() => onEdit(p)}>Editar</Button>
+                  <Button size="sm" variant="ghost" onClick={() => onDelete(p.id)}><Trash2 className="h-4 w-4" /></Button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
