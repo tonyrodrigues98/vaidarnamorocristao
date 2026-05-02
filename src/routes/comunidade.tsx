@@ -6,7 +6,7 @@ import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Send, Trash2, Users, Pencil, Check, X, Reply, MoreHorizontal, Pin, PinOff } from "lucide-react";
+import { Send, Trash2, Users, Pencil, Check, X, Reply, MoreHorizontal, Pin, PinOff, ShieldCheck } from "lucide-react";
 import { useLongPress } from "@/hooks/use-long-press";
 import { markSeen } from "@/lib/lastSeen";
 
@@ -37,6 +37,18 @@ function Comunidade() {
   const [replyTo, setReplyTo] = useState<GMsg | null>(null);
   const [highlightId, setHighlightId] = useState<string | null>(null);
   const messageRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const [adminIds, setAdminIds] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      const { data } = await supabase.rpc("get_admin_ids");
+      const ids = ((data ?? []) as any[]).map((x: any) =>
+        typeof x === "string" ? x : (x.get_admin_ids ?? x.user_id ?? "")
+      ).filter(Boolean);
+      setAdminIds(new Set(ids));
+    })();
+  }, [user]);
 
   useEffect(() => {
     if (!user) return;
@@ -209,6 +221,7 @@ function Comunidade() {
                 .map((m) => {
                   const p = profiles[m.sender_id];
                   const name = p?.full_name?.split(" ")[0] ?? "Alguém";
+                  const senderIsAdmin = adminIds.has(m.sender_id);
                   return (
                     <div
                       key={`pin-${m.id}`}
@@ -221,7 +234,12 @@ function Comunidade() {
                       >
                         <span className="w-0.5 shrink-0 rounded bg-primary" />
                         <span className="min-w-0 flex-1">
-                          <span className="block font-semibold text-foreground">{name}</span>
+                          <span className="flex items-center gap-1 font-semibold text-foreground">
+                            {name}
+                            {senderIsAdmin && (
+                              <ShieldCheck className="h-3 w-3 text-primary" aria-label="Admin" />
+                            )}
+                          </span>
                           <span className="line-clamp-2 text-muted-foreground">{m.content}</span>
                         </span>
                       </button>
