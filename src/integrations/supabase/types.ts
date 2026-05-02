@@ -77,6 +77,7 @@ export type Database = {
           created_at: string
           edited_at: string | null
           id: string
+          pinned_at: string | null
           reply_to_id: string | null
           sender_id: string
         }
@@ -85,6 +86,7 @@ export type Database = {
           created_at?: string
           edited_at?: string | null
           id?: string
+          pinned_at?: string | null
           reply_to_id?: string | null
           sender_id: string
         }
@@ -93,6 +95,7 @@ export type Database = {
           created_at?: string
           edited_at?: string | null
           id?: string
+          pinned_at?: string | null
           reply_to_id?: string | null
           sender_id?: string
         }

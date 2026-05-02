@@ -6,7 +6,7 @@ import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Send, Trash2, Users, Pencil, Check, X, Reply, MoreHorizontal } from "lucide-react";
+import { Send, Trash2, Users, Pencil, Check, X, Reply, MoreHorizontal, Pin, PinOff } from "lucide-react";
 import { useLongPress } from "@/hooks/use-long-press";
 
 type GMsg = {
@@ -16,6 +16,7 @@ type GMsg = {
   created_at: string;
   edited_at?: string | null;
   reply_to_id?: string | null;
+  pinned_at?: string | null;
 };
 type Profile = { id: string; full_name: string; photo_url: string | null };
 
@@ -139,6 +140,13 @@ function Comunidade() {
     if (error) toast.error(error.message);
   }
 
+  async function togglePin(m: GMsg) {
+    const pinned_at = m.pinned_at ? null : new Date().toISOString();
+    const { error } = await supabase.from("global_messages").update({ pinned_at }).eq("id", m.id);
+    if (error) { toast.error("Não foi possível fixar."); return; }
+    toast.success(pinned_at ? "Mensagem fixada" : "Mensagem desafixada");
+  }
+
   function startEdit(m: GMsg) {
     setEditingId(m.id);
     setEditText(m.content);
@@ -188,6 +196,34 @@ function Comunidade() {
             />
           )}
           <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto p-4 sm:p-6" style={{ maxHeight: "calc(100vh - 280px)" }}>
+            {messages.some((m) => m.pinned_at) && (
+              <div className="mb-2 space-y-2 rounded-2xl border border-primary/20 bg-primary/5 p-3">
+                <div className="flex items-center gap-2 text-xs font-semibold text-primary">
+                  <Pin className="h-3.5 w-3.5" /> Mensagens fixadas
+                </div>
+                {messages
+                  .filter((m) => m.pinned_at)
+                  .sort((a, b) => (b.pinned_at ?? "").localeCompare(a.pinned_at ?? ""))
+                  .map((m) => {
+                    const p = profiles[m.sender_id];
+                    const name = p?.full_name?.split(" ")[0] ?? "Alguém";
+                    return (
+                      <button
+                        key={`pin-${m.id}`}
+                        type="button"
+                        onClick={() => jumpToMessage(m.id)}
+                        className="flex w-full items-stretch gap-2 rounded-lg bg-background/60 px-2 py-1.5 text-left text-xs hover:bg-background"
+                      >
+                        <span className="w-0.5 shrink-0 rounded bg-primary" />
+                        <span className="min-w-0 flex-1">
+                          <span className="block font-semibold text-foreground">{name}</span>
+                          <span className="line-clamp-2 text-muted-foreground">{m.content}</span>
+                        </span>
+                      </button>
+                    );
+                  })}
+              </div>
+            )}
             {messages.length === 0 ? (
               <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
                 Nenhuma mensagem ainda. Seja o primeiro!
@@ -336,6 +372,15 @@ function Comunidade() {
                             aria-label="Apagar"
                           >
                             <Trash2 className="h-4 w-4" /> Excluir
+                          </button>
+                        )}
+                        {isAdmin && (
+                          <button
+                            onClick={() => { setActionsOpenId(null); togglePin(m); }}
+                            className="flex items-center gap-1 rounded-full px-2 py-1 text-xs text-foreground hover:bg-accent"
+                            aria-label={m.pinned_at ? "Desafixar" : "Fixar"}
+                          >
+                            {m.pinned_at ? <><PinOff className="h-4 w-4" /> Desafixar</> : <><Pin className="h-4 w-4" /> Fixar</>}
                           </button>
                         )}
                       </div>
