@@ -6,7 +6,7 @@ import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Send, Trash2, Users, Pencil, Check, X, Reply, MoreHorizontal } from "lucide-react";
+import { Send, Trash2, Users, Pencil, Check, X, Reply, MoreHorizontal, Pin, PinOff } from "lucide-react";
 import { useLongPress } from "@/hooks/use-long-press";
 
 type GMsg = {
@@ -16,6 +16,7 @@ type GMsg = {
   created_at: string;
   edited_at?: string | null;
   reply_to_id?: string | null;
+  pinned_at?: string | null;
 };
 type Profile = { id: string; full_name: string; photo_url: string | null };
 
@@ -137,6 +138,13 @@ function Comunidade() {
   async function remove(id: string) {
     const { error } = await supabase.from("global_messages").delete().eq("id", id);
     if (error) toast.error(error.message);
+  }
+
+  async function togglePin(m: GMsg) {
+    const pinned_at = m.pinned_at ? null : new Date().toISOString();
+    const { error } = await supabase.from("global_messages").update({ pinned_at }).eq("id", m.id);
+    if (error) { toast.error("Não foi possível fixar."); return; }
+    toast.success(pinned_at ? "Mensagem fixada" : "Mensagem desafixada");
   }
 
   function startEdit(m: GMsg) {
