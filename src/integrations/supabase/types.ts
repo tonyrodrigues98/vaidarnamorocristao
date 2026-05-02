@@ -201,14 +201,17 @@ export type Database = {
       }
       pre_cadastros: {
         Row: {
+          accepts_partner_with_children: boolean | null
           age: number | null
           bio: string | null
+          children_count: number | null
           church: string | null
           city: string | null
           created_at: string
           created_by: string
           email: string | null
           full_name: string | null
+          has_children: boolean | null
           height_cm: number | null
           id: string
           marital: string | null
@@ -220,6 +223,7 @@ export type Database = {
           pref_age_min: number | null
           pref_custom_states: string[] | null
           pref_desired_quality: string | null
+          pref_distance_ok: boolean | null
           pref_location_scope: string | null
           pref_looking_for_bio: string | null
           sex: string | null
@@ -229,14 +233,17 @@ export type Database = {
           years_baptized: number | null
         }
         Insert: {
+          accepts_partner_with_children?: boolean | null
           age?: number | null
           bio?: string | null
+          children_count?: number | null
           church?: string | null
           city?: string | null
           created_at?: string
           created_by: string
           email?: string | null
           full_name?: string | null
+          has_children?: boolean | null
           height_cm?: number | null
           id?: string
           marital?: string | null
@@ -248,6 +255,7 @@ export type Database = {
           pref_age_min?: number | null
           pref_custom_states?: string[] | null
           pref_desired_quality?: string | null
+          pref_distance_ok?: boolean | null
           pref_location_scope?: string | null
           pref_looking_for_bio?: string | null
           sex?: string | null
@@ -257,14 +265,17 @@ export type Database = {
           years_baptized?: number | null
         }
         Update: {
+          accepts_partner_with_children?: boolean | null
           age?: number | null
           bio?: string | null
+          children_count?: number | null
           church?: string | null
           city?: string | null
           created_at?: string
           created_by?: string
           email?: string | null
           full_name?: string | null
+          has_children?: boolean | null
           height_cm?: number | null
           id?: string
           marital?: string | null
@@ -276,6 +287,7 @@ export type Database = {
           pref_age_min?: number | null
           pref_custom_states?: string[] | null
           pref_desired_quality?: string | null
+          pref_distance_ok?: boolean | null
           pref_location_scope?: string | null
           pref_looking_for_bio?: string | null
           sex?: string | null
@@ -442,6 +454,27 @@ export type Database = {
           reporter_id?: string
           status?: Database["public"]["Enums"]["report_status"]
           updated_at?: string
+        }
+        Relationships: []
+      }
+      restricted_words: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          word: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          word: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          word?: string
         }
         Relationships: []
       }

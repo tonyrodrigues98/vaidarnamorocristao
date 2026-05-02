@@ -11,6 +11,11 @@ import { useLongPress } from "@/hooks/use-long-press";
 import { markSeen } from "@/lib/lastSeen";
 import { RoleBadge } from "@/components/RoleBadge";
 import { type AppRole, type RoleColor, ROLE_PRIORITY } from "@/lib/roles";
+import { useRestrictedWords, findRestrictedWord } from "@/lib/profanity";
+import { ShieldAlert } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+
+const COOLDOWN_MS = 10_000;
 
 type GMsg = {
   id: string;
@@ -41,6 +46,20 @@ function Comunidade() {
   const [highlightId, setHighlightId] = useState<string | null>(null);
   const messageRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const [staffMap, setStaffMap] = useState<Record<string, { role: AppRole; color: RoleColor | null }>>({});
+  const restrictedWords = useRestrictedWords();
+  const [cooldownLeft, setCooldownLeft] = useState(0);
+  const lastSentRef = useRef<number>(0);
+  const [warning, setWarning] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (cooldownLeft <= 0) return;
+    const t = setInterval(() => {
+      const remaining = Math.max(0, COOLDOWN_MS - (Date.now() - lastSentRef.current));
+      setCooldownLeft(remaining);
+      if (remaining <= 0) clearInterval(t);
+    }, 250);
+    return () => clearInterval(t);
+  }, [cooldownLeft]);
 
   useEffect(() => {
     if (!user) return;
@@ -149,6 +168,16 @@ function Comunidade() {
     e.preventDefault();
     const content = text.trim();
     if (!content || !user) return;
+    const hit = findRestrictedWord(content, restrictedWords);
+    if (hit) {
+      setWarning(hit);
+      return;
+    }
+    const since = Date.now() - lastSentRef.current;
+    if (since < COOLDOWN_MS) {
+      toast.error(`Aguarde ${Math.ceil((COOLDOWN_MS - since) / 1000)}s para enviar outra mensagem`);
+      return;
+    }
     setSending(true);
     const { error } = await supabase.from("global_messages").insert({
       sender_id: user.id,
@@ -159,6 +188,8 @@ function Comunidade() {
     if (error) { toast.error(error.message); return; }
     setText("");
     setReplyTo(null);
+    lastSentRef.current = Date.now();
+    setCooldownLeft(COOLDOWN_MS);
   }
 
   async function remove(id: string) {
@@ -486,14 +517,40 @@ function Comunidade() {
                 disabled={!approved || sending}
                 className="flex-1"
               />
-              <Button type="submit" disabled={!approved || sending || !text.trim()} size="icon" className="rounded-full">
-                <Send className="h-4 w-4" />
+              <Button type="submit" disabled={!approved || sending || !text.trim() || cooldownLeft > 0} size="icon" className="rounded-full">
+                {cooldownLeft > 0 ? (
+                  <span className="text-[10px] font-semibold">{Math.ceil(cooldownLeft / 1000)}s</span>
+                ) : (
+                  <Send className="h-4 w-4" />
+                )}
               </Button>
             </div>
           </form>
         </div>
       </main>
+      <RestrictedWordDialog word={warning} onClose={() => setWarning(null)} />
     </div>
+  );
+}
+
+function RestrictedWordDialog({ word, onClose }: { word: string | null; onClose: () => void }) {
+  return (
+    <Dialog open={!!word} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-destructive/10">
+            <ShieldAlert className="h-7 w-7 text-destructive" />
+          </div>
+          <DialogTitle className="text-center">Mensagem bloqueada</DialogTitle>
+          <DialogDescription className="text-center">
+            A palavra <span className="font-semibold text-foreground">"{word}"</span> fere as diretrizes da comunidade. Por favor, reescreva sua mensagem com respeito e cuidado.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="flex justify-center pt-2">
+          <Button onClick={onClose}>Entendi</Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 

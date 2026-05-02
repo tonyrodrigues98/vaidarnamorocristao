@@ -6,7 +6,7 @@ import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Check, X, Ban, ShieldAlert, Flag, Newspaper, Trash2, Users as UsersIcon, ClipboardList, MessageSquareWarning } from "lucide-react";
+import { Check, X, Ban, ShieldAlert, Flag, Newspaper, Trash2, Users as UsersIcon, ClipboardList, MessageSquareWarning, ShieldX } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -22,6 +22,7 @@ type ProfileUpdate = Database["public"]["Tables"]["profiles"]["Update"];
 type Report = Database["public"]["Tables"]["reports"]["Row"];
 type DailyPost = { id: string; title: string; content: string; published: boolean; published_at: string; kind: "news" | "devotional" };
 type PreCadastro = Database["public"]["Tables"]["pre_cadastros"]["Row"];
+type RestrictedWord = Database["public"]["Tables"]["restricted_words"]["Row"];
 type AdminUserRow = Row & { primaryRole: AppRole };
 
 export const Route = createFileRoute("/admin/")({ component: Admin });
@@ -33,10 +34,10 @@ function Admin() {
   const isModerador = role === "moderador";
   const canSeeAdminPanel = isAdmin || isApresentador || isModerador;
 
-  type TabKey = "pending" | "approved" | "rejected" | "banned" | "reports" | "posts" | "users" | "pre_cadastros";
+  type TabKey = "pending" | "approved" | "rejected" | "banned" | "reports" | "posts" | "users" | "pre_cadastros" | "restricted_words";
 
   const availableTabs = useMemo<TabKey[]>(() => {
-    if (isSuperAdmin) return ["pending","approved","rejected","banned","reports","posts","users","pre_cadastros"];
+    if (isSuperAdmin) return ["pending","approved","rejected","banned","reports","posts","users","pre_cadastros","restricted_words"];
     if (isAdmin) return ["pending","approved","rejected","banned","reports","posts"];
     if (isApresentador) return ["pre_cadastros"];
     return [];
@@ -251,6 +252,7 @@ function Admin() {
             {availableTabs.includes("posts") && <TabsTrigger value="posts"><Newspaper className="mr-1 h-3 w-3" /> Texto Diário</TabsTrigger>}
             {availableTabs.includes("users") && <TabsTrigger value="users"><UsersIcon className="mr-1 h-3 w-3" /> Usuários</TabsTrigger>}
             {availableTabs.includes("pre_cadastros") && <TabsTrigger value="pre_cadastros"><ClipboardList className="mr-1 h-3 w-3" /> Pré-cadastros</TabsTrigger>}
+            {availableTabs.includes("restricted_words") && <TabsTrigger value="restricted_words"><ShieldX className="mr-1 h-3 w-3" /> Palavras Restritas</TabsTrigger>}
           </TabsList>
 
           <TabsContent value={tab} className="mt-6">
@@ -260,6 +262,8 @@ function Admin() {
                 busy={busy}
                 onChangeRole={changeUserRole}
               />
+            ) : tab === "restricted_words" ? (
+              <RestrictedWordsPanel />
             ) : tab === "pre_cadastros" ? (
               <PreCadastrosPanel
                 items={preCads}
@@ -550,25 +554,74 @@ function PreCadastrosPanel({
           <div className="space-y-1 sm:col-span-2"><Label>Usuário do TikTok</Label><Input value={(draft as { tiktok_user?: string | null }).tiktok_user ?? ""} onChange={(e) => setDraft({ ...draft, tiktok_user: e.target.value || null } as Partial<PreCadastro>)} placeholder="@usuario" /></div>
           <div className="space-y-1"><Label>Idade</Label><Input type="number" value={draft.age ?? ""} onChange={(e) => set("age", numOrNull(e.target.value))} /></div>
           <div className="space-y-1"><Label>Altura (cm)</Label><Input type="number" value={draft.height_cm ?? ""} onChange={(e) => set("height_cm", numOrNull(e.target.value))} /></div>
-          <div className="space-y-1"><Label>Sexo</Label><Input value={draft.sex ?? ""} onChange={(e) => set("sex", e.target.value || null)} placeholder="masculino / feminino" /></div>
-          <div className="space-y-1"><Label>Estado civil</Label><Input value={draft.marital ?? ""} onChange={(e) => set("marital", e.target.value || null)} placeholder="solteiro / divorciado" /></div>
+          <div className="space-y-1">
+            <Label>Sexo</Label>
+            <Select value={draft.sex ?? ""} onValueChange={(v) => set("sex", v || null)}>
+              <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="masculino">Masculino</SelectItem>
+                <SelectItem value="feminino">Feminino</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-1">
+            <Label>Estado civil</Label>
+            <Select value={draft.marital ?? ""} onValueChange={(v) => set("marital", v || null)}>
+              <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="solteiro">Solteiro</SelectItem>
+                <SelectItem value="divorciado">Divorciado</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           <div className="space-y-1"><Label>Cidade</Label><Input value={draft.city ?? ""} onChange={(e) => set("city", e.target.value || null)} /></div>
           <div className="space-y-1"><Label>Estado (UF)</Label><Input value={draft.state ?? ""} onChange={(e) => set("state", e.target.value || null)} maxLength={2} /></div>
           <div className="space-y-1 sm:col-span-2"><Label>Igreja</Label><Input value={draft.church ?? ""} onChange={(e) => set("church", e.target.value || null)} /></div>
-          <div className="space-y-1"><Label>Anos de batismo</Label><Input type="number" value={draft.years_baptized ?? ""} onChange={(e) => set("years_baptized", numOrNull(e.target.value))} /></div>
           <div className="space-y-1 sm:col-span-2"><Label>Sobre</Label><Textarea value={draft.bio ?? ""} onChange={(e) => set("bio", e.target.value || null)} /></div>
           <div className="space-y-1"><Label>Idade desejada (mín)</Label><Input type="number" value={draft.pref_age_min ?? ""} onChange={(e) => set("pref_age_min", numOrNull(e.target.value))} /></div>
           <div className="space-y-1"><Label>Idade desejada (máx)</Label><Input type="number" value={draft.pref_age_max ?? ""} onChange={(e) => set("pref_age_max", numOrNull(e.target.value))} /></div>
-          <div className="space-y-1 sm:col-span-2"><Label>Localização desejada</Label><Input value={draft.pref_location_scope ?? ""} onChange={(e) => set("pref_location_scope", e.target.value || null)} placeholder="regiao / brasil / mundo / personalizado" /></div>
           <div className="flex items-center justify-between rounded-xl border border-border/50 bg-muted/30 p-3 sm:col-span-2">
             <div>
-              <Label className="text-sm">Aceita ter filhos</Label>
-              <p className="text-xs text-muted-foreground">Marque se a pessoa aceita ter ou já tem filhos</p>
+              <Label className="text-sm">Tem problema com distância?</Label>
+              <p className="text-xs text-muted-foreground">Ative se a distância <strong>não</strong> é problema</p>
             </div>
             <Switch
-              checked={draft.pref_accepts_children ?? false}
-              onCheckedChange={(v) => set("pref_accepts_children", v)}
+              checked={draft.pref_distance_ok ?? false}
+              onCheckedChange={(v) => set("pref_distance_ok", v)}
             />
+          </div>
+          <div className="rounded-xl border border-border/50 bg-muted/30 p-3 sm:col-span-2 space-y-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <Label className="text-sm">Tem filhos?</Label>
+                <p className="text-xs text-muted-foreground">Indique se a pessoa já tem filhos</p>
+              </div>
+              <Switch
+                checked={draft.has_children ?? false}
+                onCheckedChange={(v) => setDraft({ ...draft, has_children: v, children_count: v ? draft.children_count ?? null : null })}
+              />
+            </div>
+            {draft.has_children && (
+              <div className="space-y-1">
+                <Label className="text-xs">Quantidade de filhos</Label>
+                <Input
+                  type="number"
+                  min={1}
+                  value={draft.children_count ?? ""}
+                  onChange={(e) => set("children_count", numOrNull(e.target.value))}
+                />
+              </div>
+            )}
+            <div className="flex items-center justify-between border-t border-border/40 pt-3">
+              <div>
+                <Label className="text-sm">Aceita pessoa com filhos?</Label>
+                <p className="text-xs text-muted-foreground">Aceitaria um(a) parceiro(a) que já tem filhos</p>
+              </div>
+              <Switch
+                checked={draft.accepts_partner_with_children ?? false}
+                onCheckedChange={(v) => set("accepts_partner_with_children", v)}
+              />
+            </div>
           </div>
           <div className="space-y-1 sm:col-span-2"><Label>Qualidade que busca</Label><Input value={draft.pref_desired_quality ?? ""} onChange={(e) => set("pref_desired_quality", e.target.value || null)} /></div>
           <div className="space-y-1 sm:col-span-2"><Label>Sobre o que procura</Label><Textarea value={draft.pref_looking_for_bio ?? ""} onChange={(e) => set("pref_looking_for_bio", e.target.value || null)} /></div>
@@ -654,7 +707,6 @@ function PreCadastrosPanel({
                 <Field label="Cidade" value={viewing.city} />
                 <Field label="Estado" value={viewing.state} />
                 <Field label="Igreja" value={viewing.church} />
-                <Field label="Anos batismo" value={viewing.years_baptized?.toString()} />
                 <Field label="TikTok" value={(viewing as { tiktok_user?: string | null }).tiktok_user} />
               </div>
               {viewing.bio && (
@@ -668,8 +720,9 @@ function PreCadastrosPanel({
                 <div className="mt-2 grid grid-cols-2 gap-2 text-sm">
                   <Field label="Idade mín" value={viewing.pref_age_min?.toString()} />
                   <Field label="Idade máx" value={viewing.pref_age_max?.toString()} />
-                  <Field label="Localização" value={viewing.pref_location_scope} />
-                  <Field label="Aceita filhos" value={viewing.pref_accepts_children == null ? null : viewing.pref_accepts_children ? "Sim" : "Não"} />
+                  <Field label="Distância OK" value={viewing.pref_distance_ok == null ? null : viewing.pref_distance_ok ? "Sim" : "Não"} />
+                  <Field label="Tem filhos" value={viewing.has_children == null ? null : viewing.has_children ? `Sim${viewing.children_count ? ` (${viewing.children_count})` : ""}` : "Não"} />
+                  <Field label="Aceita c/ filhos" value={viewing.accepts_partner_with_children == null ? null : viewing.accepts_partner_with_children ? "Sim" : "Não"} />
                 </div>
                 {viewing.pref_desired_quality && (
                   <p className="mt-2 text-sm"><span className="text-muted-foreground">Qualidade: </span>{viewing.pref_desired_quality}</p>
@@ -698,6 +751,90 @@ function Field({ label, value }: { label: string; value: string | null | undefin
     <div>
       <p className="text-xs text-muted-foreground">{label}</p>
       <p className="font-medium">{value}</p>
+    </div>
+  );
+}
+
+function RestrictedWordsPanel() {
+  const [words, setWords] = useState<RestrictedWord[]>([]);
+  const [newWord, setNewWord] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  async function load() {
+    const { data, error } = await supabase
+      .from("restricted_words")
+      .select("*")
+      .order("word", { ascending: true });
+    if (error) { toast.error(error.message); return; }
+    setWords((data ?? []) as RestrictedWord[]);
+  }
+
+  useEffect(() => { load(); }, []);
+
+  async function add() {
+    const w = newWord.trim().toLowerCase();
+    if (!w) return;
+    setBusy(true);
+    const { error } = await supabase.from("restricted_words").insert({ word: w });
+    setBusy(false);
+    if (error) { toast.error(error.message); return; }
+    setNewWord("");
+    toast.success("Palavra adicionada");
+    load();
+  }
+
+  async function remove(id: string) {
+    if (!confirm("Remover esta palavra?")) return;
+    const { error } = await supabase.from("restricted_words").delete().eq("id", id);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Removida");
+    load();
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="glass rounded-2xl p-5 shadow-soft">
+        <h3 className="text-lg font-semibold">Palavras restritas</h3>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Mensagens contendo essas palavras serão bloqueadas no chat da comunidade e nas conversas privadas, com aviso ao remetente.
+        </p>
+        <div className="mt-4 flex gap-2">
+          <Input
+            value={newWord}
+            onChange={(e) => setNewWord(e.target.value)}
+            placeholder="Adicionar palavra..."
+            onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); add(); } }}
+            maxLength={60}
+          />
+          <Button onClick={add} disabled={busy || !newWord.trim()}>Adicionar</Button>
+        </div>
+      </div>
+      {words.length === 0 ? (
+        <div className="glass rounded-2xl p-10 text-center text-muted-foreground shadow-soft">
+          Nenhuma palavra cadastrada.
+        </div>
+      ) : (
+        <div className="glass rounded-2xl p-4 shadow-soft">
+          <div className="flex flex-wrap gap-2">
+            {words.map((w) => (
+              <div
+                key={w.id}
+                className="group flex items-center gap-2 rounded-full border border-border bg-background px-3 py-1.5 text-sm"
+              >
+                <span className="font-medium">{w.word}</span>
+                <button
+                  type="button"
+                  onClick={() => remove(w.id)}
+                  className="rounded-full p-0.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                  aria-label={`Remover ${w.word}`}
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
