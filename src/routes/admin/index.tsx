@@ -707,7 +707,6 @@ function PreCadastrosPanel({
                 <Field label="Cidade" value={viewing.city} />
                 <Field label="Estado" value={viewing.state} />
                 <Field label="Igreja" value={viewing.church} />
-                <Field label="Anos batismo" value={viewing.years_baptized?.toString()} />
                 <Field label="TikTok" value={(viewing as { tiktok_user?: string | null }).tiktok_user} />
               </div>
               {viewing.bio && (
@@ -721,8 +720,9 @@ function PreCadastrosPanel({
                 <div className="mt-2 grid grid-cols-2 gap-2 text-sm">
                   <Field label="Idade mín" value={viewing.pref_age_min?.toString()} />
                   <Field label="Idade máx" value={viewing.pref_age_max?.toString()} />
-                  <Field label="Localização" value={viewing.pref_location_scope} />
-                  <Field label="Aceita filhos" value={viewing.pref_accepts_children == null ? null : viewing.pref_accepts_children ? "Sim" : "Não"} />
+                  <Field label="Distância OK" value={viewing.pref_distance_ok == null ? null : viewing.pref_distance_ok ? "Sim" : "Não"} />
+                  <Field label="Tem filhos" value={viewing.has_children == null ? null : viewing.has_children ? `Sim${viewing.children_count ? ` (${viewing.children_count})` : ""}` : "Não"} />
+                  <Field label="Aceita c/ filhos" value={viewing.accepts_partner_with_children == null ? null : viewing.accepts_partner_with_children ? "Sim" : "Não"} />
                 </div>
                 {viewing.pref_desired_quality && (
                   <p className="mt-2 text-sm"><span className="text-muted-foreground">Qualidade: </span>{viewing.pref_desired_quality}</p>
@@ -751,6 +751,90 @@ function Field({ label, value }: { label: string; value: string | null | undefin
     <div>
       <p className="text-xs text-muted-foreground">{label}</p>
       <p className="font-medium">{value}</p>
+    </div>
+  );
+}
+
+function RestrictedWordsPanel() {
+  const [words, setWords] = useState<RestrictedWord[]>([]);
+  const [newWord, setNewWord] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  async function load() {
+    const { data, error } = await supabase
+      .from("restricted_words")
+      .select("*")
+      .order("word", { ascending: true });
+    if (error) { toast.error(error.message); return; }
+    setWords((data ?? []) as RestrictedWord[]);
+  }
+
+  useEffect(() => { load(); }, []);
+
+  async function add() {
+    const w = newWord.trim().toLowerCase();
+    if (!w) return;
+    setBusy(true);
+    const { error } = await supabase.from("restricted_words").insert({ word: w });
+    setBusy(false);
+    if (error) { toast.error(error.message); return; }
+    setNewWord("");
+    toast.success("Palavra adicionada");
+    load();
+  }
+
+  async function remove(id: string) {
+    if (!confirm("Remover esta palavra?")) return;
+    const { error } = await supabase.from("restricted_words").delete().eq("id", id);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Removida");
+    load();
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="glass rounded-2xl p-5 shadow-soft">
+        <h3 className="text-lg font-semibold">Palavras restritas</h3>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Mensagens contendo essas palavras serão bloqueadas no chat da comunidade e nas conversas privadas, com aviso ao remetente.
+        </p>
+        <div className="mt-4 flex gap-2">
+          <Input
+            value={newWord}
+            onChange={(e) => setNewWord(e.target.value)}
+            placeholder="Adicionar palavra..."
+            onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); add(); } }}
+            maxLength={60}
+          />
+          <Button onClick={add} disabled={busy || !newWord.trim()}>Adicionar</Button>
+        </div>
+      </div>
+      {words.length === 0 ? (
+        <div className="glass rounded-2xl p-10 text-center text-muted-foreground shadow-soft">
+          Nenhuma palavra cadastrada.
+        </div>
+      ) : (
+        <div className="glass rounded-2xl p-4 shadow-soft">
+          <div className="flex flex-wrap gap-2">
+            {words.map((w) => (
+              <div
+                key={w.id}
+                className="group flex items-center gap-2 rounded-full border border-border bg-background px-3 py-1.5 text-sm"
+              >
+                <span className="font-medium">{w.word}</span>
+                <button
+                  type="button"
+                  onClick={() => remove(w.id)}
+                  className="rounded-full p-0.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                  aria-label={`Remover ${w.word}`}
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
