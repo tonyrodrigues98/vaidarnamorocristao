@@ -7,14 +7,15 @@ import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Send, Trash2, Users, Pencil, Check, X, Reply, MoreHorizontal, Pin, PinOff, ShieldCheck } from "lucide-react";
+import { Send, Trash2, Users, Pencil, Check, X, Reply, MoreHorizontal, Pin, PinOff, ShieldCheck, Flag } from "lucide-react";
 import { useLongPress } from "@/hooks/use-long-press";
 import { markSeen } from "@/lib/lastSeen";
 import { RoleBadge } from "@/components/RoleBadge";
 import { type AppRole, type RoleColor, ROLE_PRIORITY } from "@/lib/roles";
 import { useRestrictedWords, findRestrictedWord } from "@/lib/profanity";
 import { ShieldAlert } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 
 const COOLDOWN_MS = 10_000;
 
@@ -34,6 +35,8 @@ export const Route = createFileRoute("/comunidade")({ component: () => (<Require
 function Comunidade() {
   const { user, isAdmin, role, loading } = useAuth();
   const canModerateMessages = isAdmin || role === "moderador";
+  const canFlagMessages = isAdmin || role === "moderador" || role === "apresentador";
+  const isStaffViewer = canFlagMessages;
   const [messages, setMessages] = useState<GMsg[]>([]);
   const [profiles, setProfiles] = useState<Record<string, Profile>>({});
   const [text, setText] = useState("");
@@ -51,6 +54,11 @@ function Comunidade() {
   const [cooldownLeft, setCooldownLeft] = useState(0);
   const lastSentRef = useRef<number>(0);
   const [warning, setWarning] = useState<string | null>(null);
+  const [flaggedIds, setFlaggedIds] = useState<Set<string>>(new Set());
+  const [myFlags, setMyFlags] = useState<Record<string, { id: string; reason: string }>>({});
+  const [flagDialog, setFlagDialog] = useState<{ msg: GMsg; existingId?: string } | null>(null);
+  const [flagReason, setFlagReason] = useState("");
+  const [flagBusy, setFlagBusy] = useState(false);
 
   useEffect(() => {
     if (cooldownLeft <= 0) return;
@@ -79,6 +87,30 @@ function Comunidade() {
       }
       setStaffMap(map);
     })();
+  }, [user]);
+
+  // Carrega sinalizações
+  useEffect(() => {
+    if (!user) return;
+    let active = true;
+    const load = async () => {
+      const { data } = await supabase.from("message_flags").select("id, message_id, flagged_by, reason");
+      if (!active) return;
+      const ids = new Set<string>();
+      const mine: Record<string, { id: string; reason: string }> = {};
+      for (const r of (data ?? []) as Array<{ id: string; message_id: string; flagged_by: string; reason: string }>) {
+        ids.add(r.message_id);
+        if (r.flagged_by === user.id) mine[r.message_id] = { id: r.id, reason: r.reason };
+      }
+      setFlaggedIds(ids);
+      setMyFlags(mine);
+    };
+    load();
+    const ch = supabase
+      .channel("message-flags")
+      .on("postgres_changes", { event: "*", schema: "public", table: "message_flags" }, () => { load(); })
+      .subscribe();
+    return () => { active = false; supabase.removeChannel(ch); };
   }, [user]);
 
   useEffect(() => {
@@ -196,6 +228,37 @@ function Comunidade() {
   async function remove(id: string) {
     const { error } = await supabase.from("global_messages").delete().eq("id", id);
     if (error) toast.error(error.message);
+  }
+
+  function openFlagDialog(m: GMsg) {
+    const existing = myFlags[m.id];
+    setFlagReason(existing?.reason ?? "");
+    setFlagDialog({ msg: m, existingId: existing?.id });
+  }
+
+  async function submitFlag() {
+    if (!flagDialog || !user) return;
+    const reason = flagReason.trim();
+    if (!reason) { toast.error("Descreva o motivo"); return; }
+    setFlagBusy(true);
+    if (flagDialog.existingId) {
+      const { error } = await supabase
+        .from("message_flags")
+        .update({ reason })
+        .eq("id", flagDialog.existingId);
+      setFlagBusy(false);
+      if (error) { toast.error(error.message); return; }
+      toast.success("Sinalização atualizada");
+    } else {
+      const { error } = await supabase
+        .from("message_flags")
+        .insert({ message_id: flagDialog.msg.id, flagged_by: user.id, reason });
+      setFlagBusy(false);
+      if (error) { toast.error(error.message); return; }
+      toast.success("Mensagem sinalizada");
+    }
+    setFlagDialog(null);
+    setFlagReason("");
   }
 
   async function togglePin(m: GMsg) {
