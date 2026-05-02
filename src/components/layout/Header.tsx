@@ -97,12 +97,14 @@ export function Header() {
           {user ? (
             <>
               <Button variant="ghost" size="sm" asChild><Link to="/dashboard">Início</Link></Button>
-              <Button variant="ghost" size="sm" asChild><Link to="/pretendentes">Pretendentes</Link></Button>
               <Button variant="ghost" size="sm" asChild>
-                <Link to="/comunidade"><Globe className="mr-1 h-4 w-4" /> Comunidade</Link>
+                <Link to="/perfil"><UserIcon className="mr-1 h-4 w-4" /> Perfil</Link>
               </Button>
               <Button variant="ghost" size="sm" asChild>
-                <Link to="/noticias"><Newspaper className="mr-1 h-4 w-4" /> Notícias</Link>
+                <Link to="/conversas"><MessageCircle className="mr-1 h-4 w-4" /> Conversas<Badge n={unreadCount} /></Link>
+              </Button>
+              <Button variant="ghost" size="sm" asChild>
+                <Link to="/comunidade"><Globe className="mr-1 h-4 w-4" /> Comunidade</Link>
               </Button>
               <Button variant="ghost" size="sm" asChild>
                 <Link to="/interesses"><Sparkles className="mr-1 h-4 w-4" /> Interesses<Badge n={interestCount} /></Link>
@@ -111,16 +113,13 @@ export function Header() {
                 <Link to="/matches"><Users className="mr-1 h-4 w-4" /> Matches</Link>
               </Button>
               <Button variant="ghost" size="sm" asChild>
-                <Link to="/conversas"><MessageCircle className="mr-1 h-4 w-4" /> Conversas<Badge n={unreadCount} /></Link>
-              </Button>
-              <Button variant="ghost" size="sm" asChild>
-                <Link to="/perfil"><UserIcon className="mr-1 h-4 w-4" /> Perfil</Link>
-              </Button>
-              <Button variant="ghost" size="sm" asChild>
-                <Link to="/bloqueados"><Ban className="mr-1 h-4 w-4" /> Bloqueados</Link>
+                <Link to="/noticias"><Newspaper className="mr-1 h-4 w-4" /> Notícias</Link>
               </Button>
               <Button variant="ghost" size="sm" onClick={shareSite}>
                 <Share2 className="mr-1 h-4 w-4" /> Compartilhar
+              </Button>
+              <Button variant="ghost" size="sm" asChild>
+                <Link to="/bloqueados"><Ban className="mr-1 h-4 w-4" /> Bloqueados</Link>
               </Button>
               {isAdmin && (
                 <Button variant="ghost" size="sm" asChild>
@@ -159,12 +158,15 @@ export function Header() {
             {user ? (
               <>
                 <MobileItem to="/dashboard" onClick={close}>Início</MobileItem>
-                <MobileItem to="/pretendentes" onClick={close}>Pretendentes</MobileItem>
+                <MobileItem to="/perfil" onClick={close}>
+                  <span className="flex items-center gap-2"><UserIcon className="h-4 w-4" /> Perfil</span>
+                </MobileItem>
+                <MobileItem to="/conversas" onClick={close}>
+                  <span className="flex items-center gap-2"><MessageCircle className="h-4 w-4" /> Conversas</span>
+                  <Badge n={unreadCount} />
+                </MobileItem>
                 <MobileItem to="/comunidade" onClick={close}>
                   <span className="flex items-center gap-2"><Globe className="h-4 w-4" /> Comunidade</span>
-                </MobileItem>
-                <MobileItem to="/noticias" onClick={close}>
-                  <span className="flex items-center gap-2"><Newspaper className="h-4 w-4" /> Notícias</span>
                 </MobileItem>
                 <MobileItem to="/interesses" onClick={close}>
                   <span className="flex items-center gap-2"><Sparkles className="h-4 w-4" /> Interesses</span>
@@ -173,15 +175,8 @@ export function Header() {
                 <MobileItem to="/matches" onClick={close}>
                   <span className="flex items-center gap-2"><Users className="h-4 w-4" /> Matches</span>
                 </MobileItem>
-                <MobileItem to="/conversas" onClick={close}>
-                  <span className="flex items-center gap-2"><MessageCircle className="h-4 w-4" /> Conversas</span>
-                  <Badge n={unreadCount} />
-                </MobileItem>
-                <MobileItem to="/perfil" onClick={close}>
-                  <span className="flex items-center gap-2"><UserIcon className="h-4 w-4" /> Perfil</span>
-                </MobileItem>
-                <MobileItem to="/bloqueados" onClick={close}>
-                  <span className="flex items-center gap-2"><Ban className="h-4 w-4" /> Bloqueados</span>
+                <MobileItem to="/noticias" onClick={close}>
+                  <span className="flex items-center gap-2"><Newspaper className="h-4 w-4" /> Notícias</span>
                 </MobileItem>
                 <button
                   onClick={() => { close(); shareSite(); }}
@@ -189,6 +184,9 @@ export function Header() {
                 >
                   <Share2 className="h-4 w-4" /> Compartilhar
                 </button>
+                <MobileItem to="/bloqueados" onClick={close}>
+                  <span className="flex items-center gap-2"><Ban className="h-4 w-4" /> Bloqueados</span>
+                </MobileItem>
                 {isAdmin && (
                   <MobileItem to="/admin" onClick={close}>
                     <span className="flex items-center gap-2"><Shield className="h-4 w-4" /> Admin</span>
