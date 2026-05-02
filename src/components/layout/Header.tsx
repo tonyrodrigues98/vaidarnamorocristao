@@ -5,8 +5,34 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import {
   Heart, LogOut, Shield, MessageCircle, Sparkles, Menu, X,
-  User as UserIcon, Users, Newspaper, Globe, Ban,
+  User as UserIcon, Users, Newspaper, Globe, Ban, Share2,
 } from "lucide-react";
+import { toast } from "sonner";
+
+async function shareSite() {
+  const url = typeof window !== "undefined" ? window.location.origin : "";
+  const shareData = {
+    title: "Encontros de Fé",
+    text: "Conheça pretendentes que compartilham sua fé.",
+    url,
+  };
+  try {
+    if (typeof navigator !== "undefined" && navigator.share) {
+      await navigator.share(shareData);
+      return;
+    }
+    await navigator.clipboard.writeText(url);
+    toast.success("Link copiado!");
+  } catch (e: any) {
+    if (e?.name === "AbortError") return;
+    try {
+      await navigator.clipboard.writeText(url);
+      toast.success("Link copiado!");
+    } catch {
+      toast.error("Não foi possível compartilhar");
+    }
+  }
+}
 
 export function Header() {
   const { user, isAdmin, signOut } = useAuth();
@@ -93,6 +119,9 @@ export function Header() {
               <Button variant="ghost" size="sm" asChild>
                 <Link to="/bloqueados"><Ban className="mr-1 h-4 w-4" /> Bloqueados</Link>
               </Button>
+              <Button variant="ghost" size="sm" onClick={shareSite}>
+                <Share2 className="mr-1 h-4 w-4" /> Compartilhar
+              </Button>
               {isAdmin && (
                 <Button variant="ghost" size="sm" asChild>
                   <Link to="/admin"><Shield className="mr-1 h-4 w-4" /> Admin</Link>
@@ -106,6 +135,9 @@ export function Header() {
             <>
               <Button variant="ghost" size="sm" asChild><Link to="/auth/login">Entrar</Link></Button>
               <Button size="sm" asChild className="rounded-full px-5"><Link to="/auth/signup">Criar conta</Link></Button>
+              <Button variant="ghost" size="sm" onClick={shareSite}>
+                <Share2 className="mr-1 h-4 w-4" /> Compartilhar
+              </Button>
             </>
           )}
         </nav>
@@ -151,6 +183,12 @@ export function Header() {
                 <MobileItem to="/bloqueados" onClick={close}>
                   <span className="flex items-center gap-2"><Ban className="h-4 w-4" /> Bloqueados</span>
                 </MobileItem>
+                <button
+                  onClick={() => { close(); shareSite(); }}
+                  className="flex items-center gap-2 rounded-xl px-3 py-3 text-left text-sm font-medium hover:bg-muted"
+                >
+                  <Share2 className="h-4 w-4" /> Compartilhar
+                </button>
                 {isAdmin && (
                   <MobileItem to="/admin" onClick={close}>
                     <span className="flex items-center gap-2"><Shield className="h-4 w-4" /> Admin</span>
@@ -167,6 +205,12 @@ export function Header() {
               <>
                 <MobileItem to="/auth/login" onClick={close}>Entrar</MobileItem>
                 <MobileItem to="/auth/signup" onClick={close}>Criar conta</MobileItem>
+                <button
+                  onClick={() => { close(); shareSite(); }}
+                  className="flex items-center gap-2 rounded-xl px-3 py-3 text-left text-sm font-medium hover:bg-muted"
+                >
+                  <Share2 className="h-4 w-4" /> Compartilhar
+                </button>
               </>
             )}
           </nav>
