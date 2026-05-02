@@ -208,13 +208,13 @@ function Detail() {
                   <div className="flex flex-wrap items-center gap-2">
                     <dt className="flex items-center gap-1 text-muted-foreground"><Globe2 className="h-3.5 w-3.5" /> Localização:</dt>
                     <dd className="font-medium">
-                      {prefs.location_scope === "same_city" ? "Mesma cidade"
-                        : prefs.location_scope === "same_state" ? "Mesmo estado"
-                        : prefs.location_scope === "any" ? "Qualquer lugar"
-                        : prefs.location_scope === "custom_states"
-                          ? ((prefs.custom_states ?? []).length > 0
-                              ? (prefs.custom_states ?? []).join(", ")
-                              : "—")
+                      {prefs.location_scope === "personalizado"
+                        ? ((prefs.custom_states ?? []).length > 0
+                            ? (prefs.custom_states ?? []).join(", ")
+                            : "—")
+                        : prefs.location_scope === "regiao" ? "Mesma região"
+                        : prefs.location_scope === "brasil" ? "Brasil todo"
+                        : prefs.location_scope === "mundo" ? "Mundo todo"
                         : prefs.location_scope}
                     </dd>
                   </div>
