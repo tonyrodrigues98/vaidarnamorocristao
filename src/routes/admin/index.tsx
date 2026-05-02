@@ -6,7 +6,7 @@ import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Check, X, Ban, ShieldAlert, Flag, Newspaper, Trash2, Users as UsersIcon, ClipboardList, MessageSquareWarning } from "lucide-react";
+import { Check, X, Ban, ShieldAlert, Flag, Newspaper, Trash2, Users as UsersIcon, ClipboardList, MessageSquareWarning, ShieldX } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -22,6 +22,7 @@ type ProfileUpdate = Database["public"]["Tables"]["profiles"]["Update"];
 type Report = Database["public"]["Tables"]["reports"]["Row"];
 type DailyPost = { id: string; title: string; content: string; published: boolean; published_at: string; kind: "news" | "devotional" };
 type PreCadastro = Database["public"]["Tables"]["pre_cadastros"]["Row"];
+type RestrictedWord = Database["public"]["Tables"]["restricted_words"]["Row"];
 type AdminUserRow = Row & { primaryRole: AppRole };
 
 export const Route = createFileRoute("/admin/")({ component: Admin });
@@ -33,10 +34,10 @@ function Admin() {
   const isModerador = role === "moderador";
   const canSeeAdminPanel = isAdmin || isApresentador || isModerador;
 
-  type TabKey = "pending" | "approved" | "rejected" | "banned" | "reports" | "posts" | "users" | "pre_cadastros";
+  type TabKey = "pending" | "approved" | "rejected" | "banned" | "reports" | "posts" | "users" | "pre_cadastros" | "restricted_words";
 
   const availableTabs = useMemo<TabKey[]>(() => {
-    if (isSuperAdmin) return ["pending","approved","rejected","banned","reports","posts","users","pre_cadastros"];
+    if (isSuperAdmin) return ["pending","approved","rejected","banned","reports","posts","users","pre_cadastros","restricted_words"];
     if (isAdmin) return ["pending","approved","rejected","banned","reports","posts"];
     if (isApresentador) return ["pre_cadastros"];
     return [];
@@ -251,6 +252,7 @@ function Admin() {
             {availableTabs.includes("posts") && <TabsTrigger value="posts"><Newspaper className="mr-1 h-3 w-3" /> Texto Diário</TabsTrigger>}
             {availableTabs.includes("users") && <TabsTrigger value="users"><UsersIcon className="mr-1 h-3 w-3" /> Usuários</TabsTrigger>}
             {availableTabs.includes("pre_cadastros") && <TabsTrigger value="pre_cadastros"><ClipboardList className="mr-1 h-3 w-3" /> Pré-cadastros</TabsTrigger>}
+            {availableTabs.includes("restricted_words") && <TabsTrigger value="restricted_words"><ShieldX className="mr-1 h-3 w-3" /> Palavras Restritas</TabsTrigger>}
           </TabsList>
 
           <TabsContent value={tab} className="mt-6">
@@ -260,6 +262,8 @@ function Admin() {
                 busy={busy}
                 onChangeRole={changeUserRole}
               />
+            ) : tab === "restricted_words" ? (
+              <RestrictedWordsPanel />
             ) : tab === "pre_cadastros" ? (
               <PreCadastrosPanel
                 items={preCads}
