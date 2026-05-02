@@ -236,9 +236,6 @@ function Detail() {
                   <RoleBadge role={targetRole.role} color={targetRole.color} size="md" />
                 )}
               </h1>
-              {targetRole && (
-                <p className="mt-1 text-xs text-muted-foreground">{/* description handled by RoleBadge if showDescription */}</p>
-              )}
               <p className="mt-1 text-muted-foreground">{profile.marital === "solteiro" ? "Solteiro(a)" : "Divorciado(a)"} {profile.height_cm ? `· ${profile.height_cm} cm` : ""}</p>
             </div>
 
