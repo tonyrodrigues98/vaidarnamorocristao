@@ -237,7 +237,7 @@ function Comunidade() {
                           <span className="flex items-center gap-1 font-semibold text-foreground">
                             {name}
                             {senderIsAdmin && (
-                              <ShieldCheck className="h-3 w-3 text-primary" aria-label="Admin" />
+                              <ShieldCheck className="admin-icon-sparkle h-3 w-3" aria-label="Admin" />
                             )}
                           </span>
                           <span className="line-clamp-2 text-muted-foreground">{m.content}</span>
@@ -287,7 +287,7 @@ function Comunidade() {
                     className={`group relative flex scroll-mt-24 items-start gap-3 rounded-xl transition-colors duration-500 ${isFlash ? "bg-primary/10" : ""}`}
                   >
                     {mine ? (
-                      <div className={`h-9 w-9 shrink-0 overflow-hidden rounded-full bg-muted ${senderIsAdmin ? "ring-2 ring-primary ring-offset-2 ring-offset-background" : ""}`}>
+                      <div className={`h-9 w-9 shrink-0 overflow-hidden rounded-full bg-muted ${senderIsAdmin ? "ring-2 ring-[var(--gold)] ring-offset-2 ring-offset-background" : ""}`}>
                         {p?.photo_url ? (
                           <img src={p.photo_url} alt="" className="h-full w-full object-cover" />
                         ) : (
@@ -300,7 +300,7 @@ function Comunidade() {
                       <Link
                         to="/pretendentes/$id"
                         params={{ id: m.sender_id }}
-                        className={`h-9 w-9 shrink-0 overflow-hidden rounded-full bg-muted transition hover:ring-2 hover:ring-primary/40 ${senderIsAdmin ? "ring-2 ring-primary ring-offset-2 ring-offset-background" : "ring-0"}`}
+                        className={`h-9 w-9 shrink-0 overflow-hidden rounded-full bg-muted transition hover:ring-2 hover:ring-primary/40 ${senderIsAdmin ? "ring-2 ring-[var(--gold)] ring-offset-2 ring-offset-background" : "ring-0"}`}
                         aria-label={`Ver perfil de ${name}`}
                       >
                         {p?.photo_url ? (
@@ -323,7 +323,7 @@ function Comunidade() {
                           <span className="flex items-center gap-1 text-sm font-semibold">
                             {name}
                             {adminIds.has(m.sender_id) && (
-                              <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-primary" aria-label="Admin" />
+                              <ShieldCheck className="admin-icon-sparkle h-3.5 w-3.5 shrink-0" aria-label="Admin" />
                             )}
                           </span>
                         ) : (
@@ -334,7 +334,7 @@ function Comunidade() {
                           >
                             {name}
                             {adminIds.has(m.sender_id) && (
-                              <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-primary" aria-label="Admin" />
+                              <ShieldCheck className="admin-icon-sparkle h-3.5 w-3.5 shrink-0" aria-label="Admin" />
                             )}
                           </Link>
                         )}
@@ -496,7 +496,7 @@ function BubbleWrap({
       {...bound}
       className={`flex-1 min-w-0 rounded-xl transition-all duration-200 ${
         enableLongPress ? "select-none md:select-text" : ""
-      } ${isAdmin ? "border-l-2 border-primary bg-primary/5 pl-2" : ""} ${
+      } ${isAdmin ? "admin-sparkle border-l-2 border-[var(--gold)] bg-[var(--gold-soft)]/30 pl-2" : ""} ${
         pressing ? "scale-[0.98] bg-primary/5 ring-2 ring-primary/30 px-2 -mx-2" : ""
       } ${
         highlighted ? "bg-primary/10 ring-2 ring-primary/50 px-2 -mx-2" : ""

@@ -38,6 +38,8 @@
   --color-petal: var(--petal);
   --color-cream: var(--cream);
   --color-ink: var(--ink);
+  --color-gold: var(--gold);
+  --color-gold-soft: var(--gold-soft);
 }
 
 :root {
@@ -81,6 +83,10 @@
   --cream: oklch(0.985 0.006 60);
   --ink: oklch(0.16 0.01 30);
 
+  /* Sparky gold — admin highlight */
+  --gold: oklch(0.82 0.16 90);            /* warm sparkly gold */
+  --gold-soft: oklch(0.93 0.09 92);       /* soft champagne */
+
   --gradient-love: linear-gradient(135deg, var(--coral) 0%, var(--rose) 60%, var(--ink) 130%);
   --gradient-warm: linear-gradient(180deg, oklch(0.985 0.006 60) 0%, oklch(0.97 0.022 18) 100%);
   --gradient-text: linear-gradient(120deg, var(--rose) 0%, var(--coral) 100%);
@@ -118,6 +124,10 @@
   --petal: oklch(0.32 0.08 18);
   --cream: oklch(0.22 0.014 25);
   --ink: oklch(0.97 0.006 60);
+
+  /* Sparky gold — admin highlight (dark) */
+  --gold: oklch(0.85 0.17 92);
+  --gold-soft: oklch(0.42 0.1 90);
 
   --gradient-warm: linear-gradient(180deg, oklch(0.18 0.012 25) 0%, oklch(0.22 0.04 18) 100%);
 
@@ -175,6 +185,27 @@
   .animate-fade-in { animation: fade-in 0.5s ease-out both; }
   .animate-reveal { animation: reveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) both; opacity: 0; }
   .animate-letter { display: inline-block; animation: letter-fade .8s cubic-bezier(.2,0,.2,1) both; opacity: 0; }
+  .admin-sparkle {
+    position: relative;
+    box-shadow: 0 0 0 1px var(--gold-soft) inset, 0 6px 22px oklch(0.82 0.16 90 / 0.18);
+  }
+  .admin-sparkle::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background: linear-gradient(120deg, transparent 30%, oklch(1 0 0 / 0.55) 50%, transparent 70%);
+    background-size: 220% 100%;
+    animation: sparkle-sweep 3.4s ease-in-out infinite;
+    mix-blend-mode: overlay;
+    opacity: 0.7;
+  }
+  .admin-icon-sparkle {
+    color: var(--gold);
+    filter: drop-shadow(0 0 4px oklch(0.82 0.16 90 / 0.55));
+    animation: sparkle-pulse 2.4s ease-in-out infinite;
+  }
 }
 
 @keyframes fade-up {
@@ -192,6 +223,14 @@
 @keyframes letter-fade {
   from { opacity: 0; transform: translateY(14px); filter: blur(6px); }
   to { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+@keyframes sparkle-sweep {
+  0% { background-position: 200% 0; }
+  100% { background-position: -120% 0; }
+}
+@keyframes sparkle-pulse {
+  0%, 100% { transform: scale(1); filter: drop-shadow(0 0 3px oklch(0.82 0.16 90 / 0.5)); }
+  50% { transform: scale(1.1); filter: drop-shadow(0 0 7px oklch(0.82 0.16 90 / 0.85)); }
 }
 
 /* App-like behavior on touch devices.
