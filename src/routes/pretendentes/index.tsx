@@ -46,9 +46,9 @@ function List() {
         const hidden = new Set<string>([
           ...(blocksRes.data ?? []).map((b: any) => b.blocked_id),
           ...(blockedByRes.data ?? []).map((b: any) => b.blocker_id),
-          ...(((adminsRes as any).data ?? []) as Array<string | { get_admin_ids?: string }>).map(
-            (x: any) => (typeof x === "string" ? x : x.get_admin_ids ?? x)
-          ),
+          ...(((adminsRes as any).data ?? []) as any[]).map((x: any) =>
+            typeof x === "string" ? x : (x.get_admin_ids ?? x.user_id ?? "")
+          ).filter(Boolean),
         ]);
         setProfiles(((profsRes.data ?? []) as Profile[]).filter((p) => !hidden.has(p.id)));
       }
