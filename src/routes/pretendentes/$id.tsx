@@ -29,7 +29,7 @@ export const Route = createFileRoute("/pretendentes/$id")({ component: Detail })
 
 function Detail() {
   const { id } = Route.useParams();
-  const { user, loading } = useAuth();
+  const { user, loading, isAdmin } = useAuth();
   const navigate = useNavigate();
   const [profile, setProfile] = useState<Full | null | undefined>(undefined);
   const [prefs, setPrefs] = useState<Prefs | null>(null);
@@ -41,6 +41,17 @@ function Detail() {
   const [reportReason, setReportReason] = useState("");
   const [reportAlsoBlock, setReportAlsoBlock] = useState(true);
   const [mySex, setMySex] = useState<string | null>(null);
+  const [targetIsAdmin, setTargetIsAdmin] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase.rpc("get_admin_ids");
+      const ids = ((data ?? []) as any[]).map((x: any) =>
+        typeof x === "string" ? x : (x.get_admin_ids ?? x.user_id ?? "")
+      );
+      setTargetIsAdmin(ids.includes(id));
+    })();
+  }, [id]);
 
   useEffect(() => {
     if (!user) return;
@@ -269,7 +280,7 @@ function Detail() {
             )}
 
             <div className="space-y-2">
-              {profile && mySex && profile.sex === mySex ? null : matchId ? (
+              {profile && mySex && profile.sex === mySex ? null : (targetIsAdmin && !isAdmin) ? null : matchId ? (
                 <Button size="lg" className="w-full shadow-glow" asChild>
                   <Link to="/conversas/$matchId" params={{ matchId }}><MessageCircle className="mr-2 h-4 w-4" /> Conversar</Link>
                 </Button>

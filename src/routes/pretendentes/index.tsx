@@ -34,17 +34,21 @@ function List() {
       setMySex(me?.sex ?? null);
       if (me?.status === "approved") {
         const targetSex = me.sex === "masculino" ? "feminino" : "masculino";
-        const [profsRes, blocksRes, blockedByRes] = await Promise.all([
+        const [profsRes, blocksRes, blockedByRes, adminsRes] = await Promise.all([
           supabase.from("profiles")
             .select("id, full_name, age, city, state, church, bio, photo_url, sex, marital")
             .eq("status", "approved").eq("sex", targetSex).neq("id", user.id)
             .order("created_at", { ascending: false }),
           supabase.from("blocks").select("blocked_id").eq("blocker_id", user.id),
           supabase.from("blocks").select("blocker_id").eq("blocked_id", user.id),
+          supabase.rpc("get_admin_ids"),
         ]);
         const hidden = new Set<string>([
           ...(blocksRes.data ?? []).map((b: any) => b.blocked_id),
           ...(blockedByRes.data ?? []).map((b: any) => b.blocker_id),
+          ...(((adminsRes as any).data ?? []) as any[]).map((x: any) =>
+            typeof x === "string" ? x : (x.get_admin_ids ?? x.user_id ?? "")
+          ).filter(Boolean),
         ]);
         setProfiles(((profsRes.data ?? []) as Profile[]).filter((p) => !hidden.has(p.id)));
       }
