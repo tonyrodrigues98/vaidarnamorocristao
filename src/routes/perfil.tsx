@@ -125,6 +125,24 @@ function PerfilPage() {
     refreshRole();
   }
 
+  async function togglePublicListing(next: boolean) {
+    if (!user || !isStaff) return;
+    const prev = localPublic;
+    setLocalPublic(next);
+    const { error } = await supabase
+      .from("user_roles")
+      .update({ public_listing: next })
+      .eq("user_id", user.id)
+      .eq("role", role);
+    if (error) {
+      setLocalPublic(prev);
+      toast.error("Não foi possível salvar");
+      return;
+    }
+    toast.success(next ? "Aparecendo em Pretendentes" : "Oculto de Pretendentes");
+    refreshRole();
+  }
+
   function handlePhoto(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0]; if (!f) return;
     if (f.size > 5 * 1024 * 1024) { toast.error("Foto até 5MB"); return; }
@@ -422,17 +440,15 @@ function PerfilPage() {
                   </div>
                 )}
 
-                {(role === "apresentador" || role === "moderador") && (
-                  <div className="flex items-center justify-between rounded-xl border border-border bg-card/40 p-4">
-                    <div>
-                      <p className="font-medium">Aparecer em pretendentes</p>
-                      <p className="text-xs text-muted-foreground">
-                        Ative se quiser que seu perfil também apareça na busca de pretendentes.
-                      </p>
-                    </div>
-                    <Switch checked={localPublic} onCheckedChange={setLocalPublic} />
+                <div className="flex items-center justify-between rounded-xl border border-border bg-card/40 p-4">
+                  <div className="pr-4">
+                    <p className="font-medium">Aparecer em Pretendentes</p>
+                    <p className="text-xs text-muted-foreground">
+                      Ligado por padrão. Desative para ocultar seu perfil da busca de pretendentes — suas preferências são salvas automaticamente.
+                    </p>
                   </div>
-                )}
+                  <Switch checked={localPublic} onCheckedChange={togglePublicListing} />
+                </div>
 
                 <Button onClick={saveRoleSettings} disabled={savingRole} size="lg" className="w-full">
                   <Save className="mr-2 h-4 w-4" /> {savingRole ? "Salvando..." : "Salvar cargo"}
