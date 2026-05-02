@@ -644,6 +644,7 @@ export type Database = {
         Returns: boolean
       }
       is_staff: { Args: { _user_id: string }; Returns: boolean }
+      mark_message_read: { Args: { _message_id: string }; Returns: undefined }
       unmatch: { Args: { _match_id: string }; Returns: undefined }
     }
     Enums: {
