@@ -16,7 +16,7 @@ type Post = {
   kind: "news" | "devotional";
 };
 
-export const Route = createFileRoute("/noticias/$id")({ component: NoticiaDetail });
+export const Route = createFileRoute("/noticias/")({ component: NoticiaDetail });
 
 function NoticiaDetail() {
   const { id } = useParams({ from: "/noticias/$id" });
