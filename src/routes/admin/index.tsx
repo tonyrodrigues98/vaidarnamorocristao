@@ -812,6 +812,14 @@ function PreCadastrosPanel({
           )}
         </DialogContent>
       </Dialog>
+
+      <MatchDialog
+        target={matchTarget}
+        editing={editingMatch}
+        currentUserId={currentUserId}
+        onClose={() => { setMatchTarget(null); setEditingMatch(null); }}
+        onSaved={() => { setMatchTarget(null); setEditingMatch(null); loadMatches(); }}
+      />
     </div>
   );
 }
