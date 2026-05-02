@@ -290,7 +290,7 @@ function Detail() {
             )}
 
             <div className="space-y-2">
-              {profile && mySex && profile.sex === mySex ? null : (targetIsAdmin && !isAdmin) ? null : matchId ? (
+              {profile && mySex && profile.sex === mySex ? null : (targetRole && !isAdmin) ? null : matchId ? (
                 <Button size="lg" className="w-full shadow-glow" asChild>
                   <Link to="/conversas/$matchId" params={{ matchId }}><MessageCircle className="mr-2 h-4 w-4" /> Conversar</Link>
                 </Button>
