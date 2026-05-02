@@ -9,6 +9,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ArrowLeft, MapPin, Church, Heart, Flag, Ban, MessageCircle, Check, Sparkles, Baby, Globe2, ShieldOff } from "lucide-react";
+import { RoleBadge } from "@/components/RoleBadge";
+import { ROLE_PRIORITY, type AppRole, type RoleColor } from "@/lib/roles";
 
 type Full = {
   id: string; full_name: string; age: number; height_cm: number | null;
@@ -41,15 +43,23 @@ function Detail() {
   const [reportReason, setReportReason] = useState("");
   const [reportAlsoBlock, setReportAlsoBlock] = useState(true);
   const [mySex, setMySex] = useState<string | null>(null);
-  const [targetIsAdmin, setTargetIsAdmin] = useState(false);
+  const [targetRole, setTargetRole] = useState<{ role: AppRole; color: RoleColor | null } | null>(null);
 
   useEffect(() => {
     (async () => {
-      const { data } = await supabase.rpc("get_admin_ids");
-      const ids = ((data ?? []) as any[]).map((x: any) =>
-        typeof x === "string" ? x : (x.get_admin_ids ?? x.user_id ?? "")
-      );
-      setTargetIsAdmin(ids.includes(id));
+      const { data } = await supabase
+        .from("user_roles")
+        .select("role, badge_color")
+        .eq("user_id", id);
+      const rows = (data ?? []) as Array<{ role: AppRole; badge_color: string | null }>;
+      let best: { role: AppRole; color: RoleColor | null } | null = null;
+      for (const r of rows) {
+        if (r.role === "user") continue;
+        if (!best || ROLE_PRIORITY.indexOf(r.role) < ROLE_PRIORITY.indexOf(best.role)) {
+          best = { role: r.role, color: (r.badge_color as RoleColor | null) ?? null };
+        }
+      }
+      setTargetRole(best);
     })();
   }, [id]);
 
