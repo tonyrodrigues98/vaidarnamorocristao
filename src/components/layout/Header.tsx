@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import {
   Heart, LogOut, Shield, MessageCircle, Sparkles, Menu, X,
-  User as UserIcon, Users, Newspaper, Globe, Ban, Share2,
+  User as UserIcon, Users, Newspaper, Globe, Ban, Share2, Gem,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -97,7 +97,6 @@ export function Header() {
           {user ? (
             <>
               <Button variant="ghost" size="sm" asChild><Link to="/dashboard">Início</Link></Button>
-              <Button variant="ghost" size="sm" asChild><Link to="/pretendentes">Pretendentes</Link></Button>
               <Button variant="ghost" size="sm" asChild>
                 <Link to="/perfil"><UserIcon className="mr-1 h-4 w-4" /> Perfil</Link>
               </Button>
@@ -106,6 +105,9 @@ export function Header() {
               </Button>
               <Button variant="ghost" size="sm" asChild>
                 <Link to="/comunidade"><Globe className="mr-1 h-4 w-4" /> Comunidade</Link>
+              </Button>
+              <Button variant="ghost" size="sm" asChild>
+                <Link to="/pretendentes"><Gem className="mr-1 h-4 w-4" /> Pretendentes</Link>
               </Button>
               <Button variant="ghost" size="sm" asChild>
                 <Link to="/interesses"><Sparkles className="mr-1 h-4 w-4" /> Interesses<Badge n={interestCount} /></Link>
@@ -159,7 +161,6 @@ export function Header() {
             {user ? (
               <>
                 <MobileItem to="/dashboard" onClick={close}>Início</MobileItem>
-                <MobileItem to="/pretendentes" onClick={close}>Pretendentes</MobileItem>
                 <MobileItem to="/perfil" onClick={close}>
                   <span className="flex items-center gap-2"><UserIcon className="h-4 w-4" /> Perfil</span>
                 </MobileItem>
@@ -169,6 +170,9 @@ export function Header() {
                 </MobileItem>
                 <MobileItem to="/comunidade" onClick={close}>
                   <span className="flex items-center gap-2"><Globe className="h-4 w-4" /> Comunidade</span>
+                </MobileItem>
+                <MobileItem to="/pretendentes" onClick={close}>
+                  <span className="flex items-center gap-2"><Gem className="h-4 w-4" /> Pretendentes</span>
                 </MobileItem>
                 <MobileItem to="/interesses" onClick={close}>
                   <span className="flex items-center gap-2"><Sparkles className="h-4 w-4" /> Interesses</span>
