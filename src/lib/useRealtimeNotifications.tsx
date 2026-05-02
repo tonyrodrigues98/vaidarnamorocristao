@@ -99,6 +99,38 @@ export function useRealtimeNotifications() {
           });
         }
       )
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "daily_posts" },
+        (payload) => {
+          const p = payload.new as { published: boolean; kind: string; title: string };
+          if (!p.published) return;
+          const label = p.kind === "devotional" ? "📖 Novo devocional" : "📰 Nova notícia";
+          toast(label, {
+            description: p.title,
+            action: { label: "Ler", onClick: () => router.navigate({ to: "/noticias" }) },
+          });
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "global_messages" },
+        async (payload) => {
+          const m = payload.new as { sender_id: string; content: string };
+          if (m.sender_id === user.id) return;
+          // Suppress when the user is already on the community page.
+          if (typeof window !== "undefined" && window.location.pathname.startsWith("/comunidade")) return;
+          const { data: prof } = await supabase
+            .from("profiles")
+            .select("full_name")
+            .eq("id", m.sender_id)
+            .maybeSingle();
+          toast("🌐 Comunidade", {
+            description: `${prof?.full_name?.split(" ")[0] ?? "Alguém"}: ${m.content.slice(0, 60)}`,
+            action: { label: "Abrir", onClick: () => router.navigate({ to: "/comunidade" }) },
+          });
+        }
+      )
       .subscribe();
 
     return () => {

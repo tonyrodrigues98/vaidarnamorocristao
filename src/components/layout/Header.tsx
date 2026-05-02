@@ -8,6 +8,7 @@ import {
   User as UserIcon, Users, Newspaper, Globe, Ban, Share2, Gem,
 } from "lucide-react";
 import { toast } from "sonner";
+import { getLastSeen } from "@/lib/lastSeen";
 
 async function shareSite() {
   const url = typeof window !== "undefined" ? window.location.origin : "";
@@ -39,16 +40,20 @@ export function Header() {
   const navigate = useNavigate();
   const [interestCount, setInterestCount] = useState(0);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [newsCount, setNewsCount] = useState(0);
+  const [communityCount, setCommunityCount] = useState(0);
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    if (!user) { setInterestCount(0); setUnreadCount(0); return; }
+    if (!user) { setInterestCount(0); setUnreadCount(0); setNewsCount(0); setCommunityCount(0); return; }
     let ignore = false;
     const loadInterests = async () => {
+      const since = getLastSeen(user.id, "interests");
       const { count } = await supabase
         .from("interests")
         .select("id", { count: "exact", head: true })
-        .eq("receiver_id", user.id);
+        .eq("receiver_id", user.id)
+        .gt("created_at", since);
       if (!ignore) setInterestCount(count ?? 0);
     };
     const loadUnread = async () => {
@@ -65,13 +70,45 @@ export function Header() {
         .is("read_at", null);
       if (!ignore) setUnreadCount(count ?? 0);
     };
-    loadInterests(); loadUnread();
+    const loadNews = async () => {
+      const since = getLastSeen(user.id, "news");
+      const { count } = await supabase
+        .from("daily_posts")
+        .select("id", { count: "exact", head: true })
+        .eq("published", true)
+        .gt("published_at", since);
+      if (!ignore) setNewsCount(count ?? 0);
+    };
+    const loadCommunity = async () => {
+      const since = getLastSeen(user.id, "community");
+      const { count } = await supabase
+        .from("global_messages")
+        .select("id", { count: "exact", head: true })
+        .neq("sender_id", user.id)
+        .gt("created_at", since);
+      if (!ignore) setCommunityCount(count ?? 0);
+    };
+    loadInterests(); loadUnread(); loadNews(); loadCommunity();
     const ch = supabase.channel("hdr-counters")
       .on("postgres_changes", { event: "*", schema: "public", table: "interests", filter: `receiver_id=eq.${user.id}` }, loadInterests)
       .on("postgres_changes", { event: "*", schema: "public", table: "messages" }, loadUnread)
       .on("postgres_changes", { event: "*", schema: "public", table: "matches" }, loadUnread)
+      .on("postgres_changes", { event: "*", schema: "public", table: "daily_posts" }, loadNews)
+      .on("postgres_changes", { event: "*", schema: "public", table: "global_messages" }, loadCommunity)
       .subscribe();
-    return () => { ignore = true; supabase.removeChannel(ch); };
+    const onSeen = (e: Event) => {
+      const detail = (e as CustomEvent).detail as { key?: string } | undefined;
+      if (!detail?.key) return;
+      if (detail.key === "interests") loadInterests();
+      if (detail.key === "news") loadNews();
+      if (detail.key === "community") loadCommunity();
+    };
+    window.addEventListener("lastSeen:update", onSeen);
+    return () => {
+      ignore = true;
+      supabase.removeChannel(ch);
+      window.removeEventListener("lastSeen:update", onSeen);
+    };
   }, [user]);
 
   const close = () => setOpen(false);
@@ -104,7 +141,7 @@ export function Header() {
                 <Link to="/conversas"><MessageCircle className="mr-1 h-4 w-4" /> Conversas<Badge n={unreadCount} /></Link>
               </Button>
               <Button variant="ghost" size="sm" asChild>
-                <Link to="/comunidade"><Globe className="mr-1 h-4 w-4" /> Comunidade</Link>
+                <Link to="/comunidade"><Globe className="mr-1 h-4 w-4" /> Comunidade<Badge n={communityCount} /></Link>
               </Button>
               <Button variant="ghost" size="sm" asChild>
                 <Link to="/pretendentes"><Gem className="mr-1 h-4 w-4" /> Pretendentes</Link>
@@ -116,7 +153,7 @@ export function Header() {
                 <Link to="/matches"><Users className="mr-1 h-4 w-4" /> Matches</Link>
               </Button>
               <Button variant="ghost" size="sm" asChild>
-                <Link to="/noticias"><Newspaper className="mr-1 h-4 w-4" /> Notícias</Link>
+                <Link to="/noticias"><Newspaper className="mr-1 h-4 w-4" /> Notícias<Badge n={newsCount} /></Link>
               </Button>
               <Button variant="ghost" size="sm" onClick={shareSite}>
                 <Share2 className="mr-1 h-4 w-4" /> Compartilhar
@@ -170,6 +207,7 @@ export function Header() {
                 </MobileItem>
                 <MobileItem to="/comunidade" onClick={close}>
                   <span className="flex items-center gap-2"><Globe className="h-4 w-4" /> Comunidade</span>
+                  <Badge n={communityCount} />
                 </MobileItem>
                 <MobileItem to="/pretendentes" onClick={close}>
                   <span className="flex items-center gap-2"><Gem className="h-4 w-4" /> Pretendentes</span>
@@ -183,6 +221,7 @@ export function Header() {
                 </MobileItem>
                 <MobileItem to="/noticias" onClick={close}>
                   <span className="flex items-center gap-2"><Newspaper className="h-4 w-4" /> Notícias</span>
+                  <Badge n={newsCount} />
                 </MobileItem>
                 <button
                   onClick={() => { close(); shareSite(); }}
