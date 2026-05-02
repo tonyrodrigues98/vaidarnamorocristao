@@ -58,9 +58,9 @@ function Chat() {
       setPartner(p as Partner | null);
       const { data: msgs } = await supabase.from("messages").select("*").eq("match_id", matchId).order("created_at");
       setMessages((msgs ?? []) as Msg[]);
-      // mark received as read
-      await supabase.from("messages").update({ read_at: new Date().toISOString() })
-        .eq("match_id", matchId).neq("sender_id", user.id).is("read_at", null);
+      // mark received as read via SECURITY DEFINER RPC (only updates read_at)
+      const unread = (msgs ?? []).filter((m: Msg) => m.sender_id !== user.id && !m.read_at);
+      await Promise.all(unread.map((m) => supabase.rpc("mark_message_read", { _message_id: m.id })));
     })();
 
     const ch = supabase.channel(`chat-${matchId}`)
@@ -68,7 +68,7 @@ function Chat() {
         (payload) => {
           setMessages((prev) => prev.some((m) => m.id === (payload.new as Msg).id) ? prev : [...prev, payload.new as Msg]);
           if ((payload.new as Msg).sender_id !== user.id) {
-            supabase.from("messages").update({ read_at: new Date().toISOString() }).eq("id", (payload.new as Msg).id);
+            supabase.rpc("mark_message_read", { _message_id: (payload.new as Msg).id });
           }
         }
       )
