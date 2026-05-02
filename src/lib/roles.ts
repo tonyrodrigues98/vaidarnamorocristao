@@ -9,7 +9,8 @@ export type RoleColor =
   | "purple"
   | "red"
   | "blue"
-  | "green";
+  | "green"
+  | "orange";
 
 export type RoleConfig = {
   label: string;
@@ -38,8 +39,8 @@ export const ROLE_CONFIG: Record<AppRole, RoleConfig> = {
   apresentador: {
     label: "Apresentador",
     description: "Equipe · cadastros presenciais",
-    defaultColor: "purple",
-    availableColors: ["purple", "red", "blue", "green"],
+    defaultColor: "orange",
+    availableColors: ["orange", "purple", "red", "blue", "green"],
     hasBadge: true,
   },
   moderador: {
@@ -66,6 +67,7 @@ export const COLOR_HEX: Record<RoleColor, { fg: string; bg: string; ring: string
   red: { fg: "#5c0f12", bg: "#e15155", ring: "#e15155", name: "Vermelho" },
   blue: { fg: "#0e2f55", bg: "#5aa3e6", ring: "#5aa3e6", name: "Azul" },
   green: { fg: "#0d3b22", bg: "#5db98a", ring: "#5db98a", name: "Verde" },
+  orange: { fg: "#5c2a00", bg: "#ff9b3d", ring: "#ff9b3d", name: "Laranja" },
 };
 
 export const ROLE_PRIORITY: AppRole[] = [

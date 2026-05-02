@@ -7,14 +7,15 @@ import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Send, Trash2, Users, Pencil, Check, X, Reply, MoreHorizontal, Pin, PinOff, ShieldCheck } from "lucide-react";
+import { Send, Trash2, Users, Pencil, Check, X, Reply, MoreHorizontal, Pin, PinOff, ShieldCheck, Flag } from "lucide-react";
 import { useLongPress } from "@/hooks/use-long-press";
 import { markSeen } from "@/lib/lastSeen";
 import { RoleBadge } from "@/components/RoleBadge";
 import { type AppRole, type RoleColor, ROLE_PRIORITY } from "@/lib/roles";
 import { useRestrictedWords, findRestrictedWord } from "@/lib/profanity";
 import { ShieldAlert } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 
 const COOLDOWN_MS = 10_000;
 
@@ -34,6 +35,8 @@ export const Route = createFileRoute("/comunidade")({ component: () => (<Require
 function Comunidade() {
   const { user, isAdmin, role, loading } = useAuth();
   const canModerateMessages = isAdmin || role === "moderador";
+  const canFlagMessages = isAdmin || role === "moderador" || role === "apresentador";
+  const isStaffViewer = canFlagMessages;
   const [messages, setMessages] = useState<GMsg[]>([]);
   const [profiles, setProfiles] = useState<Record<string, Profile>>({});
   const [text, setText] = useState("");
@@ -51,6 +54,11 @@ function Comunidade() {
   const [cooldownLeft, setCooldownLeft] = useState(0);
   const lastSentRef = useRef<number>(0);
   const [warning, setWarning] = useState<string | null>(null);
+  const [flaggedIds, setFlaggedIds] = useState<Set<string>>(new Set());
+  const [myFlags, setMyFlags] = useState<Record<string, { id: string; reason: string }>>({});
+  const [flagDialog, setFlagDialog] = useState<{ msg: GMsg; existingId?: string } | null>(null);
+  const [flagReason, setFlagReason] = useState("");
+  const [flagBusy, setFlagBusy] = useState(false);
 
   useEffect(() => {
     if (cooldownLeft <= 0) return;
@@ -79,6 +87,30 @@ function Comunidade() {
       }
       setStaffMap(map);
     })();
+  }, [user]);
+
+  // Carrega sinalizações
+  useEffect(() => {
+    if (!user) return;
+    let active = true;
+    const load = async () => {
+      const { data } = await supabase.from("message_flags").select("id, message_id, flagged_by, reason");
+      if (!active) return;
+      const ids = new Set<string>();
+      const mine: Record<string, { id: string; reason: string }> = {};
+      for (const r of (data ?? []) as Array<{ id: string; message_id: string; flagged_by: string; reason: string }>) {
+        ids.add(r.message_id);
+        if (r.flagged_by === user.id) mine[r.message_id] = { id: r.id, reason: r.reason };
+      }
+      setFlaggedIds(ids);
+      setMyFlags(mine);
+    };
+    load();
+    const ch = supabase
+      .channel("message-flags")
+      .on("postgres_changes", { event: "*", schema: "public", table: "message_flags" }, () => { load(); })
+      .subscribe();
+    return () => { active = false; supabase.removeChannel(ch); };
   }, [user]);
 
   useEffect(() => {
@@ -198,6 +230,37 @@ function Comunidade() {
     if (error) toast.error(error.message);
   }
 
+  function openFlagDialog(m: GMsg) {
+    const existing = myFlags[m.id];
+    setFlagReason(existing?.reason ?? "");
+    setFlagDialog({ msg: m, existingId: existing?.id });
+  }
+
+  async function submitFlag() {
+    if (!flagDialog || !user) return;
+    const reason = flagReason.trim();
+    if (!reason) { toast.error("Descreva o motivo"); return; }
+    setFlagBusy(true);
+    if (flagDialog.existingId) {
+      const { error } = await supabase
+        .from("message_flags")
+        .update({ reason })
+        .eq("id", flagDialog.existingId);
+      setFlagBusy(false);
+      if (error) { toast.error(error.message); return; }
+      toast.success("Sinalização atualizada");
+    } else {
+      const { error } = await supabase
+        .from("message_flags")
+        .insert({ message_id: flagDialog.msg.id, flagged_by: user.id, reason });
+      setFlagBusy(false);
+      if (error) { toast.error(error.message); return; }
+      toast.success("Mensagem sinalizada");
+    }
+    setFlagDialog(null);
+    setFlagReason("");
+  }
+
   async function togglePin(m: GMsg) {
     const pinned_at = m.pinned_at ? null : new Date().toISOString();
     const { error } = await supabase.from("global_messages").update({ pinned_at }).eq("id", m.id);
@@ -308,6 +371,13 @@ function Comunidade() {
               </div>
             ) : (
               messages
+                .filter((m) => {
+                  // Mensagens sinalizadas: visíveis ao autor e a staff; ocultas para os demais
+                  if (!flaggedIds.has(m.id)) return true;
+                  if (isStaffViewer) return true;
+                  if (user && m.sender_id === user.id) return true;
+                  return false;
+                })
                 .map((m) => {
                 const p = profiles[m.sender_id];
                 const mine = user && m.sender_id === user.id;
@@ -325,11 +395,13 @@ function Comunidade() {
                 const senderStaff = staffMap[m.sender_id];
                 const senderIsAdmin = !!senderStaff && (senderStaff.role === "admin" || senderStaff.role === "super_admin") && (senderStaff.color ?? "gold") === "gold";
                 const senderIsStaff = !!senderStaff;
+                const isFlagged = flaggedIds.has(m.id);
+                const myFlag = myFlags[m.id];
                 return (
                   <div
                     key={m.id}
                     ref={(el) => { messageRefs.current[m.id] = el; }}
-                    className={`group relative flex scroll-mt-24 items-start gap-3 rounded-xl transition-colors duration-500 ${isFlash ? "bg-primary/10" : ""}`}
+                    className={`group relative flex scroll-mt-24 items-start gap-3 rounded-xl transition-colors duration-500 ${isFlash ? "bg-primary/10" : ""} ${isFlagged && isStaffViewer ? "bg-destructive/5 ring-1 ring-destructive/30 px-2 py-1" : ""}`}
                   >
                     {mine ? (
                       <div className={`h-9 w-9 shrink-0 overflow-hidden rounded-full bg-muted ${senderIsAdmin ? "ring-2 ring-[var(--gold)] ring-offset-2 ring-offset-background" : senderIsStaff ? "ring-2 ring-primary/40 ring-offset-2 ring-offset-background" : ""}`}>
@@ -472,6 +544,15 @@ function Comunidade() {
                             <Trash2 className="h-4 w-4" /> Excluir
                           </button>
                         )}
+                        {canFlagMessages && user && m.sender_id !== user.id && (
+                          <button
+                            onClick={() => { setActionsOpenId(null); openFlagDialog(m); }}
+                            className="flex items-center gap-1 rounded-full px-2 py-1 text-xs text-amber-600 hover:bg-amber-500/10"
+                            aria-label={myFlag ? "Editar sinalização" : "Sinalizar"}
+                          >
+                            <Flag className="h-4 w-4" /> {myFlag ? "Editar sinal." : "Sinalizar"}
+                          </button>
+                        )}
                         {isAdmin && (
                           <button
                             onClick={() => { setActionsOpenId(null); togglePin(m); }}
@@ -530,6 +611,37 @@ function Comunidade() {
         </div>
       </main>
       <RestrictedWordDialog word={warning} onClose={() => setWarning(null)} />
+      <Dialog open={!!flagDialog} onOpenChange={(o) => { if (!o) { setFlagDialog(null); setFlagReason(""); } }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>{flagDialog?.existingId ? "Editar sinalização" : "Sinalizar mensagem"}</DialogTitle>
+            <DialogDescription>
+              Descreva por que você acredita que esta mensagem fere as diretrizes da comunidade. Sua sinalização será revisada pelo Super Admin.
+            </DialogDescription>
+          </DialogHeader>
+          {flagDialog && (
+            <div className="space-y-3">
+              <div className="rounded-lg border border-border bg-muted/30 p-3 text-sm">
+                <p className="text-xs font-semibold text-muted-foreground">Mensagem</p>
+                <p className="mt-1 whitespace-pre-wrap break-words">{flagDialog.msg.content}</p>
+              </div>
+              <Textarea
+                placeholder="Motivo da sinalização..."
+                value={flagReason}
+                onChange={(e) => setFlagReason(e.target.value)}
+                maxLength={500}
+                rows={4}
+              />
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setFlagDialog(null); setFlagReason(""); }}>Cancelar</Button>
+            <Button onClick={submitFlag} disabled={flagBusy || !flagReason.trim()}>
+              {flagDialog?.existingId ? "Salvar" : "Sinalizar"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

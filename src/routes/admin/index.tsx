@@ -6,12 +6,12 @@ import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Check, X, Ban, ShieldAlert, Flag, Newspaper, Trash2, Users as UsersIcon, ClipboardList, MessageSquareWarning, ShieldX } from "lucide-react";
+import { Check, X, Ban, ShieldAlert, Flag, Newspaper, Trash2, Users as UsersIcon, ClipboardList, MessageSquareWarning, ShieldX, Heart, Plus, UserPlus, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import type { Database } from "@/integrations/supabase/types";
 import { ROLE_CONFIG, ROLE_PRIORITY, type AppRole } from "@/lib/roles";
@@ -24,6 +24,34 @@ type DailyPost = { id: string; title: string; content: string; published: boolea
 type PreCadastro = Database["public"]["Tables"]["pre_cadastros"]["Row"];
 type RestrictedWord = Database["public"]["Tables"]["restricted_words"]["Row"];
 type AdminUserRow = Row & { primaryRole: AppRole };
+type CoupleStatus = "aceitaram_conversar" | "namorando" | "casamento_marcado";
+type PreMatchRow = {
+  id: string;
+  pre_cadastro_id: string;
+  partner_pre_cadastro_id: string | null;
+  partner_user_id: string | null;
+  partner_full_name: string | null;
+  partner_username: string | null;
+  partner_age: number | null;
+  partner_height_cm: number | null;
+  partner_sex: string | null;
+  partner_marital: string | null;
+  partner_city: string | null;
+  partner_state: string | null;
+  partner_church: string | null;
+  partner_has_children: boolean | null;
+  partner_children_count: number | null;
+  internal_notes: string | null;
+  status: CoupleStatus | null;
+  created_by: string;
+  created_at: string;
+};
+
+const COUPLE_STATUS_LABEL: Record<CoupleStatus, string> = {
+  aceitaram_conversar: "Aceitaram conversar",
+  namorando: "Namorando",
+  casamento_marcado: "Casamento marcado",
+};
 
 export const Route = createFileRoute("/admin/")({ component: Admin });
 
@@ -34,12 +62,13 @@ function Admin() {
   const isModerador = role === "moderador";
   const canSeeAdminPanel = isAdmin || isApresentador || isModerador;
 
-  type TabKey = "pending" | "approved" | "rejected" | "banned" | "reports" | "posts" | "users" | "pre_cadastros" | "restricted_words";
+  type TabKey = "pending" | "approved" | "rejected" | "banned" | "reports" | "posts" | "users" | "pre_cadastros" | "restricted_words" | "flags";
 
   const availableTabs = useMemo<TabKey[]>(() => {
-    if (isSuperAdmin) return ["pending","approved","rejected","banned","reports","posts","users","pre_cadastros","restricted_words"];
-    if (isAdmin) return ["pending","approved","rejected","banned","reports","posts"];
-    if (isApresentador) return ["pre_cadastros"];
+    if (isSuperAdmin) return ["pending","approved","rejected","banned","reports","posts","users","pre_cadastros","restricted_words","flags"];
+    if (isAdmin) return ["pending","approved","rejected","banned","reports","posts","flags"];
+    if (isApresentador) return ["pre_cadastros","flags"];
+    if (isModerador) return ["flags"];
     return [];
   }, [isAdmin, isSuperAdmin, isApresentador]);
 
@@ -127,25 +156,6 @@ function Admin() {
       </main>
     </div>
   );
-
-  // Moderador: simple landing
-  if (!loading && isModerador) {
-    return (
-      <div className="min-h-screen">
-        <Header />
-        <main className="mx-auto max-w-2xl px-4 py-16">
-          <div className="glass rounded-3xl p-8 text-center shadow-soft">
-            <MessageSquareWarning className="mx-auto h-12 w-12 text-primary" />
-            <h1 className="mt-4 text-2xl font-semibold">Painel do Moderador</h1>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Como Moderador, você pode excluir mensagens inadequadas diretamente na Comunidade.
-            </p>
-            <Button asChild className="mt-6"><Link to="/comunidade">Ir para a Comunidade</Link></Button>
-          </div>
-        </main>
-      </div>
-    );
-  }
 
   async function update(id: string, patch: ProfileUpdate) {
     setBusy(id);
@@ -253,6 +263,7 @@ function Admin() {
             {availableTabs.includes("users") && <TabsTrigger value="users"><UsersIcon className="mr-1 h-3 w-3" /> Usuários</TabsTrigger>}
             {availableTabs.includes("pre_cadastros") && <TabsTrigger value="pre_cadastros"><ClipboardList className="mr-1 h-3 w-3" /> Pré-cadastros</TabsTrigger>}
             {availableTabs.includes("restricted_words") && <TabsTrigger value="restricted_words"><ShieldX className="mr-1 h-3 w-3" /> Palavras Restritas</TabsTrigger>}
+            {availableTabs.includes("flags") && <TabsTrigger value="flags"><MessageSquareWarning className="mr-1 h-3 w-3" /> Sinalizações</TabsTrigger>}
           </TabsList>
 
           <TabsContent value={tab} className="mt-6">
@@ -264,6 +275,8 @@ function Admin() {
               />
             ) : tab === "restricted_words" ? (
               <RestrictedWordsPanel />
+            ) : tab === "flags" ? (
+              <FlagsPanel isSuperAdmin={isSuperAdmin} currentUserId={user?.id ?? null} />
             ) : tab === "pre_cadastros" ? (
               <PreCadastrosPanel
                 items={preCads}
@@ -275,6 +288,8 @@ function Admin() {
                 onSave={savePreCadastro}
                 onDelete={deletePreCadastro}
                 busy={pcBusy}
+                currentUserId={user?.id ?? null}
+                isSuperAdmin={isSuperAdmin}
               />
             ) : tab === "posts" ? (
               <div className="space-y-6">
@@ -470,7 +485,7 @@ function UsersPanel({
 }
 
 function PreCadastrosPanel({
-  items, editing, draft, setDraft, onEdit, onCancel, onSave, onDelete, busy,
+  items, editing, draft, setDraft, onEdit, onCancel, onSave, onDelete, busy, currentUserId, isSuperAdmin,
 }: {
   items: PreCadastro[];
   editing: PreCadastro | null;
@@ -481,6 +496,8 @@ function PreCadastrosPanel({
   onSave: () => void;
   onDelete: (id: string) => void;
   busy: boolean;
+  currentUserId: string | null;
+  isSuperAdmin: boolean;
 }) {
   const set = <K extends keyof PreCadastro>(k: K, v: PreCadastro[K] | null) =>
     setDraft({ ...draft, [k]: v });
@@ -488,16 +505,48 @@ function PreCadastrosPanel({
   const [uploading, setUploading] = useState(false);
   const [viewing, setViewing] = useState<PreCadastro | null>(null);
   const [search, setSearch] = useState("");
+  const [creating, setCreating] = useState(false);
+  const [filterMatches, setFilterMatches] = useState(false);
+  const [matches, setMatches] = useState<PreMatchRow[]>([]);
+  const [matchTarget, setMatchTarget] = useState<PreCadastro | null>(null);
+  const [editingMatch, setEditingMatch] = useState<PreMatchRow | null>(null);
+
+  const isFormOpen = creating || !!editing;
+
+  const loadMatches = async () => {
+    const { data, error } = await supabase
+      .from("pre_cadastro_matches")
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (error) { toast.error(error.message); return; }
+    setMatches((data ?? []) as PreMatchRow[]);
+  };
+
+  useEffect(() => { loadMatches(); }, [items]);
+
+  const matchesByPC = useMemo(() => {
+    const map = new Map<string, PreMatchRow[]>();
+    for (const m of matches) {
+      const arr = map.get(m.pre_cadastro_id) ?? [];
+      arr.push(m);
+      map.set(m.pre_cadastro_id, arr);
+    }
+    return map;
+  }, [matches]);
 
   const filteredItems = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return items;
-    return items.filter((p) => {
-      const name = (p.full_name ?? "").toLowerCase();
-      const tk = ((p as { tiktok_user?: string | null }).tiktok_user ?? "").toLowerCase();
-      return name.includes(q) || tk.includes(q);
-    });
-  }, [items, search]);
+    let list = items;
+    if (filterMatches) list = list.filter((p) => matchesByPC.has(p.id));
+    if (q) {
+      list = list.filter((p) => {
+        const name = (p.full_name ?? "").toLowerCase();
+        const tk = ((p as { tiktok_user?: string | null }).tiktok_user ?? "").toLowerCase();
+        return name.includes(q) || tk.includes(q);
+      });
+    }
+    return list;
+  }, [items, search, filterMatches, matchesByPC]);
 
   async function handlePhotoUpload(file: File) {
     setUploading(true);
@@ -516,12 +565,36 @@ function PreCadastrosPanel({
     }
   }
 
+  const handleCancel = () => {
+    setCreating(false);
+    onCancel();
+  };
+  const handleSave = async () => {
+    await onSave();
+    setCreating(false);
+  };
+  const startCreate = () => {
+    setDraft({});
+    setCreating(true);
+  };
+
   return (
     <div className="space-y-6">
-      <div className="glass rounded-2xl p-5 shadow-soft">
-        <h3 className="text-lg font-semibold">{editing ? "Editar pré-cadastro" : "Novo pré-cadastro"}</h3>
-        <p className="mt-1 text-xs text-muted-foreground">Nenhum campo é obrigatório. Preencha o que tiver.</p>
-        <div className="mt-4 flex items-center gap-4">
+      <div className="glass flex flex-wrap items-center justify-between gap-3 rounded-2xl p-5 shadow-soft">
+        <div>
+          <h3 className="text-lg font-semibold">Pré-cadastros</h3>
+          <p className="text-xs text-muted-foreground">Cadastre fichas, registre matches e acompanhe o casal.</p>
+        </div>
+        <Button onClick={startCreate}><Plus className="mr-1 h-4 w-4" /> Cadastrar Ficha</Button>
+      </div>
+
+      <Dialog open={isFormOpen} onOpenChange={(o) => { if (!o) handleCancel(); }}>
+        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>{editing ? "Editar pré-cadastro" : "Novo pré-cadastro"}</DialogTitle>
+            <DialogDescription>Nenhum campo é obrigatório. Preencha o que tiver.</DialogDescription>
+          </DialogHeader>
+          <div className="mt-4 flex items-center gap-4">
           <div className="h-20 w-20 shrink-0 overflow-hidden rounded-2xl bg-muted">
             {draft.photo_url ? (
               <img src={draft.photo_url} alt="" className="h-full w-full object-cover" />
@@ -627,11 +700,12 @@ function PreCadastrosPanel({
           <div className="space-y-1 sm:col-span-2"><Label>Sobre o que procura</Label><Textarea value={draft.pref_looking_for_bio ?? ""} onChange={(e) => set("pref_looking_for_bio", e.target.value || null)} /></div>
           <div className="space-y-1 sm:col-span-2"><Label>Notas internas</Label><Textarea value={draft.notes ?? ""} onChange={(e) => set("notes", e.target.value || null)} /></div>
         </div>
-        <div className="mt-4 flex gap-2">
-          <Button onClick={onSave} disabled={busy}>{editing ? "Salvar alterações" : "Adicionar"}</Button>
-          {editing && <Button variant="outline" onClick={onCancel}>Cancelar</Button>}
-        </div>
-      </div>
+          <DialogFooter className="mt-4">
+            <Button variant="outline" onClick={handleCancel}>Cancelar</Button>
+            <Button onClick={handleSave} disabled={busy}>{editing ? "Salvar alterações" : "Adicionar"}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <div className="glass rounded-2xl p-4 shadow-soft">
         <Label htmlFor="pc-search" className="text-xs text-muted-foreground">Buscar</Label>
@@ -642,9 +716,20 @@ function PreCadastrosPanel({
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
-        <p className="mt-2 text-xs text-muted-foreground">
-          {filteredItems.length} de {items.length} pré-cadastro{items.length === 1 ? "" : "s"}
-        </p>
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+          <button
+            type="button"
+            onClick={() => setFilterMatches((v) => !v)}
+            className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold transition ${
+              filterMatches ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/70"
+            }`}
+          >
+            <Heart className="h-3 w-3" /> Matches
+          </button>
+          <p className="text-xs text-muted-foreground">
+            {filteredItems.length} de {items.length} pré-cadastro{items.length === 1 ? "" : "s"}
+          </p>
+        </div>
       </div>
 
       {items.length === 0 ? (
@@ -654,37 +739,23 @@ function PreCadastrosPanel({
       ) : (
         <div className="grid gap-3">
           {filteredItems.map((p) => (
-            <div key={p.id} className="glass rounded-2xl p-4 shadow-soft">
-              <div className="flex items-start gap-3">
-                <button
-                  type="button"
-                  onClick={() => setViewing(p)}
-                  className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-muted transition hover:opacity-80"
-                  aria-label="Ver detalhes"
-                >
-                  {p.photo_url ? (
-                    <img src={p.photo_url} alt="" className="h-full w-full object-cover" />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center bg-gradient-love text-lg text-white">
-                      {(p.full_name ?? "?").charAt(0).toUpperCase()}
-                    </div>
-                  )}
-                </button>
-                <div className="min-w-0 flex-1">
-                  <h4 className="font-semibold">{p.full_name ?? "(sem nome)"}{p.age ? `, ${p.age}` : ""}</h4>
-                  <p className="text-xs text-muted-foreground">
-                    {[p.sex, p.marital, p.city && p.state ? `${p.city}/${p.state}` : p.city || p.state, p.church].filter(Boolean).join(" · ")}
-                  </p>
-                  {p.bio && <p className="mt-2 line-clamp-2 text-sm text-foreground/80">{p.bio}</p>}
-                  {p.notes && <p className="mt-1 text-xs italic text-muted-foreground">📝 {p.notes}</p>}
-                </div>
-                <div className="flex flex-col gap-1">
-                  <Button size="sm" variant="outline" onClick={() => setViewing(p)}>Visualizar</Button>
-                  <Button size="sm" variant="outline" onClick={() => onEdit(p)}>Editar</Button>
-                  <Button size="sm" variant="ghost" onClick={() => onDelete(p.id)}><Trash2 className="h-4 w-4" /></Button>
-                </div>
-              </div>
-            </div>
+            <PreCadastroCard
+              key={p.id}
+              p={p}
+              matches={matchesByPC.get(p.id) ?? []}
+              onView={setViewing}
+              onEdit={onEdit}
+              onDelete={onDelete}
+              onMatch={() => setMatchTarget(p)}
+              onEditMatch={(m) => setEditingMatch(m)}
+              onDeleteMatch={async (m) => {
+                if (!confirm("Remover este match?")) return;
+                const { error } = await supabase.from("pre_cadastro_matches").delete().eq("id", m.id);
+                if (error) { toast.error(error.message); return; }
+                toast.success("Match removido");
+                loadMatches();
+              }}
+            />
           ))}
         </div>
       )}
@@ -741,6 +812,14 @@ function PreCadastrosPanel({
           )}
         </DialogContent>
       </Dialog>
+
+      <MatchDialog
+        target={matchTarget}
+        editing={editingMatch}
+        currentUserId={currentUserId}
+        onClose={() => { setMatchTarget(null); setEditingMatch(null); }}
+        onSaved={() => { setMatchTarget(null); setEditingMatch(null); loadMatches(); }}
+      />
     </div>
   );
 }
@@ -835,6 +914,478 @@ function RestrictedWordsPanel() {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+function PreCadastroCard({
+  p, matches, onView, onEdit, onDelete, onMatch, onEditMatch, onDeleteMatch,
+}: {
+  p: PreCadastro;
+  matches: PreMatchRow[];
+  onView: (p: PreCadastro) => void;
+  onEdit: (p: PreCadastro) => void;
+  onDelete: (id: string) => void;
+  onMatch: () => void;
+  onEditMatch: (m: PreMatchRow) => void;
+  onDeleteMatch: (m: PreMatchRow) => void;
+}) {
+  const hasMatch = matches.length > 0;
+  return (
+    <div className={`glass rounded-2xl p-4 shadow-soft ${hasMatch ? "ring-1 ring-pink-400/40" : ""}`}>
+      <div className="flex items-start gap-3">
+        <button
+          type="button"
+          onClick={() => onView(p)}
+          className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-muted transition hover:opacity-80"
+          aria-label="Ver detalhes"
+        >
+          {p.photo_url ? (
+            <img src={p.photo_url} alt="" className="h-full w-full object-cover" />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center bg-gradient-love text-lg text-white">
+              {(p.full_name ?? "?").charAt(0).toUpperCase()}
+            </div>
+          )}
+        </button>
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <h4 className="font-semibold">{p.full_name ?? "(sem nome)"}{p.age ? `, ${p.age}` : ""}</h4>
+            {hasMatch && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-pink-500/15 px-2 py-0.5 text-[10px] font-semibold uppercase text-pink-600 dark:text-pink-300">
+                <Heart className="h-3 w-3" /> Match
+              </span>
+            )}
+          </div>
+          <p className="text-xs text-muted-foreground">
+            {[p.sex, p.marital, p.city && p.state ? `${p.city}/${p.state}` : p.city || p.state, p.church].filter(Boolean).join(" · ")}
+          </p>
+          {p.bio && <p className="mt-2 line-clamp-2 text-sm text-foreground/80">{p.bio}</p>}
+          {p.notes && <p className="mt-1 text-xs italic text-muted-foreground">📝 {p.notes}</p>}
+        </div>
+        <div className="flex flex-col gap-1">
+          <Button size="sm" variant="outline" onClick={() => onView(p)}>Visualizar</Button>
+          <Button size="sm" variant="outline" onClick={() => onEdit(p)}>Editar</Button>
+          <Button size="sm" variant="outline" className="border-pink-400/60 text-pink-600 hover:bg-pink-500/10" onClick={onMatch}>
+            <Heart className="mr-1 h-3 w-3" /> Match
+          </Button>
+          <Button size="sm" variant="ghost" onClick={() => onDelete(p.id)}><Trash2 className="h-4 w-4" /></Button>
+        </div>
+      </div>
+      {hasMatch && (
+        <div className="mt-3 space-y-2 rounded-xl border border-pink-300/40 bg-pink-500/5 p-3">
+          {matches.map((m) => (
+            <div key={m.id} className="flex flex-wrap items-start justify-between gap-2 text-sm">
+              <div className="min-w-0 flex-1">
+                <p className="font-semibold">
+                  💕 {m.partner_full_name ?? "(par sem nome)"}
+                  {m.partner_age ? `, ${m.partner_age}` : ""}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {[m.partner_sex, m.partner_marital, m.partner_city && m.partner_state ? `${m.partner_city}/${m.partner_state}` : m.partner_city || m.partner_state, m.partner_church].filter(Boolean).join(" · ")}
+                </p>
+                {m.status && (
+                  <span className="mt-1 inline-block rounded-full bg-foreground/10 px-2 py-0.5 text-[10px] font-semibold uppercase text-foreground/80">
+                    {COUPLE_STATUS_LABEL[m.status]}
+                  </span>
+                )}
+                {m.internal_notes && (
+                  <p className="mt-1 text-xs italic text-muted-foreground">📝 {m.internal_notes}</p>
+                )}
+              </div>
+              <div className="flex gap-1">
+                <Button size="sm" variant="ghost" onClick={() => onEditMatch(m)}><Pencil1 /></Button>
+                <Button size="sm" variant="ghost" onClick={() => onDeleteMatch(m)}><Trash2 className="h-4 w-4" /></Button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Pencil1() {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+      <path d="M12 20h9" />
+      <path d="M16.5 3.5a2.121 2.121 0 113 3L7 19l-4 1 1-4L16.5 3.5z" />
+    </svg>
+  );
+}
+
+function MatchDialog({
+  target, editing, currentUserId, onClose, onSaved,
+}: {
+  target: PreCadastro | null;
+  editing: PreMatchRow | null;
+  currentUserId: string | null;
+  onClose: () => void;
+  onSaved: () => void;
+}) {
+  const open = !!target || !!editing;
+  const [mode, setMode] = useState<"new" | "existing">("new");
+  const [draft, setDraft] = useState<Partial<PreMatchRow>>({});
+  const [saving, setSaving] = useState(false);
+  const [search, setSearch] = useState("");
+  const [results, setResults] = useState<Array<{ kind: "pc" | "user"; id: string; name: string; age: number | null; sex: string | null; city: string | null; state: string | null; church: string | null; marital: string | null; height_cm: number | null; }>>([]);
+
+  // Determinar sexo oposto baseado no target
+  const targetSex = target?.sex ?? null;
+  const oppositeSex = targetSex === "masculino" ? "feminino" : targetSex === "feminino" ? "masculino" : null;
+
+  useEffect(() => {
+    if (!open) return;
+    if (editing) {
+      setDraft(editing);
+      setMode(editing.partner_pre_cadastro_id || editing.partner_user_id ? "existing" : "new");
+    } else {
+      setDraft({ partner_sex: oppositeSex });
+      setMode("new");
+      setSearch("");
+      setResults([]);
+    }
+  }, [open, editing, oppositeSex]);
+
+  const set = <K extends keyof PreMatchRow>(k: K, v: PreMatchRow[K] | null) => setDraft((d) => ({ ...d, [k]: v }));
+  const numOrNull = (s: string) => (s.trim() === "" ? null : Number(s));
+
+  async function runSearch(q: string) {
+    setSearch(q);
+    const term = q.trim();
+    if (term.length < 2) { setResults([]); return; }
+    const [{ data: pcs }, { data: profs }] = await Promise.all([
+      supabase
+        .from("pre_cadastros")
+        .select("id, full_name, age, sex, marital, city, state, church, height_cm, tiktok_user")
+        .ilike("full_name", `%${term}%`)
+        .limit(8),
+      supabase
+        .from("profiles")
+        .select("id, full_name, age, sex, marital, city, state, church, height_cm")
+        .eq("status", "approved")
+        .ilike("full_name", `%${term}%`)
+        .limit(8),
+    ]);
+    const a = (pcs ?? [])
+      .filter((r) => r.id !== target?.id)
+      .map((r) => ({ kind: "pc" as const, id: r.id, name: r.full_name ?? "(sem nome)", age: r.age, sex: r.sex, city: r.city, state: r.state, church: r.church, marital: r.marital, height_cm: r.height_cm }));
+    const b = (profs ?? []).map((r) => ({ kind: "user" as const, id: r.id, name: r.full_name, age: r.age, sex: r.sex, city: r.city, state: r.state, church: r.church, marital: r.marital, height_cm: r.height_cm }));
+    setResults([...a, ...b]);
+  }
+
+  function pickResult(r: { kind: "pc" | "user"; id: string; name: string; age: number | null; sex: string | null; city: string | null; state: string | null; church: string | null; marital: string | null; height_cm: number | null }) {
+    setDraft((d) => ({
+      ...d,
+      partner_pre_cadastro_id: r.kind === "pc" ? r.id : null,
+      partner_user_id: r.kind === "user" ? r.id : null,
+      partner_full_name: r.name,
+      partner_age: r.age,
+      partner_sex: r.sex,
+      partner_city: r.city,
+      partner_state: r.state,
+      partner_church: r.church,
+      partner_marital: r.marital,
+      partner_height_cm: r.height_cm,
+    }));
+  }
+
+  async function save() {
+    if (!currentUserId) return;
+    const pcId = editing?.pre_cadastro_id ?? target?.id;
+    if (!pcId) return;
+    setSaving(true);
+    if (editing) {
+      const { error } = await supabase
+        .from("pre_cadastro_matches")
+        .update({
+          partner_pre_cadastro_id: draft.partner_pre_cadastro_id ?? null,
+          partner_user_id: draft.partner_user_id ?? null,
+          partner_full_name: draft.partner_full_name ?? null,
+          partner_username: draft.partner_username ?? null,
+          partner_age: draft.partner_age ?? null,
+          partner_height_cm: draft.partner_height_cm ?? null,
+          partner_sex: draft.partner_sex ?? null,
+          partner_marital: draft.partner_marital ?? null,
+          partner_city: draft.partner_city ?? null,
+          partner_state: draft.partner_state ?? null,
+          partner_church: draft.partner_church ?? null,
+          partner_has_children: draft.partner_has_children ?? null,
+          partner_children_count: draft.partner_children_count ?? null,
+          internal_notes: draft.internal_notes ?? null,
+          status: draft.status ?? null,
+        })
+        .eq("id", editing.id);
+      setSaving(false);
+      if (error) { toast.error(error.message); return; }
+      toast.success("Match atualizado");
+    } else {
+      const { error } = await supabase
+        .from("pre_cadastro_matches")
+        .insert({
+          pre_cadastro_id: pcId,
+          created_by: currentUserId,
+          partner_pre_cadastro_id: draft.partner_pre_cadastro_id ?? null,
+          partner_user_id: draft.partner_user_id ?? null,
+          partner_full_name: draft.partner_full_name ?? null,
+          partner_username: draft.partner_username ?? null,
+          partner_age: draft.partner_age ?? null,
+          partner_height_cm: draft.partner_height_cm ?? null,
+          partner_sex: draft.partner_sex ?? null,
+          partner_marital: draft.partner_marital ?? null,
+          partner_city: draft.partner_city ?? null,
+          partner_state: draft.partner_state ?? null,
+          partner_church: draft.partner_church ?? null,
+          partner_has_children: draft.partner_has_children ?? null,
+          partner_children_count: draft.partner_children_count ?? null,
+          internal_notes: draft.internal_notes ?? null,
+          status: draft.status ?? null,
+        });
+      setSaving(false);
+      if (error) { toast.error(error.message); return; }
+      toast.success("Match criado");
+    }
+    onSaved();
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={(o) => { if (!o) onClose(); }}>
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>{editing ? "Editar Match" : "Novo Match"}</DialogTitle>
+          <DialogDescription>
+            {target ? `Para ${target.full_name ?? "(sem nome)"}` : editing ? "Edição do match existente" : ""}
+            {oppositeSex && !editing ? ` · sexo do par será ${oppositeSex}` : ""}
+          </DialogDescription>
+        </DialogHeader>
+
+        {!editing && (
+          <div className="flex gap-2">
+            <Button size="sm" variant={mode === "new" ? "default" : "outline"} onClick={() => setMode("new")}>
+              <UserPlus className="mr-1 h-4 w-4" /> Novo Match (ficha)
+            </Button>
+            <Button size="sm" variant={mode === "existing" ? "default" : "outline"} onClick={() => setMode("existing")}>
+              <Search className="mr-1 h-4 w-4" /> Usuário Existente
+            </Button>
+          </div>
+        )}
+
+        {mode === "existing" && !editing && (
+          <div className="space-y-2">
+            <Input placeholder="Buscar pelo nome..." value={search} onChange={(e) => runSearch(e.target.value)} />
+            {results.length > 0 && (
+              <div className="max-h-48 overflow-y-auto rounded-xl border border-border">
+                {results.map((r) => (
+                  <button
+                    key={`${r.kind}-${r.id}`}
+                    type="button"
+                    onClick={() => pickResult(r)}
+                    className={`flex w-full items-center justify-between gap-2 border-b border-border p-2 text-left text-sm hover:bg-accent ${
+                      (r.kind === "pc" && draft.partner_pre_cadastro_id === r.id) || (r.kind === "user" && draft.partner_user_id === r.id) ? "bg-primary/10" : ""
+                    }`}
+                  >
+                    <span>
+                      <span className="font-medium">{r.name}</span>
+                      <span className="ml-2 text-xs text-muted-foreground">{r.age ? `${r.age} anos · ` : ""}{r.city}/{r.state}</span>
+                    </span>
+                    <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] uppercase text-muted-foreground">
+                      {r.kind === "pc" ? "Ficha" : "Usuário"}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div className="space-y-1 sm:col-span-2"><Label>Nome</Label><Input value={draft.partner_full_name ?? ""} onChange={(e) => set("partner_full_name", e.target.value || null)} /></div>
+          <div className="space-y-1 sm:col-span-2"><Label>Usuário</Label><Input value={draft.partner_username ?? ""} onChange={(e) => set("partner_username", e.target.value || null)} placeholder="@usuario" /></div>
+          <div className="space-y-1"><Label>Idade</Label><Input type="number" value={draft.partner_age ?? ""} onChange={(e) => set("partner_age", numOrNull(e.target.value))} /></div>
+          <div className="space-y-1"><Label>Altura (cm)</Label><Input type="number" value={draft.partner_height_cm ?? ""} onChange={(e) => set("partner_height_cm", numOrNull(e.target.value))} /></div>
+          <div className="space-y-1">
+            <Label>Sexo</Label>
+            <Select value={draft.partner_sex ?? ""} onValueChange={(v) => set("partner_sex", v || null)}>
+              <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="masculino">Masculino</SelectItem>
+                <SelectItem value="feminino">Feminino</SelectItem>
+              </SelectContent>
+            </Select>
+            {!editing && oppositeSex && draft.partner_sex && draft.partner_sex !== oppositeSex && (
+              <p className="text-[11px] text-amber-600">Atenção: sexo cadastrado não é o oposto do principal.</p>
+            )}
+          </div>
+          <div className="space-y-1">
+            <Label>Estado civil</Label>
+            <Select value={draft.partner_marital ?? ""} onValueChange={(v) => set("partner_marital", v || null)}>
+              <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="solteiro">Solteiro</SelectItem>
+                <SelectItem value="divorciado">Divorciado</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-1"><Label>Cidade</Label><Input value={draft.partner_city ?? ""} onChange={(e) => set("partner_city", e.target.value || null)} /></div>
+          <div className="space-y-1"><Label>Estado (UF)</Label><Input value={draft.partner_state ?? ""} onChange={(e) => set("partner_state", e.target.value || null)} maxLength={2} /></div>
+          <div className="space-y-1 sm:col-span-2"><Label>Igreja</Label><Input value={draft.partner_church ?? ""} onChange={(e) => set("partner_church", e.target.value || null)} /></div>
+          <div className="rounded-xl border border-border/50 bg-muted/30 p-3 sm:col-span-2 space-y-3">
+            <div className="flex items-center justify-between">
+              <Label className="text-sm">Tem filhos?</Label>
+              <Switch
+                checked={draft.partner_has_children ?? false}
+                onCheckedChange={(v) => setDraft((d) => ({ ...d, partner_has_children: v, partner_children_count: v ? d.partner_children_count ?? null : null }))}
+              />
+            </div>
+            {draft.partner_has_children && (
+              <div className="space-y-1">
+                <Label className="text-xs">Quantidade</Label>
+                <Input type="number" min={1} value={draft.partner_children_count ?? ""} onChange={(e) => set("partner_children_count", numOrNull(e.target.value))} />
+              </div>
+            )}
+          </div>
+          <div className="space-y-1 sm:col-span-2">
+            <Label>Status do casal</Label>
+            <Select value={draft.status ?? ""} onValueChange={(v) => set("status", (v || null) as CoupleStatus | null)}>
+              <SelectTrigger><SelectValue placeholder="(sem status)" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="aceitaram_conversar">Aceitaram conversar</SelectItem>
+                <SelectItem value="namorando">Namorando</SelectItem>
+                <SelectItem value="casamento_marcado">Casamento marcado</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-1 sm:col-span-2"><Label>Nota interna</Label><Textarea value={draft.internal_notes ?? ""} onChange={(e) => set("internal_notes", e.target.value || null)} /></div>
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>Cancelar</Button>
+          <Button onClick={save} disabled={saving}>{editing ? "Salvar" : "Criar Match"}</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function FlagsPanel({ isSuperAdmin, currentUserId }: { isSuperAdmin: boolean; currentUserId: string | null }) {
+  type FlagRow = {
+    id: string;
+    message_id: string;
+    flagged_by: string;
+    reason: string;
+    created_at: string;
+  };
+  const [flags, setFlags] = useState<FlagRow[]>([]);
+  const [messages, setMessages] = useState<Record<string, { content: string; sender_id: string; created_at: string }>>({});
+  const [profs, setProfs] = useState<Record<string, { full_name: string | null }>>({});
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editText, setEditText] = useState("");
+
+  async function load() {
+    const { data, error } = await supabase
+      .from("message_flags")
+      .select("id, message_id, flagged_by, reason, created_at")
+      .order("created_at", { ascending: false });
+    if (error) { toast.error(error.message); return; }
+    const list = (data ?? []) as FlagRow[];
+    setFlags(list);
+    const msgIds = Array.from(new Set(list.map((f) => f.message_id)));
+    const { data: msgs } = msgIds.length
+      ? await supabase.from("global_messages").select("id, content, sender_id, created_at").in("id", msgIds)
+      : { data: [] as Array<{ id: string; content: string; sender_id: string; created_at: string }> };
+    const mMap: Record<string, { content: string; sender_id: string; created_at: string }> = {};
+    for (const m of msgs ?? []) mMap[m.id] = { content: m.content, sender_id: m.sender_id, created_at: m.created_at };
+    setMessages(mMap);
+    const userIds = Array.from(new Set([
+      ...list.map((f) => f.flagged_by),
+      ...Object.values(mMap).map((m) => m.sender_id),
+    ]));
+    const { data: ps } = userIds.length
+      ? await supabase.from("profiles").select("id, full_name").in("id", userIds)
+      : { data: [] as Array<{ id: string; full_name: string | null }> };
+    const pMap: Record<string, { full_name: string | null }> = {};
+    for (const p of ps ?? []) pMap[p.id] = { full_name: p.full_name };
+    setProfs(pMap);
+  }
+
+  useEffect(() => { load(); }, []);
+
+  async function deleteFlag(id: string) {
+    if (!confirm("Excluir esta sinalização?")) return;
+    const { error } = await supabase.from("message_flags").delete().eq("id", id);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Sinalização excluída");
+    load();
+  }
+
+  async function saveEdit(id: string) {
+    const reason = editText.trim();
+    if (!reason) return;
+    const { error } = await supabase.from("message_flags").update({ reason }).eq("id", id);
+    if (error) { toast.error(error.message); return; }
+    setEditingId(null);
+    setEditText("");
+    toast.success("Atualizada");
+    load();
+  }
+
+  if (flags.length === 0) {
+    return <div className="glass rounded-2xl p-10 text-center text-muted-foreground shadow-soft">Nenhuma sinalização.</div>;
+  }
+
+  return (
+    <div className="grid gap-3">
+      {flags.map((f) => {
+        const msg = messages[f.message_id];
+        const senderName = msg ? (profs[msg.sender_id]?.full_name ?? "Alguém") : "(mensagem removida)";
+        const flagger = profs[f.flagged_by]?.full_name ?? "Alguém";
+        const isMine = f.flagged_by === currentUserId;
+        const canDelete = isSuperAdmin || isMine;
+        return (
+          <div key={f.id} className="glass rounded-2xl p-4 shadow-soft">
+            <div className="flex flex-wrap items-start justify-between gap-2">
+              <div className="min-w-0 flex-1">
+                <p className="text-xs text-muted-foreground">
+                  Sinalizada por <strong className="text-foreground">{flagger}</strong> · {new Date(f.created_at).toLocaleString("pt-BR")}
+                </p>
+                <div className="mt-2 rounded-lg border border-border bg-muted/40 p-3">
+                  <p className="text-xs font-semibold text-muted-foreground">Mensagem de {senderName}</p>
+                  <p className="mt-1 whitespace-pre-wrap break-words text-sm">{msg?.content ?? "(mensagem indisponível)"}</p>
+                </div>
+                <div className="mt-2 rounded-lg border border-amber-400/40 bg-amber-500/5 p-3">
+                  <p className="text-xs font-semibold text-amber-700 dark:text-amber-300">Motivo</p>
+                  {editingId === f.id ? (
+                    <div className="mt-1 space-y-2">
+                      <Textarea value={editText} onChange={(e) => setEditText(e.target.value)} rows={3} maxLength={500} />
+                      <div className="flex gap-2">
+                        <Button size="sm" onClick={() => saveEdit(f.id)}>Salvar</Button>
+                        <Button size="sm" variant="outline" onClick={() => { setEditingId(null); setEditText(""); }}>Cancelar</Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="mt-1 whitespace-pre-wrap break-words text-sm">{f.reason}</p>
+                  )}
+                </div>
+              </div>
+              <div className="flex flex-col gap-2">
+                {isSuperAdmin && msg && (
+                  <Button asChild size="sm" variant="outline">
+                    <Link to="/pretendentes/$id" params={{ id: msg.sender_id }}>Ver perfil</Link>
+                  </Button>
+                )}
+                {isMine && editingId !== f.id && (
+                  <Button size="sm" variant="outline" onClick={() => { setEditingId(f.id); setEditText(f.reason); }}>Editar</Button>
+                )}
+                {canDelete && (
+                  <Button size="sm" variant="ghost" onClick={() => deleteFlag(f.id)}>
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }
