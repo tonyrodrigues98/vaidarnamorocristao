@@ -279,6 +279,7 @@ function Comunidade() {
                   ? (profiles[replied.sender_id]?.full_name?.split(" ")[0] ?? "Alguém")
                   : "";
                 const isFlash = highlightId === m.id;
+                const senderIsAdmin = adminIds.has(m.sender_id);
                 return (
                   <div
                     key={m.id}
@@ -286,7 +287,7 @@ function Comunidade() {
                     className={`group relative flex scroll-mt-24 items-start gap-3 rounded-xl transition-colors duration-500 ${isFlash ? "bg-primary/10" : ""}`}
                   >
                     {mine ? (
-                      <div className="h-9 w-9 shrink-0 overflow-hidden rounded-full bg-muted">
+                      <div className={`h-9 w-9 shrink-0 overflow-hidden rounded-full bg-muted ${senderIsAdmin ? "ring-2 ring-primary ring-offset-2 ring-offset-background" : ""}`}>
                         {p?.photo_url ? (
                           <img src={p.photo_url} alt="" className="h-full w-full object-cover" />
                         ) : (
@@ -299,7 +300,7 @@ function Comunidade() {
                       <Link
                         to="/pretendentes/$id"
                         params={{ id: m.sender_id }}
-                        className="h-9 w-9 shrink-0 overflow-hidden rounded-full bg-muted ring-0 transition hover:ring-2 hover:ring-primary/40"
+                        className={`h-9 w-9 shrink-0 overflow-hidden rounded-full bg-muted transition hover:ring-2 hover:ring-primary/40 ${senderIsAdmin ? "ring-2 ring-primary ring-offset-2 ring-offset-background" : "ring-0"}`}
                         aria-label={`Ver perfil de ${name}`}
                       >
                         {p?.photo_url ? (
@@ -315,6 +316,7 @@ function Comunidade() {
                       enableLongPress={!!enableLongPress}
                       onLongPress={() => setActionsOpenId(m.id)}
                       highlighted={showActions || isFlash}
+                      isAdmin={senderIsAdmin}
                     >
                       <div className="flex items-baseline gap-2">
                         {mine ? (
@@ -478,11 +480,13 @@ function BubbleWrap({
   enableLongPress,
   onLongPress,
   highlighted,
+  isAdmin,
   children,
 }: {
   enableLongPress: boolean;
   onLongPress: () => void;
   highlighted: boolean;
+  isAdmin?: boolean;
   children: React.ReactNode;
 }) {
   const { pressing, handlers } = useLongPress(onLongPress, 450);
@@ -492,7 +496,9 @@ function BubbleWrap({
       {...bound}
       className={`flex-1 min-w-0 rounded-xl transition-all duration-200 ${
         enableLongPress ? "select-none md:select-text" : ""
-      } ${pressing ? "scale-[0.98] bg-primary/5 ring-2 ring-primary/30 px-2 -mx-2" : ""} ${
+      } ${isAdmin ? "border-l-2 border-primary bg-primary/5 pl-2" : ""} ${
+        pressing ? "scale-[0.98] bg-primary/5 ring-2 ring-primary/30 px-2 -mx-2" : ""
+      } ${
         highlighted ? "bg-primary/10 ring-2 ring-primary/50 px-2 -mx-2" : ""
       }`}
       style={enableLongPress ? { WebkitUserSelect: "none", WebkitTouchCallout: "none" } : undefined}
