@@ -148,6 +148,18 @@
     font-weight: 700;
   }
   ::selection { background: var(--petal); color: var(--rose); }
+
+  /* Prevent any element from forcing horizontal page scroll on mobile.
+     Long URLs / words break instead of stretching the layout, and media
+     never exceeds its container's width. */
+  img, video, canvas, svg, iframe {
+    max-width: 100%;
+    height: auto;
+  }
+  pre, code {
+    overflow-x: auto;
+    max-width: 100%;
+  }
 }
 
 @layer utilities {
