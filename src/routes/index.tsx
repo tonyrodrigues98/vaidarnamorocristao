@@ -8,7 +8,7 @@ export const Route = createFileRoute("/")({
   component: Landing,
   head: () => ({
     meta: [
-      { title: "Encontros — Onde a fé encontra o amor" },
+      { title: "VaiDarNamoro — Onde a fé encontra o amor" },
       { name: "description", content: "A plataforma cristã de relacionamentos sérios. Conheça pretendentes que vivem e compartilham a sua fé." },
     ],
   }),
@@ -125,7 +125,7 @@ function Landing() {
         </section>
 
         <footer className="border-t border-border py-10 text-center text-xs text-muted-foreground">
-          © {new Date().getFullYear()} Encontros · Feito com fé e cuidado.
+          © {new Date().getFullYear()} VaiDarNamoro · Feito com fé e cuidado.
         </footer>
       </main>
     </div>
