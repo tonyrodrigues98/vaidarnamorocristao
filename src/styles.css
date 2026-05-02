@@ -132,15 +132,12 @@
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
-    overflow-x: hidden;
   }
   body {
     background: var(--background);
     color: var(--color-foreground);
     font-feature-settings: "ss01";
     letter-spacing: -0.01em;
-    overflow-x: hidden;
-    max-width: 100vw;
   }
   h1, h2, h3, h4 {
     font-family: var(--font-display);
@@ -148,40 +145,6 @@
     font-weight: 700;
   }
   ::selection { background: var(--petal); color: var(--rose); }
-
-  /* Prevent any element from forcing horizontal page scroll on mobile.
-     Long URLs / words break instead of stretching the layout, and media
-     never exceeds its container's width. */
-  img, video, canvas, svg, iframe {
-    max-width: 100%;
-    height: auto;
-  }
-  pre, code {
-    overflow-x: auto;
-    max-width: 100%;
-  }
-
-  /* Force long words and URLs to wrap so nothing overflows the viewport.
-     Applies to all text-bearing elements; opt-out via `.no-wrap-anywhere`. */
-  p, span, a, li, h1, h2, h3, h4, h5, h6,
-  label, button, dt, dd, td, th, blockquote, figcaption, summary {
-    overflow-wrap: anywhere;
-    word-break: break-word;
-  }
-  a {
-    word-break: break-word;
-  }
-}
-
-@layer utilities {
-  .break-anywhere {
-    overflow-wrap: anywhere;
-    word-break: break-word;
-  }
-  .no-wrap-anywhere {
-    overflow-wrap: normal;
-    word-break: normal;
-  }
 }
 
 @layer utilities {
