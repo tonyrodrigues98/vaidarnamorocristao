@@ -346,6 +346,15 @@ function Comunidade() {
                             <Trash2 className="h-4 w-4" /> Excluir
                           </button>
                         )}
+                        {isAdmin && (
+                          <button
+                            onClick={() => { setActionsOpenId(null); togglePin(m); }}
+                            className="flex items-center gap-1 rounded-full px-2 py-1 text-xs text-foreground hover:bg-accent"
+                            aria-label={m.pinned_at ? "Desafixar" : "Fixar"}
+                          >
+                            {m.pinned_at ? <><PinOff className="h-4 w-4" /> Desafixar</> : <><Pin className="h-4 w-4" /> Fixar</>}
+                          </button>
+                        )}
                       </div>
                     )}
                   </div>
