@@ -17,7 +17,7 @@ type Post = {
   kind: "news" | "devotional";
 };
 
-export const Route = createFileRoute("/noticias")({ component: Noticias });
+export const Route = createFileRoute("/noticias/")({ component: Noticias });
 
 function Noticias() {
   const { user, loading } = useAuth();
