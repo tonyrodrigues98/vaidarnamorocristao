@@ -238,6 +238,36 @@ export type Database = {
         }
         Relationships: []
       }
+      profile_views: {
+        Row: {
+          created_at: string
+          id: string
+          viewed_id: string
+          viewer_age: number | null
+          viewer_city: string | null
+          viewer_id: string
+          viewer_state: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          viewed_id: string
+          viewer_age?: number | null
+          viewer_city?: string | null
+          viewer_id: string
+          viewer_state?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          viewed_id?: string
+          viewer_age?: number | null
+          viewer_city?: string | null
+          viewer_id?: string
+          viewer_state?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           age: number
