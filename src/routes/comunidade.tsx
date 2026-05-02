@@ -279,7 +279,7 @@ function Comunidade() {
                 .map((m) => {
                 const p = profiles[m.sender_id];
                 const mine = user && m.sender_id === user.id;
-                const canDelete = mine || isAdmin;
+                const canDelete = mine || canModerateMessages;
                 const canEdit = mine;
                 const isEditing = editingId === m.id;
                 const name = p?.full_name?.split(" ")[0] ?? "Alguém";
