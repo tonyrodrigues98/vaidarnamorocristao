@@ -124,7 +124,7 @@ export function Header() {
           <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-love shadow-glow transition-transform group-hover:scale-105">
             <Heart className="h-4 w-4 text-white" fill="white" />
           </div>
-          <span className="text-lg font-bold tracking-tight">
+          <span className="tracking-tight font-extrabold text-2xl">
             VaiDar<span className="text-gradient">Namoro</span>
           </span>
         </Link>
