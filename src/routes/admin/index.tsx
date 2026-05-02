@@ -483,6 +483,17 @@ function PreCadastrosPanel({
   const numOrNull = (s: string) => (s.trim() === "" ? null : Number(s));
   const [uploading, setUploading] = useState(false);
   const [viewing, setViewing] = useState<PreCadastro | null>(null);
+  const [search, setSearch] = useState("");
+
+  const filteredItems = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return items;
+    return items.filter((p) => {
+      const name = (p.full_name ?? "").toLowerCase();
+      const tk = ((p as { tiktok_user?: string | null }).tiktok_user ?? "").toLowerCase();
+      return name.includes(q) || tk.includes(q);
+    });
+  }, [items, search]);
 
   async function handlePhotoUpload(file: File) {
     setUploading(true);
@@ -569,11 +580,27 @@ function PreCadastrosPanel({
         </div>
       </div>
 
+      <div className="glass rounded-2xl p-4 shadow-soft">
+        <Label htmlFor="pc-search" className="text-xs text-muted-foreground">Buscar</Label>
+        <Input
+          id="pc-search"
+          className="mt-1"
+          placeholder="Pesquisar por nome ou usuário do TikTok..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+        <p className="mt-2 text-xs text-muted-foreground">
+          {filteredItems.length} de {items.length} pré-cadastro{items.length === 1 ? "" : "s"}
+        </p>
+      </div>
+
       {items.length === 0 ? (
         <div className="glass rounded-2xl p-10 text-center text-muted-foreground shadow-soft">Nenhum pré-cadastro ainda.</div>
+      ) : filteredItems.length === 0 ? (
+        <div className="glass rounded-2xl p-10 text-center text-muted-foreground shadow-soft">Nenhum resultado para "{search}".</div>
       ) : (
         <div className="grid gap-3">
-          {items.map((p) => (
+          {filteredItems.map((p) => (
             <div key={p.id} className="glass rounded-2xl p-4 shadow-soft">
               <div className="flex items-start gap-3">
                 <button
