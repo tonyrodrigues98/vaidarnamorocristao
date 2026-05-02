@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
+import { markSeen } from "@/lib/lastSeen";
 import { Header } from "@/components/layout/Header";
 import { Newspaper, BookHeart } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -36,6 +37,7 @@ function Noticias() {
       setPosts((data ?? []) as Post[]);
     };
     load();
+    markSeen(user.id, "news");
     const ch = supabase
       .channel("daily-posts")
       .on("postgres_changes", { event: "*", schema: "public", table: "daily_posts" }, load)
