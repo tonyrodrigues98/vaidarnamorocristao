@@ -196,6 +196,34 @@ function Comunidade() {
             />
           )}
           <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto p-4 sm:p-6" style={{ maxHeight: "calc(100vh - 280px)" }}>
+            {messages.some((m) => m.pinned_at) && (
+              <div className="mb-2 space-y-2 rounded-2xl border border-primary/20 bg-primary/5 p-3">
+                <div className="flex items-center gap-2 text-xs font-semibold text-primary">
+                  <Pin className="h-3.5 w-3.5" /> Mensagens fixadas
+                </div>
+                {messages
+                  .filter((m) => m.pinned_at)
+                  .sort((a, b) => (b.pinned_at ?? "").localeCompare(a.pinned_at ?? ""))
+                  .map((m) => {
+                    const p = profiles[m.sender_id];
+                    const name = p?.full_name?.split(" ")[0] ?? "Alguém";
+                    return (
+                      <button
+                        key={`pin-${m.id}`}
+                        type="button"
+                        onClick={() => jumpToMessage(m.id)}
+                        className="flex w-full items-stretch gap-2 rounded-lg bg-background/60 px-2 py-1.5 text-left text-xs hover:bg-background"
+                      >
+                        <span className="w-0.5 shrink-0 rounded bg-primary" />
+                        <span className="min-w-0 flex-1">
+                          <span className="block font-semibold text-foreground">{name}</span>
+                          <span className="line-clamp-2 text-muted-foreground">{m.content}</span>
+                        </span>
+                      </button>
+                    );
+                  })}
+              </div>
+            )}
             {messages.length === 0 ? (
               <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
                 Nenhuma mensagem ainda. Seja o primeiro!
