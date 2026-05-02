@@ -5,10 +5,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import {
   Heart, LogOut, Shield, MessageCircle, Sparkles, Menu, X,
-  User as UserIcon, Users, Newspaper, Globe, Ban, Share2, Gem,
+  User as UserIcon, Users, Newspaper, Globe, Ban, Share2, Gem, Sun, Moon,
 } from "lucide-react";
 import { toast } from "sonner";
 import { getLastSeen } from "@/lib/lastSeen";
+import { useTheme } from "@/lib/theme";
 
 async function shareSite() {
   const url = typeof window !== "undefined" ? window.location.origin : "";
@@ -38,6 +39,7 @@ async function shareSite() {
 export function Header() {
   const { user, isAdmin, signOut } = useAuth();
   const navigate = useNavigate();
+  const { theme, toggle: toggleTheme } = useTheme();
   const [interestCount, setInterestCount] = useState(0);
   const [unreadCount, setUnreadCount] = useState(0);
   const [newsCount, setNewsCount] = useState(0);
@@ -161,6 +163,9 @@ export function Header() {
               <Button variant="ghost" size="sm" asChild>
                 <Link to="/bloqueados"><Ban className="mr-1 h-4 w-4" /> Bloqueados</Link>
               </Button>
+              <Button variant="ghost" size="icon" onClick={toggleTheme} aria-label={theme === "dark" ? "Modo claro" : "Modo escuro"}>
+                {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+              </Button>
               {isAdmin && (
                 <Button variant="ghost" size="sm" asChild>
                   <Link to="/admin"><Shield className="mr-1 h-4 w-4" /> Admin</Link>
@@ -176,6 +181,9 @@ export function Header() {
               <Button size="sm" asChild className="rounded-full px-5"><Link to="/auth/signup">Criar conta</Link></Button>
               <Button variant="ghost" size="sm" onClick={shareSite}>
                 <Share2 className="mr-1 h-4 w-4" /> Compartilhar
+              </Button>
+              <Button variant="ghost" size="icon" onClick={toggleTheme} aria-label={theme === "dark" ? "Modo claro" : "Modo escuro"}>
+                {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
               </Button>
             </>
           )}
@@ -232,6 +240,12 @@ export function Header() {
                 <MobileItem to="/bloqueados" onClick={close}>
                   <span className="flex items-center gap-2"><Ban className="h-4 w-4" /> Bloqueados</span>
                 </MobileItem>
+                <button
+                  onClick={() => { toggleTheme(); }}
+                  className="flex items-center gap-2 rounded-xl px-3 py-3 text-left text-sm font-medium hover:bg-muted"
+                >
+                  {theme === "dark" ? <><Sun className="h-4 w-4" /> Modo claro</> : <><Moon className="h-4 w-4" /> Modo escuro</>}
+                </button>
                 {isAdmin && (
                   <MobileItem to="/admin" onClick={close}>
                     <span className="flex items-center gap-2"><Shield className="h-4 w-4" /> Admin</span>
@@ -253,6 +267,12 @@ export function Header() {
                   className="flex items-center gap-2 rounded-xl px-3 py-3 text-left text-sm font-medium hover:bg-muted"
                 >
                   <Share2 className="h-4 w-4" /> Compartilhar
+                </button>
+                <button
+                  onClick={toggleTheme}
+                  className="flex items-center gap-2 rounded-xl px-3 py-3 text-left text-sm font-medium hover:bg-muted"
+                >
+                  {theme === "dark" ? <><Sun className="h-4 w-4" /> Modo claro</> : <><Moon className="h-4 w-4" /> Modo escuro</>}
                 </button>
               </>
             )}
