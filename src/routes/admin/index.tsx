@@ -263,6 +263,7 @@ function Admin() {
             {availableTabs.includes("users") && <TabsTrigger value="users"><UsersIcon className="mr-1 h-3 w-3" /> Usuários</TabsTrigger>}
             {availableTabs.includes("pre_cadastros") && <TabsTrigger value="pre_cadastros"><ClipboardList className="mr-1 h-3 w-3" /> Pré-cadastros</TabsTrigger>}
             {availableTabs.includes("restricted_words") && <TabsTrigger value="restricted_words"><ShieldX className="mr-1 h-3 w-3" /> Palavras Restritas</TabsTrigger>}
+            {availableTabs.includes("flags") && <TabsTrigger value="flags"><MessageSquareWarning className="mr-1 h-3 w-3" /> Sinalizações</TabsTrigger>}
           </TabsList>
 
           <TabsContent value={tab} className="mt-6">
@@ -274,6 +275,8 @@ function Admin() {
               />
             ) : tab === "restricted_words" ? (
               <RestrictedWordsPanel />
+            ) : tab === "flags" ? (
+              <FlagsPanel isSuperAdmin={isSuperAdmin} currentUserId={user?.id ?? null} />
             ) : tab === "pre_cadastros" ? (
               <PreCadastrosPanel
                 items={preCads}
@@ -285,6 +288,8 @@ function Admin() {
                 onSave={savePreCadastro}
                 onDelete={deletePreCadastro}
                 busy={pcBusy}
+                currentUserId={user?.id ?? null}
+                isSuperAdmin={isSuperAdmin}
               />
             ) : tab === "posts" ? (
               <div className="space-y-6">
