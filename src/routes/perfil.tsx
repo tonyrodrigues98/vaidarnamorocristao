@@ -129,14 +129,15 @@ function PerfilPage() {
     if (!user || !isStaff) return;
     const prev = localPublic;
     setLocalPublic(next);
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from("user_roles")
       .update({ public_listing: next })
       .eq("user_id", user.id)
-      .eq("role", role);
-    if (error) {
+      .eq("role", role)
+      .select("public_listing");
+    if (error || !data || data.length === 0) {
       setLocalPublic(prev);
-      toast.error("Não foi possível salvar");
+      toast.error(error?.message ?? "Não foi possível salvar a preferência");
       return;
     }
     toast.success(next ? "Aparecendo em Pretendentes" : "Oculto de Pretendentes");
