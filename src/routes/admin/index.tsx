@@ -1,36 +1,68 @@
 import { createFileRoute, Navigate, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Check, X, Ban, ShieldAlert, Flag, Newspaper, Trash2 } from "lucide-react";
+import { Check, X, Ban, ShieldAlert, Flag, Newspaper, Trash2, Users as UsersIcon, ClipboardList, MessageSquareWarning } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 import type { Database } from "@/integrations/supabase/types";
+import { ROLE_CONFIG, ROLE_PRIORITY, type AppRole } from "@/lib/roles";
+import { RoleBadge } from "@/components/RoleBadge";
 
 type Row = Database["public"]["Tables"]["profiles"]["Row"];
 type ProfileUpdate = Database["public"]["Tables"]["profiles"]["Update"];
 type Report = Database["public"]["Tables"]["reports"]["Row"];
 type DailyPost = { id: string; title: string; content: string; published: boolean; published_at: string; kind: "news" | "devotional" };
+type PreCadastro = Database["public"]["Tables"]["pre_cadastros"]["Row"];
+type AdminUserRow = Row & { primaryRole: AppRole };
 
 export const Route = createFileRoute("/admin/")({ component: Admin });
 
 function Admin() {
-  const { user, isAdmin, loading } = useAuth();
+  const { user, isAdmin, role, loading } = useAuth();
+  const isSuperAdmin = role === "super_admin";
+  const isApresentador = role === "apresentador";
+  const isModerador = role === "moderador";
+  const canSeeAdminPanel = isAdmin || isApresentador || isModerador;
+
+  type TabKey = "pending" | "approved" | "rejected" | "banned" | "reports" | "posts" | "users" | "pre_cadastros";
+
+  const availableTabs = useMemo<TabKey[]>(() => {
+    if (isSuperAdmin) return ["pending","approved","rejected","banned","reports","posts","users","pre_cadastros"];
+    if (isAdmin) return ["pending","approved","rejected","banned","reports","posts"];
+    if (isApresentador) return ["pre_cadastros"];
+    return [];
+  }, [isAdmin, isSuperAdmin, isApresentador]);
+
   const [rows, setRows] = useState<Row[]>([]);
-  const [tab, setTab] = useState<"pending" | "approved" | "rejected" | "banned" | "reports" | "posts">("pending");
+  const [tab, setTab] = useState<TabKey>("pending");
+
+  useEffect(() => {
+    if (availableTabs.length > 0 && !availableTabs.includes(tab)) {
+      setTab(availableTabs[0]);
+    }
+  }, [availableTabs, tab]);
+
   const [busy, setBusy] = useState<string | null>(null);
   const [reports, setReports] = useState<Array<Report & { reporter?: { full_name: string | null }; reported?: { full_name: string | null; id: string } }>>([]);
   const [posts, setPosts] = useState<DailyPost[]>([]);
+  const [users, setUsers] = useState<AdminUserRow[]>([]);
+  const [preCads, setPreCads] = useState<PreCadastro[]>([]);
+  const [editingPC, setEditingPC] = useState<PreCadastro | null>(null);
+  const [pcDraft, setPcDraft] = useState<Partial<PreCadastro>>({});
+  const [pcBusy, setPcBusy] = useState(false);
   const [newTitle, setNewTitle] = useState("");
   const [newContent, setNewContent] = useState("");
   const [newKind, setNewKind] = useState<"news" | "devotional">("news");
   const [postBusy, setPostBusy] = useState(false);
 
-  async function load(status: typeof tab) {
+  async function load(status: TabKey) {
     if (status === "reports") {
       const { data: rs, error } = await supabase.from("reports").select("*").order("created_at", { ascending: false });
       if (error) { toast.error(error.message); return; }
@@ -49,16 +81,41 @@ function Admin() {
       setPosts((data ?? []) as DailyPost[]);
       return;
     }
+    if (status === "users") {
+      const [{ data: profs, error: pe }, { data: roles }] = await Promise.all([
+        supabase.from("profiles").select("*").order("created_at", { ascending: false }),
+        supabase.from("user_roles").select("user_id, role"),
+      ]);
+      if (pe) { toast.error(pe.message); return; }
+      const roleMap = new Map<string, AppRole>();
+      for (const r of (roles ?? []) as Array<{ user_id: string; role: AppRole }>) {
+        const cur = roleMap.get(r.user_id);
+        if (!cur || ROLE_PRIORITY.indexOf(r.role) < ROLE_PRIORITY.indexOf(cur)) {
+          roleMap.set(r.user_id, r.role);
+        }
+      }
+      setUsers(((profs ?? []) as Row[]).map((p) => ({ ...p, primaryRole: roleMap.get(p.id) ?? "user" })));
+      return;
+    }
+    if (status === "pre_cadastros") {
+      const { data, error } = await supabase
+        .from("pre_cadastros")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (error) { toast.error(error.message); return; }
+      setPreCads((data ?? []) as PreCadastro[]);
+      return;
+    }
     const { data, error } = await supabase
       .from("profiles").select("*").eq("status", status as "pending" | "approved" | "rejected" | "banned").order("created_at", { ascending: false });
     if (error) toast.error(error.message);
     setRows((data ?? []) as Row[]);
   }
 
-  useEffect(() => { if (isAdmin) load(tab); }, [isAdmin, tab]);
+  useEffect(() => { if (canSeeAdminPanel) load(tab); }, [canSeeAdminPanel, tab]);
 
   if (!loading && !user) return <Navigate to="/auth/login" />;
-  if (!loading && !isAdmin) return (
+  if (!loading && !canSeeAdminPanel) return (
     <div className="min-h-screen"><Header />
       <main className="mx-auto max-w-md px-4 py-20 text-center">
         <ShieldAlert className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
@@ -68,6 +125,25 @@ function Admin() {
     </div>
   );
 
+  // Moderador: simple landing
+  if (!loading && isModerador) {
+    return (
+      <div className="min-h-screen">
+        <Header />
+        <main className="mx-auto max-w-2xl px-4 py-16">
+          <div className="glass rounded-3xl p-8 text-center shadow-soft">
+            <MessageSquareWarning className="mx-auto h-12 w-12 text-primary" />
+            <h1 className="mt-4 text-2xl font-semibold">Painel do Moderador</h1>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Como Moderador, você pode excluir mensagens inadequadas diretamente na Comunidade.
+            </p>
+            <Button asChild className="mt-6"><Link to="/comunidade">Ir para a Comunidade</Link></Button>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   async function update(id: string, patch: ProfileUpdate) {
     setBusy(id);
     const { error } = await supabase.from("profiles").update(patch).eq("id", id);
@@ -75,6 +151,55 @@ function Admin() {
     if (error) { toast.error(error.message); return; }
     toast.success("Atualizado");
     load(tab);
+  }
+
+  async function changeUserRole(userId: string, newRole: AppRole, currentRole: AppRole) {
+    if (!user) return;
+    if (newRole === currentRole) return;
+    setBusy(userId);
+    // Remove current non-user role(s) and add new one (or just set to user)
+    const { error: delErr } = await supabase
+      .from("user_roles")
+      .delete()
+      .eq("user_id", userId);
+    if (delErr) { setBusy(null); toast.error(delErr.message); return; }
+    const { error: insErr } = await supabase
+      .from("user_roles")
+      .insert({ user_id: userId, role: newRole });
+    setBusy(null);
+    if (insErr) { toast.error(insErr.message); return; }
+    toast.success(`Papel atualizado para ${ROLE_CONFIG[newRole].label}`);
+    load("users");
+  }
+
+  async function savePreCadastro() {
+    if (!user) return;
+    setPcBusy(true);
+    if (editingPC) {
+      const { error } = await supabase
+        .from("pre_cadastros")
+        .update({ ...pcDraft })
+        .eq("id", editingPC.id);
+      setPcBusy(false);
+      if (error) { toast.error(error.message); return; }
+      toast.success("Pré-cadastro atualizado");
+    } else {
+      const { error } = await supabase
+        .from("pre_cadastros")
+        .insert({ ...pcDraft, created_by: user.id });
+      setPcBusy(false);
+      if (error) { toast.error(error.message); return; }
+      toast.success("Pré-cadastro salvo");
+    }
+    setEditingPC(null);
+    setPcDraft({});
+    load("pre_cadastros");
+  }
+
+  async function deletePreCadastro(id: string) {
+    if (!confirm("Excluir este pré-cadastro?")) return;
+    const { error } = await supabase.from("pre_cadastros").delete().eq("id", id);
+    if (error) toast.error(error.message); else { toast.success("Excluído"); load("pre_cadastros"); }
   }
 
   async function createPost() {
@@ -107,21 +232,45 @@ function Admin() {
       <main className="mx-auto max-w-6xl px-4 py-10">
         <div className="animate-fade-up">
           <h1 className="text-4xl font-semibold">Painel administrativo</h1>
-          <p className="mt-1 text-muted-foreground">Aprovação de perfis, denúncias e conteúdo</p>
+          <p className="mt-1 text-muted-foreground">
+            {isSuperAdmin ? "Gestão completa da plataforma" :
+             isApresentador ? "Pré-cadastros para controle de pessoas" :
+             "Aprovação de perfis, denúncias e conteúdo"}
+          </p>
         </div>
 
-        <Tabs value={tab} onValueChange={(v) => setTab(v as typeof tab)} className="mt-8">
-          <TabsList>
-            <TabsTrigger value="pending">Pendentes</TabsTrigger>
-            <TabsTrigger value="approved">Aprovados</TabsTrigger>
-            <TabsTrigger value="rejected">Rejeitados</TabsTrigger>
-            <TabsTrigger value="banned">Banidos</TabsTrigger>
-            <TabsTrigger value="reports"><Flag className="mr-1 h-3 w-3" /> Denúncias</TabsTrigger>
-            <TabsTrigger value="posts"><Newspaper className="mr-1 h-3 w-3" /> Texto Diário</TabsTrigger>
+        <Tabs value={tab} onValueChange={(v) => setTab(v as TabKey)} className="mt-8">
+          <TabsList className="flex-wrap">
+            {availableTabs.includes("pending") && <TabsTrigger value="pending">Pendentes</TabsTrigger>}
+            {availableTabs.includes("approved") && <TabsTrigger value="approved">Aprovados</TabsTrigger>}
+            {availableTabs.includes("rejected") && <TabsTrigger value="rejected">Rejeitados</TabsTrigger>}
+            {availableTabs.includes("banned") && <TabsTrigger value="banned">Banidos</TabsTrigger>}
+            {availableTabs.includes("reports") && <TabsTrigger value="reports"><Flag className="mr-1 h-3 w-3" /> Denúncias</TabsTrigger>}
+            {availableTabs.includes("posts") && <TabsTrigger value="posts"><Newspaper className="mr-1 h-3 w-3" /> Texto Diário</TabsTrigger>}
+            {availableTabs.includes("users") && <TabsTrigger value="users"><UsersIcon className="mr-1 h-3 w-3" /> Usuários</TabsTrigger>}
+            {availableTabs.includes("pre_cadastros") && <TabsTrigger value="pre_cadastros"><ClipboardList className="mr-1 h-3 w-3" /> Pré-cadastros</TabsTrigger>}
           </TabsList>
 
           <TabsContent value={tab} className="mt-6">
-            {tab === "posts" ? (
+            {tab === "users" ? (
+              <UsersPanel
+                users={users}
+                busy={busy}
+                onChangeRole={changeUserRole}
+              />
+            ) : tab === "pre_cadastros" ? (
+              <PreCadastrosPanel
+                items={preCads}
+                editing={editingPC}
+                draft={pcDraft}
+                setDraft={setPcDraft}
+                onEdit={(p) => { setEditingPC(p); setPcDraft(p); }}
+                onCancel={() => { setEditingPC(null); setPcDraft({}); }}
+                onSave={savePreCadastro}
+                onDelete={deletePreCadastro}
+                busy={pcBusy}
+              />
+            ) : tab === "posts" ? (
               <div className="space-y-6">
                 <div className="glass rounded-2xl p-5 shadow-soft">
                   <h3 className="text-lg font-semibold">Nova publicação</h3>
