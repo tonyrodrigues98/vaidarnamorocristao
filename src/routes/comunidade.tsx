@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Send, Trash2, Users, Pencil, Check, X, Reply, MoreHorizontal, Pin, PinOff } from "lucide-react";
 import { useLongPress } from "@/hooks/use-long-press";
+import { markSeen } from "@/lib/lastSeen";
 
 type GMsg = {
   id: string;
@@ -77,6 +78,7 @@ function Comunidade() {
       const list = ((data ?? []) as GMsg[]).slice().reverse();
       setMessages(list);
       await loadProfiles(Array.from(new Set(list.map((m) => m.sender_id))));
+      markSeen(user.id, "community");
       requestAnimationFrame(() => {
         if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
       });
@@ -91,6 +93,7 @@ function Comunidade() {
           const m = payload.new as GMsg;
           setMessages((prev) => [...prev, m]);
           await loadProfiles([m.sender_id]);
+          if (user) markSeen(user.id, "community");
           requestAnimationFrame(() => {
             if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
           });
