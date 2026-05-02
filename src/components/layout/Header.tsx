@@ -97,6 +97,7 @@ export function Header() {
           {user ? (
             <>
               <Button variant="ghost" size="sm" asChild><Link to="/dashboard">Início</Link></Button>
+              <Button variant="ghost" size="sm" asChild><Link to="/pretendentes">Pretendentes</Link></Button>
               <Button variant="ghost" size="sm" asChild>
                 <Link to="/perfil"><UserIcon className="mr-1 h-4 w-4" /> Perfil</Link>
               </Button>
@@ -158,6 +159,7 @@ export function Header() {
             {user ? (
               <>
                 <MobileItem to="/dashboard" onClick={close}>Início</MobileItem>
+                <MobileItem to="/pretendentes" onClick={close}>Pretendentes</MobileItem>
                 <MobileItem to="/perfil" onClick={close}>
                   <span className="flex items-center gap-2"><UserIcon className="h-4 w-4" /> Perfil</span>
                 </MobileItem>
