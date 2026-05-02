@@ -395,7 +395,7 @@ export type Database = {
       unmatch: { Args: { _match_id: string }; Returns: undefined }
     }
     Enums: {
-      app_role: "admin" | "user"
+      app_role: "admin" | "user" | "super_admin" | "apresentador" | "moderador"
       daily_post_kind: "news" | "devotional"
       location_scope: "regiao" | "brasil" | "mundo" | "personalizado"
       marital_status: "solteiro" | "divorciado"
@@ -529,7 +529,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "user"],
+      app_role: ["admin", "user", "super_admin", "apresentador", "moderador"],
       daily_post_kind: ["news", "devotional"],
       location_scope: ["regiao", "brasil", "mundo", "personalizado"],
       marital_status: ["solteiro", "divorciado"],
