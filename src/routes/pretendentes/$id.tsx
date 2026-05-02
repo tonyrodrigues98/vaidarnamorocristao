@@ -40,6 +40,15 @@ function Detail() {
   const [reportOpen, setReportOpen] = useState(false);
   const [reportReason, setReportReason] = useState("");
   const [reportAlsoBlock, setReportAlsoBlock] = useState(true);
+  const [mySex, setMySex] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      const { data } = await supabase.from("profiles").select("sex").eq("id", user.id).maybeSingle();
+      setMySex((data?.sex as string | undefined) ?? null);
+    })();
+  }, [user]);
 
   useEffect(() => {
     (async () => {
@@ -260,7 +269,7 @@ function Detail() {
             )}
 
             <div className="space-y-2">
-              {matchId ? (
+              {profile && mySex && profile.sex === mySex ? null : matchId ? (
                 <Button size="lg" className="w-full shadow-glow" asChild>
                   <Link to="/conversas/$matchId" params={{ matchId }}><MessageCircle className="mr-2 h-4 w-4" /> Conversar</Link>
                 </Button>
