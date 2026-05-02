@@ -42,11 +42,36 @@ export function useRealtimeNotifications() {
             .select("full_name")
             .eq("id", senderId)
             .maybeSingle();
-          toast("✨ Novo interesse!", {
+          toast("✨ + Interesse", {
             description: `${prof?.full_name?.split(" ")[0] ?? "Alguém"} demonstrou interesse em você.`,
             action: {
               label: "Ver",
               onClick: () => router.navigate({ to: "/interesses" }),
+            },
+          });
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "profile_views", filter: `viewed_id=eq.${user.id}` },
+        async (payload) => {
+          const v = payload.new as { viewer_id: string };
+          // Notify only the first time this viewer appears in the current session
+          const key = `pv-notif:${user.id}:${v.viewer_id}`;
+          if (typeof window !== "undefined") {
+            if (window.sessionStorage.getItem(key)) return;
+            window.sessionStorage.setItem(key, "1");
+          }
+          const { data: prof } = await supabase
+            .from("profiles")
+            .select("full_name")
+            .eq("id", v.viewer_id)
+            .maybeSingle();
+          toast("👀 Visualizou seu perfil", {
+            description: `${prof?.full_name?.split(" ")[0] ?? "Alguém"} acabou de ver seu perfil.`,
+            action: {
+              label: "Ver dashboard",
+              onClick: () => router.navigate({ to: "/dashboard" }),
             },
           });
         }
