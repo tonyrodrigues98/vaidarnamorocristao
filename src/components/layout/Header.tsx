@@ -13,7 +13,7 @@ import { getLastSeen } from "@/lib/lastSeen";
 async function shareSite() {
   const url = typeof window !== "undefined" ? window.location.origin : "";
   const shareData = {
-    title: "Encontros de Fé",
+    title: "VaiDarNamoro",
     text: "Conheça pretendentes que compartilham sua fé.",
     url,
   };
@@ -125,7 +125,7 @@ export function Header() {
             <Heart className="h-4 w-4 text-white" fill="white" />
           </div>
           <span className="text-lg font-bold tracking-tight">
-            Encontros<span className="text-gradient">.</span>
+            VaiDar<span className="text-gradient">Namoro</span>
           </span>
         </Link>
 
