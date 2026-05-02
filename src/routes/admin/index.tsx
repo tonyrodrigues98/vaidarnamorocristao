@@ -6,12 +6,12 @@ import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Check, X, Ban, ShieldAlert, Flag, Newspaper, Trash2, Users as UsersIcon, ClipboardList, MessageSquareWarning, ShieldX } from "lucide-react";
+import { Check, X, Ban, ShieldAlert, Flag, Newspaper, Trash2, Users as UsersIcon, ClipboardList, MessageSquareWarning, ShieldX, Heart, Plus, UserPlus, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import type { Database } from "@/integrations/supabase/types";
 import { ROLE_CONFIG, ROLE_PRIORITY, type AppRole } from "@/lib/roles";
@@ -24,6 +24,34 @@ type DailyPost = { id: string; title: string; content: string; published: boolea
 type PreCadastro = Database["public"]["Tables"]["pre_cadastros"]["Row"];
 type RestrictedWord = Database["public"]["Tables"]["restricted_words"]["Row"];
 type AdminUserRow = Row & { primaryRole: AppRole };
+type CoupleStatus = "aceitaram_conversar" | "namorando" | "casamento_marcado";
+type PreMatchRow = {
+  id: string;
+  pre_cadastro_id: string;
+  partner_pre_cadastro_id: string | null;
+  partner_user_id: string | null;
+  partner_full_name: string | null;
+  partner_username: string | null;
+  partner_age: number | null;
+  partner_height_cm: number | null;
+  partner_sex: string | null;
+  partner_marital: string | null;
+  partner_city: string | null;
+  partner_state: string | null;
+  partner_church: string | null;
+  partner_has_children: boolean | null;
+  partner_children_count: number | null;
+  internal_notes: string | null;
+  status: CoupleStatus | null;
+  created_by: string;
+  created_at: string;
+};
+
+const COUPLE_STATUS_LABEL: Record<CoupleStatus, string> = {
+  aceitaram_conversar: "Aceitaram conversar",
+  namorando: "Namorando",
+  casamento_marcado: "Casamento marcado",
+};
 
 export const Route = createFileRoute("/admin/")({ component: Admin });
 
@@ -34,12 +62,13 @@ function Admin() {
   const isModerador = role === "moderador";
   const canSeeAdminPanel = isAdmin || isApresentador || isModerador;
 
-  type TabKey = "pending" | "approved" | "rejected" | "banned" | "reports" | "posts" | "users" | "pre_cadastros" | "restricted_words";
+  type TabKey = "pending" | "approved" | "rejected" | "banned" | "reports" | "posts" | "users" | "pre_cadastros" | "restricted_words" | "flags";
 
   const availableTabs = useMemo<TabKey[]>(() => {
-    if (isSuperAdmin) return ["pending","approved","rejected","banned","reports","posts","users","pre_cadastros","restricted_words"];
-    if (isAdmin) return ["pending","approved","rejected","banned","reports","posts"];
-    if (isApresentador) return ["pre_cadastros"];
+    if (isSuperAdmin) return ["pending","approved","rejected","banned","reports","posts","users","pre_cadastros","restricted_words","flags"];
+    if (isAdmin) return ["pending","approved","rejected","banned","reports","posts","flags"];
+    if (isApresentador) return ["pre_cadastros","flags"];
+    if (isModerador) return ["flags"];
     return [];
   }, [isAdmin, isSuperAdmin, isApresentador]);
 
@@ -127,25 +156,6 @@ function Admin() {
       </main>
     </div>
   );
-
-  // Moderador: simple landing
-  if (!loading && isModerador) {
-    return (
-      <div className="min-h-screen">
-        <Header />
-        <main className="mx-auto max-w-2xl px-4 py-16">
-          <div className="glass rounded-3xl p-8 text-center shadow-soft">
-            <MessageSquareWarning className="mx-auto h-12 w-12 text-primary" />
-            <h1 className="mt-4 text-2xl font-semibold">Painel do Moderador</h1>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Como Moderador, você pode excluir mensagens inadequadas diretamente na Comunidade.
-            </p>
-            <Button asChild className="mt-6"><Link to="/comunidade">Ir para a Comunidade</Link></Button>
-          </div>
-        </main>
-      </div>
-    );
-  }
 
   async function update(id: string, patch: ProfileUpdate) {
     setBusy(id);
