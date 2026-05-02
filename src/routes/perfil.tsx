@@ -644,7 +644,11 @@ function PerfilPage() {
                       suas preferências são salvas automaticamente.
                     </p>
                   </div>
-                  <Switch checked={localPublic} onCheckedChange={togglePublicListing} />
+                  <Switch
+                    checked={localPublic}
+                    disabled={savingRole}
+                    onCheckedChange={togglePublicListing}
+                  />
                 </div>
 
                 <Button
