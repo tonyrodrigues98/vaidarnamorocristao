@@ -232,7 +232,7 @@ function Comunidade() {
                 .map((m) => {
                   const p = profiles[m.sender_id];
                   const name = p?.full_name?.split(" ")[0] ?? "Alguém";
-                  const senderIsAdmin = adminIds.has(m.sender_id);
+                  const senderStaff = staffMap[m.sender_id];
                   return (
                     <div
                       key={`pin-${m.id}`}
@@ -247,8 +247,8 @@ function Comunidade() {
                         <span className="min-w-0 flex-1">
                           <span className="flex items-center gap-1 font-semibold text-foreground">
                             {name}
-                            {senderIsAdmin && (
-                              <ShieldCheck className="admin-icon-sparkle h-3 w-3" aria-label="Admin" />
+                            {senderStaff && (
+                              <RoleBadge role={senderStaff.role} color={senderStaff.color} />
                             )}
                           </span>
                           <span className="line-clamp-2 text-muted-foreground">{m.content}</span>
@@ -290,7 +290,9 @@ function Comunidade() {
                   ? (profiles[replied.sender_id]?.full_name?.split(" ")[0] ?? "Alguém")
                   : "";
                 const isFlash = highlightId === m.id;
-                const senderIsAdmin = adminIds.has(m.sender_id);
+                const senderStaff = staffMap[m.sender_id];
+                const senderIsAdmin = !!senderStaff && (senderStaff.role === "admin" || senderStaff.role === "super_admin") && (senderStaff.color ?? "gold") === "gold";
+                const senderIsStaff = !!senderStaff;
                 return (
                   <div
                     key={m.id}
@@ -298,7 +300,7 @@ function Comunidade() {
                     className={`group relative flex scroll-mt-24 items-start gap-3 rounded-xl transition-colors duration-500 ${isFlash ? "bg-primary/10" : ""}`}
                   >
                     {mine ? (
-                      <div className={`h-9 w-9 shrink-0 overflow-hidden rounded-full bg-muted ${senderIsAdmin ? "ring-2 ring-[var(--gold)] ring-offset-2 ring-offset-background" : ""}`}>
+                      <div className={`h-9 w-9 shrink-0 overflow-hidden rounded-full bg-muted ${senderIsAdmin ? "ring-2 ring-[var(--gold)] ring-offset-2 ring-offset-background" : senderIsStaff ? "ring-2 ring-primary/40 ring-offset-2 ring-offset-background" : ""}`}>
                         {p?.photo_url ? (
                           <img src={p.photo_url} alt="" className="h-full w-full object-cover" />
                         ) : (
@@ -311,7 +313,7 @@ function Comunidade() {
                       <Link
                         to="/pretendentes/$id"
                         params={{ id: m.sender_id }}
-                        className={`h-9 w-9 shrink-0 overflow-hidden rounded-full bg-muted transition hover:ring-2 hover:ring-primary/40 ${senderIsAdmin ? "ring-2 ring-[var(--gold)] ring-offset-2 ring-offset-background" : "ring-0"}`}
+                        className={`h-9 w-9 shrink-0 overflow-hidden rounded-full bg-muted transition hover:ring-2 hover:ring-primary/40 ${senderIsAdmin ? "ring-2 ring-[var(--gold)] ring-offset-2 ring-offset-background" : senderIsStaff ? "ring-2 ring-primary/40 ring-offset-2 ring-offset-background" : "ring-0"}`}
                         aria-label={`Ver perfil de ${name}`}
                       >
                         {p?.photo_url ? (
@@ -333,8 +335,12 @@ function Comunidade() {
                         {mine ? (
                           <span className="flex items-center gap-1 text-sm font-semibold">
                             {name}
-                            {adminIds.has(m.sender_id) && (
-                              <ShieldCheck className="admin-icon-sparkle h-3.5 w-3.5 shrink-0" aria-label="Admin" />
+                            {senderStaff && (
+                              senderIsAdmin ? (
+                                <ShieldCheck className="admin-icon-sparkle h-3.5 w-3.5 shrink-0" aria-label="Admin" />
+                              ) : (
+                                <RoleBadge role={senderStaff.role} color={senderStaff.color} />
+                              )
                             )}
                           </span>
                         ) : (
@@ -344,8 +350,12 @@ function Comunidade() {
                             className="flex items-center gap-1 text-sm font-semibold text-foreground hover:text-primary hover:underline"
                           >
                             {name}
-                            {adminIds.has(m.sender_id) && (
-                              <ShieldCheck className="admin-icon-sparkle h-3.5 w-3.5 shrink-0" aria-label="Admin" />
+                            {senderStaff && (
+                              senderIsAdmin ? (
+                                <ShieldCheck className="admin-icon-sparkle h-3.5 w-3.5 shrink-0" aria-label="Admin" />
+                              ) : (
+                                <RoleBadge role={senderStaff.role} color={senderStaff.color} />
+                              )
                             )}
                           </Link>
                         )}
