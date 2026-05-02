@@ -160,6 +160,28 @@
     overflow-x: auto;
     max-width: 100%;
   }
+
+  /* Force long words and URLs to wrap so nothing overflows the viewport.
+     Applies to all text-bearing elements; opt-out via `.no-wrap-anywhere`. */
+  p, span, a, li, h1, h2, h3, h4, h5, h6,
+  label, button, dt, dd, td, th, blockquote, figcaption, summary {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+  a {
+    word-break: break-word;
+  }
+}
+
+@layer utilities {
+  .break-anywhere {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+  .no-wrap-anywhere {
+    overflow-wrap: normal;
+    word-break: normal;
+  }
 }
 
 @layer utilities {
