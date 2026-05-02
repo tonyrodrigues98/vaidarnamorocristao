@@ -230,7 +230,15 @@ function Detail() {
 
           <div className="animate-fade-up space-y-6" style={{ animationDelay: "80ms" }}>
             <div>
-              <h1 className="text-4xl font-semibold">{profile.full_name}, {profile.age}</h1>
+              <h1 className="flex flex-wrap items-center gap-2 text-4xl font-semibold">
+                {profile.full_name}, {profile.age}
+                {targetRole && (
+                  <RoleBadge role={targetRole.role} color={targetRole.color} size="md" />
+                )}
+              </h1>
+              {targetRole && (
+                <p className="mt-1 text-xs text-muted-foreground">{/* description handled by RoleBadge if showDescription */}</p>
+              )}
               <p className="mt-1 text-muted-foreground">{profile.marital === "solteiro" ? "Solteiro(a)" : "Divorciado(a)"} {profile.height_cm ? `· ${profile.height_cm} cm` : ""}</p>
             </div>
 
