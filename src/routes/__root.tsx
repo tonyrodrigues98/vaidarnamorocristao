@@ -32,9 +32,9 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Encontros de Fé — Plataforma Cristã de Relacionamentos" },
+      { title: "VaiDarNamoro — Plataforma Cristã de Relacionamentos" },
       { name: "description", content: "Plataforma cristã de relacionamentos sérios. Conheça pretendentes que compartilham sua fé." },
-      { property: "og:title", content: "Encontros de Fé" },
+      { property: "og:title", content: "VaiDarNamoro" },
       { property: "og:description", content: "Onde a fé encontra o amor." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
