@@ -6,7 +6,7 @@ import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import {
   Clock, CheckCircle2, XCircle, Users, Heart, MessageCircle, Sparkles,
-  Globe, Newspaper, Eye, TrendingUp,
+  Globe, Newspaper, Eye, TrendingUp, User as UserIcon, Gem,
 } from "lucide-react";
 import {
   ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid,
@@ -348,15 +348,15 @@ function Dashboard() {
         <section className="mt-10">
           <h2 className="text-xl font-semibold">Atalhos</h2>
           <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <DashCard to="/pretendentes" Icon={Users} title="Pretendentes" desc="Conheça pessoas com a mesma fé" />
-            <DashCard to="/interesses" Icon={Sparkles} title="Interesses" desc="Quem demonstrou interesse" />
-            <DashCard to="/matches" Icon={Heart} title="Matches" desc="Conexões com reciprocidade" />
+            <DashCard to="/perfil" Icon={UserIcon} title="Meu perfil" desc="Edite seus dados e preferências" />
             <DashCard to="/conversas" Icon={MessageCircle} title="Conversas" desc="Suas mensagens privadas" />
+            <DashCard to="/comunidade" Icon={Globe} title="Comunidade" desc="Chat global em tempo real" />
+            <DashCard to="/pretendentes" Icon={Gem} title="Pretendentes" desc="Conheça pessoas com a mesma fé" />
           </div>
           <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <DashCard to="/comunidade" Icon={Globe} title="Comunidade" desc="Chat global em tempo real" />
+            <DashCard to="/interesses" Icon={Sparkles} title="Interesses" desc="Quem demonstrou interesse" />
+            <DashCard to="/matches" Icon={Users} title="Matches" desc="Conexões com reciprocidade" />
             <DashCard to="/noticias" Icon={Newspaper} title="Notícias & Devocional" desc="Reflexões e avisos" />
-            <DashCard to="/perfil" Icon={Heart} title="Meu perfil" desc="Edite seus dados e preferências" />
           </div>
         </section>
       </main>
