@@ -544,6 +544,15 @@ function Comunidade() {
                             <Trash2 className="h-4 w-4" /> Excluir
                           </button>
                         )}
+                        {canFlagMessages && user && m.sender_id !== user.id && (
+                          <button
+                            onClick={() => { setActionsOpenId(null); openFlagDialog(m); }}
+                            className="flex items-center gap-1 rounded-full px-2 py-1 text-xs text-amber-600 hover:bg-amber-500/10"
+                            aria-label={myFlag ? "Editar sinalização" : "Sinalizar"}
+                          >
+                            <Flag className="h-4 w-4" /> {myFlag ? "Editar sinal." : "Sinalizar"}
+                          </button>
+                        )}
                         {isAdmin && (
                           <button
                             onClick={() => { setActionsOpenId(null); togglePin(m); }}
