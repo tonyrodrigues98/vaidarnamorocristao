@@ -7,6 +7,7 @@ import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Heart, MessageCircle, Sparkles } from "lucide-react";
+import { markSeen } from "@/lib/lastSeen";
 
 type ProfileLite = {
   id: string; full_name: string; age: number; city: string; state: string;
@@ -49,6 +50,7 @@ function Page() {
   useEffect(() => {
     if (!user) return;
     load();
+    markSeen(user.id, "interests");
     const ch = supabase.channel("interests-page")
       .on("postgres_changes", { event: "*", schema: "public", table: "interests" }, load)
       .on("postgres_changes", { event: "*", schema: "public", table: "matches" }, load)
