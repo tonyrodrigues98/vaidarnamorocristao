@@ -321,7 +321,7 @@ function Comunidade() {
                           <span className="flex items-center gap-1 text-sm font-semibold">
                             {name}
                             {adminIds.has(m.sender_id) && (
-                              <ShieldCheck className="h-3.5 w-3.5 text-primary" aria-label="Admin" />
+                              <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-primary" aria-label="Admin" />
                             )}
                           </span>
                         ) : (
@@ -332,7 +332,7 @@ function Comunidade() {
                           >
                             {name}
                             {adminIds.has(m.sender_id) && (
-                              <ShieldCheck className="h-3.5 w-3.5 text-primary" aria-label="Admin" />
+                              <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-primary" aria-label="Admin" />
                             )}
                           </Link>
                         )}
