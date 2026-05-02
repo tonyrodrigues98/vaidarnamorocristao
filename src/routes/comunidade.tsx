@@ -611,6 +611,37 @@ function Comunidade() {
         </div>
       </main>
       <RestrictedWordDialog word={warning} onClose={() => setWarning(null)} />
+      <Dialog open={!!flagDialog} onOpenChange={(o) => { if (!o) { setFlagDialog(null); setFlagReason(""); } }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>{flagDialog?.existingId ? "Editar sinalização" : "Sinalizar mensagem"}</DialogTitle>
+            <DialogDescription>
+              Descreva por que você acredita que esta mensagem fere as diretrizes da comunidade. Sua sinalização será revisada pelo Super Admin.
+            </DialogDescription>
+          </DialogHeader>
+          {flagDialog && (
+            <div className="space-y-3">
+              <div className="rounded-lg border border-border bg-muted/30 p-3 text-sm">
+                <p className="text-xs font-semibold text-muted-foreground">Mensagem</p>
+                <p className="mt-1 whitespace-pre-wrap break-words">{flagDialog.msg.content}</p>
+              </div>
+              <Textarea
+                placeholder="Motivo da sinalização..."
+                value={flagReason}
+                onChange={(e) => setFlagReason(e.target.value)}
+                maxLength={500}
+                rows={4}
+              />
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setFlagDialog(null); setFlagReason(""); }}>Cancelar</Button>
+            <Button onClick={submitFlag} disabled={flagBusy || !flagReason.trim()}>
+              {flagDialog?.existingId ? "Salvar" : "Sinalizar"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
