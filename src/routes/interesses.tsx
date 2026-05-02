@@ -1,4 +1,5 @@
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
+import { RequireApproved } from "@/components/RequireApproved";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -16,7 +17,7 @@ type ProfileLite = {
 type ReceivedRow = { id: string; created_at: string; sender: ProfileLite | null };
 type SentRow = { id: string; created_at: string; receiver: ProfileLite | null };
 
-export const Route = createFileRoute("/interesses")({ component: Page });
+export const Route = createFileRoute("/interesses")({ component: () => (<RequireApproved><Page /></RequireApproved>) });
 
 function Page() {
   const { user, loading } = useAuth();

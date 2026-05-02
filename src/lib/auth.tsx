@@ -11,6 +11,8 @@ type AuthCtx = {
   role: AppRole;
   badgeColor: RoleColor | null;
   publicListing: boolean;
+  profileStatus: "pending" | "approved" | "rejected" | "banned" | null;
+  isApproved: boolean;
   refreshRole: () => Promise<void>;
   signOut: () => Promise<void>;
 };
@@ -23,6 +25,8 @@ const Ctx = createContext<AuthCtx>({
   role: "user",
   badgeColor: null,
   publicListing: false,
+  profileStatus: null,
+  isApproved: false,
   refreshRole: async () => {},
   signOut: async () => {},
 });
@@ -33,6 +37,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [role, setRole] = useState<AppRole>("user");
   const [badgeColor, setBadgeColor] = useState<RoleColor | null>(null);
   const [publicListing, setPublicListing] = useState(false);
+  const [profileStatus, setProfileStatus] = useState<AuthCtx["profileStatus"]>(null);
 
   async function loadRoles(uid: string) {
     const { data } = await supabase
@@ -45,6 +50,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setRole(primary);
     setBadgeColor((primaryRow?.badge_color as RoleColor | null) ?? null);
     setPublicListing(!!primaryRow?.public_listing);
+    const { data: prof } = await supabase
+      .from("profiles")
+      .select("status")
+      .eq("id", uid)
+      .maybeSingle();
+    setProfileStatus((prof?.status as AuthCtx["profileStatus"]) ?? null);
   }
 
   useEffect(() => {
@@ -57,6 +68,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setRole("user");
         setBadgeColor(null);
         setPublicListing(false);
+        setProfileStatus(null);
       }
     });
 
@@ -70,6 +82,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const isAdmin = role === "admin" || role === "super_admin";
+  const isStaff = isAdmin || role === "apresentador" || role === "moderador";
+  const isApproved = profileStatus === "approved" || isStaff;
 
   const value: AuthCtx = {
     user: session?.user ?? null,
@@ -79,6 +93,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     role,
     badgeColor,
     publicListing,
+    profileStatus,
+    isApproved,
     refreshRole: async () => {
       if (session?.user) await loadRoles(session.user.id);
     },

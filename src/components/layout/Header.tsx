@@ -37,7 +37,7 @@ async function shareSite() {
 }
 
 export function Header() {
-  const { user, isAdmin, role, signOut } = useAuth();
+  const { user, isAdmin, role, isApproved, signOut } = useAuth();
   const canSeeAdminPanel = isAdmin || role === "apresentador" || role === "moderador";
   const navigate = useNavigate();
   const { theme, toggle: toggleTheme } = useTheme();
@@ -140,30 +140,36 @@ export function Header() {
               <Button variant="ghost" size="sm" asChild>
                 <Link to="/perfil"><UserIcon className="mr-1 h-4 w-4" /> Perfil</Link>
               </Button>
-              <Button variant="ghost" size="sm" asChild>
-                <Link to="/conversas"><MessageCircle className="mr-1 h-4 w-4" /> Conversas<Badge n={unreadCount} /></Link>
-              </Button>
-              <Button variant="ghost" size="sm" asChild>
-                <Link to="/comunidade"><Globe className="mr-1 h-4 w-4" /> Comunidade<Badge n={communityCount} /></Link>
-              </Button>
-              <Button variant="ghost" size="sm" asChild>
-                <Link to="/pretendentes"><Gem className="mr-1 h-4 w-4" /> Pretendentes</Link>
-              </Button>
-              <Button variant="ghost" size="sm" asChild>
-                <Link to="/interesses"><Sparkles className="mr-1 h-4 w-4" /> Interesses<Badge n={interestCount} /></Link>
-              </Button>
-              <Button variant="ghost" size="sm" asChild>
-                <Link to="/matches"><Users className="mr-1 h-4 w-4" /> Matches</Link>
-              </Button>
+              {isApproved && (
+                <>
+                  <Button variant="ghost" size="sm" asChild>
+                    <Link to="/conversas"><MessageCircle className="mr-1 h-4 w-4" /> Conversas<Badge n={unreadCount} /></Link>
+                  </Button>
+                  <Button variant="ghost" size="sm" asChild>
+                    <Link to="/comunidade"><Globe className="mr-1 h-4 w-4" /> Comunidade<Badge n={communityCount} /></Link>
+                  </Button>
+                  <Button variant="ghost" size="sm" asChild>
+                    <Link to="/pretendentes"><Gem className="mr-1 h-4 w-4" /> Pretendentes</Link>
+                  </Button>
+                  <Button variant="ghost" size="sm" asChild>
+                    <Link to="/interesses"><Sparkles className="mr-1 h-4 w-4" /> Interesses<Badge n={interestCount} /></Link>
+                  </Button>
+                  <Button variant="ghost" size="sm" asChild>
+                    <Link to="/matches"><Users className="mr-1 h-4 w-4" /> Matches</Link>
+                  </Button>
+                </>
+              )}
               <Button variant="ghost" size="sm" asChild>
                 <Link to="/noticias"><Newspaper className="mr-1 h-4 w-4" /> Notícias<Badge n={newsCount} /></Link>
               </Button>
               <Button variant="ghost" size="sm" onClick={shareSite}>
                 <Share2 className="mr-1 h-4 w-4" /> Compartilhar
               </Button>
-              <Button variant="ghost" size="sm" asChild>
-                <Link to="/bloqueados"><Ban className="mr-1 h-4 w-4" /> Bloqueados</Link>
-              </Button>
+              {isApproved && (
+                <Button variant="ghost" size="sm" asChild>
+                  <Link to="/bloqueados"><Ban className="mr-1 h-4 w-4" /> Bloqueados</Link>
+                </Button>
+              )}
               <Button variant="ghost" size="icon" onClick={toggleTheme} aria-label={theme === "dark" ? "Modo claro" : "Modo escuro"}>
                 {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
               </Button>
@@ -210,24 +216,28 @@ export function Header() {
                 <MobileItem to="/perfil" onClick={close}>
                   <span className="flex items-center gap-2"><UserIcon className="h-4 w-4" /> Perfil</span>
                 </MobileItem>
-                <MobileItem to="/conversas" onClick={close}>
-                  <span className="flex items-center gap-2"><MessageCircle className="h-4 w-4" /> Conversas</span>
-                  <Badge n={unreadCount} />
-                </MobileItem>
-                <MobileItem to="/comunidade" onClick={close}>
-                  <span className="flex items-center gap-2"><Globe className="h-4 w-4" /> Comunidade</span>
-                  <Badge n={communityCount} />
-                </MobileItem>
-                <MobileItem to="/pretendentes" onClick={close}>
-                  <span className="flex items-center gap-2"><Gem className="h-4 w-4" /> Pretendentes</span>
-                </MobileItem>
-                <MobileItem to="/interesses" onClick={close}>
-                  <span className="flex items-center gap-2"><Sparkles className="h-4 w-4" /> Interesses</span>
-                  <Badge n={interestCount} />
-                </MobileItem>
-                <MobileItem to="/matches" onClick={close}>
-                  <span className="flex items-center gap-2"><Users className="h-4 w-4" /> Matches</span>
-                </MobileItem>
+                {isApproved && (
+                  <>
+                    <MobileItem to="/conversas" onClick={close}>
+                      <span className="flex items-center gap-2"><MessageCircle className="h-4 w-4" /> Conversas</span>
+                      <Badge n={unreadCount} />
+                    </MobileItem>
+                    <MobileItem to="/comunidade" onClick={close}>
+                      <span className="flex items-center gap-2"><Globe className="h-4 w-4" /> Comunidade</span>
+                      <Badge n={communityCount} />
+                    </MobileItem>
+                    <MobileItem to="/pretendentes" onClick={close}>
+                      <span className="flex items-center gap-2"><Gem className="h-4 w-4" /> Pretendentes</span>
+                    </MobileItem>
+                    <MobileItem to="/interesses" onClick={close}>
+                      <span className="flex items-center gap-2"><Sparkles className="h-4 w-4" /> Interesses</span>
+                      <Badge n={interestCount} />
+                    </MobileItem>
+                    <MobileItem to="/matches" onClick={close}>
+                      <span className="flex items-center gap-2"><Users className="h-4 w-4" /> Matches</span>
+                    </MobileItem>
+                  </>
+                )}
                 <MobileItem to="/noticias" onClick={close}>
                   <span className="flex items-center gap-2"><Newspaper className="h-4 w-4" /> Notícias</span>
                   <Badge n={newsCount} />
@@ -238,9 +248,11 @@ export function Header() {
                 >
                   <Share2 className="h-4 w-4" /> Compartilhar
                 </button>
-                <MobileItem to="/bloqueados" onClick={close}>
-                  <span className="flex items-center gap-2"><Ban className="h-4 w-4" /> Bloqueados</span>
-                </MobileItem>
+                {isApproved && (
+                  <MobileItem to="/bloqueados" onClick={close}>
+                    <span className="flex items-center gap-2"><Ban className="h-4 w-4" /> Bloqueados</span>
+                  </MobileItem>
+                )}
                 <button
                   onClick={() => { toggleTheme(); }}
                   className="flex items-center gap-2 rounded-xl px-3 py-3 text-left text-sm font-medium hover:bg-muted"

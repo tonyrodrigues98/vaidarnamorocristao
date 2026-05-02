@@ -1,4 +1,5 @@
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
+import { RequireApproved } from "@/components/RequireApproved";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -24,7 +25,7 @@ type MatchItem = {
   };
 };
 
-export const Route = createFileRoute("/matches")({ component: MatchesPage });
+export const Route = createFileRoute("/matches")({ component: () => (<RequireApproved><MatchesPage /></RequireApproved>) });
 
 function MatchesPage() {
   const { user, loading } = useAuth();

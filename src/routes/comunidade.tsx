@@ -1,4 +1,5 @@
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
+import { RequireApproved } from "@/components/RequireApproved";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -28,7 +29,7 @@ type GMsg = {
 };
 type Profile = { id: string; full_name: string; photo_url: string | null };
 
-export const Route = createFileRoute("/comunidade")({ component: Comunidade });
+export const Route = createFileRoute("/comunidade")({ component: () => (<RequireApproved><Comunidade /></RequireApproved>) });
 
 function Comunidade() {
   const { user, isAdmin, role, loading } = useAuth();

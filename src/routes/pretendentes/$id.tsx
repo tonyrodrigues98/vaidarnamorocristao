@@ -1,4 +1,5 @@
 import { createFileRoute, Link, Navigate, useNavigate } from "@tanstack/react-router";
+import { RequireApproved } from "@/components/RequireApproved";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -27,7 +28,7 @@ type Prefs = {
   custom_states: string[] | null;
 };
 
-export const Route = createFileRoute("/pretendentes/$id")({ component: Detail });
+export const Route = createFileRoute("/pretendentes/$id")({ component: () => (<RequireApproved><Detail /></RequireApproved>) });
 
 function Detail() {
   const { id } = Route.useParams();
