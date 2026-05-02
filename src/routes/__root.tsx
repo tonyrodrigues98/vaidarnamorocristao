@@ -65,8 +65,10 @@ function RootShell({ children }: { children: React.ReactNode }) {
       <head>
         <HeadContent />
       </head>
-      <body>
-        {children}
+      <body className="overflow-x-hidden">
+        <div className="min-h-screen w-full overflow-x-hidden">
+          {children}
+        </div>
         <Scripts />
       </body>
     </html>
