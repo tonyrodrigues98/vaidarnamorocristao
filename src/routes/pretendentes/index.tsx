@@ -8,12 +8,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { BR_STATES } from "@/lib/constants";
 import { SlidersHorizontal, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { RoleBadge } from "@/components/RoleBadge";
+import { ROLE_PRIORITY, type AppRole, type RoleColor } from "@/lib/roles";
 
 type Profile = {
   id: string; full_name: string; age: number; city: string; state: string;
   church: string; bio: string | null; photo_url: string | null; sex: "masculino" | "feminino";
   marital: "solteiro" | "divorciado";
 };
+type StaffInfo = { role: AppRole; color: RoleColor | null };
 
 export const Route = createFileRoute("/pretendentes/")({ component: List });
 
@@ -25,6 +28,7 @@ function List() {
   const [mySex, setMySex] = useState<"masculino" | "feminino" | null>(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [f, setF] = useState({ search: "", state: "all", marital: "all", ageMin: "", ageMax: "", church: "" });
+  const [staffMap, setStaffMap] = useState<Record<string, StaffInfo>>({});
 
   useEffect(() => {
     if (!user) return;
@@ -34,22 +38,31 @@ function List() {
       setMySex(me?.sex ?? null);
       if (me?.status === "approved") {
         const targetSex = me.sex === "masculino" ? "feminino" : "masculino";
-        const [profsRes, blocksRes, blockedByRes, adminsRes] = await Promise.all([
+        const [profsRes, blocksRes, blockedByRes, hiddenRes, rolesRes] = await Promise.all([
           supabase.from("profiles")
             .select("id, full_name, age, city, state, church, bio, photo_url, sex, marital")
             .eq("status", "approved").eq("sex", targetSex).neq("id", user.id)
             .order("created_at", { ascending: false }),
           supabase.from("blocks").select("blocked_id").eq("blocker_id", user.id),
           supabase.from("blocks").select("blocker_id").eq("blocked_id", user.id),
-          supabase.rpc("get_admin_ids"),
+          supabase.rpc("get_hidden_staff_ids"),
+          supabase.from("user_roles").select("user_id, role, badge_color").neq("role", "user"),
         ]);
         const hidden = new Set<string>([
           ...(blocksRes.data ?? []).map((b: any) => b.blocked_id),
           ...(blockedByRes.data ?? []).map((b: any) => b.blocker_id),
-          ...(((adminsRes as any).data ?? []) as any[]).map((x: any) =>
-            typeof x === "string" ? x : (x.get_admin_ids ?? x.user_id ?? "")
+          ...(((hiddenRes as any).data ?? []) as any[]).map((x: any) =>
+            typeof x === "string" ? x : (x.get_hidden_staff_ids ?? x.user_id ?? "")
           ).filter(Boolean),
         ]);
+        const map: Record<string, StaffInfo> = {};
+        for (const row of (rolesRes.data ?? []) as Array<{ user_id: string; role: AppRole; badge_color: string | null }>) {
+          const existing = map[row.user_id];
+          if (!existing || ROLE_PRIORITY.indexOf(row.role) < ROLE_PRIORITY.indexOf(existing.role)) {
+            map[row.user_id] = { role: row.role, color: (row.badge_color as RoleColor | null) ?? null };
+          }
+        }
+        setStaffMap(map);
         setProfiles(((profsRes.data ?? []) as Profile[]).filter((p) => !hidden.has(p.id)));
       }
       setLoadingList(false);
@@ -169,7 +182,12 @@ function List() {
                   )}
                 </div>
                 <div className="p-5">
-                  <h3 className="text-xl font-semibold">{p.full_name.split(" ")[0]}, {p.age}</h3>
+                  <h3 className="flex flex-wrap items-center gap-2 text-xl font-semibold">
+                    {p.full_name.split(" ")[0]}, {p.age}
+                    {staffMap[p.id] && (
+                      <RoleBadge role={staffMap[p.id].role} color={staffMap[p.id].color} />
+                    )}
+                  </h3>
                   <p className="mt-0.5 text-sm text-muted-foreground">{p.city} · {p.state}</p>
                   <p className="mt-1 text-xs text-[var(--rose)]">{p.church}</p>
                   {p.bio && <p className="mt-3 line-clamp-2 text-sm text-foreground/70">{p.bio}</p>}

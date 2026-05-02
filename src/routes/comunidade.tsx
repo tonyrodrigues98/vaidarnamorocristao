@@ -9,6 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Send, Trash2, Users, Pencil, Check, X, Reply, MoreHorizontal, Pin, PinOff, ShieldCheck } from "lucide-react";
 import { useLongPress } from "@/hooks/use-long-press";
 import { markSeen } from "@/lib/lastSeen";
+import { RoleBadge } from "@/components/RoleBadge";
+import { type AppRole, type RoleColor, ROLE_PRIORITY } from "@/lib/roles";
 
 type GMsg = {
   id: string;
@@ -24,7 +26,8 @@ type Profile = { id: string; full_name: string; photo_url: string | null };
 export const Route = createFileRoute("/comunidade")({ component: Comunidade });
 
 function Comunidade() {
-  const { user, isAdmin, loading } = useAuth();
+  const { user, isAdmin, role, loading } = useAuth();
+  const canModerateMessages = isAdmin || role === "moderador";
   const [messages, setMessages] = useState<GMsg[]>([]);
   const [profiles, setProfiles] = useState<Record<string, Profile>>({});
   const [text, setText] = useState("");
@@ -37,16 +40,24 @@ function Comunidade() {
   const [replyTo, setReplyTo] = useState<GMsg | null>(null);
   const [highlightId, setHighlightId] = useState<string | null>(null);
   const messageRefs = useRef<Record<string, HTMLDivElement | null>>({});
-  const [adminIds, setAdminIds] = useState<Set<string>>(new Set());
+  const [staffMap, setStaffMap] = useState<Record<string, { role: AppRole; color: RoleColor | null }>>({});
 
   useEffect(() => {
     if (!user) return;
     (async () => {
-      const { data } = await supabase.rpc("get_admin_ids");
-      const ids = ((data ?? []) as any[]).map((x: any) =>
-        typeof x === "string" ? x : (x.get_admin_ids ?? x.user_id ?? "")
-      ).filter(Boolean);
-      setAdminIds(new Set(ids));
+      const { data } = await supabase
+        .from("user_roles")
+        .select("user_id, role, badge_color")
+        .neq("role", "user");
+      const map: Record<string, { role: AppRole; color: RoleColor | null }> = {};
+      for (const row of (data ?? []) as Array<{ user_id: string; role: AppRole; badge_color: string | null }>) {
+        const existing = map[row.user_id];
+        // pick highest priority role per user
+        if (!existing || ROLE_PRIORITY.indexOf(row.role) < ROLE_PRIORITY.indexOf(existing.role)) {
+          map[row.user_id] = { role: row.role, color: (row.badge_color as RoleColor | null) ?? null };
+        }
+      }
+      setStaffMap(map);
     })();
   }, [user]);
 
@@ -221,7 +232,7 @@ function Comunidade() {
                 .map((m) => {
                   const p = profiles[m.sender_id];
                   const name = p?.full_name?.split(" ")[0] ?? "Alguém";
-                  const senderIsAdmin = adminIds.has(m.sender_id);
+                  const senderStaff = staffMap[m.sender_id];
                   return (
                     <div
                       key={`pin-${m.id}`}
@@ -236,8 +247,8 @@ function Comunidade() {
                         <span className="min-w-0 flex-1">
                           <span className="flex items-center gap-1 font-semibold text-foreground">
                             {name}
-                            {senderIsAdmin && (
-                              <ShieldCheck className="admin-icon-sparkle h-3 w-3" aria-label="Admin" />
+                            {senderStaff && (
+                              <RoleBadge role={senderStaff.role} color={senderStaff.color} />
                             )}
                           </span>
                           <span className="line-clamp-2 text-muted-foreground">{m.content}</span>
@@ -268,7 +279,7 @@ function Comunidade() {
                 .map((m) => {
                 const p = profiles[m.sender_id];
                 const mine = user && m.sender_id === user.id;
-                const canDelete = mine || isAdmin;
+                const canDelete = mine || canModerateMessages;
                 const canEdit = mine;
                 const isEditing = editingId === m.id;
                 const name = p?.full_name?.split(" ")[0] ?? "Alguém";
@@ -279,7 +290,9 @@ function Comunidade() {
                   ? (profiles[replied.sender_id]?.full_name?.split(" ")[0] ?? "Alguém")
                   : "";
                 const isFlash = highlightId === m.id;
-                const senderIsAdmin = adminIds.has(m.sender_id);
+                const senderStaff = staffMap[m.sender_id];
+                const senderIsAdmin = !!senderStaff && (senderStaff.role === "admin" || senderStaff.role === "super_admin") && (senderStaff.color ?? "gold") === "gold";
+                const senderIsStaff = !!senderStaff;
                 return (
                   <div
                     key={m.id}
@@ -287,7 +300,7 @@ function Comunidade() {
                     className={`group relative flex scroll-mt-24 items-start gap-3 rounded-xl transition-colors duration-500 ${isFlash ? "bg-primary/10" : ""}`}
                   >
                     {mine ? (
-                      <div className={`h-9 w-9 shrink-0 overflow-hidden rounded-full bg-muted ${senderIsAdmin ? "ring-2 ring-[var(--gold)] ring-offset-2 ring-offset-background" : ""}`}>
+                      <div className={`h-9 w-9 shrink-0 overflow-hidden rounded-full bg-muted ${senderIsAdmin ? "ring-2 ring-[var(--gold)] ring-offset-2 ring-offset-background" : senderIsStaff ? "ring-2 ring-primary/40 ring-offset-2 ring-offset-background" : ""}`}>
                         {p?.photo_url ? (
                           <img src={p.photo_url} alt="" className="h-full w-full object-cover" />
                         ) : (
@@ -300,7 +313,7 @@ function Comunidade() {
                       <Link
                         to="/pretendentes/$id"
                         params={{ id: m.sender_id }}
-                        className={`h-9 w-9 shrink-0 overflow-hidden rounded-full bg-muted transition hover:ring-2 hover:ring-primary/40 ${senderIsAdmin ? "ring-2 ring-[var(--gold)] ring-offset-2 ring-offset-background" : "ring-0"}`}
+                        className={`h-9 w-9 shrink-0 overflow-hidden rounded-full bg-muted transition hover:ring-2 hover:ring-primary/40 ${senderIsAdmin ? "ring-2 ring-[var(--gold)] ring-offset-2 ring-offset-background" : senderIsStaff ? "ring-2 ring-primary/40 ring-offset-2 ring-offset-background" : "ring-0"}`}
                         aria-label={`Ver perfil de ${name}`}
                       >
                         {p?.photo_url ? (
@@ -322,8 +335,12 @@ function Comunidade() {
                         {mine ? (
                           <span className="flex items-center gap-1 text-sm font-semibold">
                             {name}
-                            {adminIds.has(m.sender_id) && (
-                              <ShieldCheck className="admin-icon-sparkle h-3.5 w-3.5 shrink-0" aria-label="Admin" />
+                            {senderStaff && (
+                              senderIsAdmin ? (
+                                <ShieldCheck className="admin-icon-sparkle h-3.5 w-3.5 shrink-0" aria-label="Admin" />
+                              ) : (
+                                <RoleBadge role={senderStaff.role} color={senderStaff.color} />
+                              )
                             )}
                           </span>
                         ) : (
@@ -333,8 +350,12 @@ function Comunidade() {
                             className="flex items-center gap-1 text-sm font-semibold text-foreground hover:text-primary hover:underline"
                           >
                             {name}
-                            {adminIds.has(m.sender_id) && (
-                              <ShieldCheck className="admin-icon-sparkle h-3.5 w-3.5 shrink-0" aria-label="Admin" />
+                            {senderStaff && (
+                              senderIsAdmin ? (
+                                <ShieldCheck className="admin-icon-sparkle h-3.5 w-3.5 shrink-0" aria-label="Admin" />
+                              ) : (
+                                <RoleBadge role={senderStaff.role} color={senderStaff.color} />
+                              )
                             )}
                           </Link>
                         )}

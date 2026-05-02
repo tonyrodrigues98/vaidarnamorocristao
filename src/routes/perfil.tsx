@@ -15,7 +15,10 @@ import {
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { BR_STATES } from "@/lib/constants";
-import { Camera, Save, CheckCircle2, Clock, XCircle } from "lucide-react";
+import { Camera, Save, CheckCircle2, Clock, XCircle, Shield } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { ROLE_CONFIG, COLOR_HEX, type RoleColor } from "@/lib/roles";
+import { RoleBadge } from "@/components/RoleBadge";
 
 export const Route = createFileRoute("/perfil")({ component: PerfilPage });
 
@@ -33,7 +36,18 @@ const profileSchema = z.object({
 });
 
 function PerfilPage() {
-  const { user, loading } = useAuth();
+  const { user, loading, role, badgeColor, publicListing, refreshRole } = useAuth();
+  const [savingRole, setSavingRole] = useState(false);
+  const [localColor, setLocalColor] = useState<RoleColor | null>(null);
+  const [localPublic, setLocalPublic] = useState(false);
+
+  useEffect(() => {
+    setLocalColor(badgeColor);
+    setLocalPublic(publicListing);
+  }, [badgeColor, publicListing]);
+
+  const isStaff = role !== "user";
+  const roleCfg = ROLE_CONFIG[role];
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [savingProfile, setSavingProfile] = useState(false);
@@ -93,6 +107,23 @@ function PerfilPage() {
   }, [user]);
 
   if (!loading && !user) return <Navigate to="/auth/login" />;
+
+  async function saveRoleSettings() {
+    if (!user || !isStaff) return;
+    setSavingRole(true);
+    const { error } = await supabase
+      .from("user_roles")
+      .update({
+        badge_color: localColor ?? roleCfg.defaultColor,
+        public_listing: localPublic,
+      })
+      .eq("user_id", user.id)
+      .eq("role", role);
+    setSavingRole(false);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Configurações de cargo atualizadas");
+    refreshRole();
+  }
 
   function handlePhoto(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0]; if (!f) return;
@@ -183,6 +214,9 @@ function PerfilPage() {
           <TabsList className="w-full sm:w-auto">
             <TabsTrigger value="profile" className="flex-1 sm:flex-none">Sobre mim</TabsTrigger>
             <TabsTrigger value="prefs" className="flex-1 sm:flex-none">Preferências</TabsTrigger>
+            {isStaff && (
+              <TabsTrigger value="role" className="flex-1 sm:flex-none">Cargo</TabsTrigger>
+            )}
           </TabsList>
 
           {/* Profile tab */}
@@ -343,6 +377,69 @@ function PerfilPage() {
               </Button>
             </form>
           </TabsContent>
+
+          {isStaff && (
+            <TabsContent value="role" className="mt-6">
+              <div className="glass animate-fade-up space-y-6 rounded-3xl p-6 shadow-elegant sm:p-8">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10">
+                    <Shield className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-semibold">Seu cargo</h2>
+                    <p className="text-sm text-muted-foreground">{roleCfg.description}</p>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <Label>Pré-visualização</Label>
+                  <div className="rounded-xl border border-border bg-card/40 p-4">
+                    <RoleBadge role={role} color={localColor ?? roleCfg.defaultColor} size="md" showDescription />
+                  </div>
+                </div>
+
+                {(roleCfg.availableColors?.length ?? 0) > 0 && (
+                  <div className="space-y-3">
+                    <Label>Cor da badge</Label>
+                    <div className="flex flex-wrap gap-2">
+                      {roleCfg.availableColors.map((c) => {
+                        const hex = COLOR_HEX[c];
+                        const selected = (localColor ?? roleCfg.defaultColor) === c;
+                        return (
+                          <button
+                            type="button"
+                            key={c}
+                            onClick={() => setLocalColor(c)}
+                            className={`flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium transition ${selected ? "border-foreground" : "border-border"}`}
+                            style={selected ? { boxShadow: `0 0 0 2px ${hex.ring}` } : undefined}
+                          >
+                            <span className="h-4 w-4 rounded-full" style={{ backgroundColor: hex.bg }} />
+                            {hex.name}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {(role === "apresentador" || role === "moderador") && (
+                  <div className="flex items-center justify-between rounded-xl border border-border bg-card/40 p-4">
+                    <div>
+                      <p className="font-medium">Aparecer em pretendentes</p>
+                      <p className="text-xs text-muted-foreground">
+                        Ative se quiser que seu perfil também apareça na busca de pretendentes.
+                      </p>
+                    </div>
+                    <Switch checked={localPublic} onCheckedChange={setLocalPublic} />
+                  </div>
+                )}
+
+                <Button onClick={saveRoleSettings} disabled={savingRole} size="lg" className="w-full">
+                  <Save className="mr-2 h-4 w-4" /> {savingRole ? "Salvando..." : "Salvar cargo"}
+                </Button>
+              </div>
+            </TabsContent>
+          )}
         </Tabs>
 
         <div className="mt-6 text-center text-xs text-muted-foreground">

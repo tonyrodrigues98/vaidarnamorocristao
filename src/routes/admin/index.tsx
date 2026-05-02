@@ -1,36 +1,68 @@
 import { createFileRoute, Navigate, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Check, X, Ban, ShieldAlert, Flag, Newspaper, Trash2 } from "lucide-react";
+import { Check, X, Ban, ShieldAlert, Flag, Newspaper, Trash2, Users as UsersIcon, ClipboardList, MessageSquareWarning } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 import type { Database } from "@/integrations/supabase/types";
+import { ROLE_CONFIG, ROLE_PRIORITY, type AppRole } from "@/lib/roles";
+import { RoleBadge } from "@/components/RoleBadge";
 
 type Row = Database["public"]["Tables"]["profiles"]["Row"];
 type ProfileUpdate = Database["public"]["Tables"]["profiles"]["Update"];
 type Report = Database["public"]["Tables"]["reports"]["Row"];
 type DailyPost = { id: string; title: string; content: string; published: boolean; published_at: string; kind: "news" | "devotional" };
+type PreCadastro = Database["public"]["Tables"]["pre_cadastros"]["Row"];
+type AdminUserRow = Row & { primaryRole: AppRole };
 
 export const Route = createFileRoute("/admin/")({ component: Admin });
 
 function Admin() {
-  const { user, isAdmin, loading } = useAuth();
+  const { user, isAdmin, role, loading } = useAuth();
+  const isSuperAdmin = role === "super_admin";
+  const isApresentador = role === "apresentador";
+  const isModerador = role === "moderador";
+  const canSeeAdminPanel = isAdmin || isApresentador || isModerador;
+
+  type TabKey = "pending" | "approved" | "rejected" | "banned" | "reports" | "posts" | "users" | "pre_cadastros";
+
+  const availableTabs = useMemo<TabKey[]>(() => {
+    if (isSuperAdmin) return ["pending","approved","rejected","banned","reports","posts","users","pre_cadastros"];
+    if (isAdmin) return ["pending","approved","rejected","banned","reports","posts"];
+    if (isApresentador) return ["pre_cadastros"];
+    return [];
+  }, [isAdmin, isSuperAdmin, isApresentador]);
+
   const [rows, setRows] = useState<Row[]>([]);
-  const [tab, setTab] = useState<"pending" | "approved" | "rejected" | "banned" | "reports" | "posts">("pending");
+  const [tab, setTab] = useState<TabKey>("pending");
+
+  useEffect(() => {
+    if (availableTabs.length > 0 && !availableTabs.includes(tab)) {
+      setTab(availableTabs[0]);
+    }
+  }, [availableTabs, tab]);
+
   const [busy, setBusy] = useState<string | null>(null);
   const [reports, setReports] = useState<Array<Report & { reporter?: { full_name: string | null }; reported?: { full_name: string | null; id: string } }>>([]);
   const [posts, setPosts] = useState<DailyPost[]>([]);
+  const [users, setUsers] = useState<AdminUserRow[]>([]);
+  const [preCads, setPreCads] = useState<PreCadastro[]>([]);
+  const [editingPC, setEditingPC] = useState<PreCadastro | null>(null);
+  const [pcDraft, setPcDraft] = useState<Partial<PreCadastro>>({});
+  const [pcBusy, setPcBusy] = useState(false);
   const [newTitle, setNewTitle] = useState("");
   const [newContent, setNewContent] = useState("");
   const [newKind, setNewKind] = useState<"news" | "devotional">("news");
   const [postBusy, setPostBusy] = useState(false);
 
-  async function load(status: typeof tab) {
+  async function load(status: TabKey) {
     if (status === "reports") {
       const { data: rs, error } = await supabase.from("reports").select("*").order("created_at", { ascending: false });
       if (error) { toast.error(error.message); return; }
@@ -49,16 +81,41 @@ function Admin() {
       setPosts((data ?? []) as DailyPost[]);
       return;
     }
+    if (status === "users") {
+      const [{ data: profs, error: pe }, { data: roles }] = await Promise.all([
+        supabase.from("profiles").select("*").order("created_at", { ascending: false }),
+        supabase.from("user_roles").select("user_id, role"),
+      ]);
+      if (pe) { toast.error(pe.message); return; }
+      const roleMap = new Map<string, AppRole>();
+      for (const r of (roles ?? []) as Array<{ user_id: string; role: AppRole }>) {
+        const cur = roleMap.get(r.user_id);
+        if (!cur || ROLE_PRIORITY.indexOf(r.role) < ROLE_PRIORITY.indexOf(cur)) {
+          roleMap.set(r.user_id, r.role);
+        }
+      }
+      setUsers(((profs ?? []) as Row[]).map((p) => ({ ...p, primaryRole: roleMap.get(p.id) ?? "user" })));
+      return;
+    }
+    if (status === "pre_cadastros") {
+      const { data, error } = await supabase
+        .from("pre_cadastros")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (error) { toast.error(error.message); return; }
+      setPreCads((data ?? []) as PreCadastro[]);
+      return;
+    }
     const { data, error } = await supabase
       .from("profiles").select("*").eq("status", status as "pending" | "approved" | "rejected" | "banned").order("created_at", { ascending: false });
     if (error) toast.error(error.message);
     setRows((data ?? []) as Row[]);
   }
 
-  useEffect(() => { if (isAdmin) load(tab); }, [isAdmin, tab]);
+  useEffect(() => { if (canSeeAdminPanel) load(tab); }, [canSeeAdminPanel, tab]);
 
   if (!loading && !user) return <Navigate to="/auth/login" />;
-  if (!loading && !isAdmin) return (
+  if (!loading && !canSeeAdminPanel) return (
     <div className="min-h-screen"><Header />
       <main className="mx-auto max-w-md px-4 py-20 text-center">
         <ShieldAlert className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
@@ -68,6 +125,25 @@ function Admin() {
     </div>
   );
 
+  // Moderador: simple landing
+  if (!loading && isModerador) {
+    return (
+      <div className="min-h-screen">
+        <Header />
+        <main className="mx-auto max-w-2xl px-4 py-16">
+          <div className="glass rounded-3xl p-8 text-center shadow-soft">
+            <MessageSquareWarning className="mx-auto h-12 w-12 text-primary" />
+            <h1 className="mt-4 text-2xl font-semibold">Painel do Moderador</h1>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Como Moderador, você pode excluir mensagens inadequadas diretamente na Comunidade.
+            </p>
+            <Button asChild className="mt-6"><Link to="/comunidade">Ir para a Comunidade</Link></Button>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   async function update(id: string, patch: ProfileUpdate) {
     setBusy(id);
     const { error } = await supabase.from("profiles").update(patch).eq("id", id);
@@ -75,6 +151,55 @@ function Admin() {
     if (error) { toast.error(error.message); return; }
     toast.success("Atualizado");
     load(tab);
+  }
+
+  async function changeUserRole(userId: string, newRole: AppRole, currentRole: AppRole) {
+    if (!user) return;
+    if (newRole === currentRole) return;
+    setBusy(userId);
+    // Remove current non-user role(s) and add new one (or just set to user)
+    const { error: delErr } = await supabase
+      .from("user_roles")
+      .delete()
+      .eq("user_id", userId);
+    if (delErr) { setBusy(null); toast.error(delErr.message); return; }
+    const { error: insErr } = await supabase
+      .from("user_roles")
+      .insert({ user_id: userId, role: newRole });
+    setBusy(null);
+    if (insErr) { toast.error(insErr.message); return; }
+    toast.success(`Papel atualizado para ${ROLE_CONFIG[newRole].label}`);
+    load("users");
+  }
+
+  async function savePreCadastro() {
+    if (!user) return;
+    setPcBusy(true);
+    if (editingPC) {
+      const { error } = await supabase
+        .from("pre_cadastros")
+        .update({ ...pcDraft })
+        .eq("id", editingPC.id);
+      setPcBusy(false);
+      if (error) { toast.error(error.message); return; }
+      toast.success("Pré-cadastro atualizado");
+    } else {
+      const { error } = await supabase
+        .from("pre_cadastros")
+        .insert({ ...pcDraft, created_by: user.id });
+      setPcBusy(false);
+      if (error) { toast.error(error.message); return; }
+      toast.success("Pré-cadastro salvo");
+    }
+    setEditingPC(null);
+    setPcDraft({});
+    load("pre_cadastros");
+  }
+
+  async function deletePreCadastro(id: string) {
+    if (!confirm("Excluir este pré-cadastro?")) return;
+    const { error } = await supabase.from("pre_cadastros").delete().eq("id", id);
+    if (error) toast.error(error.message); else { toast.success("Excluído"); load("pre_cadastros"); }
   }
 
   async function createPost() {
@@ -107,21 +232,45 @@ function Admin() {
       <main className="mx-auto max-w-6xl px-4 py-10">
         <div className="animate-fade-up">
           <h1 className="text-4xl font-semibold">Painel administrativo</h1>
-          <p className="mt-1 text-muted-foreground">Aprovação de perfis, denúncias e conteúdo</p>
+          <p className="mt-1 text-muted-foreground">
+            {isSuperAdmin ? "Gestão completa da plataforma" :
+             isApresentador ? "Pré-cadastros para controle de pessoas" :
+             "Aprovação de perfis, denúncias e conteúdo"}
+          </p>
         </div>
 
-        <Tabs value={tab} onValueChange={(v) => setTab(v as typeof tab)} className="mt-8">
-          <TabsList>
-            <TabsTrigger value="pending">Pendentes</TabsTrigger>
-            <TabsTrigger value="approved">Aprovados</TabsTrigger>
-            <TabsTrigger value="rejected">Rejeitados</TabsTrigger>
-            <TabsTrigger value="banned">Banidos</TabsTrigger>
-            <TabsTrigger value="reports"><Flag className="mr-1 h-3 w-3" /> Denúncias</TabsTrigger>
-            <TabsTrigger value="posts"><Newspaper className="mr-1 h-3 w-3" /> Texto Diário</TabsTrigger>
+        <Tabs value={tab} onValueChange={(v) => setTab(v as TabKey)} className="mt-8">
+          <TabsList className="flex-wrap">
+            {availableTabs.includes("pending") && <TabsTrigger value="pending">Pendentes</TabsTrigger>}
+            {availableTabs.includes("approved") && <TabsTrigger value="approved">Aprovados</TabsTrigger>}
+            {availableTabs.includes("rejected") && <TabsTrigger value="rejected">Rejeitados</TabsTrigger>}
+            {availableTabs.includes("banned") && <TabsTrigger value="banned">Banidos</TabsTrigger>}
+            {availableTabs.includes("reports") && <TabsTrigger value="reports"><Flag className="mr-1 h-3 w-3" /> Denúncias</TabsTrigger>}
+            {availableTabs.includes("posts") && <TabsTrigger value="posts"><Newspaper className="mr-1 h-3 w-3" /> Texto Diário</TabsTrigger>}
+            {availableTabs.includes("users") && <TabsTrigger value="users"><UsersIcon className="mr-1 h-3 w-3" /> Usuários</TabsTrigger>}
+            {availableTabs.includes("pre_cadastros") && <TabsTrigger value="pre_cadastros"><ClipboardList className="mr-1 h-3 w-3" /> Pré-cadastros</TabsTrigger>}
           </TabsList>
 
           <TabsContent value={tab} className="mt-6">
-            {tab === "posts" ? (
+            {tab === "users" ? (
+              <UsersPanel
+                users={users}
+                busy={busy}
+                onChangeRole={changeUserRole}
+              />
+            ) : tab === "pre_cadastros" ? (
+              <PreCadastrosPanel
+                items={preCads}
+                editing={editingPC}
+                draft={pcDraft}
+                setDraft={setPcDraft}
+                onEdit={(p: PreCadastro) => { setEditingPC(p); setPcDraft(p); }}
+                onCancel={() => { setEditingPC(null); setPcDraft({}); }}
+                onSave={savePreCadastro}
+                onDelete={deletePreCadastro}
+                busy={pcBusy}
+              />
+            ) : tab === "posts" ? (
               <div className="space-y-6">
                 <div className="glass rounded-2xl p-5 shadow-soft">
                   <h3 className="text-lg font-semibold">Nova publicação</h3>
@@ -265,6 +414,126 @@ function Admin() {
           </TabsContent>
         </Tabs>
       </main>
+    </div>
+  );
+}
+
+function UsersPanel({
+  users, busy, onChangeRole,
+}: {
+  users: AdminUserRow[];
+  busy: string | null;
+  onChangeRole: (userId: string, newRole: AppRole, currentRole: AppRole) => void;
+}) {
+  if (users.length === 0) {
+    return <div className="glass rounded-2xl p-10 text-center text-muted-foreground shadow-soft">Nenhum usuário.</div>;
+  }
+  return (
+    <div className="grid gap-3">
+      {users.map((u) => (
+        <div key={u.id} className="glass flex flex-col gap-3 rounded-2xl p-4 shadow-soft sm:flex-row sm:items-center">
+          <div className="h-14 w-14 shrink-0 overflow-hidden rounded-full bg-muted">
+            {u.photo_url ? <img src={u.photo_url} alt="" className="h-full w-full object-cover" /> :
+              <div className="flex h-full w-full items-center justify-center bg-gradient-love text-white">{u.full_name.charAt(0)}</div>}
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <h3 className="font-semibold">{u.full_name}, {u.age}</h3>
+              <RoleBadge role={u.primaryRole} />
+            </div>
+            <p className="truncate text-xs text-muted-foreground">{u.sex} · {u.city}/{u.state} · {u.status}</p>
+          </div>
+          <div className="w-full sm:w-52">
+            <Select
+              value={u.primaryRole}
+              onValueChange={(v) => onChangeRole(u.id, v as AppRole, u.primaryRole)}
+              disabled={busy === u.id}
+            >
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {(Object.keys(ROLE_CONFIG) as AppRole[]).map((r) => (
+                  <SelectItem key={r} value={r}>{ROLE_CONFIG[r].label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function PreCadastrosPanel({
+  items, editing, draft, setDraft, onEdit, onCancel, onSave, onDelete, busy,
+}: {
+  items: PreCadastro[];
+  editing: PreCadastro | null;
+  draft: Partial<PreCadastro>;
+  setDraft: (d: Partial<PreCadastro>) => void;
+  onEdit: (p: PreCadastro) => void;
+  onCancel: () => void;
+  onSave: () => void;
+  onDelete: (id: string) => void;
+  busy: boolean;
+}) {
+  const set = <K extends keyof PreCadastro>(k: K, v: PreCadastro[K] | null) =>
+    setDraft({ ...draft, [k]: v });
+  const numOrNull = (s: string) => (s.trim() === "" ? null : Number(s));
+  return (
+    <div className="space-y-6">
+      <div className="glass rounded-2xl p-5 shadow-soft">
+        <h3 className="text-lg font-semibold">{editing ? "Editar pré-cadastro" : "Novo pré-cadastro"}</h3>
+        <p className="mt-1 text-xs text-muted-foreground">Nenhum campo é obrigatório. Preencha o que tiver.</p>
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          <div className="space-y-1 sm:col-span-2"><Label>Nome completo</Label><Input value={draft.full_name ?? ""} onChange={(e) => set("full_name", e.target.value || null)} /></div>
+          <div className="space-y-1"><Label>Email</Label><Input value={draft.email ?? ""} onChange={(e) => set("email", e.target.value || null)} /></div>
+          <div className="space-y-1"><Label>Telefone</Label><Input value={draft.phone ?? ""} onChange={(e) => set("phone", e.target.value || null)} /></div>
+          <div className="space-y-1"><Label>Idade</Label><Input type="number" value={draft.age ?? ""} onChange={(e) => set("age", numOrNull(e.target.value))} /></div>
+          <div className="space-y-1"><Label>Altura (cm)</Label><Input type="number" value={draft.height_cm ?? ""} onChange={(e) => set("height_cm", numOrNull(e.target.value))} /></div>
+          <div className="space-y-1"><Label>Sexo</Label><Input value={draft.sex ?? ""} onChange={(e) => set("sex", e.target.value || null)} placeholder="masculino / feminino" /></div>
+          <div className="space-y-1"><Label>Estado civil</Label><Input value={draft.marital ?? ""} onChange={(e) => set("marital", e.target.value || null)} placeholder="solteiro / divorciado" /></div>
+          <div className="space-y-1"><Label>Cidade</Label><Input value={draft.city ?? ""} onChange={(e) => set("city", e.target.value || null)} /></div>
+          <div className="space-y-1"><Label>Estado (UF)</Label><Input value={draft.state ?? ""} onChange={(e) => set("state", e.target.value || null)} maxLength={2} /></div>
+          <div className="space-y-1 sm:col-span-2"><Label>Igreja</Label><Input value={draft.church ?? ""} onChange={(e) => set("church", e.target.value || null)} /></div>
+          <div className="space-y-1"><Label>Anos de batismo</Label><Input type="number" value={draft.years_baptized ?? ""} onChange={(e) => set("years_baptized", numOrNull(e.target.value))} /></div>
+          <div className="space-y-1 sm:col-span-2"><Label>Sobre</Label><Textarea value={draft.bio ?? ""} onChange={(e) => set("bio", e.target.value || null)} /></div>
+          <div className="space-y-1"><Label>Idade desejada (mín)</Label><Input type="number" value={draft.pref_age_min ?? ""} onChange={(e) => set("pref_age_min", numOrNull(e.target.value))} /></div>
+          <div className="space-y-1"><Label>Idade desejada (máx)</Label><Input type="number" value={draft.pref_age_max ?? ""} onChange={(e) => set("pref_age_max", numOrNull(e.target.value))} /></div>
+          <div className="space-y-1 sm:col-span-2"><Label>Localização desejada</Label><Input value={draft.pref_location_scope ?? ""} onChange={(e) => set("pref_location_scope", e.target.value || null)} placeholder="regiao / brasil / mundo / personalizado" /></div>
+          <div className="space-y-1 sm:col-span-2"><Label>Qualidade que busca</Label><Input value={draft.pref_desired_quality ?? ""} onChange={(e) => set("pref_desired_quality", e.target.value || null)} /></div>
+          <div className="space-y-1 sm:col-span-2"><Label>Sobre o que procura</Label><Textarea value={draft.pref_looking_for_bio ?? ""} onChange={(e) => set("pref_looking_for_bio", e.target.value || null)} /></div>
+          <div className="space-y-1 sm:col-span-2"><Label>Notas internas</Label><Textarea value={draft.notes ?? ""} onChange={(e) => set("notes", e.target.value || null)} /></div>
+        </div>
+        <div className="mt-4 flex gap-2">
+          <Button onClick={onSave} disabled={busy}>{editing ? "Salvar alterações" : "Adicionar"}</Button>
+          {editing && <Button variant="outline" onClick={onCancel}>Cancelar</Button>}
+        </div>
+      </div>
+
+      {items.length === 0 ? (
+        <div className="glass rounded-2xl p-10 text-center text-muted-foreground shadow-soft">Nenhum pré-cadastro ainda.</div>
+      ) : (
+        <div className="grid gap-3">
+          {items.map((p) => (
+            <div key={p.id} className="glass rounded-2xl p-4 shadow-soft">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0 flex-1">
+                  <h4 className="font-semibold">{p.full_name ?? "(sem nome)"}{p.age ? `, ${p.age}` : ""}</h4>
+                  <p className="text-xs text-muted-foreground">
+                    {[p.sex, p.marital, p.city && p.state ? `${p.city}/${p.state}` : p.city || p.state, p.church].filter(Boolean).join(" · ")}
+                  </p>
+                  {p.bio && <p className="mt-2 line-clamp-2 text-sm text-foreground/80">{p.bio}</p>}
+                  {p.notes && <p className="mt-1 text-xs italic text-muted-foreground">📝 {p.notes}</p>}
+                </div>
+                <div className="flex flex-col gap-1">
+                  <Button size="sm" variant="outline" onClick={() => onEdit(p)}>Editar</Button>
+                  <Button size="sm" variant="ghost" onClick={() => onDelete(p.id)}><Trash2 className="h-4 w-4" /></Button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

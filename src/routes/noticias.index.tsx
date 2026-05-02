@@ -76,10 +76,8 @@ function Noticias() {
               </div>
             ) : (
               filtered.map((p) => (
-                <Link
+                <article
                   key={p.id}
-                  to="/noticias/$id"
-                  params={{ id: p.id }}
                   className={`animate-fade-up block rounded-3xl p-6 shadow-soft transition-shadow hover:shadow-elegant sm:p-7 ${
                     p.kind === "devotional"
                       ? "border border-[var(--rose)]/20 bg-[var(--petal)]/40"
@@ -115,10 +113,7 @@ function Noticias() {
                   >
                     {p.content}
                   </p>
-                  <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-[var(--rose)]">
-                    Ler artigo completo <ArrowRight className="h-3 w-3" />
-                  </span>
-                </Link>
+                </article>
               ))
             )}
           </TabsContent>

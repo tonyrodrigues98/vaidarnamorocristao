@@ -9,6 +9,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ArrowLeft, MapPin, Church, Heart, Flag, Ban, MessageCircle, Check, Sparkles, Baby, Globe2, ShieldOff } from "lucide-react";
+import { RoleBadge } from "@/components/RoleBadge";
+import { ROLE_PRIORITY, type AppRole, type RoleColor } from "@/lib/roles";
 
 type Full = {
   id: string; full_name: string; age: number; height_cm: number | null;
@@ -41,15 +43,23 @@ function Detail() {
   const [reportReason, setReportReason] = useState("");
   const [reportAlsoBlock, setReportAlsoBlock] = useState(true);
   const [mySex, setMySex] = useState<string | null>(null);
-  const [targetIsAdmin, setTargetIsAdmin] = useState(false);
+  const [targetRole, setTargetRole] = useState<{ role: AppRole; color: RoleColor | null } | null>(null);
 
   useEffect(() => {
     (async () => {
-      const { data } = await supabase.rpc("get_admin_ids");
-      const ids = ((data ?? []) as any[]).map((x: any) =>
-        typeof x === "string" ? x : (x.get_admin_ids ?? x.user_id ?? "")
-      );
-      setTargetIsAdmin(ids.includes(id));
+      const { data } = await supabase
+        .from("user_roles")
+        .select("role, badge_color")
+        .eq("user_id", id);
+      const rows = (data ?? []) as Array<{ role: AppRole; badge_color: string | null }>;
+      let best: { role: AppRole; color: RoleColor | null } | null = null;
+      for (const r of rows) {
+        if (r.role === "user") continue;
+        if (!best || ROLE_PRIORITY.indexOf(r.role) < ROLE_PRIORITY.indexOf(best.role)) {
+          best = { role: r.role, color: (r.badge_color as RoleColor | null) ?? null };
+        }
+      }
+      setTargetRole(best);
     })();
   }, [id]);
 
@@ -220,7 +230,12 @@ function Detail() {
 
           <div className="animate-fade-up space-y-6" style={{ animationDelay: "80ms" }}>
             <div>
-              <h1 className="text-4xl font-semibold">{profile.full_name}, {profile.age}</h1>
+              <h1 className="flex flex-wrap items-center gap-2 text-4xl font-semibold">
+                {profile.full_name}, {profile.age}
+                {targetRole && (
+                  <RoleBadge role={targetRole.role} color={targetRole.color} size="md" />
+                )}
+              </h1>
               <p className="mt-1 text-muted-foreground">{profile.marital === "solteiro" ? "Solteiro(a)" : "Divorciado(a)"} {profile.height_cm ? `· ${profile.height_cm} cm` : ""}</p>
             </div>
 
@@ -280,7 +295,7 @@ function Detail() {
             )}
 
             <div className="space-y-2">
-              {profile && mySex && profile.sex === mySex ? null : (targetIsAdmin && !isAdmin) ? null : matchId ? (
+              {profile && mySex && profile.sex === mySex ? null : (targetRole && !isAdmin) ? null : matchId ? (
                 <Button size="lg" className="w-full shadow-glow" asChild>
                   <Link to="/conversas/$matchId" params={{ matchId }}><MessageCircle className="mr-2 h-4 w-4" /> Conversar</Link>
                 </Button>
