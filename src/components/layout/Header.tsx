@@ -37,7 +37,8 @@ async function shareSite() {
 }
 
 export function Header() {
-  const { user, isAdmin, signOut } = useAuth();
+  const { user, isAdmin, role, signOut } = useAuth();
+  const canSeeAdminPanel = isAdmin || role === "apresentador" || role === "moderador";
   const navigate = useNavigate();
   const { theme, toggle: toggleTheme } = useTheme();
   const [interestCount, setInterestCount] = useState(0);
@@ -166,7 +167,7 @@ export function Header() {
               <Button variant="ghost" size="icon" onClick={toggleTheme} aria-label={theme === "dark" ? "Modo claro" : "Modo escuro"}>
                 {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
               </Button>
-              {isAdmin && (
+              {canSeeAdminPanel && (
                 <Button variant="ghost" size="sm" asChild>
                   <Link to="/admin"><Shield className="mr-1 h-4 w-4" /> Admin</Link>
                 </Button>
@@ -246,7 +247,7 @@ export function Header() {
                 >
                   {theme === "dark" ? <><Sun className="h-4 w-4" /> Modo claro</> : <><Moon className="h-4 w-4" /> Modo escuro</>}
                 </button>
-                {isAdmin && (
+                {canSeeAdminPanel && (
                   <MobileItem to="/admin" onClick={close}>
                     <span className="flex items-center gap-2"><Shield className="h-4 w-4" /> Admin</span>
                   </MobileItem>
