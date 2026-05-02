@@ -151,6 +151,41 @@ export type Database = {
         }
         Relationships: []
       }
+      message_flags: {
+        Row: {
+          created_at: string
+          flagged_by: string
+          id: string
+          message_id: string
+          reason: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          flagged_by: string
+          id?: string
+          message_id: string
+          reason: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          flagged_by?: string
+          id?: string
+          message_id?: string
+          reason?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "message_flags_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "global_messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       messages: {
         Row: {
           content: string
@@ -195,6 +230,90 @@ export type Database = {
             columns: ["reply_to_id"]
             isOneToOne: false
             referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pre_cadastro_matches: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          internal_notes: string | null
+          partner_age: number | null
+          partner_children_count: number | null
+          partner_church: string | null
+          partner_city: string | null
+          partner_full_name: string | null
+          partner_has_children: boolean | null
+          partner_height_cm: number | null
+          partner_marital: string | null
+          partner_pre_cadastro_id: string | null
+          partner_sex: string | null
+          partner_state: string | null
+          partner_user_id: string | null
+          partner_username: string | null
+          pre_cadastro_id: string
+          status: Database["public"]["Enums"]["couple_status"] | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          internal_notes?: string | null
+          partner_age?: number | null
+          partner_children_count?: number | null
+          partner_church?: string | null
+          partner_city?: string | null
+          partner_full_name?: string | null
+          partner_has_children?: boolean | null
+          partner_height_cm?: number | null
+          partner_marital?: string | null
+          partner_pre_cadastro_id?: string | null
+          partner_sex?: string | null
+          partner_state?: string | null
+          partner_user_id?: string | null
+          partner_username?: string | null
+          pre_cadastro_id: string
+          status?: Database["public"]["Enums"]["couple_status"] | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          internal_notes?: string | null
+          partner_age?: number | null
+          partner_children_count?: number | null
+          partner_church?: string | null
+          partner_city?: string | null
+          partner_full_name?: string | null
+          partner_has_children?: boolean | null
+          partner_height_cm?: number | null
+          partner_marital?: string | null
+          partner_pre_cadastro_id?: string | null
+          partner_sex?: string | null
+          partner_state?: string | null
+          partner_user_id?: string | null
+          partner_username?: string | null
+          pre_cadastro_id?: string
+          status?: Database["public"]["Enums"]["couple_status"] | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pre_cadastro_matches_partner_pre_cadastro_id_fkey"
+            columns: ["partner_pre_cadastro_id"]
+            isOneToOne: false
+            referencedRelation: "pre_cadastros"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pre_cadastro_matches_pre_cadastro_id_fkey"
+            columns: ["pre_cadastro_id"]
+            isOneToOne: false
+            referencedRelation: "pre_cadastros"
             referencedColumns: ["id"]
           },
         ]
@@ -511,6 +630,7 @@ export type Database = {
     }
     Functions: {
       get_admin_ids: { Args: never; Returns: string[] }
+      get_flagged_message_ids: { Args: never; Returns: string[] }
       get_hidden_staff_ids: { Args: never; Returns: string[] }
       get_user_primary_role: {
         Args: { _user_id: string }
@@ -528,6 +648,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user" | "super_admin" | "apresentador" | "moderador"
+      couple_status: "aceitaram_conversar" | "namorando" | "casamento_marcado"
       daily_post_kind: "news" | "devotional"
       location_scope: "regiao" | "brasil" | "mundo" | "personalizado"
       marital_status: "solteiro" | "divorciado"
@@ -662,6 +783,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user", "super_admin", "apresentador", "moderador"],
+      couple_status: ["aceitaram_conversar", "namorando", "casamento_marcado"],
       daily_post_kind: ["news", "devotional"],
       location_scope: ["regiao", "brasil", "mundo", "personalizado"],
       marital_status: ["solteiro", "divorciado"],
