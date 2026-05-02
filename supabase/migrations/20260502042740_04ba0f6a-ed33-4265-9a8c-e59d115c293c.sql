@@ -1,0 +1,1 @@
+ALTER TABLE public.pre_cadastros ADD COLUMN IF NOT EXISTS tiktok_user text;

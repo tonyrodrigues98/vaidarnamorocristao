@@ -224,6 +224,7 @@ export type Database = {
           pref_looking_for_bio: string | null
           sex: string | null
           state: string | null
+          tiktok_user: string | null
           updated_at: string
           years_baptized: number | null
         }
@@ -251,6 +252,7 @@ export type Database = {
           pref_looking_for_bio?: string | null
           sex?: string | null
           state?: string | null
+          tiktok_user?: string | null
           updated_at?: string
           years_baptized?: number | null
         }
@@ -278,6 +280,7 @@ export type Database = {
           pref_looking_for_bio?: string | null
           sex?: string | null
           state?: string | null
+          tiktok_user?: string | null
           updated_at?: string
           years_baptized?: number | null
         }
