@@ -214,6 +214,7 @@ export type Database = {
           marital: string | null
           notes: string | null
           phone: string | null
+          photo_url: string | null
           pref_accepts_children: boolean | null
           pref_age_max: number | null
           pref_age_min: number | null
@@ -240,6 +241,7 @@ export type Database = {
           marital?: string | null
           notes?: string | null
           phone?: string | null
+          photo_url?: string | null
           pref_accepts_children?: boolean | null
           pref_age_max?: number | null
           pref_age_min?: number | null
@@ -266,6 +268,7 @@ export type Database = {
           marital?: string | null
           notes?: string | null
           phone?: string | null
+          photo_url?: string | null
           pref_accepts_children?: boolean | null
           pref_age_max?: number | null
           pref_age_min?: number | null
