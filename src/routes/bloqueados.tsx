@@ -1,4 +1,5 @@
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
+import { RequireApproved } from "@/components/RequireApproved";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -7,7 +8,7 @@ import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { Ban, ShieldOff, ArrowLeft } from "lucide-react";
 
-export const Route = createFileRoute("/bloqueados")({ component: BlockedPage });
+export const Route = createFileRoute("/bloqueados")({ component: () => (<RequireApproved><BlockedPage /></RequireApproved>) });
 
 type Row = {
   blocked_id: string;

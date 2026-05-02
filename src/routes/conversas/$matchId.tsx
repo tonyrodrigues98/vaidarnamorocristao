@@ -1,4 +1,5 @@
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
+import { RequireApproved } from "@/components/RequireApproved";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -23,7 +24,7 @@ type Msg = {
 };
 type Partner = { id: string; full_name: string; photo_url: string | null };
 
-export const Route = createFileRoute("/conversas/$matchId")({ component: Chat });
+export const Route = createFileRoute("/conversas/$matchId")({ component: () => (<RequireApproved><Chat /></RequireApproved>) });
 
 function Chat() {
   const { matchId } = Route.useParams();

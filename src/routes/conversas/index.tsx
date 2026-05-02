@@ -1,4 +1,5 @@
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
+import { RequireApproved } from "@/components/RequireApproved";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
@@ -13,7 +14,7 @@ type Item = {
   unread: boolean;
 };
 
-export const Route = createFileRoute("/conversas/")({ component: List });
+export const Route = createFileRoute("/conversas/")({ component: () => (<RequireApproved><List /></RequireApproved>) });
 
 function List() {
   const { user, loading } = useAuth();

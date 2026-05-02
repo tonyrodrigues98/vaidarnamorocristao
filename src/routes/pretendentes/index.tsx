@@ -1,4 +1,5 @@
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
+import { RequireApproved } from "@/components/RequireApproved";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
@@ -18,7 +19,7 @@ type Profile = {
 };
 type StaffInfo = { role: AppRole; color: RoleColor | null };
 
-export const Route = createFileRoute("/pretendentes/")({ component: List });
+export const Route = createFileRoute("/pretendentes/")({ component: () => (<RequireApproved><List /></RequireApproved>) });
 
 function List() {
   const { user, loading } = useAuth();
