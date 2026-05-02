@@ -6,7 +6,7 @@ import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, Send, Trash2, Pencil, Check, X, Reply, MoreHorizontal } from "lucide-react";
+import { ArrowLeft, Send, Trash2, Pencil, Check, X, Reply, MoreHorizontal, CheckCheck } from "lucide-react";
 import { useLongPress } from "@/hooks/use-long-press";
 
 type Msg = {
@@ -256,9 +256,20 @@ function Chat() {
                   ) : (
                     <>
                       <p className="whitespace-pre-wrap break-words">{m.content}</p>
-                      <p className={`mt-1 text-[10px] ${mine ? "text-white/70" : "text-muted-foreground"}`}>
-                        {new Date(m.created_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
-                        {m.edited_at ? " · editado" : ""}
+                      <p className={`mt-1 flex items-center gap-1 text-[10px] ${mine ? "text-white/70" : "text-muted-foreground"}`}>
+                        <span>
+                          {new Date(m.created_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+                          {m.edited_at ? " · editado" : ""}
+                        </span>
+                        {mine && (
+                          m.read_at ? (
+                            <span className="ml-0.5 inline-flex items-center gap-0.5" title={`Visto ${new Date(m.read_at).toLocaleString("pt-BR")}`}>
+                              <CheckCheck className="h-3 w-3" /> Visto
+                            </span>
+                          ) : (
+                            <Check className="ml-0.5 h-3 w-3" aria-label="Enviada" />
+                          )
+                        )}
                       </p>
                     </>
                   )}
