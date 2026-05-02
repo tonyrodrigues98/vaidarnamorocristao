@@ -6,7 +6,7 @@ import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import {
   Clock, CheckCircle2, XCircle, Users, Heart, MessageCircle, Sparkles,
-  Globe, Newspaper, Eye, TrendingUp,
+  Globe, Newspaper, Eye, TrendingUp, User as UserIcon, Gem,
 } from "lucide-react";
 import {
   ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid,
