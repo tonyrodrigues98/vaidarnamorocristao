@@ -318,14 +318,22 @@ function Comunidade() {
                     >
                       <div className="flex items-baseline gap-2">
                         {mine ? (
-                          <span className="text-sm font-semibold">{name}</span>
+                          <span className="flex items-center gap-1 text-sm font-semibold">
+                            {name}
+                            {adminIds.has(m.sender_id) && (
+                              <ShieldCheck className="h-3.5 w-3.5 text-primary" aria-label="Admin" />
+                            )}
+                          </span>
                         ) : (
                           <Link
                             to="/pretendentes/$id"
                             params={{ id: m.sender_id }}
-                            className="text-sm font-semibold text-foreground hover:text-primary hover:underline"
+                            className="flex items-center gap-1 text-sm font-semibold text-foreground hover:text-primary hover:underline"
                           >
                             {name}
+                            {adminIds.has(m.sender_id) && (
+                              <ShieldCheck className="h-3.5 w-3.5 text-primary" aria-label="Admin" />
+                            )}
                           </Link>
                         )}
                         <span className="text-[11px] text-muted-foreground">
