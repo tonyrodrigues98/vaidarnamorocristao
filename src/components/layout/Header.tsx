@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import {
   Heart, LogOut, Shield, MessageCircle, Sparkles, Menu, X,
   User as UserIcon, Users, Newspaper, Globe, Ban, Share2, Gem, Sun, Moon, MoreHorizontal,
+  ChevronDown, Heart as HeartIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 import { getLastSeen } from "@/lib/lastSeen";
@@ -15,6 +16,8 @@ import {
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 
 async function shareSite() {
@@ -52,6 +55,13 @@ export function Header() {
   const [newsCount, setNewsCount] = useState(0);
   const [communityCount, setCommunityCount] = useState(0);
   const [open, setOpen] = useState(false);
+  const [profile, setProfile] = useState<{ photo_url: string | null; full_name: string | null } | null>(null);
+
+  useEffect(() => {
+    if (!user) { setProfile(null); return; }
+    supabase.from("profiles").select("photo_url, full_name").eq("id", user.id).maybeSingle()
+      .then(({ data }) => setProfile(data ?? null));
+  }, [user]);
 
   useEffect(() => {
     if (!user) { setInterestCount(0); setUnreadCount(0); setNewsCount(0); setCommunityCount(0); return; }
@@ -126,9 +136,13 @@ export function Header() {
       <span className="ml-1 rounded-full bg-[var(--rose)] px-1.5 py-[1px] text-[10px] font-bold text-white">{n > 99 ? "99+" : n}</span>
     ) : null;
 
+  const relCount = unreadCount + interestCount;
+  const initials = (profile?.full_name ?? user?.email ?? "?")
+    .split(" ").map((s) => s[0]).filter(Boolean).slice(0, 2).join("").toUpperCase();
+
   return (
     <header className="sticky top-0 z-50 glass">
-      <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-2 px-4 sm:px-6 min-w-0">
+      <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-3 px-4 sm:px-6 min-w-0">
         <Link to="/" className="flex items-center gap-2.5 group min-w-0 shrink-0" onClick={close}>
           <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-love shadow-glow transition-transform group-hover:scale-105">
             <Heart className="h-4 w-4 text-white" fill="white" />
@@ -139,35 +153,40 @@ export function Header() {
         </Link>
 
         {/* Desktop nav */}
-        <nav className="hidden min-w-0 items-center gap-0.5 md:flex">
+        <nav className="hidden min-w-0 flex-1 items-center justify-end gap-1 md:flex">
           {user ? (
             <>
-              <Button variant="ghost" size="sm" asChild className="px-2"><Link to="/dashboard">Início</Link></Button>
-              <Button variant="ghost" size="sm" asChild className="px-2">
-                <Link to="/perfil"><UserIcon className="mr-1 h-4 w-4" /> Perfil</Link>
-              </Button>
+              <Button variant="ghost" size="sm" asChild><Link to="/dashboard">Início</Link></Button>
               {isApproved && (
-                <>
-                  <Button variant="ghost" size="sm" asChild className="px-2">
-                    <Link to="/conversas"><MessageCircle className="mr-1 h-4 w-4" /> Conversas<Badge n={unreadCount} /></Link>
-                  </Button>
-                  <Button variant="ghost" size="sm" asChild className="px-2">
-                    <Link to="/comunidade"><Globe className="mr-1 h-4 w-4" /> Comunidade<Badge n={communityCount} /></Link>
-                  </Button>
-                  <Button variant="ghost" size="sm" asChild className="px-2">
-                    <Link to="/pretendentes"><Gem className="mr-1 h-4 w-4" /> Pretendentes</Link>
-                  </Button>
-                  <Button variant="ghost" size="sm" asChild className="px-2">
-                    <Link to="/interesses"><Sparkles className="mr-1 h-4 w-4" /> Interesses<Badge n={interestCount} /></Link>
-                  </Button>
-                  <Button variant="ghost" size="sm" asChild className="px-2">
-                    <Link to="/matches"><Users className="mr-1 h-4 w-4" /> Matches</Link>
-                  </Button>
-                </>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm" className="gap-1">
+                      <HeartIcon className="h-4 w-4" /> Relacionamento
+                      <ChevronDown className="h-3.5 w-3.5 opacity-70" />
+                      <Badge n={relCount} />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start" className="w-72 p-2">
+                    <DropdownMenuLabel className="text-xs uppercase tracking-wide text-muted-foreground">
+                      Conexões
+                    </DropdownMenuLabel>
+                    <div className="grid grid-cols-2 gap-1">
+                      <MegaItem to="/pretendentes" icon={<Gem className="h-4 w-4" />} title="Pretendentes" desc="Descobrir perfis" />
+                      <MegaItem to="/interesses" icon={<Sparkles className="h-4 w-4" />} title="Interesses" desc="Quem te quer" badge={interestCount} />
+                      <MegaItem to="/matches" icon={<Users className="h-4 w-4" />} title="Matches" desc="Conexões mútuas" />
+                      <MegaItem to="/conversas" icon={<MessageCircle className="h-4 w-4" />} title="Conversas" desc="Suas mensagens" badge={unreadCount} />
+                    </div>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
+              {isApproved && (
+                <Button variant="ghost" size="sm" asChild>
+                  <Link to="/comunidade"><Globe className="mr-1 h-4 w-4" /> Comunidade<Badge n={communityCount} /></Link>
+                </Button>
               )}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="px-2" aria-label="Mais opções">
+                  <Button variant="ghost" size="sm" aria-label="Mais opções">
                     <MoreHorizontal className="h-4 w-4" />
                     {(newsCount > 0) && <Badge n={newsCount} />}
                   </Button>
@@ -181,26 +200,44 @@ export function Header() {
                   <DropdownMenuItem onSelect={() => shareSite()}>
                     <Share2 className="mr-2 h-4 w-4" /> Compartilhar
                   </DropdownMenuItem>
-                  {isApproved && (
-                    <DropdownMenuItem asChild>
-                      <Link to="/bloqueados" className="flex items-center gap-2">
-                        <Ban className="h-4 w-4" /> Bloqueados
-                      </Link>
-                    </DropdownMenuItem>
-                  )}
                 </DropdownMenuContent>
               </DropdownMenu>
               <Button variant="ghost" size="icon" onClick={toggleTheme} aria-label={theme === "dark" ? "Modo claro" : "Modo escuro"}>
                 {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
               </Button>
-              {canSeeAdminPanel && (
-                <Button variant="ghost" size="sm" asChild className="px-2">
-                  <Link to="/admin"><Shield className="mr-1 h-4 w-4" /> Admin</Link>
-                </Button>
-              )}
-              <Button variant="ghost" size="icon" onClick={async () => { await signOut(); navigate({ to: "/" }); }}>
-                <LogOut className="h-4 w-4" />
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="ml-1 flex items-center gap-2 rounded-full border border-border bg-card/60 p-1 pr-2 hover:bg-muted shrink-0" aria-label="Menu do perfil">
+                    <span className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-gradient-love text-xs font-bold text-white">
+                      {profile?.photo_url ? (
+                        <img src={profile.photo_url} alt="" className="h-full w-full object-cover" />
+                      ) : initials}
+                    </span>
+                    <ChevronDown className="h-3.5 w-3.5 opacity-70" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel className="truncate">{profile?.full_name ?? user.email}</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link to="/perfil" className="flex items-center gap-2"><UserIcon className="h-4 w-4" /> Ver perfil</Link>
+                  </DropdownMenuItem>
+                  {canSeeAdminPanel && (
+                    <DropdownMenuItem asChild>
+                      <Link to="/admin" className="flex items-center gap-2"><Shield className="h-4 w-4" /> Admin</Link>
+                    </DropdownMenuItem>
+                  )}
+                  {isApproved && (
+                    <DropdownMenuItem asChild>
+                      <Link to="/bloqueados" className="flex items-center gap-2"><Ban className="h-4 w-4" /> Bloqueados</Link>
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onSelect={async () => { await signOut(); navigate({ to: "/" }); }}>
+                    <LogOut className="mr-2 h-4 w-4" /> Sair
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </>
           ) : (
             <>
@@ -327,6 +364,32 @@ function MobileItem({
       activeProps={{ className: "bg-[var(--petal)] text-[var(--rose)]" }}
     >
       {children}
+    </Link>
+  );
+}
+
+function MegaItem({
+  to, icon, title, desc, badge,
+}: { to: string; icon: React.ReactNode; title: string; desc: string; badge?: number }) {
+  return (
+    <Link
+      to={to}
+      className="group flex items-start gap-2 rounded-lg p-2 hover:bg-muted"
+    >
+      <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-[var(--petal)] text-[var(--rose)]">
+        {icon}
+      </span>
+      <span className="min-w-0">
+        <span className="flex items-center gap-1 text-sm font-medium">
+          {title}
+          {badge && badge > 0 ? (
+            <span className="rounded-full bg-[var(--rose)] px-1.5 py-[1px] text-[10px] font-bold text-white">
+              {badge > 99 ? "99+" : badge}
+            </span>
+          ) : null}
+        </span>
+        <span className="block text-xs text-muted-foreground">{desc}</span>
+      </span>
     </Link>
   );
 }
