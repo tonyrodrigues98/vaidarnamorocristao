@@ -343,6 +343,7 @@ function Comunidade() {
                         <span className="min-w-0 flex-1">
                           <span className="flex items-center gap-1 font-semibold text-foreground">
                             {name}
+                            {p?.verified && <VerifiedBadge size="sm" />}
                             {senderStaff && (
                               <RoleBadge role={senderStaff.role} color={senderStaff.color} />
                             )}
@@ -440,6 +441,7 @@ function Comunidade() {
                         {mine ? (
                           <span className="flex items-center gap-1 text-sm font-semibold">
                             {name}
+                            {p?.verified && <VerifiedBadge size="sm" />}
                             {senderStaff && (
                               senderIsAdmin ? (
                                 <ShieldCheck className="admin-icon-sparkle h-3.5 w-3.5 shrink-0" aria-label="Admin" />
@@ -455,6 +457,7 @@ function Comunidade() {
                             className="flex items-center gap-1 text-sm font-semibold text-foreground hover:text-primary hover:underline"
                           >
                             {name}
+                            {p?.verified && <VerifiedBadge size="sm" />}
                             {senderStaff && (
                               senderIsAdmin ? (
                                 <ShieldCheck className="admin-icon-sparkle h-3.5 w-3.5 shrink-0" aria-label="Admin" />
