@@ -95,7 +95,10 @@ function List() {
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex items-baseline justify-between gap-2">
-                  <h3 className="truncate font-semibold">{i.partner.full_name.split(" ")[0]}</h3>
+                  <h3 className="flex min-w-0 items-center gap-1.5 truncate font-semibold">
+                    <span className="truncate">{i.partner.full_name.split(" ")[0]}</span>
+                    {i.partner.verified && <VerifiedBadge size="sm" />}
+                  </h3>
                   <span className="shrink-0 text-[10px] text-muted-foreground">{new Date(i.lastAt).toLocaleDateString("pt-BR")}</span>
                 </div>
                 <p className={`truncate text-sm ${i.unread ? "font-semibold text-foreground" : "text-muted-foreground"}`}>
