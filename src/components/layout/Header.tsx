@@ -166,11 +166,11 @@ export function Header() {
                       <Badge n={relCount} />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start" className="w-72 p-2">
+                  <DropdownMenuContent align="start" className="w-[22rem] p-3">
                     <DropdownMenuLabel className="text-xs uppercase tracking-wide text-muted-foreground">
                       Conexões
                     </DropdownMenuLabel>
-                    <div className="grid grid-cols-2 gap-1">
+                    <div className="grid grid-cols-2 gap-2">
                       <MegaItem to="/pretendentes" icon={<Gem className="h-4 w-4" />} title="Pretendentes" desc="Descobrir perfis" />
                       <MegaItem to="/interesses" icon={<Sparkles className="h-4 w-4" />} title="Interesses" desc="Quem te quer" badge={interestCount} />
                       <MegaItem to="/matches" icon={<Users className="h-4 w-4" />} title="Matches" desc="Conexões mútuas" />
@@ -374,9 +374,9 @@ function MegaItem({
   return (
     <Link
       to={to}
-      className="group flex items-start gap-2 rounded-lg p-2 hover:bg-muted"
+      className="group flex items-start gap-3 rounded-lg p-3 hover:bg-muted"
     >
-      <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-[var(--petal)] text-[var(--rose)]">
+      <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-[var(--petal)] text-[var(--rose)]">
         {icon}
       </span>
       <span className="min-w-0">
