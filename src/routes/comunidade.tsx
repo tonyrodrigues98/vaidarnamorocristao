@@ -28,7 +28,7 @@ type GMsg = {
   reply_to_id?: string | null;
   pinned_at?: string | null;
 };
-type Profile = { id: string; full_name: string; photo_url: string | null };
+type Profile = { id: string; full_name: string; photo_url: string | null; verified?: boolean | null };
 
 export const Route = createFileRoute("/comunidade")({ component: () => (<RequireApproved><Comunidade /></RequireApproved>) });
 
@@ -128,7 +128,7 @@ function Comunidade() {
     if (missing.length === 0) return;
     const { data } = await supabase
       .from("profiles")
-      .select("id, full_name, photo_url")
+      .select("id, full_name, photo_url, verified")
       .in("id", missing);
     if (data) {
       setProfiles((p) => {
