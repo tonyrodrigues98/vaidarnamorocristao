@@ -650,12 +650,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      current_terms_version: { Args: never; Returns: string }
       get_admin_ids: { Args: never; Returns: string[] }
       get_flagged_message_ids: { Args: never; Returns: string[] }
       get_hidden_staff_ids: { Args: never; Returns: string[] }
       get_user_primary_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
+      }
+      has_accepted_current_terms: {
+        Args: { _user_id: string }
+        Returns: boolean
       }
       has_role: {
         Args: {
