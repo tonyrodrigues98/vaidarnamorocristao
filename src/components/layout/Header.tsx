@@ -269,20 +269,28 @@ export function Header() {
           <nav className="mx-auto flex max-w-7xl flex-col gap-1 p-3">
             {user ? (
               <>
-                <MobileItem to="/dashboard" onClick={close}>Início</MobileItem>
-                <MobileItem to="/perfil" onClick={close}>
-                  <span className="flex items-center gap-2"><UserIcon className="h-4 w-4" /> Perfil</span>
+                {/* Profile header */}
+                <div className="mb-2 flex items-center gap-3 rounded-xl border border-border bg-card/60 p-3">
+                  <span className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full bg-gradient-love text-sm font-bold text-white">
+                    {profile?.photo_url ? (
+                      <img src={profile.photo_url} alt="" className="h-full w-full object-cover" />
+                    ) : initials}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-semibold">{profile?.full_name ?? user.email}</p>
+                    <p className="truncate text-xs text-muted-foreground">{user.email}</p>
+                  </div>
+                  <Button variant="ghost" size="icon" onClick={toggleTheme} aria-label="Tema">
+                    {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                  </Button>
+                </div>
+
+                <MobileItem to="/dashboard" onClick={close}>
+                  <span className="flex items-center gap-2"><Heart className="h-4 w-4" /> Início</span>
                 </MobileItem>
+
                 {isApproved && (
-                  <>
-                    <MobileItem to="/conversas" onClick={close}>
-                      <span className="flex items-center gap-2"><MessageCircle className="h-4 w-4" /> Conversas</span>
-                      <Badge n={unreadCount} />
-                    </MobileItem>
-                    <MobileItem to="/comunidade" onClick={close}>
-                      <span className="flex items-center gap-2"><Globe className="h-4 w-4" /> Comunidade</span>
-                      <Badge n={communityCount} />
-                    </MobileItem>
+                  <MobileSection label="Relacionamento" defaultOpen>
                     <MobileItem to="/pretendentes" onClick={close}>
                       <span className="flex items-center gap-2"><Gem className="h-4 w-4" /> Pretendentes</span>
                     </MobileItem>
@@ -293,40 +301,54 @@ export function Header() {
                     <MobileItem to="/matches" onClick={close}>
                       <span className="flex items-center gap-2"><Users className="h-4 w-4" /> Matches</span>
                     </MobileItem>
-                  </>
+                    <MobileItem to="/conversas" onClick={close}>
+                      <span className="flex items-center gap-2"><MessageCircle className="h-4 w-4" /> Conversas</span>
+                      <Badge n={unreadCount} />
+                    </MobileItem>
+                  </MobileSection>
                 )}
-                <MobileItem to="/noticias" onClick={close}>
-                  <span className="flex items-center gap-2"><Newspaper className="h-4 w-4" /> Notícias</span>
-                  <Badge n={newsCount} />
-                </MobileItem>
-                <button
-                  onClick={() => { close(); shareSite(); }}
-                  className="flex items-center gap-2 rounded-xl px-3 py-3 text-left text-sm font-medium hover:bg-muted"
-                >
-                  <Share2 className="h-4 w-4" /> Compartilhar
-                </button>
+
                 {isApproved && (
-                  <MobileItem to="/bloqueados" onClick={close}>
-                    <span className="flex items-center gap-2"><Ban className="h-4 w-4" /> Bloqueados</span>
+                  <MobileItem to="/comunidade" onClick={close}>
+                    <span className="flex items-center gap-2"><Globe className="h-4 w-4" /> Comunidade</span>
+                    <Badge n={communityCount} />
                   </MobileItem>
                 )}
-                <button
-                  onClick={() => { toggleTheme(); }}
-                  className="flex items-center gap-2 rounded-xl px-3 py-3 text-left text-sm font-medium hover:bg-muted"
-                >
-                  {theme === "dark" ? <><Sun className="h-4 w-4" /> Modo claro</> : <><Moon className="h-4 w-4" /> Modo escuro</>}
-                </button>
-                {canSeeAdminPanel && (
-                  <MobileItem to="/admin" onClick={close}>
-                    <span className="flex items-center gap-2"><Shield className="h-4 w-4" /> Admin</span>
+
+                <MobileSection label="Mais">
+                  <MobileItem to="/noticias" onClick={close}>
+                    <span className="flex items-center gap-2"><Newspaper className="h-4 w-4" /> Notícias</span>
+                    <Badge n={newsCount} />
                   </MobileItem>
-                )}
-                <button
-                  onClick={async () => { close(); await signOut(); navigate({ to: "/" }); }}
-                  className="mt-1 flex items-center gap-2 rounded-xl px-3 py-3 text-left text-sm text-muted-foreground hover:bg-muted"
-                >
-                  <LogOut className="h-4 w-4" /> Sair
-                </button>
+                  <button
+                    onClick={() => { close(); shareSite(); }}
+                    className="flex items-center gap-2 rounded-xl px-3 py-3 text-left text-sm font-medium hover:bg-muted"
+                  >
+                    <Share2 className="h-4 w-4" /> Compartilhar
+                  </button>
+                </MobileSection>
+
+                <MobileSection label="Perfil">
+                  <MobileItem to="/perfil" onClick={close}>
+                    <span className="flex items-center gap-2"><UserIcon className="h-4 w-4" /> Ver perfil</span>
+                  </MobileItem>
+                  {canSeeAdminPanel && (
+                    <MobileItem to="/admin" onClick={close}>
+                      <span className="flex items-center gap-2"><Shield className="h-4 w-4" /> Admin</span>
+                    </MobileItem>
+                  )}
+                  {isApproved && (
+                    <MobileItem to="/bloqueados" onClick={close}>
+                      <span className="flex items-center gap-2"><Ban className="h-4 w-4" /> Bloqueados</span>
+                    </MobileItem>
+                  )}
+                  <button
+                    onClick={async () => { close(); await signOut(); navigate({ to: "/" }); }}
+                    className="flex items-center gap-2 rounded-xl px-3 py-3 text-left text-sm text-muted-foreground hover:bg-muted"
+                  >
+                    <LogOut className="h-4 w-4" /> Sair
+                  </button>
+                </MobileSection>
               </>
             ) : (
               <>
@@ -365,6 +387,25 @@ function MobileItem({
     >
       {children}
     </Link>
+  );
+}
+
+function MobileSection({
+  label, defaultOpen, children,
+}: { label: string; defaultOpen?: boolean; children: React.ReactNode }) {
+  const [open, setOpen] = useState(!!defaultOpen);
+  return (
+    <div className="mt-1 rounded-xl border border-border/60 bg-background/40">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground hover:bg-muted"
+      >
+        {label}
+        <ChevronDown className={`h-4 w-4 transition-transform ${open ? "rotate-180" : ""}`} />
+      </button>
+      {open && <div className="flex flex-col gap-0.5 p-1">{children}</div>}
+    </div>
   );
 }
 
