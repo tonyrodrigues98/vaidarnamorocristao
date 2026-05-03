@@ -3,6 +3,7 @@ import { AuthProvider } from "@/lib/auth";
 import { Toaster } from "@/components/ui/sonner";
 import { NotificationsBridge } from "@/lib/useRealtimeNotifications";
 import { ThemeProvider } from "@/lib/theme";
+import { TermsGate } from "@/components/TermsGate";
 
 import appCss from "../styles.css?url";
 
@@ -78,22 +79,23 @@ function RootComponent() {
     <ThemeProvider>
       <AuthProvider>
         <NotificationsBridge />
-        <Outlet />
-        <footer className="pointer-events-none fixed bottom-2 right-3 z-40 flex items-center gap-3 text-[11px] text-muted-foreground/80">
-          <Link
-            to="/termos"
-            className="pointer-events-auto rounded px-1 hover:text-[var(--rose)] hover:underline"
-          >
-            Termos e Condições
-          </Link>
-          <span aria-hidden className="opacity-40">•</span>
-          <Link
-            to="/manual"
-            className="pointer-events-auto rounded px-1 hover:text-[var(--rose)] hover:underline"
-          >
-            Manual do Usuário
-          </Link>
-        </footer>
+        <div className="flex min-h-screen flex-col">
+          <div className="flex-1">
+            <Outlet />
+          </div>
+          <footer className="border-t border-border/50 bg-background/60 py-4 mt-8">
+            <div className="mx-auto flex max-w-7xl items-center justify-end gap-4 px-4 text-xs text-muted-foreground">
+              <Link to="/termos" className="hover:text-[var(--rose)] hover:underline">
+                Termos e Condições
+              </Link>
+              <span aria-hidden className="opacity-40">•</span>
+              <Link to="/manual" className="hover:text-[var(--rose)] hover:underline">
+                Manual do Usuário
+              </Link>
+            </div>
+          </footer>
+        </div>
+        <TermsGate />
         <Toaster richColors position="top-right" />
       </AuthProvider>
     </ThemeProvider>
