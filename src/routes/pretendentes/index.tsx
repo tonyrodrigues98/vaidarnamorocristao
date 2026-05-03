@@ -10,12 +10,13 @@ import { BR_STATES } from "@/lib/constants";
 import { SlidersHorizontal, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { RoleBadge } from "@/components/RoleBadge";
+import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { ROLE_PRIORITY, type AppRole, type RoleColor } from "@/lib/roles";
 
 type Profile = {
   id: string; full_name: string; age: number; city: string; state: string;
   church: string; bio: string | null; photo_url: string | null; sex: "masculino" | "feminino";
-  marital: "solteiro" | "divorciado";
+  marital: "solteiro" | "divorciado"; verified?: boolean;
 };
 type StaffInfo = { role: AppRole; color: RoleColor | null };
 
@@ -30,6 +31,7 @@ function List() {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [f, setF] = useState({ search: "", state: "all", marital: "all", ageMin: "", ageMax: "", church: "" });
   const [staffMap, setStaffMap] = useState<Record<string, StaffInfo>>({});
+  const [onlyVerified, setOnlyVerified] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -41,7 +43,7 @@ function List() {
         const targetSex = me.sex === "masculino" ? "feminino" : "masculino";
         const [profsRes, blocksRes, blockedByRes, hiddenRes, rolesRes] = await Promise.all([
           supabase.from("profiles")
-            .select("id, full_name, age, city, state, church, bio, photo_url, sex, marital")
+            .select("id, full_name, age, city, state, church, bio, photo_url, sex, marital, verified")
             .eq("status", "approved").eq("sex", targetSex).neq("id", user.id)
             .order("created_at", { ascending: false }),
           supabase.from("blocks").select("blocked_id").eq("blocker_id", user.id),
@@ -81,9 +83,10 @@ function List() {
       if (f.ageMin && p.age < Number(f.ageMin)) return false;
       if (f.ageMax && p.age > Number(f.ageMax)) return false;
       if (f.church && !p.church.toLowerCase().includes(f.church.toLowerCase())) return false;
+      if (onlyVerified && !p.verified) return false;
       return true;
     });
-  }, [profiles, f]);
+  }, [profiles, f, onlyVerified]);
 
   const hasFilters = f.search || f.state !== "all" || f.marital !== "all" || f.ageMin || f.ageMax || f.church;
   function clearFilters() { setF({ search: "", state: "all", marital: "all", ageMin: "", ageMax: "", church: "" }); }
@@ -115,6 +118,9 @@ function List() {
             {hasFilters && (
               <Button variant="ghost" size="sm" onClick={clearFilters}><X className="mr-1 h-4 w-4" /> Limpar</Button>
             )}
+            <Button variant={onlyVerified ? "default" : "outline"} size="sm" onClick={() => setOnlyVerified((v) => !v)}>
+              ✔ Verificados
+            </Button>
             <span className="ml-auto text-sm text-muted-foreground">{filtered.length} {filtered.length === 1 ? "perfil" : "perfis"}</span>
           </div>
 
@@ -185,6 +191,7 @@ function List() {
                 <div className="p-5">
                   <h3 className="flex flex-wrap items-center gap-2 text-xl font-semibold">
                     {p.full_name.split(" ")[0]}, {p.age}
+                    {p.verified && <VerifiedBadge size="md" />}
                     {staffMap[p.id] && (
                       <RoleBadge role={staffMap[p.id].role} color={staffMap[p.id].color} />
                     )}
