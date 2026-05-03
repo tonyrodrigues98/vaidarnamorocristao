@@ -31,6 +31,7 @@ import { Route as AuthSignupRouteImport } from './routes/auth/signup'
 import { Route as AuthResetPasswordRouteImport } from './routes/auth/reset-password'
 import { Route as AuthLoginRouteImport } from './routes/auth/login'
 import { Route as AuthForgotPasswordRouteImport } from './routes/auth/forgot-password'
+import { Route as AdminVerificacoesRouteImport } from './routes/admin/verificacoes'
 
 const VerificacaoRoute = VerificacaoRouteImport.update({
   id: '/verificacao',
@@ -142,6 +143,11 @@ const AuthForgotPasswordRoute = AuthForgotPasswordRouteImport.update({
   path: '/auth/forgot-password',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminVerificacoesRoute = AdminVerificacoesRouteImport.update({
+  id: '/admin/verificacoes',
+  path: '/admin/verificacoes',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -154,6 +160,7 @@ export interface FileRoutesByFullPath {
   '/perfil': typeof PerfilRoute
   '/termos': typeof TermosRoute
   '/verificacao': typeof VerificacaoRoute
+  '/admin/verificacoes': typeof AdminVerificacoesRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
@@ -178,6 +185,7 @@ export interface FileRoutesByTo {
   '/perfil': typeof PerfilRoute
   '/termos': typeof TermosRoute
   '/verificacao': typeof VerificacaoRoute
+  '/admin/verificacoes': typeof AdminVerificacoesRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
@@ -203,6 +211,7 @@ export interface FileRoutesById {
   '/perfil': typeof PerfilRoute
   '/termos': typeof TermosRoute
   '/verificacao': typeof VerificacaoRoute
+  '/admin/verificacoes': typeof AdminVerificacoesRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
@@ -229,6 +238,7 @@ export interface FileRouteTypes {
     | '/perfil'
     | '/termos'
     | '/verificacao'
+    | '/admin/verificacoes'
     | '/auth/forgot-password'
     | '/auth/login'
     | '/auth/reset-password'
@@ -253,6 +263,7 @@ export interface FileRouteTypes {
     | '/perfil'
     | '/termos'
     | '/verificacao'
+    | '/admin/verificacoes'
     | '/auth/forgot-password'
     | '/auth/login'
     | '/auth/reset-password'
@@ -277,6 +288,7 @@ export interface FileRouteTypes {
     | '/perfil'
     | '/termos'
     | '/verificacao'
+    | '/admin/verificacoes'
     | '/auth/forgot-password'
     | '/auth/login'
     | '/auth/reset-password'
@@ -302,6 +314,7 @@ export interface RootRouteChildren {
   PerfilRoute: typeof PerfilRoute
   TermosRoute: typeof TermosRoute
   VerificacaoRoute: typeof VerificacaoRoute
+  AdminVerificacoesRoute: typeof AdminVerificacoesRoute
   AuthForgotPasswordRoute: typeof AuthForgotPasswordRoute
   AuthLoginRoute: typeof AuthLoginRoute
   AuthResetPasswordRoute: typeof AuthResetPasswordRoute
@@ -472,6 +485,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthForgotPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/verificacoes': {
+      id: '/admin/verificacoes'
+      path: '/admin/verificacoes'
+      fullPath: '/admin/verificacoes'
+      preLoaderRoute: typeof AdminVerificacoesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -486,6 +506,7 @@ const rootRouteChildren: RootRouteChildren = {
   PerfilRoute: PerfilRoute,
   TermosRoute: TermosRoute,
   VerificacaoRoute: VerificacaoRoute,
+  AdminVerificacoesRoute: AdminVerificacoesRoute,
   AuthForgotPasswordRoute: AuthForgotPasswordRoute,
   AuthLoginRoute: AuthLoginRoute,
   AuthResetPasswordRoute: AuthResetPasswordRoute,
