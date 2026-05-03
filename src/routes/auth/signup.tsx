@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Header } from "@/components/layout/Header";
+import { CURRENT_TERMS_VERSION } from "@/lib/terms";
 
 const schema = z.object({
   email: z.string().trim().email("Email inválido").max(255),
@@ -28,13 +29,17 @@ function Signup() {
     const parsed = schema.safeParse({ email, password });
     if (!parsed.success) { toast.error(parsed.error.issues[0].message); return; }
     setLoading(true);
-    const { error } = await supabase.auth.signUp({
+    const { data: signUpData, error } = await supabase.auth.signUp({
       email: parsed.data.email,
       password: parsed.data.password,
       options: { emailRedirectTo: window.location.origin },
     });
     setLoading(false);
     if (error) { toast.error(error.message); return; }
+    const uid = signUpData.user?.id;
+    if (uid) {
+      await supabase.from("terms_acceptances").insert({ user_id: uid, version: CURRENT_TERMS_VERSION });
+    }
     toast.success("Conta criada! Vamos montar seu perfil.");
     navigate({ to: "/onboarding/etapa-1" });
   }
