@@ -253,7 +253,7 @@ function Admin() {
         </div>
 
         <Tabs value={tab} onValueChange={(v) => setTab(v as TabKey)} className="mt-8">
-          <TabsList className="flex-wrap">
+          <TabsList className="flex h-auto w-full flex-wrap justify-start gap-1 overflow-x-auto">
             {availableTabs.includes("pending") && <TabsTrigger value="pending">Pendentes</TabsTrigger>}
             {availableTabs.includes("approved") && <TabsTrigger value="approved">Aprovados</TabsTrigger>}
             {availableTabs.includes("rejected") && <TabsTrigger value="rejected">Rejeitados</TabsTrigger>}
