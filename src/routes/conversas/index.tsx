@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
 import { MessageCircle } from "lucide-react";
+import { VerifiedBadge } from "@/components/VerifiedBadge";
 
 type Item = {
   matchId: string;
