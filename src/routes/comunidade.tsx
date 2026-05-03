@@ -14,6 +14,7 @@ import { RoleBadge } from "@/components/RoleBadge";
 import { type AppRole, type RoleColor, ROLE_PRIORITY } from "@/lib/roles";
 import { useRestrictedWords, findRestrictedWord } from "@/lib/profanity";
 import { ShieldAlert } from "lucide-react";
+import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 
