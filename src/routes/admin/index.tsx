@@ -250,6 +250,13 @@ function Admin() {
              isApresentador ? "Pré-cadastros para controle de pessoas" :
              "Aprovação de perfis, denúncias e conteúdo"}
           </p>
+          {(isAdmin || isSuperAdmin) && (
+            <div className="mt-3">
+              <Button asChild variant="outline" size="sm">
+                <Link to="/admin/verificacoes">✔ Verificações de perfil</Link>
+              </Button>
+            </div>
+          )}
         </div>
 
         <Tabs value={tab} onValueChange={(v) => setTab(v as TabKey)} className="mt-8">
