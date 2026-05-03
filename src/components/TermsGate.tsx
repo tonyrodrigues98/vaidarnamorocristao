@@ -19,13 +19,12 @@ export function TermsGate() {
     if (loading || !user) { setNeedsAccept(false); return; }
     let ignore = false;
     (async () => {
-      const { data } = await supabase
-        .from("terms_acceptances")
-        .select("id")
-        .eq("user_id", user.id)
-        .eq("version", CURRENT_TERMS_VERSION)
-        .maybeSingle();
-      if (!ignore) setNeedsAccept(!data);
+      // Server-side check: returns current_version + accepted flag + accepted_at
+      const { data, error } = await supabase.rpc("get_my_terms_status");
+      if (ignore) return;
+      if (error) { setNeedsAccept(true); return; }
+      const row = Array.isArray(data) ? data[0] : data;
+      setNeedsAccept(!row?.accepted);
     })();
     return () => { ignore = true; };
   }, [user, loading]);

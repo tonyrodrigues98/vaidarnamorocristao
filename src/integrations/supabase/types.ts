@@ -654,6 +654,15 @@ export type Database = {
       get_admin_ids: { Args: never; Returns: string[] }
       get_flagged_message_ids: { Args: never; Returns: string[] }
       get_hidden_staff_ids: { Args: never; Returns: string[] }
+      get_my_terms_status: {
+        Args: never
+        Returns: {
+          accepted: boolean
+          accepted_at: string
+          accepted_version: string
+          current_version: string
+        }[]
+      }
       get_user_primary_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
