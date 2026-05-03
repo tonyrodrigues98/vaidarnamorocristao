@@ -55,11 +55,11 @@ export function Header() {
   const [newsCount, setNewsCount] = useState(0);
   const [communityCount, setCommunityCount] = useState(0);
   const [open, setOpen] = useState(false);
-  const [profile, setProfile] = useState<{ photo_url: string | null; full_name: string | null } | null>(null);
+  const [profile, setProfile] = useState<{ photo_url: string | null; full_name: string | null; verified: boolean | null } | null>(null);
 
   useEffect(() => {
     if (!user) { setProfile(null); return; }
-    supabase.from("profiles").select("photo_url, full_name").eq("id", user.id).maybeSingle()
+    supabase.from("profiles").select("photo_url, full_name, verified").eq("id", user.id).maybeSingle()
       .then(({ data }) => setProfile(data ?? null));
   }, [user]);
 
