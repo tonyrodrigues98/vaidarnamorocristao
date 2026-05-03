@@ -9,8 +9,10 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TermosRouteImport } from './routes/termos'
 import { Route as PerfilRouteImport } from './routes/perfil'
 import { Route as MatchesRouteImport } from './routes/matches'
+import { Route as ManualRouteImport } from './routes/manual'
 import { Route as InteressesRouteImport } from './routes/interesses'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ComunidadeRouteImport } from './routes/comunidade'
@@ -29,6 +31,11 @@ import { Route as AuthResetPasswordRouteImport } from './routes/auth/reset-passw
 import { Route as AuthLoginRouteImport } from './routes/auth/login'
 import { Route as AuthForgotPasswordRouteImport } from './routes/auth/forgot-password'
 
+const TermosRoute = TermosRouteImport.update({
+  id: '/termos',
+  path: '/termos',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PerfilRoute = PerfilRouteImport.update({
   id: '/perfil',
   path: '/perfil',
@@ -37,6 +44,11 @@ const PerfilRoute = PerfilRouteImport.update({
 const MatchesRoute = MatchesRouteImport.update({
   id: '/matches',
   path: '/matches',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ManualRoute = ManualRouteImport.update({
+  id: '/manual',
+  path: '/manual',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InteressesRoute = InteressesRouteImport.update({
@@ -131,8 +143,10 @@ export interface FileRoutesByFullPath {
   '/comunidade': typeof ComunidadeRoute
   '/dashboard': typeof DashboardRoute
   '/interesses': typeof InteressesRoute
+  '/manual': typeof ManualRoute
   '/matches': typeof MatchesRoute
   '/perfil': typeof PerfilRoute
+  '/termos': typeof TermosRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
@@ -152,8 +166,10 @@ export interface FileRoutesByTo {
   '/comunidade': typeof ComunidadeRoute
   '/dashboard': typeof DashboardRoute
   '/interesses': typeof InteressesRoute
+  '/manual': typeof ManualRoute
   '/matches': typeof MatchesRoute
   '/perfil': typeof PerfilRoute
+  '/termos': typeof TermosRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
@@ -174,8 +190,10 @@ export interface FileRoutesById {
   '/comunidade': typeof ComunidadeRoute
   '/dashboard': typeof DashboardRoute
   '/interesses': typeof InteressesRoute
+  '/manual': typeof ManualRoute
   '/matches': typeof MatchesRoute
   '/perfil': typeof PerfilRoute
+  '/termos': typeof TermosRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
@@ -197,8 +215,10 @@ export interface FileRouteTypes {
     | '/comunidade'
     | '/dashboard'
     | '/interesses'
+    | '/manual'
     | '/matches'
     | '/perfil'
+    | '/termos'
     | '/auth/forgot-password'
     | '/auth/login'
     | '/auth/reset-password'
@@ -218,8 +238,10 @@ export interface FileRouteTypes {
     | '/comunidade'
     | '/dashboard'
     | '/interesses'
+    | '/manual'
     | '/matches'
     | '/perfil'
+    | '/termos'
     | '/auth/forgot-password'
     | '/auth/login'
     | '/auth/reset-password'
@@ -239,8 +261,10 @@ export interface FileRouteTypes {
     | '/comunidade'
     | '/dashboard'
     | '/interesses'
+    | '/manual'
     | '/matches'
     | '/perfil'
+    | '/termos'
     | '/auth/forgot-password'
     | '/auth/login'
     | '/auth/reset-password'
@@ -261,8 +285,10 @@ export interface RootRouteChildren {
   ComunidadeRoute: typeof ComunidadeRoute
   DashboardRoute: typeof DashboardRoute
   InteressesRoute: typeof InteressesRoute
+  ManualRoute: typeof ManualRoute
   MatchesRoute: typeof MatchesRoute
   PerfilRoute: typeof PerfilRoute
+  TermosRoute: typeof TermosRoute
   AuthForgotPasswordRoute: typeof AuthForgotPasswordRoute
   AuthLoginRoute: typeof AuthLoginRoute
   AuthResetPasswordRoute: typeof AuthResetPasswordRoute
@@ -279,6 +305,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/termos': {
+      id: '/termos'
+      path: '/termos'
+      fullPath: '/termos'
+      preLoaderRoute: typeof TermosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/perfil': {
       id: '/perfil'
       path: '/perfil'
@@ -291,6 +324,13 @@ declare module '@tanstack/react-router' {
       path: '/matches'
       fullPath: '/matches'
       preLoaderRoute: typeof MatchesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/manual': {
+      id: '/manual'
+      path: '/manual'
+      fullPath: '/manual'
+      preLoaderRoute: typeof ManualRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/interesses': {
@@ -421,8 +461,10 @@ const rootRouteChildren: RootRouteChildren = {
   ComunidadeRoute: ComunidadeRoute,
   DashboardRoute: DashboardRoute,
   InteressesRoute: InteressesRoute,
+  ManualRoute: ManualRoute,
   MatchesRoute: MatchesRoute,
   PerfilRoute: PerfilRoute,
+  TermosRoute: TermosRoute,
   AuthForgotPasswordRoute: AuthForgotPasswordRoute,
   AuthLoginRoute: AuthLoginRoute,
   AuthResetPasswordRoute: AuthResetPasswordRoute,
@@ -439,12 +481,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}

@@ -20,9 +20,11 @@ function Signup() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!acceptedTerms) { toast.error("Você precisa aceitar os Termos e Condições."); return; }
     const parsed = schema.safeParse({ email, password });
     if (!parsed.success) { toast.error(parsed.error.issues[0].message); return; }
     setLoading(true);
@@ -54,7 +56,22 @@ function Signup() {
               <Input id="password" type="password" autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} required />
               <p className="text-xs text-muted-foreground">Mínimo 8 caracteres.</p>
             </div>
-            <Button type="submit" className="w-full" size="lg" disabled={loading}>
+            <label className="flex items-start gap-2 rounded-xl border border-border bg-card/40 p-3 text-sm">
+              <input
+                type="checkbox"
+                className="mt-0.5 h-4 w-4 accent-[var(--rose)]"
+                checked={acceptedTerms}
+                onChange={(e) => setAcceptedTerms(e.target.checked)}
+              />
+              <span className="text-foreground/85">
+                Li e concordo com os{" "}
+                <Link to="/termos" className="font-medium text-[var(--rose)] hover:underline">
+                  Termos e Condições
+                </Link>{" "}
+                da comunidade.
+              </span>
+            </label>
+            <Button type="submit" className="w-full" size="lg" disabled={loading || !acceptedTerms}>
               {loading ? "Criando..." : "Criar minha conta"}
             </Button>
           </form>

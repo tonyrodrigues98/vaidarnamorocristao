@@ -79,6 +79,21 @@ function RootComponent() {
       <AuthProvider>
         <NotificationsBridge />
         <Outlet />
+        <footer className="pointer-events-none fixed bottom-2 right-3 z-40 flex items-center gap-3 text-[11px] text-muted-foreground/80">
+          <Link
+            to="/termos"
+            className="pointer-events-auto rounded px-1 hover:text-[var(--rose)] hover:underline"
+          >
+            Termos e Condições
+          </Link>
+          <span aria-hidden className="opacity-40">•</span>
+          <Link
+            to="/manual"
+            className="pointer-events-auto rounded px-1 hover:text-[var(--rose)] hover:underline"
+          >
+            Manual do Usuário
+          </Link>
+        </footer>
         <Toaster richColors position="top-right" />
       </AuthProvider>
     </ThemeProvider>
