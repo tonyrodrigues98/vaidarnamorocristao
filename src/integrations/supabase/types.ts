@@ -645,6 +645,7 @@ export type Database = {
       }
       is_staff: { Args: { _user_id: string }; Returns: boolean }
       mark_message_read: { Args: { _message_id: string }; Returns: undefined }
+      unaccent_safe: { Args: { input: string }; Returns: string }
       unmatch: { Args: { _match_id: string }; Returns: undefined }
     }
     Enums: {
