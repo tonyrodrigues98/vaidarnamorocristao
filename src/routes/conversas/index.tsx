@@ -8,7 +8,7 @@ import { MessageCircle } from "lucide-react";
 
 type Item = {
   matchId: string;
-  partner: { id: string; full_name: string; photo_url: string | null; city: string; state: string };
+  partner: { id: string; full_name: string; photo_url: string | null; city: string; state: string; verified?: boolean | null };
   lastMessage: string | null;
   lastAt: string;
   unread: boolean;
@@ -36,7 +36,7 @@ function List() {
     });
     if (!visibleMatches.length) { setItems([]); setLoadingList(false); return; }
     const partnerIds = visibleMatches.map((m) => (m.user_a === user.id ? m.user_b : m.user_a));
-    const { data: profs } = await supabase.from("profiles").select("id,full_name,photo_url,city,state").in("id", partnerIds);
+    const { data: profs } = await supabase.from("profiles").select("id,full_name,photo_url,city,state,verified").in("id", partnerIds);
     const profMap = new Map((profs ?? []).map((p) => [p.id, p]));
     const list: Item[] = await Promise.all(visibleMatches.map(async (m) => {
       const partnerId = m.user_a === user.id ? m.user_b : m.user_a;
