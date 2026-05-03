@@ -179,7 +179,10 @@ function Chat() {
                 <div className="flex h-full w-full items-center justify-center bg-gradient-love text-sm text-white">{partner.full_name?.charAt(0) ?? "?"}</div>}
             </div>
             <div className="flex-1">
-              <h2 className="font-semibold leading-none hover:underline">{partner.full_name?.split(" ")[0] ?? "—"}</h2>
+              <h2 className="flex items-center gap-1.5 font-semibold leading-none hover:underline">
+                {partner.full_name?.split(" ")[0] ?? "—"}
+                {partner.verified && <VerifiedBadge size="sm" />}
+              </h2>
               <p className="text-[11px] text-muted-foreground">ver perfil</p>
             </div>
           </Link>
