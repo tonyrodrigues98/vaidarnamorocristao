@@ -23,7 +23,7 @@ type MatchItem = {
     city: string;
     state: string;
     photo_url: string | null;
-    verified?: boolean;
+    verified?: boolean | null;
   };
 };
 
