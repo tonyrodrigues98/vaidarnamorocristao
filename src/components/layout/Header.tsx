@@ -367,3 +367,29 @@ function MobileItem({
     </Link>
   );
 }
+
+function MegaItem({
+  to, icon, title, desc, badge,
+}: { to: string; icon: React.ReactNode; title: string; desc: string; badge?: number }) {
+  return (
+    <Link
+      to={to}
+      className="group flex items-start gap-2 rounded-lg p-2 hover:bg-muted"
+    >
+      <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-[var(--petal)] text-[var(--rose)]">
+        {icon}
+      </span>
+      <span className="min-w-0">
+        <span className="flex items-center gap-1 text-sm font-medium">
+          {title}
+          {badge && badge > 0 ? (
+            <span className="rounded-full bg-[var(--rose)] px-1.5 py-[1px] text-[10px] font-bold text-white">
+              {badge > 99 ? "99+" : badge}
+            </span>
+          ) : null}
+        </span>
+        <span className="block text-xs text-muted-foreground">{desc}</span>
+      </span>
+    </Link>
+  );
+}
