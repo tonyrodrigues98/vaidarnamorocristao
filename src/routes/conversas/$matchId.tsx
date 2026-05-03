@@ -22,7 +22,7 @@ type Msg = {
   edited_at?: string | null;
   reply_to_id?: string | null;
 };
-type Partner = { id: string; full_name: string; photo_url: string | null };
+type Partner = { id: string; full_name: string; photo_url: string | null; verified?: boolean | null };
 
 export const Route = createFileRoute("/conversas/$matchId")({ component: () => (<RequireApproved><Chat /></RequireApproved>) });
 
@@ -54,7 +54,7 @@ function Chat() {
         .eq("blocker_id", user.id).eq("blocked_id", partnerId).maybeSingle();
       if (blk) { setAuthorized(false); return; }
       setAuthorized(true);
-      const { data: p } = await supabase.from("profiles").select("id,full_name,photo_url").eq("id", partnerId).maybeSingle();
+      const { data: p } = await supabase.from("profiles").select("id,full_name,photo_url,verified").eq("id", partnerId).maybeSingle();
       setPartner(p as Partner | null);
       const { data: msgs } = await supabase.from("messages").select("*").eq("match_id", matchId).order("created_at");
       setMessages((msgs ?? []) as Msg[]);
