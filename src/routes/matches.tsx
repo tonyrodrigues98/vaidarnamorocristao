@@ -7,6 +7,7 @@ import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { Heart, MessageCircle, User as UserIcon, HeartCrack } from "lucide-react";
+import { VerifiedBadge } from "@/components/VerifiedBadge";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
@@ -22,6 +23,7 @@ type MatchItem = {
     city: string;
     state: string;
     photo_url: string | null;
+    verified?: boolean;
   };
 };
 
@@ -43,7 +45,7 @@ function MatchesPage() {
     const partnerIds = matches.map((m) => (m.user_a === user.id ? m.user_b : m.user_a));
     const { data: profs } = await supabase
       .from("profiles")
-      .select("id, full_name, age, city, state, photo_url")
+      .select("id, full_name, age, city, state, photo_url, verified")
       .in("id", partnerIds);
     const map = new Map((profs ?? []).map((p) => [p.id, p]));
     const list: MatchItem[] = matches
@@ -129,7 +131,10 @@ function MatchesPage() {
                 </Link>
                 <div className="space-y-3 p-4">
                   <div>
-                    <h3 className="text-lg font-semibold">{it.partner.full_name.split(" ")[0]}, {it.partner.age}</h3>
+                    <h3 className="flex items-center gap-1.5 text-lg font-semibold">
+                      {it.partner.full_name.split(" ")[0]}, {it.partner.age}
+                      {it.partner.verified && <VerifiedBadge size="sm" />}
+                    </h3>
                     <p className="text-xs text-muted-foreground">{it.partner.city} · {it.partner.state}</p>
                   </div>
                   <div className="flex gap-2">
