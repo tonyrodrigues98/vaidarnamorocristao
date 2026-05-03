@@ -5,11 +5,17 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import {
   Heart, LogOut, Shield, MessageCircle, Sparkles, Menu, X,
-  User as UserIcon, Users, Newspaper, Globe, Ban, Share2, Gem, Sun, Moon,
+  User as UserIcon, Users, Newspaper, Globe, Ban, Share2, Gem, Sun, Moon, MoreHorizontal,
 } from "lucide-react";
 import { toast } from "sonner";
 import { getLastSeen } from "@/lib/lastSeen";
 import { useTheme } from "@/lib/theme";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
 
 async function shareSite() {
   const url = typeof window !== "undefined" ? window.location.origin : "";
@@ -122,59 +128,73 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 glass">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
-        <Link to="/" className="flex items-center gap-2.5 group" onClick={close}>
+      <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-2 px-4 sm:px-6 min-w-0">
+        <Link to="/" className="flex items-center gap-2.5 group min-w-0 shrink-0" onClick={close}>
           <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-love shadow-glow transition-transform group-hover:scale-105">
             <Heart className="h-4 w-4 text-white" fill="white" />
           </div>
-          <span className="tracking-tight font-extrabold text-2xl">
+          <span className="tracking-tight font-extrabold text-xl lg:text-2xl truncate">
             VaiDar<span className="text-gradient">Namoro</span>
           </span>
         </Link>
 
         {/* Desktop nav */}
-        <nav className="hidden items-center gap-1 md:flex">
+        <nav className="hidden min-w-0 items-center gap-0.5 md:flex">
           {user ? (
             <>
-              <Button variant="ghost" size="sm" asChild><Link to="/dashboard">Início</Link></Button>
-              <Button variant="ghost" size="sm" asChild>
+              <Button variant="ghost" size="sm" asChild className="px-2"><Link to="/dashboard">Início</Link></Button>
+              <Button variant="ghost" size="sm" asChild className="px-2">
                 <Link to="/perfil"><UserIcon className="mr-1 h-4 w-4" /> Perfil</Link>
               </Button>
               {isApproved && (
                 <>
-                  <Button variant="ghost" size="sm" asChild>
+                  <Button variant="ghost" size="sm" asChild className="px-2">
                     <Link to="/conversas"><MessageCircle className="mr-1 h-4 w-4" /> Conversas<Badge n={unreadCount} /></Link>
                   </Button>
-                  <Button variant="ghost" size="sm" asChild>
+                  <Button variant="ghost" size="sm" asChild className="px-2">
                     <Link to="/comunidade"><Globe className="mr-1 h-4 w-4" /> Comunidade<Badge n={communityCount} /></Link>
                   </Button>
-                  <Button variant="ghost" size="sm" asChild>
+                  <Button variant="ghost" size="sm" asChild className="px-2">
                     <Link to="/pretendentes"><Gem className="mr-1 h-4 w-4" /> Pretendentes</Link>
                   </Button>
-                  <Button variant="ghost" size="sm" asChild>
+                  <Button variant="ghost" size="sm" asChild className="px-2">
                     <Link to="/interesses"><Sparkles className="mr-1 h-4 w-4" /> Interesses<Badge n={interestCount} /></Link>
                   </Button>
-                  <Button variant="ghost" size="sm" asChild>
+                  <Button variant="ghost" size="sm" asChild className="px-2">
                     <Link to="/matches"><Users className="mr-1 h-4 w-4" /> Matches</Link>
                   </Button>
                 </>
               )}
-              <Button variant="ghost" size="sm" asChild>
-                <Link to="/noticias"><Newspaper className="mr-1 h-4 w-4" /> Notícias<Badge n={newsCount} /></Link>
-              </Button>
-              <Button variant="ghost" size="sm" onClick={shareSite}>
-                <Share2 className="mr-1 h-4 w-4" /> Compartilhar
-              </Button>
-              {isApproved && (
-                <Button variant="ghost" size="sm" asChild>
-                  <Link to="/bloqueados"><Ban className="mr-1 h-4 w-4" /> Bloqueados</Link>
-                </Button>
-              )}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="px-2" aria-label="Mais opções">
+                    <MoreHorizontal className="h-4 w-4" />
+                    {(newsCount > 0) && <Badge n={newsCount} />}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-52">
+                  <DropdownMenuItem asChild>
+                    <Link to="/noticias" className="flex items-center gap-2">
+                      <Newspaper className="h-4 w-4" /> Notícias <Badge n={newsCount} />
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onSelect={() => shareSite()}>
+                    <Share2 className="mr-2 h-4 w-4" /> Compartilhar
+                  </DropdownMenuItem>
+                  {isApproved && (
+                    <DropdownMenuItem asChild>
+                      <Link to="/bloqueados" className="flex items-center gap-2">
+                        <Ban className="h-4 w-4" /> Bloqueados
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
               <Button variant="ghost" size="icon" onClick={toggleTheme} aria-label={theme === "dark" ? "Modo claro" : "Modo escuro"}>
                 {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
               </Button>
               {canSeeAdminPanel && (
-                <Button variant="ghost" size="sm" asChild>
+                <Button variant="ghost" size="sm" asChild className="px-2">
                   <Link to="/admin"><Shield className="mr-1 h-4 w-4" /> Admin</Link>
                 </Button>
               )}
