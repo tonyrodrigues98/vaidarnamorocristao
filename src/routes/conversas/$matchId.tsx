@@ -12,6 +12,7 @@ import { useLongPress } from "@/hooks/use-long-press";
 import { useRestrictedWords, findRestrictedWord } from "@/lib/profanity";
 import { ShieldAlert } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { VerifiedBadge } from "@/components/VerifiedBadge";
 
 type Msg = {
   id: string;
