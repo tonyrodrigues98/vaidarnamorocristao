@@ -8,11 +8,12 @@ import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Heart, MessageCircle, Sparkles } from "lucide-react";
+import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { markSeen } from "@/lib/lastSeen";
 
 type ProfileLite = {
   id: string; full_name: string; age: number; city: string; state: string;
-  church: string; photo_url: string | null;
+  church: string; photo_url: string | null; verified: boolean;
 };
 type ReceivedRow = { id: string; created_at: string; sender: ProfileLite | null };
 type SentRow = { id: string; created_at: string; receiver: ProfileLite | null };
@@ -38,7 +39,7 @@ function Page() {
       ...(s.data ?? []).map((x) => x.receiver_id),
     ]));
     const profsRes = ids.length
-      ? await supabase.from("profiles").select("id,full_name,age,city,state,church,photo_url").in("id", ids)
+      ? await supabase.from("profiles").select("id,full_name,age,city,state,church,photo_url,verified").in("id", ids)
       : { data: [] as ProfileLite[] };
     const map = new Map<string, ProfileLite>((profsRes.data ?? []).map((p) => [p.id, p as ProfileLite]));
     setReceived((r.data ?? []).map((x) => ({ id: x.id, created_at: x.created_at, sender: map.get(x.sender_id) ?? null })));
@@ -158,7 +159,7 @@ function ProfileCard({ p, children }: { p: ProfileLite; children: React.ReactNod
             <div className="flex h-full w-full items-center justify-center bg-gradient-love text-5xl text-white">{p.full_name.charAt(0)}</div>}
         </div>
         <div className="p-4">
-          <h3 className="font-semibold">{p.full_name.split(" ")[0]}, {p.age}</h3>
+          <h3 className="flex items-center gap-1.5 font-semibold">{p.full_name.split(" ")[0]}, {p.age}{p.verified && <VerifiedBadge size="sm" />}</h3>
           <p className="text-xs text-muted-foreground">{p.city} · {p.state}</p>
         </div>
       </Link>

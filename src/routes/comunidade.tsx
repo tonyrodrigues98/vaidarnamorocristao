@@ -14,6 +14,7 @@ import { RoleBadge } from "@/components/RoleBadge";
 import { type AppRole, type RoleColor, ROLE_PRIORITY } from "@/lib/roles";
 import { useRestrictedWords, findRestrictedWord } from "@/lib/profanity";
 import { ShieldAlert } from "lucide-react";
+import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 
@@ -28,7 +29,7 @@ type GMsg = {
   reply_to_id?: string | null;
   pinned_at?: string | null;
 };
-type Profile = { id: string; full_name: string; photo_url: string | null };
+type Profile = { id: string; full_name: string; photo_url: string | null; verified?: boolean | null };
 
 export const Route = createFileRoute("/comunidade")({ component: () => (<RequireApproved><Comunidade /></RequireApproved>) });
 
@@ -128,7 +129,7 @@ function Comunidade() {
     if (missing.length === 0) return;
     const { data } = await supabase
       .from("profiles")
-      .select("id, full_name, photo_url")
+      .select("id, full_name, photo_url, verified")
       .in("id", missing);
     if (data) {
       setProfiles((p) => {
@@ -342,6 +343,7 @@ function Comunidade() {
                         <span className="min-w-0 flex-1">
                           <span className="flex items-center gap-1 font-semibold text-foreground">
                             {name}
+                            {p?.verified && <VerifiedBadge size="sm" />}
                             {senderStaff && (
                               <RoleBadge role={senderStaff.role} color={senderStaff.color} />
                             )}
@@ -439,6 +441,7 @@ function Comunidade() {
                         {mine ? (
                           <span className="flex items-center gap-1 text-sm font-semibold">
                             {name}
+                            {p?.verified && <VerifiedBadge size="sm" />}
                             {senderStaff && (
                               senderIsAdmin ? (
                                 <ShieldCheck className="admin-icon-sparkle h-3.5 w-3.5 shrink-0" aria-label="Admin" />
@@ -454,6 +457,7 @@ function Comunidade() {
                             className="flex items-center gap-1 text-sm font-semibold text-foreground hover:text-primary hover:underline"
                           >
                             {name}
+                            {p?.verified && <VerifiedBadge size="sm" />}
                             {senderStaff && (
                               senderIsAdmin ? (
                                 <ShieldCheck className="admin-icon-sparkle h-3.5 w-3.5 shrink-0" aria-label="Admin" />

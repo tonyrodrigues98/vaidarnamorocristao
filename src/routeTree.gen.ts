@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as VerificacaoRouteImport } from './routes/verificacao'
 import { Route as TermosRouteImport } from './routes/termos'
 import { Route as PerfilRouteImport } from './routes/perfil'
 import { Route as MatchesRouteImport } from './routes/matches'
@@ -30,7 +31,13 @@ import { Route as AuthSignupRouteImport } from './routes/auth/signup'
 import { Route as AuthResetPasswordRouteImport } from './routes/auth/reset-password'
 import { Route as AuthLoginRouteImport } from './routes/auth/login'
 import { Route as AuthForgotPasswordRouteImport } from './routes/auth/forgot-password'
+import { Route as AdminVerificacoesRouteImport } from './routes/admin/verificacoes'
 
+const VerificacaoRoute = VerificacaoRouteImport.update({
+  id: '/verificacao',
+  path: '/verificacao',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TermosRoute = TermosRouteImport.update({
   id: '/termos',
   path: '/termos',
@@ -136,6 +143,11 @@ const AuthForgotPasswordRoute = AuthForgotPasswordRouteImport.update({
   path: '/auth/forgot-password',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminVerificacoesRoute = AdminVerificacoesRouteImport.update({
+  id: '/admin/verificacoes',
+  path: '/admin/verificacoes',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -147,6 +159,8 @@ export interface FileRoutesByFullPath {
   '/matches': typeof MatchesRoute
   '/perfil': typeof PerfilRoute
   '/termos': typeof TermosRoute
+  '/verificacao': typeof VerificacaoRoute
+  '/admin/verificacoes': typeof AdminVerificacoesRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
@@ -170,6 +184,8 @@ export interface FileRoutesByTo {
   '/matches': typeof MatchesRoute
   '/perfil': typeof PerfilRoute
   '/termos': typeof TermosRoute
+  '/verificacao': typeof VerificacaoRoute
+  '/admin/verificacoes': typeof AdminVerificacoesRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
@@ -194,6 +210,8 @@ export interface FileRoutesById {
   '/matches': typeof MatchesRoute
   '/perfil': typeof PerfilRoute
   '/termos': typeof TermosRoute
+  '/verificacao': typeof VerificacaoRoute
+  '/admin/verificacoes': typeof AdminVerificacoesRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
@@ -219,6 +237,8 @@ export interface FileRouteTypes {
     | '/matches'
     | '/perfil'
     | '/termos'
+    | '/verificacao'
+    | '/admin/verificacoes'
     | '/auth/forgot-password'
     | '/auth/login'
     | '/auth/reset-password'
@@ -242,6 +262,8 @@ export interface FileRouteTypes {
     | '/matches'
     | '/perfil'
     | '/termos'
+    | '/verificacao'
+    | '/admin/verificacoes'
     | '/auth/forgot-password'
     | '/auth/login'
     | '/auth/reset-password'
@@ -265,6 +287,8 @@ export interface FileRouteTypes {
     | '/matches'
     | '/perfil'
     | '/termos'
+    | '/verificacao'
+    | '/admin/verificacoes'
     | '/auth/forgot-password'
     | '/auth/login'
     | '/auth/reset-password'
@@ -289,6 +313,8 @@ export interface RootRouteChildren {
   MatchesRoute: typeof MatchesRoute
   PerfilRoute: typeof PerfilRoute
   TermosRoute: typeof TermosRoute
+  VerificacaoRoute: typeof VerificacaoRoute
+  AdminVerificacoesRoute: typeof AdminVerificacoesRoute
   AuthForgotPasswordRoute: typeof AuthForgotPasswordRoute
   AuthLoginRoute: typeof AuthLoginRoute
   AuthResetPasswordRoute: typeof AuthResetPasswordRoute
@@ -305,6 +331,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/verificacao': {
+      id: '/verificacao'
+      path: '/verificacao'
+      fullPath: '/verificacao'
+      preLoaderRoute: typeof VerificacaoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/termos': {
       id: '/termos'
       path: '/termos'
@@ -452,6 +485,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthForgotPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/verificacoes': {
+      id: '/admin/verificacoes'
+      path: '/admin/verificacoes'
+      fullPath: '/admin/verificacoes'
+      preLoaderRoute: typeof AdminVerificacoesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -465,6 +505,8 @@ const rootRouteChildren: RootRouteChildren = {
   MatchesRoute: MatchesRoute,
   PerfilRoute: PerfilRoute,
   TermosRoute: TermosRoute,
+  VerificacaoRoute: VerificacaoRoute,
+  AdminVerificacoesRoute: AdminVerificacoesRoute,
   AuthForgotPasswordRoute: AuthForgotPasswordRoute,
   AuthLoginRoute: AuthLoginRoute,
   AuthResetPasswordRoute: AuthResetPasswordRoute,

@@ -503,6 +503,9 @@ export type Database = {
           state: string
           status: Database["public"]["Enums"]["profile_status"]
           updated_at: string
+          verified: boolean
+          verified_at: string | null
+          verified_by: string | null
           years_baptized: number
         }
         Insert: {
@@ -521,6 +524,9 @@ export type Database = {
           state: string
           status?: Database["public"]["Enums"]["profile_status"]
           updated_at?: string
+          verified?: boolean
+          verified_at?: string | null
+          verified_by?: string | null
           years_baptized: number
         }
         Update: {
@@ -539,6 +545,9 @@ export type Database = {
           state?: string
           status?: Database["public"]["Enums"]["profile_status"]
           updated_at?: string
+          verified?: boolean
+          verified_at?: string | null
+          verified_by?: string | null
           years_baptized?: number
         }
         Relationships: []
@@ -645,6 +654,48 @@ export type Database = {
         }
         Relationships: []
       }
+      verification_requests: {
+        Row: {
+          admin_notes: string | null
+          created_at: string
+          document_path: string
+          document_type: string
+          id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          selfie_path: string
+          status: Database["public"]["Enums"]["verification_status"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string
+          document_path: string
+          document_type: string
+          id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          selfie_path: string
+          status?: Database["public"]["Enums"]["verification_status"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string
+          document_path?: string
+          document_type?: string
+          id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          selfie_path?: string
+          status?: Database["public"]["Enums"]["verification_status"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -692,6 +743,7 @@ export type Database = {
       profile_status: "pending" | "approved" | "rejected" | "banned"
       report_status: "open" | "reviewed" | "dismissed"
       sex_type: "masculino" | "feminino"
+      verification_status: "pending" | "approved" | "rejected" | "more_info"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -827,6 +879,7 @@ export const Constants = {
       profile_status: ["pending", "approved", "rejected", "banned"],
       report_status: ["open", "reviewed", "dismissed"],
       sex_type: ["masculino", "feminino"],
+      verification_status: ["pending", "approved", "rejected", "more_info"],
     },
   },
 } as const

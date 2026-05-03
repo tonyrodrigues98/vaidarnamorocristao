@@ -12,6 +12,7 @@ import { useLongPress } from "@/hooks/use-long-press";
 import { useRestrictedWords, findRestrictedWord } from "@/lib/profanity";
 import { ShieldAlert } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { VerifiedBadge } from "@/components/VerifiedBadge";
 
 type Msg = {
   id: string;
@@ -22,7 +23,7 @@ type Msg = {
   edited_at?: string | null;
   reply_to_id?: string | null;
 };
-type Partner = { id: string; full_name: string; photo_url: string | null };
+type Partner = { id: string; full_name: string; photo_url: string | null; verified?: boolean | null };
 
 export const Route = createFileRoute("/conversas/$matchId")({ component: () => (<RequireApproved><Chat /></RequireApproved>) });
 
@@ -54,7 +55,7 @@ function Chat() {
         .eq("blocker_id", user.id).eq("blocked_id", partnerId).maybeSingle();
       if (blk) { setAuthorized(false); return; }
       setAuthorized(true);
-      const { data: p } = await supabase.from("profiles").select("id,full_name,photo_url").eq("id", partnerId).maybeSingle();
+      const { data: p } = await supabase.from("profiles").select("id,full_name,photo_url,verified").eq("id", partnerId).maybeSingle();
       setPartner(p as Partner | null);
       const { data: msgs } = await supabase.from("messages").select("*").eq("match_id", matchId).order("created_at");
       setMessages((msgs ?? []) as Msg[]);
@@ -179,7 +180,10 @@ function Chat() {
                 <div className="flex h-full w-full items-center justify-center bg-gradient-love text-sm text-white">{partner.full_name?.charAt(0) ?? "?"}</div>}
             </div>
             <div className="flex-1">
-              <h2 className="font-semibold leading-none hover:underline">{partner.full_name?.split(" ")[0] ?? "—"}</h2>
+              <h2 className="flex items-center gap-1.5 font-semibold leading-none hover:underline">
+                {partner.full_name?.split(" ")[0] ?? "—"}
+                {partner.verified && <VerifiedBadge size="sm" />}
+              </h2>
               <p className="text-[11px] text-muted-foreground">ver perfil</p>
             </div>
           </Link>

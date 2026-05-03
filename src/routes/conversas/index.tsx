@@ -5,10 +5,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
 import { MessageCircle } from "lucide-react";
+import { VerifiedBadge } from "@/components/VerifiedBadge";
 
 type Item = {
   matchId: string;
-  partner: { id: string; full_name: string; photo_url: string | null; city: string; state: string };
+  partner: { id: string; full_name: string; photo_url: string | null; city: string; state: string; verified?: boolean | null };
   lastMessage: string | null;
   lastAt: string;
   unread: boolean;
@@ -36,7 +37,7 @@ function List() {
     });
     if (!visibleMatches.length) { setItems([]); setLoadingList(false); return; }
     const partnerIds = visibleMatches.map((m) => (m.user_a === user.id ? m.user_b : m.user_a));
-    const { data: profs } = await supabase.from("profiles").select("id,full_name,photo_url,city,state").in("id", partnerIds);
+    const { data: profs } = await supabase.from("profiles").select("id,full_name,photo_url,city,state,verified").in("id", partnerIds);
     const profMap = new Map((profs ?? []).map((p) => [p.id, p]));
     const list: Item[] = await Promise.all(visibleMatches.map(async (m) => {
       const partnerId = m.user_a === user.id ? m.user_b : m.user_a;
@@ -95,7 +96,10 @@ function List() {
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex items-baseline justify-between gap-2">
-                  <h3 className="truncate font-semibold">{i.partner.full_name.split(" ")[0]}</h3>
+                  <h3 className="flex min-w-0 items-center gap-1.5 truncate font-semibold">
+                    <span className="truncate">{i.partner.full_name.split(" ")[0]}</span>
+                    {i.partner.verified && <VerifiedBadge size="sm" />}
+                  </h3>
                   <span className="shrink-0 text-[10px] text-muted-foreground">{new Date(i.lastAt).toLocaleDateString("pt-BR")}</span>
                 </div>
                 <p className={`truncate text-sm ${i.unread ? "font-semibold text-foreground" : "text-muted-foreground"}`}>

@@ -9,6 +9,7 @@ import {
   ChevronDown, Heart as HeartIcon,
 } from "lucide-react";
 import { toast } from "sonner";
+import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { getLastSeen } from "@/lib/lastSeen";
 import { useTheme } from "@/lib/theme";
 import {
@@ -55,11 +56,11 @@ export function Header() {
   const [newsCount, setNewsCount] = useState(0);
   const [communityCount, setCommunityCount] = useState(0);
   const [open, setOpen] = useState(false);
-  const [profile, setProfile] = useState<{ photo_url: string | null; full_name: string | null } | null>(null);
+  const [profile, setProfile] = useState<{ photo_url: string | null; full_name: string | null; verified: boolean | null } | null>(null);
 
   useEffect(() => {
     if (!user) { setProfile(null); return; }
-    supabase.from("profiles").select("photo_url, full_name").eq("id", user.id).maybeSingle()
+    supabase.from("profiles").select("photo_url, full_name, verified").eq("id", user.id).maybeSingle()
       .then(({ data }) => setProfile(data ?? null));
   }, [user]);
 
@@ -217,11 +218,19 @@ export function Header() {
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuLabel className="truncate">{profile?.full_name ?? user.email}</DropdownMenuLabel>
+                  <DropdownMenuLabel className="flex items-center gap-1.5 truncate">
+                    <span className="truncate">{profile?.full_name ?? user.email}</span>
+                    {profile?.verified && <VerifiedBadge size="sm" />}
+                  </DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
                     <Link to="/perfil" className="flex items-center gap-2"><UserIcon className="h-4 w-4" /> Ver perfil</Link>
                   </DropdownMenuItem>
+                  {isApproved && (
+                    <DropdownMenuItem asChild>
+                      <Link to="/verificacao" className="flex items-center gap-2"><Shield className="h-4 w-4" /> Verificação</Link>
+                    </DropdownMenuItem>
+                  )}
                   {canSeeAdminPanel && (
                     <DropdownMenuItem asChild>
                       <Link to="/admin" className="flex items-center gap-2"><Shield className="h-4 w-4" /> Admin</Link>
@@ -277,7 +286,10 @@ export function Header() {
                     ) : initials}
                   </span>
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-semibold">{profile?.full_name ?? user.email}</p>
+                    <p className="flex items-center gap-1.5 truncate text-sm font-semibold">
+                      <span className="truncate">{profile?.full_name ?? user.email}</span>
+                      {profile?.verified && <VerifiedBadge size="sm" />}
+                    </p>
                     <p className="truncate text-xs text-muted-foreground">{user.email}</p>
                   </div>
                   <Button variant="ghost" size="icon" onClick={toggleTheme} aria-label="Tema">
