@@ -11,12 +11,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Checkbox } from "@/components/ui/checkbox";
 import { ArrowLeft, MapPin, Church, Heart, Flag, Ban, MessageCircle, Check, Sparkles, Baby, Globe2, ShieldOff } from "lucide-react";
 import { RoleBadge } from "@/components/RoleBadge";
+import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { ROLE_PRIORITY, type AppRole, type RoleColor } from "@/lib/roles";
 
 type Full = {
   id: string; full_name: string; age: number; height_cm: number | null;
   city: string; state: string; church: string; bio: string | null;
-  photo_url: string | null; marital: string; years_baptized: number; sex: string;
+  photo_url: string | null; marital: string; years_baptized: number; sex: string; verified?: boolean;
 };
 type Prefs = {
   age_min: number;
@@ -233,6 +234,7 @@ function Detail() {
             <div>
               <h1 className="flex flex-wrap items-center gap-2 text-4xl font-semibold">
                 {profile.full_name}, {profile.age}
+                {profile.verified && <VerifiedBadge size="lg" />}
                 {targetRole && (
                   <RoleBadge role={targetRole.role} color={targetRole.color} size="md" />
                 )}
