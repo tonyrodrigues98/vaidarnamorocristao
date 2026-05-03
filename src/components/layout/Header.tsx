@@ -226,6 +226,11 @@ export function Header() {
                   <DropdownMenuItem asChild>
                     <Link to="/perfil" className="flex items-center gap-2"><UserIcon className="h-4 w-4" /> Ver perfil</Link>
                   </DropdownMenuItem>
+                  {isApproved && (
+                    <DropdownMenuItem asChild>
+                      <Link to="/verificacao" className="flex items-center gap-2"><Shield className="h-4 w-4" /> Verificação</Link>
+                    </DropdownMenuItem>
+                  )}
                   {canSeeAdminPanel && (
                     <DropdownMenuItem asChild>
                       <Link to="/admin" className="flex items-center gap-2"><Shield className="h-4 w-4" /> Admin</Link>
