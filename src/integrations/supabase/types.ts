@@ -38,6 +38,8 @@ export type Database = {
       daily_posts: {
         Row: {
           author_id: string
+          bible_reference: string | null
+          bible_text: string | null
           content: string
           created_at: string
           id: string
@@ -49,6 +51,8 @@ export type Database = {
         }
         Insert: {
           author_id: string
+          bible_reference?: string | null
+          bible_text?: string | null
           content: string
           created_at?: string
           id?: string
@@ -60,6 +64,8 @@ export type Database = {
         }
         Update: {
           author_id?: string
+          bible_reference?: string | null
+          bible_text?: string | null
           content?: string
           created_at?: string
           id?: string
