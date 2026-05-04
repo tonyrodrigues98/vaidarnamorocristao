@@ -6,7 +6,7 @@ import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Check, X, Ban, ShieldAlert, Flag, Newspaper, Trash2, Users as UsersIcon, ClipboardList, MessageSquareWarning, ShieldX, Heart, Plus, UserPlus, Search } from "lucide-react";
+import { Check, X, Ban, ShieldAlert, Flag, Newspaper, Trash2, Users as UsersIcon, ClipboardList, MessageSquareWarning, ShieldX, Heart, Plus, UserPlus, Search, BadgeCheck } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -16,6 +16,7 @@ import { Switch } from "@/components/ui/switch";
 import type { Database } from "@/integrations/supabase/types";
 import { ROLE_CONFIG, ROLE_PRIORITY, type AppRole } from "@/lib/roles";
 import { RoleBadge } from "@/components/RoleBadge";
+import { VerifiedBadge } from "@/components/VerifiedBadge";
 
 type Row = Database["public"]["Tables"]["profiles"]["Row"];
 type ProfileUpdate = Database["public"]["Tables"]["profiles"]["Update"];
@@ -185,6 +186,19 @@ function Admin() {
     load("users");
   }
 
+  async function toggleVerified(userId: string, current: boolean) {
+    if (!user) return;
+    setBusy(userId);
+    const patch: ProfileUpdate = current
+      ? { verified: false, verified_at: null, verified_by: null }
+      : { verified: true, verified_at: new Date().toISOString(), verified_by: user.id };
+    const { error } = await supabase.from("profiles").update(patch).eq("id", userId);
+    setBusy(null);
+    if (error) { toast.error(error.message); return; }
+    toast.success(current ? "Verificação removida" : "Perfil verificado");
+    load("users");
+  }
+
   async function savePreCadastro() {
     if (!user) return;
     setPcBusy(true);
@@ -279,6 +293,8 @@ function Admin() {
                 users={users}
                 busy={busy}
                 onChangeRole={changeUserRole}
+                onToggleVerified={toggleVerified}
+                canVerify={isSuperAdmin || isAdmin}
               />
             ) : tab === "restricted_words" ? (
               <RestrictedWordsPanel />
