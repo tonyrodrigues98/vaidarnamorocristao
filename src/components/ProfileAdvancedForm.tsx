@@ -100,9 +100,15 @@ export function ProfileAdvancedForm({ userId }: { userId: string }) {
       const { data: row } = await supabase.from("profile_advanced").select("*").eq("user_id", userId).maybeSingle();
       if (!alive) return;
       if (row) {
-        const { user_id: _omit, created_at: _c, updated_at: _u, ...rest } = row as never;
-        void _omit; void _c; void _u;
-        setData({ ...EMPTY_ADVANCED, ...(rest as Partial<Form>) });
+        const r = row as Record<string, unknown>;
+        const next: Form = { ...EMPTY_ADVANCED };
+        (Object.keys(EMPTY_ADVANCED) as Array<keyof Form>).forEach((k) => {
+          if (k in r) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (next as any)[k] = (r[k as string] as Form[typeof k]) ?? EMPTY_ADVANCED[k];
+          }
+        });
+        setData(next);
       }
       setLoading(false);
     })();
