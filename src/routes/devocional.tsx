@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 import {
-  BookHeart, Heart, Sparkles, Hand, Share2, MessageCircle, Pencil, Trash2,
+  BookHeart, BookOpen, Heart, Sparkles, Hand, Share2, MessageCircle, Pencil, Trash2,
   Check, X, Reply, Pin, PinOff, Flag, Flame, Trophy, Loader2,
 } from "lucide-react";
 import {
@@ -19,6 +19,7 @@ export const Route = createFileRoute("/devocional")({ component: Devocional });
 
 type Post = {
   id: string; title: string; content: string; published_at: string; author_id: string;
+  bible_reference: string | null; bible_text: string | null;
 };
 type ProfileLite = { id: string; full_name: string; photo_url: string | null; verified: boolean | null };
 type Reaction = "heart" | "prayed" | "edify";
@@ -91,7 +92,7 @@ function Devocional() {
 
     let q = supabase
       .from("daily_posts")
-      .select("id, title, content, published_at, author_id")
+      .select("id, title, content, published_at, author_id, bible_reference, bible_text")
       .eq("kind", "devotional")
       .eq("published", true)
       .range(from, to);
@@ -510,6 +511,16 @@ function PostCard(props: PostCardProps) {
       </div>
 
       <h2 className="mt-3 font-serif text-2xl italic leading-tight sm:text-3xl">{post.title}</h2>
+      {post.bible_reference && (
+        <div className="mt-3 rounded-xl border-l-4 border-[var(--rose)] bg-[var(--petal)]/40 p-3">
+          <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-[var(--rose)]">
+            <BookOpen className="h-3.5 w-3.5" /> {post.bible_reference}
+          </div>
+          {post.bible_text && (
+            <p className="mt-1 font-serif text-sm italic leading-relaxed text-foreground/85">"{post.bible_text}"</p>
+          )}
+        </div>
+      )}
       <p className="mt-3 whitespace-pre-wrap font-serif text-[15px] italic leading-relaxed text-foreground/85 sm:text-base">{post.content}</p>
 
       {author && (

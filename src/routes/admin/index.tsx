@@ -17,6 +17,7 @@ import type { Database } from "@/integrations/supabase/types";
 import { ROLE_CONFIG, ROLE_PRIORITY, type AppRole } from "@/lib/roles";
 import { RoleBadge } from "@/components/RoleBadge";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
+import { BibleVerseSelector, type BibleSelection } from "@/components/BibleVerseSelector";
 
 type Row = Database["public"]["Tables"]["profiles"]["Row"];
 type ProfileUpdate = Database["public"]["Tables"]["profiles"]["Update"];
@@ -94,6 +95,7 @@ function Admin() {
   const [newContent, setNewContent] = useState("");
   const [newKind, setNewKind] = useState<"news" | "devotional">("news");
   const [postBusy, setPostBusy] = useState(false);
+  const [bibleSel, setBibleSel] = useState<BibleSelection | null>(null);
 
   async function load(status: TabKey) {
     if (status === "reports") {
@@ -234,11 +236,19 @@ function Admin() {
     const t = newTitle.trim(); const c = newContent.trim();
     if (!t || !c) { toast.error("Preencha título e conteúdo"); return; }
     setPostBusy(true);
-    const { error } = await supabase.from("daily_posts").insert({ author_id: user.id, title: t, content: c, published: true, kind: newKind });
+    const { error } = await supabase.from("daily_posts").insert({
+      author_id: user.id,
+      title: t,
+      content: c,
+      published: true,
+      kind: newKind,
+      bible_reference: newKind === "devotional" ? bibleSel?.reference ?? null : null,
+      bible_text: newKind === "devotional" ? bibleSel?.text ?? null : null,
+    });
     setPostBusy(false);
     if (error) { toast.error(error.message); return; }
     toast.success("Publicado");
-    setNewTitle(""); setNewContent("");
+    setNewTitle(""); setNewContent(""); setBibleSel(null);
     load("posts");
   }
 
@@ -339,6 +349,14 @@ function Admin() {
                     </button>
                   </div>
                   <Input className="mt-3" placeholder="Título" value={newTitle} onChange={(e) => setNewTitle(e.target.value)} maxLength={200} />
+                  {newKind === "devotional" && (
+                    <div className="mt-3 rounded-xl border border-dashed border-[var(--rose)]/30 bg-[var(--petal)]/20 p-3">
+                      <Label className="text-xs uppercase tracking-wide text-muted-foreground">Texto bíblico base (opcional)</Label>
+                      <div className="mt-2">
+                        <BibleVerseSelector value={bibleSel} onChange={setBibleSel} />
+                      </div>
+                    </div>
+                  )}
                   <Textarea className="mt-2 min-h-[140px]" placeholder={newKind === "devotional" ? "Escreva uma reflexão devocional..." : "Escreva uma notícia ou aviso para a comunidade..."} value={newContent} onChange={(e) => setNewContent(e.target.value)} maxLength={10000} />
                   <div className="mt-3 flex justify-end">
                     <Button onClick={createPost} disabled={postBusy}>Publicar</Button>
