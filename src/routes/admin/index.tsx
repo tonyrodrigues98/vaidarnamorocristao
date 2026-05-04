@@ -17,6 +17,9 @@ import type { Database } from "@/integrations/supabase/types";
 import { ROLE_CONFIG, ROLE_PRIORITY, type AppRole } from "@/lib/roles";
 import { RoleBadge } from "@/components/RoleBadge";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
+import { UserBadges, invalidateUserBadges } from "@/components/UserBadges";
+import { BADGE_META, type BadgeCode } from "@/lib/badges";
+import { Award as AwardIcon } from "lucide-react";
 import { BibleVerseSelector, type BibleSelection } from "@/components/BibleVerseSelector";
 
 type Row = Database["public"]["Tables"]["profiles"]["Row"];
@@ -590,10 +593,12 @@ function UsersPanel({
               <h3 className="font-semibold">{u.full_name}, {u.age}</h3>
               <RoleBadge role={u.primaryRole} />
               {u.verified && <VerifiedBadge size="sm" />}
+              <UserBadges userId={u.id} size="xs" max={5} />
             </div>
             <p className="truncate text-xs text-muted-foreground">{u.sex} · {u.city}/{u.state} · {u.status}</p>
           </div>
           <div className="flex w-full items-center gap-2 sm:w-auto">
+            <BadgeAdminControls userId={u.id} userName={u.full_name} />
             {canVerify && (
               <Button
                 size="sm"
@@ -1528,6 +1533,46 @@ function FlagsPanel({ isSuperAdmin, currentUserId }: { isSuperAdmin: boolean; cu
           </div>
         );
       })}
+    </div>
+  );
+}
+
+function BadgeAdminControls({ userId, userName }: { userId: string; userName: string }) {
+  const [busy, setBusy] = useState(false);
+
+  async function award() {
+    if (!confirm(`Atribuir badge "Contribuidor" a ${userName} por 30 dias?`)) return;
+    setBusy(true);
+    const { error } = await supabase.rpc("award_contributor_badge", { _user_id: userId });
+    setBusy(false);
+    if (error) { toast.error(error.message); return; }
+    invalidateUserBadges(userId);
+    toast.success("Badge Contribuidor atribuída");
+  }
+
+  async function removeBadge(code: BadgeCode) {
+    if (!confirm(`Remover badge "${BADGE_META[code].name}" deste usuário?`)) return;
+    setBusy(true);
+    const { error } = await supabase.rpc("admin_remove_badge", { _user_id: userId, _code: code });
+    setBusy(false);
+    if (error) { toast.error(error.message); return; }
+    invalidateUserBadges(userId);
+    toast.success("Badge removida");
+  }
+
+  return (
+    <div className="flex items-center gap-1">
+      <Button size="sm" variant="outline" disabled={busy} onClick={award} title="Atribuir Contribuidor (30 dias)">
+        <AwardIcon className="h-4 w-4" />
+      </Button>
+      <Select onValueChange={(v) => removeBadge(v as BadgeCode)} disabled={busy}>
+        <SelectTrigger className="h-9 w-[44px] px-2"><span className="text-xs">−</span></SelectTrigger>
+        <SelectContent>
+          {(Object.keys(BADGE_META) as BadgeCode[]).map((c) => (
+            <SelectItem key={c} value={c}>Remover: {BADGE_META[c].name}</SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </div>
   );
 }

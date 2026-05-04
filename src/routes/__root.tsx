@@ -5,6 +5,7 @@ import { NotificationsBridge } from "@/lib/useRealtimeNotifications";
 import { ThemeProvider } from "@/lib/theme";
 import { TermsGate } from "@/components/TermsGate";
 import { SupportFooterButton } from "@/components/SupportFooterButton";
+import { PresenceProvider } from "@/lib/presence";
 
 import appCss from "../styles.css?url";
 
@@ -79,8 +80,9 @@ function RootComponent() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <NotificationsBridge />
-        <div className="flex min-h-screen flex-col">
+        <PresenceProvider>
+          <NotificationsBridge />
+          <div className="flex min-h-screen flex-col">
           <div className="flex-1">
             <Outlet />
           </div>
@@ -96,8 +98,9 @@ function RootComponent() {
               <SupportFooterButton />
             </div>
           </footer>
-        </div>
-        <TermsGate />
+          </div>
+          <TermsGate />
+        </PresenceProvider>
         <Toaster richColors position="top-right" />
       </AuthProvider>
     </ThemeProvider>

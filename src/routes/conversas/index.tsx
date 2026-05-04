@@ -6,6 +6,8 @@ import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
 import { MessageCircle } from "lucide-react";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
+import { OnlineDot } from "@/components/OnlineDot";
+import { UserBadges } from "@/components/UserBadges";
 
 type Item = {
   matchId: string;
@@ -90,9 +92,12 @@ function List() {
           ) : items.map((i) => (
             <Link key={i.matchId} to="/conversas/$matchId" params={{ matchId: i.matchId }}
               className="glass hover-lift flex items-center gap-4 rounded-2xl p-4 shadow-soft">
-              <div className="h-14 w-14 shrink-0 overflow-hidden rounded-full bg-muted">
-                {i.partner.photo_url ? <img src={i.partner.photo_url} alt="" className="h-full w-full object-cover" /> :
-                  <div className="flex h-full w-full items-center justify-center bg-gradient-love text-xl text-white">{i.partner.full_name.charAt(0)}</div>}
+              <div className="relative h-14 w-14 shrink-0">
+                <div className="h-full w-full overflow-hidden rounded-full bg-muted">
+                  {i.partner.photo_url ? <img src={i.partner.photo_url} alt="" className="h-full w-full object-cover" /> :
+                    <div className="flex h-full w-full items-center justify-center bg-gradient-love text-xl text-white">{i.partner.full_name.charAt(0)}</div>}
+                </div>
+                <span className="absolute bottom-0 right-0"><OnlineDot userId={i.partner.id} size="sm" /></span>
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex items-baseline justify-between gap-2">
@@ -102,6 +107,7 @@ function List() {
                   </h3>
                   <span className="shrink-0 text-[10px] text-muted-foreground">{new Date(i.lastAt).toLocaleDateString("pt-BR")}</span>
                 </div>
+                <UserBadges userId={i.partner.id} size="xs" max={2} className="mt-0.5" />
                 <p className={`truncate text-sm ${i.unread ? "font-semibold text-foreground" : "text-muted-foreground"}`}>
                   {i.lastMessage ?? "Diga olá 👋"}
                 </p>

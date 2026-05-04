@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      badges: {
+        Row: {
+          active: boolean
+          code: string
+          color: string
+          created_at: string
+          description: string
+          duration_days: number | null
+          id: string
+          kind: string
+          name: string
+        }
+        Insert: {
+          active?: boolean
+          code: string
+          color: string
+          created_at?: string
+          description: string
+          duration_days?: number | null
+          id?: string
+          kind?: string
+          name: string
+        }
+        Update: {
+          active?: boolean
+          code?: string
+          color?: string
+          created_at?: string
+          description?: string
+          duration_days?: number | null
+          id?: string
+          kind?: string
+          name?: string
+        }
+        Relationships: []
+      }
       blocks: {
         Row: {
           blocked_id: string
@@ -599,6 +635,21 @@ export type Database = {
         }
         Relationships: []
       }
+      presence_last_seen: {
+        Row: {
+          last_seen_at: string
+          user_id: string
+        }
+        Insert: {
+          last_seen_at?: string
+          user_id: string
+        }
+        Update: {
+          last_seen_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profile_preferences: {
         Row: {
           accepts_children: boolean
@@ -934,6 +985,86 @@ export type Database = {
         }
         Relationships: []
       }
+      user_activity: {
+        Row: {
+          day: string
+          user_id: string
+        }
+        Insert: {
+          day?: string
+          user_id: string
+        }
+        Update: {
+          day?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_badges: {
+        Row: {
+          active: boolean
+          awarded_at: string
+          badge_id: string
+          expires_at: string | null
+          granted_by: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          active?: boolean
+          awarded_at?: string
+          badge_id: string
+          expires_at?: string | null
+          granted_by?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          active?: boolean
+          awarded_at?: string
+          badge_id?: string
+          expires_at?: string | null
+          granted_by?: string | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_badges_badge_id_fkey"
+            columns: ["badge_id"]
+            isOneToOne: false
+            referencedRelation: "badges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_donations: {
+        Row: {
+          amount: number | null
+          created_at: string
+          created_by: string
+          id: string
+          note: string | null
+          user_id: string
+        }
+        Insert: {
+          amount?: number | null
+          created_at?: string
+          created_by: string
+          id?: string
+          note?: string | null
+          user_id: string
+        }
+        Update: {
+          amount?: number | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          note?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           badge_color: string | null
@@ -1008,10 +1139,41 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_remove_badge: {
+        Args: { _code: string; _user_id: string }
+        Returns: undefined
+      }
+      award_contributor_badge: {
+        Args: { _amount?: number; _note?: string; _user_id: string }
+        Returns: undefined
+      }
       current_terms_version: { Args: never; Returns: string }
+      get_active_streak: {
+        Args: { _user_id: string }
+        Returns: {
+          best_streak: number
+          current_streak: number
+          last_day: string
+          total_days: number
+        }[]
+      }
       get_admin_ids: { Args: never; Returns: string[] }
       get_flagged_message_ids: { Args: never; Returns: string[] }
       get_hidden_staff_ids: { Args: never; Returns: string[] }
+      get_my_missions: {
+        Args: never
+        Returns: {
+          active_streak: number
+          best_streak: number
+          devotional_count_14: number
+          devotional_target: number
+          has_first_devotional: boolean
+          has_first_match: boolean
+          prayer_count_7: number
+          prayer_target: number
+          profile_complete: boolean
+        }[]
+      }
       get_my_terms_status: {
         Args: never
         Returns: {
@@ -1047,6 +1209,9 @@ export type Database = {
       increment_article_views: { Args: { _slug: string }; Returns: undefined }
       is_staff: { Args: { _user_id: string }; Returns: boolean }
       mark_message_read: { Args: { _message_id: string }; Returns: undefined }
+      recompute_all_badges: { Args: never; Returns: undefined }
+      recompute_user_badges: { Args: { _user_id: string }; Returns: undefined }
+      touch_my_activity: { Args: never; Returns: undefined }
       unaccent_safe: { Args: { input: string }; Returns: string }
       unmatch: { Args: { _match_id: string }; Returns: undefined }
     }
