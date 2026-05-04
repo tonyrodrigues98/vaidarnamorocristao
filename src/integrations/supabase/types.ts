@@ -71,6 +71,182 @@ export type Database = {
         }
         Relationships: []
       }
+      devotional_comment_likes: {
+        Row: {
+          comment_id: string
+          created_at: string
+          user_id: string
+        }
+        Insert: {
+          comment_id: string
+          created_at?: string
+          user_id: string
+        }
+        Update: {
+          comment_id?: string
+          created_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "devotional_comment_likes_comment_id_fkey"
+            columns: ["comment_id"]
+            isOneToOne: false
+            referencedRelation: "devotional_comments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      devotional_comment_reports: {
+        Row: {
+          comment_id: string
+          created_at: string
+          id: string
+          reason: string
+          reporter_id: string
+        }
+        Insert: {
+          comment_id: string
+          created_at?: string
+          id?: string
+          reason: string
+          reporter_id: string
+        }
+        Update: {
+          comment_id?: string
+          created_at?: string
+          id?: string
+          reason?: string
+          reporter_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "devotional_comment_reports_comment_id_fkey"
+            columns: ["comment_id"]
+            isOneToOne: false
+            referencedRelation: "devotional_comments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      devotional_comments: {
+        Row: {
+          content: string
+          created_at: string
+          deleted_at: string | null
+          edited_at: string | null
+          id: string
+          parent_id: string | null
+          pinned_at: string | null
+          post_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          deleted_at?: string | null
+          edited_at?: string | null
+          id?: string
+          parent_id?: string | null
+          pinned_at?: string | null
+          post_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          deleted_at?: string | null
+          edited_at?: string | null
+          id?: string
+          parent_id?: string | null
+          pinned_at?: string | null
+          post_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "devotional_comments_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "devotional_comments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "devotional_comments_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "daily_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      devotional_prayed: {
+        Row: {
+          created_at: string
+          day: string
+          id: string
+          post_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          day?: string
+          id?: string
+          post_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          day?: string
+          id?: string
+          post_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "devotional_prayed_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "daily_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      devotional_reactions: {
+        Row: {
+          created_at: string
+          id: string
+          post_id: string
+          reaction: Database["public"]["Enums"]["devotional_reaction"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          post_id: string
+          reaction: Database["public"]["Enums"]["devotional_reaction"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          post_id?: string
+          reaction?: Database["public"]["Enums"]["devotional_reaction"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "devotional_reactions_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "daily_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       global_messages: {
         Row: {
           content: string
@@ -839,6 +1015,14 @@ export type Database = {
           current_version: string
         }[]
       }
+      get_prayer_streak: {
+        Args: { _user_id: string }
+        Returns: {
+          best_streak: number
+          current_streak: number
+          last_day: string
+        }[]
+      }
       get_user_primary_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
@@ -864,6 +1048,7 @@ export type Database = {
       app_role: "admin" | "user" | "super_admin" | "apresentador" | "moderador"
       couple_status: "aceitaram_conversar" | "namorando" | "casamento_marcado"
       daily_post_kind: "news" | "devotional"
+      devotional_reaction: "heart" | "prayed" | "edify"
       location_scope: "regiao" | "brasil" | "mundo" | "personalizado"
       marital_status: "solteiro" | "divorciado"
       profile_status: "pending" | "approved" | "rejected" | "banned"
@@ -1016,6 +1201,7 @@ export const Constants = {
       app_role: ["admin", "user", "super_admin", "apresentador", "moderador"],
       couple_status: ["aceitaram_conversar", "namorando", "casamento_marcado"],
       daily_post_kind: ["news", "devotional"],
+      devotional_reaction: ["heart", "prayed", "edify"],
       location_scope: ["regiao", "brasil", "mundo", "personalizado"],
       marital_status: ["solteiro", "divorciado"],
       profile_status: ["pending", "approved", "rejected", "banned"],

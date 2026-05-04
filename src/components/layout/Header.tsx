@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import {
   Heart, LogOut, Shield, MessageCircle, Sparkles, Menu, X,
   User as UserIcon, Users, Newspaper, Globe, Ban, Share2, Gem, Sun, Moon, MoreHorizontal,
-  ChevronDown, Heart as HeartIcon, LifeBuoy,
+  ChevronDown, Heart as HeartIcon, LifeBuoy, BookHeart,
 } from "lucide-react";
 import { toast } from "sonner";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
@@ -194,6 +194,11 @@ export function Header() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-52">
                   <DropdownMenuItem asChild>
+                    <Link to="/devocional" className="flex items-center gap-2">
+                      <BookHeart className="h-4 w-4" /> Devocional
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
                     <Link to="/noticias" className="flex items-center gap-2">
                       <Newspaper className="h-4 w-4" /> Notícias <Badge n={newsCount} />
                     </Link>
@@ -331,6 +336,9 @@ export function Header() {
                 )}
 
                 <MobileSection label="Mais">
+                  <MobileItem to="/devocional" onClick={close}>
+                    <span className="flex items-center gap-2"><BookHeart className="h-4 w-4" /> Devocional</span>
+                  </MobileItem>
                   <MobileItem to="/noticias" onClick={close}>
                     <span className="flex items-center gap-2"><Newspaper className="h-4 w-4" /> Notícias</span>
                     <Badge n={newsCount} />
