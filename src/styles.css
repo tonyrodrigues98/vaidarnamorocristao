@@ -210,6 +210,28 @@
     filter: drop-shadow(0 0 4px oklch(0.82 0.16 90 / 0.55));
     animation: sparkle-pulse 2.4s ease-in-out infinite;
   }
+  /* Contributor — emerald highlight (paralelo ao gold do admin) */
+  .contributor-sparkle {
+    position: relative;
+    box-shadow: 0 0 0 1px oklch(0.82 0.17 155 / 0.45) inset, 0 6px 22px oklch(0.7 0.2 155 / 0.22);
+  }
+  .contributor-sparkle::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background: linear-gradient(120deg, transparent 30%, oklch(0.95 0.18 155 / 0.55) 50%, transparent 70%);
+    background-size: 220% 100%;
+    animation: sparkle-sweep 3.4s ease-in-out infinite;
+    mix-blend-mode: overlay;
+    opacity: 0.7;
+  }
+  .contributor-icon-sparkle {
+    color: oklch(0.7 0.2 155);
+    filter: drop-shadow(0 0 4px oklch(0.7 0.2 155 / 0.55));
+    animation: sparkle-pulse 2.4s ease-in-out infinite;
+  }
 }
 
 @keyframes fade-up {
