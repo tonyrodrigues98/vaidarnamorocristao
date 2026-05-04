@@ -195,6 +195,53 @@ export function useRealtimeNotifications() {
           }
         }
       )
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "support_messages" },
+        async (payload) => {
+          const m = payload.new as { ticket_id: string; sender_id: string; is_staff: boolean; content: string };
+          if (m.sender_id === user.id) return;
+          // Only notify if user is participant in the ticket
+          const { data: t } = await supabase
+            .from("support_tickets")
+            .select("user_id, title")
+            .eq("id", m.ticket_id)
+            .maybeSingle();
+          if (!t) return;
+          const isOwner = t.user_id === user.id;
+          const { data: roles } = await supabase
+            .from("user_roles")
+            .select("role")
+            .eq("user_id", user.id);
+          const staff = (roles ?? []).some((r) => r.role === "admin" || r.role === "super_admin");
+          if (!isOwner && !staff) return;
+          if (typeof window !== "undefined" && window.location.pathname.startsWith(`/suporte/${m.ticket_id}`)) return;
+          toast(m.is_staff ? "🛟 Resposta do suporte" : "🛟 Nova mensagem no chamado", {
+            description: `${t.title}: ${m.content.slice(0, 60)}`,
+            action: { label: "Abrir", onClick: () => router.navigate({ to: "/suporte/$id", params: { id: m.ticket_id } }) },
+          });
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "support_tickets", filter: `user_id=eq.${user.id}` },
+        (payload) => {
+          const n = payload.new as { id: string; status: string; title: string };
+          const o = payload.old as { status: string };
+          if (n.status === o.status) return;
+          const labels: Record<string, string> = {
+            in_review: "🔎 Chamado em análise",
+            awaiting_user: "✉️ Aguardando sua resposta",
+            resolved: "✅ Chamado resolvido",
+            closed: "🔒 Chamado fechado",
+            open: "🛟 Chamado reaberto",
+          };
+          toast(labels[n.status] ?? "Status atualizado", {
+            description: n.title,
+            action: { label: "Abrir", onClick: () => router.navigate({ to: "/suporte/$id", params: { id: n.id } }) },
+          });
+        }
+      )
       .subscribe();
 
     return () => {
