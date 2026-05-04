@@ -1543,7 +1543,7 @@ function BadgeAdminControls({ userId, userName }: { userId: string; userName: st
   async function award() {
     if (!confirm(`Atribuir badge "Contribuidor" a ${userName} por 30 dias?`)) return;
     setBusy(true);
-    const { error } = await supabase.rpc("award_contributor_badge", { _user_id: userId, _amount: null, _note: null });
+    const { error } = await supabase.rpc("award_contributor_badge", { _user_id: userId });
     setBusy(false);
     if (error) { toast.error(error.message); return; }
     invalidateUserBadges(userId);
