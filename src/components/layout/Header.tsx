@@ -352,6 +352,9 @@ export function Header() {
                       <span className="flex items-center gap-2"><Shield className="h-4 w-4" /> Verificação</span>
                     </MobileItem>
                   )}
+                  <MobileItem to="/suporte" onClick={close}>
+                    <span className="flex items-center gap-2"><LifeBuoy className="h-4 w-4" /> Suporte</span>
+                  </MobileItem>
                   {canSeeAdminPanel && (
                     <MobileItem to="/admin" onClick={close}>
                       <span className="flex items-center gap-2"><Shield className="h-4 w-4" /> Admin</span>
