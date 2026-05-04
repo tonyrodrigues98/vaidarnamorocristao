@@ -472,6 +472,7 @@ function Comunidade() {
                             )}
                           </Link>
                         )}
+                        <UserBadges userId={m.sender_id} size="xs" max={2} />
                         <span className="text-[11px] text-muted-foreground">
                           {new Date(m.created_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
                           {m.edited_at ? " · editado" : ""}
