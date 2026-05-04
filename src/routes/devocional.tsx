@@ -7,6 +7,7 @@ import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
+import { recomputeMyBadges } from "@/lib/recomputeBadges";
 import {
   BookHeart, BookOpen, Heart, Sparkles, Hand, Share2, MessageCircle, Pencil, Trash2,
   Check, X, Reply, Pin, PinOff, Flag, Flame, Trophy, Loader2,
