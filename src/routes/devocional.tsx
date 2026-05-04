@@ -511,6 +511,16 @@ function PostCard(props: PostCardProps) {
       </div>
 
       <h2 className="mt-3 font-serif text-2xl italic leading-tight sm:text-3xl">{post.title}</h2>
+      {post.bible_reference && (
+        <div className="mt-3 rounded-xl border-l-4 border-[var(--rose)] bg-[var(--petal)]/40 p-3">
+          <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-[var(--rose)]">
+            <BookOpen className="h-3.5 w-3.5" /> {post.bible_reference}
+          </div>
+          {post.bible_text && (
+            <p className="mt-1 font-serif text-sm italic leading-relaxed text-foreground/85">"{post.bible_text}"</p>
+          )}
+        </div>
+      )}
       <p className="mt-3 whitespace-pre-wrap font-serif text-[15px] italic leading-relaxed text-foreground/85 sm:text-base">{post.content}</p>
 
       {author && (
