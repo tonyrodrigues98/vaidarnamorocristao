@@ -590,10 +590,12 @@ function UsersPanel({
               <h3 className="font-semibold">{u.full_name}, {u.age}</h3>
               <RoleBadge role={u.primaryRole} />
               {u.verified && <VerifiedBadge size="sm" />}
+              <UserBadges userId={u.id} size="xs" max={5} />
             </div>
             <p className="truncate text-xs text-muted-foreground">{u.sex} · {u.city}/{u.state} · {u.status}</p>
           </div>
           <div className="flex w-full items-center gap-2 sm:w-auto">
+            <BadgeAdminControls userId={u.id} userName={u.full_name} />
             {canVerify && (
               <Button
                 size="sm"
