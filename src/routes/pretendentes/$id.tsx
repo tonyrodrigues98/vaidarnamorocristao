@@ -12,6 +12,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { ArrowLeft, MapPin, Church, Heart, Flag, Ban, MessageCircle, Check, Sparkles, Baby, Globe2, ShieldOff } from "lucide-react";
 import { RoleBadge } from "@/components/RoleBadge";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
+import { OnlineDot } from "@/components/OnlineDot";
+import { UserBadges } from "@/components/UserBadges";
 import { ROLE_PRIORITY, type AppRole, type RoleColor } from "@/lib/roles";
 
 type Full = {
@@ -238,7 +240,9 @@ function Detail() {
                 {targetRole && (
                   <RoleBadge role={targetRole.role} color={targetRole.color} size="md" />
                 )}
+                <OnlineDot userId={profile.id} size="md" showLabel />
               </h1>
+              <UserBadges userId={profile.id} size="sm" max={5} className="mt-2" />
               <p className="mt-1 text-muted-foreground">{profile.marital === "solteiro" ? "Solteiro(a)" : "Divorciado(a)"} {profile.height_cm ? `· ${profile.height_cm} cm` : ""}</p>
             </div>
 
