@@ -24,6 +24,7 @@ import { Route as PretendentesIndexRouteImport } from './routes/pretendentes/ind
 import { Route as NoticiasIndexRouteImport } from './routes/noticias.index'
 import { Route as ConversasIndexRouteImport } from './routes/conversas/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as SuporteIdRouteImport } from './routes/suporte/$id'
 import { Route as PretendentesIdRouteImport } from './routes/pretendentes/$id'
 import { Route as OnboardingEtapa2RouteImport } from './routes/onboarding/etapa-2'
 import { Route as OnboardingEtapa1RouteImport } from './routes/onboarding/etapa-1'
@@ -109,6 +110,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/admin/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SuporteIdRoute = SuporteIdRouteImport.update({
+  id: '/suporte/$id',
+  path: '/suporte/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PretendentesIdRoute = PretendentesIdRouteImport.update({
   id: '/pretendentes/$id',
   path: '/pretendentes/$id',
@@ -175,6 +181,7 @@ export interface FileRoutesByFullPath {
   '/onboarding/etapa-1': typeof OnboardingEtapa1Route
   '/onboarding/etapa-2': typeof OnboardingEtapa2Route
   '/pretendentes/$id': typeof PretendentesIdRoute
+  '/suporte/$id': typeof SuporteIdRoute
   '/admin/': typeof AdminIndexRoute
   '/conversas/': typeof ConversasIndexRoute
   '/noticias/': typeof NoticiasIndexRoute
@@ -201,6 +208,7 @@ export interface FileRoutesByTo {
   '/onboarding/etapa-1': typeof OnboardingEtapa1Route
   '/onboarding/etapa-2': typeof OnboardingEtapa2Route
   '/pretendentes/$id': typeof PretendentesIdRoute
+  '/suporte/$id': typeof SuporteIdRoute
   '/admin': typeof AdminIndexRoute
   '/conversas': typeof ConversasIndexRoute
   '/noticias': typeof NoticiasIndexRoute
@@ -228,6 +236,7 @@ export interface FileRoutesById {
   '/onboarding/etapa-1': typeof OnboardingEtapa1Route
   '/onboarding/etapa-2': typeof OnboardingEtapa2Route
   '/pretendentes/$id': typeof PretendentesIdRoute
+  '/suporte/$id': typeof SuporteIdRoute
   '/admin/': typeof AdminIndexRoute
   '/conversas/': typeof ConversasIndexRoute
   '/noticias/': typeof NoticiasIndexRoute
@@ -256,6 +265,7 @@ export interface FileRouteTypes {
     | '/onboarding/etapa-1'
     | '/onboarding/etapa-2'
     | '/pretendentes/$id'
+    | '/suporte/$id'
     | '/admin/'
     | '/conversas/'
     | '/noticias/'
@@ -282,6 +292,7 @@ export interface FileRouteTypes {
     | '/onboarding/etapa-1'
     | '/onboarding/etapa-2'
     | '/pretendentes/$id'
+    | '/suporte/$id'
     | '/admin'
     | '/conversas'
     | '/noticias'
@@ -308,6 +319,7 @@ export interface FileRouteTypes {
     | '/onboarding/etapa-1'
     | '/onboarding/etapa-2'
     | '/pretendentes/$id'
+    | '/suporte/$id'
     | '/admin/'
     | '/conversas/'
     | '/noticias/'
@@ -335,6 +347,7 @@ export interface RootRouteChildren {
   OnboardingEtapa1Route: typeof OnboardingEtapa1Route
   OnboardingEtapa2Route: typeof OnboardingEtapa2Route
   PretendentesIdRoute: typeof PretendentesIdRoute
+  SuporteIdRoute: typeof SuporteIdRoute
   AdminIndexRoute: typeof AdminIndexRoute
   ConversasIndexRoute: typeof ConversasIndexRoute
   NoticiasIndexRoute: typeof NoticiasIndexRoute
@@ -449,6 +462,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/suporte/$id': {
+      id: '/suporte/$id'
+      path: '/suporte/$id'
+      fullPath: '/suporte/$id'
+      preLoaderRoute: typeof SuporteIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/pretendentes/$id': {
       id: '/pretendentes/$id'
       path: '/pretendentes/$id'
@@ -535,6 +555,7 @@ const rootRouteChildren: RootRouteChildren = {
   OnboardingEtapa1Route: OnboardingEtapa1Route,
   OnboardingEtapa2Route: OnboardingEtapa2Route,
   PretendentesIdRoute: PretendentesIdRoute,
+  SuporteIdRoute: SuporteIdRoute,
   AdminIndexRoute: AdminIndexRoute,
   ConversasIndexRoute: ConversasIndexRoute,
   NoticiasIndexRoute: NoticiasIndexRoute,
