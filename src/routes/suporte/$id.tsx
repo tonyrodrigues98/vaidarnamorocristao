@@ -11,12 +11,17 @@ import {
 } from "@/components/ui/select";
 import {
   ArrowLeft, Loader2, Paperclip, Send, ShieldCheck, X, Image as ImageIcon,
+  UserCog,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
   CATEGORIES, PRIORITIES, STATUSES, statusBadge, priorityBadge,
   type Ticket, type TicketMessage,
 } from "@/lib/support";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
+type ProfileLite = { id: string; full_name: string; photo_url: string | null };
+type StaffOption = { user_id: string; full_name: string; photo_url: string | null; role: string };
 
 export const Route = createFileRoute("/suporte/$id")({
   component: TicketPage,
@@ -29,6 +34,8 @@ function TicketPage() {
   const [ticket, setTicket] = useState<Ticket | null>(null);
   const [msgs, setMsgs] = useState<TicketMessage[]>([]);
   const [signed, setSigned] = useState<Record<string, string>>({});
+  const [profiles, setProfiles] = useState<Record<string, ProfileLite>>({});
+  const [staffList, setStaffList] = useState<StaffOption[]>([]);
   const [busy, setBusy] = useState(true);
   const [text, setText] = useState("");
   const [files, setFiles] = useState<File[]>([]);
@@ -49,6 +56,19 @@ function TicketPage() {
         const messages = (m ?? []) as TicketMessage[];
         setMsgs(messages);
         setBusy(false);
+        // load profiles for senders + ticket owner
+        const ids = Array.from(new Set([
+          ...(t ? [(t as Ticket).user_id, (t as Ticket).assigned_to].filter(Boolean) as string[] : []),
+          ...messages.map((mm) => mm.sender_id),
+        ]));
+        if (ids.length) {
+          const { data: ps } = await supabase.from("profiles").select("id, full_name, photo_url").in("id", ids);
+          if (ps && !ignore) {
+            const map: Record<string, ProfileLite> = {};
+            ps.forEach((p: any) => { map[p.id] = p; });
+            setProfiles((prev) => ({ ...prev, ...map }));
+          }
+        }
         // sign attachments
         const paths = messages.flatMap((mm) => (mm.attachments ?? []).map((a) => a.path));
         if (paths.length) {
@@ -68,6 +88,10 @@ function TicketPage() {
         async (payload) => {
           const m = payload.new as TicketMessage;
           setMsgs((prev) => [...prev, m]);
+          if (!profiles[m.sender_id]) {
+            const { data: p } = await supabase.from("profiles").select("id, full_name, photo_url").eq("id", m.sender_id).maybeSingle();
+            if (p) setProfiles((prev) => ({ ...prev, [p.id]: p as ProfileLite }));
+          }
           if (m.attachments?.length) {
             const paths = m.attachments.map((a) => a.path);
             const { data: urls } = await supabase.storage.from("support-attachments").createSignedUrls(paths, 3600);
@@ -83,6 +107,31 @@ function TicketPage() {
       .subscribe();
     return () => { ignore = true; supabase.removeChannel(ch); };
   }, [id, user]);
+
+  // Load staff list for assignment (admins only)
+  useEffect(() => {
+    if (!isStaff) return;
+    let ignore = false;
+    (async () => {
+      const { data: roles } = await supabase
+        .from("user_roles")
+        .select("user_id, role")
+        .in("role", ["admin", "super_admin", "moderador", "apresentador"] as any);
+      const ids = Array.from(new Set((roles ?? []).map((r: any) => r.user_id)));
+      if (!ids.length) return;
+      const { data: ps } = await supabase.from("profiles").select("id, full_name, photo_url").in("id", ids);
+      if (ignore) return;
+      const profMap = new Map((ps ?? []).map((p: any) => [p.id, p]));
+      const list: StaffOption[] = (roles ?? []).map((r: any) => {
+        const p: any = profMap.get(r.user_id);
+        return p ? { user_id: r.user_id, full_name: p.full_name, photo_url: p.photo_url, role: r.role } : null;
+      }).filter(Boolean) as StaffOption[];
+      // dedupe by user_id
+      const seen = new Set<string>();
+      setStaffList(list.filter((s) => { if (seen.has(s.user_id)) return false; seen.add(s.user_id); return true; }));
+    })();
+    return () => { ignore = true; };
+  }, [isStaff]);
 
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth" }); }, [msgs.length]);
 
@@ -124,6 +173,13 @@ function TicketPage() {
     else toast.success("Atualizado");
   }
 
+  async function assignTo(userId: string | null) {
+    if (!ticket) return;
+    const { error } = await supabase.from("support_tickets").update({ assigned_to: userId }).eq("id", ticket.id);
+    if (error) return toast.error(error.message);
+    toast.success(userId ? "Atribuído" : "Atribuição removida");
+  }
+
   const canChat = useMemo(() => ticket && ticket.status !== "closed", [ticket]);
 
   if (!loading && !user) return <Navigate to="/auth/login" />;
@@ -151,11 +207,23 @@ function TicketPage() {
 
         <div className="glass mt-3 rounded-2xl p-5 shadow-soft">
           <div className="flex flex-wrap items-start justify-between gap-3">
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <h1 className="break-words text-xl font-semibold">{ticket.title}</h1>
-              <p className="mt-1 text-xs text-muted-foreground">
-                Aberto em {new Date(ticket.created_at).toLocaleString("pt-BR")}
-              </p>
+              <div className="mt-2 flex items-center gap-2">
+                <Avatar className="h-7 w-7">
+                  <AvatarImage src={profiles[ticket.user_id]?.photo_url ?? undefined} />
+                  <AvatarFallback>{(profiles[ticket.user_id]?.full_name ?? "?").charAt(0)}</AvatarFallback>
+                </Avatar>
+                <span className="text-sm font-medium">{profiles[ticket.user_id]?.full_name ?? "Usuário"}</span>
+                <span className="text-xs text-muted-foreground">
+                  • aberto em {new Date(ticket.created_at).toLocaleString("pt-BR")}
+                </span>
+              </div>
+              {ticket.assigned_to && (
+                <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
+                  <UserCog className="h-3 w-3" /> Responsável: {profiles[ticket.assigned_to]?.full_name ?? "—"}
+                </p>
+              )}
             </div>
             <div className="flex flex-wrap items-center gap-2">
               {priorityBadge(ticket.priority)}
@@ -164,7 +232,7 @@ function TicketPage() {
           </div>
 
           {isStaff && (
-            <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-3">
+            <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
               <Select value={ticket.status} onValueChange={(v) => updateField({ status: v as Ticket["status"] })}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -183,6 +251,17 @@ function TicketPage() {
                   {CATEGORIES.map((c) => <SelectItem key={c.value} value={c.value}>Cat: {c.label}</SelectItem>)}
                 </SelectContent>
               </Select>
+              <Select value={ticket.assigned_to ?? "__none__"} onValueChange={(v) => assignTo(v === "__none__" ? null : v)}>
+                <SelectTrigger><SelectValue placeholder="Atribuir a..." /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__">Sem responsável</SelectItem>
+                  {staffList.map((s) => (
+                    <SelectItem key={s.user_id} value={s.user_id}>
+                      Responsável: {s.full_name} ({s.role})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           )}
         </div>
@@ -193,20 +272,27 @@ function TicketPage() {
           )}
           {msgs.map((m) => {
             const mine = m.sender_id === user?.id;
+            const sender = profiles[m.sender_id];
             return (
-              <div key={m.id} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
-                <div className={`max-w-[80%] rounded-2xl px-4 py-2 text-sm shadow-soft ${
+              <div key={m.id} className={`flex items-end gap-2 ${mine ? "justify-end" : "justify-start"}`}>
+                {!mine && (
+                  <Avatar className="h-7 w-7 shrink-0">
+                    <AvatarImage src={sender?.photo_url ?? undefined} />
+                    <AvatarFallback>{(sender?.full_name ?? "?").charAt(0)}</AvatarFallback>
+                  </Avatar>
+                )}
+                <div className={`max-w-[78%] rounded-2xl px-4 py-2 text-sm shadow-soft ${
                   m.is_staff
                     ? "bg-[var(--rose)]/15 text-foreground border border-[var(--rose)]/30"
                     : mine
                       ? "bg-primary text-primary-foreground"
                       : "bg-muted"
                 }`}>
-                  {m.is_staff && (
-                    <p className="mb-0.5 flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide text-[var(--rose)]">
-                      <ShieldCheck className="h-3 w-3" /> Equipe de Suporte
-                    </p>
-                  )}
+                  <p className="mb-0.5 flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide opacity-80">
+                    {m.is_staff && <ShieldCheck className="h-3 w-3 text-[var(--rose)]" />}
+                    <span className={m.is_staff ? "text-[var(--rose)]" : ""}>{sender?.full_name ?? (mine ? "Você" : "Usuário")}</span>
+                    {m.is_staff && <span className="text-[var(--rose)]">• Equipe</span>}
+                  </p>
                   <p className="whitespace-pre-wrap break-words">{m.content}</p>
                   {m.attachments?.length > 0 && (
                     <div className="mt-2 flex flex-wrap gap-2">
