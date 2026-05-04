@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { BADGE_META, type BadgeCode } from "@/lib/badges";
-import { Award, Flame, Heart as HeartIcon, BookOpen, UserCheck, Sparkles } from "lucide-react";
+import { Award, Flame, Heart as HeartIcon, BookOpen, UserCheck, Sparkles, Gem } from "lucide-react";
 
 type Missions = {
   profile_complete: boolean;
@@ -13,6 +13,8 @@ type Missions = {
   has_first_devotional: boolean;
   active_streak: number;
   best_streak: number;
+  advanced_sections: number;
+  advanced_target: number;
 };
 
 const STREAK_TIERS = [7, 15, 30, 60, 90, 365];
@@ -127,6 +129,16 @@ export function MissionsPanel({ userId }: { userId: string }) {
             target={m.devotional_target}
             doneLabel="Badge ativa — continue interagindo"
             todoLabel={`${m.devotional_count_14}/${m.devotional_target} interações nos últimos 14 dias`}
+          />
+
+          <Mission
+            icon={<Gem className="h-4 w-4" />}
+            title="Perfil Avançado"
+            done={has("advanced_profile")}
+            value={Math.min(m.advanced_sections, m.advanced_target)}
+            target={m.advanced_target}
+            doneLabel="Badge ativa — perfil profundo ✓"
+            todoLabel={`${m.advanced_sections}/${m.advanced_target} seções preenchidas em "Perfil profundo"`}
           />
 
           <Mission
