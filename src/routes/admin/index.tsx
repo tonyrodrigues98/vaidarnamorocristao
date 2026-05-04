@@ -17,6 +17,7 @@ import type { Database } from "@/integrations/supabase/types";
 import { ROLE_CONFIG, ROLE_PRIORITY, type AppRole } from "@/lib/roles";
 import { RoleBadge } from "@/components/RoleBadge";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
+import { BibleVerseSelector, type BibleSelection } from "@/components/BibleVerseSelector";
 
 type Row = Database["public"]["Tables"]["profiles"]["Row"];
 type ProfileUpdate = Database["public"]["Tables"]["profiles"]["Update"];
@@ -94,6 +95,7 @@ function Admin() {
   const [newContent, setNewContent] = useState("");
   const [newKind, setNewKind] = useState<"news" | "devotional">("news");
   const [postBusy, setPostBusy] = useState(false);
+  const [bibleSel, setBibleSel] = useState<BibleSelection | null>(null);
 
   async function load(status: TabKey) {
     if (status === "reports") {
@@ -234,11 +236,19 @@ function Admin() {
     const t = newTitle.trim(); const c = newContent.trim();
     if (!t || !c) { toast.error("Preencha título e conteúdo"); return; }
     setPostBusy(true);
-    const { error } = await supabase.from("daily_posts").insert({ author_id: user.id, title: t, content: c, published: true, kind: newKind });
+    const { error } = await supabase.from("daily_posts").insert({
+      author_id: user.id,
+      title: t,
+      content: c,
+      published: true,
+      kind: newKind,
+      bible_reference: newKind === "devotional" ? bibleSel?.reference ?? null : null,
+      bible_text: newKind === "devotional" ? bibleSel?.text ?? null : null,
+    });
     setPostBusy(false);
     if (error) { toast.error(error.message); return; }
     toast.success("Publicado");
-    setNewTitle(""); setNewContent("");
+    setNewTitle(""); setNewContent(""); setBibleSel(null);
     load("posts");
   }
 
