@@ -46,6 +46,52 @@ function PerfilPage() {
   const [savingRole, setSavingRole] = useState(false);
   const [localColor, setLocalColor] = useState<RoleColor | null>(null);
   const [localPublic, setLocalPublic] = useState(false);
+  const [hasContributorBadge, setHasContributorBadge] = useState(false);
+  const [contribHighlight, setContribHighlight] = useState(true);
+  const [savingContrib, setSavingContrib] = useState(false);
+
+  useEffect(() => {
+    if (!user) return;
+    let alive = true;
+    (async () => {
+      const [{ data: badgeData }, { data: profData }] = await Promise.all([
+        supabase
+          .from("user_badges")
+          .select("active, expires_at, badges(code)")
+          .eq("user_id", user.id)
+          .eq("active", true),
+        supabase
+          .from("profiles")
+          .select("contributor_highlight")
+          .eq("id", user.id)
+          .maybeSingle(),
+      ]);
+      if (!alive) return;
+      const has = ((badgeData ?? []) as Array<{ active: boolean; expires_at: string | null; badges: { code: string } | null }>)
+        .some((r) => r.badges?.code === "contributor" && (!r.expires_at || new Date(r.expires_at) > new Date()));
+      setHasContributorBadge(has);
+      setContribHighlight((profData as { contributor_highlight?: boolean | null } | null)?.contributor_highlight !== false);
+    })();
+    return () => { alive = false; };
+  }, [user]);
+
+  const toggleContribHighlight = async (next: boolean) => {
+    if (!user) return;
+    setSavingContrib(true);
+    const prev = contribHighlight;
+    setContribHighlight(next);
+    const { error } = await supabase
+      .from("profiles")
+      .update({ contributor_highlight: next })
+      .eq("id", user.id);
+    setSavingContrib(false);
+    if (error) {
+      setContribHighlight(prev);
+      toast.error("Não foi possível salvar a preferência.");
+    } else {
+      toast.success(next ? "Destaque verde ativado nas mensagens." : "Destaque verde desativado.");
+    }
+  };
 
   useEffect(() => {
     setLocalColor(badgeColor);
@@ -592,6 +638,22 @@ function PerfilPage() {
 
           <TabsContent value="missions" className="mt-6">
             {user && <MissionsPanel userId={user.id} />}
+            {hasContributorBadge && (
+              <div className="glass mt-4 flex items-center justify-between rounded-2xl p-4 shadow-soft sm:p-5">
+                <div className="pr-4">
+                  <p className="font-medium text-foreground">Destaque verde nas mensagens</p>
+                  <p className="text-xs text-muted-foreground">
+                    Como Contribuidor, suas mensagens na comunidade ganham um destaque verde.
+                    A badge ao lado do seu nome continua visível mesmo desligada.
+                  </p>
+                </div>
+                <Switch
+                  checked={contribHighlight}
+                  disabled={savingContrib}
+                  onCheckedChange={toggleContribHighlight}
+                />
+              </div>
+            )}
           </TabsContent>
 
           {isStaff && (

@@ -31,7 +31,7 @@ type GMsg = {
   reply_to_id?: string | null;
   pinned_at?: string | null;
 };
-type Profile = { id: string; full_name: string; photo_url: string | null; verified?: boolean | null };
+type Profile = { id: string; full_name: string; photo_url: string | null; verified?: boolean | null; contributor_highlight?: boolean | null };
 
 export const Route = createFileRoute("/comunidade")({ component: () => (<RequireApproved><Comunidade /></RequireApproved>) });
 
@@ -53,6 +53,7 @@ function Comunidade() {
   const [highlightId, setHighlightId] = useState<string | null>(null);
   const messageRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const [staffMap, setStaffMap] = useState<Record<string, { role: AppRole; color: RoleColor | null }>>({});
+  const [contribIds, setContribIds] = useState<Set<string>>(new Set());
   const restrictedWords = useRestrictedWords();
   const [cooldownLeft, setCooldownLeft] = useState(0);
   const lastSentRef = useRef<number>(0);
@@ -131,7 +132,7 @@ function Comunidade() {
     if (missing.length === 0) return;
     const { data } = await supabase
       .from("profiles")
-      .select("id, full_name, photo_url, verified")
+      .select("id, full_name, photo_url, verified, contributor_highlight")
       .in("id", missing);
     if (data) {
       setProfiles((p) => {
@@ -139,6 +140,22 @@ function Comunidade() {
         for (const pr of data) next[pr.id] = pr as Profile;
         return next;
       });
+    }
+    // Verifica quais desses ids têm a badge "contributor" ativa
+    const { data: badgeRows } = await supabase
+      .from("user_badges")
+      .select("user_id, active, expires_at, badges(code)")
+      .in("user_id", missing)
+      .eq("active", true);
+    if (badgeRows && badgeRows.length) {
+      const now = Date.now();
+      const newIds = new Set<string>();
+      for (const r of badgeRows as Array<{ user_id: string; active: boolean; expires_at: string | null; badges: { code: string } | null }>) {
+        if (r.badges?.code !== "contributor") continue;
+        if (r.expires_at && new Date(r.expires_at).getTime() <= now) continue;
+        newIds.add(r.user_id);
+      }
+      if (newIds.size) setContribIds((prev) => { const n = new Set(prev); newIds.forEach((id) => n.add(id)); return n; });
     }
   };
 
@@ -399,6 +416,7 @@ function Comunidade() {
                 const senderStaff = staffMap[m.sender_id];
                 const senderIsAdmin = !!senderStaff && (senderStaff.role === "admin" || senderStaff.role === "super_admin") && (senderStaff.color ?? "gold") === "gold";
                 const senderIsStaff = !!senderStaff;
+                const senderContribOn = !senderIsAdmin && contribIds.has(m.sender_id) && (p?.contributor_highlight !== false);
                 const isFlagged = flaggedIds.has(m.id);
                 const myFlag = myFlags[m.id];
                 return (
@@ -408,7 +426,7 @@ function Comunidade() {
                     className={`group relative flex scroll-mt-24 items-start gap-3 rounded-xl transition-colors duration-500 ${isFlash ? "bg-primary/10" : ""} ${isFlagged && isStaffViewer ? "bg-destructive/5 ring-1 ring-destructive/30 px-2 py-1" : ""}`}
                   >
                     {mine ? (
-                      <div className={`h-9 w-9 shrink-0 overflow-hidden rounded-full bg-muted ${senderIsAdmin ? "ring-2 ring-[var(--gold)] ring-offset-2 ring-offset-background" : senderIsStaff ? "ring-2 ring-primary/40 ring-offset-2 ring-offset-background" : ""}`}>
+                      <div className={`h-9 w-9 shrink-0 overflow-hidden rounded-full bg-muted ${senderIsAdmin ? "ring-2 ring-[var(--gold)] ring-offset-2 ring-offset-background" : senderContribOn ? "ring-2 ring-emerald-500 ring-offset-2 ring-offset-background" : senderIsStaff ? "ring-2 ring-primary/40 ring-offset-2 ring-offset-background" : ""}`}>
                         {p?.photo_url ? (
                           <img src={p.photo_url} alt="" className="h-full w-full object-cover" />
                         ) : (
@@ -421,7 +439,7 @@ function Comunidade() {
                       <Link
                         to="/pretendentes/$id"
                         params={{ id: m.sender_id }}
-                        className={`relative h-9 w-9 shrink-0 overflow-visible rounded-full bg-muted transition hover:ring-2 hover:ring-primary/40 ${senderIsAdmin ? "ring-2 ring-[var(--gold)] ring-offset-2 ring-offset-background" : senderIsStaff ? "ring-2 ring-primary/40 ring-offset-2 ring-offset-background" : "ring-0"}`}
+                        className={`relative h-9 w-9 shrink-0 overflow-visible rounded-full bg-muted transition hover:ring-2 hover:ring-primary/40 ${senderIsAdmin ? "ring-2 ring-[var(--gold)] ring-offset-2 ring-offset-background" : senderContribOn ? "ring-2 ring-emerald-500 ring-offset-2 ring-offset-background" : senderIsStaff ? "ring-2 ring-primary/40 ring-offset-2 ring-offset-background" : "ring-0"}`}
                         aria-label={`Ver perfil de ${name}`}
                       >
                         <span className="absolute inset-0 overflow-hidden rounded-full">
@@ -441,6 +459,7 @@ function Comunidade() {
                       onLongPress={() => setActionsOpenId(m.id)}
                       highlighted={showActions || isFlash}
                       isAdmin={senderIsAdmin}
+                      isContributor={senderContribOn}
                     >
                       <div className="flex items-baseline gap-2">
                         {mine ? (
@@ -682,12 +701,14 @@ function BubbleWrap({
   onLongPress,
   highlighted,
   isAdmin,
+  isContributor,
   children,
 }: {
   enableLongPress: boolean;
   onLongPress: () => void;
   highlighted: boolean;
   isAdmin?: boolean;
+  isContributor?: boolean;
   children: React.ReactNode;
 }) {
   const { pressing, handlers } = useLongPress(onLongPress, 450);
@@ -697,7 +718,7 @@ function BubbleWrap({
       {...bound}
       className={`flex-1 min-w-0 rounded-xl transition-all duration-200 ${
         enableLongPress ? "select-none md:select-text" : ""
-      } ${isAdmin ? "admin-sparkle border-l-2 border-[var(--gold)] bg-[var(--gold-soft)]/30 pl-2" : ""} ${
+      } ${isAdmin ? "admin-sparkle border-l-2 border-[var(--gold)] bg-[var(--gold-soft)]/30 pl-2" : isContributor ? "contributor-sparkle border-l-2 border-emerald-500 bg-emerald-500/10 pl-2" : ""} ${
         pressing ? "scale-[0.98] bg-primary/5 ring-2 ring-primary/30 px-2 -mx-2" : ""
       } ${
         highlighted ? "bg-primary/10 ring-2 ring-primary/50 px-2 -mx-2" : ""
