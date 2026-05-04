@@ -31,7 +31,7 @@ type GMsg = {
   reply_to_id?: string | null;
   pinned_at?: string | null;
 };
-type Profile = { id: string; full_name: string; photo_url: string | null; verified?: boolean | null };
+type Profile = { id: string; full_name: string; photo_url: string | null; verified?: boolean | null; contributor_highlight?: boolean | null };
 
 export const Route = createFileRoute("/comunidade")({ component: () => (<RequireApproved><Comunidade /></RequireApproved>) });
 
@@ -53,6 +53,7 @@ function Comunidade() {
   const [highlightId, setHighlightId] = useState<string | null>(null);
   const messageRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const [staffMap, setStaffMap] = useState<Record<string, { role: AppRole; color: RoleColor | null }>>({});
+  const [contribIds, setContribIds] = useState<Set<string>>(new Set());
   const restrictedWords = useRestrictedWords();
   const [cooldownLeft, setCooldownLeft] = useState(0);
   const lastSentRef = useRef<number>(0);
@@ -131,7 +132,7 @@ function Comunidade() {
     if (missing.length === 0) return;
     const { data } = await supabase
       .from("profiles")
-      .select("id, full_name, photo_url, verified")
+      .select("id, full_name, photo_url, verified, contributor_highlight")
       .in("id", missing);
     if (data) {
       setProfiles((p) => {
@@ -139,6 +140,22 @@ function Comunidade() {
         for (const pr of data) next[pr.id] = pr as Profile;
         return next;
       });
+    }
+    // Verifica quais desses ids têm a badge "contributor" ativa
+    const { data: badgeRows } = await supabase
+      .from("user_badges")
+      .select("user_id, active, expires_at, badges(code)")
+      .in("user_id", missing)
+      .eq("active", true);
+    if (badgeRows && badgeRows.length) {
+      const now = Date.now();
+      const newIds = new Set<string>();
+      for (const r of badgeRows as Array<{ user_id: string; active: boolean; expires_at: string | null; badges: { code: string } | null }>) {
+        if (r.badges?.code !== "contributor") continue;
+        if (r.expires_at && new Date(r.expires_at).getTime() <= now) continue;
+        newIds.add(r.user_id);
+      }
+      if (newIds.size) setContribIds((prev) => { const n = new Set(prev); newIds.forEach((id) => n.add(id)); return n; });
     }
   };
 
