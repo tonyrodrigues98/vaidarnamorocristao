@@ -23,6 +23,7 @@ import { Camera, Save, CheckCircle2, Clock, XCircle, Shield } from "lucide-react
 import { Switch } from "@/components/ui/switch";
 import { ROLE_CONFIG, COLOR_HEX, type RoleColor } from "@/lib/roles";
 import { RoleBadge } from "@/components/RoleBadge";
+import { MissionsPanel } from "@/components/MissionsPanel";
 
 export const Route = createFileRoute("/perfil")({ component: PerfilPage });
 
@@ -314,6 +315,9 @@ function PerfilPage() {
             </TabsTrigger>
             <TabsTrigger value="prefs" className="flex-1 sm:flex-none">
               Preferências
+            </TabsTrigger>
+            <TabsTrigger value="missions" className="flex-1 sm:flex-none">
+              Conquistas
             </TabsTrigger>
             {isStaff && (
               <TabsTrigger value="role" className="flex-1 sm:flex-none">
