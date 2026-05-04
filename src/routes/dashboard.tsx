@@ -27,6 +27,7 @@ type ViewRow = {
   created_at: string;
 };
 type Visitor = { id: string; full_name: string; photo_url: string | null; city: string; state: string; age: number };
+type LatestNews = { id: string; title: string; content: string; published_at: string };
 
 export const Route = createFileRoute("/dashboard")({ component: Dashboard });
 
@@ -50,6 +51,20 @@ function Dashboard() {
   const [views, setViews] = useState<ViewRow[]>([]);
   const [visitorsMap, setVisitorsMap] = useState<Record<string, Visitor>>({});
   const [stats, setStats] = useState({ interests: 0, matches: 0, unread: 0 });
+  const [latestNews, setLatestNews] = useState<LatestNews | null>(null);
+
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from("daily_posts")
+      .select("id, title, content, published_at")
+      .eq("kind", "news")
+      .eq("published", true)
+      .order("published_at", { ascending: false })
+      .limit(1)
+      .maybeSingle()
+      .then(({ data }) => setLatestNews((data as LatestNews | null) ?? null));
+  }, [user]);
 
   useEffect(() => {
     if (!user) return;
@@ -346,6 +361,26 @@ function Dashboard() {
 
         {/* Atalhos */}
         <section className="mt-10">
+          {latestNews && (
+            <div className="mb-6">
+              <h2 className="text-xl font-semibold">Última notícia</h2>
+              <Link
+                to="/noticias"
+                className="glass mt-4 flex items-start gap-4 rounded-3xl p-6 shadow-soft transition hover:bg-accent"
+              >
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[var(--petal)]">
+                  <Newspaper className="h-6 w-6 text-[var(--rose)]" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--rose)]">
+                    {new Date(latestNews.published_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "long" })}
+                  </p>
+                  <h3 className="mt-1 truncate text-lg font-semibold">{latestNews.title}</h3>
+                  <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{latestNews.content}</p>
+                </div>
+              </Link>
+            </div>
+          )}
           <h2 className="text-xl font-semibold">Atalhos</h2>
           <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <DashCard to="/perfil" Icon={UserIcon} title="Meu perfil" desc="Edite seus dados e preferências" />

@@ -23,6 +23,7 @@ type Row = Database["public"]["Tables"]["profiles"]["Row"];
 type ProfileUpdate = Database["public"]["Tables"]["profiles"]["Update"];
 type Report = Database["public"]["Tables"]["reports"]["Row"];
 type DailyPost = { id: string; title: string; content: string; published: boolean; published_at: string; kind: "news" | "devotional" };
+type DailyPostFull = DailyPost & { bible_reference: string | null; bible_text: string | null };
 type PreCadastro = Database["public"]["Tables"]["pre_cadastros"]["Row"];
 type RestrictedWord = Database["public"]["Tables"]["restricted_words"]["Row"];
 type AdminUserRow = Row & { primaryRole: AppRole };
@@ -96,6 +97,11 @@ function Admin() {
   const [newKind, setNewKind] = useState<"news" | "devotional">("news");
   const [postBusy, setPostBusy] = useState(false);
   const [bibleSel, setBibleSel] = useState<BibleSelection | null>(null);
+  const [editingPost, setEditingPost] = useState<DailyPostFull | null>(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [editContent, setEditContent] = useState("");
+  const [editBibleSel, setEditBibleSel] = useState<BibleSelection | null>(null);
+  const [editBusy, setEditBusy] = useState(false);
 
   async function load(status: TabKey) {
     if (status === "reports") {
@@ -110,7 +116,7 @@ function Admin() {
     if (status === "posts") {
       const { data, error } = await supabase
         .from("daily_posts")
-        .select("id, title, content, published, published_at, kind")
+        .select("id, title, content, published, published_at, kind, bible_reference, bible_text")
         .order("published_at", { ascending: false });
       if (error) { toast.error(error.message); return; }
       setPosts((data ?? []) as DailyPost[]);
@@ -263,6 +269,50 @@ function Admin() {
     if (error) toast.error(error.message); else load("posts");
   }
 
+  function openEditPost(p: DailyPost) {
+    const full = p as DailyPostFull;
+    setEditingPost(full);
+    setEditTitle(full.title);
+    setEditContent(full.content);
+    if (full.kind === "devotional" && full.bible_reference) {
+      // Try to parse "Livro 3:16" back into a selection placeholder
+      const m = full.bible_reference.match(/^(.+)\s+(\d+):(\d+)$/);
+      if (m) {
+        setEditBibleSel({
+          book: m[1],
+          abbrev: "",
+          chapter: parseInt(m[2], 10),
+          verse: parseInt(m[3], 10),
+          reference: full.bible_reference,
+          text: full.bible_text ?? "",
+        });
+      } else {
+        setEditBibleSel(null);
+      }
+    } else {
+      setEditBibleSel(null);
+    }
+  }
+
+  async function saveEditPost() {
+    if (!editingPost) return;
+    const t = editTitle.trim(); const c = editContent.trim();
+    if (!t || !c) { toast.error("Preencha título e conteúdo"); return; }
+    setEditBusy(true);
+    const patch: { title: string; content: string; bible_reference: string | null; bible_text: string | null } = {
+      title: t,
+      content: c,
+      bible_reference: editingPost.kind === "devotional" ? editBibleSel?.reference ?? null : null,
+      bible_text: editingPost.kind === "devotional" ? editBibleSel?.text ?? null : null,
+    };
+    const { error } = await supabase.from("daily_posts").update(patch).eq("id", editingPost.id);
+    setEditBusy(false);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Publicação atualizada");
+    setEditingPost(null);
+    load("posts");
+  }
+
   return (
     <div className="min-h-screen">
       <Header />
@@ -380,6 +430,9 @@ function Admin() {
                             <p className="mt-1 line-clamp-3 whitespace-pre-wrap text-sm text-muted-foreground">{p.content}</p>
                           </div>
                           <div className="flex flex-col gap-2">
+                            <Button size="sm" variant="outline" onClick={() => openEditPost(p)}>
+                              Editar
+                            </Button>
                             <Button size="sm" variant="outline" onClick={() => togglePublish(p)}>
                               {p.published ? "Despublicar" : "Publicar"}
                             </Button>
@@ -392,6 +445,38 @@ function Admin() {
                     ))}
                   </div>
                 )}
+                <Dialog open={!!editingPost} onOpenChange={(o) => { if (!o) setEditingPost(null); }}>
+                  <DialogContent className="max-w-2xl">
+                    <DialogHeader>
+                      <DialogTitle>Editar {editingPost?.kind === "devotional" ? "devocional" : "notícia"}</DialogTitle>
+                      <DialogDescription>
+                        Atualize o conteúdo {editingPost?.kind === "devotional" ? "e a referência bíblica" : ""}. As alterações ficam visíveis imediatamente.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-3">
+                      <div>
+                        <Label className="text-xs">Título</Label>
+                        <Input value={editTitle} onChange={(e) => setEditTitle(e.target.value)} maxLength={200} />
+                      </div>
+                      {editingPost?.kind === "devotional" && (
+                        <div className="rounded-xl border border-dashed border-[var(--rose)]/30 bg-[var(--petal)]/20 p-3">
+                          <Label className="text-xs uppercase tracking-wide text-muted-foreground">Texto bíblico base</Label>
+                          <div className="mt-2">
+                            <BibleVerseSelector value={editBibleSel} onChange={setEditBibleSel} />
+                          </div>
+                        </div>
+                      )}
+                      <div>
+                        <Label className="text-xs">Conteúdo</Label>
+                        <Textarea className="min-h-[160px]" value={editContent} onChange={(e) => setEditContent(e.target.value)} maxLength={10000} />
+                      </div>
+                    </div>
+                    <DialogFooter>
+                      <Button variant="ghost" onClick={() => setEditingPost(null)} disabled={editBusy}>Cancelar</Button>
+                      <Button onClick={saveEditPost} disabled={editBusy}>Salvar</Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
               </div>
             ) : tab === "reports" ? (
               reports.length === 0 ? (
