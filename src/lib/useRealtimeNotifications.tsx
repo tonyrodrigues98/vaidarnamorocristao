@@ -156,6 +156,45 @@ export function useRealtimeNotifications() {
           });
         }
       )
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "verification_requests", filter: `user_id=eq.${user.id}` },
+        (payload) => {
+          const n = payload.new as { status: string; admin_notes: string | null };
+          const o = payload.old as { status: string };
+          if (n.status === o.status) return;
+          if (n.status === "approved") {
+            toast.success("✔ Verificação aprovada!", {
+              description: "Seu perfil agora exibe o selo de verificado.",
+              action: { label: "Ver perfil", onClick: () => router.navigate({ to: "/perfil" }) },
+            });
+          } else if (n.status === "rejected") {
+            toast.error("Verificação rejeitada", {
+              description: n.admin_notes || "Sua solicitação foi rejeitada.",
+              action: { label: "Detalhes", onClick: () => router.navigate({ to: "/verificacao" }) },
+            });
+          } else if (n.status === "more_info") {
+            toast("ℹ Mais informações necessárias", {
+              description: n.admin_notes || "Por favor, envie informações adicionais.",
+              action: { label: "Abrir", onClick: () => router.navigate({ to: "/verificacao" }) },
+            });
+          }
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "profiles", filter: `id=eq.${user.id}` },
+        (payload) => {
+          const n = payload.new as { verified: boolean };
+          const o = payload.old as { verified: boolean };
+          if (!o.verified && n.verified) {
+            toast.success("✔ Perfil verificado!", {
+              description: "Um administrador verificou seu perfil.",
+              action: { label: "Ver perfil", onClick: () => router.navigate({ to: "/perfil" }) },
+            });
+          }
+        }
+      )
       .subscribe();
 
     return () => {

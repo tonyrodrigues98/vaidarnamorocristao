@@ -31,7 +31,15 @@ function List() {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [f, setF] = useState({ search: "", state: "all", marital: "all", ageMin: "", ageMax: "", church: "" });
   const [staffMap, setStaffMap] = useState<Record<string, StaffInfo>>({});
-  const [onlyVerified, setOnlyVerified] = useState(false);
+  const [onlyVerified, setOnlyVerified] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
+    return window.localStorage.getItem("pretendentes:onlyVerified") === "1";
+  });
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem("pretendentes:onlyVerified", onlyVerified ? "1" : "0");
+  }, [onlyVerified]);
 
   useEffect(() => {
     if (!user) return;

@@ -6,7 +6,7 @@ import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Check, X, Ban, ShieldAlert, Flag, Newspaper, Trash2, Users as UsersIcon, ClipboardList, MessageSquareWarning, ShieldX, Heart, Plus, UserPlus, Search } from "lucide-react";
+import { Check, X, Ban, ShieldAlert, Flag, Newspaper, Trash2, Users as UsersIcon, ClipboardList, MessageSquareWarning, ShieldX, Heart, Plus, UserPlus, Search, BadgeCheck } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -16,6 +16,7 @@ import { Switch } from "@/components/ui/switch";
 import type { Database } from "@/integrations/supabase/types";
 import { ROLE_CONFIG, ROLE_PRIORITY, type AppRole } from "@/lib/roles";
 import { RoleBadge } from "@/components/RoleBadge";
+import { VerifiedBadge } from "@/components/VerifiedBadge";
 
 type Row = Database["public"]["Tables"]["profiles"]["Row"];
 type ProfileUpdate = Database["public"]["Tables"]["profiles"]["Update"];
@@ -185,6 +186,19 @@ function Admin() {
     load("users");
   }
 
+  async function toggleVerified(userId: string, current: boolean) {
+    if (!user) return;
+    setBusy(userId);
+    const patch: ProfileUpdate = current
+      ? { verified: false, verified_at: null, verified_by: null }
+      : { verified: true, verified_at: new Date().toISOString(), verified_by: user.id };
+    const { error } = await supabase.from("profiles").update(patch).eq("id", userId);
+    setBusy(null);
+    if (error) { toast.error(error.message); return; }
+    toast.success(current ? "Verificação removida" : "Perfil verificado");
+    load("users");
+  }
+
   async function savePreCadastro() {
     if (!user) return;
     setPcBusy(true);
@@ -279,6 +293,8 @@ function Admin() {
                 users={users}
                 busy={busy}
                 onChangeRole={changeUserRole}
+                onToggleVerified={toggleVerified}
+                canVerify={isSuperAdmin || isAdmin}
               />
             ) : tab === "restricted_words" ? (
               <RestrictedWordsPanel />
@@ -447,11 +463,13 @@ function Admin() {
 }
 
 function UsersPanel({
-  users, busy, onChangeRole,
+  users, busy, onChangeRole, onToggleVerified, canVerify,
 }: {
   users: AdminUserRow[];
   busy: string | null;
   onChangeRole: (userId: string, newRole: AppRole, currentRole: AppRole) => void;
+  onToggleVerified: (userId: string, current: boolean) => void;
+  canVerify: boolean;
 }) {
   if (users.length === 0) {
     return <div className="glass rounded-2xl p-10 text-center text-muted-foreground shadow-soft">Nenhum usuário.</div>;
@@ -468,10 +486,23 @@ function UsersPanel({
             <div className="flex flex-wrap items-center gap-2">
               <h3 className="font-semibold">{u.full_name}, {u.age}</h3>
               <RoleBadge role={u.primaryRole} />
+              {u.verified && <VerifiedBadge size="sm" />}
             </div>
             <p className="truncate text-xs text-muted-foreground">{u.sex} · {u.city}/{u.state} · {u.status}</p>
           </div>
-          <div className="w-full sm:w-52">
+          <div className="flex w-full items-center gap-2 sm:w-auto">
+            {canVerify && (
+              <Button
+                size="sm"
+                variant={u.verified ? "default" : "outline"}
+                disabled={busy === u.id}
+                onClick={() => onToggleVerified(u.id, !!u.verified)}
+                title={u.verified ? "Remover verificação" : "Verificar perfil"}
+              >
+                <BadgeCheck className="h-4 w-4" />
+              </Button>
+            )}
+            <div className="flex-1 sm:w-52">
             <Select
               value={u.primaryRole}
               onValueChange={(v) => onChangeRole(u.id, v as AppRole, u.primaryRole)}
@@ -484,6 +515,7 @@ function UsersPanel({
                 ))}
               </SelectContent>
             </Select>
+            </div>
           </div>
         </div>
       ))}
