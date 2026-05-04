@@ -606,6 +606,83 @@ export type Database = {
         }
         Relationships: []
       }
+      support_messages: {
+        Row: {
+          attachments: Json
+          content: string
+          created_at: string
+          id: string
+          is_staff: boolean
+          sender_id: string
+          ticket_id: string
+        }
+        Insert: {
+          attachments?: Json
+          content: string
+          created_at?: string
+          id?: string
+          is_staff?: boolean
+          sender_id: string
+          ticket_id: string
+        }
+        Update: {
+          attachments?: Json
+          content?: string
+          created_at?: string
+          id?: string
+          is_staff?: boolean
+          sender_id?: string
+          ticket_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_messages_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "support_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      support_tickets: {
+        Row: {
+          assigned_to: string | null
+          category: Database["public"]["Enums"]["support_category"]
+          created_at: string
+          id: string
+          last_message_at: string
+          priority: Database["public"]["Enums"]["support_priority"]
+          status: Database["public"]["Enums"]["support_status"]
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          category?: Database["public"]["Enums"]["support_category"]
+          created_at?: string
+          id?: string
+          last_message_at?: string
+          priority?: Database["public"]["Enums"]["support_priority"]
+          status?: Database["public"]["Enums"]["support_status"]
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          assigned_to?: string | null
+          category?: Database["public"]["Enums"]["support_category"]
+          created_at?: string
+          id?: string
+          last_message_at?: string
+          priority?: Database["public"]["Enums"]["support_priority"]
+          status?: Database["public"]["Enums"]["support_status"]
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       terms_acceptances: {
         Row: {
           accepted_at: string
@@ -743,6 +820,22 @@ export type Database = {
       profile_status: "pending" | "approved" | "rejected" | "banned"
       report_status: "open" | "reviewed" | "dismissed"
       sex_type: "masculino" | "feminino"
+      support_category:
+        | "account"
+        | "payments"
+        | "profile"
+        | "matches"
+        | "community"
+        | "technical"
+        | "security"
+        | "other"
+      support_priority: "low" | "medium" | "high" | "urgent"
+      support_status:
+        | "open"
+        | "in_review"
+        | "awaiting_user"
+        | "resolved"
+        | "closed"
       verification_status: "pending" | "approved" | "rejected" | "more_info"
     }
     CompositeTypes: {
@@ -879,6 +972,24 @@ export const Constants = {
       profile_status: ["pending", "approved", "rejected", "banned"],
       report_status: ["open", "reviewed", "dismissed"],
       sex_type: ["masculino", "feminino"],
+      support_category: [
+        "account",
+        "payments",
+        "profile",
+        "matches",
+        "community",
+        "technical",
+        "security",
+        "other",
+      ],
+      support_priority: ["low", "medium", "high", "urgent"],
+      support_status: [
+        "open",
+        "in_review",
+        "awaiting_user",
+        "resolved",
+        "closed",
+      ],
       verification_status: ["pending", "approved", "rejected", "more_info"],
     },
   },
