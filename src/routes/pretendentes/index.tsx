@@ -15,6 +15,8 @@ import { ROLE_PRIORITY, type AppRole, type RoleColor } from "@/lib/roles";
 import { UserBadges } from "@/components/UserBadges";
 import { OnlineDot } from "@/components/OnlineDot";
 import { Sparkles } from "lucide-react";
+import { computeAffinity, type AffinityChip } from "@/lib/affinity";
+import type { AdvancedProfile } from "@/lib/profileAdvanced";
 
 type Profile = {
   id: string; full_name: string; age: number; city: string; state: string;
@@ -36,6 +38,8 @@ function List() {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [f, setF] = useState({ search: "", state: "all", marital: "all", ageMin: "", ageMax: "", church: "" });
   const [staffMap, setStaffMap] = useState<Record<string, StaffInfo>>({});
+  const [myAdvanced, setMyAdvanced] = useState<AdvancedProfile | null>(null);
+  const [advancedMap, setAdvancedMap] = useState<Record<string, AdvancedProfile>>({});
   const [onlyVerified, setOnlyVerified] = useState<boolean>(() => {
     if (typeof window === "undefined") return false;
     return window.localStorage.getItem("pretendentes:onlyVerified") === "1";
@@ -64,7 +68,7 @@ function List() {
       });
       if (me?.status === "approved") {
         const targetSex = me.sex === "masculino" ? "feminino" : "masculino";
-        const [profsRes, blocksRes, blockedByRes, hiddenRes, rolesRes] = await Promise.all([
+        const [profsRes, blocksRes, blockedByRes, hiddenRes, rolesRes, myAdvRes] = await Promise.all([
           supabase.from("profiles")
             .select("id, full_name, age, city, state, church, bio, photo_url, sex, marital, verified")
             .eq("status", "approved").eq("sex", targetSex).neq("id", user.id)
@@ -73,6 +77,7 @@ function List() {
           supabase.from("blocks").select("blocker_id").eq("blocked_id", user.id),
           supabase.rpc("get_hidden_staff_ids"),
           supabase.from("user_roles").select("user_id, role, badge_color").neq("role", "user"),
+          supabase.from("profile_advanced").select("*").eq("user_id", user.id).maybeSingle(),
         ]);
         const hidden = new Set<string>([
           ...(blocksRes.data ?? []).map((b: any) => b.blocked_id),
@@ -89,7 +94,20 @@ function List() {
           }
         }
         setStaffMap(map);
-        setProfiles(((profsRes.data ?? []) as Profile[]).filter((p) => !hidden.has(p.id)));
+        const visible = ((profsRes.data ?? []) as Profile[]).filter((p) => !hidden.has(p.id));
+        setProfiles(visible);
+        setMyAdvanced(((myAdvRes as any)?.data ?? null) as AdvancedProfile | null);
+        // Batch-load advanced profiles for affinity chips (RLS already restricts to approved)
+        const ids = visible.map((p) => p.id);
+        if (ids.length > 0) {
+          const { data: advs } = await supabase
+            .from("profile_advanced")
+            .select("*")
+            .in("user_id", ids);
+          const m: Record<string, AdvancedProfile> = {};
+          for (const a of (advs ?? []) as AdvancedProfile[]) m[a.user_id] = a;
+          setAdvancedMap(m);
+        }
       }
       setLoadingList(false);
     })();
@@ -245,6 +263,7 @@ function List() {
                   <p className="mt-0.5 text-sm text-muted-foreground">{p.city} · {p.state}</p>
                   <p className="mt-1 text-xs text-[var(--rose)]">{p.church}</p>
                   <UserBadges userId={p.id} size="xs" max={2} className="mt-2" />
+                  <AffinityChips chips={computeAffinity(myAdvanced, advancedMap[p.id])} />
                   {p.bio && <p className="mt-3 line-clamp-2 text-sm text-foreground/70">{p.bio}</p>}
                 </div>
               </Link>
@@ -252,6 +271,31 @@ function List() {
           </div>
         ))}
       </main>
+    </div>
+  );
+}
+
+function AffinityChips({ chips }: { chips: AffinityChip[] }) {
+  if (!chips.length) return null;
+  const visible = chips.slice(0, 4);
+  const extra = chips.length - visible.length;
+  return (
+    <div className="mt-2 flex flex-wrap gap-1">
+      {visible.map((c) => (
+        <span
+          key={c.key}
+          className="inline-flex items-center gap-1 rounded-full border border-[var(--rose)]/30 bg-[var(--rose)]/10 px-2 py-0.5 text-[10px] font-medium text-[var(--rose)]"
+          title="Vocês têm em comum"
+        >
+          <Sparkles className="h-2.5 w-2.5" />
+          {c.label}
+        </span>
+      ))}
+      {extra > 0 && (
+        <span className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
+          +{extra}
+        </span>
+      )}
     </div>
   );
 }
