@@ -606,6 +606,54 @@ export type Database = {
         }
         Relationships: []
       }
+      support_articles: {
+        Row: {
+          category: Database["public"]["Enums"]["support_category"]
+          content: string
+          created_at: string
+          created_by: string | null
+          featured: boolean
+          id: string
+          published: boolean
+          slug: string
+          sort_order: number
+          summary: string | null
+          title: string
+          updated_at: string
+          views_count: number
+        }
+        Insert: {
+          category?: Database["public"]["Enums"]["support_category"]
+          content: string
+          created_at?: string
+          created_by?: string | null
+          featured?: boolean
+          id?: string
+          published?: boolean
+          slug: string
+          sort_order?: number
+          summary?: string | null
+          title: string
+          updated_at?: string
+          views_count?: number
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["support_category"]
+          content?: string
+          created_at?: string
+          created_by?: string | null
+          featured?: boolean
+          id?: string
+          published?: boolean
+          slug?: string
+          sort_order?: number
+          summary?: string | null
+          title?: string
+          updated_at?: string
+          views_count?: number
+        }
+        Relationships: []
+      }
       support_messages: {
         Row: {
           attachments: Json
@@ -806,6 +854,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      increment_article_views: { Args: { _slug: string }; Returns: undefined }
       is_staff: { Args: { _user_id: string }; Returns: boolean }
       mark_message_read: { Args: { _message_id: string }; Returns: undefined }
       unaccent_safe: { Args: { input: string }; Returns: string }
