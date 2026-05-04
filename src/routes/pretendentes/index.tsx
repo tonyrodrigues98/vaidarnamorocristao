@@ -12,6 +12,9 @@ import { Button } from "@/components/ui/button";
 import { RoleBadge } from "@/components/RoleBadge";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { ROLE_PRIORITY, type AppRole, type RoleColor } from "@/lib/roles";
+import { UserBadges } from "@/components/UserBadges";
+import { OnlineDot } from "@/components/OnlineDot";
+import { Sparkles } from "lucide-react";
 
 type Profile = {
   id: string; full_name: string; age: number; city: string; state: string;
@@ -19,6 +22,7 @@ type Profile = {
   marital: "solteiro" | "divorciado"; verified?: boolean;
 };
 type StaffInfo = { role: AppRole; color: RoleColor | null };
+type MyPrefs = { state: string | null; ageMin: number | null; ageMax: number | null };
 
 export const Route = createFileRoute("/pretendentes/")({ component: () => (<RequireApproved><List /></RequireApproved>) });
 
@@ -28,6 +32,7 @@ function List() {
   const [loadingList, setLoadingList] = useState(true);
   const [myStatus, setMyStatus] = useState<string | null>(null);
   const [mySex, setMySex] = useState<"masculino" | "feminino" | null>(null);
+  const [myPrefs, setMyPrefs] = useState<MyPrefs>({ state: null, ageMin: null, ageMax: null });
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [f, setF] = useState({ search: "", state: "all", marital: "all", ageMin: "", ageMax: "", church: "" });
   const [staffMap, setStaffMap] = useState<Record<string, StaffInfo>>({});
@@ -44,9 +49,19 @@ function List() {
   useEffect(() => {
     if (!user) return;
     (async () => {
-      const { data: me } = await supabase.from("profiles").select("status, sex").eq("id", user.id).maybeSingle();
+      const { data: me } = await supabase.from("profiles").select("status, sex, state").eq("id", user.id).maybeSingle();
       setMyStatus(me?.status ?? null);
       setMySex(me?.sex ?? null);
+      const { data: prefs } = await supabase
+        .from("profile_preferences")
+        .select("age_min, age_max")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      setMyPrefs({
+        state: me?.state ?? null,
+        ageMin: prefs?.age_min ?? null,
+        ageMax: prefs?.age_max ?? null,
+      });
       if (me?.status === "approved") {
         const targetSex = me.sex === "masculino" ? "feminino" : "masculino";
         const [profsRes, blocksRes, blockedByRes, hiddenRes, rolesRes] = await Promise.all([
@@ -81,7 +96,7 @@ function List() {
   }, [user]);
 
   const filtered = useMemo(() => {
-    return profiles.filter((p) => {
+    const list = profiles.filter((p) => {
       if (f.search) {
         const q = f.search.toLowerCase();
         if (!p.full_name.toLowerCase().includes(q) && !p.city.toLowerCase().includes(q)) return false;
@@ -94,7 +109,24 @@ function List() {
       if (onlyVerified && !p.verified) return false;
       return true;
     });
-  }, [profiles, f, onlyVerified]);
+    // Geographic ordering: same state first
+    if (myPrefs.state) {
+      list.sort((a, b) => {
+        const aSame = a.state === myPrefs.state ? 0 : 1;
+        const bSame = b.state === myPrefs.state ? 0 : 1;
+        return aSame - bSame;
+      });
+    }
+    return list;
+  }, [profiles, f, onlyVerified, myPrefs.state]);
+
+  function isSuggestion(p: Profile): boolean {
+    if (!myPrefs.state) return false;
+    if (p.state !== myPrefs.state) return false;
+    if (myPrefs.ageMin != null && p.age < myPrefs.ageMin) return false;
+    if (myPrefs.ageMax != null && p.age > myPrefs.ageMax) return false;
+    return true;
+  }
 
   const hasFilters = f.search || f.state !== "all" || f.marital !== "all" || f.ageMin || f.ageMax || f.church;
   function clearFilters() { setF({ search: "", state: "all", marital: "all", ageMin: "", ageMax: "", church: "" }); }
@@ -195,6 +227,12 @@ function List() {
                       <span className="text-5xl text-white">{p.full_name.charAt(0)}</span>
                     </div>
                   )}
+                  {isSuggestion(p) && (
+                    <span className="absolute left-2 top-2 inline-flex items-center gap-1 rounded-full bg-[var(--rose)] px-2 py-1 text-[10px] font-semibold text-white shadow-md">
+                      <Sparkles className="h-3 w-3" /> Sugestão pra você
+                    </span>
+                  )}
+                  <span className="absolute right-2 top-2"><OnlineDot userId={p.id} size="md" /></span>
                 </div>
                 <div className="p-5">
                   <h3 className="flex flex-wrap items-center gap-2 text-xl font-semibold">
@@ -206,6 +244,7 @@ function List() {
                   </h3>
                   <p className="mt-0.5 text-sm text-muted-foreground">{p.city} · {p.state}</p>
                   <p className="mt-1 text-xs text-[var(--rose)]">{p.church}</p>
+                  <UserBadges userId={p.id} size="xs" max={2} className="mt-2" />
                   {p.bio && <p className="mt-3 line-clamp-2 text-sm text-foreground/70">{p.bio}</p>}
                 </div>
               </Link>
