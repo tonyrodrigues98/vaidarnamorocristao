@@ -344,6 +344,11 @@ export function Header() {
                   <MobileItem to="/perfil" onClick={close}>
                     <span className="flex items-center gap-2"><UserIcon className="h-4 w-4" /> Ver perfil</span>
                   </MobileItem>
+                  {isApproved && (
+                    <MobileItem to="/verificacao" onClick={close}>
+                      <span className="flex items-center gap-2"><Shield className="h-4 w-4" /> Verificação</span>
+                    </MobileItem>
+                  )}
                   {canSeeAdminPanel && (
                     <MobileItem to="/admin" onClick={close}>
                       <span className="flex items-center gap-2"><Shield className="h-4 w-4" /> Admin</span>
