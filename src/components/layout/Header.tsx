@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import {
   Heart, LogOut, Shield, MessageCircle, Sparkles, Menu, X,
   User as UserIcon, Users, Newspaper, Globe, Ban, Share2, Gem, Sun, Moon, MoreHorizontal,
-  ChevronDown, Heart as HeartIcon, LifeBuoy,
+  ChevronDown, Heart as HeartIcon, LifeBuoy, BookHeart,
 } from "lucide-react";
 import { toast } from "sonner";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
