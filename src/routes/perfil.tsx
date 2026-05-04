@@ -588,6 +588,10 @@ function PerfilPage() {
             </form>
           </TabsContent>
 
+          <TabsContent value="missions" className="mt-6">
+            {user && <MissionsPanel userId={user.id} />}
+          </TabsContent>
+
           {isStaff && (
             <TabsContent value="role" className="mt-6">
               <div className="glass animate-fade-up space-y-6 rounded-3xl p-6 shadow-elegant sm:p-8">
