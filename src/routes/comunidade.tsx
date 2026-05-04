@@ -17,6 +17,8 @@ import { ShieldAlert } from "lucide-react";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+import { OnlineDot } from "@/components/OnlineDot";
+import { UserBadges } from "@/components/UserBadges";
 
 const COOLDOWN_MS = 10_000;
 
