@@ -24,6 +24,7 @@ import { Switch } from "@/components/ui/switch";
 import { ROLE_CONFIG, COLOR_HEX, type RoleColor } from "@/lib/roles";
 import { RoleBadge } from "@/components/RoleBadge";
 import { MissionsPanel } from "@/components/MissionsPanel";
+import { recomputeMyBadges } from "@/lib/recomputeBadges";
 
 export const Route = createFileRoute("/perfil")({ component: PerfilPage });
 
@@ -254,6 +255,7 @@ function PerfilPage() {
     }
     toast.success("Perfil atualizado!");
     setPhotoFile(null);
+    void recomputeMyBadges(user?.id);
   }
 
   async function savePrefs(e: React.FormEvent) {
