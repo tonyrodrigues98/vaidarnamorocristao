@@ -14,6 +14,7 @@ import { RoleBadge } from "@/components/RoleBadge";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { OnlineDot } from "@/components/OnlineDot";
 import { UserBadges } from "@/components/UserBadges";
+import { ProfileAdvancedView } from "@/components/ProfileAdvancedView";
 import { ROLE_PRIORITY, type AppRole, type RoleColor } from "@/lib/roles";
 
 type Full = {
@@ -257,6 +258,8 @@ function Detail() {
                 <p className="mt-2 leading-relaxed text-foreground/80">{profile.bio}</p>
               </div>
             )}
+
+            <ProfileAdvancedView userId={profile.id} />
 
             {prefs && (
               <div className="glass rounded-2xl p-5 shadow-soft">
