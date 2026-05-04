@@ -4,6 +4,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { NotificationsBridge } from "@/lib/useRealtimeNotifications";
 import { ThemeProvider } from "@/lib/theme";
 import { TermsGate } from "@/components/TermsGate";
+import { SupportFooterButton } from "@/components/SupportFooterButton";
 
 import appCss from "../styles.css?url";
 
@@ -92,6 +93,7 @@ function RootComponent() {
               <Link to="/manual" className="hover:text-[var(--rose)] hover:underline">
                 Manual do Usuário
               </Link>
+              <SupportFooterButton />
             </div>
           </footer>
         </div>
