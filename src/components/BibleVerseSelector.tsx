@@ -22,23 +22,20 @@ export interface BibleVerseSelectorProps {
   onChange: (sel: BibleSelection | null) => void;
 }
 
-// Cache fetched chapters in-memory
-const chapterCache = new Map<string, string[]>();
+// Cache fetched verses in-memory
+const verseCache = new Map<string, string>();
 
-async function fetchChapter(abbrev: string, chapter: number): Promise<string[]> {
-  const key = `${abbrev}-${chapter}`;
-  const cached = chapterCache.get(key);
-  if (cached) return cached;
-  // thiagobodruk pt_aa.json — heavy file; we fetch once and cache aggressively per book
-  const fullKey = `__full_${abbrev}`;
-  if (chapterCache.has(fullKey)) {
-    // dummy guard; not used
-  }
-  const res = await fetch(`https://raw.githubusercontent.com/thiagobodruk/bible/master/json/books/${abbrev}.json`);
-  if (!res.ok) throw new Error("Não foi possível carregar o livro");
-  const data = (await res.json()) as { chapters: string[][] };
-  data.chapters.forEach((verses, idx) => chapterCache.set(`${abbrev}-${idx + 1}`, verses));
-  return chapterCache.get(key) ?? [];
+async function fetchVerse(bookName: string, chapter: number, verse: number): Promise<string> {
+  const key = `${bookName}|${chapter}|${verse}`;
+  const cached = verseCache.get(key);
+  if (cached !== undefined) return cached;
+  const ref = `${bookName} ${chapter}:${verse}`;
+  const res = await fetch(`https://bible-api.com/${encodeURIComponent(ref)}?translation=almeida`);
+  if (!res.ok) throw new Error("Não foi possível carregar o versículo");
+  const data = (await res.json()) as { text?: string };
+  const text = (data.text ?? "").trim();
+  verseCache.set(key, text);
+  return text;
 }
 
 export function BibleVerseSelector({ value, onChange }: BibleVerseSelectorProps) {
@@ -67,10 +64,9 @@ export function BibleVerseSelector({ value, onChange }: BibleVerseSelectorProps)
     }
     let active = true;
     setLoading(true);
-    fetchChapter(selBook.a, selChapter)
-      .then((vs) => {
+    fetchVerse(selBook.n, selChapter, selVerse)
+      .then((text) => {
         if (!active) return;
-        const text = vs[selVerse - 1] ?? "";
         setVerseText(text);
         onChange({
           abbrev: selBook.a,
