@@ -638,6 +638,22 @@ function PerfilPage() {
 
           <TabsContent value="missions" className="mt-6">
             {user && <MissionsPanel userId={user.id} />}
+            {hasContributorBadge && (
+              <div className="glass mt-4 flex items-center justify-between rounded-2xl p-4 shadow-soft sm:p-5">
+                <div className="pr-4">
+                  <p className="font-medium text-foreground">Destaque verde nas mensagens</p>
+                  <p className="text-xs text-muted-foreground">
+                    Como Contribuidor, suas mensagens na comunidade ganham um destaque verde.
+                    A badge ao lado do seu nome continua visível mesmo desligada.
+                  </p>
+                </div>
+                <Switch
+                  checked={contribHighlight}
+                  disabled={savingContrib}
+                  onCheckedChange={toggleContribHighlight}
+                />
+              </div>
+            )}
           </TabsContent>
 
           {isStaff && (
