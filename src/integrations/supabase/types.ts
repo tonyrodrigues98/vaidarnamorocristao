@@ -650,6 +650,120 @@ export type Database = {
         }
         Relationships: []
       }
+      profile_advanced: {
+        Row: {
+          available_time: string | null
+          calling_description: string | null
+          children_count: number | null
+          church_frequency: string | null
+          communication: string | null
+          created_at: string
+          energy: string | null
+          essential_quality: string | null
+          faith_moment: string | null
+          favorite_worships: string | null
+          free_time: string | null
+          has_calling: string | null
+          hobbies: string | null
+          in_relationship_iam: string | null
+          introversion: string | null
+          life_goals: string[] | null
+          life_verse: string | null
+          living_place: string | null
+          love_language: string | null
+          ministry: string | null
+          ministry_other: string | null
+          non_negotiable: string | null
+          pace: string | null
+          participates: string[] | null
+          routine: string | null
+          seeking: string | null
+          spiritual_routine: string[] | null
+          style: string | null
+          testimony: string | null
+          updated_at: string
+          user_id: string
+          wants_children: string | null
+          wants_marriage: string | null
+          willing_to_build: string | null
+          worship_style: string | null
+        }
+        Insert: {
+          available_time?: string | null
+          calling_description?: string | null
+          children_count?: number | null
+          church_frequency?: string | null
+          communication?: string | null
+          created_at?: string
+          energy?: string | null
+          essential_quality?: string | null
+          faith_moment?: string | null
+          favorite_worships?: string | null
+          free_time?: string | null
+          has_calling?: string | null
+          hobbies?: string | null
+          in_relationship_iam?: string | null
+          introversion?: string | null
+          life_goals?: string[] | null
+          life_verse?: string | null
+          living_place?: string | null
+          love_language?: string | null
+          ministry?: string | null
+          ministry_other?: string | null
+          non_negotiable?: string | null
+          pace?: string | null
+          participates?: string[] | null
+          routine?: string | null
+          seeking?: string | null
+          spiritual_routine?: string[] | null
+          style?: string | null
+          testimony?: string | null
+          updated_at?: string
+          user_id: string
+          wants_children?: string | null
+          wants_marriage?: string | null
+          willing_to_build?: string | null
+          worship_style?: string | null
+        }
+        Update: {
+          available_time?: string | null
+          calling_description?: string | null
+          children_count?: number | null
+          church_frequency?: string | null
+          communication?: string | null
+          created_at?: string
+          energy?: string | null
+          essential_quality?: string | null
+          faith_moment?: string | null
+          favorite_worships?: string | null
+          free_time?: string | null
+          has_calling?: string | null
+          hobbies?: string | null
+          in_relationship_iam?: string | null
+          introversion?: string | null
+          life_goals?: string[] | null
+          life_verse?: string | null
+          living_place?: string | null
+          love_language?: string | null
+          ministry?: string | null
+          ministry_other?: string | null
+          non_negotiable?: string | null
+          pace?: string | null
+          participates?: string[] | null
+          routine?: string | null
+          seeking?: string | null
+          spiritual_routine?: string[] | null
+          style?: string | null
+          testimony?: string | null
+          updated_at?: string
+          user_id?: string
+          wants_children?: string | null
+          wants_marriage?: string | null
+          willing_to_build?: string | null
+          worship_style?: string | null
+        }
+        Relationships: []
+      }
       profile_preferences: {
         Row: {
           accepts_children: boolean
@@ -1150,6 +1264,7 @@ export type Database = {
         Args: { _amount?: number; _note?: string; _user_id: string }
         Returns: undefined
       }
+      count_advanced_sections: { Args: { _user_id: string }; Returns: number }
       current_terms_version: { Args: never; Returns: string }
       get_active_streak: {
         Args: { _user_id: string }
@@ -1167,6 +1282,8 @@ export type Database = {
         Args: never
         Returns: {
           active_streak: number
+          advanced_sections: number
+          advanced_target: number
           best_streak: number
           devotional_count_14: number
           devotional_target: number

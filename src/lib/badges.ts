@@ -1,12 +1,13 @@
 import type { LucideIcon } from "lucide-react";
-import { Sparkles, HandHeart, UserCheck, BookOpen, Heart } from "lucide-react";
+import { Sparkles, HandHeart, UserCheck, BookOpen, Heart, Gem } from "lucide-react";
 
 export type BadgeCode =
   | "new_member"
   | "prayer_active"
   | "profile_complete"
   | "devotional_active"
-  | "contributor";
+  | "contributor"
+  | "advanced_profile";
 
 export type BadgeMeta = {
   code: BadgeCode;
@@ -65,6 +66,15 @@ export const BADGE_META: Record<BadgeCode, BadgeMeta> = {
     ring: "#34d399",
     icon: Heart,
     premium: true,
+  },
+  advanced_profile: {
+    code: "advanced_profile",
+    name: "Perfil Avançado",
+    description: "Perfil profundo e bem preenchido",
+    bg: "#a78bfa",
+    fg: "#ffffff",
+    ring: "#a78bfa",
+    icon: Gem,
   },
 };
 

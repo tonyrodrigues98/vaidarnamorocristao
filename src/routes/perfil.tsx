@@ -25,6 +25,7 @@ import { ROLE_CONFIG, COLOR_HEX, type RoleColor } from "@/lib/roles";
 import { RoleBadge } from "@/components/RoleBadge";
 import { MissionsPanel } from "@/components/MissionsPanel";
 import { recomputeMyBadges } from "@/lib/recomputeBadges";
+import { ProfileAdvancedForm } from "@/components/ProfileAdvancedForm";
 
 export const Route = createFileRoute("/perfil")({ component: PerfilPage });
 
@@ -361,6 +362,9 @@ function PerfilPage() {
             <TabsTrigger value="profile" className="flex-1 sm:flex-none">
               Sobre mim
             </TabsTrigger>
+            <TabsTrigger value="advanced" className="flex-1 sm:flex-none">
+              Profundo
+            </TabsTrigger>
             <TabsTrigger value="prefs" className="flex-1 sm:flex-none">
               Preferências
             </TabsTrigger>
@@ -514,6 +518,10 @@ function PerfilPage() {
             </form>
           </TabsContent>
 
+          <TabsContent value="advanced" className="mt-6">
+            {user && <ProfileAdvancedForm userId={user.id} />}
+          </TabsContent>
+
           {/* Preferences tab */}
           <TabsContent value="prefs" className="mt-6">
             <form
@@ -637,6 +645,7 @@ function PerfilPage() {
           </TabsContent>
 
           <TabsContent value="missions" className="mt-6">
+            {/* placeholder anchor */}
             {user && <MissionsPanel userId={user.id} />}
             {hasContributorBadge && (
               <div className="glass mt-4 flex items-center justify-between rounded-2xl p-4 shadow-soft sm:p-5">
