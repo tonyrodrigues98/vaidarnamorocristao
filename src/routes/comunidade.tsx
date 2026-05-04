@@ -701,12 +701,14 @@ function BubbleWrap({
   onLongPress,
   highlighted,
   isAdmin,
+  isContributor,
   children,
 }: {
   enableLongPress: boolean;
   onLongPress: () => void;
   highlighted: boolean;
   isAdmin?: boolean;
+  isContributor?: boolean;
   children: React.ReactNode;
 }) {
   const { pressing, handlers } = useLongPress(onLongPress, 450);
@@ -716,7 +718,7 @@ function BubbleWrap({
       {...bound}
       className={`flex-1 min-w-0 rounded-xl transition-all duration-200 ${
         enableLongPress ? "select-none md:select-text" : ""
-      } ${isAdmin ? "admin-sparkle border-l-2 border-[var(--gold)] bg-[var(--gold-soft)]/30 pl-2" : ""} ${
+      } ${isAdmin ? "admin-sparkle border-l-2 border-[var(--gold)] bg-[var(--gold-soft)]/30 pl-2" : isContributor ? "contributor-sparkle border-l-2 border-emerald-500 bg-emerald-500/10 pl-2" : ""} ${
         pressing ? "scale-[0.98] bg-primary/5 ring-2 ring-primary/30 px-2 -mx-2" : ""
       } ${
         highlighted ? "bg-primary/10 ring-2 ring-primary/50 px-2 -mx-2" : ""
