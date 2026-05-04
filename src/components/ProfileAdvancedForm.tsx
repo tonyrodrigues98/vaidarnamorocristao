@@ -89,7 +89,27 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
-export function ProfileAdvancedForm({ userId }: { userId: string }) {
+export type AdvancedSection =
+  | "identity"
+  | "lifestyle"
+  | "ministry"
+  | "future"
+  | "personality"
+  | "tastes"
+  | "routine"
+  | "self"
+  | "relationship"
+  | "seeking";
+
+const ABOUT_SECTIONS: AdvancedSection[] = [
+  "identity", "lifestyle", "ministry", "future", "personality", "tastes", "routine", "self",
+];
+const PREFS_SECTIONS: AdvancedSection[] = ["relationship", "seeking"];
+
+export function ProfileAdvancedForm({ userId, mode = "all" }: { userId: string; mode?: "about" | "prefs" | "all" }) {
+  const visible: AdvancedSection[] =
+    mode === "about" ? ABOUT_SECTIONS : mode === "prefs" ? PREFS_SECTIONS : [...ABOUT_SECTIONS, ...PREFS_SECTIONS];
+  const show = (s: AdvancedSection) => visible.includes(s);
   const [data, setData] = useState<Form>(EMPTY_ADVANCED);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -140,6 +160,8 @@ export function ProfileAdvancedForm({ userId }: { userId: string }) {
 
   if (loading) return <div className="glass animate-pulse rounded-3xl p-6 shadow-soft h-96" />;
 
+  const saveLabel = mode === "prefs" ? "Salvar preferências" : mode === "about" ? "Salvar sobre mim" : "Salvar perfil avançado";
+
   return (
     <form onSubmit={save} className="space-y-5">
       <div className="rounded-2xl border border-[var(--rose)]/20 bg-[var(--rose)]/5 p-4 text-sm">
@@ -150,7 +172,7 @@ export function ProfileAdvancedForm({ userId }: { userId: string }) {
         </p>
       </div>
 
-      {/* 2. IDENTIDADE ESPIRITUAL */}
+      {show("identity") && (
       <Section icon={<BookHeart className="h-4 w-4" />} title="Identidade Espiritual" subtitle="Quem você é em Cristo, hoje">
         <Field label="Versículo que define sua vida hoje">
           <Input value={data.life_verse ?? ""} onChange={(e) => set("life_verse", e.target.value || null)} placeholder="Ex: Filipenses 4:13" maxLength={120} />
@@ -162,8 +184,9 @@ export function ProfileAdvancedForm({ userId }: { userId: string }) {
           <Textarea rows={3} maxLength={500} value={data.testimony ?? ""} onChange={(e) => set("testimony", e.target.value || null)} placeholder="Um momento marcante da sua jornada com Deus..." />
         </Field>
       </Section>
+      )}
 
-      {/* 3. ESTILO DE VIDA CRISTÃO */}
+      {show("lifestyle") && (
       <Section icon={<HeartHandshake className="h-4 w-4" />} title="Estilo de Vida Cristão" subtitle="Como sua fé acontece no dia a dia">
         <Field label="Você participa de">
           <ChipMulti values={data.participates ?? []} options={PARTICIPATES} onChange={(v) => set("participates", v)} />
@@ -175,8 +198,9 @@ export function ProfileAdvancedForm({ userId }: { userId: string }) {
           <ChipSingle value={data.church_frequency} options={CHURCH_FREQUENCY} onChange={(v) => set("church_frequency", v)} />
         </Field>
       </Section>
+      )}
 
-      {/* 4. MINISTÉRIO */}
+      {show("ministry") && (
       <Section icon={<Users className="h-4 w-4" />} title="Ministério e Chamado">
         <Field label="Ministério atual">
           <ChipSingle value={data.ministry} options={MINISTRY} onChange={(v) => set("ministry", v)} />
@@ -195,8 +219,9 @@ export function ProfileAdvancedForm({ userId }: { userId: string }) {
           </Field>
         )}
       </Section>
+      )}
 
-      {/* 5. RELACIONAMENTO */}
+      {show("relationship") && (
       <Section icon={<MessageCircleHeart className="h-4 w-4" />} title="Relacionamento e Intenção">
         <Field label="O que busca">
           <ChipSingle value={data.seeking} options={SEEKING} onChange={(v) => set("seeking", v)} />
@@ -208,8 +233,9 @@ export function ProfileAdvancedForm({ userId }: { userId: string }) {
           <ChipSingle value={data.love_language} options={LOVE_LANGUAGE} onChange={(v) => set("love_language", v)} />
         </Field>
       </Section>
+      )}
 
-      {/* 6. VISÃO DE FUTURO */}
+      {show("future") && (
       <Section icon={<Compass className="h-4 w-4" />} title="Visão de Futuro">
         <Field label="Quer casar?">
           <ChipSingle value={data.wants_marriage} options={SIM_NAO_TALVEZ} onChange={(v) => set("wants_marriage", v)} />
@@ -234,16 +260,18 @@ export function ProfileAdvancedForm({ userId }: { userId: string }) {
           <ChipMulti values={data.life_goals ?? []} options={LIFE_GOALS} onChange={(v) => set("life_goals", v)} />
         </Field>
       </Section>
+      )}
 
-      {/* 7. PERSONALIDADE */}
+      {show("personality") && (
       <Section icon={<Smile className="h-4 w-4" />} title="Personalidade">
         <Field label="Introversão"><ChipSingle value={data.introversion} options={INTROVERSION} onChange={(v) => set("introversion", v)} /></Field>
         <Field label="Energia"><ChipSingle value={data.energy} options={ENERGY} onChange={(v) => set("energy", v)} /></Field>
         <Field label="Comunicação"><ChipSingle value={data.communication} options={COMMUNICATION} onChange={(v) => set("communication", v)} /></Field>
         <Field label="Estilo"><ChipSingle value={data.style} options={STYLE} onChange={(v) => set("style", v)} /></Field>
       </Section>
+      )}
 
-      {/* 8. GOSTOS */}
+      {show("tastes") && (
       <Section icon={<Music className="h-4 w-4" />} title="Gostos e Interesses">
         <Field label="Hobbies">
           <Input value={data.hobbies ?? ""} onChange={(e) => set("hobbies", e.target.value || null)} placeholder="Ex: leitura, esportes, cozinhar..." maxLength={200} />
@@ -258,19 +286,22 @@ export function ProfileAdvancedForm({ userId }: { userId: string }) {
           <Textarea rows={2} maxLength={300} value={data.free_time ?? ""} onChange={(e) => set("free_time", e.target.value || null)} />
         </Field>
       </Section>
+      )}
 
-      {/* 9. ROTINA */}
+      {show("routine") && (
       <Section icon={<Clock className="h-4 w-4" />} title="Rotina">
         <Field label="Sua rotina é"><ChipSingle value={data.routine} options={ROUTINE} onChange={(v) => set("routine", v)} /></Field>
         <Field label="Tempo disponível para relacionamento"><ChipSingle value={data.available_time} options={AVAILABLE_TIME} onChange={(v) => set("available_time", v)} /></Field>
       </Section>
+      )}
 
-      {/* 10. SOBRE MIM EMOCIONAL */}
-      <Section icon={<Sparkles className="h-4 w-4" />} title="Sobre mim" subtitle="Em um relacionamento, eu sou alguém que…">
+      {show("self") && (
+      <Section icon={<Sparkles className="h-4 w-4" />} title="Em um relacionamento" subtitle="Em um relacionamento, eu sou alguém que…">
         <Textarea rows={4} maxLength={500} value={data.in_relationship_iam ?? ""} onChange={(e) => set("in_relationship_iam", e.target.value || null)} placeholder="Conte de forma sincera..." />
       </Section>
+      )}
 
-      {/* 11. O QUE BUSCO */}
+      {show("seeking") && (
       <Section icon={<Search className="h-4 w-4" />} title="O que busco" subtitle="Seja honesto — isso atrai conexões reais">
         <Field label="Uma qualidade essencial">
           <Input value={data.essential_quality ?? ""} onChange={(e) => set("essential_quality", e.target.value || null)} maxLength={120} />
@@ -282,10 +313,11 @@ export function ProfileAdvancedForm({ userId }: { userId: string }) {
           <Input value={data.willing_to_build ?? ""} onChange={(e) => set("willing_to_build", e.target.value || null)} maxLength={120} />
         </Field>
       </Section>
+      )}
 
       <div className="sticky bottom-4 z-10">
         <Button type="submit" size="lg" className="w-full shadow-glow" disabled={saving}>
-          <Save className="mr-2 h-4 w-4" /> {saving ? "Salvando..." : "Salvar perfil avançado"}
+          <Save className="mr-2 h-4 w-4" /> {saving ? "Salvando..." : saveLabel}
         </Button>
       </div>
 

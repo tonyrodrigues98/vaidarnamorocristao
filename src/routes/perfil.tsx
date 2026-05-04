@@ -362,9 +362,6 @@ function PerfilPage() {
             <TabsTrigger value="profile" className="flex-1 sm:flex-none">
               Sobre mim
             </TabsTrigger>
-            <TabsTrigger value="advanced" className="flex-1 sm:flex-none">
-              Profundo
-            </TabsTrigger>
             <TabsTrigger value="prefs" className="flex-1 sm:flex-none">
               Preferências
             </TabsTrigger>
@@ -516,10 +513,11 @@ function PerfilPage() {
                 <Save className="mr-2 h-4 w-4" /> {savingProfile ? "Salvando..." : "Salvar perfil"}
               </Button>
             </form>
-          </TabsContent>
-
-          <TabsContent value="advanced" className="mt-6">
-            {user && <ProfileAdvancedForm userId={user.id} />}
+            {user && (
+              <div className="mt-6">
+                <ProfileAdvancedForm userId={user.id} mode="about" />
+              </div>
+            )}
           </TabsContent>
 
           {/* Preferences tab */}
@@ -642,6 +640,11 @@ function PerfilPage() {
                 {savingPrefs ? "Salvando..." : "Salvar preferências"}
               </Button>
             </form>
+            {user && (
+              <div className="mt-6">
+                <ProfileAdvancedForm userId={user.id} mode="prefs" />
+              </div>
+            )}
           </TabsContent>
 
           <TabsContent value="missions" className="mt-6">
