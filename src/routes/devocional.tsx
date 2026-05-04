@@ -19,6 +19,7 @@ export const Route = createFileRoute("/devocional")({ component: Devocional });
 
 type Post = {
   id: string; title: string; content: string; published_at: string; author_id: string;
+  bible_reference: string | null; bible_text: string | null;
 };
 type ProfileLite = { id: string; full_name: string; photo_url: string | null; verified: boolean | null };
 type Reaction = "heart" | "prayed" | "edify";
@@ -91,7 +92,7 @@ function Devocional() {
 
     let q = supabase
       .from("daily_posts")
-      .select("id, title, content, published_at, author_id")
+      .select("id, title, content, published_at, author_id, bible_reference, bible_text")
       .eq("kind", "devotional")
       .eq("published", true)
       .range(from, to);
