@@ -431,6 +431,7 @@ function Comunidade() {
                             {name.charAt(0).toUpperCase()}
                           </div>
                         )}
+                        <span className="absolute -bottom-0.5 -right-0.5"><OnlineDot userId={m.sender_id} size="xs" /></span>
                       </Link>
                     )}
                     <BubbleWrap
