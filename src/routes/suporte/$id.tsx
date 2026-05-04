@@ -207,11 +207,23 @@ function TicketPage() {
 
         <div className="glass mt-3 rounded-2xl p-5 shadow-soft">
           <div className="flex flex-wrap items-start justify-between gap-3">
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <h1 className="break-words text-xl font-semibold">{ticket.title}</h1>
-              <p className="mt-1 text-xs text-muted-foreground">
-                Aberto em {new Date(ticket.created_at).toLocaleString("pt-BR")}
-              </p>
+              <div className="mt-2 flex items-center gap-2">
+                <Avatar className="h-7 w-7">
+                  <AvatarImage src={profiles[ticket.user_id]?.photo_url ?? undefined} />
+                  <AvatarFallback>{(profiles[ticket.user_id]?.full_name ?? "?").charAt(0)}</AvatarFallback>
+                </Avatar>
+                <span className="text-sm font-medium">{profiles[ticket.user_id]?.full_name ?? "Usuário"}</span>
+                <span className="text-xs text-muted-foreground">
+                  • aberto em {new Date(ticket.created_at).toLocaleString("pt-BR")}
+                </span>
+              </div>
+              {ticket.assigned_to && (
+                <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
+                  <UserCog className="h-3 w-3" /> Responsável: {profiles[ticket.assigned_to]?.full_name ?? "—"}
+                </p>
+              )}
             </div>
             <div className="flex flex-wrap items-center gap-2">
               {priorityBadge(ticket.priority)}
@@ -220,7 +232,7 @@ function TicketPage() {
           </div>
 
           {isStaff && (
-            <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-3">
+            <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
               <Select value={ticket.status} onValueChange={(v) => updateField({ status: v as Ticket["status"] })}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -239,6 +251,17 @@ function TicketPage() {
                   {CATEGORIES.map((c) => <SelectItem key={c.value} value={c.value}>Cat: {c.label}</SelectItem>)}
                 </SelectContent>
               </Select>
+              <Select value={ticket.assigned_to ?? "__none__"} onValueChange={(v) => assignTo(v === "__none__" ? null : v)}>
+                <SelectTrigger><SelectValue placeholder="Atribuir a..." /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__">Sem responsável</SelectItem>
+                  {staffList.map((s) => (
+                    <SelectItem key={s.user_id} value={s.user_id}>
+                      Responsável: {s.full_name} ({s.role})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           )}
         </div>
@@ -249,20 +272,27 @@ function TicketPage() {
           )}
           {msgs.map((m) => {
             const mine = m.sender_id === user?.id;
+            const sender = profiles[m.sender_id];
             return (
-              <div key={m.id} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
-                <div className={`max-w-[80%] rounded-2xl px-4 py-2 text-sm shadow-soft ${
+              <div key={m.id} className={`flex items-end gap-2 ${mine ? "justify-end" : "justify-start"}`}>
+                {!mine && (
+                  <Avatar className="h-7 w-7 shrink-0">
+                    <AvatarImage src={sender?.photo_url ?? undefined} />
+                    <AvatarFallback>{(sender?.full_name ?? "?").charAt(0)}</AvatarFallback>
+                  </Avatar>
+                )}
+                <div className={`max-w-[78%] rounded-2xl px-4 py-2 text-sm shadow-soft ${
                   m.is_staff
                     ? "bg-[var(--rose)]/15 text-foreground border border-[var(--rose)]/30"
                     : mine
                       ? "bg-primary text-primary-foreground"
                       : "bg-muted"
                 }`}>
-                  {m.is_staff && (
-                    <p className="mb-0.5 flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide text-[var(--rose)]">
-                      <ShieldCheck className="h-3 w-3" /> Equipe de Suporte
-                    </p>
-                  )}
+                  <p className="mb-0.5 flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide opacity-80">
+                    {m.is_staff && <ShieldCheck className="h-3 w-3 text-[var(--rose)]" />}
+                    <span className={m.is_staff ? "text-[var(--rose)]" : ""}>{sender?.full_name ?? (mine ? "Você" : "Usuário")}</span>
+                    {m.is_staff && <span className="text-[var(--rose)]">• Equipe</span>}
+                  </p>
                   <p className="whitespace-pre-wrap break-words">{m.content}</p>
                   {m.attachments?.length > 0 && (
                     <div className="mt-2 flex flex-wrap gap-2">
