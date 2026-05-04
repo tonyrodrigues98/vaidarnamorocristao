@@ -349,6 +349,14 @@ function Admin() {
                     </button>
                   </div>
                   <Input className="mt-3" placeholder="Título" value={newTitle} onChange={(e) => setNewTitle(e.target.value)} maxLength={200} />
+                  {newKind === "devotional" && (
+                    <div className="mt-3 rounded-xl border border-dashed border-[var(--rose)]/30 bg-[var(--petal)]/20 p-3">
+                      <Label className="text-xs uppercase tracking-wide text-muted-foreground">Texto bíblico base (opcional)</Label>
+                      <div className="mt-2">
+                        <BibleVerseSelector value={bibleSel} onChange={setBibleSel} />
+                      </div>
+                    </div>
+                  )}
                   <Textarea className="mt-2 min-h-[140px]" placeholder={newKind === "devotional" ? "Escreva uma reflexão devocional..." : "Escreva uma notícia ou aviso para a comunidade..."} value={newContent} onChange={(e) => setNewContent(e.target.value)} maxLength={10000} />
                   <div className="mt-3 flex justify-end">
                     <Button onClick={createPost} disabled={postBusy}>Publicar</Button>
