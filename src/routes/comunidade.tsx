@@ -421,9 +421,10 @@ function Comunidade() {
                       <Link
                         to="/pretendentes/$id"
                         params={{ id: m.sender_id }}
-                        className={`h-9 w-9 shrink-0 overflow-hidden rounded-full bg-muted transition hover:ring-2 hover:ring-primary/40 ${senderIsAdmin ? "ring-2 ring-[var(--gold)] ring-offset-2 ring-offset-background" : senderIsStaff ? "ring-2 ring-primary/40 ring-offset-2 ring-offset-background" : "ring-0"}`}
+                        className={`relative h-9 w-9 shrink-0 overflow-visible rounded-full bg-muted transition hover:ring-2 hover:ring-primary/40 ${senderIsAdmin ? "ring-2 ring-[var(--gold)] ring-offset-2 ring-offset-background" : senderIsStaff ? "ring-2 ring-primary/40 ring-offset-2 ring-offset-background" : "ring-0"}`}
                         aria-label={`Ver perfil de ${name}`}
                       >
+                        <span className="absolute inset-0 overflow-hidden rounded-full">
                         {p?.photo_url ? (
                           <img src={p.photo_url} alt="" className="h-full w-full object-cover" />
                         ) : (
@@ -431,6 +432,7 @@ function Comunidade() {
                             {name.charAt(0).toUpperCase()}
                           </div>
                         )}
+                        </span>
                         <span className="absolute -bottom-0.5 -right-0.5"><OnlineDot userId={m.sender_id} size="xs" /></span>
                       </Link>
                     )}
