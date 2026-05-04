@@ -1,0 +1,22 @@
+User-agent: *
+Allow: /$
+Allow: /termos
+Allow: /manual
+
+Disallow: /dashboard
+Disallow: /perfil
+Disallow: /pretendentes
+Disallow: /conversas
+Disallow: /matches
+Disallow: /interesses
+Disallow: /comunidade
+Disallow: /devocional
+Disallow: /noticias
+Disallow: /verificacao
+Disallow: /onboarding
+Disallow: /admin
+Disallow: /suporte
+Disallow: /bloqueados
+Disallow: /auth
+
+Sitemap: https://vaidarnamoro.com/sitemap.xml
