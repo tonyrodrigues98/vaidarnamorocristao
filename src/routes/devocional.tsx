@@ -174,6 +174,17 @@ function Devocional() {
       .on("postgres_changes", { event: "*", schema: "public", table: "devotional_reactions" }, () => loadReactions())
       .on("postgres_changes", { event: "*", schema: "public", table: "devotional_comments" }, () => loadComments())
       .on("postgres_changes", { event: "*", schema: "public", table: "devotional_comment_likes" }, () => loadLikes())
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "daily_posts" }, (payload: any) => {
+        const updated = payload.new as Post & { kind?: string; published?: boolean };
+        if (updated.kind && updated.kind !== "devotional") return;
+        setPosts((prev) => prev.map((p) => p.id === updated.id ? {
+          ...p,
+          title: updated.title,
+          content: updated.content,
+          bible_reference: updated.bible_reference ?? null,
+          bible_text: updated.bible_text ?? null,
+        } : p));
+      })
       .subscribe();
     return () => { supabase.removeChannel(ch); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
