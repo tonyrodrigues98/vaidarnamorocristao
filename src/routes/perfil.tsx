@@ -518,6 +518,10 @@ function PerfilPage() {
             </form>
           </TabsContent>
 
+          <TabsContent value="advanced" className="mt-6">
+            {user && <ProfileAdvancedForm userId={user.id} />}
+          </TabsContent>
+
           {/* Preferences tab */}
           <TabsContent value="prefs" className="mt-6">
             <form
