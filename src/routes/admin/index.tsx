@@ -17,6 +17,9 @@ import type { Database } from "@/integrations/supabase/types";
 import { ROLE_CONFIG, ROLE_PRIORITY, type AppRole } from "@/lib/roles";
 import { RoleBadge } from "@/components/RoleBadge";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
+import { UserBadges, invalidateUserBadges } from "@/components/UserBadges";
+import { BADGE_META, type BadgeCode } from "@/lib/badges";
+import { Award as AwardIcon } from "lucide-react";
 import { BibleVerseSelector, type BibleSelection } from "@/components/BibleVerseSelector";
 
 type Row = Database["public"]["Tables"]["profiles"]["Row"];
