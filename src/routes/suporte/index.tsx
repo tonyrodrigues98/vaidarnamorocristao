@@ -13,7 +13,7 @@ import {
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter,
 } from "@/components/ui/dialog";
-import { LifeBuoy, Plus, Loader2, Search } from "lucide-react";
+import { LifeBuoy, Plus, Loader2, Search, BookOpen } from "lucide-react";
 import { toast } from "sonner";
 import {
   CATEGORIES, PRIORITIES, STATUSES, statusBadge, priorityBadge, type Ticket,
@@ -93,6 +93,15 @@ function SuportePage() {
             }} />
           )}
         </div>
+
+        <Link to="/suporte/ajuda" className="glass mt-4 flex items-center gap-3 rounded-2xl p-4 shadow-soft transition-all hover:shadow-glow">
+          <BookOpen className="h-6 w-6 text-[var(--rose)]" />
+          <div className="flex-1">
+            <p className="font-semibold">Central de Ajuda e FAQ</p>
+            <p className="text-xs text-muted-foreground">Veja respostas para dúvidas comuns antes de abrir um chamado.</p>
+          </div>
+          <span className="text-sm text-[var(--rose)]">Abrir →</span>
+        </Link>
 
         <div className="glass mt-6 flex flex-wrap items-center gap-3 rounded-2xl p-3 shadow-soft">
           <div className="relative flex-1 min-w-[200px]">

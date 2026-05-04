@@ -24,6 +24,7 @@ import { Route as PretendentesIndexRouteImport } from './routes/pretendentes/ind
 import { Route as NoticiasIndexRouteImport } from './routes/noticias.index'
 import { Route as ConversasIndexRouteImport } from './routes/conversas/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as SuporteAjudaRouteImport } from './routes/suporte/ajuda'
 import { Route as SuporteIdRouteImport } from './routes/suporte/$id'
 import { Route as PretendentesIdRouteImport } from './routes/pretendentes/$id'
 import { Route as OnboardingEtapa2RouteImport } from './routes/onboarding/etapa-2'
@@ -110,6 +111,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/admin/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SuporteAjudaRoute = SuporteAjudaRouteImport.update({
+  id: '/suporte/ajuda',
+  path: '/suporte/ajuda',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SuporteIdRoute = SuporteIdRouteImport.update({
   id: '/suporte/$id',
   path: '/suporte/$id',
@@ -182,6 +188,7 @@ export interface FileRoutesByFullPath {
   '/onboarding/etapa-2': typeof OnboardingEtapa2Route
   '/pretendentes/$id': typeof PretendentesIdRoute
   '/suporte/$id': typeof SuporteIdRoute
+  '/suporte/ajuda': typeof SuporteAjudaRoute
   '/admin/': typeof AdminIndexRoute
   '/conversas/': typeof ConversasIndexRoute
   '/noticias/': typeof NoticiasIndexRoute
@@ -209,6 +216,7 @@ export interface FileRoutesByTo {
   '/onboarding/etapa-2': typeof OnboardingEtapa2Route
   '/pretendentes/$id': typeof PretendentesIdRoute
   '/suporte/$id': typeof SuporteIdRoute
+  '/suporte/ajuda': typeof SuporteAjudaRoute
   '/admin': typeof AdminIndexRoute
   '/conversas': typeof ConversasIndexRoute
   '/noticias': typeof NoticiasIndexRoute
@@ -237,6 +245,7 @@ export interface FileRoutesById {
   '/onboarding/etapa-2': typeof OnboardingEtapa2Route
   '/pretendentes/$id': typeof PretendentesIdRoute
   '/suporte/$id': typeof SuporteIdRoute
+  '/suporte/ajuda': typeof SuporteAjudaRoute
   '/admin/': typeof AdminIndexRoute
   '/conversas/': typeof ConversasIndexRoute
   '/noticias/': typeof NoticiasIndexRoute
@@ -266,6 +275,7 @@ export interface FileRouteTypes {
     | '/onboarding/etapa-2'
     | '/pretendentes/$id'
     | '/suporte/$id'
+    | '/suporte/ajuda'
     | '/admin/'
     | '/conversas/'
     | '/noticias/'
@@ -293,6 +303,7 @@ export interface FileRouteTypes {
     | '/onboarding/etapa-2'
     | '/pretendentes/$id'
     | '/suporte/$id'
+    | '/suporte/ajuda'
     | '/admin'
     | '/conversas'
     | '/noticias'
@@ -320,6 +331,7 @@ export interface FileRouteTypes {
     | '/onboarding/etapa-2'
     | '/pretendentes/$id'
     | '/suporte/$id'
+    | '/suporte/ajuda'
     | '/admin/'
     | '/conversas/'
     | '/noticias/'
@@ -348,6 +360,7 @@ export interface RootRouteChildren {
   OnboardingEtapa2Route: typeof OnboardingEtapa2Route
   PretendentesIdRoute: typeof PretendentesIdRoute
   SuporteIdRoute: typeof SuporteIdRoute
+  SuporteAjudaRoute: typeof SuporteAjudaRoute
   AdminIndexRoute: typeof AdminIndexRoute
   ConversasIndexRoute: typeof ConversasIndexRoute
   NoticiasIndexRoute: typeof NoticiasIndexRoute
@@ -462,6 +475,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/suporte/ajuda': {
+      id: '/suporte/ajuda'
+      path: '/suporte/ajuda'
+      fullPath: '/suporte/ajuda'
+      preLoaderRoute: typeof SuporteAjudaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/suporte/$id': {
       id: '/suporte/$id'
       path: '/suporte/$id'
@@ -556,6 +576,7 @@ const rootRouteChildren: RootRouteChildren = {
   OnboardingEtapa2Route: OnboardingEtapa2Route,
   PretendentesIdRoute: PretendentesIdRoute,
   SuporteIdRoute: SuporteIdRoute,
+  SuporteAjudaRoute: SuporteAjudaRoute,
   AdminIndexRoute: AdminIndexRoute,
   ConversasIndexRoute: ConversasIndexRoute,
   NoticiasIndexRoute: NoticiasIndexRoute,
