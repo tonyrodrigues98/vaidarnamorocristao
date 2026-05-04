@@ -236,6 +236,7 @@ function Devocional() {
       setReactionTotals((t) => ({ ...t, [postId]: (t[postId] ?? 0) + 1 }));
       const { error } = await supabase.from("devotional_reactions").insert({ post_id: postId, user_id: user.id, reaction });
       if (error) { toast.error(error.message); void loadReactions(); }
+      void recomputeMyBadges(user.id);
     }
   }
 
@@ -249,6 +250,7 @@ function Devocional() {
     toast.success("Marcado! Que Deus abençoe sua oração.");
     void loadStreak();
     void toggleReaction(postId, "prayed").catch(() => {});
+    void recomputeMyBadges(user.id);
   }
 
   async function sharePost(p: Post) {
@@ -283,6 +285,7 @@ function Devocional() {
       setCommentCount((cc) => ({ ...cc, [postId]: (cc[postId] ?? 0) + 1 }));
     }
     setDraft((d) => ({ ...d, [postId]: "" }));
+    void recomputeMyBadges(user.id);
     setReplyTo((r) => ({ ...r, [postId]: null }));
   }
 
