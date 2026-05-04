@@ -20,6 +20,7 @@ export const Route = createFileRoute("/noticias/")({ component: Noticias });
 function Noticias() {
   const { user, loading } = useAuth();
   const [posts, setPosts] = useState<Post[]>([]);
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     if (!user) return;
@@ -80,7 +81,20 @@ function Noticias() {
                   </span>
                 </div>
                 <h2 className="mt-3 line-clamp-2 text-xl font-semibold">{p.title}</h2>
-                <p className="mt-2 line-clamp-3 text-[14px] leading-relaxed text-foreground/75">{p.content}</p>
+                <p
+                  className={`mt-2 whitespace-pre-wrap text-[14px] leading-relaxed text-foreground/75 ${expanded[p.id] ? "" : "line-clamp-3"}`}
+                >
+                  {p.content}
+                </p>
+                {p.content && p.content.length > 180 ? (
+                  <button
+                    type="button"
+                    onClick={() => setExpanded((s) => ({ ...s, [p.id]: !s[p.id] }))}
+                    className="mt-3 text-sm font-semibold text-primary hover:underline"
+                  >
+                    {expanded[p.id] ? "Ler menos" : "Ler mais"}
+                  </button>
+                ) : null}
               </article>
             ))
           )}
