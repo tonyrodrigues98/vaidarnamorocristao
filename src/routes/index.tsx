@@ -8,8 +8,53 @@ export const Route = createFileRoute("/")({
   component: Landing,
   head: () => ({
     meta: [
-      { title: "VaiDarNamoro — Onde a fé encontra o amor" },
-      { name: "description", content: "A plataforma cristã de relacionamentos sérios. Conheça pretendentes que vivem e compartilham a sua fé." },
+      { title: "VaiDarNamoro — Onde a fé encontra o amor | Namoro Cristão" },
+      { name: "description", content: "A plataforma cristã de relacionamentos sérios para solteiros e divorciados. Perfis aprovados manualmente, sem swipe, com propósito eterno. Cadastro gratuito." },
+      { name: "keywords", content: "namoro cristão, relacionamento cristão, app cristão de namoro, encontros cristãos, namoro evangélico, casamento cristão, solteiros cristãos" },
+      { property: "og:title", content: "VaiDarNamoro — Onde a fé encontra o amor" },
+      { property: "og:description", content: "Plataforma cristã de relacionamentos sérios. Perfis aprovados manualmente, sem swipe, com propósito eterno." },
+      { property: "og:image", content: "https://vaidarnamoro.com/og-image.jpg" },
+      { property: "og:image:width", content: "1200" },
+      { property: "og:image:height", content: "630" },
+      { property: "og:image:alt", content: "VaiDarNamoro — Onde a fé encontra o amor" },
+      { property: "og:url", content: "https://vaidarnamoro.com/" },
+      { name: "twitter:title", content: "VaiDarNamoro — Onde a fé encontra o amor" },
+      { name: "twitter:description", content: "Plataforma cristã de relacionamentos sérios. Sem swipe, com propósito." },
+      { name: "twitter:image", content: "https://vaidarnamoro.com/og-image.jpg" },
+    ],
+    links: [
+      { rel: "canonical", href: "https://vaidarnamoro.com/" },
+    ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          name: "VaiDarNamoro",
+          url: "https://vaidarnamoro.com/",
+          description: "Plataforma cristã de relacionamentos sérios.",
+          inLanguage: "pt-BR",
+          publisher: {
+            "@type": "Organization",
+            name: "VaiDarNamoro",
+            url: "https://vaidarnamoro.com/",
+            logo: { "@type": "ImageObject", url: "https://vaidarnamoro.com/og-image.jpg" },
+          },
+        }),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          name: "VaiDarNamoro",
+          url: "https://vaidarnamoro.com/",
+          logo: "https://vaidarnamoro.com/og-image.jpg",
+          description: "Plataforma cristã de relacionamentos sérios para solteiros e divorciados que buscam um relacionamento com propósito.",
+          areaServed: "BR",
+        }),
+      },
     ],
   }),
 });
