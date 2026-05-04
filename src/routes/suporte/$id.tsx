@@ -11,12 +11,17 @@ import {
 } from "@/components/ui/select";
 import {
   ArrowLeft, Loader2, Paperclip, Send, ShieldCheck, X, Image as ImageIcon,
+  UserCog,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
   CATEGORIES, PRIORITIES, STATUSES, statusBadge, priorityBadge,
   type Ticket, type TicketMessage,
 } from "@/lib/support";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
+type ProfileLite = { id: string; full_name: string; photo_url: string | null };
+type StaffOption = { user_id: string; full_name: string; photo_url: string | null; role: string };
 
 export const Route = createFileRoute("/suporte/$id")({
   component: TicketPage,
@@ -29,6 +34,8 @@ function TicketPage() {
   const [ticket, setTicket] = useState<Ticket | null>(null);
   const [msgs, setMsgs] = useState<TicketMessage[]>([]);
   const [signed, setSigned] = useState<Record<string, string>>({});
+  const [profiles, setProfiles] = useState<Record<string, ProfileLite>>({});
+  const [staffList, setStaffList] = useState<StaffOption[]>([]);
   const [busy, setBusy] = useState(true);
   const [text, setText] = useState("");
   const [files, setFiles] = useState<File[]>([]);
@@ -49,6 +56,19 @@ function TicketPage() {
         const messages = (m ?? []) as TicketMessage[];
         setMsgs(messages);
         setBusy(false);
+        // load profiles for senders + ticket owner
+        const ids = Array.from(new Set([
+          ...(t ? [(t as Ticket).user_id, (t as Ticket).assigned_to].filter(Boolean) as string[] : []),
+          ...messages.map((mm) => mm.sender_id),
+        ]));
+        if (ids.length) {
+          const { data: ps } = await supabase.from("profiles").select("id, full_name, photo_url").in("id", ids);
+          if (ps && !ignore) {
+            const map: Record<string, ProfileLite> = {};
+            ps.forEach((p: any) => { map[p.id] = p; });
+            setProfiles((prev) => ({ ...prev, ...map }));
+          }
+        }
         // sign attachments
         const paths = messages.flatMap((mm) => (mm.attachments ?? []).map((a) => a.path));
         if (paths.length) {
@@ -68,6 +88,10 @@ function TicketPage() {
         async (payload) => {
           const m = payload.new as TicketMessage;
           setMsgs((prev) => [...prev, m]);
+          if (!profiles[m.sender_id]) {
+            const { data: p } = await supabase.from("profiles").select("id, full_name, photo_url").eq("id", m.sender_id).maybeSingle();
+            if (p) setProfiles((prev) => ({ ...prev, [p.id]: p as ProfileLite }));
+          }
           if (m.attachments?.length) {
             const paths = m.attachments.map((a) => a.path);
             const { data: urls } = await supabase.storage.from("support-attachments").createSignedUrls(paths, 3600);
@@ -83,6 +107,31 @@ function TicketPage() {
       .subscribe();
     return () => { ignore = true; supabase.removeChannel(ch); };
   }, [id, user]);
+
+  // Load staff list for assignment (admins only)
+  useEffect(() => {
+    if (!isStaff) return;
+    let ignore = false;
+    (async () => {
+      const { data: roles } = await supabase
+        .from("user_roles")
+        .select("user_id, role")
+        .in("role", ["admin", "super_admin", "moderador", "apresentador"] as any);
+      const ids = Array.from(new Set((roles ?? []).map((r: any) => r.user_id)));
+      if (!ids.length) return;
+      const { data: ps } = await supabase.from("profiles").select("id, full_name, photo_url").in("id", ids);
+      if (ignore) return;
+      const profMap = new Map((ps ?? []).map((p: any) => [p.id, p]));
+      const list: StaffOption[] = (roles ?? []).map((r: any) => {
+        const p: any = profMap.get(r.user_id);
+        return p ? { user_id: r.user_id, full_name: p.full_name, photo_url: p.photo_url, role: r.role } : null;
+      }).filter(Boolean) as StaffOption[];
+      // dedupe by user_id
+      const seen = new Set<string>();
+      setStaffList(list.filter((s) => { if (seen.has(s.user_id)) return false; seen.add(s.user_id); return true; }));
+    })();
+    return () => { ignore = true; };
+  }, [isStaff]);
 
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth" }); }, [msgs.length]);
 
@@ -122,6 +171,13 @@ function TicketPage() {
     const { error } = await supabase.from("support_tickets").update(patch).eq("id", ticket.id);
     if (error) toast.error(error.message);
     else toast.success("Atualizado");
+  }
+
+  async function assignTo(userId: string | null) {
+    if (!ticket) return;
+    const { error } = await supabase.from("support_tickets").update({ assigned_to: userId }).eq("id", ticket.id);
+    if (error) return toast.error(error.message);
+    toast.success(userId ? "Atribuído" : "Atribuição removida");
   }
 
   const canChat = useMemo(() => ticket && ticket.status !== "closed", [ticket]);
