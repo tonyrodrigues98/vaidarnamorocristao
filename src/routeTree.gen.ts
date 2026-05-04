@@ -19,6 +19,7 @@ import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ComunidadeRouteImport } from './routes/comunidade'
 import { Route as BloqueadosRouteImport } from './routes/bloqueados'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as SuporteIndexRouteImport } from './routes/suporte/index'
 import { Route as PretendentesIndexRouteImport } from './routes/pretendentes/index'
 import { Route as NoticiasIndexRouteImport } from './routes/noticias.index'
 import { Route as ConversasIndexRouteImport } from './routes/conversas/index'
@@ -81,6 +82,11 @@ const BloqueadosRoute = BloqueadosRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SuporteIndexRoute = SuporteIndexRouteImport.update({
+  id: '/suporte/',
+  path: '/suporte/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PretendentesIndexRoute = PretendentesIndexRouteImport.update({
@@ -173,6 +179,7 @@ export interface FileRoutesByFullPath {
   '/conversas/': typeof ConversasIndexRoute
   '/noticias/': typeof NoticiasIndexRoute
   '/pretendentes/': typeof PretendentesIndexRoute
+  '/suporte/': typeof SuporteIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -198,6 +205,7 @@ export interface FileRoutesByTo {
   '/conversas': typeof ConversasIndexRoute
   '/noticias': typeof NoticiasIndexRoute
   '/pretendentes': typeof PretendentesIndexRoute
+  '/suporte': typeof SuporteIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -224,6 +232,7 @@ export interface FileRoutesById {
   '/conversas/': typeof ConversasIndexRoute
   '/noticias/': typeof NoticiasIndexRoute
   '/pretendentes/': typeof PretendentesIndexRoute
+  '/suporte/': typeof SuporteIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -251,6 +260,7 @@ export interface FileRouteTypes {
     | '/conversas/'
     | '/noticias/'
     | '/pretendentes/'
+    | '/suporte/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -276,6 +286,7 @@ export interface FileRouteTypes {
     | '/conversas'
     | '/noticias'
     | '/pretendentes'
+    | '/suporte'
   id:
     | '__root__'
     | '/'
@@ -301,6 +312,7 @@ export interface FileRouteTypes {
     | '/conversas/'
     | '/noticias/'
     | '/pretendentes/'
+    | '/suporte/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -327,6 +339,7 @@ export interface RootRouteChildren {
   ConversasIndexRoute: typeof ConversasIndexRoute
   NoticiasIndexRoute: typeof NoticiasIndexRoute
   PretendentesIndexRoute: typeof PretendentesIndexRoute
+  SuporteIndexRoute: typeof SuporteIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -399,6 +412,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/suporte/': {
+      id: '/suporte/'
+      path: '/suporte'
+      fullPath: '/suporte/'
+      preLoaderRoute: typeof SuporteIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/pretendentes/': {
@@ -519,6 +539,7 @@ const rootRouteChildren: RootRouteChildren = {
   ConversasIndexRoute: ConversasIndexRoute,
   NoticiasIndexRoute: NoticiasIndexRoute,
   PretendentesIndexRoute: PretendentesIndexRoute,
+  SuporteIndexRoute: SuporteIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
