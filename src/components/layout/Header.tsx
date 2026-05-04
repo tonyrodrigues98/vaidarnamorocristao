@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import {
   Heart, LogOut, Shield, MessageCircle, Sparkles, Menu, X,
   User as UserIcon, Users, Newspaper, Globe, Ban, Share2, Gem, Sun, Moon, MoreHorizontal,
-  ChevronDown, Heart as HeartIcon,
+  ChevronDown, Heart as HeartIcon, LifeBuoy,
 } from "lucide-react";
 import { toast } from "sonner";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
@@ -231,6 +231,9 @@ export function Header() {
                       <Link to="/verificacao" className="flex items-center gap-2"><Shield className="h-4 w-4" /> Verificação</Link>
                     </DropdownMenuItem>
                   )}
+                  <DropdownMenuItem asChild>
+                    <Link to="/suporte" className="flex items-center gap-2"><LifeBuoy className="h-4 w-4" /> Suporte</Link>
+                  </DropdownMenuItem>
                   {canSeeAdminPanel && (
                     <DropdownMenuItem asChild>
                       <Link to="/admin" className="flex items-center gap-2"><Shield className="h-4 w-4" /> Admin</Link>
@@ -349,6 +352,9 @@ export function Header() {
                       <span className="flex items-center gap-2"><Shield className="h-4 w-4" /> Verificação</span>
                     </MobileItem>
                   )}
+                  <MobileItem to="/suporte" onClick={close}>
+                    <span className="flex items-center gap-2"><LifeBuoy className="h-4 w-4" /> Suporte</span>
+                  </MobileItem>
                   {canSeeAdminPanel && (
                     <MobileItem to="/admin" onClick={close}>
                       <span className="flex items-center gap-2"><Shield className="h-4 w-4" /> Admin</span>

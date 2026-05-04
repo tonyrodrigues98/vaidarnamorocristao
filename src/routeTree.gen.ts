@@ -19,10 +19,12 @@ import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ComunidadeRouteImport } from './routes/comunidade'
 import { Route as BloqueadosRouteImport } from './routes/bloqueados'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as SuporteIndexRouteImport } from './routes/suporte/index'
 import { Route as PretendentesIndexRouteImport } from './routes/pretendentes/index'
 import { Route as NoticiasIndexRouteImport } from './routes/noticias.index'
 import { Route as ConversasIndexRouteImport } from './routes/conversas/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as SuporteIdRouteImport } from './routes/suporte/$id'
 import { Route as PretendentesIdRouteImport } from './routes/pretendentes/$id'
 import { Route as OnboardingEtapa2RouteImport } from './routes/onboarding/etapa-2'
 import { Route as OnboardingEtapa1RouteImport } from './routes/onboarding/etapa-1'
@@ -83,6 +85,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SuporteIndexRoute = SuporteIndexRouteImport.update({
+  id: '/suporte/',
+  path: '/suporte/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PretendentesIndexRoute = PretendentesIndexRouteImport.update({
   id: '/pretendentes/',
   path: '/pretendentes/',
@@ -101,6 +108,11 @@ const ConversasIndexRoute = ConversasIndexRouteImport.update({
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/admin/',
   path: '/admin/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SuporteIdRoute = SuporteIdRouteImport.update({
+  id: '/suporte/$id',
+  path: '/suporte/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PretendentesIdRoute = PretendentesIdRouteImport.update({
@@ -169,10 +181,12 @@ export interface FileRoutesByFullPath {
   '/onboarding/etapa-1': typeof OnboardingEtapa1Route
   '/onboarding/etapa-2': typeof OnboardingEtapa2Route
   '/pretendentes/$id': typeof PretendentesIdRoute
+  '/suporte/$id': typeof SuporteIdRoute
   '/admin/': typeof AdminIndexRoute
   '/conversas/': typeof ConversasIndexRoute
   '/noticias/': typeof NoticiasIndexRoute
   '/pretendentes/': typeof PretendentesIndexRoute
+  '/suporte/': typeof SuporteIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -194,10 +208,12 @@ export interface FileRoutesByTo {
   '/onboarding/etapa-1': typeof OnboardingEtapa1Route
   '/onboarding/etapa-2': typeof OnboardingEtapa2Route
   '/pretendentes/$id': typeof PretendentesIdRoute
+  '/suporte/$id': typeof SuporteIdRoute
   '/admin': typeof AdminIndexRoute
   '/conversas': typeof ConversasIndexRoute
   '/noticias': typeof NoticiasIndexRoute
   '/pretendentes': typeof PretendentesIndexRoute
+  '/suporte': typeof SuporteIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -220,10 +236,12 @@ export interface FileRoutesById {
   '/onboarding/etapa-1': typeof OnboardingEtapa1Route
   '/onboarding/etapa-2': typeof OnboardingEtapa2Route
   '/pretendentes/$id': typeof PretendentesIdRoute
+  '/suporte/$id': typeof SuporteIdRoute
   '/admin/': typeof AdminIndexRoute
   '/conversas/': typeof ConversasIndexRoute
   '/noticias/': typeof NoticiasIndexRoute
   '/pretendentes/': typeof PretendentesIndexRoute
+  '/suporte/': typeof SuporteIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -247,10 +265,12 @@ export interface FileRouteTypes {
     | '/onboarding/etapa-1'
     | '/onboarding/etapa-2'
     | '/pretendentes/$id'
+    | '/suporte/$id'
     | '/admin/'
     | '/conversas/'
     | '/noticias/'
     | '/pretendentes/'
+    | '/suporte/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -272,10 +292,12 @@ export interface FileRouteTypes {
     | '/onboarding/etapa-1'
     | '/onboarding/etapa-2'
     | '/pretendentes/$id'
+    | '/suporte/$id'
     | '/admin'
     | '/conversas'
     | '/noticias'
     | '/pretendentes'
+    | '/suporte'
   id:
     | '__root__'
     | '/'
@@ -297,10 +319,12 @@ export interface FileRouteTypes {
     | '/onboarding/etapa-1'
     | '/onboarding/etapa-2'
     | '/pretendentes/$id'
+    | '/suporte/$id'
     | '/admin/'
     | '/conversas/'
     | '/noticias/'
     | '/pretendentes/'
+    | '/suporte/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -323,10 +347,12 @@ export interface RootRouteChildren {
   OnboardingEtapa1Route: typeof OnboardingEtapa1Route
   OnboardingEtapa2Route: typeof OnboardingEtapa2Route
   PretendentesIdRoute: typeof PretendentesIdRoute
+  SuporteIdRoute: typeof SuporteIdRoute
   AdminIndexRoute: typeof AdminIndexRoute
   ConversasIndexRoute: typeof ConversasIndexRoute
   NoticiasIndexRoute: typeof NoticiasIndexRoute
   PretendentesIndexRoute: typeof PretendentesIndexRoute
+  SuporteIndexRoute: typeof SuporteIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -401,6 +427,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/suporte/': {
+      id: '/suporte/'
+      path: '/suporte'
+      fullPath: '/suporte/'
+      preLoaderRoute: typeof SuporteIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/pretendentes/': {
       id: '/pretendentes/'
       path: '/pretendentes'
@@ -427,6 +460,13 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/suporte/$id': {
+      id: '/suporte/$id'
+      path: '/suporte/$id'
+      fullPath: '/suporte/$id'
+      preLoaderRoute: typeof SuporteIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/pretendentes/$id': {
@@ -515,10 +555,12 @@ const rootRouteChildren: RootRouteChildren = {
   OnboardingEtapa1Route: OnboardingEtapa1Route,
   OnboardingEtapa2Route: OnboardingEtapa2Route,
   PretendentesIdRoute: PretendentesIdRoute,
+  SuporteIdRoute: SuporteIdRoute,
   AdminIndexRoute: AdminIndexRoute,
   ConversasIndexRoute: ConversasIndexRoute,
   NoticiasIndexRoute: NoticiasIndexRoute,
   PretendentesIndexRoute: PretendentesIndexRoute,
+  SuporteIndexRoute: SuporteIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
