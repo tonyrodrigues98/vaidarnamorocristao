@@ -725,6 +725,7 @@ export type Database = {
           bio: string | null
           church: string
           city: string
+          contributor_highlight: boolean
           created_at: string
           full_name: string
           height_cm: number | null
@@ -746,6 +747,7 @@ export type Database = {
           bio?: string | null
           church: string
           city: string
+          contributor_highlight?: boolean
           created_at?: string
           full_name: string
           height_cm?: number | null
@@ -767,6 +769,7 @@ export type Database = {
           bio?: string | null
           church?: string
           city?: string
+          contributor_highlight?: boolean
           created_at?: string
           full_name?: string
           height_cm?: number | null
