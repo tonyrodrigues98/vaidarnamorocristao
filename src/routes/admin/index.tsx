@@ -463,11 +463,13 @@ function Admin() {
 }
 
 function UsersPanel({
-  users, busy, onChangeRole,
+  users, busy, onChangeRole, onToggleVerified, canVerify,
 }: {
   users: AdminUserRow[];
   busy: string | null;
   onChangeRole: (userId: string, newRole: AppRole, currentRole: AppRole) => void;
+  onToggleVerified: (userId: string, current: boolean) => void;
+  canVerify: boolean;
 }) {
   if (users.length === 0) {
     return <div className="glass rounded-2xl p-10 text-center text-muted-foreground shadow-soft">Nenhum usuário.</div>;
@@ -484,10 +486,23 @@ function UsersPanel({
             <div className="flex flex-wrap items-center gap-2">
               <h3 className="font-semibold">{u.full_name}, {u.age}</h3>
               <RoleBadge role={u.primaryRole} />
+              {u.verified && <VerifiedBadge size="sm" />}
             </div>
             <p className="truncate text-xs text-muted-foreground">{u.sex} · {u.city}/{u.state} · {u.status}</p>
           </div>
-          <div className="w-full sm:w-52">
+          <div className="flex w-full items-center gap-2 sm:w-auto">
+            {canVerify && (
+              <Button
+                size="sm"
+                variant={u.verified ? "default" : "outline"}
+                disabled={busy === u.id}
+                onClick={() => onToggleVerified(u.id, !!u.verified)}
+                title={u.verified ? "Remover verificação" : "Verificar perfil"}
+              >
+                <BadgeCheck className="h-4 w-4" />
+              </Button>
+            )}
+            <div className="flex-1 sm:w-52">
             <Select
               value={u.primaryRole}
               onValueChange={(v) => onChangeRole(u.id, v as AppRole, u.primaryRole)}
@@ -500,6 +515,7 @@ function UsersPanel({
                 ))}
               </SelectContent>
             </Select>
+            </div>
           </div>
         </div>
       ))}
