@@ -1,5 +1,5 @@
 import { createFileRoute, Navigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 import {
   BookHeart, Heart, Sparkles, Hand, Share2, MessageCircle, Pencil, Trash2,
-  Check, X, Reply, Pin, PinOff, Flag, Flame, Trophy,
+  Check, X, Reply, Pin, PinOff, Flag, Flame, Trophy, Loader2,
 } from "lucide-react";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
@@ -28,11 +28,14 @@ type Comment = {
   content: string; created_at: string; edited_at: string | null;
   deleted_at: string | null; pinned_at: string | null;
 };
+type SortKey = "recent" | "commented" | "reactions";
 
-const REACTIONS: { key: Reaction; emoji: string; label: string }[] = [
-  { key: "heart", emoji: "❤️", label: "Tocou meu coração" },
-  { key: "prayed", emoji: "🙏", label: "Orei hoje" },
-  { key: "edify", emoji: "✨", label: "Edificante" },
+const PAGE_SIZE = 8;
+
+const REACTIONS: { key: Reaction; Icon: typeof Heart; label: string; activeClass: string }[] = [
+  { key: "heart", Icon: Heart, label: "Tocou meu coração", activeClass: "text-rose-500 fill-rose-500" },
+  { key: "prayed", Icon: Hand, label: "Orei hoje", activeClass: "text-amber-500 fill-amber-500/30" },
+  { key: "edify", Icon: Sparkles, label: "Edificante", activeClass: "text-sky-500 fill-sky-500/30" },
 ];
 
 function relTime(iso: string) {
@@ -47,7 +50,11 @@ function relTime(iso: string) {
 function Devocional() {
   const { user, isAdmin, role, loading } = useAuth();
   const canModerate = isAdmin || role === "moderador";
+  const [sort, setSort] = useState<SortKey>("recent");
   const [posts, setPosts] = useState<Post[]>([]);
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingPosts, setLoadingPosts] = useState(false);
   const [profiles, setProfiles] = useState<Record<string, ProfileLite>>({});
   const [reactions, setReactions] = useState<ReactionRow[]>([]);
   const [prayedToday, setPrayedToday] = useState(false);
@@ -56,72 +63,76 @@ function Devocional() {
   const [likes, setLikes] = useState<Record<string, number>>({});
   const [myLikes, setMyLikes] = useState<Set<string>>(new Set());
   const [commentCount, setCommentCount] = useState<Record<string, number>>({});
+  const [reactionTotals, setReactionTotals] = useState<Record<string, number>>({});
 
-  // Composer state per post
   const [draft, setDraft] = useState<Record<string, string>>({});
   const [replyTo, setReplyTo] = useState<Record<string, Comment | null>>({});
   const [editing, setEditing] = useState<{ id: string; text: string } | null>(null);
   const [reportFor, setReportFor] = useState<Comment | null>(null);
   const [reportReason, setReportReason] = useState("");
 
-  useEffect(() => {
-    if (!user) return;
-    void loadAll();
-    const ch = supabase
-      .channel("devocional-live")
-      .on("postgres_changes", { event: "*", schema: "public", table: "daily_posts" }, () => loadAll())
-      .on("postgres_changes", { event: "*", schema: "public", table: "devotional_reactions" }, () => loadReactions())
-      .on("postgres_changes", { event: "*", schema: "public", table: "devotional_comments" }, () => loadComments())
-      .on("postgres_changes", { event: "*", schema: "public", table: "devotional_comment_likes" }, () => loadLikes())
-      .subscribe();
-    return () => { supabase.removeChannel(ch); };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
 
-  async function loadAll() {
-    await Promise.all([loadPosts(), loadReactions(), loadPrayed(), loadStreak(), loadComments(), loadLikes()]);
-  }
+  const loadProfiles = useCallback(async (ids: string[]) => {
+    const missing = ids.filter((id) => id && !profiles[id]);
+    if (!missing.length) return;
+    const { data } = await supabase.from("profiles").select("id, full_name, photo_url, verified").in("id", missing);
+    const map: Record<string, ProfileLite> = {};
+    (data ?? []).forEach((p) => { map[p.id] = p as ProfileLite; });
+    setProfiles((prev) => ({ ...prev, ...map }));
+  }, [profiles]);
 
-  async function loadPosts() {
-    const { data, error } = await supabase
+  const loadPostsPage = useCallback(async (reset: boolean, sortKey: SortKey) => {
+    if (loadingPosts) return;
+    setLoadingPosts(true);
+    const nextPage = reset ? 0 : page;
+    const from = nextPage * PAGE_SIZE;
+    const to = from + PAGE_SIZE - 1;
+
+    let q = supabase
       .from("daily_posts")
       .select("id, title, content, published_at, author_id")
       .eq("kind", "devotional")
       .eq("published", true)
-      .order("published_at", { ascending: false })
-      .limit(30);
-    if (error) { toast.error(error.message); return; }
+      .range(from, to);
+
+    if (sortKey === "recent") q = q.order("published_at", { ascending: false });
+    else q = q.order("published_at", { ascending: false }); // server-side fallback; resort client-side
+
+    const { data, error } = await q;
+    if (error) { toast.error(error.message); setLoadingPosts(false); return; }
     const list = (data ?? []) as Post[];
-    setPosts(list);
-    const ids = Array.from(new Set(list.map((p) => p.author_id)));
-    if (ids.length) {
-      const { data: profs } = await supabase.from("profiles").select("id, full_name, photo_url, verified").in("id", ids);
-      const map: Record<string, ProfileLite> = {};
-      (profs ?? []).forEach((p) => { map[p.id] = p as ProfileLite; });
-      setProfiles((prev) => ({ ...prev, ...map }));
-    }
-  }
+    setPosts((prev) => reset ? list : [...prev, ...list]);
+    setHasMore(list.length === PAGE_SIZE);
+    setPage(nextPage + 1);
+    void loadProfiles(list.map((p) => p.author_id));
+    setLoadingPosts(false);
+  }, [loadingPosts, page, loadProfiles]);
 
-  async function loadReactions() {
+  const loadReactions = useCallback(async () => {
     const { data } = await supabase.from("devotional_reactions").select("post_id, user_id, reaction");
-    setReactions((data ?? []) as ReactionRow[]);
-  }
+    const list = (data ?? []) as ReactionRow[];
+    setReactions(list);
+    const totals: Record<string, number> = {};
+    list.forEach((r) => { totals[r.post_id] = (totals[r.post_id] ?? 0) + 1; });
+    setReactionTotals(totals);
+  }, []);
 
-  async function loadPrayed() {
+  const loadPrayed = useCallback(async () => {
     if (!user) return;
     const today = new Date().toISOString().slice(0, 10);
     const { data } = await supabase.from("devotional_prayed").select("id").eq("user_id", user.id).eq("day", today).maybeSingle();
     setPrayedToday(!!data);
-  }
+  }, [user]);
 
-  async function loadStreak() {
+  const loadStreak = useCallback(async () => {
     if (!user) return;
     const { data } = await supabase.rpc("get_prayer_streak", { _user_id: user.id });
     const row = (data?.[0] ?? null) as { current_streak: number; best_streak: number } | null;
     setStreak({ current: row?.current_streak ?? 0, best: row?.best_streak ?? 0 });
-  }
+  }, [user]);
 
-  async function loadComments() {
+  const loadComments = useCallback(async () => {
     const { data } = await supabase
       .from("devotional_comments")
       .select("*")
@@ -131,17 +142,10 @@ function Devocional() {
     const counts: Record<string, number> = {};
     list.forEach((c) => { if (!c.deleted_at) counts[c.post_id] = (counts[c.post_id] ?? 0) + 1; });
     setCommentCount(counts);
-    const uids = Array.from(new Set(list.map((c) => c.user_id)));
-    const missing = uids.filter((id) => !profiles[id]);
-    if (missing.length) {
-      const { data: profs } = await supabase.from("profiles").select("id, full_name, photo_url, verified").in("id", missing);
-      const map: Record<string, ProfileLite> = {};
-      (profs ?? []).forEach((p) => { map[p.id] = p as ProfileLite; });
-      setProfiles((prev) => ({ ...prev, ...map }));
-    }
-  }
+    void loadProfiles(list.map((c) => c.user_id));
+  }, [loadProfiles]);
 
-  async function loadLikes() {
+  const loadLikes = useCallback(async () => {
     if (!user) return;
     const { data } = await supabase.from("devotional_comment_likes").select("comment_id, user_id");
     const counts: Record<string, number> = {};
@@ -152,21 +156,80 @@ function Devocional() {
     });
     setLikes(counts);
     setMyLikes(mine);
-  }
+  }, [user]);
+
+  // Initial load + realtime
+  useEffect(() => {
+    if (!user) return;
+    void loadPostsPage(true, sort);
+    void loadReactions();
+    void loadPrayed();
+    void loadStreak();
+    void loadComments();
+    void loadLikes();
+
+    const ch = supabase
+      .channel("devocional-live")
+      .on("postgres_changes", { event: "*", schema: "public", table: "devotional_reactions" }, () => loadReactions())
+      .on("postgres_changes", { event: "*", schema: "public", table: "devotional_comments" }, () => loadComments())
+      .on("postgres_changes", { event: "*", schema: "public", table: "devotional_comment_likes" }, () => loadLikes())
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
+
+  // Reload posts on sort change
+  useEffect(() => {
+    if (!user) return;
+    void loadPostsPage(true, sort);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sort]);
+
+  // Infinite scroll observer
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el || !hasMore) return;
+    const io = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting && !loadingPosts && hasMore) {
+        void loadPostsPage(false, sort);
+      }
+    }, { rootMargin: "400px" });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [hasMore, loadingPosts, sort, loadPostsPage]);
+
+  // Client-side sort
+  const sortedPosts = useMemo(() => {
+    if (sort === "recent") return posts;
+    const arr = [...posts];
+    if (sort === "commented") {
+      arr.sort((a, b) => (commentCount[b.id] ?? 0) - (commentCount[a.id] ?? 0));
+    } else if (sort === "reactions") {
+      arr.sort((a, b) => (reactionTotals[b.id] ?? 0) - (reactionTotals[a.id] ?? 0));
+    }
+    return arr;
+  }, [posts, sort, commentCount, reactionTotals]);
 
   async function toggleReaction(postId: string, reaction: Reaction) {
     if (!user) return;
     const mine = reactions.find((r) => r.post_id === postId && r.user_id === user.id && r.reaction === reaction);
+    // optimistic
     if (mine) {
-      await supabase.from("devotional_reactions").delete().eq("post_id", postId).eq("user_id", user.id).eq("reaction", reaction);
+      setReactions((prev) => prev.filter((r) => !(r.post_id === postId && r.user_id === user.id && r.reaction === reaction)));
+      setReactionTotals((t) => ({ ...t, [postId]: Math.max(0, (t[postId] ?? 1) - 1) }));
+      const { error } = await supabase.from("devotional_reactions").delete().eq("post_id", postId).eq("user_id", user.id).eq("reaction", reaction);
+      if (error) { toast.error(error.message); void loadReactions(); }
     } else {
-      await supabase.from("devotional_reactions").insert({ post_id: postId, user_id: user.id, reaction });
+      setReactions((prev) => [...prev, { post_id: postId, user_id: user.id, reaction }]);
+      setReactionTotals((t) => ({ ...t, [postId]: (t[postId] ?? 0) + 1 }));
+      const { error } = await supabase.from("devotional_reactions").insert({ post_id: postId, user_id: user.id, reaction });
+      if (error) { toast.error(error.message); void loadReactions(); }
     }
   }
 
   async function prayToday(postId: string) {
     if (!user) return;
-    if (prayedToday) { toast.info("Você já marcou que orou hoje 🙏"); return; }
+    if (prayedToday) { toast.info("Você já marcou que orou hoje"); return; }
     const today = new Date().toISOString().slice(0, 10);
     const { error } = await supabase.from("devotional_prayed").insert({ user_id: user.id, post_id: postId, day: today });
     if (error) { toast.error(error.message); return; }
@@ -195,10 +258,18 @@ function Devocional() {
     const text = (draft[postId] ?? "").trim();
     if (!text) return;
     const parent = replyTo[postId];
-    const { error } = await supabase.from("devotional_comments").insert({
-      post_id: postId, user_id: user.id, content: text, parent_id: parent?.id ?? null,
-    });
+    const { data, error } = await supabase
+      .from("devotional_comments")
+      .insert({ post_id: postId, user_id: user.id, content: text, parent_id: parent?.id ?? null })
+      .select("*")
+      .single();
     if (error) { toast.error(error.message); return; }
+    // optimistic append (also realtime will reconcile)
+    if (data) {
+      const c = data as Comment;
+      setComments((prev) => prev.some((x) => x.id === c.id) ? prev : [...prev, c]);
+      setCommentCount((cc) => ({ ...cc, [postId]: (cc[postId] ?? 0) + 1 }));
+    }
     setDraft((d) => ({ ...d, [postId]: "" }));
     setReplyTo((r) => ({ ...r, [postId]: null }));
   }
@@ -207,28 +278,43 @@ function Devocional() {
     if (!editing) return;
     const { error } = await supabase.from("devotional_comments").update({ content: editing.text }).eq("id", editing.id);
     if (error) { toast.error(error.message); return; }
+    setComments((prev) => prev.map((c) => c.id === editing.id ? { ...c, content: editing.text, edited_at: new Date().toISOString() } : c));
     setEditing(null);
   }
 
   async function deleteComment(c: Comment) {
     if (!user) return;
     if (c.user_id === user.id) {
-      await supabase.from("devotional_comments").update({ deleted_at: new Date().toISOString(), content: "[removido]" }).eq("id", c.id);
+      const { error } = await supabase.from("devotional_comments").update({ deleted_at: new Date().toISOString(), content: "[removido]" }).eq("id", c.id);
+      if (!error) setComments((prev) => prev.map((x) => x.id === c.id ? { ...x, deleted_at: new Date().toISOString(), content: "[removido]" } : x));
     } else if (canModerate || isAdmin) {
-      await supabase.from("devotional_comments").delete().eq("id", c.id);
+      const { error } = await supabase.from("devotional_comments").delete().eq("id", c.id);
+      if (!error) setComments((prev) => prev.filter((x) => x.id !== c.id));
     }
   }
 
   async function togglePin(c: Comment) {
-    await supabase.from("devotional_comments").update({ pinned_at: c.pinned_at ? null : new Date().toISOString() }).eq("id", c.id);
+    const newPin = c.pinned_at ? null : new Date().toISOString();
+    const { error } = await supabase.from("devotional_comments").update({ pinned_at: newPin }).eq("id", c.id);
+    if (!error) setComments((prev) => prev.map((x) => x.id === c.id ? { ...x, pinned_at: newPin } : x));
   }
 
   async function toggleLike(c: Comment) {
     if (!user) return;
-    if (myLikes.has(c.id)) {
-      await supabase.from("devotional_comment_likes").delete().eq("comment_id", c.id).eq("user_id", user.id);
+    const has = myLikes.has(c.id);
+    // optimistic
+    setMyLikes((prev) => {
+      const n = new Set(prev);
+      if (has) n.delete(c.id); else n.add(c.id);
+      return n;
+    });
+    setLikes((prev) => ({ ...prev, [c.id]: Math.max(0, (prev[c.id] ?? 0) + (has ? -1 : 1)) }));
+    if (has) {
+      const { error } = await supabase.from("devotional_comment_likes").delete().eq("comment_id", c.id).eq("user_id", user.id);
+      if (error) { toast.error(error.message); void loadLikes(); }
     } else {
-      await supabase.from("devotional_comment_likes").insert({ comment_id: c.id, user_id: user.id });
+      const { error } = await supabase.from("devotional_comment_likes").insert({ comment_id: c.id, user_id: user.id });
+      if (error) { toast.error(error.message); void loadLikes(); }
     }
   }
 
@@ -262,16 +348,23 @@ function Devocional() {
         <div className="animate-fade-up mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
           <StatCard icon={<Flame className="h-4 w-4 text-orange-500" />} label="Sequência" value={`${streak.current} ${streak.current === 1 ? "dia" : "dias"}`} />
           <StatCard icon={<Trophy className="h-4 w-4 text-amber-500" />} label="Recorde" value={`${streak.best}`} />
-          <StatCard icon={<Hand className="h-4 w-4 text-[var(--rose)]" />} label="Hoje" value={prayedToday ? "Orei 🙏" : "Pendente"} />
+          <StatCard icon={<Hand className="h-4 w-4 text-[var(--rose)]" />} label="Hoje" value={prayedToday ? "Orei" : "Pendente"} />
         </div>
 
-        <section className="mt-8 space-y-6">
-          {posts.length === 0 ? (
+        {/* Filters */}
+        <div className="mt-6 flex flex-wrap gap-2">
+          <FilterChip active={sort === "recent"} onClick={() => setSort("recent")}>Mais recentes</FilterChip>
+          <FilterChip active={sort === "commented"} onClick={() => setSort("commented")}>Mais comentados</FilterChip>
+          <FilterChip active={sort === "reactions"} onClick={() => setSort("reactions")}>Mais reações</FilterChip>
+        </div>
+
+        <section className="mt-6 space-y-6">
+          {sortedPosts.length === 0 && !loadingPosts ? (
             <div className="glass rounded-3xl p-10 text-center text-muted-foreground shadow-soft">
               Nenhum devocional publicado ainda.
             </div>
           ) : (
-            posts.map((p) => (
+            sortedPosts.map((p) => (
               <PostCard
                 key={p.id}
                 post={p}
@@ -305,6 +398,11 @@ function Devocional() {
               />
             ))
           )}
+
+          {/* Sentinel & loader */}
+          <div ref={sentinelRef} className="flex items-center justify-center py-6 text-sm text-muted-foreground">
+            {loadingPosts ? <Loader2 className="h-5 w-5 animate-spin" /> : !hasMore && sortedPosts.length > 0 ? "Você chegou ao fim 🌿" : null}
+          </div>
         </section>
       </main>
 
@@ -322,6 +420,19 @@ function Devocional() {
         </DialogContent>
       </Dialog>
     </div>
+  );
+}
+
+function FilterChip({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`rounded-full border px-3.5 py-1.5 text-sm font-medium transition-all ${
+        active ? "border-[var(--rose)] bg-[var(--rose)] text-white shadow-glow" : "border-border bg-card/60 text-foreground/70 hover:bg-muted"
+      }`}
+    >
+      {children}
+    </button>
   );
 }
 
@@ -381,7 +492,6 @@ function PostCard(props: PostCardProps) {
     new Set(reactions.filter((r) => r.user_id === myUserId).map((r) => r.reaction)),
     [reactions, myUserId]);
 
-  // Build threaded list: top-level pinned first, then by date asc
   const topLevel = comments.filter((c) => !c.parent_id).sort((a, b) => {
     if (!!b.pinned_at !== !!a.pinned_at) return b.pinned_at ? 1 : -1;
     return a.created_at.localeCompare(b.created_at);
@@ -413,6 +523,7 @@ function PostCard(props: PostCardProps) {
       <div className="mt-5 flex flex-wrap items-center gap-2">
         {REACTIONS.map((r) => {
           const active = myReactions.has(r.key);
+          const Icon = r.Icon;
           return (
             <button
               key={r.key}
@@ -421,8 +532,9 @@ function PostCard(props: PostCardProps) {
                 active ? "border-[var(--rose)] bg-[var(--rose)]/10 text-foreground" : "border-border bg-card/50 hover:bg-muted"
               }`}
               title={r.label}
+              aria-label={r.label}
             >
-              <span className={`text-base ${active ? "animate-scale-in" : ""}`}>{r.emoji}</span>
+              <Icon className={`h-4 w-4 ${active ? r.activeClass : "text-muted-foreground"}`} />
               <span className="text-xs font-semibold tabular-nums">{counts[r.key]}</span>
             </button>
           );
@@ -435,7 +547,7 @@ function PostCard(props: PostCardProps) {
           className={`ml-auto rounded-full ${prayedToday ? "bg-muted text-muted-foreground" : "bg-gradient-love text-white shadow-glow"}`}
         >
           <Hand className="mr-1.5 h-4 w-4" />
-          {prayedToday ? "Orei hoje 🙏" : "Orei hoje"}
+          {prayedToday ? "Orei hoje" : "Orei hoje"}
         </Button>
       </div>
 
@@ -462,15 +574,10 @@ function PostCard(props: PostCardProps) {
 
           <div className="mt-5 space-y-4">
             {topLevel.length === 0 && (
-              <p className="text-center text-sm text-muted-foreground">Seja o primeiro a comentar 💬</p>
+              <p className="text-center text-sm text-muted-foreground">Seja o primeiro a comentar</p>
             )}
             {topLevel.map((c) => (
-              <CommentNode
-                key={c.id}
-                c={c}
-                replies={replies(c.id)}
-                {...props}
-              />
+              <CommentNode key={c.id} c={c} replies={replies(c.id)} {...props} />
             ))}
           </div>
         </div>
@@ -562,8 +669,8 @@ function CommentNode({
 
           {!c.deleted_at && !isEditing && (
             <div className="mt-1 flex items-center gap-3 px-2 text-xs text-muted-foreground">
-              <button onClick={() => onToggleLike(c)} className={`inline-flex items-center gap-1 hover:text-foreground ${myLikes.has(c.id) ? "text-[var(--rose)]" : ""}`}>
-                <Heart className={`h-3.5 w-3.5 ${myLikes.has(c.id) ? "fill-[var(--rose)]" : ""}`} />
+              <button onClick={() => onToggleLike(c)} className={`inline-flex items-center gap-1 transition-colors hover:text-foreground ${myLikes.has(c.id) ? "text-rose-500" : ""}`}>
+                <Heart className={`h-3.5 w-3.5 ${myLikes.has(c.id) ? "fill-rose-500" : ""}`} />
                 {likes[c.id] ?? 0}
               </button>
               <button onClick={() => onSetReply(c)} className="inline-flex items-center gap-1 hover:text-foreground">
@@ -655,8 +762,8 @@ function ReplyNode({
         </div>
         {!c.deleted_at && !isEditing && (
           <div className="mt-1 flex items-center gap-3 px-2 text-xs text-muted-foreground">
-            <button onClick={() => onToggleLike(c)} className={`inline-flex items-center gap-1 hover:text-foreground ${myLikes.has(c.id) ? "text-[var(--rose)]" : ""}`}>
-              <Heart className={`h-3.5 w-3.5 ${myLikes.has(c.id) ? "fill-[var(--rose)]" : ""}`} /> {likes[c.id] ?? 0}
+            <button onClick={() => onToggleLike(c)} className={`inline-flex items-center gap-1 hover:text-foreground ${myLikes.has(c.id) ? "text-rose-500" : ""}`}>
+              <Heart className={`h-3.5 w-3.5 ${myLikes.has(c.id) ? "fill-rose-500" : ""}`} /> {likes[c.id] ?? 0}
             </button>
             {isMine && (
               <>
