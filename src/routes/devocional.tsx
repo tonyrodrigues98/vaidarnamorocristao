@@ -362,9 +362,11 @@ function Devocional() {
           </div>
           <Link
             to="/oracoes"
-            className="hidden sm:inline-flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-medium border border-border hover:bg-accent transition"
+            className="inline-flex shrink-0 items-center gap-1.5 px-3 py-2 rounded-full text-xs font-medium border border-border hover:bg-accent transition"
           >
-            <HandHeart className="h-4 w-4" /> Pedidos de oração
+            <HandHeart className="h-4 w-4" />
+            <span className="hidden sm:inline">Pedidos de oração</span>
+            <span className="sm:hidden">Orações</span>
           </Link>
         </header>
 

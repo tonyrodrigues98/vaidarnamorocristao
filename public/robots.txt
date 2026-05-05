@@ -6,6 +6,7 @@ Allow: /depoimentos
 Allow: /blog
 Allow: /termos
 Allow: /manual
+Allow: /oracoes
 
 Disallow: /dashboard
 Disallow: /perfil

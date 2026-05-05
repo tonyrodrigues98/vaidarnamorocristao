@@ -481,6 +481,45 @@ export type Database = {
           },
         ]
       }
+      prayer_request_reports: {
+        Row: {
+          admin_notes: string | null
+          created_at: string
+          id: string
+          reason: string
+          reporter_id: string
+          request_id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string
+          id?: string
+          reason: string
+          reporter_id: string
+          request_id: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string
+          id?: string
+          reason?: string
+          reporter_id?: string
+          request_id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       prayer_requests: {
         Row: {
           category: Database["public"]["Enums"]["prayer_category"]
@@ -488,6 +527,7 @@ export type Database = {
           created_at: string
           id: string
           is_anonymous: boolean
+          moderation_status: Database["public"]["Enums"]["prayer_moderation_status"]
           resolved: boolean
           resolved_at: string | null
           title: string
@@ -500,6 +540,7 @@ export type Database = {
           created_at?: string
           id?: string
           is_anonymous?: boolean
+          moderation_status?: Database["public"]["Enums"]["prayer_moderation_status"]
           resolved?: boolean
           resolved_at?: string | null
           title: string
@@ -512,6 +553,7 @@ export type Database = {
           created_at?: string
           id?: string
           is_anonymous?: boolean
+          moderation_status?: Database["public"]["Enums"]["prayer_moderation_status"]
           resolved?: boolean
           resolved_at?: string | null
           title?: string
@@ -1417,6 +1459,7 @@ export type Database = {
         | "financial"
         | "spiritual"
         | "other"
+      prayer_moderation_status: "visible" | "hidden" | "removed"
       profile_status: "pending" | "approved" | "rejected" | "banned"
       report_status: "open" | "reviewed" | "dismissed"
       sex_type: "masculino" | "feminino"
@@ -1578,6 +1621,7 @@ export const Constants = {
         "spiritual",
         "other",
       ],
+      prayer_moderation_status: ["visible", "hidden", "removed"],
       profile_status: ["pending", "approved", "rejected", "banned"],
       report_status: ["open", "reviewed", "dismissed"],
       sex_type: ["masculino", "feminino"],
