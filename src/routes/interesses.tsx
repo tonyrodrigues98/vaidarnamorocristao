@@ -1,3 +1,4 @@
+import { friendlyError } from "@/lib/errors";
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { RequireApproved } from "@/components/RequireApproved";
 import { useEffect, useState } from "react";
@@ -68,7 +69,7 @@ function Page() {
     setBusy(senderId);
     const { error } = await supabase.from("interests").insert({ sender_id: user.id, receiver_id: senderId });
     setBusy(null);
-    if (error && !error.message.includes("duplicate")) { toast.error(error.message); return; }
+    if (error && !error.message.includes("duplicate")) { toast.error(friendlyError(error)); return; }
     toast.success("Match! 💗 Vocês já podem conversar.");
     load();
   }

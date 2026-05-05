@@ -1,3 +1,4 @@
+import { friendlyError } from "@/lib/errors";
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { RequireApproved } from "@/components/RequireApproved";
 import { useEffect, useRef, useState } from "react";
@@ -120,7 +121,7 @@ function Chat() {
       reply_to_id: replyTo?.id ?? null,
     });
     setSending(false);
-    if (error) { toast.error(error.message); return; }
+    if (error) { toast.error(friendlyError(error)); return; }
     setInput("");
     setReplyTo(null);
   }

@@ -1,3 +1,4 @@
+import { friendlyError } from "@/lib/errors";
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { RequireApproved } from "@/components/RequireApproved";
 import { useEffect, useRef, useState, type FormEvent } from "react";
@@ -168,7 +169,7 @@ function Comunidade() {
         .select("*")
         .order("created_at", { ascending: false })
         .limit(100);
-      if (error) { toast.error(error.message); return; }
+      if (error) { toast.error(friendlyError(error)); return; }
       if (ignore) return;
       const list = ((data ?? []) as GMsg[]).slice().reverse();
       setMessages(list);
@@ -238,7 +239,7 @@ function Comunidade() {
       reply_to_id: replyTo?.id ?? null,
     });
     setSending(false);
-    if (error) { toast.error(error.message); return; }
+    if (error) { toast.error(friendlyError(error)); return; }
     setText("");
     setReplyTo(null);
     lastSentRef.current = Date.now();
@@ -247,7 +248,7 @@ function Comunidade() {
 
   async function remove(id: string) {
     const { error } = await supabase.from("global_messages").delete().eq("id", id);
-    if (error) toast.error(error.message);
+    if (error) toast.error(friendlyError(error));
   }
 
   function openFlagDialog(m: GMsg) {
@@ -267,14 +268,14 @@ function Comunidade() {
         .update({ reason })
         .eq("id", flagDialog.existingId);
       setFlagBusy(false);
-      if (error) { toast.error(error.message); return; }
+      if (error) { toast.error(friendlyError(error)); return; }
       toast.success("Sinalização atualizada");
     } else {
       const { error } = await supabase
         .from("message_flags")
         .insert({ message_id: flagDialog.msg.id, flagged_by: user.id, reason });
       setFlagBusy(false);
-      if (error) { toast.error(error.message); return; }
+      if (error) { toast.error(friendlyError(error)); return; }
       toast.success("Mensagem sinalizada");
     }
     setFlagDialog(null);
