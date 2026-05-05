@@ -11,19 +11,23 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as VerificacaoRouteImport } from './routes/verificacao'
 import { Route as TermosRouteImport } from './routes/termos'
+import { Route as SobreRouteImport } from './routes/sobre'
 import { Route as PerfilRouteImport } from './routes/perfil'
 import { Route as MatchesRouteImport } from './routes/matches'
 import { Route as ManualRouteImport } from './routes/manual'
 import { Route as InteressesRouteImport } from './routes/interesses'
 import { Route as DevocionalRouteImport } from './routes/devocional'
+import { Route as DepoimentosRouteImport } from './routes/depoimentos'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ComunidadeRouteImport } from './routes/comunidade'
+import { Route as ComoFuncionaRouteImport } from './routes/como-funciona'
 import { Route as BloqueadosRouteImport } from './routes/bloqueados'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SuporteIndexRouteImport } from './routes/suporte/index'
 import { Route as PretendentesIndexRouteImport } from './routes/pretendentes/index'
 import { Route as NoticiasIndexRouteImport } from './routes/noticias.index'
 import { Route as ConversasIndexRouteImport } from './routes/conversas/index'
+import { Route as BlogIndexRouteImport } from './routes/blog.index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as SuporteAjudaRouteImport } from './routes/suporte/ajuda'
 import { Route as SuporteIdRouteImport } from './routes/suporte/$id'
@@ -31,6 +35,7 @@ import { Route as PretendentesIdRouteImport } from './routes/pretendentes/$id'
 import { Route as OnboardingEtapa2RouteImport } from './routes/onboarding/etapa-2'
 import { Route as OnboardingEtapa1RouteImport } from './routes/onboarding/etapa-1'
 import { Route as ConversasMatchIdRouteImport } from './routes/conversas/$matchId'
+import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as AuthSignupRouteImport } from './routes/auth/signup'
 import { Route as AuthResetPasswordRouteImport } from './routes/auth/reset-password'
 import { Route as AuthLoginRouteImport } from './routes/auth/login'
@@ -45,6 +50,11 @@ const VerificacaoRoute = VerificacaoRouteImport.update({
 const TermosRoute = TermosRouteImport.update({
   id: '/termos',
   path: '/termos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SobreRoute = SobreRouteImport.update({
+  id: '/sobre',
+  path: '/sobre',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PerfilRoute = PerfilRouteImport.update({
@@ -72,6 +82,11 @@ const DevocionalRoute = DevocionalRouteImport.update({
   path: '/devocional',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DepoimentosRoute = DepoimentosRouteImport.update({
+  id: '/depoimentos',
+  path: '/depoimentos',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -80,6 +95,11 @@ const DashboardRoute = DashboardRouteImport.update({
 const ComunidadeRoute = ComunidadeRouteImport.update({
   id: '/comunidade',
   path: '/comunidade',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ComoFuncionaRoute = ComoFuncionaRouteImport.update({
+  id: '/como-funciona',
+  path: '/como-funciona',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BloqueadosRoute = BloqueadosRouteImport.update({
@@ -110,6 +130,11 @@ const NoticiasIndexRoute = NoticiasIndexRouteImport.update({
 const ConversasIndexRoute = ConversasIndexRouteImport.update({
   id: '/conversas/',
   path: '/conversas/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BlogIndexRoute = BlogIndexRouteImport.update({
+  id: '/blog/',
+  path: '/blog/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
@@ -147,6 +172,11 @@ const ConversasMatchIdRoute = ConversasMatchIdRouteImport.update({
   path: '/conversas/$matchId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BlogSlugRoute = BlogSlugRouteImport.update({
+  id: '/blog/$slug',
+  path: '/blog/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthSignupRoute = AuthSignupRouteImport.update({
   id: '/auth/signup',
   path: '/auth/signup',
@@ -176,13 +206,16 @@ const AdminVerificacoesRoute = AdminVerificacoesRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/bloqueados': typeof BloqueadosRoute
+  '/como-funciona': typeof ComoFuncionaRoute
   '/comunidade': typeof ComunidadeRoute
   '/dashboard': typeof DashboardRoute
+  '/depoimentos': typeof DepoimentosRoute
   '/devocional': typeof DevocionalRoute
   '/interesses': typeof InteressesRoute
   '/manual': typeof ManualRoute
   '/matches': typeof MatchesRoute
   '/perfil': typeof PerfilRoute
+  '/sobre': typeof SobreRoute
   '/termos': typeof TermosRoute
   '/verificacao': typeof VerificacaoRoute
   '/admin/verificacoes': typeof AdminVerificacoesRoute
@@ -190,6 +223,7 @@ export interface FileRoutesByFullPath {
   '/auth/login': typeof AuthLoginRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/auth/signup': typeof AuthSignupRoute
+  '/blog/$slug': typeof BlogSlugRoute
   '/conversas/$matchId': typeof ConversasMatchIdRoute
   '/onboarding/etapa-1': typeof OnboardingEtapa1Route
   '/onboarding/etapa-2': typeof OnboardingEtapa2Route
@@ -197,6 +231,7 @@ export interface FileRoutesByFullPath {
   '/suporte/$id': typeof SuporteIdRoute
   '/suporte/ajuda': typeof SuporteAjudaRoute
   '/admin/': typeof AdminIndexRoute
+  '/blog/': typeof BlogIndexRoute
   '/conversas/': typeof ConversasIndexRoute
   '/noticias/': typeof NoticiasIndexRoute
   '/pretendentes/': typeof PretendentesIndexRoute
@@ -205,13 +240,16 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/bloqueados': typeof BloqueadosRoute
+  '/como-funciona': typeof ComoFuncionaRoute
   '/comunidade': typeof ComunidadeRoute
   '/dashboard': typeof DashboardRoute
+  '/depoimentos': typeof DepoimentosRoute
   '/devocional': typeof DevocionalRoute
   '/interesses': typeof InteressesRoute
   '/manual': typeof ManualRoute
   '/matches': typeof MatchesRoute
   '/perfil': typeof PerfilRoute
+  '/sobre': typeof SobreRoute
   '/termos': typeof TermosRoute
   '/verificacao': typeof VerificacaoRoute
   '/admin/verificacoes': typeof AdminVerificacoesRoute
@@ -219,6 +257,7 @@ export interface FileRoutesByTo {
   '/auth/login': typeof AuthLoginRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/auth/signup': typeof AuthSignupRoute
+  '/blog/$slug': typeof BlogSlugRoute
   '/conversas/$matchId': typeof ConversasMatchIdRoute
   '/onboarding/etapa-1': typeof OnboardingEtapa1Route
   '/onboarding/etapa-2': typeof OnboardingEtapa2Route
@@ -226,6 +265,7 @@ export interface FileRoutesByTo {
   '/suporte/$id': typeof SuporteIdRoute
   '/suporte/ajuda': typeof SuporteAjudaRoute
   '/admin': typeof AdminIndexRoute
+  '/blog': typeof BlogIndexRoute
   '/conversas': typeof ConversasIndexRoute
   '/noticias': typeof NoticiasIndexRoute
   '/pretendentes': typeof PretendentesIndexRoute
@@ -235,13 +275,16 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/bloqueados': typeof BloqueadosRoute
+  '/como-funciona': typeof ComoFuncionaRoute
   '/comunidade': typeof ComunidadeRoute
   '/dashboard': typeof DashboardRoute
+  '/depoimentos': typeof DepoimentosRoute
   '/devocional': typeof DevocionalRoute
   '/interesses': typeof InteressesRoute
   '/manual': typeof ManualRoute
   '/matches': typeof MatchesRoute
   '/perfil': typeof PerfilRoute
+  '/sobre': typeof SobreRoute
   '/termos': typeof TermosRoute
   '/verificacao': typeof VerificacaoRoute
   '/admin/verificacoes': typeof AdminVerificacoesRoute
@@ -249,6 +292,7 @@ export interface FileRoutesById {
   '/auth/login': typeof AuthLoginRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/auth/signup': typeof AuthSignupRoute
+  '/blog/$slug': typeof BlogSlugRoute
   '/conversas/$matchId': typeof ConversasMatchIdRoute
   '/onboarding/etapa-1': typeof OnboardingEtapa1Route
   '/onboarding/etapa-2': typeof OnboardingEtapa2Route
@@ -256,6 +300,7 @@ export interface FileRoutesById {
   '/suporte/$id': typeof SuporteIdRoute
   '/suporte/ajuda': typeof SuporteAjudaRoute
   '/admin/': typeof AdminIndexRoute
+  '/blog/': typeof BlogIndexRoute
   '/conversas/': typeof ConversasIndexRoute
   '/noticias/': typeof NoticiasIndexRoute
   '/pretendentes/': typeof PretendentesIndexRoute
@@ -266,13 +311,16 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/bloqueados'
+    | '/como-funciona'
     | '/comunidade'
     | '/dashboard'
+    | '/depoimentos'
     | '/devocional'
     | '/interesses'
     | '/manual'
     | '/matches'
     | '/perfil'
+    | '/sobre'
     | '/termos'
     | '/verificacao'
     | '/admin/verificacoes'
@@ -280,6 +328,7 @@ export interface FileRouteTypes {
     | '/auth/login'
     | '/auth/reset-password'
     | '/auth/signup'
+    | '/blog/$slug'
     | '/conversas/$matchId'
     | '/onboarding/etapa-1'
     | '/onboarding/etapa-2'
@@ -287,6 +336,7 @@ export interface FileRouteTypes {
     | '/suporte/$id'
     | '/suporte/ajuda'
     | '/admin/'
+    | '/blog/'
     | '/conversas/'
     | '/noticias/'
     | '/pretendentes/'
@@ -295,13 +345,16 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/bloqueados'
+    | '/como-funciona'
     | '/comunidade'
     | '/dashboard'
+    | '/depoimentos'
     | '/devocional'
     | '/interesses'
     | '/manual'
     | '/matches'
     | '/perfil'
+    | '/sobre'
     | '/termos'
     | '/verificacao'
     | '/admin/verificacoes'
@@ -309,6 +362,7 @@ export interface FileRouteTypes {
     | '/auth/login'
     | '/auth/reset-password'
     | '/auth/signup'
+    | '/blog/$slug'
     | '/conversas/$matchId'
     | '/onboarding/etapa-1'
     | '/onboarding/etapa-2'
@@ -316,6 +370,7 @@ export interface FileRouteTypes {
     | '/suporte/$id'
     | '/suporte/ajuda'
     | '/admin'
+    | '/blog'
     | '/conversas'
     | '/noticias'
     | '/pretendentes'
@@ -324,13 +379,16 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/bloqueados'
+    | '/como-funciona'
     | '/comunidade'
     | '/dashboard'
+    | '/depoimentos'
     | '/devocional'
     | '/interesses'
     | '/manual'
     | '/matches'
     | '/perfil'
+    | '/sobre'
     | '/termos'
     | '/verificacao'
     | '/admin/verificacoes'
@@ -338,6 +396,7 @@ export interface FileRouteTypes {
     | '/auth/login'
     | '/auth/reset-password'
     | '/auth/signup'
+    | '/blog/$slug'
     | '/conversas/$matchId'
     | '/onboarding/etapa-1'
     | '/onboarding/etapa-2'
@@ -345,6 +404,7 @@ export interface FileRouteTypes {
     | '/suporte/$id'
     | '/suporte/ajuda'
     | '/admin/'
+    | '/blog/'
     | '/conversas/'
     | '/noticias/'
     | '/pretendentes/'
@@ -354,13 +414,16 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   BloqueadosRoute: typeof BloqueadosRoute
+  ComoFuncionaRoute: typeof ComoFuncionaRoute
   ComunidadeRoute: typeof ComunidadeRoute
   DashboardRoute: typeof DashboardRoute
+  DepoimentosRoute: typeof DepoimentosRoute
   DevocionalRoute: typeof DevocionalRoute
   InteressesRoute: typeof InteressesRoute
   ManualRoute: typeof ManualRoute
   MatchesRoute: typeof MatchesRoute
   PerfilRoute: typeof PerfilRoute
+  SobreRoute: typeof SobreRoute
   TermosRoute: typeof TermosRoute
   VerificacaoRoute: typeof VerificacaoRoute
   AdminVerificacoesRoute: typeof AdminVerificacoesRoute
@@ -368,6 +431,7 @@ export interface RootRouteChildren {
   AuthLoginRoute: typeof AuthLoginRoute
   AuthResetPasswordRoute: typeof AuthResetPasswordRoute
   AuthSignupRoute: typeof AuthSignupRoute
+  BlogSlugRoute: typeof BlogSlugRoute
   ConversasMatchIdRoute: typeof ConversasMatchIdRoute
   OnboardingEtapa1Route: typeof OnboardingEtapa1Route
   OnboardingEtapa2Route: typeof OnboardingEtapa2Route
@@ -375,6 +439,7 @@ export interface RootRouteChildren {
   SuporteIdRoute: typeof SuporteIdRoute
   SuporteAjudaRoute: typeof SuporteAjudaRoute
   AdminIndexRoute: typeof AdminIndexRoute
+  BlogIndexRoute: typeof BlogIndexRoute
   ConversasIndexRoute: typeof ConversasIndexRoute
   NoticiasIndexRoute: typeof NoticiasIndexRoute
   PretendentesIndexRoute: typeof PretendentesIndexRoute
@@ -395,6 +460,13 @@ declare module '@tanstack/react-router' {
       path: '/termos'
       fullPath: '/termos'
       preLoaderRoute: typeof TermosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sobre': {
+      id: '/sobre'
+      path: '/sobre'
+      fullPath: '/sobre'
+      preLoaderRoute: typeof SobreRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/perfil': {
@@ -432,6 +504,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DevocionalRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/depoimentos': {
+      id: '/depoimentos'
+      path: '/depoimentos'
+      fullPath: '/depoimentos'
+      preLoaderRoute: typeof DepoimentosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dashboard': {
       id: '/dashboard'
       path: '/dashboard'
@@ -444,6 +523,13 @@ declare module '@tanstack/react-router' {
       path: '/comunidade'
       fullPath: '/comunidade'
       preLoaderRoute: typeof ComunidadeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/como-funciona': {
+      id: '/como-funciona'
+      path: '/como-funciona'
+      fullPath: '/como-funciona'
+      preLoaderRoute: typeof ComoFuncionaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/bloqueados': {
@@ -486,6 +572,13 @@ declare module '@tanstack/react-router' {
       path: '/conversas'
       fullPath: '/conversas/'
       preLoaderRoute: typeof ConversasIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/blog/': {
+      id: '/blog/'
+      path: '/blog'
+      fullPath: '/blog/'
+      preLoaderRoute: typeof BlogIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/': {
@@ -537,6 +630,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ConversasMatchIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/blog/$slug': {
+      id: '/blog/$slug'
+      path: '/blog/$slug'
+      fullPath: '/blog/$slug'
+      preLoaderRoute: typeof BlogSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth/signup': {
       id: '/auth/signup'
       path: '/auth/signup'
@@ -578,13 +678,16 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   BloqueadosRoute: BloqueadosRoute,
+  ComoFuncionaRoute: ComoFuncionaRoute,
   ComunidadeRoute: ComunidadeRoute,
   DashboardRoute: DashboardRoute,
+  DepoimentosRoute: DepoimentosRoute,
   DevocionalRoute: DevocionalRoute,
   InteressesRoute: InteressesRoute,
   ManualRoute: ManualRoute,
   MatchesRoute: MatchesRoute,
   PerfilRoute: PerfilRoute,
+  SobreRoute: SobreRoute,
   TermosRoute: TermosRoute,
   VerificacaoRoute: VerificacaoRoute,
   AdminVerificacoesRoute: AdminVerificacoesRoute,
@@ -592,6 +695,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthLoginRoute: AuthLoginRoute,
   AuthResetPasswordRoute: AuthResetPasswordRoute,
   AuthSignupRoute: AuthSignupRoute,
+  BlogSlugRoute: BlogSlugRoute,
   ConversasMatchIdRoute: ConversasMatchIdRoute,
   OnboardingEtapa1Route: OnboardingEtapa1Route,
   OnboardingEtapa2Route: OnboardingEtapa2Route,
@@ -599,6 +703,7 @@ const rootRouteChildren: RootRouteChildren = {
   SuporteIdRoute: SuporteIdRoute,
   SuporteAjudaRoute: SuporteAjudaRoute,
   AdminIndexRoute: AdminIndexRoute,
+  BlogIndexRoute: BlogIndexRoute,
   ConversasIndexRoute: ConversasIndexRoute,
   NoticiasIndexRoute: NoticiasIndexRoute,
   PretendentesIndexRoute: PretendentesIndexRoute,
@@ -607,12 +712,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}
