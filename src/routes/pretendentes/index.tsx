@@ -355,12 +355,14 @@ function List() {
                       </div>
                     )}
                     {showScore ? (
-                      <span className="absolute left-2 top-2 inline-flex items-center gap-1 rounded-full bg-[var(--rose)] px-2 py-1 text-[10px] font-bold text-white shadow-md">
-                        <Flame className="h-3 w-3" /> {score}% afinidade
+                      <span className="absolute left-2 top-2 z-10 inline-flex max-w-[calc(100%-3rem)] items-center gap-1 rounded-full bg-[var(--rose)] px-2.5 py-1 text-[11px] font-bold text-white shadow-md sm:text-[10px]">
+                        <Flame className="h-3.5 w-3.5 shrink-0 sm:h-3 sm:w-3" />
+                        <span className="whitespace-nowrap">{score}% afinidade</span>
                       </span>
                     ) : isSuggestion(p) && (
-                      <span className="absolute left-2 top-2 inline-flex items-center gap-1 rounded-full bg-[var(--rose)] px-2 py-1 text-[10px] font-semibold text-white shadow-md">
-                        <Sparkles className="h-3 w-3" /> Sugestão pra você
+                      <span className="absolute left-2 top-2 z-10 inline-flex max-w-[calc(100%-3rem)] items-center gap-1 rounded-full bg-[var(--rose)] px-2.5 py-1 text-[11px] font-semibold text-white shadow-md sm:text-[10px]">
+                        <Sparkles className="h-3.5 w-3.5 shrink-0 sm:h-3 sm:w-3" />
+                        <span className="whitespace-nowrap">Sugestão pra você</span>
                       </span>
                     )}
                     <span className="absolute right-2 top-2"><OnlineDot userId={p.id} size="md" /></span>
@@ -398,15 +400,15 @@ function AffinityChips({ chips }: { chips: AffinityChip[] }) {
       {visible.map((c) => (
         <span
           key={c.key}
-          className="inline-flex items-center gap-1 rounded-full border border-[var(--rose)]/30 bg-[var(--rose)]/10 px-2 py-0.5 text-[10px] font-medium text-[var(--rose)]"
+          className="inline-flex max-w-full items-center gap-1 rounded-full border border-[var(--rose)]/30 bg-[var(--rose)]/10 px-2 py-0.5 text-[11px] font-medium text-[var(--rose)] sm:text-[10px]"
           title="Vocês têm em comum"
         >
-          <Sparkles className="h-2.5 w-2.5" />
-          {c.label}
+          <Sparkles className="h-2.5 w-2.5 shrink-0" />
+          <span className="truncate">{c.label}</span>
         </span>
       ))}
       {extra > 0 && (
-        <span className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
+        <span className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground sm:text-[10px]">
           +{extra}
         </span>
       )}
