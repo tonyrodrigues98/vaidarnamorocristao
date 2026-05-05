@@ -1551,6 +1551,7 @@ function FlagsPanel({ isSuperAdmin, currentUserId }: { isSuperAdmin: boolean; cu
 }
 
 function BadgeAdminControls({ userId, userName }: { userId: string; userName: string }) {
+  // (PrayerReportsPanel defined below)
   const [busy, setBusy] = useState(false);
 
   async function award() {
