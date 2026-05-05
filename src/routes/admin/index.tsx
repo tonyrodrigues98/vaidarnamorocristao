@@ -614,13 +614,15 @@ function Admin() {
 }
 
 function UsersPanel({
-  users, busy, onChangeRole, onToggleVerified, canVerify,
+  users, busy, onChangeRole, onToggleVerified, canVerify, onToggleSupportAgent, canManageSupportAgents,
 }: {
-  users: AdminUserRow[];
+  users: AdminUserRowWithSupport[];
   busy: string | null;
   onChangeRole: (userId: string, newRole: AppRole, currentRole: AppRole) => void;
   onToggleVerified: (userId: string, current: boolean) => void;
   canVerify: boolean;
+  onToggleSupportAgent: (userId: string, currentRole: AppRole, current: boolean) => void;
+  canManageSupportAgents: boolean;
 }) {
   if (users.length === 0) {
     return <div className="glass rounded-2xl p-10 text-center text-muted-foreground shadow-soft">Nenhum usuário.</div>;
@@ -638,6 +640,11 @@ function UsersPanel({
               <h3 className="font-semibold">{u.full_name}, {u.age}</h3>
               <RoleBadge role={u.primaryRole} />
               {u.verified && <VerifiedBadge size="sm" />}
+              {u.isSupportAgent && (u.primaryRole === "moderador" || u.primaryRole === "apresentador") && (
+                <span className="inline-flex items-center gap-1 rounded-full border border-sky-500/40 bg-sky-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-sky-500">
+                  <LifeBuoy className="h-3 w-3" /> Suporte
+                </span>
+              )}
               <UserBadges userId={u.id} size="xs" max={5} />
             </div>
             <p className="truncate text-xs text-muted-foreground">{u.sex} · {u.city}/{u.state} · {u.status}</p>
@@ -653,6 +660,17 @@ function UsersPanel({
                 title={u.verified ? "Remover verificação" : "Verificar perfil"}
               >
                 <BadgeCheck className="h-4 w-4" />
+              </Button>
+            )}
+            {canManageSupportAgents && (u.primaryRole === "moderador" || u.primaryRole === "apresentador") && (
+              <Button
+                size="sm"
+                variant={u.isSupportAgent ? "default" : "outline"}
+                disabled={busy === u.id}
+                onClick={() => onToggleSupportAgent(u.id, u.primaryRole, u.isSupportAgent)}
+                title={u.isSupportAgent ? "Revogar acesso ao suporte" : "Conceder acesso ao suporte"}
+              >
+                <LifeBuoy className="h-4 w-4" />
               </Button>
             )}
             <div className="flex-1 sm:w-52">
