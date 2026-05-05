@@ -1,4 +1,4 @@
-import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
+import { createFileRoute, Link, Navigate, useNavigate } from "@tanstack/react-router";
 import { RequireApproved } from "@/components/RequireApproved";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -7,48 +7,66 @@ import { Header } from "@/components/layout/Header";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { BR_STATES } from "@/lib/constants";
-import { SlidersHorizontal, X } from "lucide-react";
+import { SlidersHorizontal, X, Sparkles, Flame } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { RoleBadge } from "@/components/RoleBadge";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { ROLE_PRIORITY, type AppRole, type RoleColor } from "@/lib/roles";
 import { UserBadges } from "@/components/UserBadges";
 import { OnlineDot } from "@/components/OnlineDot";
-import { Sparkles } from "lucide-react";
 import { computeAffinity, type AffinityChip } from "@/lib/affinity";
-import type { AdvancedProfile } from "@/lib/profileAdvanced";
+import { LOVE_LANGUAGE, MINISTRY, type AdvancedProfile } from "@/lib/profileAdvanced";
+import { zodValidator, fallback } from "@tanstack/zod-adapter";
+import { z } from "zod";
 
 type Profile = {
   id: string; full_name: string; age: number; city: string; state: string;
   church: string; bio: string | null; photo_url: string | null; sex: "masculino" | "feminino";
   marital: "solteiro" | "divorciado"; verified?: boolean;
+  created_at?: string;
 };
 type StaffInfo = { role: AppRole; color: RoleColor | null };
 type MyPrefs = { state: string | null; ageMin: number | null; ageMax: number | null };
 
-export const Route = createFileRoute("/pretendentes/")({ component: () => (<RequireApproved><List /></RequireApproved>) });
+const searchSchema = z.object({
+  q: fallback(z.string(), "").default(""),
+  state: fallback(z.string(), "all").default("all"),
+  marital: fallback(z.enum(["all", "solteiro", "divorciado"]), "all").default("all"),
+  ageMin: fallback(z.number().int().min(18).max(110).optional(), undefined),
+  ageMax: fallback(z.number().int().min(18).max(110).optional(), undefined),
+  church: fallback(z.string(), "").default(""),
+  ministry: fallback(z.string(), "all").default("all"),
+  loveLang: fallback(z.string(), "all").default("all"),
+  verified: fallback(z.boolean(), false).default(false),
+  sort: fallback(z.enum(["affinity", "recent", "geographic"]), "affinity").default("affinity"),
+});
+
+export const Route = createFileRoute("/pretendentes/")({
+  component: () => (<RequireApproved><List /></RequireApproved>),
+  validateSearch: zodValidator(searchSchema),
+});
 
 function List() {
   const { user, loading } = useAuth();
+  const search = Route.useSearch();
+  const navigate = useNavigate({ from: "/pretendentes/" });
+
+  function update<K extends keyof typeof search>(key: K, value: (typeof search)[K] | undefined) {
+    navigate({ search: (prev) => ({ ...prev, [key]: value }) as any, replace: true });
+  }
+  function clearAll() {
+    navigate({ search: { sort: search.sort } as any, replace: true });
+  }
+
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loadingList, setLoadingList] = useState(true);
   const [myStatus, setMyStatus] = useState<string | null>(null);
   const [mySex, setMySex] = useState<"masculino" | "feminino" | null>(null);
   const [myPrefs, setMyPrefs] = useState<MyPrefs>({ state: null, ageMin: null, ageMax: null });
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const [f, setF] = useState({ search: "", state: "all", marital: "all", ageMin: "", ageMax: "", church: "" });
   const [staffMap, setStaffMap] = useState<Record<string, StaffInfo>>({});
   const [myAdvanced, setMyAdvanced] = useState<AdvancedProfile | null>(null);
   const [advancedMap, setAdvancedMap] = useState<Record<string, AdvancedProfile>>({});
-  const [onlyVerified, setOnlyVerified] = useState<boolean>(() => {
-    if (typeof window === "undefined") return false;
-    return window.localStorage.getItem("pretendentes:onlyVerified") === "1";
-  });
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    window.localStorage.setItem("pretendentes:onlyVerified", onlyVerified ? "1" : "0");
-  }, [onlyVerified]);
 
   useEffect(() => {
     if (!user) return;
@@ -70,7 +88,7 @@ function List() {
         const targetSex = me.sex === "masculino" ? "feminino" : "masculino";
         const [profsRes, blocksRes, blockedByRes, hiddenRes, rolesRes, myAdvRes] = await Promise.all([
           supabase.from("profiles")
-            .select("id, full_name, age, city, state, church, bio, photo_url, sex, marital, verified")
+            .select("id, full_name, age, city, state, church, bio, photo_url, sex, marital, verified, created_at")
             .eq("status", "approved").eq("sex", targetSex).neq("id", user.id)
             .order("created_at", { ascending: false }),
           supabase.from("blocks").select("blocked_id").eq("blocker_id", user.id),
@@ -97,7 +115,6 @@ function List() {
         const visible = ((profsRes.data ?? []) as Profile[]).filter((p) => !hidden.has(p.id));
         setProfiles(visible);
         setMyAdvanced(((myAdvRes as any)?.data ?? null) as AdvancedProfile | null);
-        // Batch-load advanced profiles for affinity chips (RLS already restricts to approved)
         const ids = visible.map((p) => p.id);
         if (ids.length > 0) {
           const { data: advs } = await supabase
@@ -113,22 +130,61 @@ function List() {
     })();
   }, [user]);
 
+  // Compute affinity per profile (memoized)
+  const affinityByProfile = useMemo(() => {
+    const out: Record<string, AffinityChip[]> = {};
+    for (const p of profiles) {
+      out[p.id] = computeAffinity(myAdvanced, advancedMap[p.id]);
+    }
+    return out;
+  }, [profiles, myAdvanced, advancedMap]);
+
+  // Total possible affinity points (rough): use max chip count seen, fallback 10
+  const maxScore = useMemo(() => {
+    let m = 0;
+    for (const id in affinityByProfile) m = Math.max(m, affinityByProfile[id].length);
+    return Math.max(m, 10);
+  }, [affinityByProfile]);
+
   const filtered = useMemo(() => {
     const list = profiles.filter((p) => {
-      if (f.search) {
-        const q = f.search.toLowerCase();
-        if (!p.full_name.toLowerCase().includes(q) && !p.city.toLowerCase().includes(q)) return false;
+      if (search.q) {
+        const qq = search.q.toLowerCase();
+        if (!p.full_name.toLowerCase().includes(qq) && !p.city.toLowerCase().includes(qq)) return false;
       }
-      if (f.state !== "all" && p.state !== f.state) return false;
-      if (f.marital !== "all" && p.marital !== f.marital) return false;
-      if (f.ageMin && p.age < Number(f.ageMin)) return false;
-      if (f.ageMax && p.age > Number(f.ageMax)) return false;
-      if (f.church && !p.church.toLowerCase().includes(f.church.toLowerCase())) return false;
-      if (onlyVerified && !p.verified) return false;
+      if (search.state !== "all" && p.state !== search.state) return false;
+      if (search.marital !== "all" && p.marital !== search.marital) return false;
+      if (search.ageMin != null && p.age < search.ageMin) return false;
+      if (search.ageMax != null && p.age > search.ageMax) return false;
+      if (search.church && !p.church.toLowerCase().includes(search.church.toLowerCase())) return false;
+      if (search.verified && !p.verified) return false;
+      if (search.ministry !== "all") {
+        const adv = advancedMap[p.id];
+        if (!adv || adv.ministry !== search.ministry) return false;
+      }
+      if (search.loveLang !== "all") {
+        const adv = advancedMap[p.id];
+        if (!adv || adv.love_language !== search.loveLang) return false;
+      }
       return true;
     });
-    // Geographic ordering: same state first
-    if (myPrefs.state) {
+
+    // Sort
+    if (search.sort === "affinity") {
+      list.sort((a, b) => {
+        const aff = (affinityByProfile[b.id]?.length ?? 0) - (affinityByProfile[a.id]?.length ?? 0);
+        if (aff !== 0) return aff;
+        // tiebreaker: same state first
+        if (myPrefs.state) {
+          const aSame = a.state === myPrefs.state ? 0 : 1;
+          const bSame = b.state === myPrefs.state ? 0 : 1;
+          if (aSame !== bSame) return aSame - bSame;
+        }
+        return 0;
+      });
+    } else if (search.sort === "recent") {
+      list.sort((a, b) => (b.created_at ?? "").localeCompare(a.created_at ?? ""));
+    } else if (search.sort === "geographic" && myPrefs.state) {
       list.sort((a, b) => {
         const aSame = a.state === myPrefs.state ? 0 : 1;
         const bSame = b.state === myPrefs.state ? 0 : 1;
@@ -136,7 +192,7 @@ function List() {
       });
     }
     return list;
-  }, [profiles, f, onlyVerified, myPrefs.state]);
+  }, [profiles, search, advancedMap, affinityByProfile, myPrefs.state]);
 
   function isSuggestion(p: Profile): boolean {
     if (!myPrefs.state) return false;
@@ -146,8 +202,10 @@ function List() {
     return true;
   }
 
-  const hasFilters = f.search || f.state !== "all" || f.marital !== "all" || f.ageMin || f.ageMax || f.church;
-  function clearFilters() { setF({ search: "", state: "all", marital: "all", ageMin: "", ageMax: "", church: "" }); }
+  const hasFilters =
+    !!search.q || search.state !== "all" || search.marital !== "all" ||
+    search.ageMin != null || search.ageMax != null || !!search.church ||
+    search.ministry !== "all" || search.loveLang !== "all" || search.verified;
 
   if (!loading && !user) return <Navigate to="/auth/login" />;
 
@@ -169,24 +227,43 @@ function List() {
         ) : (
           <>
           <div className="mt-6 flex flex-wrap items-center gap-2">
-            <Input placeholder="Buscar por nome ou cidade..." value={f.search} onChange={(e) => setF({ ...f, search: e.target.value })} className="max-w-sm" />
+            <Input
+              placeholder="Buscar por nome ou cidade..."
+              value={search.q}
+              onChange={(e) => update("q", e.target.value)}
+              className="max-w-sm"
+            />
             <Button variant="outline" size="sm" onClick={() => setFiltersOpen((o) => !o)}>
               <SlidersHorizontal className="mr-1 h-4 w-4" /> Filtros
             </Button>
             {hasFilters && (
-              <Button variant="ghost" size="sm" onClick={clearFilters}><X className="mr-1 h-4 w-4" /> Limpar</Button>
+              <Button variant="ghost" size="sm" onClick={clearAll}><X className="mr-1 h-4 w-4" /> Limpar</Button>
             )}
-            <Button variant={onlyVerified ? "default" : "outline"} size="sm" onClick={() => setOnlyVerified((v) => !v)}>
+            <Button
+              variant={search.verified ? "default" : "outline"}
+              size="sm"
+              onClick={() => update("verified", !search.verified)}
+            >
               ✔ Verificados
             </Button>
-            <span className="ml-auto text-sm text-muted-foreground">{filtered.length} {filtered.length === 1 ? "perfil" : "perfis"}</span>
+            <div className="ml-auto flex items-center gap-2">
+              <Select value={search.sort} onValueChange={(v) => update("sort", v as any)}>
+                <SelectTrigger className="h-9 w-[180px]"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="affinity">🔥 Afinidade</SelectItem>
+                  <SelectItem value="recent">Mais recentes</SelectItem>
+                  <SelectItem value="geographic">Mais próximos</SelectItem>
+                </SelectContent>
+              </Select>
+              <span className="text-sm text-muted-foreground">{filtered.length}</span>
+            </div>
           </div>
 
           {filtersOpen && (
-            <div className="glass mt-3 grid gap-3 rounded-2xl p-4 shadow-soft sm:grid-cols-2 md:grid-cols-5">
+            <div className="glass mt-3 grid gap-3 rounded-2xl p-4 shadow-soft sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
               <div>
                 <label className="text-xs text-muted-foreground">Estado</label>
-                <Select value={f.state} onValueChange={(v) => setF({ ...f, state: v })}>
+                <Select value={search.state} onValueChange={(v) => update("state", v)}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Todos</SelectItem>
@@ -196,7 +273,7 @@ function List() {
               </div>
               <div>
                 <label className="text-xs text-muted-foreground">Estado civil</label>
-                <Select value={f.marital} onValueChange={(v) => setF({ ...f, marital: v })}>
+                <Select value={search.marital} onValueChange={(v) => update("marital", v as any)}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Todos</SelectItem>
@@ -207,15 +284,43 @@ function List() {
               </div>
               <div>
                 <label className="text-xs text-muted-foreground">Idade mín.</label>
-                <Input type="number" min={18} max={110} value={f.ageMin} onChange={(e) => setF({ ...f, ageMin: e.target.value })} />
+                <Input
+                  type="number" min={18} max={110}
+                  value={search.ageMin ?? ""}
+                  onChange={(e) => update("ageMin", e.target.value ? Number(e.target.value) : undefined)}
+                />
               </div>
               <div>
                 <label className="text-xs text-muted-foreground">Idade máx.</label>
-                <Input type="number" min={18} max={110} value={f.ageMax} onChange={(e) => setF({ ...f, ageMax: e.target.value })} />
+                <Input
+                  type="number" min={18} max={110}
+                  value={search.ageMax ?? ""}
+                  onChange={(e) => update("ageMax", e.target.value ? Number(e.target.value) : undefined)}
+                />
               </div>
               <div>
                 <label className="text-xs text-muted-foreground">Igreja</label>
-                <Input value={f.church} onChange={(e) => setF({ ...f, church: e.target.value })} placeholder="Ex: Batista" />
+                <Input value={search.church} onChange={(e) => update("church", e.target.value)} placeholder="Ex: Batista" />
+              </div>
+              <div>
+                <label className="text-xs text-muted-foreground">Ministério</label>
+                <Select value={search.ministry} onValueChange={(v) => update("ministry", v)}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos</SelectItem>
+                    {MINISTRY.map((m) => <SelectItem key={m.v} value={m.v}>{m.l}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-xs text-muted-foreground">Linguagem do amor</label>
+                <Select value={search.loveLang} onValueChange={(v) => update("loveLang", v)}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todas</SelectItem>
+                    {LOVE_LANGUAGE.map((m) => <SelectItem key={m.v} value={m.v}>{m.l}</SelectItem>)}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
           )}
@@ -229,45 +334,54 @@ function List() {
         ) : filtered.length === 0 ? (
           <div className="glass mt-8 rounded-2xl p-12 text-center shadow-soft">
             <p className="text-xl">{hasFilters ? "Nenhum perfil corresponde aos filtros." : "Ainda não há pretendentes para mostrar."}</p>
-            {hasFilters && <Button variant="outline" className="mt-4" onClick={clearFilters}>Limpar filtros</Button>}
+            {hasFilters && <Button variant="outline" className="mt-4" onClick={clearAll}>Limpar filtros</Button>}
           </div>
         ) : (
           <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {filtered.map((p, i) => (
-              <Link key={p.id} to="/pretendentes/$id" params={{ id: p.id }}
-                className="glass group animate-fade-up overflow-hidden rounded-2xl shadow-soft transition hover:shadow-elegant"
-                style={{ animationDelay: `${i * 50}ms` }}>
-                <div className="relative aspect-[4/5] overflow-hidden bg-muted">
-                  {p.photo_url ? (
-                    <img src={p.photo_url} alt={p.full_name} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center bg-gradient-love">
-                      <span className="text-5xl text-white">{p.full_name.charAt(0)}</span>
-                    </div>
-                  )}
-                  {isSuggestion(p) && (
-                    <span className="absolute left-2 top-2 inline-flex items-center gap-1 rounded-full bg-[var(--rose)] px-2 py-1 text-[10px] font-semibold text-white shadow-md">
-                      <Sparkles className="h-3 w-3" /> Sugestão pra você
-                    </span>
-                  )}
-                  <span className="absolute right-2 top-2"><OnlineDot userId={p.id} size="md" /></span>
-                </div>
-                <div className="p-5">
-                  <h3 className="flex flex-wrap items-center gap-2 text-xl font-semibold">
-                    {p.full_name.split(" ")[0]}, {p.age}
-                    {p.verified && <VerifiedBadge size="md" />}
-                    {staffMap[p.id] && (
-                      <RoleBadge role={staffMap[p.id].role} color={staffMap[p.id].color} />
+            {filtered.map((p, i) => {
+              const chips = affinityByProfile[p.id] ?? [];
+              const score = maxScore > 0 ? Math.min(99, Math.round((chips.length / maxScore) * 100)) : 0;
+              const showScore = chips.length >= 3 && score >= 50 && !!myAdvanced;
+              return (
+                <Link key={p.id} to="/pretendentes/$id" params={{ id: p.id }}
+                  className="glass group animate-fade-up overflow-hidden rounded-2xl shadow-soft transition hover:shadow-elegant"
+                  style={{ animationDelay: `${i * 50}ms` }}>
+                  <div className="relative aspect-[4/5] overflow-hidden bg-muted">
+                    {p.photo_url ? (
+                      <img src={p.photo_url} alt={p.full_name} loading="lazy" className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center bg-gradient-love">
+                        <span className="text-5xl text-white">{p.full_name.charAt(0)}</span>
+                      </div>
                     )}
-                  </h3>
-                  <p className="mt-0.5 text-sm text-muted-foreground">{p.city} · {p.state}</p>
-                  <p className="mt-1 text-xs text-[var(--rose)]">{p.church}</p>
-                  <UserBadges userId={p.id} size="xs" max={2} className="mt-2" />
-                  <AffinityChips chips={computeAffinity(myAdvanced, advancedMap[p.id])} />
-                  {p.bio && <p className="mt-3 line-clamp-2 text-sm text-foreground/70">{p.bio}</p>}
-                </div>
-              </Link>
-            ))}
+                    {showScore ? (
+                      <span className="absolute left-2 top-2 inline-flex items-center gap-1 rounded-full bg-[var(--rose)] px-2 py-1 text-[10px] font-bold text-white shadow-md">
+                        <Flame className="h-3 w-3" /> {score}% afinidade
+                      </span>
+                    ) : isSuggestion(p) && (
+                      <span className="absolute left-2 top-2 inline-flex items-center gap-1 rounded-full bg-[var(--rose)] px-2 py-1 text-[10px] font-semibold text-white shadow-md">
+                        <Sparkles className="h-3 w-3" /> Sugestão pra você
+                      </span>
+                    )}
+                    <span className="absolute right-2 top-2"><OnlineDot userId={p.id} size="md" /></span>
+                  </div>
+                  <div className="p-5">
+                    <h3 className="flex flex-wrap items-center gap-2 text-xl font-semibold">
+                      {p.full_name.split(" ")[0]}, {p.age}
+                      {p.verified && <VerifiedBadge size="md" />}
+                      {staffMap[p.id] && (
+                        <RoleBadge role={staffMap[p.id].role} color={staffMap[p.id].color} />
+                      )}
+                    </h3>
+                    <p className="mt-0.5 text-sm text-muted-foreground">{p.city} · {p.state}</p>
+                    <p className="mt-1 text-xs text-[var(--rose)]">{p.church}</p>
+                    <UserBadges userId={p.id} size="xs" max={2} className="mt-2" />
+                    <AffinityChips chips={chips} />
+                    {p.bio && <p className="mt-3 line-clamp-2 text-sm text-foreground/70">{p.bio}</p>}
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         ))}
       </main>
