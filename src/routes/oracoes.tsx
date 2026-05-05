@@ -39,7 +39,6 @@ type PrayerRequest = {
   resolved_at: string | null; created_at: string;
   moderation_status?: ModerationStatus;
 };
-type ReportRow = { id: string; request_id: string; status: string };
 type ProfileLite = { id: string; full_name: string; photo_url: string | null };
 
 const CATEGORIES: { value: Category; label: string; Icon: typeof HeartPulse }[] = [
