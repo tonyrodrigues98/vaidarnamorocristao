@@ -1297,6 +1297,7 @@ export type Database = {
           badge_color: string | null
           created_at: string
           id: string
+          is_support_agent: boolean
           public_listing: boolean
           role: Database["public"]["Enums"]["app_role"]
           user_id: string
@@ -1305,6 +1306,7 @@ export type Database = {
           badge_color?: string | null
           created_at?: string
           id?: string
+          is_support_agent?: boolean
           public_listing?: boolean
           role?: Database["public"]["Enums"]["app_role"]
           user_id: string
@@ -1313,6 +1315,7 @@ export type Database = {
           badge_color?: string | null
           created_at?: string
           id?: string
+          is_support_agent?: boolean
           public_listing?: boolean
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
@@ -1438,6 +1441,7 @@ export type Database = {
       }
       increment_article_views: { Args: { _slug: string }; Returns: undefined }
       is_staff: { Args: { _user_id: string }; Returns: boolean }
+      is_support_staff: { Args: { _user_id: string }; Returns: boolean }
       mark_message_read: { Args: { _message_id: string }; Returns: undefined }
       recompute_all_badges: { Args: never; Returns: undefined }
       recompute_user_badges: { Args: { _user_id: string }; Returns: undefined }
