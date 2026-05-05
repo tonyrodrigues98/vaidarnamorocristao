@@ -221,7 +221,6 @@ function Page() {
       : status === "hidden" ? "Pedido ocultado"
       : "Pedido marcado como removido"
     );
-    setActionsOpenId(null);
   }
 
   async function submitReport() {
