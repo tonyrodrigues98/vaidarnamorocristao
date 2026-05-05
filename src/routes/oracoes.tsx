@@ -372,58 +372,46 @@ function Page() {
                         </Button>
                       )}
                       {canModerate && (
-                        <div className="relative">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setActionsOpenId(actionsOpenId === req.id ? null : req.id)}
-                            aria-label="Ações de moderação"
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="sm" aria-label="Ações de moderação">
+                              <ShieldCheck className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent
+                            align="end"
+                            sideOffset={4}
+                            collisionPadding={12}
+                            className="w-60 max-w-[calc(100vw-1.5rem)]"
                           >
-                            <ShieldCheck className="h-4 w-4" />
-                          </Button>
-                          {actionsOpenId === req.id && (
-                            <>
-                              <div className="fixed inset-0 z-30" onClick={() => setActionsOpenId(null)} />
-                              <div className="absolute right-0 top-full z-40 mt-1 w-56 rounded-xl border border-border bg-popover p-1 shadow-lg">
-                                {modStatus !== "visible" && (
-                                  <button
-                                    type="button"
-                                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm hover:bg-accent"
-                                    onClick={() => setModeration(req, "visible")}
-                                  >
-                                    <ArchiveRestore className="h-4 w-4 text-emerald-500" /> Aprovar / Restaurar
-                                  </button>
-                                )}
-                                {modStatus !== "hidden" && (
-                                  <button
-                                    type="button"
-                                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm hover:bg-accent"
-                                    onClick={() => setModeration(req, "hidden")}
-                                  >
-                                    <EyeOff className="h-4 w-4 text-amber-500" /> Ocultar
-                                  </button>
-                                )}
-                                {modStatus !== "removed" && (
-                                  <button
-                                    type="button"
-                                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm hover:bg-accent"
-                                    onClick={() => setModeration(req, "removed")}
-                                  >
-                                    <Ban className="h-4 w-4 text-red-500" /> Marcar como removido
-                                  </button>
-                                )}
-                                <div className="my-1 h-px bg-border" />
-                                <button
-                                  type="button"
-                                  className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-red-600 hover:bg-red-500/10"
-                                  onClick={() => { setActionsOpenId(null); deleteRequest(req); }}
-                                >
-                                  <Trash2 className="h-4 w-4" /> Apagar permanentemente
-                                </button>
-                              </div>
-                            </>
-                          )}
-                        </div>
+                            {modStatus !== "visible" && (
+                              <DropdownMenuItem onClick={() => setModeration(req, "visible")}>
+                                <ArchiveRestore className="h-4 w-4 text-emerald-500" />
+                                <span>Aprovar / Restaurar</span>
+                              </DropdownMenuItem>
+                            )}
+                            {modStatus !== "hidden" && (
+                              <DropdownMenuItem onClick={() => setModeration(req, "hidden")}>
+                                <EyeOff className="h-4 w-4 text-amber-500" />
+                                <span>Ocultar</span>
+                              </DropdownMenuItem>
+                            )}
+                            {modStatus !== "removed" && (
+                              <DropdownMenuItem onClick={() => setModeration(req, "removed")}>
+                                <Ban className="h-4 w-4 text-red-500" />
+                                <span>Marcar como removido</span>
+                              </DropdownMenuItem>
+                            )}
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              onClick={() => deleteRequest(req)}
+                              className="text-red-600 focus:text-red-600"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                              <span>Apagar permanentemente</span>
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       )}
                       {isMine && !canModerate && (
                         <Button variant="ghost" size="sm" onClick={() => deleteRequest(req)} aria-label="Apagar">
