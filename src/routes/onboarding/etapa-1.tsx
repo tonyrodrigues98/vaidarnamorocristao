@@ -62,6 +62,10 @@ function Etapa1() {
 
   function handlePhoto(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0]; if (!f) return;
+    if (!f.type.startsWith("image/")) {
+      toast.error("Selecione um arquivo de imagem (JPG, PNG, WEBP).");
+      return;
+    }
     if (f.size > 5 * 1024 * 1024) { toast.error("Foto até 5MB"); return; }
     setPhotoFile(f);
     setPhotoPreview(URL.createObjectURL(f));
@@ -70,17 +74,30 @@ function Etapa1() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!user) return;
+    // Foto de perfil é obrigatória para cadastro.
+    if (!photoFile && !photoPreview) {
+      toast.error("Adicione uma foto de perfil para continuar. Ela é obrigatória.");
+      // Foca o seletor de foto
+      document.getElementById("profile-photo-input")?.click();
+      return;
+    }
     const parsed = schema.safeParse(form);
     if (!parsed.success) { toast.error(parsed.error.issues[0].message); return; }
     setSubmitting(true);
 
     let photo_url: string | undefined;
     if (photoFile) {
-      const ext = photoFile.name.split(".").pop() ?? "jpg";
+      const rawExt = (photoFile.name.split(".").pop() ?? "").toLowerCase();
+      const allowed = ["jpg", "jpeg", "png", "webp", "heic", "heif"];
+      const ext = allowed.includes(rawExt) ? rawExt : "jpg";
       const path = `${user.id}/avatar.${ext}`;
       const { error: upErr } = await supabase.storage.from("profile-photos")
-        .upload(path, photoFile, { upsert: true, contentType: photoFile.type });
-      if (upErr) { toast.error("Falha ao enviar foto"); setSubmitting(false); return; }
+        .upload(path, photoFile, { upsert: true, contentType: photoFile.type || "image/jpeg", cacheControl: "3600" });
+      if (upErr) {
+        toast.error(`Falha ao enviar foto: ${upErr.message}`);
+        setSubmitting(false);
+        return;
+      }
       const { data: pub } = supabase.storage.from("profile-photos").getPublicUrl(path);
       photo_url = `${pub.publicUrl}?t=${Date.now()}`;
     }
@@ -88,7 +105,6 @@ function Etapa1() {
     const { error } = await supabase.from("profiles").upsert({
       id: user.id,
       ...parsed.data,
-      ...(photo_url ? { photo_url } : photoPreview ? {} : {}),
       ...(photo_url ? { photo_url } : {}),
     });
     setSubmitting(false);
@@ -111,7 +127,10 @@ function Etapa1() {
 
         <form onSubmit={handleSubmit} className="glass animate-fade-up space-y-6 rounded-3xl p-8 shadow-elegant">
           <div className="flex flex-col items-center gap-3">
-            <label className="group relative h-32 w-32 cursor-pointer overflow-hidden rounded-full border-2 border-dashed border-[var(--rose-soft)] bg-card/60 shadow-soft transition hover:border-[var(--rose)]">
+            <label
+              htmlFor="profile-photo-input"
+              className={`group relative h-32 w-32 cursor-pointer overflow-hidden rounded-full border-2 border-dashed bg-card/60 shadow-soft transition ${photoPreview ? "border-[var(--rose-soft)] hover:border-[var(--rose)]" : "border-destructive/60 hover:border-destructive"}`}
+            >
               {photoPreview ? (
                 <img src={photoPreview} alt="" className="h-full w-full object-cover" />
               ) : (
@@ -120,9 +139,11 @@ function Etapa1() {
                   <span className="mt-1 text-xs">Foto</span>
                 </div>
               )}
-              <input type="file" accept="image/*" onChange={handlePhoto} className="hidden" />
+              <input id="profile-photo-input" type="file" accept="image/*" onChange={handlePhoto} className="hidden" />
             </label>
-            <p className="text-xs text-muted-foreground">Clique para enviar sua foto (até 5MB)</p>
+            <p className="text-xs text-muted-foreground">
+              <span className="font-medium text-foreground">Foto de perfil obrigatória</span> · Clique para enviar (até 5MB)
+            </p>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">

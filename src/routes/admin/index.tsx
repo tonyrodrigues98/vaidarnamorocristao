@@ -150,6 +150,11 @@ function Admin() {
       setPreCads((data ?? []) as PreCadastro[]);
       return;
     }
+    // Tabs com painéis próprios (fazem fetch internamente).
+    // Evita query inválida em profiles.status com valores que não são enum.
+    if (status === "flags" || status === "restricted_words") {
+      return;
+    }
     const { data, error } = await supabase
       .from("profiles").select("*").eq("status", status as "pending" | "approved" | "rejected" | "banned").order("created_at", { ascending: false });
     if (error) toast.error(error.message);
