@@ -222,6 +222,24 @@ function Admin() {
     load("users");
   }
 
+  async function toggleSupportAgent(userId: string, currentRole: AppRole, current: boolean) {
+    if (!user) return;
+    if (currentRole !== "moderador" && currentRole !== "apresentador") {
+      toast.error("Apenas moderadores e apresentadores podem ser agentes de suporte.");
+      return;
+    }
+    setBusy(userId);
+    const { error } = await supabase
+      .from("user_roles")
+      .update({ is_support_agent: !current })
+      .eq("user_id", userId)
+      .eq("role", currentRole);
+    setBusy(null);
+    if (error) { toast.error(error.message); return; }
+    toast.success(!current ? "Acesso ao suporte concedido" : "Acesso ao suporte removido");
+    load("users");
+  }
+
   async function savePreCadastro() {
     if (!user) return;
     setPcBusy(true);
