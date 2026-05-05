@@ -262,11 +262,14 @@ function Page() {
           <FilterChip active={filter === "active"} onClick={() => setFilter("active")}>Ativos</FilterChip>
           <FilterChip active={filter === "all"} onClick={() => setFilter("all")}>Todos</FilterChip>
           <FilterChip active={filter === "mine"} onClick={() => setFilter("mine")}>Meus</FilterChip>
-          {CATEGORIES.map((c) => (
-            <FilterChip key={c.value} active={filter === c.value} onClick={() => setFilter(c.value)}>
-              {c.emoji} {c.label}
-            </FilterChip>
-          ))}
+          {CATEGORIES.map((c) => {
+            const Icon = c.Icon;
+            return (
+              <FilterChip key={c.value} active={filter === c.value} onClick={() => setFilter(c.value)}>
+                <Icon className="h-3.5 w-3.5" /> {c.label}
+              </FilterChip>
+            );
+          })}
         </div>
 
         <section className="mt-6 space-y-4">
@@ -277,12 +280,26 @@ function Page() {
           ) : (
             filtered.map((req) => {
               const cat = CATEGORIES.find((c) => c.value === req.category) ?? CATEGORIES[5];
+              const CatIcon = cat.Icon;
               const author = req.is_anonymous ? null : profiles[req.user_id];
               const count = prayedCounts[req.id] ?? 0;
               const iPrayed = myPrayed.has(req.id);
               const isMine = user?.id === req.user_id;
+              const reportCount = reportCounts[req.id] ?? 0;
+              const iReported = myReports.has(req.id);
+              const modStatus: ModerationStatus = req.moderation_status ?? "visible";
+              const isHidden = modStatus !== "visible";
               return (
-                <article key={req.id} className={`glass rounded-3xl p-5 shadow-soft animate-fade-up ${req.resolved ? "opacity-75" : ""}`}>
+                <article
+                  key={req.id}
+                  className={`glass rounded-3xl p-4 sm:p-5 shadow-soft animate-fade-up ${req.resolved ? "opacity-75" : ""} ${isHidden ? "ring-1 ring-amber-500/40" : ""}`}
+                >
+                  {isHidden && canModerate && (
+                    <div className="mb-3 flex items-center gap-2 rounded-lg bg-amber-500/10 px-3 py-1.5 text-xs text-amber-700 dark:text-amber-300">
+                      <ShieldAlert className="h-3.5 w-3.5" />
+                      {modStatus === "hidden" ? "Oculto pela moderação" : "Removido pela moderação"}
+                    </div>
+                  )}
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-3 min-w-0">
                       {req.is_anonymous ? (
@@ -301,9 +318,20 @@ function Page() {
                         <p className="text-xs text-muted-foreground">{relTime(req.created_at)}</p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 shrink-0">
-                      <Badge variant="secondary">{cat.emoji} {cat.label}</Badge>
-                      {req.resolved && <Badge className="bg-emerald-500 hover:bg-emerald-500">✓ Respondido</Badge>}
+                    <div className="flex items-center gap-1.5 shrink-0 flex-wrap justify-end">
+                      <Badge variant="secondary" className="gap-1">
+                        <CatIcon className="h-3 w-3" /> {cat.label}
+                      </Badge>
+                      {req.resolved && (
+                        <Badge className="gap-1 bg-emerald-500 hover:bg-emerald-500">
+                          <CheckCircle2 className="h-3 w-3" /> Respondido
+                        </Badge>
+                      )}
+                      {canModerate && reportCount > 0 && (
+                        <Badge variant="outline" className="gap-1 border-amber-500/50 text-amber-600 dark:text-amber-400">
+                          <Flag className="h-3 w-3" /> {reportCount}
+                        </Badge>
+                      )}
                     </div>
                   </div>
 
@@ -321,15 +349,81 @@ function Page() {
                       {iPrayed ? "Estou orando" : "Orar por isso"}
                       {count > 0 && <span className="ml-2 text-xs opacity-80">· {count}</span>}
                     </Button>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1 flex-wrap justify-end">
                       {isMine && (
                         <Button variant="ghost" size="sm" onClick={() => markResolved(req)}>
                           <Check className="h-4 w-4 mr-1" />
                           {req.resolved ? "Reabrir" : "Respondido"}
                         </Button>
                       )}
-                      {(isMine || canModerate) && (
-                        <Button variant="ghost" size="sm" onClick={() => deleteRequest(req)}>
+                      {!isMine && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => { setReportFor(req); setReportReason(""); }}
+                          disabled={iReported}
+                          aria-label="Denunciar"
+                          title={iReported ? "Você já denunciou este pedido" : "Denunciar"}
+                        >
+                          <Flag className={`h-4 w-4 ${iReported ? "text-amber-500" : ""}`} />
+                        </Button>
+                      )}
+                      {canModerate && (
+                        <div className="relative">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setActionsOpenId(actionsOpenId === req.id ? null : req.id)}
+                            aria-label="Ações de moderação"
+                          >
+                            <ShieldCheck className="h-4 w-4" />
+                          </Button>
+                          {actionsOpenId === req.id && (
+                            <>
+                              <div className="fixed inset-0 z-30" onClick={() => setActionsOpenId(null)} />
+                              <div className="absolute right-0 top-full z-40 mt-1 w-56 rounded-xl border border-border bg-popover p-1 shadow-lg">
+                                {modStatus !== "visible" && (
+                                  <button
+                                    type="button"
+                                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm hover:bg-accent"
+                                    onClick={() => setModeration(req, "visible")}
+                                  >
+                                    <ArchiveRestore className="h-4 w-4 text-emerald-500" /> Aprovar / Restaurar
+                                  </button>
+                                )}
+                                {modStatus !== "hidden" && (
+                                  <button
+                                    type="button"
+                                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm hover:bg-accent"
+                                    onClick={() => setModeration(req, "hidden")}
+                                  >
+                                    <EyeOff className="h-4 w-4 text-amber-500" /> Ocultar
+                                  </button>
+                                )}
+                                {modStatus !== "removed" && (
+                                  <button
+                                    type="button"
+                                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm hover:bg-accent"
+                                    onClick={() => setModeration(req, "removed")}
+                                  >
+                                    <Ban className="h-4 w-4 text-red-500" /> Marcar como removido
+                                  </button>
+                                )}
+                                <div className="my-1 h-px bg-border" />
+                                <button
+                                  type="button"
+                                  className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-red-600 hover:bg-red-500/10"
+                                  onClick={() => { setActionsOpenId(null); deleteRequest(req); }}
+                                >
+                                  <Trash2 className="h-4 w-4" /> Apagar permanentemente
+                                </button>
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      )}
+                      {isMine && !canModerate && (
+                        <Button variant="ghost" size="sm" onClick={() => deleteRequest(req)} aria-label="Apagar">
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       )}
@@ -367,16 +461,19 @@ function Page() {
               required
             />
             <div className="flex flex-wrap gap-2">
-              {CATEGORIES.map((c) => (
-                <button
-                  key={c.value}
-                  type="button"
-                  onClick={() => setFCategory(c.value)}
-                  className={`px-3 py-1 rounded-full text-xs border ${fCategory === c.value ? "bg-primary text-primary-foreground border-primary" : "bg-background hover:bg-accent"}`}
-                >
-                  {c.emoji} {c.label}
-                </button>
-              ))}
+              {CATEGORIES.map((c) => {
+                const Icon = c.Icon;
+                return (
+                  <button
+                    key={c.value}
+                    type="button"
+                    onClick={() => setFCategory(c.value)}
+                    className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs border ${fCategory === c.value ? "bg-primary text-primary-foreground border-primary" : "bg-background hover:bg-accent"}`}
+                  >
+                    <Icon className="h-3.5 w-3.5" /> {c.label}
+                  </button>
+                );
+              })}
             </div>
             <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer">
               <input type="checkbox" checked={fAnonymous} onChange={(e) => setFAnonymous(e.target.checked)} />
@@ -387,6 +484,34 @@ function Page() {
               <Button type="submit" disabled={busy}>{busy ? "Enviando..." : "Compartilhar"}</Button>
             </DialogFooter>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!reportFor} onOpenChange={(o) => { if (!o) { setReportFor(null); setReportReason(""); } }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Flag className="h-4 w-4" /> Denunciar pedido de oração
+            </DialogTitle>
+            <DialogDescription>
+              Conte para nossa equipe o que há de errado neste pedido. Sua denúncia é confidencial.
+            </DialogDescription>
+          </DialogHeader>
+          <Textarea
+            placeholder="Descreva o motivo (ex: linguagem ofensiva, expõe terceiros, spam, conteúdo inadequado)"
+            value={reportReason}
+            onChange={(e) => setReportReason(e.target.value)}
+            rows={4}
+            maxLength={500}
+          />
+          <DialogFooter>
+            <Button type="button" variant="ghost" onClick={() => { setReportFor(null); setReportReason(""); }}>
+              Cancelar
+            </Button>
+            <Button type="button" onClick={submitReport} disabled={reportBusy || !reportReason.trim()}>
+              {reportBusy ? "Enviando..." : "Enviar denúncia"}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
