@@ -1,3 +1,4 @@
+import { friendlyError } from "@/lib/errors";
 import { createFileRoute, Link, Navigate, useNavigate } from "@tanstack/react-router";
 import { RequireApproved } from "@/components/RequireApproved";
 import { useEffect, useState } from "react";
@@ -133,7 +134,7 @@ function Detail() {
     setBusy(true);
     const { error } = await supabase.from("interests").insert({ sender_id: user.id, receiver_id: id });
     setBusy(false);
-    if (error) { toast.error(error.message); return; }
+    if (error) { toast.error(friendlyError(error)); return; }
     toast.success("Interesse enviado 💗");
     setInterestSent(true);
     // refresh match
@@ -157,7 +158,7 @@ function Detail() {
     const { error } = await supabase.from("blocks").delete()
       .eq("blocker_id", user.id).eq("blocked_id", id);
     setBusy(false);
-    if (error) { toast.error(error.message); return; }
+    if (error) { toast.error(friendlyError(error)); return; }
     toast.success("Perfil desbloqueado");
     setBlocked(false);
   }
@@ -168,7 +169,7 @@ function Detail() {
     const { error } = await supabase.from("reports").insert({
       reporter_id: user.id, reported_id: id, reason: reportReason.trim().slice(0, 1000),
     });
-    if (error) { setBusy(false); toast.error(error.message); return; }
+    if (error) { setBusy(false); toast.error(friendlyError(error)); return; }
     if (reportAlsoBlock && !blocked) {
       await supabase.from("blocks").insert({ blocker_id: user.id, blocked_id: id });
       setBlocked(true);

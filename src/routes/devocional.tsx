@@ -1,3 +1,4 @@
+import { friendlyError } from "@/lib/errors";
 import { createFileRoute, Navigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { toast } from "sonner";
@@ -102,7 +103,7 @@ function Devocional() {
     else q = q.order("published_at", { ascending: false }); // server-side fallback; resort client-side
 
     const { data, error } = await q;
-    if (error) { toast.error(error.message); setLoadingPosts(false); return; }
+    if (error) { toast.error(friendlyError(error)); setLoadingPosts(false); return; }
     const list = (data ?? []) as Post[];
     setPosts((prev) => reset ? list : [...prev, ...list]);
     setHasMore(list.length === PAGE_SIZE);
@@ -231,12 +232,12 @@ function Devocional() {
       setReactions((prev) => prev.filter((r) => !(r.post_id === postId && r.user_id === user.id && r.reaction === reaction)));
       setReactionTotals((t) => ({ ...t, [postId]: Math.max(0, (t[postId] ?? 1) - 1) }));
       const { error } = await supabase.from("devotional_reactions").delete().eq("post_id", postId).eq("user_id", user.id).eq("reaction", reaction);
-      if (error) { toast.error(error.message); void loadReactions(); }
+      if (error) { toast.error(friendlyError(error)); void loadReactions(); }
     } else {
       setReactions((prev) => [...prev, { post_id: postId, user_id: user.id, reaction }]);
       setReactionTotals((t) => ({ ...t, [postId]: (t[postId] ?? 0) + 1 }));
       const { error } = await supabase.from("devotional_reactions").insert({ post_id: postId, user_id: user.id, reaction });
-      if (error) { toast.error(error.message); void loadReactions(); }
+      if (error) { toast.error(friendlyError(error)); void loadReactions(); }
       void recomputeMyBadges(user.id);
     }
   }
@@ -246,7 +247,7 @@ function Devocional() {
     if (prayedToday) { toast.info("Você já marcou que orou hoje"); return; }
     const today = new Date().toISOString().slice(0, 10);
     const { error } = await supabase.from("devotional_prayed").insert({ user_id: user.id, post_id: postId, day: today });
-    if (error) { toast.error(error.message); return; }
+    if (error) { toast.error(friendlyError(error)); return; }
     setPrayedToday(true);
     toast.success("Marcado! Que Deus abençoe sua oração.");
     void loadStreak();
@@ -278,7 +279,7 @@ function Devocional() {
       .insert({ post_id: postId, user_id: user.id, content: text, parent_id: parent?.id ?? null })
       .select("*")
       .single();
-    if (error) { toast.error(error.message); return; }
+    if (error) { toast.error(friendlyError(error)); return; }
     // optimistic append (also realtime will reconcile)
     if (data) {
       const c = data as Comment;
@@ -293,7 +294,7 @@ function Devocional() {
   async function saveEdit() {
     if (!editing) return;
     const { error } = await supabase.from("devotional_comments").update({ content: editing.text }).eq("id", editing.id);
-    if (error) { toast.error(error.message); return; }
+    if (error) { toast.error(friendlyError(error)); return; }
     setComments((prev) => prev.map((c) => c.id === editing.id ? { ...c, content: editing.text, edited_at: new Date().toISOString() } : c));
     setEditing(null);
   }
@@ -327,10 +328,10 @@ function Devocional() {
     setLikes((prev) => ({ ...prev, [c.id]: Math.max(0, (prev[c.id] ?? 0) + (has ? -1 : 1)) }));
     if (has) {
       const { error } = await supabase.from("devotional_comment_likes").delete().eq("comment_id", c.id).eq("user_id", user.id);
-      if (error) { toast.error(error.message); void loadLikes(); }
+      if (error) { toast.error(friendlyError(error)); void loadLikes(); }
     } else {
       const { error } = await supabase.from("devotional_comment_likes").insert({ comment_id: c.id, user_id: user.id });
-      if (error) { toast.error(error.message); void loadLikes(); }
+      if (error) { toast.error(friendlyError(error)); void loadLikes(); }
     }
   }
 
@@ -339,7 +340,7 @@ function Devocional() {
     const { error } = await supabase.from("devotional_comment_reports").insert({
       comment_id: reportFor.id, reporter_id: user.id, reason: reportReason.trim(),
     });
-    if (error) { toast.error(error.message); return; }
+    if (error) { toast.error(friendlyError(error)); return; }
     toast.success("Denúncia enviada. Obrigado!");
     setReportFor(null);
     setReportReason("");
