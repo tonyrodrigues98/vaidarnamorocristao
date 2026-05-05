@@ -362,7 +362,20 @@ function Admin() {
             ) : tab === "restricted_words" ? (
               <RestrictedWordsPanel />
             ) : tab === "flags" ? (
-              <FlagsPanel isSuperAdmin={isSuperAdmin} currentUserId={user?.id ?? null} />
+              <div className="space-y-8">
+                <div>
+                  <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                    Pedidos de oração denunciados
+                  </h2>
+                  <PrayerReportsPanel isSuperAdmin={isSuperAdmin} />
+                </div>
+                <div>
+                  <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                    Mensagens sinalizadas
+                  </h2>
+                  <FlagsPanel isSuperAdmin={isSuperAdmin} currentUserId={user?.id ?? null} />
+                </div>
+              </div>
             ) : tab === "pre_cadastros" ? (
               <PreCadastrosPanel
                 items={preCads}
