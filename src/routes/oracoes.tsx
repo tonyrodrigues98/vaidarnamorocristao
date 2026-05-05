@@ -78,7 +78,6 @@ function Page() {
   const [reportBusy, setReportBusy] = useState(false);
   const [reportCounts, setReportCounts] = useState<Record<string, number>>({});
   const [myReports, setMyReports] = useState<Set<string>>(new Set());
-  const [actionsOpenId, setActionsOpenId] = useState<string | null>(null);
 
   // form state
   const [fTitle, setFTitle] = useState("");
