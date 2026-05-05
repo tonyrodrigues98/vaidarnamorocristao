@@ -11,13 +11,16 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as VerificacaoRouteImport } from './routes/verificacao'
 import { Route as TermosRouteImport } from './routes/termos'
+import { Route as SobreRouteImport } from './routes/sobre'
 import { Route as PerfilRouteImport } from './routes/perfil'
 import { Route as MatchesRouteImport } from './routes/matches'
 import { Route as ManualRouteImport } from './routes/manual'
 import { Route as InteressesRouteImport } from './routes/interesses'
 import { Route as DevocionalRouteImport } from './routes/devocional'
+import { Route as DepoimentosRouteImport } from './routes/depoimentos'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ComunidadeRouteImport } from './routes/comunidade'
+import { Route as ComoFuncionaRouteImport } from './routes/como-funciona'
 import { Route as BloqueadosRouteImport } from './routes/bloqueados'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SuporteIndexRouteImport } from './routes/suporte/index'
@@ -47,6 +50,11 @@ const TermosRoute = TermosRouteImport.update({
   path: '/termos',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SobreRoute = SobreRouteImport.update({
+  id: '/sobre',
+  path: '/sobre',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PerfilRoute = PerfilRouteImport.update({
   id: '/perfil',
   path: '/perfil',
@@ -72,6 +80,11 @@ const DevocionalRoute = DevocionalRouteImport.update({
   path: '/devocional',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DepoimentosRoute = DepoimentosRouteImport.update({
+  id: '/depoimentos',
+  path: '/depoimentos',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -80,6 +93,11 @@ const DashboardRoute = DashboardRouteImport.update({
 const ComunidadeRoute = ComunidadeRouteImport.update({
   id: '/comunidade',
   path: '/comunidade',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ComoFuncionaRoute = ComoFuncionaRouteImport.update({
+  id: '/como-funciona',
+  path: '/como-funciona',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BloqueadosRoute = BloqueadosRouteImport.update({
@@ -176,13 +194,16 @@ const AdminVerificacoesRoute = AdminVerificacoesRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/bloqueados': typeof BloqueadosRoute
+  '/como-funciona': typeof ComoFuncionaRoute
   '/comunidade': typeof ComunidadeRoute
   '/dashboard': typeof DashboardRoute
+  '/depoimentos': typeof DepoimentosRoute
   '/devocional': typeof DevocionalRoute
   '/interesses': typeof InteressesRoute
   '/manual': typeof ManualRoute
   '/matches': typeof MatchesRoute
   '/perfil': typeof PerfilRoute
+  '/sobre': typeof SobreRoute
   '/termos': typeof TermosRoute
   '/verificacao': typeof VerificacaoRoute
   '/admin/verificacoes': typeof AdminVerificacoesRoute
@@ -205,13 +226,16 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/bloqueados': typeof BloqueadosRoute
+  '/como-funciona': typeof ComoFuncionaRoute
   '/comunidade': typeof ComunidadeRoute
   '/dashboard': typeof DashboardRoute
+  '/depoimentos': typeof DepoimentosRoute
   '/devocional': typeof DevocionalRoute
   '/interesses': typeof InteressesRoute
   '/manual': typeof ManualRoute
   '/matches': typeof MatchesRoute
   '/perfil': typeof PerfilRoute
+  '/sobre': typeof SobreRoute
   '/termos': typeof TermosRoute
   '/verificacao': typeof VerificacaoRoute
   '/admin/verificacoes': typeof AdminVerificacoesRoute
@@ -235,13 +259,16 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/bloqueados': typeof BloqueadosRoute
+  '/como-funciona': typeof ComoFuncionaRoute
   '/comunidade': typeof ComunidadeRoute
   '/dashboard': typeof DashboardRoute
+  '/depoimentos': typeof DepoimentosRoute
   '/devocional': typeof DevocionalRoute
   '/interesses': typeof InteressesRoute
   '/manual': typeof ManualRoute
   '/matches': typeof MatchesRoute
   '/perfil': typeof PerfilRoute
+  '/sobre': typeof SobreRoute
   '/termos': typeof TermosRoute
   '/verificacao': typeof VerificacaoRoute
   '/admin/verificacoes': typeof AdminVerificacoesRoute
@@ -266,13 +293,16 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/bloqueados'
+    | '/como-funciona'
     | '/comunidade'
     | '/dashboard'
+    | '/depoimentos'
     | '/devocional'
     | '/interesses'
     | '/manual'
     | '/matches'
     | '/perfil'
+    | '/sobre'
     | '/termos'
     | '/verificacao'
     | '/admin/verificacoes'
@@ -295,13 +325,16 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/bloqueados'
+    | '/como-funciona'
     | '/comunidade'
     | '/dashboard'
+    | '/depoimentos'
     | '/devocional'
     | '/interesses'
     | '/manual'
     | '/matches'
     | '/perfil'
+    | '/sobre'
     | '/termos'
     | '/verificacao'
     | '/admin/verificacoes'
@@ -324,13 +357,16 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/bloqueados'
+    | '/como-funciona'
     | '/comunidade'
     | '/dashboard'
+    | '/depoimentos'
     | '/devocional'
     | '/interesses'
     | '/manual'
     | '/matches'
     | '/perfil'
+    | '/sobre'
     | '/termos'
     | '/verificacao'
     | '/admin/verificacoes'
@@ -354,13 +390,16 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   BloqueadosRoute: typeof BloqueadosRoute
+  ComoFuncionaRoute: typeof ComoFuncionaRoute
   ComunidadeRoute: typeof ComunidadeRoute
   DashboardRoute: typeof DashboardRoute
+  DepoimentosRoute: typeof DepoimentosRoute
   DevocionalRoute: typeof DevocionalRoute
   InteressesRoute: typeof InteressesRoute
   ManualRoute: typeof ManualRoute
   MatchesRoute: typeof MatchesRoute
   PerfilRoute: typeof PerfilRoute
+  SobreRoute: typeof SobreRoute
   TermosRoute: typeof TermosRoute
   VerificacaoRoute: typeof VerificacaoRoute
   AdminVerificacoesRoute: typeof AdminVerificacoesRoute
@@ -395,6 +434,13 @@ declare module '@tanstack/react-router' {
       path: '/termos'
       fullPath: '/termos'
       preLoaderRoute: typeof TermosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sobre': {
+      id: '/sobre'
+      path: '/sobre'
+      fullPath: '/sobre'
+      preLoaderRoute: typeof SobreRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/perfil': {
@@ -432,6 +478,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DevocionalRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/depoimentos': {
+      id: '/depoimentos'
+      path: '/depoimentos'
+      fullPath: '/depoimentos'
+      preLoaderRoute: typeof DepoimentosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dashboard': {
       id: '/dashboard'
       path: '/dashboard'
@@ -444,6 +497,13 @@ declare module '@tanstack/react-router' {
       path: '/comunidade'
       fullPath: '/comunidade'
       preLoaderRoute: typeof ComunidadeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/como-funciona': {
+      id: '/como-funciona'
+      path: '/como-funciona'
+      fullPath: '/como-funciona'
+      preLoaderRoute: typeof ComoFuncionaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/bloqueados': {
@@ -578,13 +638,16 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   BloqueadosRoute: BloqueadosRoute,
+  ComoFuncionaRoute: ComoFuncionaRoute,
   ComunidadeRoute: ComunidadeRoute,
   DashboardRoute: DashboardRoute,
+  DepoimentosRoute: DepoimentosRoute,
   DevocionalRoute: DevocionalRoute,
   InteressesRoute: InteressesRoute,
   ManualRoute: ManualRoute,
   MatchesRoute: MatchesRoute,
   PerfilRoute: PerfilRoute,
+  SobreRoute: SobreRoute,
   TermosRoute: TermosRoute,
   VerificacaoRoute: VerificacaoRoute,
   AdminVerificacoesRoute: AdminVerificacoesRoute,
@@ -607,3 +670,12 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
