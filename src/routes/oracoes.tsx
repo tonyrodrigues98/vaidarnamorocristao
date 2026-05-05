@@ -15,8 +15,8 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from "@/components/ui/dialog";
 import {
-  Hand, HandHeart, Plus, Check, Trash2, EyeOff, Eye, Sparkles, Flag,
-  HeartPulse, Users as UsersIcon, HeartHandshake, Wallet, Flame, MoreHorizontal,
+  Hand, HandHeart, Plus, Check, Trash2, EyeOff, Sparkles, Flag,
+  HeartPulse, Users as UsersIcon, HeartHandshake, Wallet, Flame,
   ShieldCheck, ShieldAlert, ArchiveRestore, Ban, CheckCircle2,
 } from "lucide-react";
 
