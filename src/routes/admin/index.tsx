@@ -6,7 +6,7 @@ import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Check, X, Ban, ShieldAlert, Flag, Newspaper, Trash2, Users as UsersIcon, ClipboardList, MessageSquareWarning, ShieldX, Heart, Plus, UserPlus, Search, BadgeCheck } from "lucide-react";
+import { Check, X, Ban, ShieldAlert, Flag, Newspaper, Trash2, Users as UsersIcon, ClipboardList, MessageSquareWarning, ShieldX, Heart, Plus, UserPlus, Search, BadgeCheck, LifeBuoy } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -30,6 +30,7 @@ type DailyPostFull = DailyPost & { bible_reference: string | null; bible_text: s
 type PreCadastro = Database["public"]["Tables"]["pre_cadastros"]["Row"];
 type RestrictedWord = Database["public"]["Tables"]["restricted_words"]["Row"];
 type AdminUserRow = Row & { primaryRole: AppRole };
+type AdminUserRowWithSupport = AdminUserRow & { isSupportAgent: boolean };
 type CoupleStatus = "aceitaram_conversar" | "namorando" | "casamento_marcado";
 type PreMatchRow = {
   id: string;
@@ -72,7 +73,7 @@ function Admin() {
 
   const availableTabs = useMemo<TabKey[]>(() => {
     if (isSuperAdmin) return ["pending","approved","rejected","banned","reports","posts","users","pre_cadastros","restricted_words","flags"];
-    if (isAdmin) return ["pending","approved","rejected","banned","reports","posts","flags"];
+    if (isAdmin) return ["pending","approved","rejected","banned","reports","posts","restricted_words","flags"];
     if (isApresentador) return ["pre_cadastros","flags"];
     if (isModerador) return ["flags"];
     return [];
@@ -90,7 +91,7 @@ function Admin() {
   const [busy, setBusy] = useState<string | null>(null);
   const [reports, setReports] = useState<Array<Report & { reporter?: { full_name: string | null }; reported?: { full_name: string | null; id: string } }>>([]);
   const [posts, setPosts] = useState<DailyPost[]>([]);
-  const [users, setUsers] = useState<AdminUserRow[]>([]);
+  const [users, setUsers] = useState<AdminUserRowWithSupport[]>([]);
   const [preCads, setPreCads] = useState<PreCadastro[]>([]);
   const [editingPC, setEditingPC] = useState<PreCadastro | null>(null);
   const [pcDraft, setPcDraft] = useState<Partial<PreCadastro>>({});
@@ -128,17 +129,23 @@ function Admin() {
     if (status === "users") {
       const [{ data: profs, error: pe }, { data: roles }] = await Promise.all([
         supabase.from("profiles").select("*").order("created_at", { ascending: false }),
-        supabase.from("user_roles").select("user_id, role"),
+        supabase.from("user_roles").select("user_id, role, is_support_agent"),
       ]);
       if (pe) { toast.error(pe.message); return; }
       const roleMap = new Map<string, AppRole>();
-      for (const r of (roles ?? []) as Array<{ user_id: string; role: AppRole }>) {
+      const supportMap = new Map<string, boolean>();
+      for (const r of (roles ?? []) as Array<{ user_id: string; role: AppRole; is_support_agent: boolean | null }>) {
         const cur = roleMap.get(r.user_id);
         if (!cur || ROLE_PRIORITY.indexOf(r.role) < ROLE_PRIORITY.indexOf(cur)) {
           roleMap.set(r.user_id, r.role);
         }
+        if (r.is_support_agent) supportMap.set(r.user_id, true);
       }
-      setUsers(((profs ?? []) as Row[]).map((p) => ({ ...p, primaryRole: roleMap.get(p.id) ?? "user" })));
+      setUsers(((profs ?? []) as Row[]).map((p) => ({
+        ...p,
+        primaryRole: roleMap.get(p.id) ?? "user",
+        isSupportAgent: supportMap.get(p.id) ?? false,
+      })));
       return;
     }
     if (status === "pre_cadastros") {
@@ -212,6 +219,24 @@ function Admin() {
     setBusy(null);
     if (error) { toast.error(error.message); return; }
     toast.success(current ? "Verificação removida" : "Perfil verificado");
+    load("users");
+  }
+
+  async function toggleSupportAgent(userId: string, currentRole: AppRole, current: boolean) {
+    if (!user) return;
+    if (currentRole !== "moderador" && currentRole !== "apresentador") {
+      toast.error("Apenas moderadores e apresentadores podem ser agentes de suporte.");
+      return;
+    }
+    setBusy(userId);
+    const { error } = await supabase
+      .from("user_roles")
+      .update({ is_support_agent: !current })
+      .eq("user_id", userId)
+      .eq("role", currentRole);
+    setBusy(null);
+    if (error) { toast.error(error.message); return; }
+    toast.success(!current ? "Acesso ao suporte concedido" : "Acesso ao suporte removido");
     load("users");
   }
 
@@ -363,6 +388,8 @@ function Admin() {
                 onChangeRole={changeUserRole}
                 onToggleVerified={toggleVerified}
                 canVerify={isSuperAdmin || isAdmin}
+                onToggleSupportAgent={toggleSupportAgent}
+                canManageSupportAgents={isSuperAdmin}
               />
             ) : tab === "restricted_words" ? (
               <RestrictedWordsPanel />
@@ -587,13 +614,15 @@ function Admin() {
 }
 
 function UsersPanel({
-  users, busy, onChangeRole, onToggleVerified, canVerify,
+  users, busy, onChangeRole, onToggleVerified, canVerify, onToggleSupportAgent, canManageSupportAgents,
 }: {
-  users: AdminUserRow[];
+  users: AdminUserRowWithSupport[];
   busy: string | null;
   onChangeRole: (userId: string, newRole: AppRole, currentRole: AppRole) => void;
   onToggleVerified: (userId: string, current: boolean) => void;
   canVerify: boolean;
+  onToggleSupportAgent: (userId: string, currentRole: AppRole, current: boolean) => void;
+  canManageSupportAgents: boolean;
 }) {
   if (users.length === 0) {
     return <div className="glass rounded-2xl p-10 text-center text-muted-foreground shadow-soft">Nenhum usuário.</div>;
@@ -611,6 +640,11 @@ function UsersPanel({
               <h3 className="font-semibold">{u.full_name}, {u.age}</h3>
               <RoleBadge role={u.primaryRole} />
               {u.verified && <VerifiedBadge size="sm" />}
+              {u.isSupportAgent && (u.primaryRole === "moderador" || u.primaryRole === "apresentador") && (
+                <span className="inline-flex items-center gap-1 rounded-full border border-sky-500/40 bg-sky-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-sky-500">
+                  <LifeBuoy className="h-3 w-3" /> Suporte
+                </span>
+              )}
               <UserBadges userId={u.id} size="xs" max={5} />
             </div>
             <p className="truncate text-xs text-muted-foreground">{u.sex} · {u.city}/{u.state} · {u.status}</p>
@@ -626,6 +660,17 @@ function UsersPanel({
                 title={u.verified ? "Remover verificação" : "Verificar perfil"}
               >
                 <BadgeCheck className="h-4 w-4" />
+              </Button>
+            )}
+            {canManageSupportAgents && (u.primaryRole === "moderador" || u.primaryRole === "apresentador") && (
+              <Button
+                size="sm"
+                variant={u.isSupportAgent ? "default" : "outline"}
+                disabled={busy === u.id}
+                onClick={() => onToggleSupportAgent(u.id, u.primaryRole, u.isSupportAgent)}
+                title={u.isSupportAgent ? "Revogar acesso ao suporte" : "Conceder acesso ao suporte"}
+              >
+                <LifeBuoy className="h-4 w-4" />
               </Button>
             )}
             <div className="flex-1 sm:w-52">

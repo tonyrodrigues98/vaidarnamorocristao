@@ -24,8 +24,8 @@ export const Route = createFileRoute("/suporte/")({
 });
 
 function SuportePage() {
-  const { user, isAdmin, role, loading } = useAuth();
-  const isStaff = isAdmin || role === "super_admin";
+  const { user, isAdmin, role, isSupportAgent, loading } = useAuth();
+  const isStaff = isAdmin || role === "super_admin" || ((role === "moderador" || role === "apresentador") && isSupportAgent);
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [busy, setBusy] = useState(true);
   const [open, setOpen] = useState(false);
