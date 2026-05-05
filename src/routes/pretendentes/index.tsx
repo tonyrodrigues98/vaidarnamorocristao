@@ -400,15 +400,15 @@ function AffinityChips({ chips }: { chips: AffinityChip[] }) {
       {visible.map((c) => (
         <span
           key={c.key}
-          className="inline-flex items-center gap-1 rounded-full border border-[var(--rose)]/30 bg-[var(--rose)]/10 px-2 py-0.5 text-[10px] font-medium text-[var(--rose)]"
+          className="inline-flex max-w-full items-center gap-1 rounded-full border border-[var(--rose)]/30 bg-[var(--rose)]/10 px-2 py-0.5 text-[11px] font-medium text-[var(--rose)] sm:text-[10px]"
           title="Vocês têm em comum"
         >
-          <Sparkles className="h-2.5 w-2.5" />
-          {c.label}
+          <Sparkles className="h-2.5 w-2.5 shrink-0" />
+          <span className="truncate">{c.label}</span>
         </span>
       ))}
       {extra > 0 && (
-        <span className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
+        <span className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground sm:text-[10px]">
           +{extra}
         </span>
       )}
