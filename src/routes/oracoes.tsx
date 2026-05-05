@@ -15,6 +15,10 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from "@/components/ui/dialog";
 import {
+  DropdownMenu, DropdownMenuTrigger, DropdownMenuContent,
+  DropdownMenuItem, DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+import {
   Hand, HandHeart, Plus, Check, Trash2, EyeOff, Sparkles, Flag,
   HeartPulse, Users as UsersIcon, HeartHandshake, Wallet, Flame,
   ShieldCheck, ShieldAlert, ArchiveRestore, Ban, CheckCircle2,
