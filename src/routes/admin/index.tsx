@@ -362,7 +362,20 @@ function Admin() {
             ) : tab === "restricted_words" ? (
               <RestrictedWordsPanel />
             ) : tab === "flags" ? (
-              <FlagsPanel isSuperAdmin={isSuperAdmin} currentUserId={user?.id ?? null} />
+              <div className="space-y-8">
+                <div>
+                  <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                    Pedidos de oração denunciados
+                  </h2>
+                  <PrayerReportsPanel isSuperAdmin={isSuperAdmin} />
+                </div>
+                <div>
+                  <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                    Mensagens sinalizadas
+                  </h2>
+                  <FlagsPanel isSuperAdmin={isSuperAdmin} currentUserId={user?.id ?? null} />
+                </div>
+              </div>
             ) : tab === "pre_cadastros" ? (
               <PreCadastrosPanel
                 items={preCads}
@@ -1538,6 +1551,7 @@ function FlagsPanel({ isSuperAdmin, currentUserId }: { isSuperAdmin: boolean; cu
 }
 
 function BadgeAdminControls({ userId, userName }: { userId: string; userName: string }) {
+  // (PrayerReportsPanel defined below)
   const [busy, setBusy] = useState(false);
 
   async function award() {
@@ -1573,6 +1587,174 @@ function BadgeAdminControls({ userId, userName }: { userId: string; userName: st
           ))}
         </SelectContent>
       </Select>
+    </div>
+  );
+}
+
+function PrayerReportsPanel({ isSuperAdmin }: { isSuperAdmin: boolean }) {
+  type ReportRow = {
+    id: string;
+    request_id: string;
+    reporter_id: string;
+    reason: string;
+    status: string;
+    created_at: string;
+  };
+  type ReqRow = {
+    id: string;
+    user_id: string;
+    title: string;
+    content: string;
+    moderation_status: string;
+    is_anonymous: boolean;
+  };
+  const [reports, setReports] = useState<ReportRow[]>([]);
+  const [reqs, setReqs] = useState<Record<string, ReqRow>>({});
+  const [profs, setProfs] = useState<Record<string, { full_name: string | null }>>({});
+
+  async function load() {
+    const { data, error } = await supabase
+      .from("prayer_request_reports")
+      .select("id, request_id, reporter_id, reason, status, created_at")
+      .order("created_at", { ascending: false });
+    if (error) { toast.error(error.message); return; }
+    const list = (data ?? []) as ReportRow[];
+    setReports(list);
+    const reqIds = Array.from(new Set(list.map((r) => r.request_id)));
+    const { data: rs } = reqIds.length
+      ? await supabase.from("prayer_requests")
+          .select("id, user_id, title, content, moderation_status, is_anonymous")
+          .in("id", reqIds)
+      : { data: [] as ReqRow[] };
+    const rMap: Record<string, ReqRow> = {};
+    for (const r of (rs ?? []) as ReqRow[]) rMap[r.id] = r;
+    setReqs(rMap);
+    const userIds = Array.from(new Set([
+      ...list.map((r) => r.reporter_id),
+      ...Object.values(rMap).map((r) => r.user_id),
+    ]));
+    const { data: ps } = userIds.length
+      ? await supabase.from("profiles").select("id, full_name").in("id", userIds)
+      : { data: [] as Array<{ id: string; full_name: string | null }> };
+    const pMap: Record<string, { full_name: string | null }> = {};
+    for (const p of ps ?? []) pMap[p.id] = { full_name: p.full_name };
+    setProfs(pMap);
+  }
+
+  useEffect(() => { load(); }, []);
+
+  async function setModeration(requestId: string, status: "visible" | "hidden" | "removed") {
+    const { error } = await supabase
+      .from("prayer_requests")
+      .update({ moderation_status: status })
+      .eq("id", requestId);
+    if (error) { toast.error(error.message); return; }
+    toast.success(
+      status === "visible" ? "Pedido restaurado"
+      : status === "hidden" ? "Pedido ocultado"
+      : "Pedido marcado como removido",
+    );
+    load();
+  }
+
+  async function resolveReport(id: string) {
+    const { error } = await supabase
+      .from("prayer_request_reports")
+      .update({ status: "resolved" })
+      .eq("id", id);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Denúncia marcada como resolvida");
+    load();
+  }
+
+  async function deleteReport(id: string) {
+    if (!confirm("Excluir esta denúncia?")) return;
+    const { error } = await supabase.from("prayer_request_reports").delete().eq("id", id);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Denúncia excluída");
+    load();
+  }
+
+  if (reports.length === 0) {
+    return <div className="glass rounded-2xl p-6 text-center text-sm text-muted-foreground shadow-soft">Nenhuma denúncia em pedidos de oração.</div>;
+  }
+
+  return (
+    <div className="grid gap-3">
+      {reports.map((r) => {
+        const req = reqs[r.request_id];
+        const reporterName = profs[r.reporter_id]?.full_name ?? "Alguém";
+        const authorName = req
+          ? (req.is_anonymous ? "Anônimo" : (profs[req.user_id]?.full_name ?? "Irmão(a)"))
+          : "(pedido removido)";
+        const isResolved = r.status === "resolved";
+        return (
+          <div key={r.id} className="glass rounded-2xl p-4 shadow-soft">
+            <div className="flex flex-wrap items-start justify-between gap-2">
+              <div className="min-w-0 flex-1">
+                <p className="text-xs text-muted-foreground">
+                  Denunciado por <strong className="text-foreground">{reporterName}</strong>
+                  {" · "}{new Date(r.created_at).toLocaleString("pt-BR")}
+                  {isResolved && <span className="ml-2 rounded bg-emerald-500/15 px-1.5 py-0.5 text-emerald-700 dark:text-emerald-400">resolvida</span>}
+                </p>
+                <div className="mt-2 rounded-lg border border-border bg-muted/40 p-3">
+                  <p className="text-xs font-semibold text-muted-foreground">
+                    Pedido de {authorName}
+                    {req && (
+                      <span className="ml-2 text-[10px] uppercase tracking-wide">
+                        [{req.moderation_status}]
+                      </span>
+                    )}
+                  </p>
+                  {req ? (
+                    <>
+                      <p className="mt-1 break-words text-sm font-medium">{req.title}</p>
+                      <p className="mt-1 whitespace-pre-wrap break-words text-sm text-foreground/90">{req.content}</p>
+                    </>
+                  ) : (
+                    <p className="mt-1 text-sm italic text-muted-foreground">(pedido indisponível)</p>
+                  )}
+                </div>
+                <div className="mt-2 rounded-lg border border-amber-400/40 bg-amber-500/5 p-3">
+                  <p className="text-xs font-semibold text-amber-700 dark:text-amber-300">Motivo da denúncia</p>
+                  <p className="mt-1 whitespace-pre-wrap break-words text-sm">{r.reason}</p>
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-2 sm:flex-col">
+                {req && (
+                  <>
+                    {req.moderation_status !== "hidden" && (
+                      <Button size="sm" variant="outline" onClick={() => setModeration(req.id, "hidden")}>
+                        Ocultar
+                      </Button>
+                    )}
+                    {req.moderation_status !== "removed" && (
+                      <Button size="sm" variant="outline" onClick={() => setModeration(req.id, "removed")}>
+                        Remover
+                      </Button>
+                    )}
+                    {req.moderation_status !== "visible" && (
+                      <Button size="sm" variant="outline" onClick={() => setModeration(req.id, "visible")}>
+                        Restaurar
+                      </Button>
+                    )}
+                  </>
+                )}
+                {!isResolved && (
+                  <Button size="sm" variant="ghost" onClick={() => resolveReport(r.id)}>
+                    Marcar resolvida
+                  </Button>
+                )}
+                {isSuperAdmin && (
+                  <Button size="sm" variant="ghost" onClick={() => deleteReport(r.id)}>
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }
