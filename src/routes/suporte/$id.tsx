@@ -29,8 +29,8 @@ export const Route = createFileRoute("/suporte/$id")({
 
 function TicketPage() {
   const { id } = Route.useParams();
-  const { user, isAdmin, role, loading } = useAuth();
-  const isStaff = isAdmin || role === "super_admin";
+  const { user, isAdmin, role, isSupportAgent, loading } = useAuth();
+  const isStaff = isAdmin || role === "super_admin" || ((role === "moderador" || role === "apresentador") && isSupportAgent);
   const [ticket, setTicket] = useState<Ticket | null>(null);
   const [msgs, setMsgs] = useState<TicketMessage[]>([]);
   const [signed, setSigned] = useState<Record<string, string>>({});
