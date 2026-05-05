@@ -452,6 +452,74 @@ export type Database = {
           },
         ]
       }
+      prayer_request_prayed: {
+        Row: {
+          created_at: string
+          id: string
+          request_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          request_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          request_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prayer_request_prayed_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "prayer_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      prayer_requests: {
+        Row: {
+          category: Database["public"]["Enums"]["prayer_category"]
+          content: string
+          created_at: string
+          id: string
+          is_anonymous: boolean
+          resolved: boolean
+          resolved_at: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category?: Database["public"]["Enums"]["prayer_category"]
+          content: string
+          created_at?: string
+          id?: string
+          is_anonymous?: boolean
+          resolved?: boolean
+          resolved_at?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["prayer_category"]
+          content?: string
+          created_at?: string
+          id?: string
+          is_anonymous?: boolean
+          resolved?: boolean
+          resolved_at?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       pre_cadastro_matches: {
         Row: {
           created_at: string
@@ -1342,6 +1410,13 @@ export type Database = {
       devotional_reaction: "heart" | "prayed" | "edify"
       location_scope: "regiao" | "brasil" | "mundo" | "personalizado"
       marital_status: "solteiro" | "divorciado"
+      prayer_category:
+        | "health"
+        | "family"
+        | "relationship"
+        | "financial"
+        | "spiritual"
+        | "other"
       profile_status: "pending" | "approved" | "rejected" | "banned"
       report_status: "open" | "reviewed" | "dismissed"
       sex_type: "masculino" | "feminino"
@@ -1495,6 +1570,14 @@ export const Constants = {
       devotional_reaction: ["heart", "prayed", "edify"],
       location_scope: ["regiao", "brasil", "mundo", "personalizado"],
       marital_status: ["solteiro", "divorciado"],
+      prayer_category: [
+        "health",
+        "family",
+        "relationship",
+        "financial",
+        "spiritual",
+        "other",
+      ],
       profile_status: ["pending", "approved", "rejected", "banned"],
       report_status: ["open", "reviewed", "dismissed"],
       sex_type: ["masculino", "feminino"],

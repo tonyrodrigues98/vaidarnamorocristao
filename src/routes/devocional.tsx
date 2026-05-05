@@ -1,5 +1,5 @@
 import { friendlyError } from "@/lib/errors";
-import { createFileRoute, Navigate } from "@tanstack/react-router";
+import { createFileRoute, Navigate, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,7 +11,7 @@ import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { recomputeMyBadges } from "@/lib/recomputeBadges";
 import {
   BookHeart, BookOpen, Heart, Sparkles, Hand, Share2, MessageCircle, Pencil, Trash2,
-  Check, X, Reply, Pin, PinOff, Flag, Flame, Trophy, Loader2,
+  Check, X, Reply, Pin, PinOff, Flag, Flame, Trophy, Loader2, HandHeart,
 } from "lucide-react";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
@@ -360,6 +360,12 @@ function Devocional() {
             <h1 className="text-3xl font-semibold tracking-tight">Devocional</h1>
             <p className="text-sm text-muted-foreground">Sua jornada espiritual diária — ore, reflita e compartilhe.</p>
           </div>
+          <Link
+            to="/oracoes"
+            className="hidden sm:inline-flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-medium border border-border hover:bg-accent transition"
+          >
+            <HandHeart className="h-4 w-4" /> Pedidos de oração
+          </Link>
         </header>
 
         <div className="animate-fade-up mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3">

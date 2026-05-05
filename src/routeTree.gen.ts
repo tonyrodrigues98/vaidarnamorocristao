@@ -13,6 +13,7 @@ import { Route as VerificacaoRouteImport } from './routes/verificacao'
 import { Route as TermosRouteImport } from './routes/termos'
 import { Route as SobreRouteImport } from './routes/sobre'
 import { Route as PerfilRouteImport } from './routes/perfil'
+import { Route as OracoesRouteImport } from './routes/oracoes'
 import { Route as MatchesRouteImport } from './routes/matches'
 import { Route as ManualRouteImport } from './routes/manual'
 import { Route as InteressesRouteImport } from './routes/interesses'
@@ -60,6 +61,11 @@ const SobreRoute = SobreRouteImport.update({
 const PerfilRoute = PerfilRouteImport.update({
   id: '/perfil',
   path: '/perfil',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OracoesRoute = OracoesRouteImport.update({
+  id: '/oracoes',
+  path: '/oracoes',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MatchesRoute = MatchesRouteImport.update({
@@ -214,6 +220,7 @@ export interface FileRoutesByFullPath {
   '/interesses': typeof InteressesRoute
   '/manual': typeof ManualRoute
   '/matches': typeof MatchesRoute
+  '/oracoes': typeof OracoesRoute
   '/perfil': typeof PerfilRoute
   '/sobre': typeof SobreRoute
   '/termos': typeof TermosRoute
@@ -248,6 +255,7 @@ export interface FileRoutesByTo {
   '/interesses': typeof InteressesRoute
   '/manual': typeof ManualRoute
   '/matches': typeof MatchesRoute
+  '/oracoes': typeof OracoesRoute
   '/perfil': typeof PerfilRoute
   '/sobre': typeof SobreRoute
   '/termos': typeof TermosRoute
@@ -283,6 +291,7 @@ export interface FileRoutesById {
   '/interesses': typeof InteressesRoute
   '/manual': typeof ManualRoute
   '/matches': typeof MatchesRoute
+  '/oracoes': typeof OracoesRoute
   '/perfil': typeof PerfilRoute
   '/sobre': typeof SobreRoute
   '/termos': typeof TermosRoute
@@ -319,6 +328,7 @@ export interface FileRouteTypes {
     | '/interesses'
     | '/manual'
     | '/matches'
+    | '/oracoes'
     | '/perfil'
     | '/sobre'
     | '/termos'
@@ -353,6 +363,7 @@ export interface FileRouteTypes {
     | '/interesses'
     | '/manual'
     | '/matches'
+    | '/oracoes'
     | '/perfil'
     | '/sobre'
     | '/termos'
@@ -387,6 +398,7 @@ export interface FileRouteTypes {
     | '/interesses'
     | '/manual'
     | '/matches'
+    | '/oracoes'
     | '/perfil'
     | '/sobre'
     | '/termos'
@@ -422,6 +434,7 @@ export interface RootRouteChildren {
   InteressesRoute: typeof InteressesRoute
   ManualRoute: typeof ManualRoute
   MatchesRoute: typeof MatchesRoute
+  OracoesRoute: typeof OracoesRoute
   PerfilRoute: typeof PerfilRoute
   SobreRoute: typeof SobreRoute
   TermosRoute: typeof TermosRoute
@@ -474,6 +487,13 @@ declare module '@tanstack/react-router' {
       path: '/perfil'
       fullPath: '/perfil'
       preLoaderRoute: typeof PerfilRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/oracoes': {
+      id: '/oracoes'
+      path: '/oracoes'
+      fullPath: '/oracoes'
+      preLoaderRoute: typeof OracoesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/matches': {
@@ -686,6 +706,7 @@ const rootRouteChildren: RootRouteChildren = {
   InteressesRoute: InteressesRoute,
   ManualRoute: ManualRoute,
   MatchesRoute: MatchesRoute,
+  OracoesRoute: OracoesRoute,
   PerfilRoute: PerfilRoute,
   SobreRoute: SobreRoute,
   TermosRoute: TermosRoute,
@@ -712,12 +733,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}
