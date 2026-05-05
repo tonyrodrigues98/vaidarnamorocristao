@@ -30,6 +30,7 @@ type DailyPostFull = DailyPost & { bible_reference: string | null; bible_text: s
 type PreCadastro = Database["public"]["Tables"]["pre_cadastros"]["Row"];
 type RestrictedWord = Database["public"]["Tables"]["restricted_words"]["Row"];
 type AdminUserRow = Row & { primaryRole: AppRole };
+type AdminUserRowWithSupport = AdminUserRow & { isSupportAgent: boolean };
 type CoupleStatus = "aceitaram_conversar" | "namorando" | "casamento_marcado";
 type PreMatchRow = {
   id: string;
@@ -90,7 +91,7 @@ function Admin() {
   const [busy, setBusy] = useState<string | null>(null);
   const [reports, setReports] = useState<Array<Report & { reporter?: { full_name: string | null }; reported?: { full_name: string | null; id: string } }>>([]);
   const [posts, setPosts] = useState<DailyPost[]>([]);
-  const [users, setUsers] = useState<AdminUserRow[]>([]);
+  const [users, setUsers] = useState<AdminUserRowWithSupport[]>([]);
   const [preCads, setPreCads] = useState<PreCadastro[]>([]);
   const [editingPC, setEditingPC] = useState<PreCadastro | null>(null);
   const [pcDraft, setPcDraft] = useState<Partial<PreCadastro>>({});
@@ -128,17 +129,23 @@ function Admin() {
     if (status === "users") {
       const [{ data: profs, error: pe }, { data: roles }] = await Promise.all([
         supabase.from("profiles").select("*").order("created_at", { ascending: false }),
-        supabase.from("user_roles").select("user_id, role"),
+        supabase.from("user_roles").select("user_id, role, is_support_agent"),
       ]);
       if (pe) { toast.error(pe.message); return; }
       const roleMap = new Map<string, AppRole>();
-      for (const r of (roles ?? []) as Array<{ user_id: string; role: AppRole }>) {
+      const supportMap = new Map<string, boolean>();
+      for (const r of (roles ?? []) as Array<{ user_id: string; role: AppRole; is_support_agent: boolean | null }>) {
         const cur = roleMap.get(r.user_id);
         if (!cur || ROLE_PRIORITY.indexOf(r.role) < ROLE_PRIORITY.indexOf(cur)) {
           roleMap.set(r.user_id, r.role);
         }
+        if (r.is_support_agent) supportMap.set(r.user_id, true);
       }
-      setUsers(((profs ?? []) as Row[]).map((p) => ({ ...p, primaryRole: roleMap.get(p.id) ?? "user" })));
+      setUsers(((profs ?? []) as Row[]).map((p) => ({
+        ...p,
+        primaryRole: roleMap.get(p.id) ?? "user",
+        isSupportAgent: supportMap.get(p.id) ?? false,
+      })));
       return;
     }
     if (status === "pre_cadastros") {
