@@ -12,19 +12,26 @@ import { toast } from "sonner";
  */
 export function TermsGate() {
   const { user, loading } = useAuth();
-  const [needsAccept, setNeedsAccept] = useState(false);
+  // Optimistic default: assume the user MAY need to accept until we confirm
+  // otherwise. This closes the race window where RLS would otherwise reject
+  // an action ("new row violates row-level security policy") before this
+  // gate has a chance to render.
+  const [needsAccept, setNeedsAccept] = useState(true);
+  const [checked, setChecked] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    if (loading || !user) { setNeedsAccept(false); return; }
+    if (loading || !user) { setNeedsAccept(false); setChecked(true); return; }
+    setChecked(false);
     let ignore = false;
     (async () => {
       // Server-side check: returns current_version + accepted flag + accepted_at
       const { data, error } = await supabase.rpc("get_my_terms_status");
       if (ignore) return;
-      if (error) { setNeedsAccept(true); return; }
+      if (error) { setNeedsAccept(true); setChecked(true); return; }
       const row = Array.isArray(data) ? data[0] : data;
       setNeedsAccept(!row?.accepted);
+      setChecked(true);
     })();
     return () => { ignore = true; };
   }, [user, loading]);
@@ -44,9 +51,16 @@ export function TermsGate() {
   }
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+    <div
+      className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="terms-gate-title"
+    >
       <div className="glass max-w-lg rounded-3xl p-6 md:p-8 shadow-elegant">
-        <h2 className="text-2xl font-bold text-gradient">Atualizamos nossos Termos</h2>
+        <h2 id="terms-gate-title" className="text-2xl font-bold text-gradient">
+          {checked ? "Atualizamos nossos Termos" : "Verificando seus Termos…"}
+        </h2>
         <p className="mt-3 text-foreground/85">
           Para continuar usando a plataforma, você precisa revisar e aceitar nossos{" "}
           <Link to="/termos" className="font-medium text-[var(--rose)] hover:underline">
@@ -62,8 +76,8 @@ export function TermsGate() {
           <Button variant="outline" asChild>
             <Link to="/termos">Ler Termos</Link>
           </Button>
-          <Button onClick={accept} disabled={submitting} className="bg-gradient-love">
-            {submitting ? "Registrando..." : "Aceito"}
+          <Button onClick={accept} disabled={submitting || !checked} className="bg-gradient-love">
+            {submitting ? "Registrando..." : checked ? "Aceito" : "Aguarde…"}
           </Button>
         </div>
       </div>
