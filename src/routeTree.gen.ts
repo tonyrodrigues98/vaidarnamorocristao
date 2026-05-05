@@ -27,6 +27,7 @@ import { Route as SuporteIndexRouteImport } from './routes/suporte/index'
 import { Route as PretendentesIndexRouteImport } from './routes/pretendentes/index'
 import { Route as NoticiasIndexRouteImport } from './routes/noticias.index'
 import { Route as ConversasIndexRouteImport } from './routes/conversas/index'
+import { Route as BlogIndexRouteImport } from './routes/blog.index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as SuporteAjudaRouteImport } from './routes/suporte/ajuda'
 import { Route as SuporteIdRouteImport } from './routes/suporte/$id'
@@ -34,6 +35,7 @@ import { Route as PretendentesIdRouteImport } from './routes/pretendentes/$id'
 import { Route as OnboardingEtapa2RouteImport } from './routes/onboarding/etapa-2'
 import { Route as OnboardingEtapa1RouteImport } from './routes/onboarding/etapa-1'
 import { Route as ConversasMatchIdRouteImport } from './routes/conversas/$matchId'
+import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as AuthSignupRouteImport } from './routes/auth/signup'
 import { Route as AuthResetPasswordRouteImport } from './routes/auth/reset-password'
 import { Route as AuthLoginRouteImport } from './routes/auth/login'
@@ -130,6 +132,11 @@ const ConversasIndexRoute = ConversasIndexRouteImport.update({
   path: '/conversas/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BlogIndexRoute = BlogIndexRouteImport.update({
+  id: '/blog/',
+  path: '/blog/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/admin/',
   path: '/admin/',
@@ -163,6 +170,11 @@ const OnboardingEtapa1Route = OnboardingEtapa1RouteImport.update({
 const ConversasMatchIdRoute = ConversasMatchIdRouteImport.update({
   id: '/conversas/$matchId',
   path: '/conversas/$matchId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BlogSlugRoute = BlogSlugRouteImport.update({
+  id: '/blog/$slug',
+  path: '/blog/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthSignupRoute = AuthSignupRouteImport.update({
@@ -211,6 +223,7 @@ export interface FileRoutesByFullPath {
   '/auth/login': typeof AuthLoginRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/auth/signup': typeof AuthSignupRoute
+  '/blog/$slug': typeof BlogSlugRoute
   '/conversas/$matchId': typeof ConversasMatchIdRoute
   '/onboarding/etapa-1': typeof OnboardingEtapa1Route
   '/onboarding/etapa-2': typeof OnboardingEtapa2Route
@@ -218,6 +231,7 @@ export interface FileRoutesByFullPath {
   '/suporte/$id': typeof SuporteIdRoute
   '/suporte/ajuda': typeof SuporteAjudaRoute
   '/admin/': typeof AdminIndexRoute
+  '/blog/': typeof BlogIndexRoute
   '/conversas/': typeof ConversasIndexRoute
   '/noticias/': typeof NoticiasIndexRoute
   '/pretendentes/': typeof PretendentesIndexRoute
@@ -243,6 +257,7 @@ export interface FileRoutesByTo {
   '/auth/login': typeof AuthLoginRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/auth/signup': typeof AuthSignupRoute
+  '/blog/$slug': typeof BlogSlugRoute
   '/conversas/$matchId': typeof ConversasMatchIdRoute
   '/onboarding/etapa-1': typeof OnboardingEtapa1Route
   '/onboarding/etapa-2': typeof OnboardingEtapa2Route
@@ -250,6 +265,7 @@ export interface FileRoutesByTo {
   '/suporte/$id': typeof SuporteIdRoute
   '/suporte/ajuda': typeof SuporteAjudaRoute
   '/admin': typeof AdminIndexRoute
+  '/blog': typeof BlogIndexRoute
   '/conversas': typeof ConversasIndexRoute
   '/noticias': typeof NoticiasIndexRoute
   '/pretendentes': typeof PretendentesIndexRoute
@@ -276,6 +292,7 @@ export interface FileRoutesById {
   '/auth/login': typeof AuthLoginRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/auth/signup': typeof AuthSignupRoute
+  '/blog/$slug': typeof BlogSlugRoute
   '/conversas/$matchId': typeof ConversasMatchIdRoute
   '/onboarding/etapa-1': typeof OnboardingEtapa1Route
   '/onboarding/etapa-2': typeof OnboardingEtapa2Route
@@ -283,6 +300,7 @@ export interface FileRoutesById {
   '/suporte/$id': typeof SuporteIdRoute
   '/suporte/ajuda': typeof SuporteAjudaRoute
   '/admin/': typeof AdminIndexRoute
+  '/blog/': typeof BlogIndexRoute
   '/conversas/': typeof ConversasIndexRoute
   '/noticias/': typeof NoticiasIndexRoute
   '/pretendentes/': typeof PretendentesIndexRoute
@@ -310,6 +328,7 @@ export interface FileRouteTypes {
     | '/auth/login'
     | '/auth/reset-password'
     | '/auth/signup'
+    | '/blog/$slug'
     | '/conversas/$matchId'
     | '/onboarding/etapa-1'
     | '/onboarding/etapa-2'
@@ -317,6 +336,7 @@ export interface FileRouteTypes {
     | '/suporte/$id'
     | '/suporte/ajuda'
     | '/admin/'
+    | '/blog/'
     | '/conversas/'
     | '/noticias/'
     | '/pretendentes/'
@@ -342,6 +362,7 @@ export interface FileRouteTypes {
     | '/auth/login'
     | '/auth/reset-password'
     | '/auth/signup'
+    | '/blog/$slug'
     | '/conversas/$matchId'
     | '/onboarding/etapa-1'
     | '/onboarding/etapa-2'
@@ -349,6 +370,7 @@ export interface FileRouteTypes {
     | '/suporte/$id'
     | '/suporte/ajuda'
     | '/admin'
+    | '/blog'
     | '/conversas'
     | '/noticias'
     | '/pretendentes'
@@ -374,6 +396,7 @@ export interface FileRouteTypes {
     | '/auth/login'
     | '/auth/reset-password'
     | '/auth/signup'
+    | '/blog/$slug'
     | '/conversas/$matchId'
     | '/onboarding/etapa-1'
     | '/onboarding/etapa-2'
@@ -381,6 +404,7 @@ export interface FileRouteTypes {
     | '/suporte/$id'
     | '/suporte/ajuda'
     | '/admin/'
+    | '/blog/'
     | '/conversas/'
     | '/noticias/'
     | '/pretendentes/'
@@ -407,6 +431,7 @@ export interface RootRouteChildren {
   AuthLoginRoute: typeof AuthLoginRoute
   AuthResetPasswordRoute: typeof AuthResetPasswordRoute
   AuthSignupRoute: typeof AuthSignupRoute
+  BlogSlugRoute: typeof BlogSlugRoute
   ConversasMatchIdRoute: typeof ConversasMatchIdRoute
   OnboardingEtapa1Route: typeof OnboardingEtapa1Route
   OnboardingEtapa2Route: typeof OnboardingEtapa2Route
@@ -414,6 +439,7 @@ export interface RootRouteChildren {
   SuporteIdRoute: typeof SuporteIdRoute
   SuporteAjudaRoute: typeof SuporteAjudaRoute
   AdminIndexRoute: typeof AdminIndexRoute
+  BlogIndexRoute: typeof BlogIndexRoute
   ConversasIndexRoute: typeof ConversasIndexRoute
   NoticiasIndexRoute: typeof NoticiasIndexRoute
   PretendentesIndexRoute: typeof PretendentesIndexRoute
@@ -548,6 +574,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ConversasIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/blog/': {
+      id: '/blog/'
+      path: '/blog'
+      fullPath: '/blog/'
+      preLoaderRoute: typeof BlogIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/': {
       id: '/admin/'
       path: '/admin'
@@ -595,6 +628,13 @@ declare module '@tanstack/react-router' {
       path: '/conversas/$matchId'
       fullPath: '/conversas/$matchId'
       preLoaderRoute: typeof ConversasMatchIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/blog/$slug': {
+      id: '/blog/$slug'
+      path: '/blog/$slug'
+      fullPath: '/blog/$slug'
+      preLoaderRoute: typeof BlogSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth/signup': {
@@ -655,6 +695,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthLoginRoute: AuthLoginRoute,
   AuthResetPasswordRoute: AuthResetPasswordRoute,
   AuthSignupRoute: AuthSignupRoute,
+  BlogSlugRoute: BlogSlugRoute,
   ConversasMatchIdRoute: ConversasMatchIdRoute,
   OnboardingEtapa1Route: OnboardingEtapa1Route,
   OnboardingEtapa2Route: OnboardingEtapa2Route,
@@ -662,6 +703,7 @@ const rootRouteChildren: RootRouteChildren = {
   SuporteIdRoute: SuporteIdRoute,
   SuporteAjudaRoute: SuporteAjudaRoute,
   AdminIndexRoute: AdminIndexRoute,
+  BlogIndexRoute: BlogIndexRoute,
   ConversasIndexRoute: ConversasIndexRoute,
   NoticiasIndexRoute: NoticiasIndexRoute,
   PretendentesIndexRoute: PretendentesIndexRoute,

@@ -1,5 +1,9 @@
 User-agent: *
 Allow: /$
+Allow: /sobre
+Allow: /como-funciona
+Allow: /depoimentos
+Allow: /blog
 Allow: /termos
 Allow: /manual
 
