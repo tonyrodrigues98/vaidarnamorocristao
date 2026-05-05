@@ -52,7 +52,7 @@ function List() {
   const navigate = useNavigate({ from: "/pretendentes/" });
 
   function update<K extends keyof typeof search>(key: K, value: (typeof search)[K] | undefined) {
-    navigate({ search: (prev) => ({ ...prev, [key]: value }) as any, replace: true });
+    navigate({ search: (prev: typeof search) => ({ ...prev, [key]: value }) as any, replace: true });
   }
   function clearAll() {
     navigate({ search: { sort: search.sort } as any, replace: true });
