@@ -14,7 +14,11 @@ import { recomputeMyBadges } from "@/lib/recomputeBadges";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from "@/components/ui/dialog";
-import { Hand, HandHeart, Heart, Plus, Check, Trash2, EyeOff, Sparkles } from "lucide-react";
+import {
+  Hand, HandHeart, Plus, Check, Trash2, EyeOff, Eye, Sparkles, Flag,
+  HeartPulse, Users as UsersIcon, HeartHandshake, Wallet, Flame, MoreHorizontal,
+  ShieldCheck, ShieldAlert, ArchiveRestore, Ban, CheckCircle2,
+} from "lucide-react";
 
 export const Route = createFileRoute("/oracoes")({
   component: () => (<RequireApproved><Page /></RequireApproved>),
@@ -28,20 +32,23 @@ export const Route = createFileRoute("/oracoes")({
 });
 
 type Category = "health" | "family" | "relationship" | "financial" | "spiritual" | "other";
+type ModerationStatus = "visible" | "hidden" | "removed";
 type PrayerRequest = {
   id: string; user_id: string; title: string; content: string;
   category: Category; is_anonymous: boolean; resolved: boolean;
   resolved_at: string | null; created_at: string;
+  moderation_status?: ModerationStatus;
 };
+type ReportRow = { id: string; request_id: string; status: string };
 type ProfileLite = { id: string; full_name: string; photo_url: string | null };
 
-const CATEGORIES: { value: Category; label: string; emoji: string }[] = [
-  { value: "health", label: "Saúde", emoji: "🏥" },
-  { value: "family", label: "Família", emoji: "👨‍👩‍👧" },
-  { value: "relationship", label: "Relacionamento", emoji: "💑" },
-  { value: "financial", label: "Financeiro", emoji: "💰" },
-  { value: "spiritual", label: "Espiritual", emoji: "🙏" },
-  { value: "other", label: "Outro", emoji: "✨" },
+const CATEGORIES: { value: Category; label: string; Icon: typeof HeartPulse }[] = [
+  { value: "health", label: "Saúde", Icon: HeartPulse },
+  { value: "family", label: "Família", Icon: UsersIcon },
+  { value: "relationship", label: "Relacionamento", Icon: HeartHandshake },
+  { value: "financial", label: "Financeiro", Icon: Wallet },
+  { value: "spiritual", label: "Espiritual", Icon: Flame },
+  { value: "other", label: "Outro", Icon: Sparkles },
 ];
 
 function relTime(iso: string) {
@@ -63,6 +70,12 @@ function Page() {
   const [filter, setFilter] = useState<"all" | "active" | "mine" | Category>("active");
   const [openCreate, setOpenCreate] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [reportFor, setReportFor] = useState<PrayerRequest | null>(null);
+  const [reportReason, setReportReason] = useState("");
+  const [reportBusy, setReportBusy] = useState(false);
+  const [reportCounts, setReportCounts] = useState<Record<string, number>>({});
+  const [myReports, setMyReports] = useState<Set<string>>(new Set());
+  const [actionsOpenId, setActionsOpenId] = useState<string | null>(null);
 
   // form state
   const [fTitle, setFTitle] = useState("");
@@ -102,6 +115,19 @@ function Page() {
     });
     setPrayedCounts(counts);
     setMyPrayed(mine);
+
+    // Load reports (RLS limits to own + staff)
+    const { data: reportsData } = await supabase
+      .from("prayer_request_reports")
+      .select("id, request_id, reporter_id, status");
+    const rCounts: Record<string, number> = {};
+    const myR = new Set<string>();
+    (reportsData ?? []).forEach((r: any) => {
+      rCounts[r.request_id] = (rCounts[r.request_id] ?? 0) + 1;
+      if (user && r.reporter_id === user.id) myR.add(r.request_id);
+    });
+    setReportCounts(rCounts);
+    setMyReports(myR);
   }, [user, loadProfiles]);
 
   useEffect(() => {
@@ -111,6 +137,7 @@ function Page() {
       .channel("prayer-requests-live")
       .on("postgres_changes", { event: "*", schema: "public", table: "prayer_requests" }, () => loadAll())
       .on("postgres_changes", { event: "*", schema: "public", table: "prayer_request_prayed" }, () => loadAll())
+      .on("postgres_changes", { event: "*", schema: "public", table: "prayer_request_reports" }, () => loadAll())
       .subscribe();
     return () => { supabase.removeChannel(ch); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -137,7 +164,7 @@ function Page() {
     });
     setBusy(false);
     if (error) { toast.error(friendlyError(error)); return; }
-    toast.success("Pedido de oração compartilhado 🙏");
+    toast.success("Pedido de oração compartilhado");
     setFTitle(""); setFContent(""); setFCategory("other"); setFAnonymous(false);
     setOpenCreate(false);
     void recomputeMyBadges(user.id);
@@ -159,7 +186,7 @@ function Page() {
     } else {
       const { error } = await supabase.from("prayer_request_prayed").insert({ request_id: req.id, user_id: user.id });
       if (error) { toast.error(friendlyError(error)); void loadAll(); }
-      else toast.success("Que Deus ouça sua oração 🙏");
+      else toast.success("Que Deus ouça sua oração");
     }
   }
 
@@ -170,7 +197,7 @@ function Page() {
       .update({ resolved: newVal, resolved_at: newVal ? new Date().toISOString() : null })
       .eq("id", req.id);
     if (error) { toast.error(friendlyError(error)); return; }
-    toast.success(newVal ? "Marcado como respondido! 🎉" : "Reaberto");
+    toast.success(newVal ? "Marcado como respondido" : "Reaberto");
   }
 
   async function deleteRequest(req: PrayerRequest) {
@@ -179,6 +206,35 @@ function Page() {
     if (!confirm("Apagar este pedido?")) return;
     const { error } = await supabase.from("prayer_requests").delete().eq("id", req.id);
     if (error) { toast.error(friendlyError(error)); return; }
+  }
+
+  async function setModeration(req: PrayerRequest, status: ModerationStatus) {
+    if (!canModerate) return;
+    const { error } = await supabase.from("prayer_requests")
+      .update({ moderation_status: status })
+      .eq("id", req.id);
+    if (error) { toast.error(friendlyError(error)); return; }
+    toast.success(
+      status === "visible" ? "Pedido aprovado e visível"
+      : status === "hidden" ? "Pedido ocultado"
+      : "Pedido marcado como removido"
+    );
+    setActionsOpenId(null);
+  }
+
+  async function submitReport() {
+    if (!user || !reportFor) return;
+    const reason = reportReason.trim();
+    if (!reason) { toast.error("Descreva o motivo"); return; }
+    setReportBusy(true);
+    const { error } = await supabase.from("prayer_request_reports").insert({
+      request_id: reportFor.id, reporter_id: user.id, reason,
+    });
+    setReportBusy(false);
+    if (error) { toast.error(friendlyError(error)); return; }
+    toast.success("Denúncia enviada. Obrigado por cuidar da comunidade.");
+    setReportFor(null);
+    setReportReason("");
   }
 
   if (!loading && !user) return <Navigate to="/auth/login" />;
