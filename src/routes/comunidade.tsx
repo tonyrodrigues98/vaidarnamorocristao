@@ -8,7 +8,7 @@ import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Send, Trash2, Users, Pencil, Check, X, Reply, MoreHorizontal, Pin, PinOff, ShieldCheck, Flag } from "lucide-react";
+import { Send, Trash2, Users, Pencil, Check, X, Reply, MoreHorizontal, Pin, PinOff, ShieldCheck, Flag, HandHeart } from "lucide-react";
 import { useLongPress } from "@/hooks/use-long-press";
 import { markSeen } from "@/lib/lastSeen";
 import { RoleBadge } from "@/components/RoleBadge";
@@ -323,10 +323,18 @@ function Comunidade() {
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-love shadow-glow">
             <Users className="h-5 w-5 text-white" />
           </div>
-          <div>
+          <div className="flex-1 min-w-0">
             <h1 className="text-3xl font-semibold">Comunidade</h1>
             <p className="text-sm text-muted-foreground">Chat global em tempo real — converse com todos</p>
           </div>
+          <Link
+            to="/oracoes"
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-border px-3 py-2 text-xs font-medium transition hover:bg-accent"
+          >
+            <HandHeart className="h-4 w-4" />
+            <span className="hidden sm:inline">Pedidos de oração</span>
+            <span className="sm:hidden">Orações</span>
+          </Link>
         </div>
 
         <div className="glass mt-6 flex flex-1 flex-col overflow-hidden rounded-3xl shadow-soft">
