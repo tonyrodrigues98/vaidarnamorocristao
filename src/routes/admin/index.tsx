@@ -74,8 +74,8 @@ function Admin() {
   const availableTabs = useMemo<TabKey[]>(() => {
     if (isSuperAdmin) return ["pending","approved","rejected","banned","reports","posts","users","pre_cadastros","restricted_words","flags"];
     if (isAdmin) return ["pending","approved","rejected","banned","reports","posts","restricted_words","flags"];
-    if (isApresentador) return ["pre_cadastros","flags"];
-    if (isModerador) return ["flags"];
+    if (isApresentador) return ["pre_cadastros","reports","posts","restricted_words","flags"];
+    if (isModerador) return ["reports","posts","restricted_words","flags"];
     return [];
   }, [isAdmin, isSuperAdmin, isApresentador]);
 
