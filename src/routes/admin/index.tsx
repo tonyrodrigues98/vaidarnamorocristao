@@ -388,6 +388,8 @@ function Admin() {
                 onChangeRole={changeUserRole}
                 onToggleVerified={toggleVerified}
                 canVerify={isSuperAdmin || isAdmin}
+                onToggleSupportAgent={toggleSupportAgent}
+                canManageSupportAgents={isSuperAdmin}
               />
             ) : tab === "restricted_words" ? (
               <RestrictedWordsPanel />
