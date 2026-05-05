@@ -11,6 +11,7 @@ type AuthCtx = {
   role: AppRole;
   badgeColor: RoleColor | null;
   publicListing: boolean;
+  isSupportAgent: boolean;
   profileStatus: "pending" | "approved" | "rejected" | "banned" | null;
   isApproved: boolean;
   refreshRole: () => Promise<void>;
@@ -25,6 +26,7 @@ const Ctx = createContext<AuthCtx>({
   role: "user",
   badgeColor: null,
   publicListing: false,
+  isSupportAgent: false,
   profileStatus: null,
   isApproved: false,
   refreshRole: async () => {},
@@ -37,12 +39,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [role, setRole] = useState<AppRole>("user");
   const [badgeColor, setBadgeColor] = useState<RoleColor | null>(null);
   const [publicListing, setPublicListing] = useState(false);
+  const [isSupportAgent, setIsSupportAgent] = useState(false);
   const [profileStatus, setProfileStatus] = useState<AuthCtx["profileStatus"]>(null);
 
   async function loadRoles(uid: string) {
     const { data } = await supabase
       .from("user_roles")
-      .select("role, badge_color, public_listing")
+      .select("role, badge_color, public_listing, is_support_agent")
       .eq("user_id", uid);
     const rows = data ?? [];
     const primary = pickPrimaryRole(rows.map((r) => r.role as AppRole));
@@ -50,6 +53,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setRole(primary);
     setBadgeColor((primaryRow?.badge_color as RoleColor | null) ?? null);
     setPublicListing(!!primaryRow?.public_listing);
+    setIsSupportAgent(rows.some((r) => (r as { is_support_agent?: boolean }).is_support_agent === true));
     const { data: prof } = await supabase
       .from("profiles")
       .select("status")
@@ -68,6 +72,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setRole("user");
         setBadgeColor(null);
         setPublicListing(false);
+        setIsSupportAgent(false);
         setProfileStatus(null);
       }
     });
@@ -93,6 +98,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     role,
     badgeColor,
     publicListing,
+    isSupportAgent,
     profileStatus,
     isApproved,
     refreshRole: async () => {
