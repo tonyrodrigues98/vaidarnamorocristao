@@ -55,6 +55,19 @@ export const Route = createFileRoute("/")({
           areaServed: "BR",
         }),
       },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: [
+            { "@type": "Question", name: "O VaiDarNamoro é gratuito?", acceptedAnswer: { "@type": "Answer", text: "Sim, o cadastro e o uso da plataforma são totalmente gratuitos." } },
+            { "@type": "Question", name: "Quanto tempo leva a aprovação do perfil?", acceptedAnswer: { "@type": "Answer", text: "Nossa equipe revisa cada perfil manualmente em até 48 horas." } },
+            { "@type": "Question", name: "Por que aprovação manual?", acceptedAnswer: { "@type": "Answer", text: "Para garantir que cada pessoa aqui é real, cristã e busca um relacionamento sério." } },
+            { "@type": "Question", name: "Posso me cadastrar sendo divorciado?", acceptedAnswer: { "@type": "Answer", text: "Sim. Solteiros, viúvos e divorciados são bem-vindos." } },
+          ],
+        }),
+      },
     ],
   }),
 });
@@ -170,6 +183,14 @@ function Landing() {
         </section>
 
         <footer className="border-t border-border py-10 text-center text-xs text-muted-foreground">
+          <nav className="mb-4 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm">
+            <Link to="/sobre" className="hover:text-[var(--rose)]">Sobre</Link>
+            <Link to="/como-funciona" className="hover:text-[var(--rose)]">Como funciona</Link>
+            <Link to="/depoimentos" className="hover:text-[var(--rose)]">Depoimentos</Link>
+            <Link to="/blog" className="hover:text-[var(--rose)]">Blog</Link>
+            <Link to="/termos" className="hover:text-[var(--rose)]">Termos</Link>
+            <Link to="/manual" className="hover:text-[var(--rose)]">Manual</Link>
+          </nav>
           © {new Date().getFullYear()} VaiDarNamoro · Feito com fé e cuidado.
         </footer>
       </main>
