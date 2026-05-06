@@ -452,6 +452,45 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          actor_id: string | null
+          body: string | null
+          created_at: string
+          entity_id: string | null
+          id: string
+          link: string | null
+          read_at: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          actor_id?: string | null
+          body?: string | null
+          created_at?: string
+          entity_id?: string | null
+          id?: string
+          link?: string | null
+          read_at?: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          actor_id?: string | null
+          body?: string | null
+          created_at?: string
+          entity_id?: string | null
+          id?: string
+          link?: string | null
+          read_at?: string | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       prayer_request_prayed: {
         Row: {
           created_at: string
@@ -1391,6 +1430,18 @@ export type Database = {
       }
       cancel_account_deletion: { Args: never; Returns: undefined }
       count_advanced_sections: { Args: { _user_id: string }; Returns: number }
+      create_notification: {
+        Args: {
+          _actor_id?: string
+          _body?: string
+          _entity_id?: string
+          _link?: string
+          _title: string
+          _type: string
+          _user_id: string
+        }
+        Returns: string
+      }
       current_terms_version: { Args: never; Returns: string }
       get_active_streak: {
         Args: { _user_id: string }
@@ -1455,6 +1506,7 @@ export type Database = {
       increment_article_views: { Args: { _slug: string }; Returns: undefined }
       is_staff: { Args: { _user_id: string }; Returns: boolean }
       is_support_staff: { Args: { _user_id: string }; Returns: boolean }
+      mark_all_notifications_read: { Args: never; Returns: number }
       mark_message_read: { Args: { _message_id: string }; Returns: undefined }
       recompute_all_badges: { Args: never; Returns: undefined }
       recompute_user_badges: { Args: { _user_id: string }; Returns: undefined }
