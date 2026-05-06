@@ -26,7 +26,6 @@ import { RoleBadge } from "@/components/RoleBadge";
 import { MissionsPanel } from "@/components/MissionsPanel";
 import { recomputeMyBadges } from "@/lib/recomputeBadges";
 import { ProfileAdvancedForm } from "@/components/ProfileAdvancedForm";
-import { AccountDangerZone } from "@/components/AccountDangerZone";
 
 export const Route = createFileRoute("/perfil")({ component: PerfilPage });
 
@@ -374,9 +373,6 @@ function PerfilPage() {
                 Cargo
               </TabsTrigger>
             )}
-            <TabsTrigger value="account" className="flex-1 sm:flex-none">
-              Conta
-            </TabsTrigger>
           </TabsList>
 
           {/* Profile tab */}
@@ -750,18 +746,6 @@ function PerfilPage() {
               </div>
             </TabsContent>
           )}
-
-          <TabsContent value="account" className="mt-6">
-            <div className="rounded-3xl border border-border bg-card/30 p-5 sm:p-6">
-              <h2 className="text-lg font-semibold">Gerenciar conta</h2>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Aqui você pode pausar temporariamente seu perfil ou solicitar a exclusão definitiva da sua conta.
-              </p>
-              <div className="mt-5">
-                <AccountDangerZone />
-              </div>
-            </div>
-          </TabsContent>
         </Tabs>
 
         <div className="mt-6 text-center text-xs text-muted-foreground">

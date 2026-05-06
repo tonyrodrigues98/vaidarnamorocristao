@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { Header } from "@/components/layout/Header";
 import { useNotifications, type AppNotification } from "@/lib/notifications";
 import { Button } from "@/components/ui/button";
@@ -29,11 +29,17 @@ function iconFor(type: string) {
 
 function NotificacoesPage() {
   const { items, unread, loading, markRead, markAllRead, remove } = useNotifications(100);
-  const navigate = useNavigate();
+  const router = useRouter();
 
   const onClick = async (n: AppNotification) => {
     if (!n.read_at) await markRead(n.id);
-    if (n.link) navigate({ to: n.link });
+    if (n.link) {
+      try {
+        router.history.push(n.link);
+      } catch {
+        window.location.assign(n.link);
+      }
+    }
   };
 
   return (
