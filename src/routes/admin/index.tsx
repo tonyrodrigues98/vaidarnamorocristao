@@ -1000,6 +1000,29 @@ function PreCadastrosPanel({
         </DialogContent>
       </Dialog>
 
+      <AlertDialog open={!!duplicateMatch} onOpenChange={(o) => { if (!o) handleDismissDuplicate(); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Já existe um cadastro com esse usuário</AlertDialogTitle>
+            <AlertDialogDescription>
+              Encontramos uma ficha com o usuário do TikTok{" "}
+              <strong>@{normalizeTiktok((duplicateMatch as { tiktok_user?: string | null } | null)?.tiktok_user ?? "")}</strong>
+              {duplicateMatch?.full_name ? <> de <strong>{duplicateMatch.full_name}</strong></> : null}.
+              Deseja carregar essa ficha para editá-la?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={handleDismissDuplicate}>Não, criar nova</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleLoadDuplicate}
+              className="bg-primary text-primary-foreground hover:bg-primary/90 ring-2 ring-primary/40"
+            >
+              Sim, carregar ficha
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <div className="glass rounded-2xl p-4 shadow-soft">
         <Label htmlFor="pc-search" className="text-xs text-muted-foreground">Buscar</Label>
         <Input
