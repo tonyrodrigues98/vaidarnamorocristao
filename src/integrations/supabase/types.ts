@@ -1063,6 +1063,27 @@ export type Database = {
         }
         Relationships: []
       }
+      reactivation_reminders: {
+        Row: {
+          id: string
+          sent_at: string
+          tier: number
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          sent_at?: string
+          tier: number
+          user_id: string
+        }
+        Update: {
+          id?: string
+          sent_at?: string
+          tier?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       reports: {
         Row: {
           admin_notes: string | null
@@ -1513,6 +1534,7 @@ export type Database = {
       request_account_deactivation: { Args: never; Returns: undefined }
       request_account_deletion: { Args: { _confirm: string }; Returns: string }
       request_account_reactivation: { Args: never; Returns: undefined }
+      run_reactivation_reminders: { Args: never; Returns: number }
       touch_my_activity: { Args: never; Returns: undefined }
       unaccent_safe: { Args: { input: string }; Returns: string }
       unmatch: { Args: { _match_id: string }; Returns: undefined }
