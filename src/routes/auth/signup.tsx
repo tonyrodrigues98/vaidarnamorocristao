@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Header } from "@/components/layout/Header";
 import { CURRENT_TERMS_VERSION } from "@/lib/terms";
+import { SocialAuthButtons } from "@/components/SocialAuthButtons";
 
 const schema = z.object({
   email: z.string().trim().email("Email inválido").max(255),
@@ -80,6 +81,13 @@ function Signup() {
               {loading ? "Criando..." : "Criar minha conta"}
             </Button>
           </form>
+          {acceptedTerms ? (
+            <SocialAuthButtons mode="signup" />
+          ) : (
+            <p className="mt-4 text-center text-xs text-muted-foreground">
+              Aceite os Termos para liberar o login com Google ou Apple.
+            </p>
+          )}
           <p className="mt-6 text-center text-sm text-muted-foreground">
             Já tem conta? <Link to="/auth/login" className="font-medium text-[var(--rose)] hover:underline">Entrar</Link>
           </p>
