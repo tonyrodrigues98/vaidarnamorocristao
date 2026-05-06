@@ -20,6 +20,7 @@ import { Route as InteressesRouteImport } from './routes/interesses'
 import { Route as DevocionalRouteImport } from './routes/devocional'
 import { Route as DepoimentosRouteImport } from './routes/depoimentos'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as ContaRouteImport } from './routes/conta'
 import { Route as ComunidadeRouteImport } from './routes/comunidade'
 import { Route as ComoFuncionaRouteImport } from './routes/como-funciona'
 import { Route as BloqueadosRouteImport } from './routes/bloqueados'
@@ -96,6 +97,11 @@ const DepoimentosRoute = DepoimentosRouteImport.update({
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContaRoute = ContaRouteImport.update({
+  id: '/conta',
+  path: '/conta',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ComunidadeRoute = ComunidadeRouteImport.update({
@@ -214,6 +220,7 @@ export interface FileRoutesByFullPath {
   '/bloqueados': typeof BloqueadosRoute
   '/como-funciona': typeof ComoFuncionaRoute
   '/comunidade': typeof ComunidadeRoute
+  '/conta': typeof ContaRoute
   '/dashboard': typeof DashboardRoute
   '/depoimentos': typeof DepoimentosRoute
   '/devocional': typeof DevocionalRoute
@@ -249,6 +256,7 @@ export interface FileRoutesByTo {
   '/bloqueados': typeof BloqueadosRoute
   '/como-funciona': typeof ComoFuncionaRoute
   '/comunidade': typeof ComunidadeRoute
+  '/conta': typeof ContaRoute
   '/dashboard': typeof DashboardRoute
   '/depoimentos': typeof DepoimentosRoute
   '/devocional': typeof DevocionalRoute
@@ -285,6 +293,7 @@ export interface FileRoutesById {
   '/bloqueados': typeof BloqueadosRoute
   '/como-funciona': typeof ComoFuncionaRoute
   '/comunidade': typeof ComunidadeRoute
+  '/conta': typeof ContaRoute
   '/dashboard': typeof DashboardRoute
   '/depoimentos': typeof DepoimentosRoute
   '/devocional': typeof DevocionalRoute
@@ -322,6 +331,7 @@ export interface FileRouteTypes {
     | '/bloqueados'
     | '/como-funciona'
     | '/comunidade'
+    | '/conta'
     | '/dashboard'
     | '/depoimentos'
     | '/devocional'
@@ -357,6 +367,7 @@ export interface FileRouteTypes {
     | '/bloqueados'
     | '/como-funciona'
     | '/comunidade'
+    | '/conta'
     | '/dashboard'
     | '/depoimentos'
     | '/devocional'
@@ -392,6 +403,7 @@ export interface FileRouteTypes {
     | '/bloqueados'
     | '/como-funciona'
     | '/comunidade'
+    | '/conta'
     | '/dashboard'
     | '/depoimentos'
     | '/devocional'
@@ -428,6 +440,7 @@ export interface RootRouteChildren {
   BloqueadosRoute: typeof BloqueadosRoute
   ComoFuncionaRoute: typeof ComoFuncionaRoute
   ComunidadeRoute: typeof ComunidadeRoute
+  ContaRoute: typeof ContaRoute
   DashboardRoute: typeof DashboardRoute
   DepoimentosRoute: typeof DepoimentosRoute
   DevocionalRoute: typeof DevocionalRoute
@@ -536,6 +549,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/conta': {
+      id: '/conta'
+      path: '/conta'
+      fullPath: '/conta'
+      preLoaderRoute: typeof ContaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/comunidade': {
@@ -700,6 +720,7 @@ const rootRouteChildren: RootRouteChildren = {
   BloqueadosRoute: BloqueadosRoute,
   ComoFuncionaRoute: ComoFuncionaRoute,
   ComunidadeRoute: ComunidadeRoute,
+  ContaRoute: ContaRoute,
   DashboardRoute: DashboardRoute,
   DepoimentosRoute: DepoimentosRoute,
   DevocionalRoute: DevocionalRoute,

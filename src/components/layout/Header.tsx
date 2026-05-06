@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import {
   Heart, LogOut, Shield, MessageCircle, Sparkles, Menu, X,
   User as UserIcon, Users, Newspaper, Globe, Ban, Share2, Gem, Sun, Moon, MoreHorizontal,
-  ChevronDown, Heart as HeartIcon, LifeBuoy, BookHeart,
+  ChevronDown, Heart as HeartIcon, LifeBuoy, BookHeart, Settings,
 } from "lucide-react";
 import { toast } from "sonner";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
@@ -231,6 +231,9 @@ export function Header() {
                   <DropdownMenuItem asChild>
                     <Link to="/perfil" className="flex items-center gap-2"><UserIcon className="h-4 w-4" /> Ver perfil</Link>
                   </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/conta" className="flex items-center gap-2"><Settings className="h-4 w-4" /> Conta</Link>
+                  </DropdownMenuItem>
                   {isApproved && (
                     <DropdownMenuItem asChild>
                       <Link to="/verificacao" className="flex items-center gap-2"><Shield className="h-4 w-4" /> Verificação</Link>
@@ -354,6 +357,9 @@ export function Header() {
                 <MobileSection label="Perfil">
                   <MobileItem to="/perfil" onClick={close}>
                     <span className="flex items-center gap-2"><UserIcon className="h-4 w-4" /> Ver perfil</span>
+                  </MobileItem>
+                  <MobileItem to="/conta" onClick={close}>
+                    <span className="flex items-center gap-2"><Settings className="h-4 w-4" /> Conta</span>
                   </MobileItem>
                   {isApproved && (
                     <MobileItem to="/verificacao" onClick={close}>
