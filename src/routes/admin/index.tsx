@@ -901,7 +901,23 @@ function PreCadastrosPanel({
         </div>
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           <div className="space-y-1 sm:col-span-2"><Label>Nome completo</Label><Input value={draft.full_name ?? ""} onChange={(e) => set("full_name", e.target.value || null)} /></div>
-          <div className="space-y-1 sm:col-span-2"><Label>Usuário do TikTok</Label><Input value={(draft as { tiktok_user?: string | null }).tiktok_user ?? ""} onChange={(e) => setDraft({ ...draft, tiktok_user: e.target.value || null } as Partial<PreCadastro>)} placeholder="@usuario" /></div>
+          <div className="space-y-1 sm:col-span-2">
+            <Label>Usuário do TikTok</Label>
+            <Input
+              value={(draft as { tiktok_user?: string | null }).tiktok_user ?? ""}
+              onChange={(e) => {
+                setDuplicateDismissed(null);
+                setDraft({ ...draft, tiktok_user: e.target.value || null } as Partial<PreCadastro>);
+              }}
+              placeholder="@usuario"
+            />
+            {tiktokCheckBusy && (
+              <p className="text-xs text-muted-foreground">Verificando se já existe…</p>
+            )}
+            {!tiktokCheckBusy && duplicateDismissed && normalizeTiktok(currentTiktok) === duplicateDismissed && (
+              <p className="text-xs text-amber-600">Você optou por criar uma nova ficha com este usuário.</p>
+            )}
+          </div>
           <div className="space-y-1"><Label>Idade</Label><Input type="number" value={draft.age ?? ""} onChange={(e) => set("age", numOrNull(e.target.value))} /></div>
           <div className="space-y-1"><Label>Altura (cm)</Label><Input type="number" value={draft.height_cm ?? ""} onChange={(e) => set("height_cm", numOrNull(e.target.value))} /></div>
           <div className="space-y-1">
