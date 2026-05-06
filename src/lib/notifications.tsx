@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 
@@ -19,6 +19,7 @@ export function useNotifications(limit = 50) {
   const { user } = useAuth();
   const [items, setItems] = useState<AppNotification[]>([]);
   const [loading, setLoading] = useState(true);
+  const instanceIdRef = useRef<string>(Math.random().toString(36).slice(2));
 
   const load = useCallback(async () => {
     if (!user) { setItems([]); setLoading(false); return; }
@@ -35,7 +36,7 @@ export function useNotifications(limit = 50) {
   useEffect(() => {
     load();
     if (!user) return;
-    const ch = supabase.channel("notifications-" + user.id);
+    const ch = supabase.channel(`notifications-${user.id}-${instanceIdRef.current}`);
     ch.on(
       "postgres_changes" as any,
       { event: "*", schema: "public", table: "notifications", filter: `user_id=eq.${user.id}` },
