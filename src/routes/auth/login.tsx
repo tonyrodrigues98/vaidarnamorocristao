@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Header } from "@/components/layout/Header";
+import { SocialAuthButtons } from "@/components/SocialAuthButtons";
 
 const schema = z.object({
   email: z.string().trim().email("Email inválido").max(255),
@@ -56,6 +57,7 @@ function Login() {
               {loading ? "Entrando..." : "Entrar"}
             </Button>
           </form>
+          <SocialAuthButtons mode="login" />
           <p className="mt-6 text-center text-sm text-muted-foreground">
             Novo por aqui? <Link to="/auth/signup" className="font-medium text-[var(--rose)] hover:underline">Criar conta</Link>
           </p>

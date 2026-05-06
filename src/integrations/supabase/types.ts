@@ -951,9 +951,13 @@ export type Database = {
           city: string
           contributor_highlight: boolean
           created_at: string
+          deactivated_at: string | null
+          deletion_requested_at: string | null
+          deletion_scheduled_for: string | null
           full_name: string
           height_cm: number | null
           id: string
+          is_anonymized: boolean
           marital: Database["public"]["Enums"]["marital_status"]
           photo_url: string | null
           rejection_reason: string | null
@@ -973,9 +977,13 @@ export type Database = {
           city: string
           contributor_highlight?: boolean
           created_at?: string
+          deactivated_at?: string | null
+          deletion_requested_at?: string | null
+          deletion_scheduled_for?: string | null
           full_name: string
           height_cm?: number | null
           id: string
+          is_anonymized?: boolean
           marital: Database["public"]["Enums"]["marital_status"]
           photo_url?: string | null
           rejection_reason?: string | null
@@ -995,9 +1003,13 @@ export type Database = {
           city?: string
           contributor_highlight?: boolean
           created_at?: string
+          deactivated_at?: string | null
+          deletion_requested_at?: string | null
+          deletion_scheduled_for?: string | null
           full_name?: string
           height_cm?: number | null
           id?: string
+          is_anonymized?: boolean
           marital?: Database["public"]["Enums"]["marital_status"]
           photo_url?: string | null
           rejection_reason?: string | null
@@ -1377,6 +1389,7 @@ export type Database = {
         Args: { _amount?: number; _note?: string; _user_id: string }
         Returns: undefined
       }
+      cancel_account_deletion: { Args: never; Returns: undefined }
       count_advanced_sections: { Args: { _user_id: string }; Returns: number }
       current_terms_version: { Args: never; Returns: string }
       get_active_streak: {
@@ -1445,6 +1458,9 @@ export type Database = {
       mark_message_read: { Args: { _message_id: string }; Returns: undefined }
       recompute_all_badges: { Args: never; Returns: undefined }
       recompute_user_badges: { Args: { _user_id: string }; Returns: undefined }
+      request_account_deactivation: { Args: never; Returns: undefined }
+      request_account_deletion: { Args: { _confirm: string }; Returns: string }
+      request_account_reactivation: { Args: never; Returns: undefined }
       touch_my_activity: { Args: never; Returns: undefined }
       unaccent_safe: { Args: { input: string }; Returns: string }
       unmatch: { Args: { _match_id: string }; Returns: undefined }
