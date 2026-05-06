@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
+import { ProfileCompletenessAlert } from "@/components/ProfileCompletenessAlert";
 import {
   Clock, CheckCircle2, XCircle, Users, Heart, MessageCircle, Sparkles,
   Globe, Newspaper, Eye, TrendingUp, User as UserIcon, Gem,
@@ -228,6 +229,7 @@ function Dashboard() {
 
         {profile.status === "approved" && (
           <>
+            <div className="mt-6"><ProfileCompletenessAlert /></div>
             {/* Resumo */}
             <section className="mt-8">
               <h2 className="text-xl font-semibold">Resumo dos últimos {PERIOD_DAYS} dias</h2>
