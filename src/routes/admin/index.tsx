@@ -12,6 +12,16 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Switch } from "@/components/ui/switch";
 import type { Database } from "@/integrations/supabase/types";
 import { ROLE_CONFIG, ROLE_PRIORITY, type AppRole } from "@/lib/roles";
@@ -723,6 +733,63 @@ function PreCadastrosPanel({
 
   const isFormOpen = creating || !!editing;
 
+  // Real-time TikTok duplicate detection
+  const [tiktokCheckBusy, setTiktokCheckBusy] = useState(false);
+  const [duplicateMatch, setDuplicateMatch] = useState<PreCadastro | null>(null);
+  const [duplicateDismissed, setDuplicateDismissed] = useState<string | null>(null);
+
+  const normalizeTiktok = (v: string) =>
+    v.trim().toLowerCase().replace(/^@+/, "").replace(/\s+/g, "");
+
+  const currentTiktok = (draft as { tiktok_user?: string | null }).tiktok_user ?? "";
+
+  useEffect(() => {
+    if (!isFormOpen) return;
+    const raw = currentTiktok;
+    const norm = normalizeTiktok(raw);
+    if (!norm || norm.length < 2) {
+      setDuplicateMatch(null);
+      return;
+    }
+    if (duplicateDismissed && duplicateDismissed === norm) return;
+
+    let cancelled = false;
+    setTiktokCheckBusy(true);
+    const t = setTimeout(async () => {
+      const { data, error } = await supabase
+        .from("pre_cadastros")
+        .select("*")
+        .ilike("tiktok_user", norm)
+        .limit(5);
+      if (cancelled) return;
+      setTiktokCheckBusy(false);
+      if (error) return;
+      const found = (data ?? []).find((p) => {
+        const t = normalizeTiktok((p as { tiktok_user?: string | null }).tiktok_user ?? "");
+        if (t !== norm) return false;
+        if (editing && p.id === editing.id) return false;
+        return true;
+      });
+      setDuplicateMatch((found as PreCadastro) ?? null);
+    }, 450);
+    return () => { cancelled = true; clearTimeout(t); };
+  }, [currentTiktok, isFormOpen, editing, duplicateDismissed]);
+
+  const handleLoadDuplicate = () => {
+    if (!duplicateMatch) return;
+    setCreating(false);
+    onEdit(duplicateMatch);
+    setDuplicateMatch(null);
+    setDuplicateDismissed(null);
+  };
+  const handleDismissDuplicate = () => {
+    if (duplicateMatch) {
+      const t = normalizeTiktok((duplicateMatch as { tiktok_user?: string | null }).tiktok_user ?? "");
+      setDuplicateDismissed(t);
+    }
+    setDuplicateMatch(null);
+  };
+
   const loadMatches = async () => {
     const { data, error } = await supabase
       .from("pre_cadastro_matches")
@@ -834,7 +901,23 @@ function PreCadastrosPanel({
         </div>
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           <div className="space-y-1 sm:col-span-2"><Label>Nome completo</Label><Input value={draft.full_name ?? ""} onChange={(e) => set("full_name", e.target.value || null)} /></div>
-          <div className="space-y-1 sm:col-span-2"><Label>Usuário do TikTok</Label><Input value={(draft as { tiktok_user?: string | null }).tiktok_user ?? ""} onChange={(e) => setDraft({ ...draft, tiktok_user: e.target.value || null } as Partial<PreCadastro>)} placeholder="@usuario" /></div>
+          <div className="space-y-1 sm:col-span-2">
+            <Label>Usuário do TikTok</Label>
+            <Input
+              value={(draft as { tiktok_user?: string | null }).tiktok_user ?? ""}
+              onChange={(e) => {
+                setDuplicateDismissed(null);
+                setDraft({ ...draft, tiktok_user: e.target.value || null } as Partial<PreCadastro>);
+              }}
+              placeholder="@usuario"
+            />
+            {tiktokCheckBusy && (
+              <p className="text-xs text-muted-foreground">Verificando se já existe…</p>
+            )}
+            {!tiktokCheckBusy && duplicateDismissed && normalizeTiktok(currentTiktok) === duplicateDismissed && (
+              <p className="text-xs text-amber-600">Você optou por criar uma nova ficha com este usuário.</p>
+            )}
+          </div>
           <div className="space-y-1"><Label>Idade</Label><Input type="number" value={draft.age ?? ""} onChange={(e) => set("age", numOrNull(e.target.value))} /></div>
           <div className="space-y-1"><Label>Altura (cm)</Label><Input type="number" value={draft.height_cm ?? ""} onChange={(e) => set("height_cm", numOrNull(e.target.value))} /></div>
           <div className="space-y-1">
@@ -916,6 +999,29 @@ function PreCadastrosPanel({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={!!duplicateMatch} onOpenChange={(o) => { if (!o) handleDismissDuplicate(); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Já existe um cadastro com esse usuário</AlertDialogTitle>
+            <AlertDialogDescription>
+              Encontramos uma ficha com o usuário do TikTok{" "}
+              <strong>@{normalizeTiktok((duplicateMatch as { tiktok_user?: string | null } | null)?.tiktok_user ?? "")}</strong>
+              {duplicateMatch?.full_name ? <> de <strong>{duplicateMatch.full_name}</strong></> : null}.
+              Deseja carregar essa ficha para editá-la?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={handleDismissDuplicate}>Não, criar nova</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleLoadDuplicate}
+              className="bg-primary text-primary-foreground hover:bg-primary/90 ring-2 ring-primary/40"
+            >
+              Sim, carregar ficha
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <div className="glass rounded-2xl p-4 shadow-soft">
         <Label htmlFor="pc-search" className="text-xs text-muted-foreground">Buscar</Label>
