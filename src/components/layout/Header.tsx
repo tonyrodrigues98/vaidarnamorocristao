@@ -6,12 +6,13 @@ import { Button } from "@/components/ui/button";
 import {
   Heart, LogOut, Shield, MessageCircle, Sparkles, Menu, X,
   User as UserIcon, Users, Newspaper, Globe, Ban, Share2, Gem, Sun, Moon, MoreHorizontal,
-  ChevronDown, Heart as HeartIcon, LifeBuoy, BookHeart, Settings,
+  ChevronDown, Heart as HeartIcon, LifeBuoy, BookHeart, Settings, Bell,
 } from "lucide-react";
 import { toast } from "sonner";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { getLastSeen } from "@/lib/lastSeen";
 import { useTheme } from "@/lib/theme";
+import { useNotifications } from "@/lib/notifications";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -51,6 +52,7 @@ export function Header() {
   const canSeeAdminPanel = isAdmin || role === "apresentador" || role === "moderador";
   const navigate = useNavigate();
   const { theme, toggle: toggleTheme } = useTheme();
+  const { unread: notifUnread } = useNotifications(20);
   const [interestCount, setInterestCount] = useState(0);
   const [unreadCount, setUnreadCount] = useState(0);
   const [newsCount, setNewsCount] = useState(0);
@@ -211,6 +213,16 @@ export function Header() {
               <Button variant="ghost" size="icon" onClick={toggleTheme} aria-label={theme === "dark" ? "Modo claro" : "Modo escuro"}>
                 {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
               </Button>
+              <Button variant="ghost" size="icon" asChild aria-label="Notificações" className="relative">
+                <Link to="/notificacoes">
+                  <Bell className="h-4 w-4" />
+                  {notifUnread > 0 && (
+                    <span className="absolute -right-0.5 -top-0.5 rounded-full bg-[var(--rose)] px-1.5 py-[1px] text-[10px] font-bold text-white">
+                      {notifUnread > 99 ? "99+" : notifUnread}
+                    </span>
+                  )}
+                </Link>
+              </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button className="ml-1 flex items-center gap-2 rounded-full border border-border bg-card/60 p-1 pr-2 hover:bg-muted shrink-0" aria-label="Menu do perfil">
@@ -310,6 +322,11 @@ export function Header() {
 
                 <MobileItem to="/dashboard" onClick={close}>
                   <span className="flex items-center gap-2"><Heart className="h-4 w-4" /> Início</span>
+                </MobileItem>
+
+                <MobileItem to="/notificacoes" onClick={close}>
+                  <span className="flex items-center gap-2"><Bell className="h-4 w-4" /> Notificações</span>
+                  <Badge n={notifUnread} />
                 </MobileItem>
 
                 {isApproved && (
