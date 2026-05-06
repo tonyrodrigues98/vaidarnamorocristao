@@ -1,0 +1,103 @@
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { Header } from "@/components/layout/Header";
+import { useNotifications, type AppNotification } from "@/lib/notifications";
+import { Button } from "@/components/ui/button";
+import { Bell, Check, Trash2, Heart, MessageCircle, Sparkles, Shield, BadgeCheck } from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
+import { ptBR } from "date-fns/locale";
+
+export const Route = createFileRoute("/notificacoes")({
+  head: () => ({
+    meta: [
+      { title: "Notificações — VaiDarNamoro" },
+      { name: "description", content: "Sua central de notificações." },
+    ],
+  }),
+  component: NotificacoesPage,
+});
+
+function iconFor(type: string) {
+  switch (type) {
+    case "interest": return <Sparkles className="h-4 w-4" />;
+    case "match": return <Heart className="h-4 w-4" />;
+    case "message": return <MessageCircle className="h-4 w-4" />;
+    case "profile_approved": return <Shield className="h-4 w-4" />;
+    case "profile_verified": return <BadgeCheck className="h-4 w-4" />;
+    default: return <Bell className="h-4 w-4" />;
+  }
+}
+
+function NotificacoesPage() {
+  const { items, unread, loading, markRead, markAllRead, remove } = useNotifications(100);
+  const navigate = useNavigate();
+
+  const onClick = async (n: AppNotification) => {
+    if (!n.read_at) await markRead(n.id);
+    if (n.link) navigate({ to: n.link });
+  };
+
+  return (
+    <div className="min-h-screen">
+      <Header />
+      <main className="mx-auto w-full max-w-2xl px-4 py-8">
+        <div className="mb-6 flex items-center justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-semibold sm:text-3xl">Notificações</h1>
+            <p className="text-sm text-muted-foreground">
+              {unread > 0 ? `${unread} não lida${unread > 1 ? "s" : ""}` : "Tudo em dia"}
+            </p>
+          </div>
+          {unread > 0 && (
+            <Button variant="outline" size="sm" onClick={() => markAllRead()}>
+              <Check className="mr-1 h-4 w-4" /> Marcar todas
+            </Button>
+          )}
+        </div>
+
+        {loading ? (
+          <p className="text-sm text-muted-foreground">Carregando…</p>
+        ) : items.length === 0 ? (
+          <div className="glass rounded-2xl p-8 text-center">
+            <Bell className="mx-auto mb-3 h-8 w-8 text-muted-foreground" />
+            <p className="text-sm text-muted-foreground">Nenhuma notificação por enquanto.</p>
+          </div>
+        ) : (
+          <ul className="space-y-2">
+            {items.map((n) => (
+              <li
+                key={n.id}
+                className={`group flex items-start gap-3 rounded-2xl border p-4 transition ${
+                  n.read_at ? "border-border bg-card/40" : "border-[var(--rose)]/30 bg-[var(--petal)]/30"
+                }`}
+              >
+                <button onClick={() => onClick(n)} className="flex flex-1 items-start gap-3 text-left">
+                  <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--petal)] text-[var(--rose)]">
+                    {iconFor(n.type)}
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-sm font-medium">{n.title}</span>
+                    {n.body && <span className="mt-0.5 block truncate text-xs text-muted-foreground">{n.body}</span>}
+                    <span className="mt-1 block text-[11px] text-muted-foreground">
+                      {formatDistanceToNow(new Date(n.created_at), { addSuffix: true, locale: ptBR })}
+                    </span>
+                  </span>
+                </button>
+                <button
+                  onClick={() => remove(n.id)}
+                  className="rounded-md p-1.5 text-muted-foreground opacity-0 transition hover:bg-muted hover:text-foreground group-hover:opacity-100"
+                  aria-label="Remover"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        <div className="mt-6 text-center">
+          <Link to="/dashboard" className="text-sm text-muted-foreground hover:underline">Voltar ao início</Link>
+        </div>
+      </main>
+    </div>
+  );
+}

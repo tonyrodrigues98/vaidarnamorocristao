@@ -14,6 +14,7 @@ import { Route as TermosRouteImport } from './routes/termos'
 import { Route as SobreRouteImport } from './routes/sobre'
 import { Route as PerfilRouteImport } from './routes/perfil'
 import { Route as OracoesRouteImport } from './routes/oracoes'
+import { Route as NotificacoesRouteImport } from './routes/notificacoes'
 import { Route as MatchesRouteImport } from './routes/matches'
 import { Route as ManualRouteImport } from './routes/manual'
 import { Route as InteressesRouteImport } from './routes/interesses'
@@ -67,6 +68,11 @@ const PerfilRoute = PerfilRouteImport.update({
 const OracoesRoute = OracoesRouteImport.update({
   id: '/oracoes',
   path: '/oracoes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NotificacoesRoute = NotificacoesRouteImport.update({
+  id: '/notificacoes',
+  path: '/notificacoes',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MatchesRoute = MatchesRouteImport.update({
@@ -227,6 +233,7 @@ export interface FileRoutesByFullPath {
   '/interesses': typeof InteressesRoute
   '/manual': typeof ManualRoute
   '/matches': typeof MatchesRoute
+  '/notificacoes': typeof NotificacoesRoute
   '/oracoes': typeof OracoesRoute
   '/perfil': typeof PerfilRoute
   '/sobre': typeof SobreRoute
@@ -263,6 +270,7 @@ export interface FileRoutesByTo {
   '/interesses': typeof InteressesRoute
   '/manual': typeof ManualRoute
   '/matches': typeof MatchesRoute
+  '/notificacoes': typeof NotificacoesRoute
   '/oracoes': typeof OracoesRoute
   '/perfil': typeof PerfilRoute
   '/sobre': typeof SobreRoute
@@ -300,6 +308,7 @@ export interface FileRoutesById {
   '/interesses': typeof InteressesRoute
   '/manual': typeof ManualRoute
   '/matches': typeof MatchesRoute
+  '/notificacoes': typeof NotificacoesRoute
   '/oracoes': typeof OracoesRoute
   '/perfil': typeof PerfilRoute
   '/sobre': typeof SobreRoute
@@ -338,6 +347,7 @@ export interface FileRouteTypes {
     | '/interesses'
     | '/manual'
     | '/matches'
+    | '/notificacoes'
     | '/oracoes'
     | '/perfil'
     | '/sobre'
@@ -374,6 +384,7 @@ export interface FileRouteTypes {
     | '/interesses'
     | '/manual'
     | '/matches'
+    | '/notificacoes'
     | '/oracoes'
     | '/perfil'
     | '/sobre'
@@ -410,6 +421,7 @@ export interface FileRouteTypes {
     | '/interesses'
     | '/manual'
     | '/matches'
+    | '/notificacoes'
     | '/oracoes'
     | '/perfil'
     | '/sobre'
@@ -447,6 +459,7 @@ export interface RootRouteChildren {
   InteressesRoute: typeof InteressesRoute
   ManualRoute: typeof ManualRoute
   MatchesRoute: typeof MatchesRoute
+  NotificacoesRoute: typeof NotificacoesRoute
   OracoesRoute: typeof OracoesRoute
   PerfilRoute: typeof PerfilRoute
   SobreRoute: typeof SobreRoute
@@ -507,6 +520,13 @@ declare module '@tanstack/react-router' {
       path: '/oracoes'
       fullPath: '/oracoes'
       preLoaderRoute: typeof OracoesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/notificacoes': {
+      id: '/notificacoes'
+      path: '/notificacoes'
+      fullPath: '/notificacoes'
+      preLoaderRoute: typeof NotificacoesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/matches': {
@@ -727,6 +747,7 @@ const rootRouteChildren: RootRouteChildren = {
   InteressesRoute: InteressesRoute,
   ManualRoute: ManualRoute,
   MatchesRoute: MatchesRoute,
+  NotificacoesRoute: NotificacoesRoute,
   OracoesRoute: OracoesRoute,
   PerfilRoute: PerfilRoute,
   SobreRoute: SobreRoute,
