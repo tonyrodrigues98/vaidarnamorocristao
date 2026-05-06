@@ -733,6 +733,63 @@ function PreCadastrosPanel({
 
   const isFormOpen = creating || !!editing;
 
+  // Real-time TikTok duplicate detection
+  const [tiktokCheckBusy, setTiktokCheckBusy] = useState(false);
+  const [duplicateMatch, setDuplicateMatch] = useState<PreCadastro | null>(null);
+  const [duplicateDismissed, setDuplicateDismissed] = useState<string | null>(null);
+
+  const normalizeTiktok = (v: string) =>
+    v.trim().toLowerCase().replace(/^@+/, "").replace(/\s+/g, "");
+
+  const currentTiktok = (draft as { tiktok_user?: string | null }).tiktok_user ?? "";
+
+  useEffect(() => {
+    if (!isFormOpen) return;
+    const raw = currentTiktok;
+    const norm = normalizeTiktok(raw);
+    if (!norm || norm.length < 2) {
+      setDuplicateMatch(null);
+      return;
+    }
+    if (duplicateDismissed && duplicateDismissed === norm) return;
+
+    let cancelled = false;
+    setTiktokCheckBusy(true);
+    const t = setTimeout(async () => {
+      const { data, error } = await supabase
+        .from("pre_cadastros")
+        .select("*")
+        .ilike("tiktok_user", norm)
+        .limit(5);
+      if (cancelled) return;
+      setTiktokCheckBusy(false);
+      if (error) return;
+      const found = (data ?? []).find((p) => {
+        const t = normalizeTiktok((p as { tiktok_user?: string | null }).tiktok_user ?? "");
+        if (t !== norm) return false;
+        if (editing && p.id === editing.id) return false;
+        return true;
+      });
+      setDuplicateMatch((found as PreCadastro) ?? null);
+    }, 450);
+    return () => { cancelled = true; clearTimeout(t); };
+  }, [currentTiktok, isFormOpen, editing, duplicateDismissed]);
+
+  const handleLoadDuplicate = () => {
+    if (!duplicateMatch) return;
+    setCreating(false);
+    onEdit(duplicateMatch);
+    setDuplicateMatch(null);
+    setDuplicateDismissed(null);
+  };
+  const handleDismissDuplicate = () => {
+    if (duplicateMatch) {
+      const t = normalizeTiktok((duplicateMatch as { tiktok_user?: string | null }).tiktok_user ?? "");
+      setDuplicateDismissed(t);
+    }
+    setDuplicateMatch(null);
+  };
+
   const loadMatches = async () => {
     const { data, error } = await supabase
       .from("pre_cadastro_matches")
