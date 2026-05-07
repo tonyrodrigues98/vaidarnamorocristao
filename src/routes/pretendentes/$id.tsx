@@ -180,7 +180,23 @@ function Detail() {
   }
 
   if (!loading && !user) return <Navigate to="/auth/login" />;
-  if (profile === undefined) return <div className="min-h-screen"><Header /></div>;
+  if (profile === undefined) return (
+    <div className="min-h-screen">
+      <Header />
+      <main className="mx-auto max-w-4xl px-4 py-10">
+        <div className="mt-6 grid gap-8 md:grid-cols-[2fr_3fr]">
+          <div className="aspect-[4/5] animate-pulse rounded-3xl bg-muted shadow-elegant" />
+          <div className="space-y-4">
+            <div className="h-9 w-2/3 animate-pulse rounded-lg bg-muted" />
+            <div className="h-4 w-1/2 animate-pulse rounded-md bg-muted" />
+            <div className="h-4 w-2/5 animate-pulse rounded-md bg-muted" />
+            <div className="h-32 animate-pulse rounded-2xl bg-muted" />
+            <div className="h-24 animate-pulse rounded-2xl bg-muted" />
+          </div>
+        </div>
+      </main>
+    </div>
+  );
   if (!profile) return (
     <div className="min-h-screen"><Header />
       <main className="mx-auto max-w-3xl px-4 py-12 text-center">
@@ -225,7 +241,14 @@ function Detail() {
           <div className="animate-fade-up">
             <div className="aspect-[4/5] overflow-hidden rounded-3xl shadow-elegant">
               {profile.photo_url ? (
-                <img src={profile.photo_url} alt={profile.full_name} className="h-full w-full object-cover" />
+                <img
+                  src={profile.photo_url}
+                  alt={profile.full_name}
+                  loading="eager"
+                  decoding="async"
+                  fetchPriority="high"
+                  className="h-full w-full object-cover"
+                />
               ) : (
                 <div className="flex h-full w-full items-center justify-center bg-gradient-love">
                   <span className="text-7xl text-white">{profile.full_name.charAt(0)}</span>
