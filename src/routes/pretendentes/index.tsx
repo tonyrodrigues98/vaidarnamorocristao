@@ -348,7 +348,14 @@ function List() {
                   style={{ animationDelay: `${i * 50}ms` }}>
                   <div className="relative aspect-[4/5] overflow-hidden bg-muted">
                     {p.photo_url ? (
-                      <img src={p.photo_url} alt={p.full_name} loading="lazy" className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
+                      <img
+                        src={p.photo_url}
+                        alt={p.full_name}
+                        loading="lazy"
+                        decoding="async"
+                        fetchPriority={i < 3 ? "high" : "low"}
+                        className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                      />
                     ) : (
                       <div className="flex h-full w-full items-center justify-center bg-gradient-love">
                         <span className="text-5xl text-white">{p.full_name.charAt(0)}</span>
