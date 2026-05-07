@@ -1,172 +1,120 @@
-## Visão geral
+## Objetivo
 
-Três ondas sequenciais. Cada onda é entregue, testada e revisada antes da próxima. Foco da meta de 90 dias: **crescer base via SEO orgânico + engajamento**.
+Aproximar a sensação do site da fluidez de um app nativo iOS — respostas instantâneas ao toque, transições suaves, sem aquele "delay de webapp".
 
-```text
-ONDA 1 (SEO público)  →  ONDA 2 (Pretendentes)  →  ONDA 3 (Devocional)
-   ~5 arquivos novos        ~2 arquivos editados      ~3 arquivos + migração
-```
+A lentidão percebida raramente vem de FPS baixo: vem de **3 fontes principais** que vamos atacar em camadas.
 
 ---
 
-## ONDA 1 — Páginas públicas SEO
+## 1. Resposta instantânea ao toque (a maior diferença percebida)
 
-**Objetivo**: criar conteúdo indexável pelo Google. Hoje todo o app é privado (`robots.txt` bloqueia tudo exceto `/`, `/termos`, `/manual`). Sem páginas públicas, não há SEO possível.
+Hoje os botões/links só mostram efeito visual no `:hover`, e em mobile o navegador adiciona ~100-300ms de delay antes do clique. Isso é o que mais dá "sensação de webapp".
 
-### Páginas novas (cada uma com `head()` próprio: title, description, og:title, og:description únicos)
+- Adicionar feedback visual **imediato no `:active`** (escala 0.96, opacidade 0.85) em todos os botões, cards e links interativos — igual ao "tap" do iOS.
+- Adicionar `touch-action: manipulation` global para eliminar o delay de 300ms do double-tap.
+- Adicionar `-webkit-tap-highlight-color: transparent` (já existe parcialmente) e substituir por highlight customizado.
+- Criar utilitário `.tap` no `styles.css` com `transition: transform 80ms, opacity 80ms` + `:active { transform: scale(0.97) }`.
+- Aplicar `.tap` (ou variante) no `Button` base (`src/components/ui/button.tsx`) e nos Cards clicáveis principais.
 
-1. **`/sobre`** (`src/routes/sobre.tsx`)
-   - Quem somos, missão cristã, valores (Mateus 19:6 como âncora)
-   - Equipe / fundadores (texto editável depois)
-   - CTA: "Crie seu perfil"
+## 2. Navegação entre páginas com transição suave
 
-2. **`/como-funciona`** (`src/routes/como-funciona.tsx`)
-   - 4 passos visuais: cadastro → aprovação manual → conheça pretendentes → conversa com propósito
-   - Seção "Por que aprovação manual?" (diferencial vs Tinder)
-   - FAQ embutido (5 perguntas)
+Hoje a troca de rota é um "flash" — conteúdo some e o novo aparece bruscamente.
 
-3. **`/depoimentos`** (`src/routes/depoimentos.tsx`)
-   - Grid de cards com casais (foto + nome + cidade + história curta)
-   - Inicialmente com 3-4 depoimentos placeholder (você substitui por reais depois)
-   - JSON-LD `Review` schema pra rich snippets no Google
+- Habilitar **View Transitions API** no router (`src/router.tsx`) usando `defaultViewTransition: true` do TanStack Router.
+- Adicionar CSS `::view-transition` no `styles.css` com fade + leve slide (180ms, curva ease-out tipo iOS `cubic-bezier(.32,.72,0,1)`).
+- Em rotas com loaders pesados, manter conteúdo antigo até o novo estar pronto (já é comportamento padrão do Router quando há View Transition).
+- Pré-carregar rotas no hover/touch: `defaultPreload: 'intent'` no `createRouter` (já temos `defaultPreloadStaleTime: 0`, falta o `defaultPreload`). Isso faz dados/JS começarem a carregar quando o dedo encosta no link.
 
-4. **`/blog`** (`src/routes/blog.index.tsx`) + **`/blog/$slug`** (`src/routes/blog.$slug.tsx`)
-   - Lista de artigos + página individual
-   - Posts inicialmente em arquivos MDX ou em const (sem precisar de tabela no DB ainda — simples)
-   - 3 posts iniciais escritos por mim com SEO de cauda longa:
-     - "Como saber se é a pessoa certa para casar segundo a Bíblia"
-     - "Namoro cristão sério: 7 sinais que vocês estão no caminho certo"
-     - "O que diz a Bíblia sobre namoro"
-   - Cada post: H1, H2/H3 estruturados, 1.200+ palavras, JSON-LD `Article`
+## 3. Animações com a "curva iOS" e sem jank
 
-### Ajustes de infra SEO
+Substituir transições genéricas por timings que parecem nativos:
 
-5. **`public/robots.txt`** — adicionar `Allow:` para as novas rotas públicas:
-   ```
-   Allow: /sobre
-   Allow: /como-funciona
-   Allow: /depoimentos
-   Allow: /blog
-   ```
+- Definir tokens CSS:
+  - `--ease-ios: cubic-bezier(.32,.72,0,1)` (curva da Apple)
+  - `--dur-fast: 120ms`, `--dur-base: 200ms`, `--dur-slow: 320ms`
+- Reduzir durações longas (várias animações estão em 0.3s–0.8s — derrubar pra 150–250ms exceto fade-in inicial).
+- Forçar `transform`/`opacity` em vez de `top`/`height` onde possível (o `.hover-lift` e `.animate-fade-up` já estão ok).
+- Adicionar `will-change: transform` apenas durante interação (via classe `:active`) — não global, pra não comer GPU.
 
-6. **`public/sitemap.xml`** — adicionar todas as novas URLs com `<lastmod>` e `<priority>`.
+## 4. Scroll com inércia tipo iOS
 
-7. **Header da landing** (`src/routes/index.tsx`) — adicionar links de navegação para as novas páginas (visíveis a usuário não-logado). Internal linking ajuda muito SEO.
+- `-webkit-overflow-scrolling: touch` no `body` e em containers com scroll interno.
+- `overscroll-behavior: contain` em modais/sheets pra não "vazar" scroll pro fundo.
+- `scroll-behavior: smooth` no `html` pra navegação por âncora.
 
-8. **JSON-LD na landing** — adicionar `FAQPage` schema com 4 perguntas comuns ("É grátis?", "Como funciona aprovação?", etc.) → rich snippets no Google.
+## 5. Inputs e formulários sem "delay fantasma"
 
-### Entregável Onda 1
-- 6 páginas públicas indexáveis com metadata única por página
-- Sitemap atualizado
-- 3 posts de blog com conteúdo real cristão (não lorem)
-- Schema.org em todas as páginas relevantes
+- `font-size: 16px` mínimo nos inputs em mobile (evita zoom automático do iOS, que dá sensação de lag).
+- `autocomplete`, `inputmode` e `enterkeyhint` corretos onde faltam — teclado abre mais rápido e com botão certo.
+- Validar isso especialmente em `auth/login`, `auth/signup`, `admin/index`, `onboarding/etapa-*`.
 
----
+## 6. Headers sticky / glass mais leves
 
-## ONDA 2 — Pretendentes: filtros + ordenação por afinidade
+O `.glass` usa `backdrop-filter: blur(14px)` — em scroll com muito conteúdo isso pode causar repaint pesado em mobile. Vamos:
 
-**Objetivo**: usar `src/lib/affinity.ts` que já existe pra entregar matches mais relevantes e dar controle ao usuário.
+- Manter o blur só no header principal (já é o caso).
+- Garantir `transform: translateZ(0)` no header pra promover a uma camada GPU dedicada.
 
-### Mudanças em `src/routes/pretendentes/index.tsx`
+## 7. PWA / standalone polish (opcional, fase final)
 
-1. **Barra de filtros** (drawer no mobile, sidebar no desktop):
-   - Faixa etária (range slider)
-   - Estado (multi-select)
-   - Faixa de altura
-   - Estado civil
-   - Tem filhos (sim/não/tanto faz)
-   - Anos batizado (mínimo)
-   - Ministério (multi-select baseado em `profile_advanced.ministry`)
-   - Linguagem do amor (baseado em `profile_advanced.love_language`)
-
-2. **Ordenação** (select no topo):
-   - **Afinidade** (padrão) — usa `affinity.ts`, ordena desc por nº de badges em comum
-   - Mais recentes
-   - Mais ativos (presence)
-
-3. **Score visual no card**: badge "🔥 87% afinidade" quando score ≥ 70%, calculado client-side a partir do meu `profile_advanced` vs o do pretendente.
-
-4. **Filtros persistem em URL** (search params via TanStack Router) — usuário pode compartilhar/bookmark e voltar com filtros aplicados.
-
-### Sem mudança no DB
-Tudo é client-side filtering em cima do fetch já existente (já buscamos os perfis aprovados). Só precisamos garantir que `profile_advanced` está sendo carregado junto (provavelmente já está pelas mudanças anteriores).
-
-### Entregável Onda 2
-- Filtros funcionais com persistência em URL
-- Ordenação por afinidade como padrão
-- Badge de % de afinidade nos cards
+Se quiser ir mais longe ainda em direção a "app":
+- `manifest.webmanifest` com `display: "standalone"`, ícones, theme color.
+- `apple-mobile-web-app-capable` meta + splash screens iOS.
+- Permite "Adicionar à tela de início" e o site abre sem barra do Safari, indistinguível de um app.
 
 ---
 
-## ONDA 3 — Devocional: streak + pedidos de oração com contador
+## Arquivos que serão tocados
 
-**Objetivo**: dar motivo pra abrir o app todo dia (retenção).
-
-### Migração de DB
-
-1. **Nova tabela `prayer_requests`**:
-   ```sql
-   CREATE TABLE prayer_requests (
-     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-     user_id uuid NOT NULL,
-     content text NOT NULL,
-     anonymous boolean DEFAULT false,
-     created_at timestamptz DEFAULT now(),
-     resolved_at timestamptz
-   );
-   ```
-   RLS: aprovados podem inserir e ler todos; só dono pode deletar/marcar resolvido.
-
-2. **Nova tabela `prayer_request_prayed`** (quem orou por qual pedido):
-   ```sql
-   CREATE TABLE prayer_request_prayed (
-     request_id uuid NOT NULL,
-     user_id uuid NOT NULL,
-     created_at timestamptz DEFAULT now(),
-     PRIMARY KEY (request_id, user_id)
-   );
-   ```
-   RLS: aprovados podem inserir; todos leem (pra contar).
-
-3. **View `devotional_streaks`** — calcula streak atual a partir de `devotional_prayed`:
-   - Streak = dias consecutivos com pelo menos 1 registro de `devotional_prayed` até hoje (ou ontem, se ainda não orou hoje)
-
-### Mudanças em `src/routes/devocional.tsx`
-
-4. **Card de streak no topo**: "🔥 Você está em uma sequência de 12 dias! Não pare hoje."
-   - Cor laranja quando streak ≥ 3
-   - Mensagem motivacional muda conforme dias
-
-5. **Seção "Pedidos de oração da comunidade"**:
-   - Botão "Compartilhar pedido" (modal com textarea, checkbox "anônimo")
-   - Lista dos pedidos recentes (paginada)
-   - Cada card: conteúdo + botão "🙏 Orar por este pedido" + contador "47 irmãos oraram"
-   - Dono pode marcar "Pedido respondido" → move pra seção "Testemunhos respondidos"
-
-6. **Notificação leve**: toast quando alguém ora pelo seu pedido (via realtime na tabela `prayer_request_prayed`).
-
-### Entregável Onda 3
-- Streak visível e motivador no devocional
-- Sistema completo de pedidos de oração com contador
-- 2 tabelas novas com RLS, 1 view de cálculo
-
----
+- `src/styles.css` — utilitário `.tap`, view-transition CSS, tokens de easing/duração, ajustes de scroll
+- `src/router.tsx` — `defaultPreload: 'intent'`, `defaultViewTransition: true`
+- `src/components/ui/button.tsx` — feedback `:active` no `buttonVariants`
+- `src/routes/__root.tsx` — meta `apple-mobile-web-app-capable`, ajustes mobile-web-app
+- (opcional fase 7) `public/manifest.webmanifest` + link no `__root.tsx`
 
 ## Detalhes técnicos
 
-- **TanStack Start head()**: cada rota nova define seu próprio `head()` — title, description, og:title, og:description, og:image herda do root quando faz sentido.
-- **Robots/sitemap**: ambos são arquivos estáticos em `public/` por enquanto. Se a quantidade de blog posts crescer, migramos pra server route dinâmica (`/sitemap.xml` server route).
-- **Blog sem CMS**: posts iniciais como objetos TypeScript (`src/data/blog-posts.ts`). Permite SEO completo sem custo de DB. Quando você quiser editar via admin, migramos pra tabela.
-- **Affinity score**: cálculo já existe em `src/lib/affinity.ts` — só consumir e mostrar.
-- **RLS Onda 3**: todas as policies novas exigem `has_accepted_current_terms` + `profile.status = approved` (consistente com padrão atual da base).
+```css
+/* styles.css — adições principais */
+:root {
+  --ease-ios: cubic-bezier(.32,.72,0,1);
+  --dur-fast: 120ms;
+  --dur-base: 200ms;
+}
 
-## O que NÃO está nesta onda (fica pra depois)
+html { touch-action: manipulation; scroll-behavior: smooth; }
 
-- Indicação de amigos / convites (Onda 4 sugerida)
-- Vídeo de apresentação (Onda 5)
-- Quiz de compatibilidade espiritual (Onda 5)
-- Plano premium (depois de validar tração)
+.tap {
+  transition: transform var(--dur-fast) var(--ease-ios),
+              opacity   var(--dur-fast) var(--ease-ios);
+}
+.tap:active { transform: scale(.97); opacity: .85; }
 
-## Próximo passo
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 220ms;
+  animation-timing-function: var(--ease-ios);
+}
+```
 
-Aprove e eu começo pela **Onda 1 inteira** (SEO público + 3 blog posts reais). Depois te aviso pra revisar antes de partir pra Onda 2. Cada onda é independente e segura.
+```ts
+// router.tsx
+createRouter({
+  routeTree,
+  defaultPreload: 'intent',
+  defaultPreloadStaleTime: 0,
+  defaultViewTransition: true,
+  scrollRestoration: true,
+  defaultErrorComponent: DefaultErrorComponent,
+});
+```
+
+## O que NÃO vamos fazer agora
+
+- Não vamos reescrever páginas pra usar Framer Motion em massa (custo alto, ganho pequeno depois das mudanças acima).
+- Não vamos transformar em PWA full offline — só o polish standalone, se você confirmar.
+- Não vamos mexer em lógica de dados/Realtime — fluidez percebida vem de UI, não de queries (que já são rápidas).
+
+## Pergunta antes de implementar
+
+Quer incluir a **fase 7 (PWA standalone, "Adicionar à tela de início")** nesta entrega ou deixar para depois? Se sim, preciso de um ícone 512×512 (uso o favicon atual se não tiver outro).
