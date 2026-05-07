@@ -45,6 +45,13 @@
 :root {
   --radius: 1rem;
 
+  /* iOS-like motion tokens */
+  --ease-ios: cubic-bezier(.32, .72, 0, 1);
+  --ease-ios-out: cubic-bezier(.16, 1, .3, 1);
+  --dur-fast: 120ms;
+  --dur-base: 200ms;
+  --dur-slow: 320ms;
+
   /* Off-white cream base, warm love palette */
   --background: oklch(0.985 0.006 60);    /* off-white #FDFCF8 */
   --foreground: oklch(0.18 0.01 30);      /* near-black ink */
@@ -142,16 +149,32 @@
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+    touch-action: manipulation;
+    scroll-behavior: smooth;
+    -webkit-tap-highlight-color: transparent;
   }
   body {
     background: var(--background);
     color: var(--color-foreground);
     font-feature-settings: "ss01";
     letter-spacing: -0.01em;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: none;
   }
   html, body {
     overflow-x: hidden;
     max-width: 100vw;
+  }
+  /* Avoid iOS auto-zoom on input focus (which feels laggy) */
+  @media (max-width: 767px) {
+    input, select, textarea {
+      font-size: 16px;
+    }
+  }
+  /* Interactive elements get instant tactile feedback */
+  button, a, [role="button"], summary, label[for] {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
   }
   h1, h2, h3, h4 {
     font-family: var(--font-display);
@@ -162,11 +185,24 @@
 }
 
 @layer utilities {
+  /* App-like tap feedback — apply to clickable cards, list rows, icon buttons */
+  .tap {
+    transition: transform var(--dur-fast) var(--ease-ios),
+                opacity   var(--dur-fast) var(--ease-ios),
+                background-color var(--dur-fast) var(--ease-ios);
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+  .tap:active { transform: scale(0.97); opacity: 0.85; }
+  .tap-sm:active { transform: scale(0.96); }
+
   .glass {
     background: oklch(1 0 0 / 0.7);
     backdrop-filter: blur(14px) saturate(1.2);
     -webkit-backdrop-filter: blur(14px) saturate(1.2);
     border-bottom: 1px solid var(--border);
+    transform: translateZ(0);
+    will-change: transform;
   }
   .dark .glass {
     background: oklch(0.2 0.014 25 / 0.7);
@@ -293,5 +329,37 @@
     -ms-user-select: text !important;
     user-select: text !important;
     -webkit-touch-callout: default !important;
+  }
+}
+
+/* Smooth, app-like page transitions via View Transitions API */
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 220ms;
+    animation-timing-function: var(--ease-ios);
+  }
+  ::view-transition-old(root) {
+    animation-name: vt-fade-out;
+  }
+  ::view-transition-new(root) {
+    animation-name: vt-fade-in;
+  }
+}
+
+@keyframes vt-fade-out {
+  to { opacity: 0; transform: translateY(-4px); }
+}
+@keyframes vt-fade-in {
+  from { opacity: 0; transform: translateY(6px); }
+}
+
+/* Honor user motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
