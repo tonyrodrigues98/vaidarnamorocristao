@@ -1,4 +1,5 @@
 import { friendlyError } from "@/lib/errors";
+import { PhotoCarousel } from "@/components/PhotoCarousel";
 import { createFileRoute, Link, Navigate, useNavigate } from "@tanstack/react-router";
 import { RequireApproved } from "@/components/RequireApproved";
 import { useEffect, useState } from "react";
@@ -248,20 +249,16 @@ function Detail() {
         <div className="mt-6 grid gap-8 md:grid-cols-[2fr_3fr]">
           <div className="animate-fade-up">
             <div className="aspect-[4/5] overflow-hidden rounded-3xl shadow-elegant">
-              {profile.photo_url ? (
-                <img
-                  src={profile.photo_url}
-                  alt={profile.full_name}
-                  loading="eager"
-                  decoding="async"
-                  fetchPriority="high"
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <div className="flex h-full w-full items-center justify-center bg-gradient-love">
-                  <span className="text-7xl text-white">{profile.full_name.charAt(0)}</span>
-                </div>
-              )}
+              <PhotoCarousel
+                photos={[...(profile.photo_url ? [profile.photo_url] : []), ...extraPhotos]}
+                alt={profile.full_name}
+                eager
+                fallback={
+                  <div className="flex h-full w-full items-center justify-center bg-gradient-love">
+                    <span className="text-7xl text-white">{profile.full_name.charAt(0)}</span>
+                  </div>
+                }
+              />
             </div>
           </div>
 
