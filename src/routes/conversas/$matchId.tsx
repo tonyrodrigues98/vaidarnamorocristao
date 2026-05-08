@@ -223,7 +223,7 @@ function Chat() {
               ref={(el) => { messageRefs.current[m.id] = el; }}
               className={`flex scroll-mt-24 transition-colors duration-500 ${mine ? "justify-end" : "justify-start"} ${isFlash ? "rounded-xl bg-primary/10" : ""}`}
             >
-              <div className={`group relative flex max-w-[75%] items-end gap-1 ${mine ? "flex-row-reverse" : "flex-row"}`}>
+              <div className={`group relative flex max-w-[75%] items-end gap-1 ${showActions ? "z-40" : ""} ${mine ? "flex-row-reverse" : "flex-row"}`}>
                 <BubbleContent
                   mine={mine}
                   isMine={!!mine}
@@ -302,7 +302,7 @@ function Chat() {
                 )}
                 {!isEditing && showActions && (
                   <div
-                    className={`absolute z-40 flex items-center gap-1 rounded-full border border-border bg-popover px-1 py-1 shadow-lg ${
+                    className={`absolute z-50 flex items-center gap-1 rounded-full border border-border bg-popover px-1 py-1 shadow-lg ${
                       mine ? "right-0" : "left-0"
                     } -top-10`}
                     onClick={(e) => e.stopPropagation()}
