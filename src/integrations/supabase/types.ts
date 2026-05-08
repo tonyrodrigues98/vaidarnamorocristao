@@ -913,6 +913,30 @@ export type Database = {
         }
         Relationships: []
       }
+      profile_photos: {
+        Row: {
+          created_at: string
+          id: string
+          sort_order: number
+          url: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          sort_order?: number
+          url: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          sort_order?: number
+          url?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profile_preferences: {
         Row: {
           accepts_children: boolean

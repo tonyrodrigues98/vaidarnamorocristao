@@ -18,6 +18,7 @@ import { computeAffinity, type AffinityChip } from "@/lib/affinity";
 import { LOVE_LANGUAGE, MINISTRY, type AdvancedProfile } from "@/lib/profileAdvanced";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
+import { PhotoCarousel } from "@/components/PhotoCarousel";
 
 type Profile = {
   id: string; full_name: string; age: number; city: string; state: string;
@@ -67,6 +68,7 @@ function List() {
   const [staffMap, setStaffMap] = useState<Record<string, StaffInfo>>({});
   const [myAdvanced, setMyAdvanced] = useState<AdvancedProfile | null>(null);
   const [advancedMap, setAdvancedMap] = useState<Record<string, AdvancedProfile>>({});
+  const [extraPhotos, setExtraPhotos] = useState<Record<string, string[]>>({});
 
   useEffect(() => {
     if (!user) return;
@@ -117,13 +119,23 @@ function List() {
         setMyAdvanced(((myAdvRes as any)?.data ?? null) as AdvancedProfile | null);
         const ids = visible.map((p) => p.id);
         if (ids.length > 0) {
-          const { data: advs } = await supabase
-            .from("profile_advanced")
-            .select("*")
-            .in("user_id", ids);
+          const [{ data: advs }, { data: extraPhotosData }] = await Promise.all([
+            supabase.from("profile_advanced").select("*").in("user_id", ids),
+            supabase
+              .from("profile_photos")
+              .select("user_id, url, sort_order, created_at")
+              .in("user_id", ids)
+              .order("sort_order", { ascending: true })
+              .order("created_at", { ascending: true }),
+          ]);
           const m: Record<string, AdvancedProfile> = {};
           for (const a of (advs ?? []) as AdvancedProfile[]) m[a.user_id] = a;
           setAdvancedMap(m);
+          const ph: Record<string, string[]> = {};
+          for (const r of (extraPhotosData ?? []) as Array<{ user_id: string; url: string }>) {
+            (ph[r.user_id] ||= []).push(r.url);
+          }
+          setExtraPhotos(ph);
         }
       }
       setLoadingList(false);
@@ -347,20 +359,17 @@ function List() {
                   className="glass group animate-fade-up overflow-hidden rounded-2xl shadow-soft transition hover:shadow-elegant"
                   style={{ animationDelay: `${i * 50}ms` }}>
                   <div className="relative aspect-[4/5] overflow-hidden bg-muted">
-                    {p.photo_url ? (
-                      <img
-                        src={p.photo_url}
-                        alt={p.full_name}
-                        loading="lazy"
-                        decoding="async"
-                        fetchPriority={i < 3 ? "high" : "low"}
-                        className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-                      />
-                    ) : (
-                      <div className="flex h-full w-full items-center justify-center bg-gradient-love">
-                        <span className="text-5xl text-white">{p.full_name.charAt(0)}</span>
-                      </div>
-                    )}
+                    <PhotoCarousel
+                      photos={[...(p.photo_url ? [p.photo_url] : []), ...(extraPhotos[p.id] ?? [])]}
+                      alt={p.full_name}
+                      eager={i < 3}
+                      imgClassName="transition duration-500 group-hover:scale-105"
+                      fallback={
+                        <div className="flex h-full w-full items-center justify-center bg-gradient-love">
+                          <span className="text-5xl text-white">{p.full_name.charAt(0)}</span>
+                        </div>
+                      }
+                    />
                     {showScore ? (
                       <span className="absolute left-2 top-2 z-10 inline-flex max-w-[calc(100%-3rem)] items-center gap-1 rounded-full bg-[var(--rose)] px-2.5 py-1 text-[11px] font-bold text-white shadow-md sm:text-[10px]">
                         <Flame className="h-3.5 w-3.5 shrink-0 sm:h-3 sm:w-3" />

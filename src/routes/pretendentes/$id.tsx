@@ -1,4 +1,5 @@
 import { friendlyError } from "@/lib/errors";
+import { PhotoCarousel } from "@/components/PhotoCarousel";
 import { createFileRoute, Link, Navigate, useNavigate } from "@tanstack/react-router";
 import { RequireApproved } from "@/components/RequireApproved";
 import { useEffect, useState } from "react";
@@ -50,6 +51,7 @@ function Detail() {
   const [reportAlsoBlock, setReportAlsoBlock] = useState(true);
   const [mySex, setMySex] = useState<string | null>(null);
   const [targetRole, setTargetRole] = useState<{ role: AppRole; color: RoleColor | null } | null>(null);
+  const [extraPhotos, setExtraPhotos] = useState<string[]>([]);
 
   useEffect(() => {
     (async () => {
@@ -87,6 +89,13 @@ function Detail() {
         .select("age_min,age_max,accepts_children,desired_quality,looking_for_bio,location_scope,custom_states")
         .eq("user_id", id).maybeSingle();
       setPrefs((pr ?? null) as Prefs | null);
+      const { data: ph } = await supabase
+        .from("profile_photos")
+        .select("url, sort_order, created_at")
+        .eq("user_id", id)
+        .order("sort_order", { ascending: true })
+        .order("created_at", { ascending: true });
+      setExtraPhotos(((ph ?? []) as Array<{ url: string }>).map((r) => r.url));
     })();
   }, [id]);
 
@@ -240,20 +249,16 @@ function Detail() {
         <div className="mt-6 grid gap-8 md:grid-cols-[2fr_3fr]">
           <div className="animate-fade-up">
             <div className="aspect-[4/5] overflow-hidden rounded-3xl shadow-elegant">
-              {profile.photo_url ? (
-                <img
-                  src={profile.photo_url}
-                  alt={profile.full_name}
-                  loading="eager"
-                  decoding="async"
-                  fetchPriority="high"
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <div className="flex h-full w-full items-center justify-center bg-gradient-love">
-                  <span className="text-7xl text-white">{profile.full_name.charAt(0)}</span>
-                </div>
-              )}
+              <PhotoCarousel
+                photos={[...(profile.photo_url ? [profile.photo_url] : []), ...extraPhotos]}
+                alt={profile.full_name}
+                eager
+                fallback={
+                  <div className="flex h-full w-full items-center justify-center bg-gradient-love">
+                    <span className="text-7xl text-white">{profile.full_name.charAt(0)}</span>
+                  </div>
+                }
+              />
             </div>
           </div>
 

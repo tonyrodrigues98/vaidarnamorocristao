@@ -26,6 +26,7 @@ import { RoleBadge } from "@/components/RoleBadge";
 import { MissionsPanel } from "@/components/MissionsPanel";
 import { recomputeMyBadges } from "@/lib/recomputeBadges";
 import { ProfileAdvancedForm } from "@/components/ProfileAdvancedForm";
+import { ProfilePhotosManager } from "@/components/ProfilePhotosManager";
 
 export const Route = createFileRoute("/perfil")({ component: PerfilPage });
 
@@ -395,6 +396,12 @@ function PerfilPage() {
                 </label>
                 <p className="text-xs text-muted-foreground">Clique para trocar (até 5MB)</p>
               </div>
+
+              {user && (
+                <div className="rounded-2xl border bg-card/50 p-4">
+                  <ProfilePhotosManager userId={user.id} />
+                </div>
+              )}
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2 sm:col-span-2">
