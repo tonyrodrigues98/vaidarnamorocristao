@@ -50,6 +50,7 @@ function Detail() {
   const [reportAlsoBlock, setReportAlsoBlock] = useState(true);
   const [mySex, setMySex] = useState<string | null>(null);
   const [targetRole, setTargetRole] = useState<{ role: AppRole; color: RoleColor | null } | null>(null);
+  const [extraPhotos, setExtraPhotos] = useState<string[]>([]);
 
   useEffect(() => {
     (async () => {
@@ -87,6 +88,13 @@ function Detail() {
         .select("age_min,age_max,accepts_children,desired_quality,looking_for_bio,location_scope,custom_states")
         .eq("user_id", id).maybeSingle();
       setPrefs((pr ?? null) as Prefs | null);
+      const { data: ph } = await supabase
+        .from("profile_photos")
+        .select("url, sort_order, created_at")
+        .eq("user_id", id)
+        .order("sort_order", { ascending: true })
+        .order("created_at", { ascending: true });
+      setExtraPhotos(((ph ?? []) as Array<{ url: string }>).map((r) => r.url));
     })();
   }, [id]);
 
