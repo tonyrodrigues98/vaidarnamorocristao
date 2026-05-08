@@ -26,6 +26,7 @@ import { RoleBadge } from "@/components/RoleBadge";
 import { MissionsPanel } from "@/components/MissionsPanel";
 import { recomputeMyBadges } from "@/lib/recomputeBadges";
 import { ProfileAdvancedForm } from "@/components/ProfileAdvancedForm";
+import { ProfilePhotosManager } from "@/components/ProfilePhotosManager";
 
 export const Route = createFileRoute("/perfil")({ component: PerfilPage });
 
