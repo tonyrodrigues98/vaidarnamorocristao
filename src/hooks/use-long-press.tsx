@@ -17,6 +17,19 @@ export function useLongPress(onLongPress: () => void, delay = 450) {
       try { (navigator as Navigator).vibrate?.(30); } catch { /* noop */ }
     }
     onLongPress();
+    // Suppress the synthetic click that fires on touchend after a long-press.
+    // Without this, on iOS/Android the click hit-tests the freshly rendered
+    // overlay (fixed inset-0) and immediately closes the action menu.
+    if (typeof document !== "undefined") {
+      const suppress = (e: Event) => {
+        e.stopPropagation();
+        e.preventDefault();
+      };
+      document.addEventListener("click", suppress, { capture: true, once: true });
+      setTimeout(() => {
+        document.removeEventListener("click", suppress, true);
+      }, 700);
+    }
   }, [onLongPress]);
 
   const clear = useCallback(() => {
