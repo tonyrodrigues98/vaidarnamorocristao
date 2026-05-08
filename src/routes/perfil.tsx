@@ -397,6 +397,12 @@ function PerfilPage() {
                 <p className="text-xs text-muted-foreground">Clique para trocar (até 5MB)</p>
               </div>
 
+              {user && (
+                <div className="rounded-2xl border bg-card/50 p-4">
+                  <ProfilePhotosManager userId={user.id} />
+                </div>
+              )}
+
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2 sm:col-span-2">
                   <Label>Nome completo</Label>
