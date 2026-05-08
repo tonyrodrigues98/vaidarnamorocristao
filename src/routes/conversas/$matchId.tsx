@@ -306,12 +306,15 @@ function Chat() {
                       mine ? "right-0" : "left-0"
                     } -top-10`}
                     onClick={(e) => e.stopPropagation()}
+                    onTouchStart={(e) => e.stopPropagation()}
+                    role="menu"
+                    style={{ touchAction: "manipulation", pointerEvents: "auto" }}
                   >
                     <button
                       type="button"
                       onClick={() => { setReplyTo(m); setActionsOpenId(null); }}
                       aria-label="Responder"
-                      className="flex items-center gap-1 rounded-full px-2 py-1 text-xs text-foreground hover:bg-accent"
+                      className="flex items-center gap-1 rounded-full px-2 py-1 text-xs text-foreground hover:bg-accent active:bg-accent/80 [touch-action:manipulation]"
                     >
                       <Reply className="h-4 w-4" /> Responder
                     </button>
@@ -321,7 +324,7 @@ function Chat() {
                           type="button"
                           onClick={() => { setActionsOpenId(null); startEdit(m); }}
                           aria-label="Editar mensagem"
-                          className="flex items-center gap-1 rounded-full px-2 py-1 text-xs text-foreground hover:bg-accent"
+                          className="flex items-center gap-1 rounded-full px-2 py-1 text-xs text-foreground hover:bg-accent active:bg-accent/80 [touch-action:manipulation]"
                         >
                           <Pencil className="h-4 w-4" /> Editar
                         </button>
@@ -329,7 +332,7 @@ function Chat() {
                           type="button"
                           onClick={() => { setActionsOpenId(null); handleDelete(m.id); }}
                           aria-label="Apagar mensagem"
-                          className="flex items-center gap-1 rounded-full px-2 py-1 text-xs text-destructive hover:bg-destructive/10"
+                          className="flex items-center gap-1 rounded-full px-2 py-1 text-xs text-destructive hover:bg-destructive/10 active:bg-destructive/20 [touch-action:manipulation]"
                         >
                           <Trash2 className="h-4 w-4" /> Excluir
                         </button>

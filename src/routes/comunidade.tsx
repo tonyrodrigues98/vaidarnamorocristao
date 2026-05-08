@@ -556,10 +556,13 @@ function Comunidade() {
                       <div
                         className="absolute right-0 -top-10 z-50 flex items-center gap-1 rounded-full border border-border bg-popover px-1 py-1 shadow-lg"
                         onClick={(e) => e.stopPropagation()}
+                        onTouchStart={(e) => e.stopPropagation()}
+                        role="menu"
+                        style={{ touchAction: "manipulation", pointerEvents: "auto" }}
                       >
                         <button
                           onClick={() => { setReplyTo(m); setActionsOpenId(null); }}
-                          className="flex items-center gap-1 rounded-full px-2 py-1 text-xs text-foreground hover:bg-accent"
+                          className="flex items-center gap-1 rounded-full px-2 py-1 text-xs text-foreground hover:bg-accent active:bg-accent/80 [touch-action:manipulation]"
                           aria-label="Responder"
                         >
                           <Reply className="h-4 w-4" /> Responder
@@ -567,7 +570,7 @@ function Comunidade() {
                         {canEdit && (
                           <button
                             onClick={() => { setActionsOpenId(null); startEdit(m); }}
-                            className="flex items-center gap-1 rounded-full px-2 py-1 text-xs text-foreground hover:bg-accent"
+                            className="flex items-center gap-1 rounded-full px-2 py-1 text-xs text-foreground hover:bg-accent active:bg-accent/80 [touch-action:manipulation]"
                             aria-label="Editar"
                           >
                             <Pencil className="h-4 w-4" /> Editar
@@ -576,7 +579,7 @@ function Comunidade() {
                         {canDelete && (
                           <button
                             onClick={() => { setActionsOpenId(null); remove(m.id); }}
-                            className="flex items-center gap-1 rounded-full px-2 py-1 text-xs text-destructive hover:bg-destructive/10"
+                            className="flex items-center gap-1 rounded-full px-2 py-1 text-xs text-destructive hover:bg-destructive/10 active:bg-destructive/20 [touch-action:manipulation]"
                             aria-label="Apagar"
                           >
                             <Trash2 className="h-4 w-4" /> Excluir
@@ -585,7 +588,7 @@ function Comunidade() {
                         {canFlagMessages && user && m.sender_id !== user.id && (
                           <button
                             onClick={() => { setActionsOpenId(null); openFlagDialog(m); }}
-                            className="flex items-center gap-1 rounded-full px-2 py-1 text-xs text-amber-600 hover:bg-amber-500/10"
+                            className="flex items-center gap-1 rounded-full px-2 py-1 text-xs text-amber-600 hover:bg-amber-500/10 active:bg-amber-500/20 [touch-action:manipulation]"
                             aria-label={myFlag ? "Editar sinalização" : "Sinalizar"}
                           >
                             <Flag className="h-4 w-4" /> {myFlag ? "Editar sinal." : "Sinalizar"}
@@ -594,7 +597,7 @@ function Comunidade() {
                         {isAdmin && (
                           <button
                             onClick={() => { setActionsOpenId(null); togglePin(m); }}
-                            className="flex items-center gap-1 rounded-full px-2 py-1 text-xs text-foreground hover:bg-accent"
+                            className="flex items-center gap-1 rounded-full px-2 py-1 text-xs text-foreground hover:bg-accent active:bg-accent/80 [touch-action:manipulation]"
                             aria-label={m.pinned_at ? "Desafixar" : "Fixar"}
                           >
                             {m.pinned_at ? <><PinOff className="h-4 w-4" /> Desafixar</> : <><Pin className="h-4 w-4" /> Fixar</>}
