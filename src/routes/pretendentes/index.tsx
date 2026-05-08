@@ -67,6 +67,7 @@ function List() {
   const [staffMap, setStaffMap] = useState<Record<string, StaffInfo>>({});
   const [myAdvanced, setMyAdvanced] = useState<AdvancedProfile | null>(null);
   const [advancedMap, setAdvancedMap] = useState<Record<string, AdvancedProfile>>({});
+  const [extraPhotos, setExtraPhotos] = useState<Record<string, string[]>>({});
 
   useEffect(() => {
     if (!user) return;
@@ -117,13 +118,23 @@ function List() {
         setMyAdvanced(((myAdvRes as any)?.data ?? null) as AdvancedProfile | null);
         const ids = visible.map((p) => p.id);
         if (ids.length > 0) {
-          const { data: advs } = await supabase
-            .from("profile_advanced")
-            .select("*")
-            .in("user_id", ids);
+          const [{ data: advs }, { data: extraPhotosData }] = await Promise.all([
+            supabase.from("profile_advanced").select("*").in("user_id", ids),
+            supabase
+              .from("profile_photos")
+              .select("user_id, url, sort_order, created_at")
+              .in("user_id", ids)
+              .order("sort_order", { ascending: true })
+              .order("created_at", { ascending: true }),
+          ]);
           const m: Record<string, AdvancedProfile> = {};
           for (const a of (advs ?? []) as AdvancedProfile[]) m[a.user_id] = a;
           setAdvancedMap(m);
+          const ph: Record<string, string[]> = {};
+          for (const r of (extraPhotosData ?? []) as Array<{ user_id: string; url: string }>) {
+            (ph[r.user_id] ||= []).push(r.url);
+          }
+          setExtraPhotos(ph);
         }
       }
       setLoadingList(false);
