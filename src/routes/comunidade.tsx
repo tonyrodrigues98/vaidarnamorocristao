@@ -432,7 +432,7 @@ function Comunidade() {
                   <div
                     key={m.id}
                     ref={(el) => { messageRefs.current[m.id] = el; }}
-                    className={`group relative flex scroll-mt-24 items-start gap-3 rounded-xl transition-colors duration-500 ${isFlash ? "bg-primary/10" : ""} ${isFlagged && isStaffViewer ? "bg-destructive/5 ring-1 ring-destructive/30 px-2 py-1" : ""}`}
+                    className={`group relative flex scroll-mt-24 items-start gap-3 rounded-xl transition-colors duration-500 ${showActions ? "z-40" : ""} ${isFlash ? "bg-primary/10" : ""} ${isFlagged && isStaffViewer ? "bg-destructive/5 ring-1 ring-destructive/30 px-2 py-1" : ""}`}
                   >
                     {mine ? (
                       <div className={`h-9 w-9 shrink-0 overflow-hidden rounded-full bg-muted ${senderIsAdmin ? "ring-2 ring-[var(--gold)] ring-offset-2 ring-offset-background" : senderContribOn ? "ring-2 ring-emerald-500 ring-offset-2 ring-offset-background" : senderIsStaff ? "ring-2 ring-primary/40 ring-offset-2 ring-offset-background" : ""}`}>
@@ -554,7 +554,7 @@ function Comunidade() {
                     )}
                     {!isEditing && showActions && (
                       <div
-                        className="absolute right-0 -top-10 z-40 flex items-center gap-1 rounded-full border border-border bg-popover px-1 py-1 shadow-lg"
+                        className="absolute right-0 -top-10 z-50 flex items-center gap-1 rounded-full border border-border bg-popover px-1 py-1 shadow-lg"
                         onClick={(e) => e.stopPropagation()}
                       >
                         <button
