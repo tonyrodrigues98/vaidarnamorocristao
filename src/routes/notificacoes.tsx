@@ -81,8 +81,8 @@ function NotificacoesPage() {
                     {iconFor(n.type)}
                   </span>
                   <span className="min-w-0 flex-1">
-                    <span className="block text-sm font-medium">{n.title}</span>
-                    {n.body && <span className="mt-0.5 block truncate text-xs text-muted-foreground">{n.body}</span>}
+                    <span className="block break-words text-sm font-medium">{n.title}</span>
+                    {n.body && <span className="mt-0.5 block break-words text-xs text-muted-foreground">{n.body}</span>}
                     <span className="mt-1 block text-[11px] text-muted-foreground">
                       {formatDistanceToNow(new Date(n.created_at), { addSuffix: true, locale: ptBR })}
                     </span>
