@@ -9,7 +9,7 @@ import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Send, Trash2, Users, Pencil, Check, X, Reply, MoreHorizontal, Pin, PinOff, ShieldCheck, Flag, HandHeart } from "lucide-react";
-import { useLongPress } from "@/hooks/use-long-press";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { markSeen } from "@/lib/lastSeen";
 import { RoleBadge } from "@/components/RoleBadge";
 import { type AppRole, type RoleColor, ROLE_PRIORITY } from "@/lib/roles";
@@ -338,13 +338,6 @@ function Comunidade() {
         </div>
 
         <div className="glass mt-6 flex flex-1 flex-col overflow-hidden rounded-3xl shadow-soft">
-          {actionsOpenId && (
-            <div
-              className="fixed inset-0 z-30"
-              onClick={() => setActionsOpenId(null)}
-              aria-hidden="true"
-            />
-          )}
           {messages.some((m) => m.pinned_at) && (
             <div className="space-y-2 border-b border-primary/20 bg-primary/5 p-3">
               <div className="flex items-center gap-2 text-xs font-semibold text-primary">
@@ -416,7 +409,6 @@ function Comunidade() {
                 const isEditing = editingId === m.id;
                 const name = p?.full_name?.split(" ")[0] ?? "Alguém";
                 const showActions = actionsOpenId === m.id;
-                const enableLongPress = !isEditing;
                 const replied = m.reply_to_id ? messages.find((x) => x.id === m.reply_to_id) : null;
                 const repliedName = replied
                   ? (profiles[replied.sender_id]?.full_name?.split(" ")[0] ?? "Alguém")
@@ -432,7 +424,7 @@ function Comunidade() {
                   <div
                     key={m.id}
                     ref={(el) => { messageRefs.current[m.id] = el; }}
-                    className={`group relative flex scroll-mt-24 items-start gap-3 rounded-xl transition-colors duration-500 ${showActions ? "z-40" : ""} ${isFlash ? "bg-primary/10" : ""} ${isFlagged && isStaffViewer ? "bg-destructive/5 ring-1 ring-destructive/30 px-2 py-1" : ""}`}
+                    className={`group relative flex scroll-mt-24 items-start gap-3 rounded-xl transition-colors duration-500 ${isFlash ? "bg-primary/10" : ""} ${isFlagged && isStaffViewer ? "bg-destructive/5 ring-1 ring-destructive/30 px-2 py-1" : ""}`}
                   >
                     {mine ? (
                       <div className={`h-9 w-9 shrink-0 overflow-hidden rounded-full bg-muted ${senderIsAdmin ? "ring-2 ring-[var(--gold)] ring-offset-2 ring-offset-background" : senderContribOn ? "ring-2 ring-emerald-500 ring-offset-2 ring-offset-background" : senderIsStaff ? "ring-2 ring-primary/40 ring-offset-2 ring-offset-background" : ""}`}>
@@ -464,8 +456,6 @@ function Comunidade() {
                       </Link>
                     )}
                     <BubbleWrap
-                      enableLongPress={!!enableLongPress}
-                      onLongPress={() => setActionsOpenId(m.id)}
                       highlighted={showActions || isFlash}
                       isAdmin={senderIsAdmin}
                       isContributor={senderContribOn}
@@ -542,68 +532,15 @@ function Comunidade() {
                         <p className="mt-0.5 whitespace-pre-wrap break-words text-sm text-foreground/90">{m.content}</p>
                       )}
                     </BubbleWrap>
-                    {!isEditing && !showActions && (
+                    {!isEditing && (
                       <button
                         type="button"
                         onClick={(e) => { e.stopPropagation(); setActionsOpenId(m.id); }}
                         aria-label="Mais opções"
-                        className="hidden md:flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-muted-foreground opacity-0 transition-opacity hover:bg-accent hover:text-foreground group-hover:opacity-100 focus:opacity-100"
+                        className="flex h-8 w-8 shrink-0 items-center justify-center self-start rounded-full text-muted-foreground transition-opacity hover:bg-accent hover:text-foreground md:opacity-0 md:group-hover:opacity-100 md:focus:opacity-100"
                       >
                         <MoreHorizontal className="h-4 w-4" />
                       </button>
-                    )}
-                    {!isEditing && showActions && (
-                      <div
-                        className="absolute right-0 -top-10 z-50 flex items-center gap-1 rounded-full border border-border bg-popover px-1 py-1 shadow-lg"
-                        onClick={(e) => e.stopPropagation()}
-                        onTouchStart={(e) => e.stopPropagation()}
-                        role="menu"
-                        style={{ touchAction: "manipulation", pointerEvents: "auto" }}
-                      >
-                        <button
-                          onClick={() => { setReplyTo(m); setActionsOpenId(null); }}
-                          className="flex items-center gap-1 rounded-full px-2 py-1 text-xs text-foreground hover:bg-accent active:bg-accent/80 [touch-action:manipulation]"
-                          aria-label="Responder"
-                        >
-                          <Reply className="h-4 w-4" /> Responder
-                        </button>
-                        {canEdit && (
-                          <button
-                            onClick={() => { setActionsOpenId(null); startEdit(m); }}
-                            className="flex items-center gap-1 rounded-full px-2 py-1 text-xs text-foreground hover:bg-accent active:bg-accent/80 [touch-action:manipulation]"
-                            aria-label="Editar"
-                          >
-                            <Pencil className="h-4 w-4" /> Editar
-                          </button>
-                        )}
-                        {canDelete && (
-                          <button
-                            onClick={() => { setActionsOpenId(null); remove(m.id); }}
-                            className="flex items-center gap-1 rounded-full px-2 py-1 text-xs text-destructive hover:bg-destructive/10 active:bg-destructive/20 [touch-action:manipulation]"
-                            aria-label="Apagar"
-                          >
-                            <Trash2 className="h-4 w-4" /> Excluir
-                          </button>
-                        )}
-                        {canFlagMessages && user && m.sender_id !== user.id && (
-                          <button
-                            onClick={() => { setActionsOpenId(null); openFlagDialog(m); }}
-                            className="flex items-center gap-1 rounded-full px-2 py-1 text-xs text-amber-600 hover:bg-amber-500/10 active:bg-amber-500/20 [touch-action:manipulation]"
-                            aria-label={myFlag ? "Editar sinalização" : "Sinalizar"}
-                          >
-                            <Flag className="h-4 w-4" /> {myFlag ? "Editar sinal." : "Sinalizar"}
-                          </button>
-                        )}
-                        {isAdmin && (
-                          <button
-                            onClick={() => { setActionsOpenId(null); togglePin(m); }}
-                            className="flex items-center gap-1 rounded-full px-2 py-1 text-xs text-foreground hover:bg-accent active:bg-accent/80 [touch-action:manipulation]"
-                            aria-label={m.pinned_at ? "Desafixar" : "Fixar"}
-                          >
-                            {m.pinned_at ? <><PinOff className="h-4 w-4" /> Desafixar</> : <><Pin className="h-4 w-4" /> Fixar</>}
-                          </button>
-                        )}
-                      </div>
                     )}
                   </div>
                 );
@@ -652,6 +589,20 @@ function Comunidade() {
         </div>
       </main>
       <RestrictedWordDialog word={warning} onClose={() => setWarning(null)} />
+      <ActionsSheet
+        msg={actionsOpenId ? messages.find((m) => m.id === actionsOpenId) ?? null : null}
+        onClose={() => setActionsOpenId(null)}
+        currentUserId={user?.id ?? null}
+        canModerateMessages={canModerateMessages}
+        canFlagMessages={canFlagMessages}
+        isAdmin={isAdmin}
+        myFlags={myFlags}
+        onReply={(m) => { setReplyTo(m); setActionsOpenId(null); }}
+        onEdit={(m) => { setActionsOpenId(null); startEdit(m); }}
+        onDelete={(m) => { setActionsOpenId(null); remove(m.id); }}
+        onFlag={(m) => { setActionsOpenId(null); openFlagDialog(m); }}
+        onPin={(m) => { setActionsOpenId(null); togglePin(m); }}
+      />
       <Dialog open={!!flagDialog} onOpenChange={(o) => { if (!o) { setFlagDialog(null); setFlagReason(""); } }}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
@@ -709,35 +660,135 @@ function RestrictedWordDialog({ word, onClose }: { word: string | null; onClose:
 }
 
 function BubbleWrap({
-  enableLongPress,
-  onLongPress,
   highlighted,
   isAdmin,
   isContributor,
   children,
 }: {
-  enableLongPress: boolean;
-  onLongPress: () => void;
   highlighted: boolean;
   isAdmin?: boolean;
   isContributor?: boolean;
   children: React.ReactNode;
 }) {
-  const { pressing, handlers } = useLongPress(onLongPress, 450);
-  const bound = enableLongPress ? handlers : {};
   return (
     <div
-      {...bound}
-      className={`flex-1 min-w-0 rounded-xl transition-all duration-200 ${
-        enableLongPress ? "select-none md:select-text" : ""
-      } ${isAdmin ? "admin-sparkle border-l-2 border-[var(--gold)] bg-[var(--gold-soft)]/30 pl-2" : isContributor ? "contributor-sparkle border-l-2 border-emerald-500 bg-emerald-500/10 pl-2" : ""} ${
-        pressing ? "scale-[0.98] bg-primary/5 ring-2 ring-primary/30 px-2 -mx-2" : ""
-      } ${
+      className={`flex-1 min-w-0 rounded-xl transition-all duration-200 ${isAdmin ? "admin-sparkle border-l-2 border-[var(--gold)] bg-[var(--gold-soft)]/30 pl-2" : isContributor ? "contributor-sparkle border-l-2 border-emerald-500 bg-emerald-500/10 pl-2" : ""} ${
         highlighted ? "bg-primary/10 ring-2 ring-primary/50 px-2 -mx-2" : ""
       }`}
-      style={enableLongPress ? { WebkitUserSelect: "none", WebkitTouchCallout: "none" } : undefined}
     >
       {children}
     </div>
+  );
+}
+
+function ActionsSheet({
+  msg,
+  onClose,
+  currentUserId,
+  canModerateMessages,
+  canFlagMessages,
+  isAdmin,
+  myFlags,
+  onReply,
+  onEdit,
+  onDelete,
+  onFlag,
+  onPin,
+}: {
+  msg: GMsg | null;
+  onClose: () => void;
+  currentUserId: string | null;
+  canModerateMessages: boolean;
+  canFlagMessages: boolean;
+  isAdmin: boolean;
+  myFlags: Record<string, { id: string; reason: string }>;
+  onReply: (m: GMsg) => void;
+  onEdit: (m: GMsg) => void;
+  onDelete: (m: GMsg) => void;
+  onFlag: (m: GMsg) => void;
+  onPin: (m: GMsg) => void;
+}) {
+  const open = !!msg;
+  const mine = !!msg && !!currentUserId && msg.sender_id === currentUserId;
+  const canDelete = mine || canModerateMessages;
+  const canEdit = mine;
+  const canShowFlag = canFlagMessages && !!msg && !!currentUserId && msg.sender_id !== currentUserId;
+  const myFlag = msg ? myFlags[msg.id] : undefined;
+  return (
+    <Sheet open={open} onOpenChange={(o) => { if (!o) onClose(); }}>
+      <SheetContent
+        side="bottom"
+        className="rounded-t-2xl p-0 sm:max-w-md sm:mx-auto"
+      >
+        <SheetHeader className="px-4 pt-4 pb-2">
+          <SheetTitle className="text-base">Ações da mensagem</SheetTitle>
+        </SheetHeader>
+        {msg && (
+          <div className="px-2 pb-4">
+            <p className="mx-2 mb-2 line-clamp-2 rounded-md bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
+              {msg.content}
+            </p>
+            <div className="flex flex-col">
+              <ActionRow icon={<Reply className="h-5 w-5" />} label="Responder" onClick={() => onReply(msg)} />
+              {canEdit && (
+                <ActionRow icon={<Pencil className="h-5 w-5" />} label="Editar" onClick={() => onEdit(msg)} />
+              )}
+              {canShowFlag && (
+                <ActionRow
+                  icon={<Flag className="h-5 w-5" />}
+                  label={myFlag ? "Editar sinalização" : "Sinalizar"}
+                  onClick={() => onFlag(msg)}
+                  tone="warn"
+                />
+              )}
+              {isAdmin && (
+                <ActionRow
+                  icon={msg.pinned_at ? <PinOff className="h-5 w-5" /> : <Pin className="h-5 w-5" />}
+                  label={msg.pinned_at ? "Desafixar" : "Fixar"}
+                  onClick={() => onPin(msg)}
+                />
+              )}
+              {canDelete && (
+                <ActionRow
+                  icon={<Trash2 className="h-5 w-5" />}
+                  label="Excluir"
+                  onClick={() => onDelete(msg)}
+                  tone="danger"
+                />
+              )}
+            </div>
+          </div>
+        )}
+      </SheetContent>
+    </Sheet>
+  );
+}
+
+function ActionRow({
+  icon,
+  label,
+  onClick,
+  tone,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  onClick: () => void;
+  tone?: "danger" | "warn";
+}) {
+  const toneClass =
+    tone === "danger"
+      ? "text-destructive hover:bg-destructive/10 active:bg-destructive/20"
+      : tone === "warn"
+      ? "text-amber-600 hover:bg-amber-500/10 active:bg-amber-500/20"
+      : "text-foreground hover:bg-accent active:bg-accent/80";
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium transition-colors ${toneClass}`}
+    >
+      <span className="flex h-9 w-9 items-center justify-center rounded-full bg-muted/60">{icon}</span>
+      <span>{label}</span>
+    </button>
   );
 }
