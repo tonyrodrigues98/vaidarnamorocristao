@@ -254,58 +254,38 @@ function AdminFotos() {
   }, [logs]);
 
   async function deleteLogPhoto(item: LogItem) {
-    if (!item.photo_url) {
-      toast.error("Esta foto não tem URL registrada.");
+    const reason = deleteReason.trim();
+    if (!reason) {
+      toast.error("Escreva o motivo da remoção (será enviado ao usuário).");
       return;
     }
-    if (!confirm("Apagar esta foto do perfil? Esta ação é definitiva.")) return;
     setDeletingPhoto(true);
     try {
-      // Apaga storage
-      const marker = "/profile-photos/";
-      const idx = item.photo_url.indexOf(marker);
-      if (idx > -1) {
-        const path = item.photo_url.substring(idx + marker.length).split("?")[0];
-        await supabase.storage.from("profile-photos").remove([path]);
+      // Apaga arquivo público em profile-photos (se ainda for foto ativa do perfil)
+      if (item.photo_url) {
+        const marker = "/profile-photos/";
+        const idx = item.photo_url.indexOf(marker);
+        if (idx > -1) {
+          const path = item.photo_url.substring(idx + marker.length).split("?")[0];
+          await supabase.storage.from("profile-photos").remove([path]);
+        }
       }
-      if (item.scope === "avatar") {
-        await supabase
-          .from("profiles")
-          .update({ photo_url: null, avatar_ai_verified: false })
-          .eq("id", item.user_id);
-      } else {
-        // Apaga linha em profile_photos com a mesma URL
-        await supabase
-          .from("profile_photos")
-          .delete()
-          .eq("user_id", item.user_id)
-          .eq("url", item.photo_url);
-      }
-      // Notificação para o usuário
-      await supabase.from("notifications").insert({
-        user_id: item.user_id,
-        type: "photo_removed",
-        title: "Uma foto foi removida pela equipe",
-        body:
-          item.scope === "avatar"
-            ? "Sua foto principal foi removida em revisão de moderação. Você pode enviar outra."
-            : "Uma foto adicional foi removida em revisão de moderação.",
+      // RPC: remove do perfil, registra log e notifica usuário com a foto e o motivo
+      const { error } = await supabase.rpc("admin_delete_user_photo", {
+        _user_id: item.user_id,
+        _photo_id: null,
+        _scope: item.scope,
+        _photo_url: item.photo_url ?? item.signed_url ?? null,
+        _reason: reason,
       });
-      // Registro de auditoria
-      await supabase.from("photo_moderation_log").insert({
-        user_id: item.user_id,
-        scope: item.scope,
-        photo_url: item.photo_url,
-        decision: "rejected",
-        confidence: item.confidence,
-        reason: "admin_deleted",
-        ai_result: { admin_deleted: true, source_log_id: item.id },
-      });
-      toast.success("Foto apagada");
+      if (error) throw error;
+      toast.success("Foto apagada e usuário notificado");
+      setDeleteReason("");
       setOpenLog(null);
       void loadLogs();
-    } catch (e) {
-      toast.error("Não foi possível apagar a foto");
+    } catch (e: any) {
+      console.error(e);
+      toast.error(e?.message || "Não foi possível apagar a foto");
     } finally {
       setDeletingPhoto(false);
     }
