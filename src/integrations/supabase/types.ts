@@ -459,6 +459,7 @@ export type Database = {
           created_at: string
           entity_id: string | null
           id: string
+          image_url: string | null
           link: string | null
           read_at: string | null
           title: string
@@ -471,6 +472,7 @@ export type Database = {
           created_at?: string
           entity_id?: string | null
           id?: string
+          image_url?: string | null
           link?: string | null
           read_at?: string | null
           title: string
@@ -483,6 +485,7 @@ export type Database = {
           created_at?: string
           entity_id?: string | null
           id?: string
+          image_url?: string | null
           link?: string | null
           read_at?: string | null
           title?: string
@@ -501,6 +504,8 @@ export type Database = {
           photo_url: string | null
           reason: string | null
           scope: Database["public"]["Enums"]["photo_moderation_scope"]
+          storage_bucket: string | null
+          storage_path: string | null
           user_id: string
         }
         Insert: {
@@ -512,6 +517,8 @@ export type Database = {
           photo_url?: string | null
           reason?: string | null
           scope: Database["public"]["Enums"]["photo_moderation_scope"]
+          storage_bucket?: string | null
+          storage_path?: string | null
           user_id: string
         }
         Update: {
@@ -523,6 +530,8 @@ export type Database = {
           photo_url?: string | null
           reason?: string | null
           scope?: Database["public"]["Enums"]["photo_moderation_scope"]
+          storage_bucket?: string | null
+          storage_path?: string | null
           user_id?: string
         }
         Relationships: []
@@ -1721,6 +1730,7 @@ export type Database = {
         Returns: undefined
       }
       cancel_account_deletion: { Args: never; Returns: undefined }
+      cleanup_photo_moderation_rejects: { Args: never; Returns: number }
       count_advanced_sections: { Args: { _user_id: string }; Returns: number }
       create_notification: {
         Args: {
