@@ -1,6 +1,8 @@
 import { supabase } from "@/integrations/supabase/client";
 import { detectFaceCount } from "./faceDetection";
 
+export type PhotoScope = "main" | "extra";
+
 export type VerifyOutcome =
   | { ok: true; approved: true; needsReview: false; confidence: number }
   | { ok: true; approved: false; needsReview: true; confidence: number; reason: string; aiResult: unknown }
@@ -24,19 +26,24 @@ function fileToBase64(file: File): Promise<string> {
  * Two-stage verification: face-api.js (browser) then Lovable AI (server).
  * Returns soft=true if AI is unavailable so the upload can proceed unflagged.
  */
-export async function verifyProfilePhoto(file: File): Promise<VerifyOutcome> {
-  // Stage 1 — face count
-  let faceCount = 0;
-  try {
-    faceCount = await detectFaceCount(file);
-  } catch (e) {
-    console.warn("face-api failed, skipping local check", e);
-  }
-  if (faceCount === 0) {
-    return { ok: false, reason: "Não detectamos um rosto. Envie uma foto sua bem iluminada e de frente." };
-  }
-  if (faceCount > 1) {
-    return { ok: false, reason: "Envie uma foto somente com você (mais de um rosto detectado)." };
+export async function verifyProfilePhoto(
+  file: File,
+  scope: PhotoScope = "main"
+): Promise<VerifyOutcome> {
+  // Stage 1 — face count (only for main avatar)
+  if (scope === "main") {
+    let faceCount = 0;
+    try {
+      faceCount = await detectFaceCount(file);
+    } catch (e) {
+      console.warn("face-api failed, skipping local check", e);
+    }
+    if (faceCount === 0) {
+      return { ok: false, reason: "Não detectamos um rosto. Envie uma foto sua bem iluminada e de frente." };
+    }
+    if (faceCount > 1) {
+      return { ok: false, reason: "Envie uma foto somente com você (mais de um rosto detectado)." };
+    }
   }
 
   // Stage 2 — AI server
@@ -53,7 +60,7 @@ export async function verifyProfilePhoto(file: File): Promise<VerifyOutcome> {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ imageBase64, mimeType: file.type || "image/jpeg" }),
+      body: JSON.stringify({ imageBase64, mimeType: file.type || "image/jpeg", scope }),
     });
   } catch {
     return { ok: true, soft: true, approved: false, needsReview: false, confidence: 0 };
