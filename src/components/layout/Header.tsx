@@ -159,7 +159,7 @@ export function Header() {
         <nav className="hidden min-w-0 flex-1 items-center justify-end gap-1 md:flex">
           {user ? (
             <>
-              <Button variant="ghost" size="sm" asChild><Link to="/dashboard">Início</Link></Button>
+              <Button variant="ghost" size="sm" asChild><Link to="/inicio">Início</Link></Button>
               {isApproved && (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -320,7 +320,7 @@ export function Header() {
                   </Button>
                 </div>
 
-                <MobileItem to="/dashboard" onClick={close}>
+                <MobileItem to="/inicio" onClick={close}>
                   <span className="flex items-center gap-2"><Heart className="h-4 w-4" /> Início</span>
                 </MobileItem>
 
