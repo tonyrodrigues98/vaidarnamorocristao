@@ -27,6 +27,7 @@ import { MissionsPanel } from "@/components/MissionsPanel";
 import { recomputeMyBadges } from "@/lib/recomputeBadges";
 import { ProfileAdvancedForm } from "@/components/ProfileAdvancedForm";
 import { ProfilePhotosManager } from "@/components/ProfilePhotosManager";
+import { AdminWarningBanner } from "@/components/AdminWarningBanner";
 
 export const Route = createFileRoute("/perfil")({ component: PerfilPage });
 
@@ -404,6 +405,7 @@ function PerfilPage() {
     <div className="min-h-screen">
       <Header />
       <main className="mx-auto max-w-3xl px-4 py-10">
+        <AdminWarningBanner />
         <div className="animate-fade-up flex items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-semibold sm:text-4xl">Meu perfil</h1>
