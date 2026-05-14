@@ -410,6 +410,16 @@ function InicioPage() {
     const txt = appealText.trim();
     if (txt.length < 10) { toast.error("Escreva sua apelação com mais detalhes."); return; }
     setAppealBusy(true);
+    if (kind === "rejection") {
+      const { error: rpcError } = await supabase.rpc("request_reverification", { _message: txt });
+      setAppealBusy(false);
+      if (rpcError) { toast.error(rpcError.message); return; }
+      setAppealText("");
+      toast.success("Pedido de reanálise enviado. Seu perfil voltou para análise.");
+      // O perfil agora é 'pending' — recarrega para sair do modo rejeitado
+      setTimeout(() => window.location.reload(), 600);
+      return;
+    }
     const { data, error } = await supabase
       .from("user_ban_appeals")
       .insert({ user_id: user.id, appeal_text: txt, kind })
@@ -419,11 +429,7 @@ function InicioPage() {
     if (error) { toast.error(error.message); return; }
     setBanAppeals((prev) => [data as BanAppeal, ...prev]);
     setAppealText("");
-    toast.success(
-      kind === "rejection"
-        ? "Pedido de reanálise enviado. A equipe vai revisar."
-        : "Apelação enviada. A equipe vai analisar.",
-    );
+    toast.success("Apelação enviada. A equipe vai analisar.");
   }
 
   return (

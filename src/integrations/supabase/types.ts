@@ -1818,6 +1818,7 @@ export type Database = {
       request_account_deactivation: { Args: never; Returns: undefined }
       request_account_deletion: { Args: { _confirm: string }; Returns: string }
       request_account_reactivation: { Args: never; Returns: undefined }
+      request_reverification: { Args: { _message: string }; Returns: string }
       run_reactivation_reminders: { Args: never; Returns: number }
       touch_my_activity: { Args: never; Returns: undefined }
       unaccent_safe: { Args: { input: string }; Returns: string }
