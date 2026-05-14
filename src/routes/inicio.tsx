@@ -939,6 +939,7 @@ function InicioPage() {
             ))}
           </div>
         </section>
+        </>}
       </main>
     </div>
   );
