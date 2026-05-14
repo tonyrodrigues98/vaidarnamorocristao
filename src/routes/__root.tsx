@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/lib/theme";
 import { TermsGate } from "@/components/TermsGate";
 import { SupportFooterButton } from "@/components/SupportFooterButton";
 import { PresenceProvider } from "@/lib/presence";
+import { BanGuard } from "@/components/BanGuard";
 
 import appCss from "../styles.css?url";
 
@@ -91,6 +92,7 @@ function RootComponent() {
       <AuthProvider>
         <PresenceProvider>
           <NotificationsBridge />
+          <BanGuard />
           <div className="flex min-h-screen flex-col">
           <div className="flex-1">
             <Outlet />
