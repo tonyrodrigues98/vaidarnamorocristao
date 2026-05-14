@@ -44,6 +44,7 @@ import { Route as AuthSignupRouteImport } from './routes/auth/signup'
 import { Route as AuthResetPasswordRouteImport } from './routes/auth/reset-password'
 import { Route as AuthLoginRouteImport } from './routes/auth/login'
 import { Route as AuthForgotPasswordRouteImport } from './routes/auth/forgot-password'
+import { Route as ApiVerifyPhotoRouteImport } from './routes/api/verify-photo'
 import { Route as AdminVerificacoesRouteImport } from './routes/admin/verificacoes'
 
 const VerificacaoRoute = VerificacaoRouteImport.update({
@@ -221,6 +222,11 @@ const AuthForgotPasswordRoute = AuthForgotPasswordRouteImport.update({
   path: '/auth/forgot-password',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiVerifyPhotoRoute = ApiVerifyPhotoRouteImport.update({
+  id: '/api/verify-photo',
+  path: '/api/verify-photo',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminVerificacoesRoute = AdminVerificacoesRouteImport.update({
   id: '/admin/verificacoes',
   path: '/admin/verificacoes',
@@ -247,6 +253,7 @@ export interface FileRoutesByFullPath {
   '/termos': typeof TermosRoute
   '/verificacao': typeof VerificacaoRoute
   '/admin/verificacoes': typeof AdminVerificacoesRoute
+  '/api/verify-photo': typeof ApiVerifyPhotoRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
@@ -285,6 +292,7 @@ export interface FileRoutesByTo {
   '/termos': typeof TermosRoute
   '/verificacao': typeof VerificacaoRoute
   '/admin/verificacoes': typeof AdminVerificacoesRoute
+  '/api/verify-photo': typeof ApiVerifyPhotoRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
@@ -324,6 +332,7 @@ export interface FileRoutesById {
   '/termos': typeof TermosRoute
   '/verificacao': typeof VerificacaoRoute
   '/admin/verificacoes': typeof AdminVerificacoesRoute
+  '/api/verify-photo': typeof ApiVerifyPhotoRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
@@ -364,6 +373,7 @@ export interface FileRouteTypes {
     | '/termos'
     | '/verificacao'
     | '/admin/verificacoes'
+    | '/api/verify-photo'
     | '/auth/forgot-password'
     | '/auth/login'
     | '/auth/reset-password'
@@ -402,6 +412,7 @@ export interface FileRouteTypes {
     | '/termos'
     | '/verificacao'
     | '/admin/verificacoes'
+    | '/api/verify-photo'
     | '/auth/forgot-password'
     | '/auth/login'
     | '/auth/reset-password'
@@ -440,6 +451,7 @@ export interface FileRouteTypes {
     | '/termos'
     | '/verificacao'
     | '/admin/verificacoes'
+    | '/api/verify-photo'
     | '/auth/forgot-password'
     | '/auth/login'
     | '/auth/reset-password'
@@ -479,6 +491,7 @@ export interface RootRouteChildren {
   TermosRoute: typeof TermosRoute
   VerificacaoRoute: typeof VerificacaoRoute
   AdminVerificacoesRoute: typeof AdminVerificacoesRoute
+  ApiVerifyPhotoRoute: typeof ApiVerifyPhotoRoute
   AuthForgotPasswordRoute: typeof AuthForgotPasswordRoute
   AuthLoginRoute: typeof AuthLoginRoute
   AuthResetPasswordRoute: typeof AuthResetPasswordRoute
@@ -745,6 +758,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthForgotPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/verify-photo': {
+      id: '/api/verify-photo'
+      path: '/api/verify-photo'
+      fullPath: '/api/verify-photo'
+      preLoaderRoute: typeof ApiVerifyPhotoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/verificacoes': {
       id: '/admin/verificacoes'
       path: '/admin/verificacoes'
@@ -775,6 +795,7 @@ const rootRouteChildren: RootRouteChildren = {
   TermosRoute: TermosRoute,
   VerificacaoRoute: VerificacaoRoute,
   AdminVerificacoesRoute: AdminVerificacoesRoute,
+  ApiVerifyPhotoRoute: ApiVerifyPhotoRoute,
   AuthForgotPasswordRoute: AuthForgotPasswordRoute,
   AuthLoginRoute: AuthLoginRoute,
   AuthResetPasswordRoute: AuthResetPasswordRoute,
