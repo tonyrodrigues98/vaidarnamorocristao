@@ -1,5 +1,5 @@
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ChangeEvent } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
@@ -687,7 +687,7 @@ function AdminFotos() {
                     <Textarea
                       id="delete-reason"
                       value={deleteReason}
-                      onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setDeleteReason(e.target.value)}
+                      onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setDeleteReason(e.target.value)}
                       placeholder="Ex.: Foto contém conteúdo inadequado, viola as diretrizes…"
                       rows={3}
                       className="mt-1"
