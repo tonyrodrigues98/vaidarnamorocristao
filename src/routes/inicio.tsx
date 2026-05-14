@@ -503,7 +503,9 @@ function InicioPage() {
                 ? "Sua jornada continua — explore, converse e deixe Deus surpreender você."
                 : isBanned
                   ? "Sua conta está temporariamente suspensa. Você ainda pode falar com a gente e enviar uma apelação abaixo."
-                  : "Logo seu perfil será revisado e você poderá começar a explorar."}
+                  : isRejected
+                    ? "Sua conta foi negada. Revise suas informações e clique em Verificar Novamente para uma reanálise."
+                    : "Logo seu perfil será revisado e você poderá começar a explorar."}
             </p>
 
             <div
