@@ -275,9 +275,20 @@ function AdminFotos() {
         }
       }
       // RPC: remove do perfil, registra log e notifica usuário com a foto e o motivo
+      // Para foto adicional, busca o id correspondente em profile_photos para o RPC apagar
+      let photoId: string | null = null;
+      if (item.scope === "extra" && item.photo_url) {
+        const { data: pp } = await supabase
+          .from("profile_photos")
+          .select("id")
+          .eq("user_id", item.user_id)
+          .eq("url", item.photo_url)
+          .maybeSingle();
+        photoId = pp?.id ?? null;
+      }
       const { error } = await supabase.rpc("admin_delete_user_photo", {
         _user_id: item.user_id,
-        _photo_id: "" as unknown as string,
+        _photo_id: photoId as unknown as string,
         _scope: item.scope,
         _photo_url: item.photo_url ?? item.signed_url ?? "",
         _reason: reason,
