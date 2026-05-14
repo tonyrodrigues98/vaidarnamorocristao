@@ -630,10 +630,13 @@ function Admin() {
                   </div>
                 )}
               </div>
-            ) : rows.length === 0 ? (
-              <div className="glass rounded-2xl p-10 text-center text-muted-foreground shadow-soft">Nenhum perfil aqui.</div>
             ) : (
-              <div className="grid gap-4">
+              <div className="space-y-6">
+                {tab === "rejected" && <BannedAppealsPanel kind="rejection" />}
+                {rows.length === 0 ? (
+                  <div className="glass rounded-2xl p-10 text-center text-muted-foreground shadow-soft">Nenhum perfil aqui.</div>
+                ) : (
+                <div className="grid gap-4">
                 {rows.map((r) => (
                   <div key={r.id} className="glass flex flex-col gap-4 rounded-2xl p-5 shadow-soft sm:flex-row">
                     <div className="h-24 w-24 shrink-0 overflow-hidden rounded-2xl bg-muted">
@@ -669,6 +672,8 @@ function Admin() {
                     </div>
                   </div>
                 ))}
+                </div>
+                )}
               </div>
             )}
           </TabsContent>
