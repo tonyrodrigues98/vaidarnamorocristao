@@ -22,7 +22,7 @@ function Reset() {
     setLoading(false);
     if (error) { toast.error(error.message); return; }
     toast.success("Senha atualizada!");
-    navigate({ to: "/dashboard" });
+    navigate({ to: "/inicio" });
   }
 
   return (
