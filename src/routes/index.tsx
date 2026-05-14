@@ -76,7 +76,7 @@ const HEADLINE = ["Onde", "a", "fé", "encontra"];
 
 function Landing() {
   const { user, loading } = useAuth();
-  if (!loading && user) return <Navigate to="/dashboard" />;
+  if (!loading && user) return <Navigate to="/inicio" />;
 
   return (
     <div className="min-h-screen bg-background">
