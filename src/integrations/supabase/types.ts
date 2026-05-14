@@ -1126,6 +1126,9 @@ export type Database = {
           avatar_ai_checked_at: string | null
           avatar_ai_confidence: number | null
           avatar_ai_verified: boolean
+          banned_at: string | null
+          banned_by: string | null
+          banned_reason: string | null
           bio: string | null
           church: string
           city: string
@@ -1155,6 +1158,9 @@ export type Database = {
           avatar_ai_checked_at?: string | null
           avatar_ai_confidence?: number | null
           avatar_ai_verified?: boolean
+          banned_at?: string | null
+          banned_by?: string | null
+          banned_reason?: string | null
           bio?: string | null
           church: string
           city: string
@@ -1184,6 +1190,9 @@ export type Database = {
           avatar_ai_checked_at?: string | null
           avatar_ai_confidence?: number | null
           avatar_ai_verified?: boolean
+          banned_at?: string | null
+          banned_by?: string | null
+          banned_reason?: string | null
           bio?: string | null
           church?: string
           city?: string
@@ -1446,6 +1455,69 @@ export type Database = {
         }
         Relationships: []
       }
+      user_admin_requests: {
+        Row: {
+          acknowledged_at: string | null
+          created_at: string
+          created_by: string
+          id: string
+          kind: string
+          message: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          created_at?: string
+          created_by: string
+          id?: string
+          kind: string
+          message: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          acknowledged_at?: string | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          kind?: string
+          message?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_admin_warnings: {
+        Row: {
+          acknowledged_at: string | null
+          created_at: string
+          created_by: string
+          id: string
+          message: string
+          severity: string
+          user_id: string
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          created_at?: string
+          created_by: string
+          id?: string
+          message: string
+          severity?: string
+          user_id: string
+        }
+        Update: {
+          acknowledged_at?: string | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          message?: string
+          severity?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_badges: {
         Row: {
           active: boolean
@@ -1483,6 +1555,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_ban_appeals: {
+        Row: {
+          appeal_text: string
+          created_at: string
+          id: string
+          responded_at: string | null
+          responded_by: string | null
+          response_text: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          appeal_text: string
+          created_at?: string
+          id?: string
+          responded_at?: string | null
+          responded_by?: string | null
+          response_text?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          appeal_text?: string
+          created_at?: string
+          id?: string
+          responded_at?: string | null
+          responded_by?: string | null
+          response_text?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       user_donations: {
         Row: {
@@ -1588,10 +1693,29 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_ban_user: {
+        Args: { _reason: string; _user_id: string }
+        Returns: undefined
+      }
+      admin_delete_user_photo: {
+        Args: {
+          _photo_id: string
+          _photo_url: string
+          _reason: string
+          _scope: string
+          _user_id: string
+        }
+        Returns: undefined
+      }
+      admin_hard_delete_user: {
+        Args: { _reason: string; _user_id: string }
+        Returns: undefined
+      }
       admin_remove_badge: {
         Args: { _code: string; _user_id: string }
         Returns: undefined
       }
+      admin_unban_user: { Args: { _user_id: string }; Returns: undefined }
       award_contributor_badge: {
         Args: { _amount?: number; _note?: string; _user_id: string }
         Returns: undefined
