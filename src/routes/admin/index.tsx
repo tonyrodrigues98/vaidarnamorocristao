@@ -665,6 +665,7 @@ function UsersPanel({
           </div>
           <div className="flex w-full items-center gap-2 sm:w-auto">
             <BadgeAdminControls userId={u.id} userName={u.full_name} />
+            <UserGearMenu user={u} />
             {canVerify && (
               <Button
                 size="sm"
