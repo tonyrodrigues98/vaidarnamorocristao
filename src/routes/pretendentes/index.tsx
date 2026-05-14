@@ -19,6 +19,7 @@ import { LOVE_LANGUAGE, MINISTRY, type AdvancedProfile } from "@/lib/profileAdva
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
 import { PhotoCarousel } from "@/components/PhotoCarousel";
+import { markHomeChecklistStep } from "@/lib/homeChecklist";
 
 type Profile = {
   id: string; full_name: string; age: number; city: string; state: string;
@@ -72,6 +73,7 @@ function List() {
 
   useEffect(() => {
     if (!user) return;
+    markHomeChecklistStep(user.id, "explore");
     (async () => {
       const { data: me } = await supabase.from("profiles").select("status, sex, state").eq("id", user.id).maybeSingle();
       setMyStatus(me?.status ?? null);
