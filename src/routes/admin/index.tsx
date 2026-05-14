@@ -1,12 +1,13 @@
 import { createFileRoute, Navigate, Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Check, X, Ban, ShieldAlert, Flag, Newspaper, Trash2, Users as UsersIcon, ClipboardList, MessageSquareWarning, ShieldX, Heart, Plus, UserPlus, Search, BadgeCheck, LifeBuoy } from "lucide-react";
+import { Check, X, Ban, ShieldAlert, Flag, Newspaper, Trash2, Users as UsersIcon, ClipboardList, MessageSquareWarning, ShieldX, Heart, Plus, UserPlus, Search, BadgeCheck, LifeBuoy, Settings, AlertTriangle, MessageSquare, Eye, MailOpen, Gavel } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -578,6 +579,57 @@ function Admin() {
                   ))}
                 </div>
               )
+            ) : tab === "banned" ? (
+              <div className="space-y-6">
+                <BannedAppealsPanel />
+                {rows.length === 0 ? (
+                  <div className="glass rounded-2xl p-10 text-center text-muted-foreground shadow-soft">
+                    Nenhum perfil banido.
+                  </div>
+                ) : (
+                  <div className="grid gap-4">
+                    {rows.map((r) => (
+                      <div key={r.id} className="glass flex flex-col gap-4 rounded-2xl p-5 shadow-soft sm:flex-row">
+                        <div className="h-24 w-24 shrink-0 overflow-hidden rounded-2xl bg-muted">
+                          {r.photo_url ? (
+                            <img src={r.photo_url} alt="" className="h-full w-full object-cover" />
+                          ) : (
+                            <div className="flex h-full w-full items-center justify-center bg-gradient-love text-2xl text-white">
+                              {r.full_name.charAt(0)}
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="text-lg font-semibold">{r.full_name}, {r.age}</h3>
+                          <p className="text-sm text-muted-foreground">
+                            {r.sex} · {r.city}/{r.state} · {r.church}
+                          </p>
+                          {r.banned_reason && (
+                            <p className="mt-2 rounded-lg bg-destructive/10 p-2 text-xs text-destructive">
+                              <strong>Motivo:</strong> {r.banned_reason}
+                            </p>
+                          )}
+                        </div>
+                        <div className="flex flex-wrap gap-2 self-center">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            disabled={busy === r.id}
+                            onClick={async () => {
+                              if (!confirm("Remover banimento e reaprovar este usuário?")) return;
+                              const { error } = await supabase.rpc("admin_unban_user", { _user_id: r.id });
+                              if (error) toast.error(error.message);
+                              else { toast.success("Usuário desbanido"); load("banned"); }
+                            }}
+                          >
+                            <Check className="mr-1 h-4 w-4" /> Desbanir
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             ) : rows.length === 0 ? (
               <div className="glass rounded-2xl p-10 text-center text-muted-foreground shadow-soft">Nenhum perfil aqui.</div>
             ) : (
@@ -664,6 +716,7 @@ function UsersPanel({
           </div>
           <div className="flex w-full items-center gap-2 sm:w-auto">
             <BadgeAdminControls userId={u.id} userName={u.full_name} />
+            <UserGearMenu user={u} />
             {canVerify && (
               <Button
                 size="sm"
@@ -1914,6 +1967,480 @@ function PrayerReportsPanel({ isSuperAdmin }: { isSuperAdmin: boolean }) {
           </div>
         );
       })}
+    </div>
+  );
+}
+
+// ============================================================================
+// UserGearMenu — menu de engrenagem com ações administrativas por usuário
+// ============================================================================
+function UserGearMenu({ user }: { user: AdminUserRowWithSupport }) {
+  const { user: me } = useAuth();
+  const [openRequest, setOpenRequest] = useState(false);
+  const [openWarning, setOpenWarning] = useState(false);
+  const [openBan, setOpenBan] = useState(false);
+  const [openDelete, setOpenDelete] = useState(false);
+  const [busy, setBusy] = useState(false);
+
+  const [reqKind, setReqKind] = useState<"photo" | "bio" | "behavior" | "other">("photo");
+  const [reqMsg, setReqMsg] = useState("");
+  const [warnMsg, setWarnMsg] = useState("");
+  const [warnSeverity, setWarnSeverity] = useState<"amber" | "severe">("amber");
+  const [banReason, setBanReason] = useState("");
+  const [delReason, setDelReason] = useState("");
+  const [delConfirm, setDelConfirm] = useState("");
+
+  async function submitRequest() {
+    if (!me) return;
+    if (reqMsg.trim().length < 5) { toast.error("Descreva a solicitação."); return; }
+    setBusy(true);
+    const { error } = await supabase.from("user_admin_requests").insert({
+      user_id: user.id,
+      created_by: me.id,
+      kind: reqKind,
+      message: reqMsg.trim(),
+    });
+    if (!error) {
+      await supabase.from("notifications").insert({
+        user_id: user.id,
+        actor_id: me.id,
+        type: "admin_request",
+        title: "Solicitação da equipe",
+        body: reqMsg.trim(),
+        link: "/inicio",
+      });
+    }
+    setBusy(false);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Solicitação enviada");
+    setReqMsg(""); setOpenRequest(false);
+  }
+
+  async function submitWarning() {
+    if (!me) return;
+    if (warnMsg.trim().length < 5) { toast.error("Descreva o aviso."); return; }
+    setBusy(true);
+    const { error } = await supabase.from("user_admin_warnings").insert({
+      user_id: user.id,
+      created_by: me.id,
+      message: warnMsg.trim(),
+      severity: warnSeverity,
+    });
+    if (!error) {
+      await supabase.from("notifications").insert({
+        user_id: user.id,
+        actor_id: me.id,
+        type: "admin_warning",
+        title: warnSeverity === "severe" ? "Aviso importante da equipe" : "Aviso da equipe",
+        body: warnMsg.trim(),
+        link: "/perfil",
+      });
+    }
+    setBusy(false);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Aviso enviado");
+    setWarnMsg(""); setOpenWarning(false);
+  }
+
+  async function submitBan() {
+    if (!me) return;
+    if (banReason.trim().length < 5) { toast.error("Informe o motivo do banimento."); return; }
+    setBusy(true);
+    const { error } = await supabase.rpc("admin_ban_user", { _user_id: user.id, _reason: banReason.trim() });
+    if (!error) {
+      await supabase.from("notifications").insert({
+        user_id: user.id,
+        actor_id: me.id,
+        type: "account_banned",
+        title: "Sua conta foi suspensa",
+        body: banReason.trim(),
+        link: "/inicio",
+      });
+    }
+    setBusy(false);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Usuário banido");
+    setBanReason(""); setOpenBan(false);
+  }
+
+  async function submitDelete() {
+    if (delConfirm !== user.full_name) { toast.error("Digite o nome exato para confirmar."); return; }
+    if (delReason.trim().length < 5) { toast.error("Informe o motivo."); return; }
+    setBusy(true);
+    const { error } = await supabase.rpc("admin_hard_delete_user", { _user_id: user.id, _reason: delReason.trim() });
+    setBusy(false);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Usuário excluído permanentemente");
+    setOpenDelete(false);
+    window.location.reload();
+  }
+
+  return (
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button size="sm" variant="outline" title="Ações administrativas">
+            <Settings className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-56">
+          <DropdownMenuLabel>Gerenciar usuário</DropdownMenuLabel>
+          <DropdownMenuItem onClick={() => setOpenRequest(true)}>
+            <MessageSquare className="mr-2 h-4 w-4" /> Requisitar alteração
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setOpenWarning(true)}>
+            <AlertTriangle className="mr-2 h-4 w-4" /> Enviar aviso
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link to="/pretendentes/$id" params={{ id: user.id }}>
+              <Eye className="mr-2 h-4 w-4" /> Ver perfil completo
+            </Link>
+          </DropdownMenuItem>
+          {user.status !== "banned" && (
+            <DropdownMenuItem className="text-destructive" onClick={() => setOpenBan(true)}>
+              <Ban className="mr-2 h-4 w-4" /> Banir
+            </DropdownMenuItem>
+          )}
+          <DropdownMenuSeparator />
+          <DropdownMenuItem className="text-destructive" onClick={() => setOpenDelete(true)}>
+            <Trash2 className="mr-2 h-4 w-4" /> Excluir permanentemente
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      {/* Solicitar alteração */}
+      <Dialog open={openRequest} onOpenChange={setOpenRequest}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Requisitar alteração — {user.full_name}</DialogTitle>
+            <DialogDescription>O usuário verá esta solicitação em /inicio e nas notificações.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div>
+              <Label className="text-xs">Tipo</Label>
+              <Select value={reqKind} onValueChange={(v) => setReqKind(v as typeof reqKind)}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="photo">Foto</SelectItem>
+                  <SelectItem value="bio">Bio</SelectItem>
+                  <SelectItem value="behavior">Comportamento</SelectItem>
+                  <SelectItem value="other">Outro</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label className="text-xs">Mensagem</Label>
+              <Textarea
+                value={reqMsg}
+                onChange={(e) => setReqMsg(e.target.value)}
+                placeholder="Descreva o que precisa ser alterado..."
+                maxLength={2000}
+                className="min-h-[120px]"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setOpenRequest(false)} disabled={busy}>Cancelar</Button>
+            <Button onClick={submitRequest} disabled={busy}>Enviar solicitação</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Aviso */}
+      <Dialog open={openWarning} onOpenChange={setOpenWarning}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Enviar aviso — {user.full_name}</DialogTitle>
+            <DialogDescription>O aviso aparece em destaque no perfil do usuário até ser reconhecido.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div>
+              <Label className="text-xs">Severidade</Label>
+              <Select value={warnSeverity} onValueChange={(v) => setWarnSeverity(v as typeof warnSeverity)}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="amber">Atenção (âmbar)</SelectItem>
+                  <SelectItem value="severe">Grave (vermelho)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label className="text-xs">Mensagem</Label>
+              <Textarea
+                value={warnMsg}
+                onChange={(e) => setWarnMsg(e.target.value)}
+                placeholder="Explique o aviso..."
+                maxLength={2000}
+                className="min-h-[120px]"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setOpenWarning(false)} disabled={busy}>Cancelar</Button>
+            <Button onClick={submitWarning} disabled={busy}>Enviar aviso</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Banir */}
+      <Dialog open={openBan} onOpenChange={setOpenBan}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Banir {user.full_name}</DialogTitle>
+            <DialogDescription>O usuário será restrito a /inicio, /notificacoes, /conta e /suporte.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <Label className="text-xs">Motivo do banimento</Label>
+            <Textarea
+              value={banReason}
+              onChange={(e) => setBanReason(e.target.value)}
+              placeholder="Explique de forma clara o motivo..."
+              maxLength={2000}
+              className="min-h-[120px]"
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setOpenBan(false)} disabled={busy}>Cancelar</Button>
+            <Button variant="destructive" onClick={submitBan} disabled={busy}>
+              <Ban className="mr-1 h-4 w-4" /> Banir
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Excluir */}
+      <Dialog open={openDelete} onOpenChange={setOpenDelete}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="text-destructive">Excluir permanentemente</DialogTitle>
+            <DialogDescription>
+              Esta ação <strong>não pode ser desfeita</strong>. Todos os dados públicos do usuário
+              serão apagados. O email permanece liberado para recadastro.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div>
+              <Label className="text-xs">Motivo</Label>
+              <Textarea
+                value={delReason}
+                onChange={(e) => setDelReason(e.target.value)}
+                maxLength={2000}
+                className="min-h-[100px]"
+              />
+            </div>
+            <div>
+              <Label className="text-xs">
+                Para confirmar, digite o nome exato: <strong>{user.full_name}</strong>
+              </Label>
+              <Input
+                value={delConfirm}
+                onChange={(e) => setDelConfirm(e.target.value)}
+                placeholder={user.full_name}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setOpenDelete(false)} disabled={busy}>Cancelar</Button>
+            <Button variant="destructive" onClick={submitDelete} disabled={busy || delConfirm !== user.full_name}>
+              <Trash2 className="mr-1 h-4 w-4" /> Excluir definitivamente
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
+
+// ============================================================================
+// BannedAppealsPanel — apelações de usuários banidos
+// ============================================================================
+type AppealRow = {
+  id: string;
+  user_id: string;
+  appeal_text: string;
+  status: string;
+  response_text: string | null;
+  responded_at: string | null;
+  created_at: string;
+};
+
+function BannedAppealsPanel() {
+  const { user: me } = useAuth();
+  const [appeals, setAppeals] = useState<AppealRow[]>([]);
+  const [profMap, setProfMap] = useState<Map<string, { full_name: string; photo_url: string | null }>>(new Map());
+  const [open, setOpen] = useState<AppealRow | null>(null);
+  const [response, setResponse] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  const load = useCallback(async () => {
+    const { data } = await supabase
+      .from("user_ban_appeals")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(100);
+    const items = (data ?? []) as AppealRow[];
+    setAppeals(items);
+    const ids = Array.from(new Set(items.map((a) => a.user_id)));
+    if (ids.length) {
+      const { data: profs } = await supabase
+        .from("profiles")
+        .select("id, full_name, photo_url")
+        .in("id", ids);
+      const m = new Map<string, { full_name: string; photo_url: string | null }>();
+      for (const p of profs ?? []) m.set(p.id, { full_name: p.full_name, photo_url: p.photo_url });
+      setProfMap(m);
+    }
+  }, []);
+
+  useEffect(() => { void load(); }, [load]);
+
+  async function respond() {
+    if (!open || !me) return;
+    if (response.trim().length < 5) { toast.error("Escreva uma resposta."); return; }
+    setBusy(true);
+    const { error } = await supabase
+      .from("user_ban_appeals")
+      .update({
+        status: "answered",
+        response_text: response.trim(),
+        responded_by: me.id,
+        responded_at: new Date().toISOString(),
+      })
+      .eq("id", open.id);
+    if (!error) {
+      await supabase.from("notifications").insert({
+        user_id: open.user_id,
+        actor_id: me.id,
+        type: "appeal_response",
+        title: "Resposta à sua apelação",
+        body: response.trim(),
+        link: "/inicio",
+      });
+    }
+    setBusy(false);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Resposta enviada");
+    setOpen(null); setResponse("");
+    void load();
+  }
+
+  async function ignore(a: AppealRow) {
+    if (!confirm("Marcar esta apelação como ignorada?")) return;
+    const { error } = await supabase
+      .from("user_ban_appeals")
+      .update({ status: "ignored", responded_by: me?.id ?? null, responded_at: new Date().toISOString() })
+      .eq("id", a.id);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Apelação ignorada");
+    void load();
+  }
+
+  if (appeals.length === 0) {
+    return (
+      <div className="glass rounded-2xl p-6 text-center text-sm text-muted-foreground shadow-soft">
+        Nenhuma apelação recebida.
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+        Apelações de banimento ({appeals.filter((a) => a.status === "pending").length} pendentes)
+      </h2>
+      {appeals.map((a) => {
+        const prof = profMap.get(a.user_id);
+        const isPending = a.status === "pending";
+        const isIgnored = a.status === "ignored";
+        return (
+          <div
+            key={a.id}
+            className={`glass rounded-2xl p-4 shadow-soft ${isIgnored ? "opacity-60" : ""}`}
+          >
+            <div className="flex items-start gap-3">
+              <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full bg-muted">
+                {prof?.photo_url ? (
+                  <img src={prof.photo_url} alt="" className="h-full w-full object-cover" />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center bg-gradient-love text-white">
+                    {(prof?.full_name ?? "?").charAt(0)}
+                  </div>
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="font-semibold">{prof?.full_name ?? a.user_id}</span>
+                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase ${
+                    isPending ? "bg-amber-500/20 text-amber-700 dark:text-amber-300" :
+                    a.status === "answered" ? "bg-emerald-500/20 text-emerald-700 dark:text-emerald-300" :
+                    "bg-muted text-muted-foreground"
+                  }`}>{a.status}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {new Date(a.created_at).toLocaleString("pt-BR")}
+                  </span>
+                </div>
+                <p className="mt-2 line-clamp-3 whitespace-pre-wrap rounded-lg bg-muted/40 p-2 text-sm">
+                  {a.appeal_text}
+                </p>
+                {a.response_text && (
+                  <p className="mt-2 whitespace-pre-wrap rounded-lg bg-emerald-500/10 p-2 text-xs text-emerald-900 dark:text-emerald-200">
+                    <strong>Resposta:</strong> {a.response_text}
+                  </p>
+                )}
+              </div>
+              <div className="flex flex-col gap-2">
+                <Button size="sm" variant="outline" onClick={() => { setOpen(a); setResponse(a.response_text ?? ""); }}>
+                  <MailOpen className="mr-1 h-4 w-4" /> Ver apelação
+                </Button>
+                {isPending && (
+                  <Button size="sm" variant="ghost" onClick={() => ignore(a)}>
+                    Ignorar
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      })}
+
+      <Dialog open={!!open} onOpenChange={(o) => { if (!o) { setOpen(null); setResponse(""); } }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Apelação de {open ? (profMap.get(open.user_id)?.full_name ?? open.user_id) : ""}</DialogTitle>
+            <DialogDescription>
+              {open && new Date(open.created_at).toLocaleString("pt-BR")} · status: <strong>{open?.status}</strong>
+            </DialogDescription>
+          </DialogHeader>
+          {open && (
+            <div className="space-y-3">
+              <div className="rounded-lg bg-muted/40 p-3 text-sm whitespace-pre-wrap">
+                {open.appeal_text}
+              </div>
+              <div>
+                <Label className="text-xs">Sua resposta</Label>
+                <Textarea
+                  value={response}
+                  onChange={(e) => setResponse(e.target.value)}
+                  className="min-h-[120px]"
+                  placeholder="Escreva uma resposta acolhedora e clara..."
+                  maxLength={4000}
+                />
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => { setOpen(null); setResponse(""); }} disabled={busy}>Fechar</Button>
+            {open && open.status !== "ignored" && (
+              <Button variant="ghost" onClick={() => open && ignore(open)} disabled={busy}>
+                Ignorar
+              </Button>
+            )}
+            <Button onClick={respond} disabled={busy}>
+              <Gavel className="mr-1 h-4 w-4" /> Enviar resposta
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
