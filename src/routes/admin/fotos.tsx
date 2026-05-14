@@ -610,6 +610,96 @@ function AdminFotos() {
           </TabsContent>
         </Tabs>
       </main>
+      <Dialog open={!!openLog} onOpenChange={(o) => !o && setOpenLog(null)}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Análise da foto</DialogTitle>
+            <DialogDescription>
+              Visualização completa para auditoria. Você pode abrir o perfil ou apagar a foto definitivamente.
+            </DialogDescription>
+          </DialogHeader>
+          {openLog && (() => {
+            const prof = profiles.get(openLog.user_id);
+            return (
+              <div className="grid gap-4 sm:grid-cols-[1fr_1fr]">
+                <div className="overflow-hidden rounded-xl border bg-muted">
+                  {openLog.photo_url ? (
+                    <img
+                      src={openLog.photo_url}
+                      alt=""
+                      className="h-full max-h-[60vh] w-full object-contain"
+                    />
+                  ) : (
+                    <div className="flex aspect-square w-full items-center justify-center text-sm text-muted-foreground">
+                      Foto não disponível
+                    </div>
+                  )}
+                </div>
+                <div className="space-y-3 text-sm">
+                  <div className="flex items-center gap-3">
+                    {prof?.photo_url ? (
+                      <img src={prof.photo_url} alt="" className="h-12 w-12 rounded-full object-cover" />
+                    ) : (
+                      <div className="h-12 w-12 rounded-full bg-muted" />
+                    )}
+                    <div>
+                      <div className="font-medium">{prof?.full_name ?? "Sem nome"}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {prof?.age ? `${prof.age} anos` : ""}
+                        {prof?.city ? ` • ${prof.city}${prof?.state ? "/" + prof.state : ""}` : ""}
+                      </div>
+                      {prof?.church && (
+                        <div className="text-xs text-muted-foreground">{prof.church}</div>
+                      )}
+                      {prof?.status && (
+                        <div className="mt-1 text-xs">
+                          <span className="rounded-full bg-muted px-2 py-0.5">Status: {prof.status}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2 text-xs">
+                    <span className={`rounded-full px-2 py-0.5 ${openLog.scope === "avatar" ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
+                      {openLog.scope === "avatar" ? "Foto principal" : "Foto adicional"}
+                    </span>
+                    <span className={`rounded-full px-2 py-0.5 ${decisionClass(openLog.decision)}`}>
+                      {decisionLabel(openLog.decision)}
+                    </span>
+                    {openLog.confidence !== null && (
+                      <span className="text-muted-foreground">
+                        Confiança: {Math.round(openLog.confidence * 100)}%
+                      </span>
+                    )}
+                  </div>
+                  {openLog.reason && (
+                    <p className="text-xs text-muted-foreground">{openLog.reason}</p>
+                  )}
+                  <p className="text-xs text-muted-foreground">
+                    {new Date(openLog.created_at).toLocaleString("pt-BR")}
+                  </p>
+                </div>
+              </div>
+            );
+          })()}
+          <DialogFooter className="flex flex-col gap-2 sm:flex-row">
+            {openLog && (
+              <Button asChild variant="outline" className="sm:mr-auto">
+                <Link to="/pretendentes/$id" params={{ id: openLog.user_id }}>
+                  <ExternalLink className="mr-1 h-4 w-4" /> Ver perfil
+                </Link>
+              </Button>
+            )}
+            <Button variant="ghost" onClick={() => setOpenLog(null)}>Fechar</Button>
+            <Button
+              variant="destructive"
+              onClick={() => openLog && deleteLogPhoto(openLog)}
+              disabled={deletingPhoto || !openLog?.photo_url}
+            >
+              <Trash2 className="mr-1 h-4 w-4" /> Apagar foto
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
