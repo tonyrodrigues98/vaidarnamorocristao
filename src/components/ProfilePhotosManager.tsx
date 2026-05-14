@@ -97,6 +97,25 @@ export function ProfilePhotosManager({ userId }: { userId: string }) {
       toast.error(error.message);
       return;
     }
+    // Backfill photo_url no log de moderação mais recente (criado pela API antes do upload)
+    try {
+      const since = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+      const { data: logRows } = await supabase
+        .from("photo_moderation_log")
+        .select("id")
+        .eq("user_id", userId)
+        .eq("scope", "extra")
+        .is("photo_url", null)
+        .gte("created_at", since)
+        .order("created_at", { ascending: false })
+        .limit(1);
+      const logId = logRows?.[0]?.id;
+      if (logId) {
+        await supabase.from("photo_moderation_log").update({ photo_url: url }).eq("id", logId);
+      }
+    } catch (e) {
+      console.warn("backfill log url failed", e);
+    }
     if (needsReview) {
       await supabase.from("photo_moderation_queue").insert({
         user_id: userId,
