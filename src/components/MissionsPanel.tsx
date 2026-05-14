@@ -17,21 +17,75 @@ type Missions = {
   advanced_target: number;
 };
 
+type ExtraProgress = {
+  faithful_heart: number;
+  intercessor: number;
+  spiritual_mentor: number;
+  bridge_builder: number;
+  open_heart: number;
+  attentive_chatter: number;
+  magnetic_profile: number;
+  faith_ambassador: number;
+  community_veteran: number;
+};
+
+const SELECTED_REWARDS: Array<{ code: BadgeCode; target: number; progress: keyof ExtraProgress }> = [
+  { code: "faithful_heart", target: 30, progress: "faithful_heart" },
+  { code: "intercessor", target: 50, progress: "intercessor" },
+  { code: "spiritual_mentor", target: 25, progress: "spiritual_mentor" },
+  { code: "bridge_builder", target: 5, progress: "bridge_builder" },
+  { code: "open_heart", target: 10, progress: "open_heart" },
+  { code: "attentive_chatter", target: 14, progress: "attentive_chatter" },
+  { code: "magnetic_profile", target: 50, progress: "magnetic_profile" },
+  { code: "faith_ambassador", target: 1, progress: "faith_ambassador" },
+  { code: "community_veteran", target: 180, progress: "community_veteran" },
+];
+
 const STREAK_TIERS = [7, 15, 30, 60, 90, 365];
+
+function toDayKey(date: Date) {
+  return date.toISOString().slice(0, 10);
+}
+
+function currentDailyStreak(days: string[]) {
+  const set = new Set(days);
+  let cursor = new Date();
+  let count = 0;
+  while (set.has(toDayKey(cursor))) {
+    count += 1;
+    cursor.setDate(cursor.getDate() - 1);
+  }
+  return count;
+}
+
+function currentMessageStreak(createdAts: string[]) {
+  return currentDailyStreak(createdAts.map((d) => toDayKey(new Date(d))));
+}
 
 export function MissionsPanel({ userId }: { userId: string }) {
   const [m, setM] = useState<Missions | null>(null);
   const [badges, setBadges] = useState<BadgeCode[]>([]);
+  const [extraProgress, setExtraProgress] = useState<ExtraProgress | null>(null);
   const [loading, setLoading] = useState(true);
 
   async function load() {
-    const [missions, ub] = await Promise.all([
+    const [missions, ub, prayers, comments, matchesA, matchesB, interests, messages, views, advanced, activity, profile] = await Promise.all([
       supabase.rpc("get_my_missions"),
       supabase
         .from("user_badges")
         .select("active, expires_at, badges(code)")
         .eq("user_id", userId)
         .eq("active", true),
+      supabase.from("prayer_request_prayed").select("id", { count: "exact", head: true }).eq("user_id", userId),
+      supabase.from("devotional_comments").select("id", { count: "exact", head: true }).eq("user_id", userId).is("deleted_at", null),
+      supabase.from("matches").select("id", { count: "exact", head: true }).eq("user_a", userId),
+      supabase.from("matches").select("id", { count: "exact", head: true }).eq("user_b", userId),
+      supabase.from("interests").select("id", { count: "exact", head: true }).eq("sender_id", userId),
+      supabase.from("messages").select("created_at").eq("sender_id", userId).order("created_at", { ascending: false }).limit(120),
+      supabase.from("profile_views").select("id", { count: "exact", head: true }).eq("viewed_id", userId),
+      supabase.from("profile_advanced").select("testimony, life_verse, faith_moment").eq("user_id", userId).maybeSingle(),
+      supabase.from("user_activity").select("day").eq("user_id", userId).order("day", { ascending: true }),
+      supabase.from("profiles").select("created_at").eq("id", userId).maybeSingle(),
     ]);
     if (missions.data?.[0]) setM(missions.data[0] as Missions);
     setBadges(
@@ -40,6 +94,20 @@ export function MissionsPanel({ userId }: { userId: string }) {
         .map((r) => r.badges?.code as BadgeCode)
         .filter(Boolean),
     );
+    const activeStreak = currentDailyStreak((activity.data ?? []).map((r) => r.day));
+    const messageStreak = currentMessageStreak(((messages.data ?? []) as Array<{ created_at: string }>).map((r) => r.created_at));
+    const adv = advanced.data as { testimony: string | null; life_verse: string | null; faith_moment: string | null } | null;
+    setExtraProgress({
+      faithful_heart: activeStreak,
+      intercessor: prayers.count ?? 0,
+      spiritual_mentor: comments.count ?? 0,
+      bridge_builder: (matchesA.count ?? 0) + (matchesB.count ?? 0),
+      open_heart: interests.count ?? 0,
+      attentive_chatter: messageStreak,
+      magnetic_profile: views.count ?? 0,
+      faith_ambassador: adv?.testimony?.trim() && adv.life_verse?.trim() && adv.faith_moment ? 1 : 0,
+      community_veteran: Math.max(0, Math.floor((Date.now() - new Date(profile.data?.created_at ?? new Date()).getTime()) / 86_400_000)),
+    });
     setLoading(false);
   }
 
@@ -158,9 +226,21 @@ export function MissionsPanel({ userId }: { userId: string }) {
         <h3 className="flex items-center gap-2 text-lg font-semibold">
           <HeartIcon className="h-5 w-5 text-[var(--rose)]" /> Recompensas pessoais
         </h3>
-        <div className="mt-3 grid grid-cols-2 gap-3">
-          <Reward label="Primeiro match" achieved={m.has_first_match} icon={<HeartIcon className="h-5 w-5" />} />
-          <Reward label="Primeiro devocional" achieved={m.has_first_devotional} icon={<BookOpen className="h-5 w-5" />} />
+        <div className="mt-3 grid gap-3 sm:grid-cols-2">
+          {SELECTED_REWARDS.map((reward) => {
+            const meta = BADGE_META[reward.code];
+            if (!meta) return null;
+            const value = Math.min(extraProgress?.[reward.progress] ?? 0, reward.target);
+            return (
+              <RewardBadge
+                key={reward.code}
+                code={reward.code}
+                value={value}
+                target={reward.target}
+                achieved={has(reward.code)}
+              />
+            );
+          })}
         </div>
         <p className="mt-3 text-xs text-muted-foreground">
           Visível apenas para você.
@@ -196,15 +276,26 @@ function Mission({
   );
 }
 
-function Reward({ label, achieved, icon }: { label: string; achieved: boolean; icon: React.ReactNode }) {
+function RewardBadge({ code, value, target, achieved }: { code: BadgeCode; value: number; target: number; achieved: boolean }) {
+  const meta = BADGE_META[code];
+  const Icon = meta.icon;
+  const pct = Math.min(100, Math.round((value / target) * 100));
   return (
     <div
       className={`flex items-center gap-2 rounded-xl border p-3 ${achieved ? "border-emerald-400/40 bg-emerald-500/5" : "border-border bg-muted/30 opacity-60"}`}
     >
-      <div className={achieved ? "text-emerald-500" : "text-muted-foreground"}>{icon}</div>
-      <div>
-        <div className="text-sm font-medium">{label}</div>
-        <div className="text-[11px] text-muted-foreground">{achieved ? "Conquistado" : "Bloqueado"}</div>
+      <div className={achieved ? "text-emerald-500" : "text-muted-foreground"}>
+        <Icon className="h-5 w-5" />
+      </div>
+      <div className="min-w-0 flex-1">
+        <div className="text-sm font-medium">{meta.name}</div>
+        <div className="text-[11px] text-muted-foreground">{meta.description}</div>
+        <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-muted">
+          <div className="h-full bg-emerald-500 transition-all" style={{ width: `${pct}%` }} />
+        </div>
+        <div className="mt-1 text-[11px] text-muted-foreground">
+          {achieved ? "Conquistado" : `${value}/${target}`}
+        </div>
       </div>
     </div>
   );
