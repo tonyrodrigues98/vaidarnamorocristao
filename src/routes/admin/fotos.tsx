@@ -687,7 +687,7 @@ function AdminFotos() {
                     <Textarea
                       id="delete-reason"
                       value={deleteReason}
-                      onChange={(e) => setDeleteReason(e.target.value)}
+                      onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setDeleteReason(e.target.value)}
                       placeholder="Ex.: Foto contém conteúdo inadequado, viola as diretrizes…"
                       rows={3}
                       className="mt-1"
