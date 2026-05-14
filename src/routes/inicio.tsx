@@ -55,6 +55,7 @@ type Profile = {
   sex: "masculino" | "feminino" | null;
   banned_reason?: string | null;
   banned_at?: string | null;
+  rejection_reason?: string | null;
 };
 
 type AdminRequest = {
@@ -67,7 +68,7 @@ type AdminRequest = {
 type AdminWarning = {
   id: string;
   message: string;
-  severity: "warning" | "severe";
+  severity: "amber" | "severe";
   acknowledged_at: string | null;
   created_at: string;
 };
@@ -78,6 +79,7 @@ type BanAppeal = {
   response_text: string | null;
   responded_at: string | null;
   created_at: string;
+  kind: "ban" | "rejection";
 };
 type Devotional = {
   id: string;
@@ -193,7 +195,7 @@ function InicioPage() {
       ] = await Promise.all([
         supabase
           .from("profiles")
-          .select("id, full_name, photo_url, bio, height_cm, status, city, state, age, sex, banned_reason, banned_at")
+          .select("id, full_name, photo_url, bio, height_cm, status, city, state, age, sex, banned_reason, banned_at, rejection_reason")
           .eq("id", user.id)
           .maybeSingle(),
         supabase
@@ -229,7 +231,7 @@ function InicioPage() {
           .order("created_at", { ascending: false }),
         supabase
           .from("user_ban_appeals")
-          .select("id, appeal_text, status, response_text, responded_at, created_at")
+          .select("id, appeal_text, status, response_text, responded_at, created_at, kind")
           .eq("user_id", user.id)
           .order("created_at", { ascending: false }),
       ]);
