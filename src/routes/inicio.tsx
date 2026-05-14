@@ -21,7 +21,15 @@ import {
   ChevronLeft,
   ChevronRight,
   Flame,
+  Hand,
+  Ban,
+  ClipboardList,
+  AlertTriangle,
+  MessageSquareWarning,
+  Send,
 } from "lucide-react";
+import { toast } from "sonner";
+import { Textarea } from "@/components/ui/textarea";
 
 export const Route = createFileRoute("/inicio")({
   component: InicioPage,
@@ -45,6 +53,31 @@ type Profile = {
   state: string | null;
   age: number | null;
   sex: "masculino" | "feminino" | null;
+  banned_reason?: string | null;
+  banned_at?: string | null;
+};
+
+type AdminRequest = {
+  id: string;
+  kind: "photo" | "bio" | "behavior" | "other";
+  message: string;
+  status: "open" | "acknowledged" | "resolved";
+  created_at: string;
+};
+type AdminWarning = {
+  id: string;
+  message: string;
+  severity: "warning" | "severe";
+  acknowledged_at: string | null;
+  created_at: string;
+};
+type BanAppeal = {
+  id: string;
+  appeal_text: string;
+  status: "pending" | "answered" | "ignored";
+  response_text: string | null;
+  responded_at: string | null;
+  created_at: string;
 };
 type Devotional = {
   id: string;
@@ -127,6 +160,11 @@ function InicioPage() {
   const [completedSteps, setCompletedSteps] = useState<Set<HomeChecklistStep>>(new Set());
   const [community, setCommunity] = useState({ newProfiles: 0, online: 0, newComments: 0 });
   const [tipIndex, setTipIndex] = useState(0);
+  const [adminRequests, setAdminRequests] = useState<AdminRequest[]>([]);
+  const [adminWarnings, setAdminWarnings] = useState<AdminWarning[]>([]);
+  const [banAppeals, setBanAppeals] = useState<BanAppeal[]>([]);
+  const [appealText, setAppealText] = useState("");
+  const [appealBusy, setAppealBusy] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -149,10 +187,13 @@ function InicioPage() {
         communityRes,
         prayedRes,
         reactionRes,
+        { data: reqs },
+        { data: warns },
+        { data: appeals },
       ] = await Promise.all([
         supabase
           .from("profiles")
-          .select("id, full_name, photo_url, bio, height_cm, status, city, state, age, sex")
+          .select("id, full_name, photo_url, bio, height_cm, status, city, state, age, sex, banned_reason, banned_at")
           .eq("id", user.id)
           .maybeSingle(),
         supabase
@@ -175,10 +216,29 @@ function InicioPage() {
         supabase.from("global_messages").select("id").eq("sender_id", user.id).limit(1),
         supabase.from("devotional_prayed").select("id").eq("user_id", user.id).limit(1),
         supabase.from("devotional_reactions").select("post_id").eq("user_id", user.id).limit(1),
+        supabase
+          .from("user_admin_requests")
+          .select("id, kind, message, status, created_at")
+          .eq("user_id", user.id)
+          .neq("status", "resolved")
+          .order("created_at", { ascending: false }),
+        supabase
+          .from("user_admin_warnings")
+          .select("id, message, severity, acknowledged_at, created_at")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false }),
+        supabase
+          .from("user_ban_appeals")
+          .select("id, appeal_text, status, response_text, responded_at, created_at")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false }),
       ]);
       if (cancel) return;
       setProfile(p as Profile | null);
       setDevo(d as Devotional | null);
+      setAdminRequests((reqs ?? []) as AdminRequest[]);
+      setAdminWarnings((warns ?? []) as AdminWarning[]);
+      setBanAppeals((appeals ?? []) as BanAppeal[]);
       setActivity({
         explored: !!viewedRes.data?.length || !!interestRes.data?.length,
         interestSent: !!interestRes.data?.length,
@@ -347,7 +407,8 @@ function InicioPage() {
               className="animate-fade-up mt-5 text-3xl font-extrabold leading-[1.1] tracking-tight sm:text-5xl"
               style={{ animationDelay: "60ms" }}
             >
-              {greeting(profile.full_name)} <span className="inline-block">👋</span>
+              {greeting(profile.full_name)}{" "}
+              <Hand className="ml-1 inline-block h-7 w-7 -translate-y-0.5 text-[var(--rose)] sm:h-9 sm:w-9" aria-hidden />
             </h1>
             <p
               className="animate-fade-up mt-3 max-w-xl text-base text-muted-foreground sm:text-lg"
