@@ -491,6 +491,42 @@ export type Database = {
         }
         Relationships: []
       }
+      photo_moderation_log: {
+        Row: {
+          ai_result: Json
+          confidence: number | null
+          created_at: string
+          decision: string
+          id: string
+          photo_url: string | null
+          reason: string | null
+          scope: Database["public"]["Enums"]["photo_moderation_scope"]
+          user_id: string
+        }
+        Insert: {
+          ai_result?: Json
+          confidence?: number | null
+          created_at?: string
+          decision: string
+          id?: string
+          photo_url?: string | null
+          reason?: string | null
+          scope: Database["public"]["Enums"]["photo_moderation_scope"]
+          user_id: string
+        }
+        Update: {
+          ai_result?: Json
+          confidence?: number | null
+          created_at?: string
+          decision?: string
+          id?: string
+          photo_url?: string | null
+          reason?: string | null
+          scope?: Database["public"]["Enums"]["photo_moderation_scope"]
+          user_id?: string
+        }
+        Relationships: []
+      }
       photo_moderation_queue: {
         Row: {
           ai_result: Json
@@ -527,6 +563,36 @@ export type Database = {
           scope?: Database["public"]["Enums"]["photo_moderation_scope"]
           status?: Database["public"]["Enums"]["photo_moderation_status"]
           user_id?: string
+        }
+        Relationships: []
+      }
+      photo_moderation_settings: {
+        Row: {
+          extra_reject_threshold: number
+          extra_review_threshold: number
+          id: boolean
+          main_approve_threshold: number
+          main_review_threshold: number
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          extra_reject_threshold?: number
+          extra_review_threshold?: number
+          id?: boolean
+          main_approve_threshold?: number
+          main_review_threshold?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          extra_reject_threshold?: number
+          extra_review_threshold?: number
+          id?: boolean
+          main_approve_threshold?: number
+          main_review_threshold?: number
+          updated_at?: string
+          updated_by?: string | null
         }
         Relationships: []
       }

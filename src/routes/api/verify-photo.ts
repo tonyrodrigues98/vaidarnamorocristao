@@ -60,6 +60,40 @@ export const Route = createFileRoute("/api/verify-photo")({
           const imageBase64: string | undefined = body?.imageBase64;
           const mimeType: string = typeof body?.mimeType === "string" ? body.mimeType : "image/jpeg";
           const scope: "main" | "extra" = body?.scope === "extra" ? "extra" : "main";
+          const photoUrl: string | null = typeof body?.photoUrl === "string" ? body.photoUrl : null;
+          const dbScope = scope === "main" ? "avatar" : "extra";
+
+          // Load admin-configured thresholds (singleton row).
+          const { data: settings } = await sb
+            .from("photo_moderation_settings")
+            .select("extra_reject_threshold, extra_review_threshold, main_approve_threshold, main_review_threshold")
+            .eq("id", true)
+            .maybeSingle();
+          const extraReject = Number(settings?.extra_reject_threshold ?? 0.6);
+          const extraReview = Number(settings?.extra_review_threshold ?? 0.4);
+          const mainApprove = Number(settings?.main_approve_threshold ?? 0.7);
+          const mainReview = Number(settings?.main_review_threshold ?? 0.5);
+
+          const logDecision = async (
+            decision: "approved" | "needs_review" | "rejected" | "soft_fail",
+            confidence: number | null,
+            reason: string,
+            aiResult: unknown
+          ) => {
+            try {
+              await sb.from("photo_moderation_log").insert({
+                user_id: userRes.user!.id,
+                scope: dbScope,
+                photo_url: photoUrl,
+                decision,
+                confidence,
+                reason,
+                ai_result: (aiResult as Record<string, unknown>) ?? {},
+              });
+            } catch (err) {
+              console.error("photo log insert failed", err);
+            }
+          };
           if (!imageBase64 || typeof imageBase64 !== "string" || imageBase64.length < 100) {
             return new Response(JSON.stringify({ error: "invalid_input" }), { status: 400 });
           }
@@ -100,6 +134,7 @@ export const Route = createFileRoute("/api/verify-photo")({
           });
 
           if (aiResp.status === 429 || aiResp.status === 402) {
+            await logDecision("soft_fail", null, "ai_rate_limited", { status: aiResp.status });
             return new Response(
               JSON.stringify({ soft: true, error: "ai_rate_limited" }),
               { status: 200, headers: { "Content-Type": "application/json" } }
@@ -108,6 +143,7 @@ export const Route = createFileRoute("/api/verify-photo")({
           if (!aiResp.ok) {
             const txt = await aiResp.text();
             console.error("AI gateway error", aiResp.status, txt);
+            await logDecision("soft_fail", null, "ai_error", { status: aiResp.status });
             return new Response(
               JSON.stringify({ soft: true, error: "ai_error" }),
               { status: 200, headers: { "Content-Type": "application/json" } }
@@ -123,6 +159,7 @@ export const Route = createFileRoute("/api/verify-photo")({
             parsed = null;
           }
           if (!parsed || typeof parsed !== "object") {
+            await logDecision("soft_fail", null, "ai_parse_error", { raw });
             return new Response(
               JSON.stringify({ soft: true, error: "ai_parse_error" }),
               { status: 200, headers: { "Content-Type": "application/json" } }
@@ -135,20 +172,21 @@ export const Route = createFileRoute("/api/verify-photo")({
             const confidence = typeof parsed.confidence === "number" ? parsed.confidence : 0;
             const reason = typeof parsed.reason === "string" ? parsed.reason : "";
             const result = { is_safe: isSafe, is_explicit: isExplicit, confidence, reason };
-            // Block only when AI is confident the image is explicit
-            if (isExplicit && confidence >= 0.6) {
+            if (isExplicit && confidence >= extraReject) {
+              await logDecision("rejected", confidence, reason, result);
               return new Response(
                 JSON.stringify({ approved: false, needsReview: false, result: { ...result, reason: reason || "Conteúdo não permitido nesta foto." } }),
                 { status: 200, headers: { "Content-Type": "application/json" } }
               );
             }
-            // Borderline: queue for manual review
-            if (isExplicit && confidence >= 0.4) {
+            if (isExplicit && confidence >= extraReview) {
+              await logDecision("needs_review", confidence, reason, result);
               return new Response(
                 JSON.stringify({ approved: false, needsReview: true, result }),
                 { status: 200, headers: { "Content-Type": "application/json" } }
               );
             }
+            await logDecision("approved", confidence, reason, result);
             return new Response(
               JSON.stringify({ approved: true, needsReview: false, result }),
               { status: 200, headers: { "Content-Type": "application/json" } }
@@ -163,11 +201,15 @@ export const Route = createFileRoute("/api/verify-photo")({
             reason: typeof parsed.reason === "string" ? parsed.reason : "",
           };
 
-          const pass =
-            result.is_human && result.is_real_photo && result.has_single_face;
-          const approved = pass && result.confidence >= 0.7;
-          const needsReview = pass && !approved && result.confidence >= 0.5;
-
+          const pass = result.is_human && result.is_real_photo && result.has_single_face;
+          const approved = pass && result.confidence >= mainApprove;
+          const needsReview = pass && !approved && result.confidence >= mainReview;
+          await logDecision(
+            approved ? "approved" : needsReview ? "needs_review" : "rejected",
+            result.confidence,
+            result.reason,
+            result
+          );
           return new Response(
             JSON.stringify({ approved, needsReview, result }),
             { status: 200, headers: { "Content-Type": "application/json" } }

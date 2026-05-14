@@ -369,8 +369,11 @@ function Admin() {
           </p>
           {(isAdmin || isSuperAdmin) && (
             <div className="mt-3">
-              <Button asChild variant="outline" size="sm">
+              <Button asChild variant="outline" size="sm" className="mr-2">
                 <Link to="/admin/verificacoes">✔ Verificações de perfil</Link>
+              </Button>
+              <Button asChild variant="outline" size="sm">
+                <Link to="/admin/fotos">📷 Análise de Fotos</Link>
               </Button>
             </div>
           )}
