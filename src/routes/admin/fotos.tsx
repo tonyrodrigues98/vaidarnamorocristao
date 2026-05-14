@@ -8,7 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { ArrowLeft, Check, X, RefreshCw, Settings, History, Image as ImageIcon } from "lucide-react";
+import { ArrowLeft, Check, X, RefreshCw, Settings, History, Image as ImageIcon, Eye, Trash2, ExternalLink } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 
 export const Route = createFileRoute("/admin/fotos")({ component: AdminFotos });
 
@@ -39,7 +40,16 @@ type LogItem = {
   created_at: string;
 };
 
-type ProfileLite = { id: string; full_name: string | null; photo_url: string | null };
+type ProfileLite = {
+  id: string;
+  full_name: string | null;
+  photo_url: string | null;
+  age?: number | null;
+  city?: string | null;
+  state?: string | null;
+  church?: string | null;
+  status?: string | null;
+};
 
 type Settings = {
   extra_reject_threshold: number;
@@ -64,13 +74,15 @@ function AdminFotos() {
   const [settings, setSettings] = useState<Settings | null>(null);
   const [draftSettings, setDraftSettings] = useState<Settings | null>(null);
   const [savingSettings, setSavingSettings] = useState(false);
+  const [openLog, setOpenLog] = useState<LogItem | null>(null);
+  const [deletingPhoto, setDeletingPhoto] = useState(false);
 
   async function loadProfilesFor(ids: string[]) {
     const fresh = ids.filter((id) => !profiles.has(id));
     if (!fresh.length) return;
     const { data } = await supabase
       .from("profiles")
-      .select("id, full_name, photo_url")
+      .select("id, full_name, photo_url, age, city, state, church, status")
       .in("id", fresh);
     if (!data) return;
     setProfiles((prev) => {
@@ -240,6 +252,64 @@ function AdminFotos() {
     }
     return Array.from(map.entries());
   }, [logs]);
+
+  async function deleteLogPhoto(item: LogItem) {
+    if (!item.photo_url) {
+      toast.error("Esta foto não tem URL registrada.");
+      return;
+    }
+    if (!confirm("Apagar esta foto do perfil? Esta ação é definitiva.")) return;
+    setDeletingPhoto(true);
+    try {
+      // Apaga storage
+      const marker = "/profile-photos/";
+      const idx = item.photo_url.indexOf(marker);
+      if (idx > -1) {
+        const path = item.photo_url.substring(idx + marker.length).split("?")[0];
+        await supabase.storage.from("profile-photos").remove([path]);
+      }
+      if (item.scope === "avatar") {
+        await supabase
+          .from("profiles")
+          .update({ photo_url: null, avatar_ai_verified: false })
+          .eq("id", item.user_id);
+      } else {
+        // Apaga linha em profile_photos com a mesma URL
+        await supabase
+          .from("profile_photos")
+          .delete()
+          .eq("user_id", item.user_id)
+          .eq("url", item.photo_url);
+      }
+      // Notificação para o usuário
+      await supabase.from("notifications").insert({
+        user_id: item.user_id,
+        type: "photo_removed",
+        title: "Uma foto foi removida pela equipe",
+        body:
+          item.scope === "avatar"
+            ? "Sua foto principal foi removida em revisão de moderação. Você pode enviar outra."
+            : "Uma foto adicional foi removida em revisão de moderação.",
+      });
+      // Registro de auditoria
+      await supabase.from("photo_moderation_log").insert({
+        user_id: item.user_id,
+        scope: item.scope,
+        photo_url: item.photo_url,
+        decision: "rejected",
+        confidence: item.confidence,
+        reason: "admin_deleted",
+        ai_result: { admin_deleted: true, source_log_id: item.id },
+      });
+      toast.success("Foto apagada");
+      setOpenLog(null);
+      void loadLogs();
+    } catch (e) {
+      toast.error("Não foi possível apagar a foto");
+    } finally {
+      setDeletingPhoto(false);
+    }
+  }
 
   if (loading) return null;
   if (!user) return <Navigate to="/auth/login" />;
