@@ -481,11 +481,18 @@ function AdminFotos() {
                             >
                               {it.photo_url ? (
                                 <img
-                                  src={it.photo_url}
+                                src={it.signed_url ?? it.photo_url}
                                   alt=""
                                   className="h-12 w-12 rounded-md object-cover"
                                   loading="lazy"
                                 />
+                            ) : it.signed_url ? (
+                              <img
+                                src={it.signed_url}
+                                alt=""
+                                className="h-12 w-12 rounded-md object-cover"
+                                loading="lazy"
+                              />
                               ) : (
                                 <div className="flex h-12 w-12 items-center justify-center rounded-md bg-muted text-muted-foreground">
                                   <ImageIcon className="h-4 w-4" />
@@ -618,9 +625,9 @@ function AdminFotos() {
             return (
               <div className="grid gap-4 sm:grid-cols-[1fr_1fr]">
                 <div className="overflow-hidden rounded-xl border bg-muted">
-                  {openLog.photo_url ? (
+                  {openLog.photo_url || openLog.signed_url ? (
                     <img
-                      src={openLog.photo_url}
+                      src={openLog.signed_url ?? openLog.photo_url ?? ""}
                       alt=""
                       className="h-full max-h-[60vh] w-full object-contain"
                     />
