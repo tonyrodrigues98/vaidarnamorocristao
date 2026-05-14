@@ -491,6 +491,45 @@ export type Database = {
         }
         Relationships: []
       }
+      photo_moderation_queue: {
+        Row: {
+          ai_result: Json
+          created_at: string
+          id: string
+          photo_id: string | null
+          photo_url: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          scope: Database["public"]["Enums"]["photo_moderation_scope"]
+          status: Database["public"]["Enums"]["photo_moderation_status"]
+          user_id: string
+        }
+        Insert: {
+          ai_result?: Json
+          created_at?: string
+          id?: string
+          photo_id?: string | null
+          photo_url: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          scope: Database["public"]["Enums"]["photo_moderation_scope"]
+          status?: Database["public"]["Enums"]["photo_moderation_status"]
+          user_id: string
+        }
+        Update: {
+          ai_result?: Json
+          created_at?: string
+          id?: string
+          photo_id?: string | null
+          photo_url?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          scope?: Database["public"]["Enums"]["photo_moderation_scope"]
+          status?: Database["public"]["Enums"]["photo_moderation_status"]
+          user_id?: string
+        }
+        Relationships: []
+      }
       prayer_request_prayed: {
         Row: {
           created_at: string
@@ -915,6 +954,9 @@ export type Database = {
       }
       profile_photos: {
         Row: {
+          ai_checked_at: string | null
+          ai_confidence: number | null
+          ai_verified: boolean
           created_at: string
           id: string
           sort_order: number
@@ -922,6 +964,9 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          ai_checked_at?: string | null
+          ai_confidence?: number | null
+          ai_verified?: boolean
           created_at?: string
           id?: string
           sort_order?: number
@@ -929,6 +974,9 @@ export type Database = {
           user_id: string
         }
         Update: {
+          ai_checked_at?: string | null
+          ai_confidence?: number | null
+          ai_verified?: boolean
           created_at?: string
           id?: string
           sort_order?: number
@@ -1009,6 +1057,9 @@ export type Database = {
       profiles: {
         Row: {
           age: number
+          avatar_ai_checked_at: string | null
+          avatar_ai_confidence: number | null
+          avatar_ai_verified: boolean
           bio: string | null
           church: string
           city: string
@@ -1035,6 +1086,9 @@ export type Database = {
         }
         Insert: {
           age: number
+          avatar_ai_checked_at?: string | null
+          avatar_ai_confidence?: number | null
+          avatar_ai_verified?: boolean
           bio?: string | null
           church: string
           city: string
@@ -1061,6 +1115,9 @@ export type Database = {
         }
         Update: {
           age?: number
+          avatar_ai_checked_at?: string | null
+          avatar_ai_confidence?: number | null
+          avatar_ai_verified?: boolean
           bio?: string | null
           church?: string
           city?: string
@@ -1570,6 +1627,8 @@ export type Database = {
       devotional_reaction: "heart" | "prayed" | "edify"
       location_scope: "regiao" | "brasil" | "mundo" | "personalizado"
       marital_status: "solteiro" | "divorciado"
+      photo_moderation_scope: "avatar" | "extra"
+      photo_moderation_status: "pending" | "approved" | "rejected"
       prayer_category:
         | "health"
         | "family"
@@ -1731,6 +1790,8 @@ export const Constants = {
       devotional_reaction: ["heart", "prayed", "edify"],
       location_scope: ["regiao", "brasil", "mundo", "personalizado"],
       marital_status: ["solteiro", "divorciado"],
+      photo_moderation_scope: ["avatar", "extra"],
+      photo_moderation_status: ["pending", "approved", "rejected"],
       prayer_category: [
         "health",
         "family",
