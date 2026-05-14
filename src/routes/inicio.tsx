@@ -718,7 +718,7 @@ function InicioPage() {
         )}
 
         {/* GRID */}
-        {!isBanned && <>
+        {!isBanned && !isRejected && <>
         <section className="mt-8 grid gap-6 lg:grid-cols-3">
           {/* CHECKLIST */}
           <div className="animate-fade-up rounded-3xl border border-border/60 bg-card/70 p-6 shadow-soft backdrop-blur lg:col-span-2">

@@ -86,6 +86,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => sub.subscription.unsubscribe();
   }, []);
 
+  // If the user's profile is hard-deleted by an admin, sign them out automatically.
+  useEffect(() => {
+    const uid = session?.user?.id;
+    if (!uid) return;
+    const ch = supabase
+      .channel(`profile-self-delete-${uid}`)
+      .on(
+        "postgres_changes" as never,
+        { event: "DELETE", schema: "public", table: "profiles", filter: `id=eq.${uid}` },
+        () => { supabase.auth.signOut(); },
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [session?.user?.id]);
+
   const isAdmin = role === "admin" || role === "super_admin";
   const isStaff = isAdmin || role === "apresentador" || role === "moderador";
   const isApproved = profileStatus === "approved" || isStaff;
