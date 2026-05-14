@@ -597,7 +597,7 @@ function InicioPage() {
                   className="mt-2 min-h-[120px]"
                 />
                 <div className="mt-3 flex justify-end">
-                  <Button onClick={submitAppeal} disabled={appealBusy}>
+                  <Button onClick={() => submitAppeal("ban")} disabled={appealBusy}>
                     <Send className="mr-2 h-4 w-4" /> Enviar apelação
                   </Button>
                 </div>
