@@ -86,7 +86,30 @@ function Etapa1() {
     setSubmitting(true);
 
     let photo_url: string | undefined;
+    let aiVerified = false;
+    let aiConfidence: number | null = null;
+    let needsReview = false;
+    let aiReason = "";
     if (photoFile) {
+      // Verificação por IA (face-api + Lovable AI)
+      const { verifyProfilePhoto } = await import("@/lib/verifyPhoto");
+      const verdict = await verifyProfilePhoto(photoFile);
+      if (!verdict.ok) {
+        toast.error(verdict.reason);
+        setSubmitting(false);
+        return;
+      }
+      if ("soft" in verdict && verdict.soft) {
+        // gateway indisponível — segue sem bloquear
+      } else if (verdict.approved) {
+        aiVerified = true;
+        aiConfidence = verdict.confidence;
+      } else if (verdict.needsReview) {
+        needsReview = true;
+        aiConfidence = verdict.confidence;
+        aiReason = verdict.reason;
+      }
+
       const rawExt = (photoFile.name.split(".").pop() ?? "").toLowerCase();
       const allowed = ["jpg", "jpeg", "png", "webp", "heic", "heif"];
       const ext = allowed.includes(rawExt) ? rawExt : "jpg";
@@ -100,12 +123,29 @@ function Etapa1() {
       }
       const { data: pub } = supabase.storage.from("profile-photos").getPublicUrl(path);
       photo_url = `${pub.publicUrl}?t=${Date.now()}`;
+      if (needsReview) {
+        await supabase.from("photo_moderation_queue").insert({
+          user_id: user.id,
+          photo_url,
+          scope: "avatar",
+          ai_result: { confidence: aiConfidence, reason: aiReason },
+          status: "pending",
+        });
+        toast.message("Foto enviada para análise rápida da nossa equipe.");
+      }
     }
 
     const { error } = await supabase.from("profiles").upsert({
       id: user.id,
       ...parsed.data,
       ...(photo_url ? { photo_url } : {}),
+      ...(photoFile
+        ? {
+            avatar_ai_verified: aiVerified,
+            avatar_ai_confidence: aiConfidence,
+            avatar_ai_checked_at: new Date().toISOString(),
+          }
+        : {}),
     });
     setSubmitting(false);
     if (error) { toast.error(error.message); return; }

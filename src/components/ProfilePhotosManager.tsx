@@ -45,6 +45,28 @@ export function ProfilePhotosManager({ userId }: { userId: string }) {
       return;
     }
     setUploading(true);
+    // Verificação por IA antes de subir
+    const { verifyProfilePhoto } = await import("@/lib/verifyPhoto");
+    const verdict = await verifyProfilePhoto(file);
+    if (!verdict.ok) {
+      setUploading(false);
+      toast.error(verdict.reason);
+      return;
+    }
+    let aiVerified = false;
+    let aiConfidence: number | null = null;
+    let needsReview = false;
+    let aiReason = "";
+    if ("soft" in verdict && verdict.soft) {
+      // ok
+    } else if (verdict.approved) {
+      aiVerified = true;
+      aiConfidence = verdict.confidence;
+    } else if (verdict.needsReview) {
+      needsReview = true;
+      aiConfidence = verdict.confidence;
+      aiReason = verdict.reason;
+    }
     const ext = file.name.split(".").pop() ?? "jpg";
     const path = `${userId}/extra-${Date.now()}.${ext}`;
     const { error: upErr } = await supabase.storage
@@ -58,13 +80,33 @@ export function ProfilePhotosManager({ userId }: { userId: string }) {
     const { data: pub } = supabase.storage.from("profile-photos").getPublicUrl(path);
     const url = pub.publicUrl;
     const nextOrder = photos.length ? Math.max(...photos.map((p) => p.sort_order)) + 1 : 0;
-    const { error } = await supabase
+    const { data: inserted, error } = await supabase
       .from("profile_photos")
-      .insert({ user_id: userId, url, sort_order: nextOrder });
+      .insert({
+        user_id: userId,
+        url,
+        sort_order: nextOrder,
+        ai_verified: aiVerified,
+        ai_confidence: aiConfidence,
+        ai_checked_at: new Date().toISOString(),
+      })
+      .select("id")
+      .single();
     setUploading(false);
     if (error) {
       toast.error(error.message);
       return;
+    }
+    if (needsReview) {
+      await supabase.from("photo_moderation_queue").insert({
+        user_id: userId,
+        photo_url: url,
+        scope: "extra",
+        photo_id: inserted?.id ?? null,
+        ai_result: { confidence: aiConfidence, reason: aiReason },
+        status: "pending",
+      });
+      toast.message("Foto enviada para análise rápida da equipe.");
     }
     toast.success("Foto adicionada");
     void load();
