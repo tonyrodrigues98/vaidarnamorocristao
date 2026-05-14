@@ -609,6 +609,72 @@ function InicioPage() {
         )}
 
         {/* SOLICITAÇÕES DA EQUIPE */}
+        {isRejected && (
+          <section className="mt-6 rounded-3xl border border-amber-500/40 bg-amber-500/5 p-6 shadow-soft">
+            <div className="flex items-start gap-3">
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-amber-500/15 text-amber-600">
+                <AlertTriangle className="h-5 w-5" />
+              </span>
+              <div className="flex-1">
+                <h2 className="text-lg font-semibold text-amber-700 dark:text-amber-300">
+                  Conta negada
+                </h2>
+                <p className="mt-1 text-sm text-amber-900/80 dark:text-amber-200/80">
+                  Revise sua conta e tente novamente.
+                </p>
+                {profile.rejection_reason && (
+                  <p className="mt-2 whitespace-pre-wrap rounded-lg bg-amber-500/10 p-2 text-sm text-amber-900 dark:text-amber-200">
+                    <span className="font-semibold">Motivo:</span> {profile.rejection_reason}
+                  </p>
+                )}
+                <div className="mt-3">
+                  <Button asChild size="sm" variant="outline">
+                    <Link to="/perfil">Editar meu perfil</Link>
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {latestRejectionAppeal && (
+              <div className="mt-5 rounded-2xl border border-border/60 bg-background/60 p-4">
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  Sua solicitação · {new Date(latestRejectionAppeal.created_at).toLocaleString("pt-BR")} ·{" "}
+                  {latestRejectionAppeal.status === "pending" && "aguardando resposta"}
+                  {latestRejectionAppeal.status === "answered" && "respondida"}
+                  {latestRejectionAppeal.status === "ignored" && "encerrada"}
+                </p>
+                <p className="mt-2 whitespace-pre-wrap text-sm">{latestRejectionAppeal.appeal_text}</p>
+                {latestRejectionAppeal.status === "answered" && latestRejectionAppeal.response_text && (
+                  <div className="mt-3 rounded-xl bg-[var(--petal)]/40 p-3 text-sm">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-[var(--rose)]">
+                      Resposta da equipe
+                    </p>
+                    <p className="mt-1 whitespace-pre-wrap">{latestRejectionAppeal.response_text}</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {canReverify && (
+              <div className="mt-5">
+                <label className="text-sm font-semibold">Pedir nova análise</label>
+                <Textarea
+                  value={appealText}
+                  onChange={(e) => setAppealText(e.target.value)}
+                  maxLength={2000}
+                  placeholder="Conte o que mudou no seu perfil ou justifique para reanálise..."
+                  className="mt-2 min-h-[120px]"
+                />
+                <div className="mt-3 flex justify-end">
+                  <Button onClick={() => submitAppeal("rejection")} disabled={appealBusy}>
+                    <Send className="mr-2 h-4 w-4" /> Verificar Novamente
+                  </Button>
+                </div>
+              </div>
+            )}
+          </section>
+        )}
+
         {adminRequests.length > 0 && (
           <section className="mt-6 rounded-3xl border border-border/60 bg-card/70 p-6 shadow-soft backdrop-blur">
             <div className="flex items-center gap-2">
