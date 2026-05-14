@@ -17,21 +17,55 @@ type Missions = {
   advanced_target: number;
 };
 
+type ExtraProgress = {
+  faithful_heart: number;
+  intercessor: number;
+  spiritual_mentor: number;
+  bridge_builder: number;
+  open_heart: number;
+  attentive_chatter: number;
+  magnetic_profile: number;
+  faith_ambassador: number;
+  community_veteran: number;
+};
+
+const SELECTED_REWARDS: Array<{ code: BadgeCode; target: number; progress: keyof ExtraProgress }> = [
+  { code: "faithful_heart", target: 30, progress: "faithful_heart" },
+  { code: "intercessor", target: 50, progress: "intercessor" },
+  { code: "spiritual_mentor", target: 25, progress: "spiritual_mentor" },
+  { code: "bridge_builder", target: 5, progress: "bridge_builder" },
+  { code: "open_heart", target: 10, progress: "open_heart" },
+  { code: "attentive_chatter", target: 14, progress: "attentive_chatter" },
+  { code: "magnetic_profile", target: 50, progress: "magnetic_profile" },
+  { code: "faith_ambassador", target: 1, progress: "faith_ambassador" },
+  { code: "community_veteran", target: 180, progress: "community_veteran" },
+];
+
 const STREAK_TIERS = [7, 15, 30, 60, 90, 365];
 
 export function MissionsPanel({ userId }: { userId: string }) {
   const [m, setM] = useState<Missions | null>(null);
   const [badges, setBadges] = useState<BadgeCode[]>([]);
+  const [extraProgress, setExtraProgress] = useState<ExtraProgress | null>(null);
   const [loading, setLoading] = useState(true);
 
   async function load() {
-    const [missions, ub] = await Promise.all([
+    const [missions, ub, prayers, comments, matchesA, matchesB, interests, messages, views, advanced, activity] = await Promise.all([
       supabase.rpc("get_my_missions"),
       supabase
         .from("user_badges")
         .select("active, expires_at, badges(code)")
         .eq("user_id", userId)
         .eq("active", true),
+      supabase.from("prayer_request_prayed").select("id", { count: "exact", head: true }).eq("user_id", userId),
+      supabase.from("devotional_comments").select("id", { count: "exact", head: true }).eq("user_id", userId).is("deleted_at", null),
+      supabase.from("matches").select("id", { count: "exact", head: true }).eq("user_a", userId),
+      supabase.from("matches").select("id", { count: "exact", head: true }).eq("user_b", userId),
+      supabase.from("interests").select("id", { count: "exact", head: true }).eq("sender_id", userId),
+      supabase.from("messages").select("created_at").eq("sender_id", userId).order("created_at", { ascending: false }).limit(120),
+      supabase.from("profile_views").select("id", { count: "exact", head: true }).eq("viewed_id", userId),
+      supabase.from("profile_advanced").select("testimony, life_verse, faith_moment").eq("user_id", userId).maybeSingle(),
+      supabase.from("user_activity").select("day").eq("user_id", userId).order("day", { ascending: true }),
     ]);
     if (missions.data?.[0]) setM(missions.data[0] as Missions);
     setBadges(
@@ -40,6 +74,20 @@ export function MissionsPanel({ userId }: { userId: string }) {
         .map((r) => r.badges?.code as BadgeCode)
         .filter(Boolean),
     );
+    const activeStreak = currentDailyStreak((activity.data ?? []).map((r) => r.day));
+    const messageStreak = currentMessageStreak(((messages.data ?? []) as Array<{ created_at: string }>).map((r) => r.created_at));
+    const adv = advanced.data as { testimony: string | null; life_verse: string | null; faith_moment: string | null } | null;
+    setExtraProgress({
+      faithful_heart: activeStreak,
+      intercessor: prayers.count ?? 0,
+      spiritual_mentor: comments.count ?? 0,
+      bridge_builder: (matchesA.count ?? 0) + (matchesB.count ?? 0),
+      open_heart: interests.count ?? 0,
+      attentive_chatter: messageStreak,
+      magnetic_profile: views.count ?? 0,
+      faith_ambassador: adv?.testimony?.trim() && adv.life_verse?.trim() && adv.faith_moment ? 1 : 0,
+      community_veteran: Math.max(0, Math.floor((Date.now() - new Date((activity.data?.[0]?.day ?? new Date()).toString()).getTime()) / 86_400_000)),
+    });
     setLoading(false);
   }
 
