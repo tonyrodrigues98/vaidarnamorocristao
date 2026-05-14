@@ -2264,7 +2264,7 @@ type AppealRow = {
   created_at: string;
 };
 
-function BannedAppealsPanel() {
+function BannedAppealsPanel({ kind = "ban" }: { kind?: "ban" | "rejection" } = {}) {
   const { user: me } = useAuth();
   const [appeals, setAppeals] = useState<AppealRow[]>([]);
   const [profMap, setProfMap] = useState<Map<string, { full_name: string; photo_url: string | null }>>(new Map());
@@ -2276,6 +2276,7 @@ function BannedAppealsPanel() {
     const { data } = await supabase
       .from("user_ban_appeals")
       .select("*")
+      .eq("kind", kind)
       .order("created_at", { ascending: false })
       .limit(100);
     const items = (data ?? []) as AppealRow[];
@@ -2290,7 +2291,7 @@ function BannedAppealsPanel() {
       for (const p of profs ?? []) m.set(p.id, { full_name: p.full_name, photo_url: p.photo_url });
       setProfMap(m);
     }
-  }, []);
+  }, [kind]);
 
   useEffect(() => { void load(); }, [load]);
 
@@ -2346,7 +2347,7 @@ function BannedAppealsPanel() {
   return (
     <div className="space-y-3">
       <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-        Apelações de banimento ({appeals.filter((a) => a.status === "pending").length} pendentes)
+        {kind === "rejection" ? "Pedidos de reanálise" : "Apelações de banimento"} ({appeals.filter((a) => a.status === "pending").length} pendentes)
       </h2>
       {appeals.map((a) => {
         const prof = profMap.get(a.user_id);
