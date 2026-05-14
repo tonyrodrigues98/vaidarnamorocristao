@@ -5,6 +5,11 @@ import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import {
+  getHomeChecklistSteps,
+  markHomeChecklistStep,
+  type HomeChecklistStep,
+} from "@/lib/homeChecklist";
+import {
   Sparkles,
   CheckCircle2,
   Circle,
@@ -61,7 +66,6 @@ type Suggestion = {
   state: string | null;
   photo_url: string | null;
 };
-type ChecklistKey = "explore" | "community" | "devotional";
 type ActivityState = {
   explored: boolean;
   interestSent: boolean;
@@ -112,26 +116,6 @@ function subGreeting() {
   return "Esperamos que seu dia tenha sido abençoado.";
 }
 
-function checklistStorageKey(userId: string) {
-  return `inicioChecklist:${userId}`;
-}
-
-function readCompletedSteps(userId: string): Set<ChecklistKey> {
-  if (typeof window === "undefined") return new Set();
-  try {
-    const raw = window.localStorage.getItem(checklistStorageKey(userId));
-    const list = raw ? (JSON.parse(raw) as ChecklistKey[]) : [];
-    return new Set(list.filter((key) => ["explore", "community", "devotional"].includes(key)));
-  } catch {
-    return new Set();
-  }
-}
-
-function saveCompletedSteps(userId: string, steps: Set<ChecklistKey>) {
-  if (typeof window === "undefined") return;
-  window.localStorage.setItem(checklistStorageKey(userId), JSON.stringify(Array.from(steps)));
-}
-
 function InicioPage() {
   const { user, loading } = useAuth();
   const [profile, setProfile] = useState<Profile | null | undefined>(undefined);
@@ -144,7 +128,7 @@ function InicioPage() {
     community: false,
     devotional: false,
   });
-  const [completedSteps, setCompletedSteps] = useState<Set<ChecklistKey>>(new Set());
+  const [completedSteps, setCompletedSteps] = useState<Set<HomeChecklistStep>>(new Set());
   const [community, setCommunity] = useState({ newProfiles: 0, online: 0, newComments: 0 });
   const [tipIndex, setTipIndex] = useState(0);
 
