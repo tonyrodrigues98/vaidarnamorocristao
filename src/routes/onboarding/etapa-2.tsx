@@ -74,7 +74,7 @@ function Etapa2() {
     setSubmitting(false);
     if (error) { toast.error(error.message); return; }
     toast.success("Cadastro enviado para aprovação!");
-    navigate({ to: "/dashboard" });
+    navigate({ to: "/inicio" });
   }
 
   const toggleState = (s: string) => setForm((p) => ({
