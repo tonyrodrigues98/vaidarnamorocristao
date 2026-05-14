@@ -101,7 +101,7 @@ function NotificacoesPage() {
         )}
 
         <div className="mt-6 text-center">
-          <Link to="/dashboard" className="text-sm text-muted-foreground hover:underline">Voltar ao início</Link>
+          <Link to="/inicio" className="text-sm text-muted-foreground hover:underline">Voltar ao início</Link>
         </div>
       </main>
     </div>
