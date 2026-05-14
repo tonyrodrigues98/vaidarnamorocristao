@@ -579,6 +579,57 @@ function Admin() {
                   ))}
                 </div>
               )
+            ) : tab === "banned" ? (
+              <div className="space-y-6">
+                <BannedAppealsPanel />
+                {rows.length === 0 ? (
+                  <div className="glass rounded-2xl p-10 text-center text-muted-foreground shadow-soft">
+                    Nenhum perfil banido.
+                  </div>
+                ) : (
+                  <div className="grid gap-4">
+                    {rows.map((r) => (
+                      <div key={r.id} className="glass flex flex-col gap-4 rounded-2xl p-5 shadow-soft sm:flex-row">
+                        <div className="h-24 w-24 shrink-0 overflow-hidden rounded-2xl bg-muted">
+                          {r.photo_url ? (
+                            <img src={r.photo_url} alt="" className="h-full w-full object-cover" />
+                          ) : (
+                            <div className="flex h-full w-full items-center justify-center bg-gradient-love text-2xl text-white">
+                              {r.full_name.charAt(0)}
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="text-lg font-semibold">{r.full_name}, {r.age}</h3>
+                          <p className="text-sm text-muted-foreground">
+                            {r.sex} · {r.city}/{r.state} · {r.church}
+                          </p>
+                          {r.banned_reason && (
+                            <p className="mt-2 rounded-lg bg-destructive/10 p-2 text-xs text-destructive">
+                              <strong>Motivo:</strong> {r.banned_reason}
+                            </p>
+                          )}
+                        </div>
+                        <div className="flex flex-wrap gap-2 self-center">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            disabled={busy === r.id}
+                            onClick={async () => {
+                              if (!confirm("Remover banimento e reaprovar este usuário?")) return;
+                              const { error } = await supabase.rpc("admin_unban_user", { _user_id: r.id });
+                              if (error) toast.error(error.message);
+                              else { toast.success("Usuário desbanido"); load("banned"); }
+                            }}
+                          >
+                            <Check className="mr-1 h-4 w-4" /> Desbanir
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             ) : rows.length === 0 ? (
               <div className="glass rounded-2xl p-10 text-center text-muted-foreground shadow-soft">Nenhum perfil aqui.</div>
             ) : (
