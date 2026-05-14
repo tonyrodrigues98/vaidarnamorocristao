@@ -77,6 +77,7 @@ export function Header() {
   const [interestCount, setInterestCount] = useState(0);
   const [unreadCount, setUnreadCount] = useState(0);
   const [newsCount, setNewsCount] = useState(0);
+  const [devotionalCount, setDevotionalCount] = useState(0);
   const [communityCount, setCommunityCount] = useState(0);
   const [open, setOpen] = useState(false);
   const [profile, setProfile] = useState<{
@@ -103,6 +104,7 @@ export function Header() {
       setInterestCount(0);
       setUnreadCount(0);
       setNewsCount(0);
+      setDevotionalCount(0);
       setCommunityCount(0);
       return;
     }
@@ -140,8 +142,19 @@ export function Header() {
         .from("daily_posts")
         .select("id", { count: "exact", head: true })
         .eq("published", true)
+        .eq("kind", "news")
         .gt("published_at", since);
       if (!ignore) setNewsCount(count ?? 0);
+    };
+    const loadDevotional = async () => {
+      const since = getLastSeen(user.id, "devotional");
+      const { count } = await supabase
+        .from("daily_posts")
+        .select("id", { count: "exact", head: true })
+        .eq("published", true)
+        .eq("kind", "devotional")
+        .gt("published_at", since);
+      if (!ignore) setDevotionalCount(count ?? 0);
     };
     const loadCommunity = async () => {
       const since = getLastSeen(user.id, "community");
@@ -155,6 +168,7 @@ export function Header() {
     loadInterests();
     loadUnread();
     loadNews();
+    loadDevotional();
     loadCommunity();
     const ch = supabase
       .channel("hdr-counters")
@@ -165,7 +179,10 @@ export function Header() {
       )
       .on("postgres_changes", { event: "*", schema: "public", table: "messages" }, loadUnread)
       .on("postgres_changes", { event: "*", schema: "public", table: "matches" }, loadUnread)
-      .on("postgres_changes", { event: "*", schema: "public", table: "daily_posts" }, loadNews)
+      .on("postgres_changes", { event: "*", schema: "public", table: "daily_posts" }, () => {
+        loadNews();
+        loadDevotional();
+      })
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "global_messages" },
@@ -177,6 +194,7 @@ export function Header() {
       if (!detail?.key) return;
       if (detail.key === "interests") loadInterests();
       if (detail.key === "news") loadNews();
+      if (detail.key === "devotional") loadDevotional();
       if (detail.key === "community") loadCommunity();
     };
     window.addEventListener("lastSeen:update", onSeen);
@@ -284,13 +302,13 @@ export function Header() {
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="sm" aria-label="Mais opções">
                     <MoreHorizontal className="h-4 w-4" />
-                    {newsCount > 0 && <Badge n={newsCount} />}
+                    {(newsCount + devotionalCount) > 0 && <Badge n={newsCount + devotionalCount} />}
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-52">
                   <DropdownMenuItem asChild>
                     <Link to="/devocional" className="flex items-center gap-2">
-                      <BookHeart className="h-4 w-4" /> Devocional
+                      <BookHeart className="h-4 w-4" /> Devocional <Badge n={devotionalCount} />
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>

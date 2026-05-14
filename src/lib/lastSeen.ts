@@ -1,7 +1,7 @@
 // Tracks per-user "last seen" timestamps for notification badges.
 // Stored in localStorage as ISO strings, scoped by user id.
 
-export type SeenKey = "interests" | "news" | "community";
+export type SeenKey = "interests" | "news" | "community" | "devotional";
 
 function storageKey(userId: string, key: SeenKey) {
   return `lastSeen:${userId}:${key}`;

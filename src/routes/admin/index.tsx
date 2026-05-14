@@ -630,10 +630,13 @@ function Admin() {
                   </div>
                 )}
               </div>
-            ) : rows.length === 0 ? (
-              <div className="glass rounded-2xl p-10 text-center text-muted-foreground shadow-soft">Nenhum perfil aqui.</div>
             ) : (
-              <div className="grid gap-4">
+              <div className="space-y-6">
+                {tab === "rejected" && <BannedAppealsPanel kind="rejection" />}
+                {rows.length === 0 ? (
+                  <div className="glass rounded-2xl p-10 text-center text-muted-foreground shadow-soft">Nenhum perfil aqui.</div>
+                ) : (
+                <div className="grid gap-4">
                 {rows.map((r) => (
                   <div key={r.id} className="glass flex flex-col gap-4 rounded-2xl p-5 shadow-soft sm:flex-row">
                     <div className="h-24 w-24 shrink-0 overflow-hidden rounded-2xl bg-muted">
@@ -669,6 +672,8 @@ function Admin() {
                     </div>
                   </div>
                 ))}
+                </div>
+                )}
               </div>
             )}
           </TabsContent>
@@ -2264,7 +2269,7 @@ type AppealRow = {
   created_at: string;
 };
 
-function BannedAppealsPanel() {
+function BannedAppealsPanel({ kind = "ban" }: { kind?: "ban" | "rejection" } = {}) {
   const { user: me } = useAuth();
   const [appeals, setAppeals] = useState<AppealRow[]>([]);
   const [profMap, setProfMap] = useState<Map<string, { full_name: string; photo_url: string | null }>>(new Map());
@@ -2276,6 +2281,7 @@ function BannedAppealsPanel() {
     const { data } = await supabase
       .from("user_ban_appeals")
       .select("*")
+      .eq("kind", kind)
       .order("created_at", { ascending: false })
       .limit(100);
     const items = (data ?? []) as AppealRow[];
@@ -2290,7 +2296,7 @@ function BannedAppealsPanel() {
       for (const p of profs ?? []) m.set(p.id, { full_name: p.full_name, photo_url: p.photo_url });
       setProfMap(m);
     }
-  }, []);
+  }, [kind]);
 
   useEffect(() => { void load(); }, [load]);
 
@@ -2338,7 +2344,7 @@ function BannedAppealsPanel() {
   if (appeals.length === 0) {
     return (
       <div className="glass rounded-2xl p-6 text-center text-sm text-muted-foreground shadow-soft">
-        Nenhuma apelação recebida.
+        {kind === "rejection" ? "Nenhum pedido de reanálise recebido." : "Nenhuma apelação recebida."}
       </div>
     );
   }
@@ -2346,7 +2352,7 @@ function BannedAppealsPanel() {
   return (
     <div className="space-y-3">
       <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-        Apelações de banimento ({appeals.filter((a) => a.status === "pending").length} pendentes)
+        {kind === "rejection" ? "Pedidos de reanálise" : "Apelações de banimento"} ({appeals.filter((a) => a.status === "pending").length} pendentes)
       </h2>
       {appeals.map((a) => {
         const prof = profMap.get(a.user_id);
