@@ -1,5 +1,5 @@
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ChangeEvent } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { ArrowLeft, Check, X, RefreshCw, Settings, History, Image as ImageIcon, Eye, Trash2, ExternalLink } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 
 export const Route = createFileRoute("/admin/fotos")({ component: AdminFotos });
 
@@ -33,11 +34,14 @@ type LogItem = {
   user_id: string;
   scope: Scope;
   photo_url: string | null;
-  decision: "approved" | "needs_review" | "rejected" | "soft_fail";
+  decision: "approved" | "needs_review" | "rejected" | "soft_fail" | "admin_deleted";
   confidence: number | null;
   reason: string | null;
   ai_result: AiResult;
   created_at: string;
+  storage_bucket?: string | null;
+  storage_path?: string | null;
+  signed_url?: string | null;
 };
 
 type ProfileLite = {
@@ -76,6 +80,7 @@ function AdminFotos() {
   const [savingSettings, setSavingSettings] = useState(false);
   const [openLog, setOpenLog] = useState<LogItem | null>(null);
   const [deletingPhoto, setDeletingPhoto] = useState(false);
+  const [deleteReason, setDeleteReason] = useState("");
 
   async function loadProfilesFor(ids: string[]) {
     const fresh = ids.filter((id) => !profiles.has(id));
@@ -254,58 +259,49 @@ function AdminFotos() {
   }, [logs]);
 
   async function deleteLogPhoto(item: LogItem) {
-    if (!item.photo_url) {
-      toast.error("Esta foto não tem URL registrada.");
+    const reason = deleteReason.trim();
+    if (!reason) {
+      toast.error("Escreva o motivo da remoção (será enviado ao usuário).");
       return;
     }
-    if (!confirm("Apagar esta foto do perfil? Esta ação é definitiva.")) return;
     setDeletingPhoto(true);
     try {
-      // Apaga storage
-      const marker = "/profile-photos/";
-      const idx = item.photo_url.indexOf(marker);
-      if (idx > -1) {
-        const path = item.photo_url.substring(idx + marker.length).split("?")[0];
-        await supabase.storage.from("profile-photos").remove([path]);
+      // Apaga arquivo público em profile-photos (se ainda for foto ativa do perfil)
+      if (item.photo_url) {
+        const marker = "/profile-photos/";
+        const idx = item.photo_url.indexOf(marker);
+        if (idx > -1) {
+          const path = item.photo_url.substring(idx + marker.length).split("?")[0];
+          await supabase.storage.from("profile-photos").remove([path]);
+        }
       }
-      if (item.scope === "avatar") {
-        await supabase
-          .from("profiles")
-          .update({ photo_url: null, avatar_ai_verified: false })
-          .eq("id", item.user_id);
-      } else {
-        // Apaga linha em profile_photos com a mesma URL
-        await supabase
+      // RPC: remove do perfil, registra log e notifica usuário com a foto e o motivo
+      // Para foto adicional, busca o id correspondente em profile_photos para o RPC apagar
+      let photoId: string | null = null;
+      if (item.scope === "extra" && item.photo_url) {
+        const { data: pp } = await supabase
           .from("profile_photos")
-          .delete()
+          .select("id")
           .eq("user_id", item.user_id)
-          .eq("url", item.photo_url);
+          .eq("url", item.photo_url)
+          .maybeSingle();
+        photoId = pp?.id ?? null;
       }
-      // Notificação para o usuário
-      await supabase.from("notifications").insert({
-        user_id: item.user_id,
-        type: "photo_removed",
-        title: "Uma foto foi removida pela equipe",
-        body:
-          item.scope === "avatar"
-            ? "Sua foto principal foi removida em revisão de moderação. Você pode enviar outra."
-            : "Uma foto adicional foi removida em revisão de moderação.",
-      });
-      // Registro de auditoria
-      await supabase.from("photo_moderation_log").insert({
-        user_id: item.user_id,
-        scope: item.scope,
-        photo_url: item.photo_url,
-        decision: "rejected",
-        confidence: item.confidence,
-        reason: "admin_deleted",
-        ai_result: { admin_deleted: true, source_log_id: item.id },
-      });
-      toast.success("Foto apagada");
+      const { error } = await supabase.rpc("admin_delete_user_photo", {
+        _user_id: item.user_id,
+        _photo_id: photoId as unknown as string,
+        _scope: item.scope,
+        _photo_url: item.photo_url ?? item.signed_url ?? "",
+        _reason: reason,
+      } as any);
+      if (error) throw error;
+      toast.success("Foto apagada e usuário notificado");
+      setDeleteReason("");
       setOpenLog(null);
       void loadLogs();
-    } catch (e) {
-      toast.error("Não foi possível apagar a foto");
+    } catch (e: any) {
+      console.error(e);
+      toast.error(e?.message || "Não foi possível apagar a foto");
     } finally {
       setDeletingPhoto(false);
     }
@@ -486,11 +482,18 @@ function AdminFotos() {
                             >
                               {it.photo_url ? (
                                 <img
-                                  src={it.photo_url}
+                                src={it.signed_url ?? it.photo_url}
                                   alt=""
                                   className="h-12 w-12 rounded-md object-cover"
                                   loading="lazy"
                                 />
+                            ) : it.signed_url ? (
+                              <img
+                                src={it.signed_url}
+                                alt=""
+                                className="h-12 w-12 rounded-md object-cover"
+                                loading="lazy"
+                              />
                               ) : (
                                 <div className="flex h-12 w-12 items-center justify-center rounded-md bg-muted text-muted-foreground">
                                   <ImageIcon className="h-4 w-4" />
@@ -623,9 +626,9 @@ function AdminFotos() {
             return (
               <div className="grid gap-4 sm:grid-cols-[1fr_1fr]">
                 <div className="overflow-hidden rounded-xl border bg-muted">
-                  {openLog.photo_url ? (
+                  {openLog.photo_url || openLog.signed_url ? (
                     <img
-                      src={openLog.photo_url}
+                      src={openLog.signed_url ?? openLog.photo_url ?? ""}
                       alt=""
                       className="h-full max-h-[60vh] w-full object-contain"
                     />
@@ -677,6 +680,19 @@ function AdminFotos() {
                   <p className="text-xs text-muted-foreground">
                     {new Date(openLog.created_at).toLocaleString("pt-BR")}
                   </p>
+                  <div className="pt-2">
+                    <Label htmlFor="delete-reason" className="text-xs">
+                      Motivo da remoção (enviado ao usuário)
+                    </Label>
+                    <Textarea
+                      id="delete-reason"
+                      value={deleteReason}
+                      onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setDeleteReason(e.target.value)}
+                      placeholder="Ex.: Foto contém conteúdo inadequado, viola as diretrizes…"
+                      rows={3}
+                      className="mt-1"
+                    />
+                  </div>
                 </div>
               </div>
             );
@@ -689,11 +705,11 @@ function AdminFotos() {
                 </Link>
               </Button>
             )}
-            <Button variant="ghost" onClick={() => setOpenLog(null)}>Fechar</Button>
+            <Button variant="ghost" onClick={() => { setDeleteReason(""); setOpenLog(null); }}>Fechar</Button>
             <Button
               variant="destructive"
               onClick={() => openLog && deleteLogPhoto(openLog)}
-              disabled={deletingPhoto || !openLog?.photo_url}
+              disabled={deletingPhoto || !deleteReason.trim()}
             >
               <Trash2 className="mr-1 h-4 w-4" /> Apagar foto
             </Button>

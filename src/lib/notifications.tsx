@@ -13,6 +13,7 @@ export type AppNotification = {
   entity_id: string | null;
   read_at: string | null;
   created_at: string;
+  image_url?: string | null;
 };
 
 export function useNotifications(limit = 50) {

@@ -78,22 +78,46 @@ export const Route = createFileRoute("/api/verify-photo")({
             decision: "approved" | "needs_review" | "rejected" | "soft_fail",
             confidence: number | null,
             reason: string,
-            aiResult: unknown
+            aiResult: unknown,
+            extra?: { storage_bucket?: string; storage_path?: string; photo_url?: string }
           ) => {
             try {
               await sb.from("photo_moderation_log").insert({
                 user_id: userRes.user!.id,
                 scope: dbScope,
-                photo_url: photoUrl,
+                photo_url: extra?.photo_url ?? photoUrl,
                 decision,
                 confidence,
                 reason,
                 ai_result: (aiResult as Record<string, unknown>) ?? {},
+                storage_bucket: extra?.storage_bucket ?? null,
+                storage_path: extra?.storage_path ?? null,
               });
             } catch (err) {
               console.error("photo log insert failed", err);
             }
           };
+
+          // Upload de evidência para fotos rejeitadas/em revisão (mantém 7 dias para auditoria do admin)
+          const uploadRejectEvidence = async (): Promise<{ bucket: string; path: string } | null> => {
+            try {
+              const ext = (mimeType.split("/")[1] || "jpg").replace("jpeg", "jpg");
+              const path = `${userRes.user!.id}/${crypto.randomUUID()}.${ext}`;
+              const bytes = Uint8Array.from(atob(imageBase64!), (c) => c.charCodeAt(0));
+              const { error } = await sb.storage
+                .from("photo-moderation-rejects")
+                .upload(path, bytes, { contentType: mimeType, upsert: false });
+              if (error) {
+                console.error("reject upload failed", error);
+                return null;
+              }
+              return { bucket: "photo-moderation-rejects", path };
+            } catch (err) {
+              console.error("reject upload exception", err);
+              return null;
+            }
+          };
+
           if (!imageBase64 || typeof imageBase64 !== "string" || imageBase64.length < 100) {
             return new Response(JSON.stringify({ error: "invalid_input" }), { status: 400 });
           }
@@ -173,14 +197,16 @@ export const Route = createFileRoute("/api/verify-photo")({
             const reason = typeof parsed.reason === "string" ? parsed.reason : "";
             const result = { is_safe: isSafe, is_explicit: isExplicit, confidence, reason };
             if (isExplicit && confidence >= extraReject) {
-              await logDecision("rejected", confidence, reason, result);
+              const ev = await uploadRejectEvidence();
+              await logDecision("rejected", confidence, reason, result, ev ? { storage_bucket: ev.bucket, storage_path: ev.path } : undefined);
               return new Response(
                 JSON.stringify({ approved: false, needsReview: false, result: { ...result, reason: reason || "Conteúdo não permitido nesta foto." } }),
                 { status: 200, headers: { "Content-Type": "application/json" } }
               );
             }
             if (isExplicit && confidence >= extraReview) {
-              await logDecision("needs_review", confidence, reason, result);
+              const ev = await uploadRejectEvidence();
+              await logDecision("needs_review", confidence, reason, result, ev ? { storage_bucket: ev.bucket, storage_path: ev.path } : undefined);
               return new Response(
                 JSON.stringify({ approved: false, needsReview: true, result }),
                 { status: 200, headers: { "Content-Type": "application/json" } }
@@ -204,11 +230,17 @@ export const Route = createFileRoute("/api/verify-photo")({
           const pass = result.is_human && result.is_real_photo && result.has_single_face;
           const approved = pass && result.confidence >= mainApprove;
           const needsReview = pass && !approved && result.confidence >= mainReview;
+          const decisionMain = approved ? "approved" : needsReview ? "needs_review" : "rejected";
+          let evMain: { bucket: string; path: string } | null = null;
+          if (decisionMain !== "approved") {
+            evMain = await uploadRejectEvidence();
+          }
           await logDecision(
-            approved ? "approved" : needsReview ? "needs_review" : "rejected",
+            decisionMain,
             result.confidence,
             result.reason,
-            result
+            result,
+            evMain ? { storage_bucket: evMain.bucket, storage_path: evMain.path } : undefined
           );
           return new Response(
             JSON.stringify({ approved, needsReview, result }),

@@ -107,6 +107,14 @@ function NotificacoesPage() {
                         {n.body}
                       </span>
                     )}
+                    {n.image_url && (
+                      <img
+                        src={n.image_url}
+                        alt=""
+                        loading="lazy"
+                        className="mt-2 h-24 w-24 rounded-lg border object-cover"
+                      />
+                    )}
                     <span className="mt-1 block text-[11px] text-muted-foreground">
                       {formatDistanceToNow(new Date(n.created_at), {
                         addSuffix: true,
