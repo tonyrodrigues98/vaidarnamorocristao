@@ -2339,7 +2339,7 @@ function BannedAppealsPanel({ kind = "ban" }: { kind?: "ban" | "rejection" } = {
   if (appeals.length === 0) {
     return (
       <div className="glass rounded-2xl p-6 text-center text-sm text-muted-foreground shadow-soft">
-        Nenhuma apelação recebida.
+        {kind === "rejection" ? "Nenhum pedido de reanálise recebido." : "Nenhuma apelação recebida."}
       </div>
     );
   }
