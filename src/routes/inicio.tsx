@@ -194,11 +194,22 @@ function InicioPage() {
       { key: "photo", label: "Adicione uma boa foto", done: !!p?.photo_url, to: "/perfil" as const },
       { key: "bio", label: "Capriche na sua bio", done: !!(p?.bio && p.bio.trim().length >= 30), to: "/perfil" as const },
       { key: "advanced", label: "Conte sobre você (testemunho, versículo…)", done: advCount.done >= 5, to: "/perfil" as const },
-      { key: "explore", label: "Explore pretendentes", done: false, to: "/pretendentes" as const },
-      { key: "community", label: "Participe da comunidade", done: false, to: "/comunidade" as const },
-      { key: "devotional", label: "Leia o devocional do dia", done: false, to: "/devocional" as const },
+      { key: "interest", label: "Demonstre interesse", done: activity.interestSent, to: "/pretendentes" as const },
+      { key: "explore", label: "Explore pretendentes", done: activity.explored || completedSteps.has("explore"), to: "/pretendentes" as const, manual: true },
+      { key: "community", label: "Participe da comunidade", done: activity.community || completedSteps.has("community"), to: "/comunidade" as const, manual: true },
+      { key: "devotional", label: "Leia o devocional do dia", done: activity.devotional || completedSteps.has("devotional"), to: "/devocional" as const, manual: true },
     ];
-  }, [profile, advCount]);
+  }, [profile, advCount, activity, completedSteps]);
+
+  function markChecklistStep(key: string) {
+    if (!user || !["explore", "community", "devotional"].includes(key)) return;
+    setCompletedSteps((prev) => {
+      const next = new Set(prev);
+      next.add(key as ChecklistKey);
+      saveCompletedSteps(user.id, next);
+      return next;
+    });
+  }
 
   const completion = useMemo(() => {
     const p = profile;
@@ -283,6 +294,7 @@ function InicioPage() {
                 <li key={item.key}>
                   <Link
                     to={item.to}
+                    onClick={() => markChecklistStep(item.key)}
                     className="group flex items-center gap-3 rounded-2xl border border-transparent px-3 py-3 transition hover:border-border/60 hover:bg-muted/40"
                   >
                     <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition ${
