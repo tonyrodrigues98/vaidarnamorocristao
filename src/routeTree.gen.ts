@@ -46,7 +46,6 @@ import { Route as AuthLoginRouteImport } from './routes/auth/login'
 import { Route as AuthForgotPasswordRouteImport } from './routes/auth/forgot-password'
 import { Route as ApiVerifyPhotoRouteImport } from './routes/api/verify-photo'
 import { Route as AdminVerificacoesRouteImport } from './routes/admin/verificacoes'
-import { Route as AdminFotosRouteImport } from './routes/admin/fotos'
 
 const VerificacaoRoute = VerificacaoRouteImport.update({
   id: '/verificacao',
@@ -233,11 +232,6 @@ const AdminVerificacoesRoute = AdminVerificacoesRouteImport.update({
   path: '/admin/verificacoes',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminFotosRoute = AdminFotosRouteImport.update({
-  id: '/admin/fotos',
-  path: '/admin/fotos',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -258,7 +252,6 @@ export interface FileRoutesByFullPath {
   '/sobre': typeof SobreRoute
   '/termos': typeof TermosRoute
   '/verificacao': typeof VerificacaoRoute
-  '/admin/fotos': typeof AdminFotosRoute
   '/admin/verificacoes': typeof AdminVerificacoesRoute
   '/api/verify-photo': typeof ApiVerifyPhotoRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
@@ -298,7 +291,6 @@ export interface FileRoutesByTo {
   '/sobre': typeof SobreRoute
   '/termos': typeof TermosRoute
   '/verificacao': typeof VerificacaoRoute
-  '/admin/fotos': typeof AdminFotosRoute
   '/admin/verificacoes': typeof AdminVerificacoesRoute
   '/api/verify-photo': typeof ApiVerifyPhotoRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
@@ -339,7 +331,6 @@ export interface FileRoutesById {
   '/sobre': typeof SobreRoute
   '/termos': typeof TermosRoute
   '/verificacao': typeof VerificacaoRoute
-  '/admin/fotos': typeof AdminFotosRoute
   '/admin/verificacoes': typeof AdminVerificacoesRoute
   '/api/verify-photo': typeof ApiVerifyPhotoRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
@@ -381,7 +372,6 @@ export interface FileRouteTypes {
     | '/sobre'
     | '/termos'
     | '/verificacao'
-    | '/admin/fotos'
     | '/admin/verificacoes'
     | '/api/verify-photo'
     | '/auth/forgot-password'
@@ -421,7 +411,6 @@ export interface FileRouteTypes {
     | '/sobre'
     | '/termos'
     | '/verificacao'
-    | '/admin/fotos'
     | '/admin/verificacoes'
     | '/api/verify-photo'
     | '/auth/forgot-password'
@@ -461,7 +450,6 @@ export interface FileRouteTypes {
     | '/sobre'
     | '/termos'
     | '/verificacao'
-    | '/admin/fotos'
     | '/admin/verificacoes'
     | '/api/verify-photo'
     | '/auth/forgot-password'
@@ -502,7 +490,6 @@ export interface RootRouteChildren {
   SobreRoute: typeof SobreRoute
   TermosRoute: typeof TermosRoute
   VerificacaoRoute: typeof VerificacaoRoute
-  AdminFotosRoute: typeof AdminFotosRoute
   AdminVerificacoesRoute: typeof AdminVerificacoesRoute
   ApiVerifyPhotoRoute: typeof ApiVerifyPhotoRoute
   AuthForgotPasswordRoute: typeof AuthForgotPasswordRoute
@@ -785,13 +772,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminVerificacoesRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/fotos': {
-      id: '/admin/fotos'
-      path: '/admin/fotos'
-      fullPath: '/admin/fotos'
-      preLoaderRoute: typeof AdminFotosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
@@ -814,7 +794,6 @@ const rootRouteChildren: RootRouteChildren = {
   SobreRoute: SobreRoute,
   TermosRoute: TermosRoute,
   VerificacaoRoute: VerificacaoRoute,
-  AdminFotosRoute: AdminFotosRoute,
   AdminVerificacoesRoute: AdminVerificacoesRoute,
   ApiVerifyPhotoRoute: ApiVerifyPhotoRoute,
   AuthForgotPasswordRoute: AuthForgotPasswordRoute,
@@ -838,3 +817,12 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
