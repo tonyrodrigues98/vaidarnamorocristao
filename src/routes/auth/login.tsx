@@ -31,7 +31,7 @@ function Login() {
     setLoading(false);
     if (error) { toast.error("Email ou senha incorretos"); return; }
     toast.success("Bem-vindo(a) de volta!");
-    navigate({ to: "/dashboard" });
+    navigate({ to: "/inicio" });
   }
 
   return (
