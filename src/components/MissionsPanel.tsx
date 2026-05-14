@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { BADGE_META, type BadgeCode } from "@/lib/badges";
-import { Award, Flame, Heart as HeartIcon, BookOpen, UserCheck, Sparkles, Gem } from "lucide-react";
+import { Award, Flame, Heart as HeartIcon, BookOpen, UserCheck, Sparkles, Gem, Users } from "lucide-react";
 
 type Missions = {
   profile_complete: boolean;
@@ -241,6 +241,18 @@ export function MissionsPanel({ userId }: { userId: string }) {
               />
             );
           })}
+          <SimpleReward
+            icon={<Users className="h-5 w-5" />}
+            name="Primeiro Match"
+            description="Conquistou seu primeiro match recíproco"
+            achieved={m.has_first_match}
+          />
+          <SimpleReward
+            icon={<BookOpen className="h-5 w-5" />}
+            name="Primeiro Devocional"
+            description="Participou do seu primeiro devocional"
+            achieved={m.has_first_devotional}
+          />
         </div>
         <p className="mt-3 text-xs text-muted-foreground">
           Visível apenas para você.
@@ -295,6 +307,28 @@ function RewardBadge({ code, value, target, achieved }: { code: BadgeCode; value
         </div>
         <div className="mt-1 text-[11px] text-muted-foreground">
           {achieved ? "Conquistado" : `${value}/${target}`}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SimpleReward({
+  icon, name, description, achieved,
+}: { icon: React.ReactNode; name: string; description: string; achieved: boolean }) {
+  return (
+    <div
+      className={`flex items-center gap-2 rounded-xl border p-3 ${achieved ? "border-emerald-400/40 bg-emerald-500/5" : "border-border bg-muted/30 opacity-60"}`}
+    >
+      <div className={achieved ? "text-emerald-500" : "text-muted-foreground"}>{icon}</div>
+      <div className="min-w-0 flex-1">
+        <div className="text-sm font-medium">{name}</div>
+        <div className="text-[11px] text-muted-foreground">{description}</div>
+        <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-muted">
+          <div className="h-full bg-emerald-500 transition-all" style={{ width: achieved ? "100%" : "0%" }} />
+        </div>
+        <div className="mt-1 text-[11px] text-muted-foreground">
+          {achieved ? "Conquistado" : "Pendente"}
         </div>
       </div>
     </div>
