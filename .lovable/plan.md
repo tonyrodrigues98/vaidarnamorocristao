@@ -1,94 +1,70 @@
-## Objetivo
+Trabalho grande dividido em 6 partes independentes. Vou implementar em ordem, validando cada parte antes de seguir. Nada fora do escopo será tocado, design atual preservado, apenas ícones lucide/heroicons.
 
-Bloquear upload de fotos que não sejam pessoas reais (desenhos, animais, memes, logos, prints, paisagens) usando duas camadas **gratuitas**:
+## Parte 1 — Histórico de Moderação de Fotos (admin/fotos)
+- Mostrar a foto real (thumbnail) em cada item do histórico, lendo `photo_url` do log.
+- Botão "Ver foto" abre modal responsivo (desktop + mobile) com:
+  - Imagem grande
+  - Resumo do perfil (nome, idade, cidade, igreja, status, link p/ perfil completo)
+  - Decisão da IA + confiança + motivo
+- Botões de ação rápida no modal e no card:
+  - **Ver perfil** → abre `/pretendentes/$id` (ou `/admin/usuarios/$id` se existir) destacando a foto.
+  - **Apagar foto** → abre prompt para motivo obrigatório, então:
+    - Remove a foto do `profile_photos` (ou zera `photo_url` no `profiles` se for principal) **imediatamente**.
+    - Remove o arquivo do storage.
+    - Cria notificação para o usuário: "Sua foto foi removida por um administrador. Motivo: …".
+    - Registra em `photo_moderation_log` decisão `admin_deleted`.
 
-1. **face-api.js** no navegador (rápido, custo zero, detecta presença de exatamente 1 rosto humano).
-2. **Lovable AI Gateway** com `google/gemini-2.5-flash` no servidor (valida que é foto real de humano, não desenho/animal/meme/print).
+## Parte 2 — Ícone do "Bom dia" no /inicio
+- Localizar o emoji estilo whatsapp (👋 / 🙋 / etc.) na saudação e substituir por ícone Lucide (`Sun` para manhã, `Sunset` tarde, `Moon` noite — ou `Hand` simples). Manter exatamente o mesmo layout.
 
-Sucesso esperado: ~90–95% de bloqueio de fotos inválidas, sem precisar pedir cartão ou API key ao usuário.
+## Parte 3 — Gerenciamento de Usuário em /admin (engrenagem)
+Adicionar botão de engrenagem em cada usuário listado em /admin com menu:
+1. **Requisitar alteração** — admin escolhe tipo (foto, bio, comportamento, outro) + texto. Cria registro em nova tabela `user_admin_requests` e notificação. Aparece em `/inicio` em nova seção abaixo de "Seu Espaço" → "Solicitações da equipe" (somente quando existir).
+2. **Aviso (warning)** — destaque maior no perfil do usuário (alert vermelho/âmbar no topo de `/perfil` e em `/inicio`). Tabela `user_admin_warnings`. Notificação enviada.
+3. **Ver perfil completo** — link para a página do perfil.
+4. **Excluir permanentemente** — apaga `profiles` + dados relacionados imediatamente via RPC `admin_hard_delete_user(uuid, reason)`. NÃO apaga `auth.users` para permitir recadastro com mesmo email (limpa só dados públicos do schema public). Confirmação dupla obrigatória.
 
----
+## Parte 4 — Sistema de Banimento
+- Adicionar coluna `banned_at`, `banned_reason`, `banned_by` em `profiles` (ou nova tabela `user_bans`).
+- Botão "Banir" no menu de engrenagem com motivo obrigatório.
+- Guard global: usuário banido só acessa `/inicio`, `/notificacoes`, `/conta`, `/suporte` + logout. Outras rotas redirecionam para `/inicio`.
+- `/inicio` para banido:
+  - Esconde seções: "Comunidade viva", "Possíveis conexões", "Devocional do dia", "Como começar".
+  - Mostra alerta de banimento dentro de "Seu espaço" com mensagem acolhedora + motivo.
+  - Botão **Recorrer** (ícone `MessageCircleWarning`/`Gavel`) → abre textarea para apelação.
+- Tabela `user_ban_appeals` (status: pending/answered/ignored, appeal_text, response_text).
+- Aba **Banidos** em /admin: lista contas banidas. Onde houver apelação pendente, botão "Ver apelação" → modal com:
+  - Texto da apelação
+  - Botão **Responder** (cria resposta exibida em nova section em /inicio do usuário banido, junto da mensagem de banimento)
+  - Botão **Ignorar** (marca apelação como ignorada e deixa o card "cinza")
 
-## Fluxo do upload
+## Parte 5 — Recompensas Pessoais novas em /perfil
+**Antes de codar**, vou apresentar 10 sugestões em checkbox para você escolher. (pergunta abaixo)
 
-```text
-Usuário escolhe foto
-   │
-   ▼
-[1] face-api.js (client)         → 0 rostos OU >1 rostos → bloqueia com mensagem clara
-   │ exatamente 1 rosto
-   ▼
-[2] Server fn verifyProfilePhoto → Gemini 2.5 Flash analisa
-   │   { is_human, is_real_photo, has_single_face, confidence, reason }
-   │ confidence >= 0.7 e tudo true → aprova
-   │ confidence < 0.7 ou alguma flag false → bloqueia
-   ▼
-[3] Upload no Storage + insere registro
-   │ marca ai_verified=true, ai_confidence, ai_reason
-   ▼
-Casos duvidosos (0.5–0.7) → fila /admin/verificacoes para revisão manual
-```
-
----
-
-## Mudanças
-
-### Banco
-Migration nova:
-- Adiciona em `profiles`: `avatar_ai_verified boolean default false`, `avatar_ai_confidence numeric`, `avatar_ai_checked_at timestamptz`.
-- Adiciona em `profile_photos`: mesmas 3 colunas.
-- Cria tabela `photo_moderation_queue` (id, user_id, photo_url, scope `'avatar'|'extra'`, photo_id nullable, ai_result jsonb, status `pending|approved|rejected`, reviewed_by, reviewed_at, created_at) com RLS: usuário vê apenas as próprias; admins (via `has_role`) leem/atualizam todas.
-
-### face-api.js (client)
-- `bun add face-api.js`.
-- Modelos `tiny_face_detector` hospedados em `public/models/` (download once, ~190KB).
-- `src/lib/faceDetection.ts`:
-  - `detectFaceInImage(file: File): Promise<{ count: number }>` carregando o modelo lazy uma vez.
-- Mensagens:
-  - `count === 0` → "Não detectamos um rosto na foto. Envie uma foto sua bem iluminada."
-  - `count > 1` → "Envie uma foto somente com você."
-
-### Lovable AI (server)
-- `src/lib/photoVerification.functions.ts`:
-  - `createServerFn({ method: "POST" })` com `requireSupabaseAuth`.
-  - Input: `{ imageBase64: string, mimeType: string }` (Zod, max ~6MB base64).
-  - Handler: chama `https://ai.gateway.lovable.dev/v1/chat/completions` com `google/gemini-2.5-flash`, mensagem multimodal e `response_format: json_object`. System prompt em PT-BR exigindo JSON `{ is_human, is_real_photo, has_single_face, confidence (0-1), reason }`.
-  - Trata 429 (créditos do gateway esgotados) e 402 → retorna `{ ok: false, soft: true }` para **não bloquear** o usuário em caso de indisponibilidade.
-  - Retorna `{ approved: boolean, needsReview: boolean, result }`.
-
-### Integração nos 3 pontos de upload
-Arquivos: `src/routes/onboarding/etapa-1.tsx`, `src/routes/perfil.tsx`, `src/components/ProfilePhotosManager.tsx`.
-
-Função utilitária `src/lib/verifyAndUpload.ts`:
-1. `detectFaceInImage(file)` → bloqueia se !=1.
-2. Lê arquivo → base64, chama `verifyProfilePhoto` via `useServerFn`.
-3. Se `approved` → segue upload normal e grava `ai_verified=true, ai_confidence`.
-4. Se `needsReview` → upload segue, mas insere em `photo_moderation_queue` com `status='pending'` e mostra toast "Foto em análise".
-5. Se rejeitado → `toast.error(result.reason)` e cancela.
-6. Se `soft` (gateway indisponível) → segue upload sem bloquear, marca `ai_verified=false`.
-
-UI: spinner "Verificando foto..." durante as duas etapas.
-
-### Painel admin
-- `src/routes/admin/verificacoes.tsx` (já existe) ganha aba "Fotos pendentes" listando `photo_moderation_queue` com preview, motivo da IA e botões Aprovar/Rejeitar (atualiza status; se rejeitado, deleta a foto do storage e do registro).
+## Parte 6 — QA final
+- Build limpo, rotas geradas, RLS testada.
+- Verificar que nada fora do solicitado foi alterado.
+- Verificar mobile (viewport 714px informado pelo usuário).
 
 ---
 
-## Detalhes técnicos
+### Ordem de execução
+1. Parte 2 (rápida, isolada)
+2. Parte 1 (modal + ações no histórico)
+3. Parte 3 (engrenagem + requisições/avisos/exclusão)
+4. Parte 4 (banimento + apelações)
+5. Aguardar resposta da pergunta abaixo → Parte 5 (recompensas)
+6. Parte 6 (QA)
 
-- **Modelo Gemini**: `google/gemini-2.5-flash` (multimodal, baixo custo, incluso no Lovable AI Gateway).
-- **Bundle**: face-api.js é ~700KB. Importar dinâmico (`await import("face-api.js")`) só no momento do upload pra não pesar a home.
-- **Modelos face-api**: baixar `tiny_face_detector_model-weights_manifest.json` + shard de `https://github.com/justadudewhohacks/face-api.js-models` e salvar em `public/models/`.
-- **Sem segredo extra**: `LOVABLE_API_KEY` já está disponível em `process.env` no servidor.
-- **Privacidade**: imagem trafega só para o gateway durante a verificação; nada é persistido fora do nosso Storage.
-- **Custos**: dentro do crédito gratuito do Lovable AI; cada verificação ≈ 1 chamada multimodal pequena.
+### Migrações de banco previstas
+- `user_admin_requests` (id, user_id, created_by, kind, message, status, created_at, resolved_at)
+- `user_admin_warnings` (id, user_id, created_by, message, severity, created_at, acknowledged_at)
+- `user_ban_appeals` (id, user_id, appeal_text, status, response_text, responded_by, responded_at, created_at)
+- Em `profiles`: `banned_at`, `banned_reason`, `banned_by`
+- RPC `admin_hard_delete_user(_user_id, _reason)` — security definer, restrito a admin/super_admin
+- RPC `admin_ban_user`, `admin_unban_user`
+- Decisão extra `admin_deleted` em `photo_moderation_log`
+- Política RLS para todas tabelas novas (admin/super_admin gerenciam; usuário lê o que é dele)
 
----
-
-## Entregáveis
-- 1 migration (colunas + tabela de fila + RLS).
-- `src/lib/faceDetection.ts`, `src/lib/photoVerification.functions.ts`, `src/lib/verifyAndUpload.ts`.
-- `public/models/*` (face-api).
-- Edição de `onboarding/etapa-1.tsx`, `perfil.tsx`, `ProfilePhotosManager.tsx`.
-- Aba nova em `admin/verificacoes.tsx`.
-- `bun add face-api.js`.
+### Pergunta obrigatória
+Vou perguntar quais das 10 recompensas você quer implementar antes de codar a Parte 5.
