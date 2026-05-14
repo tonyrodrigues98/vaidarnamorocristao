@@ -226,9 +226,21 @@ export function MissionsPanel({ userId }: { userId: string }) {
         <h3 className="flex items-center gap-2 text-lg font-semibold">
           <HeartIcon className="h-5 w-5 text-[var(--rose)]" /> Recompensas pessoais
         </h3>
-        <div className="mt-3 grid grid-cols-2 gap-3">
-          <Reward label="Primeiro match" achieved={m.has_first_match} icon={<HeartIcon className="h-5 w-5" />} />
-          <Reward label="Primeiro devocional" achieved={m.has_first_devotional} icon={<BookOpen className="h-5 w-5" />} />
+        <div className="mt-3 grid gap-3 sm:grid-cols-2">
+          {SELECTED_REWARDS.map((reward) => {
+            const meta = BADGE_META[reward.code];
+            if (!meta) return null;
+            const value = Math.min(extraProgress?.[reward.progress] ?? 0, reward.target);
+            return (
+              <RewardBadge
+                key={reward.code}
+                code={reward.code}
+                value={value}
+                target={reward.target}
+                achieved={has(reward.code)}
+              />
+            );
+          })}
         </div>
         <p className="mt-3 text-xs text-muted-foreground">
           Visível apenas para você.
