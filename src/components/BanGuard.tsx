@@ -13,9 +13,10 @@ const ALLOWED_PREFIXES = [
 ];
 
 /**
- * Redirects banned users away from disallowed routes.
- * Banned users keep access only to /inicio, /notificacoes, /conta,
- * /suporte (and the public /termos /manual /auth flows).
+ * Redirects banned and rejected users away from disallowed routes.
+ * They keep access only to /inicio, /notificacoes, /conta, /suporte
+ * (and the public /termos /manual /auth flows). Rejected users can
+ * still edit their profile, so /perfil is also allowed for them.
  */
 export function BanGuard() {
   const { profileStatus, loading } = useAuth();
@@ -24,9 +25,13 @@ export function BanGuard() {
 
   useEffect(() => {
     if (loading) return;
-    if (profileStatus !== "banned") return;
+    if (profileStatus !== "banned" && profileStatus !== "rejected") return;
     const path = location.pathname;
-    const allowed = ALLOWED_PREFIXES.some(
+    const prefixes =
+      profileStatus === "rejected"
+        ? [...ALLOWED_PREFIXES, "/perfil"]
+        : ALLOWED_PREFIXES;
+    const allowed = prefixes.some(
       (p) => path === p || path.startsWith(p + "/"),
     );
     if (!allowed) {
