@@ -43,6 +43,25 @@ const SELECTED_REWARDS: Array<{ code: BadgeCode; target: number; progress: keyof
 
 const STREAK_TIERS = [7, 15, 30, 60, 90, 365];
 
+function toDayKey(date: Date) {
+  return date.toISOString().slice(0, 10);
+}
+
+function currentDailyStreak(days: string[]) {
+  const set = new Set(days);
+  let cursor = new Date();
+  let count = 0;
+  while (set.has(toDayKey(cursor))) {
+    count += 1;
+    cursor.setDate(cursor.getDate() - 1);
+  }
+  return count;
+}
+
+function currentMessageStreak(createdAts: string[]) {
+  return currentDailyStreak(createdAts.map((d) => toDayKey(new Date(d))));
+}
+
 export function MissionsPanel({ userId }: { userId: string }) {
   const [m, setM] = useState<Missions | null>(null);
   const [badges, setBadges] = useState<BadgeCode[]>([]);
@@ -50,7 +69,7 @@ export function MissionsPanel({ userId }: { userId: string }) {
   const [loading, setLoading] = useState(true);
 
   async function load() {
-    const [missions, ub, prayers, comments, matchesA, matchesB, interests, messages, views, advanced, activity] = await Promise.all([
+    const [missions, ub, prayers, comments, matchesA, matchesB, interests, messages, views, advanced, activity, profile] = await Promise.all([
       supabase.rpc("get_my_missions"),
       supabase
         .from("user_badges")
@@ -66,6 +85,7 @@ export function MissionsPanel({ userId }: { userId: string }) {
       supabase.from("profile_views").select("id", { count: "exact", head: true }).eq("viewed_id", userId),
       supabase.from("profile_advanced").select("testimony, life_verse, faith_moment").eq("user_id", userId).maybeSingle(),
       supabase.from("user_activity").select("day").eq("user_id", userId).order("day", { ascending: true }),
+      supabase.from("profiles").select("created_at").eq("id", userId).maybeSingle(),
     ]);
     if (missions.data?.[0]) setM(missions.data[0] as Missions);
     setBadges(
@@ -86,7 +106,7 @@ export function MissionsPanel({ userId }: { userId: string }) {
       attentive_chatter: messageStreak,
       magnetic_profile: views.count ?? 0,
       faith_ambassador: adv?.testimony?.trim() && adv.life_verse?.trim() && adv.faith_moment ? 1 : 0,
-      community_veteran: Math.max(0, Math.floor((Date.now() - new Date((activity.data?.[0]?.day ?? new Date()).toString()).getTime()) / 86_400_000)),
+      community_veteran: Math.max(0, Math.floor((Date.now() - new Date(profile.data?.created_at ?? new Date()).getTime()) / 86_400_000)),
     });
     setLoading(false);
   }
