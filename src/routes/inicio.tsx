@@ -373,12 +373,84 @@ function InicioPage() {
 
   const firstName = (profile.full_name ?? "").split(" ")[0] || "amig@";
   const isApproved = profile.status === "approved";
+  const isBanned = profile.status === "banned";
+  const activeWarnings = adminWarnings.filter((w) => !w.acknowledged_at);
+  const latestAppeal = banAppeals[0] ?? null;
+  const canAppeal = isBanned && (!latestAppeal || latestAppeal.status === "ignored");
+
+  async function acknowledgeWarning(id: string) {
+    const { error } = await supabase
+      .from("user_admin_warnings")
+      .update({ acknowledged_at: new Date().toISOString() })
+      .eq("id", id);
+    if (error) { toast.error(error.message); return; }
+    setAdminWarnings((prev) =>
+      prev.map((w) => (w.id === id ? { ...w, acknowledged_at: new Date().toISOString() } : w)),
+    );
+  }
+  async function resolveRequest(id: string) {
+    const { error } = await supabase
+      .from("user_admin_requests")
+      .update({ status: "resolved" })
+      .eq("id", id);
+    if (error) { toast.error(error.message); return; }
+    setAdminRequests((prev) => prev.filter((r) => r.id !== id));
+    toast.success("Solicitação marcada como resolvida");
+  }
+  async function submitAppeal() {
+    if (!user) return;
+    const txt = appealText.trim();
+    if (txt.length < 10) { toast.error("Escreva sua apelação com mais detalhes."); return; }
+    setAppealBusy(true);
+    const { data, error } = await supabase
+      .from("user_ban_appeals")
+      .insert({ user_id: user.id, appeal_text: txt })
+      .select("id, appeal_text, status, response_text, responded_at, created_at")
+      .single();
+    setAppealBusy(false);
+    if (error) { toast.error(error.message); return; }
+    setBanAppeals((prev) => [data as BanAppeal, ...prev]);
+    setAppealText("");
+    toast.success("Apelação enviada. A equipe vai analisar.");
+  }
 
   return (
     <div className="min-h-screen">
       <Header />
 
       <main className="relative mx-auto w-full max-w-6xl px-4 pb-16 pt-6 sm:px-6 sm:pt-10">
+        {/* AVISOS SÉRIOS DA EQUIPE */}
+        {activeWarnings.length > 0 && (
+          <section className="mb-6 space-y-3">
+            {activeWarnings.map((w) => (
+              <div
+                key={w.id}
+                className={`flex items-start gap-3 rounded-2xl border p-4 shadow-soft ${
+                  w.severity === "severe"
+                    ? "border-red-500/40 bg-red-500/10 text-red-900 dark:text-red-200"
+                    : "border-amber-500/40 bg-amber-500/10 text-amber-900 dark:text-amber-200"
+                }`}
+              >
+                <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0" />
+                <div className="flex-1">
+                  <p className="text-sm font-semibold">
+                    {w.severity === "severe" ? "Aviso sério da moderação" : "Aviso da moderação"}
+                  </p>
+                  <p className="mt-1 whitespace-pre-wrap text-sm">{w.message}</p>
+                </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => acknowledgeWarning(w.id)}
+                  className="shrink-0 bg-background/50"
+                >
+                  Entendi
+                </Button>
+              </div>
+            ))}
+          </section>
+        )}
+
         {/* HERO */}
         <section className="relative overflow-hidden rounded-[2rem] border border-border/60 bg-gradient-warm px-6 py-10 shadow-soft sm:px-10 sm:py-14">
           <div
@@ -417,14 +489,22 @@ function InicioPage() {
               {subGreeting()}{" "}
               {isApproved
                 ? "Sua jornada continua — explore, converse e deixe Deus surpreender você."
-                : "Logo seu perfil será revisado e você poderá começar a explorar."}
+                : isBanned
+                  ? "Sua conta está temporariamente suspensa. Você ainda pode falar com a gente e enviar uma apelação abaixo."
+                  : "Logo seu perfil será revisado e você poderá começar a explorar."}
             </p>
 
             <div
               className="animate-fade-up mt-7 flex flex-wrap gap-3"
               style={{ animationDelay: "220ms" }}
             >
-              {isApproved ? (
+              {isBanned ? (
+                <Button asChild size="lg" variant="outline" className="rounded-full px-6 backdrop-blur bg-white/40 dark:bg-white/5">
+                  <Link to="/suporte">
+                    <MessageSquareWarning className="mr-2 h-4 w-4" /> Falar com o suporte
+                  </Link>
+                </Button>
+              ) : isApproved ? (
                 <>
                   <Button asChild size="lg" className="rounded-full px-6">
                     <Link to="/pretendentes">
@@ -451,7 +531,114 @@ function InicioPage() {
           </div>
         </section>
 
+        {/* PAINEL DE BANIMENTO */}
+        {isBanned && (
+          <section className="mt-6 rounded-3xl border border-red-500/30 bg-red-500/5 p-6 shadow-soft">
+            <div className="flex items-start gap-3">
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-red-500/15 text-red-600">
+                <Ban className="h-5 w-5" />
+              </span>
+              <div className="flex-1">
+                <h2 className="text-lg font-semibold text-red-700 dark:text-red-300">
+                  Conta suspensa
+                </h2>
+                {profile.banned_reason && (
+                  <p className="mt-1 whitespace-pre-wrap text-sm text-red-900/80 dark:text-red-200/80">
+                    <span className="font-semibold">Motivo:</span> {profile.banned_reason}
+                  </p>
+                )}
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Sentimos muito por isso. Se você acredita que houve um engano,
+                  envie uma apelação acolhedora e a equipe vai analisar.
+                </p>
+              </div>
+            </div>
+
+            {latestAppeal && (
+              <div className="mt-5 rounded-2xl border border-border/60 bg-background/60 p-4">
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  Sua apelação · {new Date(latestAppeal.created_at).toLocaleString("pt-BR")} ·{" "}
+                  {latestAppeal.status === "pending" && "aguardando resposta"}
+                  {latestAppeal.status === "answered" && "respondida"}
+                  {latestAppeal.status === "ignored" && "encerrada"}
+                </p>
+                <p className="mt-2 whitespace-pre-wrap text-sm">{latestAppeal.appeal_text}</p>
+                {latestAppeal.status === "answered" && latestAppeal.response_text && (
+                  <div className="mt-3 rounded-xl bg-[var(--petal)]/40 p-3 text-sm">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-[var(--rose)]">
+                      Resposta da equipe
+                    </p>
+                    <p className="mt-1 whitespace-pre-wrap">{latestAppeal.response_text}</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {canAppeal && (
+              <div className="mt-5">
+                <label className="text-sm font-semibold">Recorrer da decisão</label>
+                <Textarea
+                  value={appealText}
+                  onChange={(e) => setAppealText(e.target.value)}
+                  maxLength={2000}
+                  placeholder="Conte com calma o que aconteceu e por que acredita que houve engano..."
+                  className="mt-2 min-h-[120px]"
+                />
+                <div className="mt-3 flex justify-end">
+                  <Button onClick={submitAppeal} disabled={appealBusy}>
+                    <Send className="mr-2 h-4 w-4" /> Enviar apelação
+                  </Button>
+                </div>
+              </div>
+            )}
+          </section>
+        )}
+
+        {/* SOLICITAÇÕES DA EQUIPE */}
+        {adminRequests.length > 0 && (
+          <section className="mt-6 rounded-3xl border border-border/60 bg-card/70 p-6 shadow-soft backdrop-blur">
+            <div className="flex items-center gap-2">
+              <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-[var(--petal)] text-[var(--rose)]">
+                <ClipboardList className="h-4 w-4" />
+              </span>
+              <h2 className="text-lg font-semibold">Solicitações da equipe</h2>
+            </div>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Pequenos ajustes pedidos pela moderação para manter o espaço saudável.
+            </p>
+            <ul className="mt-4 space-y-3">
+              {adminRequests.map((r) => (
+                <li
+                  key={r.id}
+                  className="rounded-2xl border border-border/50 bg-background/40 p-4"
+                >
+                  <p className="text-xs font-semibold uppercase tracking-wide text-[var(--rose)]">
+                    {r.kind === "photo" && "Foto"}
+                    {r.kind === "bio" && "Biografia"}
+                    {r.kind === "behavior" && "Comportamento"}
+                    {r.kind === "other" && "Outro"}
+                    {" · "}
+                    {new Date(r.created_at).toLocaleDateString("pt-BR")}
+                  </p>
+                  <p className="mt-1 whitespace-pre-wrap text-sm">{r.message}</p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {(r.kind === "photo" || r.kind === "bio") && (
+                      <Button asChild size="sm" variant="outline">
+                        <Link to="/perfil">Ir para o perfil</Link>
+                      </Button>
+                    )}
+                    <Button size="sm" onClick={() => resolveRequest(r.id)}>
+                      Marcar como resolvida
+                    </Button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
         {/* GRID */}
+        {!isBanned && <>
         <section className="mt-8 grid gap-6 lg:grid-cols-3">
           {/* CHECKLIST */}
           <div className="animate-fade-up rounded-3xl border border-border/60 bg-card/70 p-6 shadow-soft backdrop-blur lg:col-span-2">
@@ -752,6 +939,7 @@ function InicioPage() {
             ))}
           </div>
         </section>
+        </>}
       </main>
     </div>
   );
