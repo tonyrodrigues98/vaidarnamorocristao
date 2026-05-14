@@ -376,9 +376,15 @@ function InicioPage() {
   const firstName = (profile.full_name ?? "").split(" ")[0] || "amig@";
   const isApproved = profile.status === "approved";
   const isBanned = profile.status === "banned";
+  const isRejected = profile.status === "rejected";
   const activeWarnings = adminWarnings.filter((w) => !w.acknowledged_at);
-  const latestAppeal = banAppeals[0] ?? null;
+  const banAppealsList = banAppeals.filter((a) => a.kind !== "rejection");
+  const rejectionAppealsList = banAppeals.filter((a) => a.kind === "rejection");
+  const latestAppeal = banAppealsList[0] ?? null;
+  const latestRejectionAppeal = rejectionAppealsList[0] ?? null;
   const canAppeal = isBanned && (!latestAppeal || latestAppeal.status === "ignored");
+  const canReverify =
+    isRejected && (!latestRejectionAppeal || latestRejectionAppeal.status === "ignored");
 
   async function acknowledgeWarning(id: string) {
     const { error } = await supabase
@@ -399,21 +405,25 @@ function InicioPage() {
     setAdminRequests((prev) => prev.filter((r) => r.id !== id));
     toast.success("Solicitação marcada como resolvida");
   }
-  async function submitAppeal() {
+  async function submitAppeal(kind: "ban" | "rejection" = "ban") {
     if (!user) return;
     const txt = appealText.trim();
     if (txt.length < 10) { toast.error("Escreva sua apelação com mais detalhes."); return; }
     setAppealBusy(true);
     const { data, error } = await supabase
       .from("user_ban_appeals")
-      .insert({ user_id: user.id, appeal_text: txt })
-      .select("id, appeal_text, status, response_text, responded_at, created_at")
+      .insert({ user_id: user.id, appeal_text: txt, kind })
+      .select("id, appeal_text, status, response_text, responded_at, created_at, kind")
       .single();
     setAppealBusy(false);
     if (error) { toast.error(error.message); return; }
     setBanAppeals((prev) => [data as BanAppeal, ...prev]);
     setAppealText("");
-    toast.success("Apelação enviada. A equipe vai analisar.");
+    toast.success(
+      kind === "rejection"
+        ? "Pedido de reanálise enviado. A equipe vai revisar."
+        : "Apelação enviada. A equipe vai analisar.",
+    );
   }
 
   return (
