@@ -57,8 +57,8 @@ async function shareSite() {
     }
     await navigator.clipboard.writeText(url);
     toast.success("Link copiado!");
-  } catch (e: any) {
-    if (e?.name === "AbortError") return;
+  } catch (e: unknown) {
+    if (e instanceof DOMException && e.name === "AbortError") return;
     try {
       await navigator.clipboard.writeText(url);
       toast.success("Link copiado!");
