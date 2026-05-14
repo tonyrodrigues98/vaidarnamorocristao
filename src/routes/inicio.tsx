@@ -160,6 +160,11 @@ function InicioPage() {
   const [completedSteps, setCompletedSteps] = useState<Set<HomeChecklistStep>>(new Set());
   const [community, setCommunity] = useState({ newProfiles: 0, online: 0, newComments: 0 });
   const [tipIndex, setTipIndex] = useState(0);
+  const [adminRequests, setAdminRequests] = useState<AdminRequest[]>([]);
+  const [adminWarnings, setAdminWarnings] = useState<AdminWarning[]>([]);
+  const [banAppeals, setBanAppeals] = useState<BanAppeal[]>([]);
+  const [appealText, setAppealText] = useState("");
+  const [appealBusy, setAppealBusy] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -182,10 +187,13 @@ function InicioPage() {
         communityRes,
         prayedRes,
         reactionRes,
+        { data: reqs },
+        { data: warns },
+        { data: appeals },
       ] = await Promise.all([
         supabase
           .from("profiles")
-          .select("id, full_name, photo_url, bio, height_cm, status, city, state, age, sex")
+          .select("id, full_name, photo_url, bio, height_cm, status, city, state, age, sex, banned_reason, banned_at")
           .eq("id", user.id)
           .maybeSingle(),
         supabase
@@ -208,10 +216,29 @@ function InicioPage() {
         supabase.from("global_messages").select("id").eq("sender_id", user.id).limit(1),
         supabase.from("devotional_prayed").select("id").eq("user_id", user.id).limit(1),
         supabase.from("devotional_reactions").select("post_id").eq("user_id", user.id).limit(1),
+        supabase
+          .from("user_admin_requests")
+          .select("id, kind, message, status, created_at")
+          .eq("user_id", user.id)
+          .neq("status", "resolved")
+          .order("created_at", { ascending: false }),
+        supabase
+          .from("user_admin_warnings")
+          .select("id, message, severity, acknowledged_at, created_at")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false }),
+        supabase
+          .from("user_ban_appeals")
+          .select("id, appeal_text, status, response_text, responded_at, created_at")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false }),
       ]);
       if (cancel) return;
       setProfile(p as Profile | null);
       setDevo(d as Devotional | null);
+      setAdminRequests((reqs ?? []) as AdminRequest[]);
+      setAdminWarnings((warns ?? []) as AdminWarning[]);
+      setBanAppeals((appeals ?? []) as BanAppeal[]);
       setActivity({
         explored: !!viewedRes.data?.length || !!interestRes.data?.length,
         interestSent: !!interestRes.data?.length,
