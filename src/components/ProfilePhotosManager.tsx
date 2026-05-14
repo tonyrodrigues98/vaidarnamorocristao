@@ -47,7 +47,7 @@ export function ProfilePhotosManager({ userId }: { userId: string }) {
     setUploading(true);
     // Verificação por IA antes de subir
     const { verifyProfilePhoto } = await import("@/lib/verifyPhoto");
-    const verdict = await verifyProfilePhoto(file);
+    const verdict = await verifyProfilePhoto(file, "extra");
     if (!verdict.ok) {
       setUploading(false);
       toast.error(verdict.reason);
