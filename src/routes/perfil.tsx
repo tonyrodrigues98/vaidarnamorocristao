@@ -267,7 +267,28 @@ function PerfilPage() {
     }
     setSavingProfile(true);
     let photo_url: string | undefined;
+    let aiVerified = false;
+    let aiConfidence: number | null = null;
+    let needsReview = false;
+    let aiReason = "";
     if (photoFile) {
+      const { verifyProfilePhoto } = await import("@/lib/verifyPhoto");
+      const verdict = await verifyProfilePhoto(photoFile);
+      if (!verdict.ok) {
+        toast.error(verdict.reason);
+        setSavingProfile(false);
+        return;
+      }
+      if ("soft" in verdict && verdict.soft) {
+        // ok, segue
+      } else if (verdict.approved) {
+        aiVerified = true;
+        aiConfidence = verdict.confidence;
+      } else if (verdict.needsReview) {
+        needsReview = true;
+        aiConfidence = verdict.confidence;
+        aiReason = verdict.reason;
+      }
       const ext = photoFile.name.split(".").pop() ?? "jpg";
       const path = `${user.id}/avatar.${ext}`;
       const { error: upErr } = await supabase.storage
@@ -280,6 +301,16 @@ function PerfilPage() {
       }
       const { data: pub } = supabase.storage.from("profile-photos").getPublicUrl(path);
       photo_url = `${pub.publicUrl}?t=${Date.now()}`;
+      if (needsReview) {
+        await supabase.from("photo_moderation_queue").insert({
+          user_id: user.id,
+          photo_url,
+          scope: "avatar",
+          ai_result: { confidence: aiConfidence, reason: aiReason },
+          status: "pending",
+        });
+        toast.message("Foto enviada para análise rápida da equipe.");
+      }
     }
     const payload = {
       id: user.id,
@@ -294,6 +325,13 @@ function PerfilPage() {
       bio: parsed.data.bio || null,
       ...(typeof parsed.data.height_cm === "number" ? { height_cm: parsed.data.height_cm } : {}),
       ...(photo_url ? { photo_url } : {}),
+      ...(photoFile
+        ? {
+            avatar_ai_verified: aiVerified,
+            avatar_ai_confidence: aiConfidence,
+            avatar_ai_checked_at: new Date().toISOString(),
+          }
+        : {}),
     };
     const { error } = await supabase.from("profiles").upsert(payload);
     setSavingProfile(false);
