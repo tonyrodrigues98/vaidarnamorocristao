@@ -33,11 +33,14 @@ type LogItem = {
   user_id: string;
   scope: Scope;
   photo_url: string | null;
-  decision: "approved" | "needs_review" | "rejected" | "soft_fail";
+  decision: "approved" | "needs_review" | "rejected" | "soft_fail" | "admin_deleted";
   confidence: number | null;
   reason: string | null;
   ai_result: AiResult;
   created_at: string;
+  storage_bucket?: string | null;
+  storage_path?: string | null;
+  signed_url?: string | null;
 };
 
 type ProfileLite = {
@@ -76,6 +79,7 @@ function AdminFotos() {
   const [savingSettings, setSavingSettings] = useState(false);
   const [openLog, setOpenLog] = useState<LogItem | null>(null);
   const [deletingPhoto, setDeletingPhoto] = useState(false);
+  const [deleteReason, setDeleteReason] = useState("");
 
   async function loadProfilesFor(ids: string[]) {
     const fresh = ids.filter((id) => !profiles.has(id));
