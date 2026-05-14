@@ -276,15 +276,26 @@ function Mission({
   );
 }
 
-function Reward({ label, achieved, icon }: { label: string; achieved: boolean; icon: React.ReactNode }) {
+function RewardBadge({ code, value, target, achieved }: { code: BadgeCode; value: number; target: number; achieved: boolean }) {
+  const meta = BADGE_META[code];
+  const Icon = meta.icon;
+  const pct = Math.min(100, Math.round((value / target) * 100));
   return (
     <div
       className={`flex items-center gap-2 rounded-xl border p-3 ${achieved ? "border-emerald-400/40 bg-emerald-500/5" : "border-border bg-muted/30 opacity-60"}`}
     >
-      <div className={achieved ? "text-emerald-500" : "text-muted-foreground"}>{icon}</div>
-      <div>
-        <div className="text-sm font-medium">{label}</div>
-        <div className="text-[11px] text-muted-foreground">{achieved ? "Conquistado" : "Bloqueado"}</div>
+      <div className={achieved ? "text-emerald-500" : "text-muted-foreground"}>
+        <Icon className="h-5 w-5" />
+      </div>
+      <div className="min-w-0 flex-1">
+        <div className="text-sm font-medium">{meta.name}</div>
+        <div className="text-[11px] text-muted-foreground">{meta.description}</div>
+        <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-muted">
+          <div className="h-full bg-emerald-500 transition-all" style={{ width: `${pct}%` }} />
+        </div>
+        <div className="mt-1 text-[11px] text-muted-foreground">
+          {achieved ? "Conquistado" : `${value}/${target}`}
+        </div>
       </div>
     </div>
   );
