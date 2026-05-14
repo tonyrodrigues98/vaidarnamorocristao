@@ -16,11 +16,17 @@ function Reset() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (password.length < 8) { toast.error("Mínimo 8 caracteres"); return; }
+    if (password.length < 8) {
+      toast.error("Mínimo 8 caracteres");
+      return;
+    }
     setLoading(true);
     const { error } = await supabase.auth.updateUser({ password });
     setLoading(false);
-    if (error) { toast.error(error.message); return; }
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     toast.success("Senha atualizada!");
     navigate({ to: "/inicio" });
   }
@@ -34,7 +40,13 @@ function Reset() {
           <form onSubmit={handleSubmit} className="mt-6 space-y-4">
             <div className="space-y-2">
               <Label htmlFor="password">Nova senha</Label>
-              <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
             </div>
             <Button type="submit" className="w-full" size="lg" disabled={loading}>
               {loading ? "Salvando..." : "Atualizar senha"}
