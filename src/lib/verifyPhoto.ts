@@ -28,7 +28,8 @@ function fileToBase64(file: File): Promise<string> {
  */
 export async function verifyProfilePhoto(
   file: File,
-  scope: PhotoScope = "main"
+  scope: PhotoScope = "main",
+  photoUrl?: string | null
 ): Promise<VerifyOutcome> {
   // Stage 1 — face count (only for main avatar)
   if (scope === "main") {
@@ -60,7 +61,7 @@ export async function verifyProfilePhoto(
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ imageBase64, mimeType: file.type || "image/jpeg", scope }),
+      body: JSON.stringify({ imageBase64, mimeType: file.type || "image/jpeg", scope, photoUrl: photoUrl ?? null }),
     });
   } catch {
     return { ok: true, soft: true, approved: false, needsReview: false, confidence: 0 };
