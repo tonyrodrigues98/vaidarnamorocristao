@@ -679,6 +679,19 @@ function AdminFotos() {
                   <p className="text-xs text-muted-foreground">
                     {new Date(openLog.created_at).toLocaleString("pt-BR")}
                   </p>
+                  <div className="pt-2">
+                    <Label htmlFor="delete-reason" className="text-xs">
+                      Motivo da remoção (enviado ao usuário)
+                    </Label>
+                    <Textarea
+                      id="delete-reason"
+                      value={deleteReason}
+                      onChange={(e) => setDeleteReason(e.target.value)}
+                      placeholder="Ex.: Foto contém conteúdo inadequado, viola as diretrizes…"
+                      rows={3}
+                      className="mt-1"
+                    />
+                  </div>
                 </div>
               </div>
             );
@@ -691,11 +704,11 @@ function AdminFotos() {
                 </Link>
               </Button>
             )}
-            <Button variant="ghost" onClick={() => setOpenLog(null)}>Fechar</Button>
+            <Button variant="ghost" onClick={() => { setDeleteReason(""); setOpenLog(null); }}>Fechar</Button>
             <Button
               variant="destructive"
               onClick={() => openLog && deleteLogPhoto(openLog)}
-              disabled={deletingPhoto || !openLog?.photo_url}
+              disabled={deletingPhoto || !deleteReason.trim()}
             >
               <Trash2 className="mr-1 h-4 w-4" /> Apagar foto
             </Button>
