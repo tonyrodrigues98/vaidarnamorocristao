@@ -137,7 +137,7 @@ function InicioPage() {
       setCompletedSteps(new Set());
       return;
     }
-    setCompletedSteps(readCompletedSteps(user.id));
+    setCompletedSteps(getHomeChecklistSteps(user.id));
   }, [user]);
 
   useEffect(() => {
@@ -279,7 +279,7 @@ function InicioPage() {
       {
         key: "community",
         label: "Participe da comunidade",
-        done: activity.community || completedSteps.has("community"),
+        done: activity.community,
         to: "/comunidade" as const,
         manual: true,
       },
@@ -294,11 +294,11 @@ function InicioPage() {
   }, [profile, advCount, activity, completedSteps]);
 
   function markChecklistStep(key: string) {
-    if (!user || !["explore", "community", "devotional"].includes(key)) return;
+    if (!user || !["explore", "devotional"].includes(key)) return;
     setCompletedSteps((prev) => {
       const next = new Set(prev);
-      next.add(key as ChecklistKey);
-      saveCompletedSteps(user.id, next);
+      next.add(key as HomeChecklistStep);
+      markHomeChecklistStep(user.id, key as HomeChecklistStep);
       return next;
     });
   }
