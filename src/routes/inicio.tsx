@@ -407,7 +407,8 @@ function InicioPage() {
               className="animate-fade-up mt-5 text-3xl font-extrabold leading-[1.1] tracking-tight sm:text-5xl"
               style={{ animationDelay: "60ms" }}
             >
-              {greeting(profile.full_name)} <span className="inline-block">👋</span>
+              {greeting(profile.full_name)}{" "}
+              <Hand className="ml-1 inline-block h-7 w-7 -translate-y-0.5 text-[var(--rose)] sm:h-9 sm:w-9" aria-hidden />
             </h1>
             <p
               className="animate-fade-up mt-3 max-w-xl text-base text-muted-foreground sm:text-lg"
