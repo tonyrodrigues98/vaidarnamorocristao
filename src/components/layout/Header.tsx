@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import {
   Heart, LogOut, Shield, MessageCircle, Sparkles, Menu, X,
   User as UserIcon, Users, Newspaper, Globe, Ban, Share2, Gem, Sun, Moon, MoreHorizontal,
-  ChevronDown, Heart as HeartIcon, LifeBuoy, BookHeart, Settings, Bell,
+  ChevronDown, Heart as HeartIcon, LifeBuoy, BookHeart, Settings, Bell, LayoutDashboard, Home,
 } from "lucide-react";
 import { toast } from "sonner";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
@@ -159,7 +159,10 @@ export function Header() {
         <nav className="hidden min-w-0 flex-1 items-center justify-end gap-1 md:flex">
           {user ? (
             <>
-              <Button variant="ghost" size="sm" asChild><Link to="/dashboard">Início</Link></Button>
+              <Button variant="ghost" size="sm" asChild><Link to="/">Início</Link></Button>
+              <Button variant="ghost" size="sm" asChild>
+                <Link to="/dashboard"><LayoutDashboard className="mr-1 h-4 w-4" /> Dashboard</Link>
+              </Button>
               {isApproved && (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -320,8 +323,11 @@ export function Header() {
                   </Button>
                 </div>
 
+                <MobileItem to="/" onClick={close}>
+                  <span className="flex items-center gap-2"><Home className="h-4 w-4" /> Início</span>
+                </MobileItem>
                 <MobileItem to="/dashboard" onClick={close}>
-                  <span className="flex items-center gap-2"><Heart className="h-4 w-4" /> Início</span>
+                  <span className="flex items-center gap-2"><LayoutDashboard className="h-4 w-4" /> Dashboard</span>
                 </MobileItem>
 
                 <MobileItem to="/notificacoes" onClick={close}>
