@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { recomputeMyBadges } from "@/lib/recomputeBadges";
+import { markHomeChecklistStep } from "@/lib/homeChecklist";
 import {
   BookHeart, BookOpen, Heart, Sparkles, Hand, Share2, MessageCircle, Pencil, Trash2,
   Check, X, Reply, Pin, PinOff, Flag, Flame, Trophy, Loader2, HandHeart,
@@ -164,6 +165,7 @@ function Devocional() {
   // Initial load + realtime
   useEffect(() => {
     if (!user) return;
+    markHomeChecklistStep(user.id, "devotional");
     void loadPostsPage(true, sort);
     void loadReactions();
     void loadPrayed();
