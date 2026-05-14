@@ -11,35 +11,88 @@ import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { recomputeMyBadges } from "@/lib/recomputeBadges";
 import { markHomeChecklistStep } from "@/lib/homeChecklist";
 import {
-  BookHeart, BookOpen, Heart, Sparkles, Hand, Share2, MessageCircle, Pencil, Trash2,
-  Check, X, Reply, Pin, PinOff, Flag, Flame, Trophy, Loader2, HandHeart,
+  BookHeart,
+  BookOpen,
+  Heart,
+  Sparkles,
+  Hand,
+  Share2,
+  MessageCircle,
+  Pencil,
+  Trash2,
+  Check,
+  X,
+  Reply,
+  Pin,
+  PinOff,
+  Flag,
+  Flame,
+  Trophy,
+  Loader2,
+  HandHeart,
 } from "lucide-react";
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
 } from "@/components/ui/dialog";
 
 export const Route = createFileRoute("/devocional")({ component: Devocional });
 
 type Post = {
-  id: string; title: string; content: string; published_at: string; author_id: string;
-  bible_reference: string | null; bible_text: string | null;
+  id: string;
+  title: string;
+  content: string;
+  published_at: string;
+  author_id: string;
+  bible_reference: string | null;
+  bible_text: string | null;
 };
-type ProfileLite = { id: string; full_name: string; photo_url: string | null; verified: boolean | null };
+type ProfileLite = {
+  id: string;
+  full_name: string;
+  photo_url: string | null;
+  verified: boolean | null;
+};
 type Reaction = "heart" | "prayed" | "edify";
 type ReactionRow = { post_id: string; user_id: string; reaction: Reaction };
 type Comment = {
-  id: string; post_id: string; user_id: string; parent_id: string | null;
-  content: string; created_at: string; edited_at: string | null;
-  deleted_at: string | null; pinned_at: string | null;
+  id: string;
+  post_id: string;
+  user_id: string;
+  parent_id: string | null;
+  content: string;
+  created_at: string;
+  edited_at: string | null;
+  deleted_at: string | null;
+  pinned_at: string | null;
 };
 type SortKey = "recent" | "commented" | "reactions";
 
 const PAGE_SIZE = 8;
 
 const REACTIONS: { key: Reaction; Icon: typeof Heart; label: string; activeClass: string }[] = [
-  { key: "heart", Icon: Heart, label: "Tocou meu coração", activeClass: "text-rose-500 fill-rose-500" },
-  { key: "prayed", Icon: Hand, label: "Orei hoje", activeClass: "text-amber-500 fill-amber-500/30" },
-  { key: "edify", Icon: Sparkles, label: "Edificante", activeClass: "text-sky-500 fill-sky-500/30" },
+  {
+    key: "heart",
+    Icon: Heart,
+    label: "Tocou meu coração",
+    activeClass: "text-rose-500 fill-rose-500",
+  },
+  {
+    key: "prayed",
+    Icon: Hand,
+    label: "Orei hoje",
+    activeClass: "text-amber-500 fill-amber-500/30",
+  },
+  {
+    key: "edify",
+    Icon: Sparkles,
+    label: "Edificante",
+    activeClass: "text-sky-500 fill-sky-500/30",
+  },
 ];
 
 function relTime(iso: string) {
@@ -77,55 +130,79 @@ function Devocional() {
 
   const sentinelRef = useRef<HTMLDivElement | null>(null);
 
-  const loadProfiles = useCallback(async (ids: string[]) => {
-    const missing = ids.filter((id) => id && !profiles[id]);
-    if (!missing.length) return;
-    const { data } = await supabase.from("profiles").select("id, full_name, photo_url, verified").in("id", missing);
-    const map: Record<string, ProfileLite> = {};
-    (data ?? []).forEach((p) => { map[p.id] = p as ProfileLite; });
-    setProfiles((prev) => ({ ...prev, ...map }));
-  }, [profiles]);
+  const loadProfiles = useCallback(
+    async (ids: string[]) => {
+      const missing = ids.filter((id) => id && !profiles[id]);
+      if (!missing.length) return;
+      const { data } = await supabase
+        .from("profiles")
+        .select("id, full_name, photo_url, verified")
+        .in("id", missing);
+      const map: Record<string, ProfileLite> = {};
+      (data ?? []).forEach((p) => {
+        map[p.id] = p as ProfileLite;
+      });
+      setProfiles((prev) => ({ ...prev, ...map }));
+    },
+    [profiles],
+  );
 
-  const loadPostsPage = useCallback(async (reset: boolean, sortKey: SortKey) => {
-    if (loadingPosts) return;
-    setLoadingPosts(true);
-    const nextPage = reset ? 0 : page;
-    const from = nextPage * PAGE_SIZE;
-    const to = from + PAGE_SIZE - 1;
+  const loadPostsPage = useCallback(
+    async (reset: boolean, sortKey: SortKey) => {
+      if (loadingPosts) return;
+      setLoadingPosts(true);
+      const nextPage = reset ? 0 : page;
+      const from = nextPage * PAGE_SIZE;
+      const to = from + PAGE_SIZE - 1;
 
-    let q = supabase
-      .from("daily_posts")
-      .select("id, title, content, published_at, author_id, bible_reference, bible_text")
-      .eq("kind", "devotional")
-      .eq("published", true)
-      .range(from, to);
+      let q = supabase
+        .from("daily_posts")
+        .select("id, title, content, published_at, author_id, bible_reference, bible_text")
+        .eq("kind", "devotional")
+        .eq("published", true)
+        .range(from, to);
 
-    if (sortKey === "recent") q = q.order("published_at", { ascending: false });
-    else q = q.order("published_at", { ascending: false }); // server-side fallback; resort client-side
+      if (sortKey === "recent") q = q.order("published_at", { ascending: false });
+      else q = q.order("published_at", { ascending: false }); // server-side fallback; resort client-side
 
-    const { data, error } = await q;
-    if (error) { toast.error(friendlyError(error)); setLoadingPosts(false); return; }
-    const list = (data ?? []) as Post[];
-    setPosts((prev) => reset ? list : [...prev, ...list]);
-    setHasMore(list.length === PAGE_SIZE);
-    setPage(nextPage + 1);
-    void loadProfiles(list.map((p) => p.author_id));
-    setLoadingPosts(false);
-  }, [loadingPosts, page, loadProfiles]);
+      const { data, error } = await q;
+      if (error) {
+        toast.error(friendlyError(error));
+        setLoadingPosts(false);
+        return;
+      }
+      const list = (data ?? []) as Post[];
+      setPosts((prev) => (reset ? list : [...prev, ...list]));
+      setHasMore(list.length === PAGE_SIZE);
+      setPage(nextPage + 1);
+      void loadProfiles(list.map((p) => p.author_id));
+      setLoadingPosts(false);
+    },
+    [loadingPosts, page, loadProfiles],
+  );
 
   const loadReactions = useCallback(async () => {
-    const { data } = await supabase.from("devotional_reactions").select("post_id, user_id, reaction");
+    const { data } = await supabase
+      .from("devotional_reactions")
+      .select("post_id, user_id, reaction");
     const list = (data ?? []) as ReactionRow[];
     setReactions(list);
     const totals: Record<string, number> = {};
-    list.forEach((r) => { totals[r.post_id] = (totals[r.post_id] ?? 0) + 1; });
+    list.forEach((r) => {
+      totals[r.post_id] = (totals[r.post_id] ?? 0) + 1;
+    });
     setReactionTotals(totals);
   }, []);
 
   const loadPrayed = useCallback(async () => {
     if (!user) return;
     const today = new Date().toISOString().slice(0, 10);
-    const { data } = await supabase.from("devotional_prayed").select("id").eq("user_id", user.id).eq("day", today).maybeSingle();
+    const { data } = await supabase
+      .from("devotional_prayed")
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("day", today)
+      .maybeSingle();
     setPrayedToday(!!data);
   }, [user]);
 
@@ -144,7 +221,9 @@ function Devocional() {
     const list = (data ?? []) as Comment[];
     setComments(list);
     const counts: Record<string, number> = {};
-    list.forEach((c) => { if (!c.deleted_at) counts[c.post_id] = (counts[c.post_id] ?? 0) + 1; });
+    list.forEach((c) => {
+      if (!c.deleted_at) counts[c.post_id] = (counts[c.post_id] ?? 0) + 1;
+    });
     setCommentCount(counts);
     void loadProfiles(list.map((c) => c.user_id));
   }, [loadProfiles]);
@@ -175,22 +254,42 @@ function Devocional() {
 
     const ch = supabase
       .channel("devocional-live")
-      .on("postgres_changes", { event: "*", schema: "public", table: "devotional_reactions" }, () => loadReactions())
-      .on("postgres_changes", { event: "*", schema: "public", table: "devotional_comments" }, () => loadComments())
-      .on("postgres_changes", { event: "*", schema: "public", table: "devotional_comment_likes" }, () => loadLikes())
-      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "daily_posts" }, (payload: any) => {
-        const updated = payload.new as Post & { kind?: string; published?: boolean };
-        if (updated.kind && updated.kind !== "devotional") return;
-        setPosts((prev) => prev.map((p) => p.id === updated.id ? {
-          ...p,
-          title: updated.title,
-          content: updated.content,
-          bible_reference: updated.bible_reference ?? null,
-          bible_text: updated.bible_text ?? null,
-        } : p));
-      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "devotional_reactions" }, () =>
+        loadReactions(),
+      )
+      .on("postgres_changes", { event: "*", schema: "public", table: "devotional_comments" }, () =>
+        loadComments(),
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "devotional_comment_likes" },
+        () => loadLikes(),
+      )
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "daily_posts" },
+        (payload: any) => {
+          const updated = payload.new as Post & { kind?: string; published?: boolean };
+          if (updated.kind && updated.kind !== "devotional") return;
+          setPosts((prev) =>
+            prev.map((p) =>
+              p.id === updated.id
+                ? {
+                    ...p,
+                    title: updated.title,
+                    content: updated.content,
+                    bible_reference: updated.bible_reference ?? null,
+                    bible_text: updated.bible_text ?? null,
+                  }
+                : p,
+            ),
+          );
+        },
+      )
       .subscribe();
-    return () => { supabase.removeChannel(ch); };
+    return () => {
+      supabase.removeChannel(ch);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
@@ -205,11 +304,14 @@ function Devocional() {
   useEffect(() => {
     const el = sentinelRef.current;
     if (!el || !hasMore) return;
-    const io = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting && !loadingPosts && hasMore) {
-        void loadPostsPage(false, sort);
-      }
-    }, { rootMargin: "400px" });
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && !loadingPosts && hasMore) {
+          void loadPostsPage(false, sort);
+        }
+      },
+      { rootMargin: "400px" },
+    );
     io.observe(el);
     return () => io.disconnect();
   }, [hasMore, loadingPosts, sort, loadPostsPage]);
@@ -228,28 +330,55 @@ function Devocional() {
 
   async function toggleReaction(postId: string, reaction: Reaction) {
     if (!user) return;
-    const mine = reactions.find((r) => r.post_id === postId && r.user_id === user.id && r.reaction === reaction);
+    const mine = reactions.find(
+      (r) => r.post_id === postId && r.user_id === user.id && r.reaction === reaction,
+    );
     // optimistic
     if (mine) {
-      setReactions((prev) => prev.filter((r) => !(r.post_id === postId && r.user_id === user.id && r.reaction === reaction)));
+      setReactions((prev) =>
+        prev.filter(
+          (r) => !(r.post_id === postId && r.user_id === user.id && r.reaction === reaction),
+        ),
+      );
       setReactionTotals((t) => ({ ...t, [postId]: Math.max(0, (t[postId] ?? 1) - 1) }));
-      const { error } = await supabase.from("devotional_reactions").delete().eq("post_id", postId).eq("user_id", user.id).eq("reaction", reaction);
-      if (error) { toast.error(friendlyError(error)); void loadReactions(); }
+      const { error } = await supabase
+        .from("devotional_reactions")
+        .delete()
+        .eq("post_id", postId)
+        .eq("user_id", user.id)
+        .eq("reaction", reaction);
+      if (error) {
+        toast.error(friendlyError(error));
+        void loadReactions();
+      }
     } else {
       setReactions((prev) => [...prev, { post_id: postId, user_id: user.id, reaction }]);
       setReactionTotals((t) => ({ ...t, [postId]: (t[postId] ?? 0) + 1 }));
-      const { error } = await supabase.from("devotional_reactions").insert({ post_id: postId, user_id: user.id, reaction });
-      if (error) { toast.error(friendlyError(error)); void loadReactions(); }
+      const { error } = await supabase
+        .from("devotional_reactions")
+        .insert({ post_id: postId, user_id: user.id, reaction });
+      if (error) {
+        toast.error(friendlyError(error));
+        void loadReactions();
+      }
       void recomputeMyBadges(user.id);
     }
   }
 
   async function prayToday(postId: string) {
     if (!user) return;
-    if (prayedToday) { toast.info("Você já marcou que orou hoje"); return; }
+    if (prayedToday) {
+      toast.info("Você já marcou que orou hoje");
+      return;
+    }
     const today = new Date().toISOString().slice(0, 10);
-    const { error } = await supabase.from("devotional_prayed").insert({ user_id: user.id, post_id: postId, day: today });
-    if (error) { toast.error(friendlyError(error)); return; }
+    const { error } = await supabase
+      .from("devotional_prayed")
+      .insert({ user_id: user.id, post_id: postId, day: today });
+    if (error) {
+      toast.error(friendlyError(error));
+      return;
+    }
     setPrayedToday(true);
     toast.success("Marcado! Que Deus abençoe sua oração.");
     void loadStreak();
@@ -261,7 +390,10 @@ function Devocional() {
     const url = typeof window !== "undefined" ? `${window.location.origin}/devocional#${p.id}` : "";
     const shareData = { title: p.title, text: p.content.slice(0, 140), url };
     try {
-      if (typeof navigator !== "undefined" && navigator.share) { await navigator.share(shareData); return; }
+      if (typeof navigator !== "undefined" && navigator.share) {
+        await navigator.share(shareData);
+        return;
+      }
       await navigator.clipboard.writeText(`${p.title}\n\n${p.content}\n\n${url}`);
       toast.success("Devocional copiado!");
     } catch (e: any) {
@@ -281,11 +413,14 @@ function Devocional() {
       .insert({ post_id: postId, user_id: user.id, content: text, parent_id: parent?.id ?? null })
       .select("*")
       .single();
-    if (error) { toast.error(friendlyError(error)); return; }
+    if (error) {
+      toast.error(friendlyError(error));
+      return;
+    }
     // optimistic append (also realtime will reconcile)
     if (data) {
       const c = data as Comment;
-      setComments((prev) => prev.some((x) => x.id === c.id) ? prev : [...prev, c]);
+      setComments((prev) => (prev.some((x) => x.id === c.id) ? prev : [...prev, c]));
       setCommentCount((cc) => ({ ...cc, [postId]: (cc[postId] ?? 0) + 1 }));
     }
     setDraft((d) => ({ ...d, [postId]: "" }));
@@ -295,17 +430,39 @@ function Devocional() {
 
   async function saveEdit() {
     if (!editing) return;
-    const { error } = await supabase.from("devotional_comments").update({ content: editing.text }).eq("id", editing.id);
-    if (error) { toast.error(friendlyError(error)); return; }
-    setComments((prev) => prev.map((c) => c.id === editing.id ? { ...c, content: editing.text, edited_at: new Date().toISOString() } : c));
+    const { error } = await supabase
+      .from("devotional_comments")
+      .update({ content: editing.text })
+      .eq("id", editing.id);
+    if (error) {
+      toast.error(friendlyError(error));
+      return;
+    }
+    setComments((prev) =>
+      prev.map((c) =>
+        c.id === editing.id
+          ? { ...c, content: editing.text, edited_at: new Date().toISOString() }
+          : c,
+      ),
+    );
     setEditing(null);
   }
 
   async function deleteComment(c: Comment) {
     if (!user) return;
     if (c.user_id === user.id) {
-      const { error } = await supabase.from("devotional_comments").update({ deleted_at: new Date().toISOString(), content: "[removido]" }).eq("id", c.id);
-      if (!error) setComments((prev) => prev.map((x) => x.id === c.id ? { ...x, deleted_at: new Date().toISOString(), content: "[removido]" } : x));
+      const { error } = await supabase
+        .from("devotional_comments")
+        .update({ deleted_at: new Date().toISOString(), content: "[removido]" })
+        .eq("id", c.id);
+      if (!error)
+        setComments((prev) =>
+          prev.map((x) =>
+            x.id === c.id
+              ? { ...x, deleted_at: new Date().toISOString(), content: "[removido]" }
+              : x,
+          ),
+        );
     } else if (canModerate || isAdmin) {
       const { error } = await supabase.from("devotional_comments").delete().eq("id", c.id);
       if (!error) setComments((prev) => prev.filter((x) => x.id !== c.id));
@@ -314,8 +471,12 @@ function Devocional() {
 
   async function togglePin(c: Comment) {
     const newPin = c.pinned_at ? null : new Date().toISOString();
-    const { error } = await supabase.from("devotional_comments").update({ pinned_at: newPin }).eq("id", c.id);
-    if (!error) setComments((prev) => prev.map((x) => x.id === c.id ? { ...x, pinned_at: newPin } : x));
+    const { error } = await supabase
+      .from("devotional_comments")
+      .update({ pinned_at: newPin })
+      .eq("id", c.id);
+    if (!error)
+      setComments((prev) => prev.map((x) => (x.id === c.id ? { ...x, pinned_at: newPin } : x)));
   }
 
   async function toggleLike(c: Comment) {
@@ -324,25 +485,43 @@ function Devocional() {
     // optimistic
     setMyLikes((prev) => {
       const n = new Set(prev);
-      if (has) n.delete(c.id); else n.add(c.id);
+      if (has) n.delete(c.id);
+      else n.add(c.id);
       return n;
     });
     setLikes((prev) => ({ ...prev, [c.id]: Math.max(0, (prev[c.id] ?? 0) + (has ? -1 : 1)) }));
     if (has) {
-      const { error } = await supabase.from("devotional_comment_likes").delete().eq("comment_id", c.id).eq("user_id", user.id);
-      if (error) { toast.error(friendlyError(error)); void loadLikes(); }
+      const { error } = await supabase
+        .from("devotional_comment_likes")
+        .delete()
+        .eq("comment_id", c.id)
+        .eq("user_id", user.id);
+      if (error) {
+        toast.error(friendlyError(error));
+        void loadLikes();
+      }
     } else {
-      const { error } = await supabase.from("devotional_comment_likes").insert({ comment_id: c.id, user_id: user.id });
-      if (error) { toast.error(friendlyError(error)); void loadLikes(); }
+      const { error } = await supabase
+        .from("devotional_comment_likes")
+        .insert({ comment_id: c.id, user_id: user.id });
+      if (error) {
+        toast.error(friendlyError(error));
+        void loadLikes();
+      }
     }
   }
 
   async function submitReport() {
     if (!user || !reportFor || !reportReason.trim()) return;
     const { error } = await supabase.from("devotional_comment_reports").insert({
-      comment_id: reportFor.id, reporter_id: user.id, reason: reportReason.trim(),
+      comment_id: reportFor.id,
+      reporter_id: user.id,
+      reason: reportReason.trim(),
     });
-    if (error) { toast.error(friendlyError(error)); return; }
+    if (error) {
+      toast.error(friendlyError(error));
+      return;
+    }
     toast.success("Denúncia enviada. Obrigado!");
     setReportFor(null);
     setReportReason("");
@@ -360,7 +539,9 @@ function Devocional() {
           </div>
           <div className="flex-1">
             <h1 className="text-3xl font-semibold tracking-tight">Devocional</h1>
-            <p className="text-sm text-muted-foreground">Sua jornada espiritual diária — ore, reflita e compartilhe.</p>
+            <p className="text-sm text-muted-foreground">
+              Sua jornada espiritual diária — ore, reflita e compartilhe.
+            </p>
           </div>
           <Link
             to="/oracoes"
@@ -373,16 +554,34 @@ function Devocional() {
         </header>
 
         <div className="animate-fade-up mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
-          <StatCard icon={<Flame className="h-4 w-4 text-orange-500" />} label="Sequência" value={`${streak.current} ${streak.current === 1 ? "dia" : "dias"}`} />
-          <StatCard icon={<Trophy className="h-4 w-4 text-amber-500" />} label="Recorde" value={`${streak.best}`} />
-          <StatCard icon={<Hand className="h-4 w-4 text-[var(--rose)]" />} label="Hoje" value={prayedToday ? "Orei" : "Pendente"} />
+          <StatCard
+            icon={<Flame className="h-4 w-4 text-orange-500" />}
+            label="Sequência"
+            value={`${streak.current} ${streak.current === 1 ? "dia" : "dias"}`}
+          />
+          <StatCard
+            icon={<Trophy className="h-4 w-4 text-amber-500" />}
+            label="Recorde"
+            value={`${streak.best}`}
+          />
+          <StatCard
+            icon={<Hand className="h-4 w-4 text-[var(--rose)]" />}
+            label="Hoje"
+            value={prayedToday ? "Orei" : "Pendente"}
+          />
         </div>
 
         {/* Filters */}
         <div className="mt-6 flex flex-wrap gap-2">
-          <FilterChip active={sort === "recent"} onClick={() => setSort("recent")}>Mais recentes</FilterChip>
-          <FilterChip active={sort === "commented"} onClick={() => setSort("commented")}>Mais comentados</FilterChip>
-          <FilterChip active={sort === "reactions"} onClick={() => setSort("reactions")}>Mais reações</FilterChip>
+          <FilterChip active={sort === "recent"} onClick={() => setSort("recent")}>
+            Mais recentes
+          </FilterChip>
+          <FilterChip active={sort === "commented"} onClick={() => setSort("commented")}>
+            Mais comentados
+          </FilterChip>
+          <FilterChip active={sort === "reactions"} onClick={() => setSort("reactions")}>
+            Mais reações
+          </FilterChip>
         </div>
 
         <section className="mt-6 space-y-6">
@@ -427,8 +626,15 @@ function Devocional() {
           )}
 
           {/* Sentinel & loader */}
-          <div ref={sentinelRef} className="flex items-center justify-center py-6 text-sm text-muted-foreground">
-            {loadingPosts ? <Loader2 className="h-5 w-5 animate-spin" /> : !hasMore && sortedPosts.length > 0 ? "Você chegou ao fim 🌿" : null}
+          <div
+            ref={sentinelRef}
+            className="flex items-center justify-center py-6 text-sm text-muted-foreground"
+          >
+            {loadingPosts ? (
+              <Loader2 className="h-5 w-5 animate-spin" />
+            ) : !hasMore && sortedPosts.length > 0 ? (
+              "Você chegou ao fim 🌿"
+            ) : null}
           </div>
         </section>
       </main>
@@ -437,12 +643,23 @@ function Devocional() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Denunciar comentário</DialogTitle>
-            <DialogDescription>Conte-nos por que este comentário viola as diretrizes.</DialogDescription>
+            <DialogDescription>
+              Conte-nos por que este comentário viola as diretrizes.
+            </DialogDescription>
           </DialogHeader>
-          <Textarea value={reportReason} onChange={(e) => setReportReason(e.target.value)} placeholder="Descreva o motivo..." rows={4} />
+          <Textarea
+            value={reportReason}
+            onChange={(e) => setReportReason(e.target.value)}
+            placeholder="Descreva o motivo..."
+            rows={4}
+          />
           <DialogFooter>
-            <Button variant="ghost" onClick={() => setReportFor(null)}>Cancelar</Button>
-            <Button onClick={submitReport} disabled={!reportReason.trim()}>Enviar denúncia</Button>
+            <Button variant="ghost" onClick={() => setReportFor(null)}>
+              Cancelar
+            </Button>
+            <Button onClick={submitReport} disabled={!reportReason.trim()}>
+              Enviar denúncia
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -450,12 +667,22 @@ function Devocional() {
   );
 }
 
-function FilterChip({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
+function FilterChip({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
   return (
     <button
       onClick={onClick}
       className={`rounded-full border px-3.5 py-1.5 text-sm font-medium transition-all ${
-        active ? "border-[var(--rose)] bg-[var(--rose)] text-white shadow-glow" : "border-border bg-card/60 text-foreground/70 hover:bg-muted"
+        active
+          ? "border-[var(--rose)] bg-[var(--rose)] text-white shadow-glow"
+          : "border-border bg-card/60 text-foreground/70 hover:bg-muted"
       }`}
     >
       {children}
@@ -466,7 +693,9 @@ function FilterChip({ active, onClick, children }: { active: boolean; onClick: (
 function StatCard({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
     <div className="glass flex items-center gap-3 rounded-2xl p-3 shadow-soft">
-      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-foreground/5">{icon}</div>
+      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-foreground/5">
+        {icon}
+      </div>
       <div className="min-w-0">
         <p className="text-[11px] uppercase tracking-wide text-muted-foreground">{label}</p>
         <p className="truncate text-sm font-semibold">{value}</p>
@@ -512,27 +741,42 @@ function PostCard(props: PostCardProps) {
 
   const counts = useMemo(() => {
     const c: Record<Reaction, number> = { heart: 0, prayed: 0, edify: 0 };
-    reactions.forEach((r) => { c[r.reaction] = (c[r.reaction] ?? 0) + 1; });
+    reactions.forEach((r) => {
+      c[r.reaction] = (c[r.reaction] ?? 0) + 1;
+    });
     return c;
   }, [reactions]);
-  const myReactions = useMemo(() =>
-    new Set(reactions.filter((r) => r.user_id === myUserId).map((r) => r.reaction)),
-    [reactions, myUserId]);
+  const myReactions = useMemo(
+    () => new Set(reactions.filter((r) => r.user_id === myUserId).map((r) => r.reaction)),
+    [reactions, myUserId],
+  );
 
-  const topLevel = comments.filter((c) => !c.parent_id).sort((a, b) => {
-    if (!!b.pinned_at !== !!a.pinned_at) return b.pinned_at ? 1 : -1;
-    return a.created_at.localeCompare(b.created_at);
-  });
-  const replies = (id: string) => comments.filter((c) => c.parent_id === id).sort((a, b) => a.created_at.localeCompare(b.created_at));
+  const topLevel = comments
+    .filter((c) => !c.parent_id)
+    .sort((a, b) => {
+      if (!!b.pinned_at !== !!a.pinned_at) return b.pinned_at ? 1 : -1;
+      return a.created_at.localeCompare(b.created_at);
+    });
+  const replies = (id: string) =>
+    comments
+      .filter((c) => c.parent_id === id)
+      .sort((a, b) => a.created_at.localeCompare(b.created_at));
 
   return (
-    <article id={post.id} className="animate-fade-up rounded-3xl border border-[var(--rose)]/15 bg-[var(--petal)]/30 p-5 shadow-soft sm:p-7">
+    <article
+      id={post.id}
+      className="animate-fade-up rounded-3xl border border-[var(--rose)]/15 bg-[var(--petal)]/30 p-5 shadow-soft sm:p-7"
+    >
       <div className="flex items-center gap-2 text-xs">
         <span className="inline-flex items-center gap-1 rounded-full bg-[var(--rose)] px-2.5 py-0.5 font-semibold uppercase tracking-wide text-white">
           <BookHeart className="h-3 w-3" /> Devocional
         </span>
         <span className="uppercase tracking-wide text-muted-foreground">
-          {new Date(post.published_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" })}
+          {new Date(post.published_at).toLocaleDateString("pt-BR", {
+            day: "2-digit",
+            month: "long",
+            year: "numeric",
+          })}
         </span>
       </div>
 
@@ -543,16 +787,23 @@ function PostCard(props: PostCardProps) {
             <BookOpen className="h-3.5 w-3.5" /> {post.bible_reference}
           </div>
           {post.bible_text && (
-            <p className="mt-1 font-serif text-sm italic leading-relaxed text-foreground/85">"{post.bible_text}"</p>
+            <p className="mt-1 font-serif text-sm italic leading-relaxed text-foreground/85">
+              "{post.bible_text}"
+            </p>
           )}
         </div>
       )}
-      <p className="mt-3 whitespace-pre-wrap font-serif text-[15px] italic leading-relaxed text-foreground/85 sm:text-base">{post.content}</p>
+      <p className="mt-3 whitespace-pre-wrap font-serif text-[15px] italic leading-relaxed text-foreground/85 sm:text-base">
+        {post.content}
+      </p>
 
       {author && (
         <div className="mt-5 flex items-center gap-2 text-xs text-muted-foreground">
           <Avatar profile={author} size={6} />
-          <span className="flex items-center gap-1">{author.full_name}{author.verified && <VerifiedBadge size="sm" />}</span>
+          <span className="flex items-center gap-1">
+            {author.full_name}
+            {author.verified && <VerifiedBadge size="sm" />}
+          </span>
         </div>
       )}
 
@@ -566,7 +817,9 @@ function PostCard(props: PostCardProps) {
               key={r.key}
               onClick={() => props.onReact(r.key)}
               className={`group inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition-all hover-scale ${
-                active ? "border-[var(--rose)] bg-[var(--rose)]/10 text-foreground" : "border-border bg-card/50 hover:bg-muted"
+                active
+                  ? "border-[var(--rose)] bg-[var(--rose)]/10 text-foreground"
+                  : "border-border bg-card/50 hover:bg-muted"
               }`}
               title={r.label}
               aria-label={r.label}
@@ -589,11 +842,20 @@ function PostCard(props: PostCardProps) {
       </div>
 
       <div className="mt-3 flex items-center gap-3 text-sm text-muted-foreground">
-        <button onClick={() => setOpen((o) => !o)} className="inline-flex items-center gap-1.5 hover:text-foreground">
-          <MessageCircle className="h-4 w-4" /> {commentsCount} {commentsCount === 1 ? "comentário" : "comentários"}
+        <button
+          onClick={() => setOpen((o) => !o)}
+          className="inline-flex items-center gap-1.5 hover:text-foreground"
+        >
+          <MessageCircle className="h-4 w-4" /> {commentsCount}{" "}
+          {commentsCount === 1 ? "comentário" : "comentários"}
         </button>
-        <span aria-hidden className="opacity-40">•</span>
-        <button onClick={props.onShare} className="inline-flex items-center gap-1.5 hover:text-foreground">
+        <span aria-hidden className="opacity-40">
+          •
+        </span>
+        <button
+          onClick={props.onShare}
+          className="inline-flex items-center gap-1.5 hover:text-foreground"
+        >
           <Share2 className="h-4 w-4" /> Compartilhar
         </button>
       </div>
@@ -611,7 +873,9 @@ function PostCard(props: PostCardProps) {
 
           <div className="mt-5 space-y-4">
             {topLevel.length === 0 && (
-              <p className="text-center text-sm text-muted-foreground">Seja o primeiro a comentar</p>
+              <p className="text-center text-sm text-muted-foreground">
+                Seja o primeiro a comentar
+              </p>
             )}
             {topLevel.map((c) => (
               <CommentNode key={c.id} c={c} replies={replies(c.id)} {...props} />
@@ -624,29 +888,53 @@ function PostCard(props: PostCardProps) {
 }
 
 function Avatar({ profile, size = 8 }: { profile?: ProfileLite; size?: number }) {
-  const initials = (profile?.full_name ?? "?").split(" ").map((s) => s[0]).filter(Boolean).slice(0, 2).join("").toUpperCase();
+  const initials = (profile?.full_name ?? "?")
+    .split(" ")
+    .map((s) => s[0])
+    .filter(Boolean)
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
   return (
     <span
       className="flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-love text-[10px] font-bold text-white"
       style={{ width: `${size * 4}px`, height: `${size * 4}px` }}
     >
-      {profile?.photo_url ? <img src={profile.photo_url} alt="" className="h-full w-full object-cover" /> : initials}
+      {profile?.photo_url ? (
+        <img src={profile.photo_url} alt="" className="h-full w-full object-cover" />
+      ) : (
+        initials
+      )}
     </span>
   );
 }
 
 function CommentComposer({
-  value, onChange, onSubmit, replyTo, onCancelReply, replyAuthor,
+  value,
+  onChange,
+  onSubmit,
+  replyTo,
+  onCancelReply,
+  replyAuthor,
 }: {
-  value: string; onChange: (v: string) => void; onSubmit: (e: FormEvent) => void;
-  replyTo: Comment | null; onCancelReply: () => void; replyAuthor?: ProfileLite;
+  value: string;
+  onChange: (v: string) => void;
+  onSubmit: (e: FormEvent) => void;
+  replyTo: Comment | null;
+  onCancelReply: () => void;
+  replyAuthor?: ProfileLite;
 }) {
   return (
     <form onSubmit={onSubmit} className="space-y-2">
       {replyTo && (
         <div className="flex items-center justify-between rounded-xl border border-border bg-muted/40 px-3 py-1.5 text-xs text-muted-foreground">
-          <span>Respondendo a <strong className="text-foreground">{replyAuthor?.full_name ?? "usuário"}</strong></span>
-          <button type="button" onClick={onCancelReply} className="hover:text-foreground"><X className="h-3.5 w-3.5" /></button>
+          <span>
+            Respondendo a{" "}
+            <strong className="text-foreground">{replyAuthor?.full_name ?? "usuário"}</strong>
+          </span>
+          <button type="button" onClick={onCancelReply} className="hover:text-foreground">
+            <X className="h-3.5 w-3.5" />
+          </button>
         </div>
       )}
       <Textarea
@@ -668,8 +956,23 @@ function CommentComposer({
 }
 
 function CommentNode({
-  c, replies, profiles, myUserId, myLikes, likes, editing,
-  onStartEdit, onCancelEdit, onSaveEdit, onChangeEdit, onDelete, onTogglePin, onToggleLike, onReport, onSetReply, canModerate,
+  c,
+  replies,
+  profiles,
+  myUserId,
+  myLikes,
+  likes,
+  editing,
+  onStartEdit,
+  onCancelEdit,
+  onSaveEdit,
+  onChangeEdit,
+  onDelete,
+  onTogglePin,
+  onToggleLike,
+  onReport,
+  onSetReply,
+  canModerate,
 }: PostCardProps & { c: Comment; replies: Comment[] }) {
   const author = profiles[c.user_id];
   const isMine = c.user_id === myUserId;
@@ -689,53 +992,94 @@ function CommentNode({
                   <Pin className="h-2.5 w-2.5" /> fixado
                 </span>
               )}
-              <span className="ml-auto text-muted-foreground">{relTime(c.created_at)}{c.edited_at && " · editado"}</span>
+              <span className="ml-auto text-muted-foreground">
+                {relTime(c.created_at)}
+                {c.edited_at && " · editado"}
+              </span>
             </div>
             {isEditing ? (
               <div className="mt-1.5 space-y-1.5">
-                <Textarea value={editing!.text} onChange={(e) => onChangeEdit(e.target.value)} rows={2} className="resize-none" />
+                <Textarea
+                  value={editing!.text}
+                  onChange={(e) => onChangeEdit(e.target.value)}
+                  rows={2}
+                  className="resize-none"
+                />
                 <div className="flex justify-end gap-1">
-                  <Button size="sm" variant="ghost" onClick={onCancelEdit}><X className="h-3.5 w-3.5" /></Button>
-                  <Button size="sm" onClick={onSaveEdit}><Check className="h-3.5 w-3.5" /></Button>
+                  <Button size="sm" variant="ghost" onClick={onCancelEdit}>
+                    <X className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button size="sm" onClick={onSaveEdit}>
+                    <Check className="h-3.5 w-3.5" />
+                  </Button>
                 </div>
               </div>
             ) : (
-              <p className={`mt-1 whitespace-pre-wrap break-words text-sm ${c.deleted_at ? "italic text-muted-foreground" : ""}`}>{c.content}</p>
+              <p
+                className={`mt-1 whitespace-pre-wrap break-words text-sm ${c.deleted_at ? "italic text-muted-foreground" : ""}`}
+              >
+                {c.content}
+              </p>
             )}
           </div>
 
           {!c.deleted_at && !isEditing && (
             <div className="mt-1 flex items-center gap-3 px-2 text-xs text-muted-foreground">
-              <button onClick={() => onToggleLike(c)} className={`inline-flex items-center gap-1 transition-colors hover:text-foreground ${myLikes.has(c.id) ? "text-rose-500" : ""}`}>
+              <button
+                onClick={() => onToggleLike(c)}
+                className={`inline-flex items-center gap-1 transition-colors hover:text-foreground ${myLikes.has(c.id) ? "text-rose-500" : ""}`}
+              >
                 <Heart className={`h-3.5 w-3.5 ${myLikes.has(c.id) ? "fill-rose-500" : ""}`} />
                 {likes[c.id] ?? 0}
               </button>
-              <button onClick={() => onSetReply(c)} className="inline-flex items-center gap-1 hover:text-foreground">
+              <button
+                onClick={() => onSetReply(c)}
+                className="inline-flex items-center gap-1 hover:text-foreground"
+              >
                 <Reply className="h-3.5 w-3.5" /> Responder
               </button>
               {isMine && (
                 <>
-                  <button onClick={() => onStartEdit(c)} className="inline-flex items-center gap-1 hover:text-foreground">
+                  <button
+                    onClick={() => onStartEdit(c)}
+                    className="inline-flex items-center gap-1 hover:text-foreground"
+                  >
                     <Pencil className="h-3.5 w-3.5" /> Editar
                   </button>
-                  <button onClick={() => onDelete(c)} className="inline-flex items-center gap-1 hover:text-foreground">
+                  <button
+                    onClick={() => onDelete(c)}
+                    className="inline-flex items-center gap-1 hover:text-foreground"
+                  >
                     <Trash2 className="h-3.5 w-3.5" /> Excluir
                   </button>
                 </>
               )}
               {!isMine && (
-                <button onClick={() => onReport(c)} className="inline-flex items-center gap-1 hover:text-foreground">
+                <button
+                  onClick={() => onReport(c)}
+                  className="inline-flex items-center gap-1 hover:text-foreground"
+                >
                   <Flag className="h-3.5 w-3.5" /> Denunciar
                 </button>
               )}
               {canModerate && (
                 <>
-                  <button onClick={() => onTogglePin(c)} className="inline-flex items-center gap-1 hover:text-foreground">
-                    {c.pinned_at ? <PinOff className="h-3.5 w-3.5" /> : <Pin className="h-3.5 w-3.5" />}
+                  <button
+                    onClick={() => onTogglePin(c)}
+                    className="inline-flex items-center gap-1 hover:text-foreground"
+                  >
+                    {c.pinned_at ? (
+                      <PinOff className="h-3.5 w-3.5" />
+                    ) : (
+                      <Pin className="h-3.5 w-3.5" />
+                    )}
                     {c.pinned_at ? "Desafixar" : "Fixar"}
                   </button>
                   {!isMine && (
-                    <button onClick={() => onDelete(c)} className="inline-flex items-center gap-1 text-destructive hover:opacity-80">
+                    <button
+                      onClick={() => onDelete(c)}
+                      className="inline-flex items-center gap-1 text-destructive hover:opacity-80"
+                    >
                       <Trash2 className="h-3.5 w-3.5" /> Remover
                     </button>
                   )}
@@ -747,11 +1091,23 @@ function CommentNode({
           {replies.length > 0 && (
             <div className="mt-3 space-y-3 border-l border-border/60 pl-3 sm:pl-4">
               {replies.map((r) => (
-                <ReplyNode key={r.id} c={r} profiles={profiles} myUserId={myUserId}
-                  myLikes={myLikes} likes={likes} editing={editing}
-                  onStartEdit={onStartEdit} onCancelEdit={onCancelEdit} onSaveEdit={onSaveEdit}
-                  onChangeEdit={onChangeEdit} onDelete={onDelete} onToggleLike={onToggleLike}
-                  onReport={onReport} canModerate={canModerate} />
+                <ReplyNode
+                  key={r.id}
+                  c={r}
+                  profiles={profiles}
+                  myUserId={myUserId}
+                  myLikes={myLikes}
+                  likes={likes}
+                  editing={editing}
+                  onStartEdit={onStartEdit}
+                  onCancelEdit={onCancelEdit}
+                  onSaveEdit={onSaveEdit}
+                  onChangeEdit={onChangeEdit}
+                  onDelete={onDelete}
+                  onToggleLike={onToggleLike}
+                  onReport={onReport}
+                  canModerate={canModerate}
+                />
               ))}
             </div>
           )}
@@ -762,15 +1118,35 @@ function CommentNode({
 }
 
 function ReplyNode({
-  c, profiles, myUserId, myLikes, likes, editing,
-  onStartEdit, onCancelEdit, onSaveEdit, onChangeEdit, onDelete, onToggleLike, onReport, canModerate,
+  c,
+  profiles,
+  myUserId,
+  myLikes,
+  likes,
+  editing,
+  onStartEdit,
+  onCancelEdit,
+  onSaveEdit,
+  onChangeEdit,
+  onDelete,
+  onToggleLike,
+  onReport,
+  canModerate,
 }: {
-  c: Comment; profiles: Record<string, ProfileLite>; myUserId: string;
-  myLikes: Set<string>; likes: Record<string, number>;
+  c: Comment;
+  profiles: Record<string, ProfileLite>;
+  myUserId: string;
+  myLikes: Set<string>;
+  likes: Record<string, number>;
   editing: { id: string; text: string } | null;
-  onStartEdit: (c: Comment) => void; onCancelEdit: () => void; onSaveEdit: () => void;
-  onChangeEdit: (v: string) => void; onDelete: (c: Comment) => void;
-  onToggleLike: (c: Comment) => void; onReport: (c: Comment) => void; canModerate: boolean;
+  onStartEdit: (c: Comment) => void;
+  onCancelEdit: () => void;
+  onSaveEdit: () => void;
+  onChangeEdit: (v: string) => void;
+  onDelete: (c: Comment) => void;
+  onToggleLike: (c: Comment) => void;
+  onReport: (c: Comment) => void;
+  canModerate: boolean;
 }) {
   const author = profiles[c.user_id];
   const isMine = c.user_id === myUserId;
@@ -783,36 +1159,76 @@ function ReplyNode({
           <div className="flex items-center gap-1.5 text-xs">
             <span className="font-semibold">{author?.full_name ?? "Usuário"}</span>
             {author?.verified && <VerifiedBadge size="sm" />}
-            <span className="ml-auto text-muted-foreground">{relTime(c.created_at)}{c.edited_at && " · editado"}</span>
+            <span className="ml-auto text-muted-foreground">
+              {relTime(c.created_at)}
+              {c.edited_at && " · editado"}
+            </span>
           </div>
           {isEditing ? (
             <div className="mt-1.5 space-y-1.5">
-              <Textarea value={editing!.text} onChange={(e) => onChangeEdit(e.target.value)} rows={2} className="resize-none" />
+              <Textarea
+                value={editing!.text}
+                onChange={(e) => onChangeEdit(e.target.value)}
+                rows={2}
+                className="resize-none"
+              />
               <div className="flex justify-end gap-1">
-                <Button size="sm" variant="ghost" onClick={onCancelEdit}><X className="h-3.5 w-3.5" /></Button>
-                <Button size="sm" onClick={onSaveEdit}><Check className="h-3.5 w-3.5" /></Button>
+                <Button size="sm" variant="ghost" onClick={onCancelEdit}>
+                  <X className="h-3.5 w-3.5" />
+                </Button>
+                <Button size="sm" onClick={onSaveEdit}>
+                  <Check className="h-3.5 w-3.5" />
+                </Button>
               </div>
             </div>
           ) : (
-            <p className={`mt-0.5 whitespace-pre-wrap break-words text-sm ${c.deleted_at ? "italic text-muted-foreground" : ""}`}>{c.content}</p>
+            <p
+              className={`mt-0.5 whitespace-pre-wrap break-words text-sm ${c.deleted_at ? "italic text-muted-foreground" : ""}`}
+            >
+              {c.content}
+            </p>
           )}
         </div>
         {!c.deleted_at && !isEditing && (
           <div className="mt-1 flex items-center gap-3 px-2 text-xs text-muted-foreground">
-            <button onClick={() => onToggleLike(c)} className={`inline-flex items-center gap-1 hover:text-foreground ${myLikes.has(c.id) ? "text-rose-500" : ""}`}>
-              <Heart className={`h-3.5 w-3.5 ${myLikes.has(c.id) ? "fill-rose-500" : ""}`} /> {likes[c.id] ?? 0}
+            <button
+              onClick={() => onToggleLike(c)}
+              className={`inline-flex items-center gap-1 hover:text-foreground ${myLikes.has(c.id) ? "text-rose-500" : ""}`}
+            >
+              <Heart className={`h-3.5 w-3.5 ${myLikes.has(c.id) ? "fill-rose-500" : ""}`} />{" "}
+              {likes[c.id] ?? 0}
             </button>
             {isMine && (
               <>
-                <button onClick={() => onStartEdit(c)} className="inline-flex items-center gap-1 hover:text-foreground"><Pencil className="h-3.5 w-3.5" /> Editar</button>
-                <button onClick={() => onDelete(c)} className="inline-flex items-center gap-1 hover:text-foreground"><Trash2 className="h-3.5 w-3.5" /> Excluir</button>
+                <button
+                  onClick={() => onStartEdit(c)}
+                  className="inline-flex items-center gap-1 hover:text-foreground"
+                >
+                  <Pencil className="h-3.5 w-3.5" /> Editar
+                </button>
+                <button
+                  onClick={() => onDelete(c)}
+                  className="inline-flex items-center gap-1 hover:text-foreground"
+                >
+                  <Trash2 className="h-3.5 w-3.5" /> Excluir
+                </button>
               </>
             )}
             {!isMine && (
-              <button onClick={() => onReport(c)} className="inline-flex items-center gap-1 hover:text-foreground"><Flag className="h-3.5 w-3.5" /> Denunciar</button>
+              <button
+                onClick={() => onReport(c)}
+                className="inline-flex items-center gap-1 hover:text-foreground"
+              >
+                <Flag className="h-3.5 w-3.5" /> Denunciar
+              </button>
             )}
             {canModerate && !isMine && (
-              <button onClick={() => onDelete(c)} className="inline-flex items-center gap-1 text-destructive hover:opacity-80"><Trash2 className="h-3.5 w-3.5" /> Remover</button>
+              <button
+                onClick={() => onDelete(c)}
+                className="inline-flex items-center gap-1 text-destructive hover:opacity-80"
+              >
+                <Trash2 className="h-3.5 w-3.5" /> Remover
+              </button>
             )}
           </div>
         )}
