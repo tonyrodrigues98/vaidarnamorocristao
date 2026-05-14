@@ -1570,6 +1570,7 @@ export type Database = {
           appeal_text: string
           created_at: string
           id: string
+          kind: string
           responded_at: string | null
           responded_by: string | null
           response_text: string | null
@@ -1580,6 +1581,7 @@ export type Database = {
           appeal_text: string
           created_at?: string
           id?: string
+          kind?: string
           responded_at?: string | null
           responded_by?: string | null
           response_text?: string | null
@@ -1590,6 +1592,7 @@ export type Database = {
           appeal_text?: string
           created_at?: string
           id?: string
+          kind?: string
           responded_at?: string | null
           responded_by?: string | null
           response_text?: string | null
