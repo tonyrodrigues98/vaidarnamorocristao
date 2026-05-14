@@ -48,6 +48,13 @@ type Suggestion = {
   state: string | null;
   photo_url: string | null;
 };
+type ChecklistKey = "explore" | "community" | "devotional";
+type ActivityState = {
+  explored: boolean;
+  interestSent: boolean;
+  community: boolean;
+  devotional: boolean;
+};
 
 const TIPS = [
   { icon: Camera, title: "Capriche nas fotos", text: "Use luz natural, mostre seu sorriso e evite filtros pesados. A primeira impressão importa." },
@@ -72,20 +79,56 @@ function subGreeting() {
   return "Esperamos que seu dia tenha sido abençoado.";
 }
 
+function checklistStorageKey(userId: string) {
+  return `inicioChecklist:${userId}`;
+}
+
+function readCompletedSteps(userId: string): Set<ChecklistKey> {
+  if (typeof window === "undefined") return new Set();
+  try {
+    const raw = window.localStorage.getItem(checklistStorageKey(userId));
+    const list = raw ? (JSON.parse(raw) as ChecklistKey[]) : [];
+    return new Set(list.filter((key) => ["explore", "community", "devotional"].includes(key)));
+  } catch {
+    return new Set();
+  }
+}
+
+function saveCompletedSteps(userId: string, steps: Set<ChecklistKey>) {
+  if (typeof window === "undefined") return;
+  window.localStorage.setItem(checklistStorageKey(userId), JSON.stringify(Array.from(steps)));
+}
+
 function InicioPage() {
   const { user, loading } = useAuth();
   const [profile, setProfile] = useState<Profile | null | undefined>(undefined);
   const [advCount, setAdvCount] = useState<{ done: number; total: number }>({ done: 0, total: 8 });
   const [devo, setDevo] = useState<Devotional | null>(null);
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
+  const [activity, setActivity] = useState<ActivityState>({ explored: false, interestSent: false, community: false, devotional: false });
+  const [completedSteps, setCompletedSteps] = useState<Set<ChecklistKey>>(new Set());
   const [community, setCommunity] = useState({ newProfiles: 0, online: 0, newComments: 0 });
   const [tipIndex, setTipIndex] = useState(0);
+
+  useEffect(() => {
+    if (!user) { setCompletedSteps(new Set()); return; }
+    setCompletedSteps(readCompletedSteps(user.id));
+  }, [user]);
 
   useEffect(() => {
     if (!user) return;
     let cancel = false;
     (async () => {
-      const [{ data: p }, { data: adv }, { data: d }] = await Promise.all([
+      const [
+        { data: p },
+        { data: adv },
+        { data: d },
+        viewedRes,
+        interestRes,
+        communityRes,
+        prayedRes,
+        reactionRes,
+      ] = await Promise.all([
         supabase.from("profiles")
           .select("id, full_name, photo_url, bio, height_cm, status, city, state, age, sex")
           .eq("id", user.id).maybeSingle(),
@@ -96,10 +139,21 @@ function InicioPage() {
           .select("id, title, content, bible_reference, bible_text, published_at")
           .eq("kind", "devotional").eq("published", true)
           .order("published_at", { ascending: false }).limit(1).maybeSingle(),
+        supabase.from("profile_views").select("id").eq("viewer_id", user.id).limit(1),
+        supabase.from("interests").select("id").eq("sender_id", user.id).limit(1),
+        supabase.from("global_messages").select("id").eq("sender_id", user.id).limit(1),
+        supabase.from("devotional_prayed").select("id").eq("user_id", user.id).limit(1),
+        supabase.from("devotional_reactions").select("post_id").eq("user_id", user.id).limit(1),
       ]);
       if (cancel) return;
       setProfile(p as Profile | null);
       setDevo(d as Devotional | null);
+      setActivity({
+        explored: !!viewedRes.data?.length || !!interestRes.data?.length,
+        interestSent: !!interestRes.data?.length,
+        community: !!communityRes.data?.length,
+        devotional: !!prayedRes.data?.length || !!reactionRes.data?.length,
+      });
       const fields = adv ? [adv.life_verse, adv.testimony, adv.seeking, adv.essential_quality, adv.hobbies, adv.love_language, adv.wants_marriage, adv.wants_children] : [];
       setAdvCount({ done: fields.filter(Boolean).length, total: 8 });
 
