@@ -22,11 +22,13 @@ Regras:
 
 const SYSTEM_PROMPT_EXTRA = `Você modera fotos adicionais em um app de relacionamento cristão.
 Devolva SOMENTE JSON com este formato exato:
-{"is_safe": boolean, "is_explicit": boolean, "confidence": number entre 0 e 1, "reason": "explicação curta em pt-br"}
+{"is_safe": boolean, "is_explicit": boolean, "is_document": boolean, "confidence": number entre 0 e 1, "reason": "explicação curta em pt-br"}
 
 Regras:
 - is_explicit=true se houver nudez, conteúdo sexual, pornografia, lingerie sugestiva, partes íntimas expostas, violência gráfica, drogas ou conteúdo ofensivo.
+- is_document=true se a imagem mostrar documento de identidade (RG, CNH, passaporte, CPF, certidão), cartão bancário, comprovante, prints com dados pessoais sensíveis (CPF, endereço, telefone, e-mail), QR codes de pagamento, ou qualquer mídia que exponha dados pessoais de identificação. Documentos NUNCA são permitidos.
 - is_safe=true para qualquer outra foto: pessoa, paisagem, pet, comida, hobby, família, viagem, igreja, etc. Desenhos e memes não-ofensivos são permitidos.
+- Se is_document=true ou is_explicit=true, então is_safe=false.
 - confidence: o quanto você está certo (0 a 1).
 - reason: motivo curto. Se reprovar, indique o que está errado.`;
 
@@ -192,10 +194,36 @@ export const Route = createFileRoute("/api/verify-photo")({
 
           if (scope === "extra") {
             const isExplicit = !!parsed.is_explicit;
-            const isSafe = parsed.is_safe === undefined ? !isExplicit : !!parsed.is_safe;
+            const isDocument = !!parsed.is_document;
+            const isSafe =
+              parsed.is_safe === undefined ? !isExplicit && !isDocument : !!parsed.is_safe && !isDocument;
             const confidence = typeof parsed.confidence === "number" ? parsed.confidence : 0;
             const reason = typeof parsed.reason === "string" ? parsed.reason : "";
-            const result = { is_safe: isSafe, is_explicit: isExplicit, confidence, reason };
+            const result = { is_safe: isSafe, is_explicit: isExplicit, is_document: isDocument, confidence, reason };
+            // Documentos: reprovar imediatamente, independente do limiar configurado
+            if (isDocument && confidence >= extraReview) {
+              const ev = await uploadRejectEvidence();
+              await logDecision(
+                "rejected",
+                confidence,
+                reason || "Documento de identidade ou dados pessoais detectados.",
+                result,
+                ev ? { storage_bucket: ev.bucket, storage_path: ev.path } : undefined
+              );
+              return new Response(
+                JSON.stringify({
+                  approved: false,
+                  needsReview: false,
+                  result: {
+                    ...result,
+                    reason:
+                      reason ||
+                      "Não envie documentos de identidade ou imagens com dados pessoais.",
+                  },
+                }),
+                { status: 200, headers: { "Content-Type": "application/json" } }
+              );
+            }
             if (isExplicit && confidence >= extraReject) {
               const ev = await uploadRejectEvidence();
               await logDecision("rejected", confidence, reason, result, ev ? { storage_bucket: ev.bucket, storage_path: ev.path } : undefined);
