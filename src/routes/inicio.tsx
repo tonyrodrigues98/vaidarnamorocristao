@@ -419,6 +419,38 @@ function InicioPage() {
       <Header />
 
       <main className="relative mx-auto w-full max-w-6xl px-4 pb-16 pt-6 sm:px-6 sm:pt-10">
+        {/* AVISOS SÉRIOS DA EQUIPE */}
+        {activeWarnings.length > 0 && (
+          <section className="mb-6 space-y-3">
+            {activeWarnings.map((w) => (
+              <div
+                key={w.id}
+                className={`flex items-start gap-3 rounded-2xl border p-4 shadow-soft ${
+                  w.severity === "severe"
+                    ? "border-red-500/40 bg-red-500/10 text-red-900 dark:text-red-200"
+                    : "border-amber-500/40 bg-amber-500/10 text-amber-900 dark:text-amber-200"
+                }`}
+              >
+                <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0" />
+                <div className="flex-1">
+                  <p className="text-sm font-semibold">
+                    {w.severity === "severe" ? "Aviso sério da moderação" : "Aviso da moderação"}
+                  </p>
+                  <p className="mt-1 whitespace-pre-wrap text-sm">{w.message}</p>
+                </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => acknowledgeWarning(w.id)}
+                  className="shrink-0 bg-background/50"
+                >
+                  Entendi
+                </Button>
+              </div>
+            ))}
+          </section>
+        )}
+
         {/* HERO */}
         <section className="relative overflow-hidden rounded-[2rem] border border-border/60 bg-gradient-warm px-6 py-10 shadow-soft sm:px-10 sm:py-14">
           <div
