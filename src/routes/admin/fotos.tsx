@@ -277,11 +277,11 @@ function AdminFotos() {
       // RPC: remove do perfil, registra log e notifica usuário com a foto e o motivo
       const { error } = await supabase.rpc("admin_delete_user_photo", {
         _user_id: item.user_id,
-        _photo_id: null,
+        _photo_id: "" as unknown as string,
         _scope: item.scope,
-        _photo_url: item.photo_url ?? item.signed_url ?? null,
+        _photo_url: item.photo_url ?? item.signed_url ?? "",
         _reason: reason,
-      });
+      } as any);
       if (error) throw error;
       toast.success("Foto apagada e usuário notificado");
       setDeleteReason("");
