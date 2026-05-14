@@ -373,6 +373,46 @@ function InicioPage() {
 
   const firstName = (profile.full_name ?? "").split(" ")[0] || "amig@";
   const isApproved = profile.status === "approved";
+  const isBanned = profile.status === "banned";
+  const activeWarnings = adminWarnings.filter((w) => !w.acknowledged_at);
+  const latestAppeal = banAppeals[0] ?? null;
+  const canAppeal = isBanned && (!latestAppeal || latestAppeal.status === "ignored");
+
+  async function acknowledgeWarning(id: string) {
+    const { error } = await supabase
+      .from("user_admin_warnings")
+      .update({ acknowledged_at: new Date().toISOString() })
+      .eq("id", id);
+    if (error) { toast.error(error.message); return; }
+    setAdminWarnings((prev) =>
+      prev.map((w) => (w.id === id ? { ...w, acknowledged_at: new Date().toISOString() } : w)),
+    );
+  }
+  async function resolveRequest(id: string) {
+    const { error } = await supabase
+      .from("user_admin_requests")
+      .update({ status: "resolved" })
+      .eq("id", id);
+    if (error) { toast.error(error.message); return; }
+    setAdminRequests((prev) => prev.filter((r) => r.id !== id));
+    toast.success("Solicitação marcada como resolvida");
+  }
+  async function submitAppeal() {
+    if (!user) return;
+    const txt = appealText.trim();
+    if (txt.length < 10) { toast.error("Escreva sua apelação com mais detalhes."); return; }
+    setAppealBusy(true);
+    const { data, error } = await supabase
+      .from("user_ban_appeals")
+      .insert({ user_id: user.id, appeal_text: txt })
+      .select("id, appeal_text, status, response_text, responded_at, created_at")
+      .single();
+    setAppealBusy(false);
+    if (error) { toast.error(error.message); return; }
+    setBanAppeals((prev) => [data as BanAppeal, ...prev]);
+    setAppealText("");
+    toast.success("Apelação enviada. A equipe vai analisar.");
+  }
 
   return (
     <div className="min-h-screen">
