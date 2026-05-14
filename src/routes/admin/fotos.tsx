@@ -124,7 +124,22 @@ function AdminFotos() {
       return;
     }
     const items = (data ?? []) as unknown as LogItem[];
-    setLogs(items);
+    // Gera URLs assinadas para evidências armazenadas no bucket privado de rejeitadas
+    await Promise.all(
+      items.map(async (it) => {
+        if (it.storage_bucket && it.storage_path) {
+          try {
+            const { data: signed } = await supabase.storage
+              .from(it.storage_bucket)
+              .createSignedUrl(it.storage_path, 60 * 60);
+            if (signed?.signedUrl) it.signed_url = signed.signedUrl;
+          } catch (e) {
+            console.warn("signed url failed", e);
+          }
+        }
+      })
+    );
+    setLogs([...items]);
     void loadProfilesFor(Array.from(new Set(items.map((i) => i.user_id))));
   }
 
