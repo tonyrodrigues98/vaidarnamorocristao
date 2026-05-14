@@ -4,11 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
-import {
-  getHomeChecklistSteps,
-  markHomeChecklistStep,
-  type HomeChecklistStep,
-} from "@/lib/homeChecklist";
+import { getHomeChecklistSteps, type HomeChecklistStep } from "@/lib/homeChecklist";
 import {
   Sparkles,
   CheckCircle2,
@@ -293,16 +289,6 @@ function InicioPage() {
     ];
   }, [profile, advCount, activity, completedSteps]);
 
-  function markChecklistStep(key: string) {
-    if (!user || !["explore", "devotional"].includes(key)) return;
-    setCompletedSteps((prev) => {
-      const next = new Set(prev);
-      next.add(key as HomeChecklistStep);
-      markHomeChecklistStep(user.id, key as HomeChecklistStep);
-      return next;
-    });
-  }
-
   const completion = useMemo(() => {
     const p = profile;
     if (!p) return 0;
@@ -422,7 +408,6 @@ function InicioPage() {
                 <li key={item.key}>
                   <Link
                     to={item.to}
-                    onClick={() => markChecklistStep(item.key)}
                     className="group flex items-center gap-3 rounded-2xl border border-transparent px-3 py-3 transition hover:border-border/60 hover:bg-muted/40"
                   >
                     <span
