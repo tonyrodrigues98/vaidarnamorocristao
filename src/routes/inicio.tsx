@@ -21,7 +21,15 @@ import {
   ChevronLeft,
   ChevronRight,
   Flame,
+  Hand,
+  Ban,
+  ClipboardList,
+  AlertTriangle,
+  MessageSquareWarning,
+  Send,
 } from "lucide-react";
+import { toast } from "sonner";
+import { Textarea } from "@/components/ui/textarea";
 
 export const Route = createFileRoute("/inicio")({
   component: InicioPage,
@@ -45,6 +53,31 @@ type Profile = {
   state: string | null;
   age: number | null;
   sex: "masculino" | "feminino" | null;
+  banned_reason?: string | null;
+  banned_at?: string | null;
+};
+
+type AdminRequest = {
+  id: string;
+  kind: "photo" | "bio" | "behavior" | "other";
+  message: string;
+  status: "open" | "acknowledged" | "resolved";
+  created_at: string;
+};
+type AdminWarning = {
+  id: string;
+  message: string;
+  severity: "warning" | "severe";
+  acknowledged_at: string | null;
+  created_at: string;
+};
+type BanAppeal = {
+  id: string;
+  appeal_text: string;
+  status: "pending" | "answered" | "ignored";
+  response_text: string | null;
+  responded_at: string | null;
+  created_at: string;
 };
 type Devotional = {
   id: string;
