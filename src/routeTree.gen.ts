@@ -18,6 +18,7 @@ import { Route as NotificacoesRouteImport } from './routes/notificacoes'
 import { Route as MatchesRouteImport } from './routes/matches'
 import { Route as ManualRouteImport } from './routes/manual'
 import { Route as InteressesRouteImport } from './routes/interesses'
+import { Route as InicioRouteImport } from './routes/inicio'
 import { Route as DevocionalRouteImport } from './routes/devocional'
 import { Route as DepoimentosRouteImport } from './routes/depoimentos'
 import { Route as DashboardRouteImport } from './routes/dashboard'
@@ -88,6 +89,11 @@ const ManualRoute = ManualRouteImport.update({
 const InteressesRoute = InteressesRouteImport.update({
   id: '/interesses',
   path: '/interesses',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InicioRoute = InicioRouteImport.update({
+  id: '/inicio',
+  path: '/inicio',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DevocionalRoute = DevocionalRouteImport.update({
@@ -230,6 +236,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRoute
   '/depoimentos': typeof DepoimentosRoute
   '/devocional': typeof DevocionalRoute
+  '/inicio': typeof InicioRoute
   '/interesses': typeof InteressesRoute
   '/manual': typeof ManualRoute
   '/matches': typeof MatchesRoute
@@ -267,6 +274,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardRoute
   '/depoimentos': typeof DepoimentosRoute
   '/devocional': typeof DevocionalRoute
+  '/inicio': typeof InicioRoute
   '/interesses': typeof InteressesRoute
   '/manual': typeof ManualRoute
   '/matches': typeof MatchesRoute
@@ -305,6 +313,7 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/depoimentos': typeof DepoimentosRoute
   '/devocional': typeof DevocionalRoute
+  '/inicio': typeof InicioRoute
   '/interesses': typeof InteressesRoute
   '/manual': typeof ManualRoute
   '/matches': typeof MatchesRoute
@@ -344,6 +353,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/depoimentos'
     | '/devocional'
+    | '/inicio'
     | '/interesses'
     | '/manual'
     | '/matches'
@@ -381,6 +391,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/depoimentos'
     | '/devocional'
+    | '/inicio'
     | '/interesses'
     | '/manual'
     | '/matches'
@@ -418,6 +429,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/depoimentos'
     | '/devocional'
+    | '/inicio'
     | '/interesses'
     | '/manual'
     | '/matches'
@@ -456,6 +468,7 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   DepoimentosRoute: typeof DepoimentosRoute
   DevocionalRoute: typeof DevocionalRoute
+  InicioRoute: typeof InicioRoute
   InteressesRoute: typeof InteressesRoute
   ManualRoute: typeof ManualRoute
   MatchesRoute: typeof MatchesRoute
@@ -548,6 +561,13 @@ declare module '@tanstack/react-router' {
       path: '/interesses'
       fullPath: '/interesses'
       preLoaderRoute: typeof InteressesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/inicio': {
+      id: '/inicio'
+      path: '/inicio'
+      fullPath: '/inicio'
+      preLoaderRoute: typeof InicioRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/devocional': {
@@ -744,6 +764,7 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRoute,
   DepoimentosRoute: DepoimentosRoute,
   DevocionalRoute: DevocionalRoute,
+  InicioRoute: InicioRoute,
   InteressesRoute: InteressesRoute,
   ManualRoute: ManualRoute,
   MatchesRoute: MatchesRoute,
