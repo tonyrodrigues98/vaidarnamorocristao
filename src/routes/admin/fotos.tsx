@@ -478,16 +478,30 @@ function AdminFotos() {
                       <ul className="divide-y">
                         {items.map((it) => (
                           <li key={it.id} className="flex items-center gap-3 py-2 text-sm">
-                            {it.photo_url ? (
-                              <img
-                                src={it.photo_url}
-                                alt=""
-                                className="h-12 w-12 rounded-md object-cover"
-                              />
-                            ) : (
-                              <div className="h-12 w-12 rounded-md bg-muted" />
-                            )}
-                            <div className="min-w-0 flex-1">
+                            <button
+                              type="button"
+                              onClick={() => setOpenLog(it)}
+                              className="shrink-0 overflow-hidden rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                              aria-label="Abrir detalhes"
+                            >
+                              {it.photo_url ? (
+                                <img
+                                  src={it.photo_url}
+                                  alt=""
+                                  className="h-12 w-12 rounded-md object-cover"
+                                  loading="lazy"
+                                />
+                              ) : (
+                                <div className="flex h-12 w-12 items-center justify-center rounded-md bg-muted text-muted-foreground">
+                                  <ImageIcon className="h-4 w-4" />
+                                </div>
+                              )}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setOpenLog(it)}
+                              className="min-w-0 flex-1 text-left"
+                            >
                               <div className="flex flex-wrap items-center gap-2">
                                 <span
                                   className={`rounded-full px-2 py-0.5 text-xs ${
@@ -519,6 +533,13 @@ function AdminFotos() {
                                   {it.reason}
                                 </p>
                               )}
+                            </button>
+                            <div className="hidden shrink-0 gap-1 sm:flex">
+                              <Button asChild size="sm" variant="ghost" title="Ver perfil">
+                                <Link to="/pretendentes/$id" params={{ id: it.user_id }}>
+                                  <Eye className="h-4 w-4" />
+                                </Link>
+                              </Button>
                             </div>
                           </li>
                         ))}
