@@ -8,7 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { ArrowLeft, Check, X, RefreshCw, Settings, History, Image as ImageIcon } from "lucide-react";
+import { ArrowLeft, Check, X, RefreshCw, Settings, History, Image as ImageIcon, Eye, Trash2, ExternalLink } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 
 export const Route = createFileRoute("/admin/fotos")({ component: AdminFotos });
 
@@ -39,7 +40,16 @@ type LogItem = {
   created_at: string;
 };
 
-type ProfileLite = { id: string; full_name: string | null; photo_url: string | null };
+type ProfileLite = {
+  id: string;
+  full_name: string | null;
+  photo_url: string | null;
+  age?: number | null;
+  city?: string | null;
+  state?: string | null;
+  church?: string | null;
+  status?: string | null;
+};
 
 type Settings = {
   extra_reject_threshold: number;
@@ -64,13 +74,15 @@ function AdminFotos() {
   const [settings, setSettings] = useState<Settings | null>(null);
   const [draftSettings, setDraftSettings] = useState<Settings | null>(null);
   const [savingSettings, setSavingSettings] = useState(false);
+  const [openLog, setOpenLog] = useState<LogItem | null>(null);
+  const [deletingPhoto, setDeletingPhoto] = useState(false);
 
   async function loadProfilesFor(ids: string[]) {
     const fresh = ids.filter((id) => !profiles.has(id));
     if (!fresh.length) return;
     const { data } = await supabase
       .from("profiles")
-      .select("id, full_name, photo_url")
+      .select("id, full_name, photo_url, age, city, state, church, status")
       .in("id", fresh);
     if (!data) return;
     setProfiles((prev) => {
@@ -241,6 +253,64 @@ function AdminFotos() {
     return Array.from(map.entries());
   }, [logs]);
 
+  async function deleteLogPhoto(item: LogItem) {
+    if (!item.photo_url) {
+      toast.error("Esta foto não tem URL registrada.");
+      return;
+    }
+    if (!confirm("Apagar esta foto do perfil? Esta ação é definitiva.")) return;
+    setDeletingPhoto(true);
+    try {
+      // Apaga storage
+      const marker = "/profile-photos/";
+      const idx = item.photo_url.indexOf(marker);
+      if (idx > -1) {
+        const path = item.photo_url.substring(idx + marker.length).split("?")[0];
+        await supabase.storage.from("profile-photos").remove([path]);
+      }
+      if (item.scope === "avatar") {
+        await supabase
+          .from("profiles")
+          .update({ photo_url: null, avatar_ai_verified: false })
+          .eq("id", item.user_id);
+      } else {
+        // Apaga linha em profile_photos com a mesma URL
+        await supabase
+          .from("profile_photos")
+          .delete()
+          .eq("user_id", item.user_id)
+          .eq("url", item.photo_url);
+      }
+      // Notificação para o usuário
+      await supabase.from("notifications").insert({
+        user_id: item.user_id,
+        type: "photo_removed",
+        title: "Uma foto foi removida pela equipe",
+        body:
+          item.scope === "avatar"
+            ? "Sua foto principal foi removida em revisão de moderação. Você pode enviar outra."
+            : "Uma foto adicional foi removida em revisão de moderação.",
+      });
+      // Registro de auditoria
+      await supabase.from("photo_moderation_log").insert({
+        user_id: item.user_id,
+        scope: item.scope,
+        photo_url: item.photo_url,
+        decision: "rejected",
+        confidence: item.confidence,
+        reason: "admin_deleted",
+        ai_result: { admin_deleted: true, source_log_id: item.id },
+      });
+      toast.success("Foto apagada");
+      setOpenLog(null);
+      void loadLogs();
+    } catch (e) {
+      toast.error("Não foi possível apagar a foto");
+    } finally {
+      setDeletingPhoto(false);
+    }
+  }
+
   if (loading) return null;
   if (!user) return <Navigate to="/auth/login" />;
   if (!canAccess) return <Navigate to="/inicio" />;
@@ -408,16 +478,30 @@ function AdminFotos() {
                       <ul className="divide-y">
                         {items.map((it) => (
                           <li key={it.id} className="flex items-center gap-3 py-2 text-sm">
-                            {it.photo_url ? (
-                              <img
-                                src={it.photo_url}
-                                alt=""
-                                className="h-12 w-12 rounded-md object-cover"
-                              />
-                            ) : (
-                              <div className="h-12 w-12 rounded-md bg-muted" />
-                            )}
-                            <div className="min-w-0 flex-1">
+                            <button
+                              type="button"
+                              onClick={() => setOpenLog(it)}
+                              className="shrink-0 overflow-hidden rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                              aria-label="Abrir detalhes"
+                            >
+                              {it.photo_url ? (
+                                <img
+                                  src={it.photo_url}
+                                  alt=""
+                                  className="h-12 w-12 rounded-md object-cover"
+                                  loading="lazy"
+                                />
+                              ) : (
+                                <div className="flex h-12 w-12 items-center justify-center rounded-md bg-muted text-muted-foreground">
+                                  <ImageIcon className="h-4 w-4" />
+                                </div>
+                              )}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setOpenLog(it)}
+                              className="min-w-0 flex-1 text-left"
+                            >
                               <div className="flex flex-wrap items-center gap-2">
                                 <span
                                   className={`rounded-full px-2 py-0.5 text-xs ${
@@ -449,6 +533,13 @@ function AdminFotos() {
                                   {it.reason}
                                 </p>
                               )}
+                            </button>
+                            <div className="hidden shrink-0 gap-1 sm:flex">
+                              <Button asChild size="sm" variant="ghost" title="Ver perfil">
+                                <Link to="/pretendentes/$id" params={{ id: it.user_id }}>
+                                  <Eye className="h-4 w-4" />
+                                </Link>
+                              </Button>
                             </div>
                           </li>
                         ))}
@@ -519,6 +610,96 @@ function AdminFotos() {
           </TabsContent>
         </Tabs>
       </main>
+      <Dialog open={!!openLog} onOpenChange={(o) => !o && setOpenLog(null)}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Análise da foto</DialogTitle>
+            <DialogDescription>
+              Visualização completa para auditoria. Você pode abrir o perfil ou apagar a foto definitivamente.
+            </DialogDescription>
+          </DialogHeader>
+          {openLog && (() => {
+            const prof = profiles.get(openLog.user_id);
+            return (
+              <div className="grid gap-4 sm:grid-cols-[1fr_1fr]">
+                <div className="overflow-hidden rounded-xl border bg-muted">
+                  {openLog.photo_url ? (
+                    <img
+                      src={openLog.photo_url}
+                      alt=""
+                      className="h-full max-h-[60vh] w-full object-contain"
+                    />
+                  ) : (
+                    <div className="flex aspect-square w-full items-center justify-center text-sm text-muted-foreground">
+                      Foto não disponível
+                    </div>
+                  )}
+                </div>
+                <div className="space-y-3 text-sm">
+                  <div className="flex items-center gap-3">
+                    {prof?.photo_url ? (
+                      <img src={prof.photo_url} alt="" className="h-12 w-12 rounded-full object-cover" />
+                    ) : (
+                      <div className="h-12 w-12 rounded-full bg-muted" />
+                    )}
+                    <div>
+                      <div className="font-medium">{prof?.full_name ?? "Sem nome"}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {prof?.age ? `${prof.age} anos` : ""}
+                        {prof?.city ? ` • ${prof.city}${prof?.state ? "/" + prof.state : ""}` : ""}
+                      </div>
+                      {prof?.church && (
+                        <div className="text-xs text-muted-foreground">{prof.church}</div>
+                      )}
+                      {prof?.status && (
+                        <div className="mt-1 text-xs">
+                          <span className="rounded-full bg-muted px-2 py-0.5">Status: {prof.status}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2 text-xs">
+                    <span className={`rounded-full px-2 py-0.5 ${openLog.scope === "avatar" ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
+                      {openLog.scope === "avatar" ? "Foto principal" : "Foto adicional"}
+                    </span>
+                    <span className={`rounded-full px-2 py-0.5 ${decisionClass(openLog.decision)}`}>
+                      {decisionLabel(openLog.decision)}
+                    </span>
+                    {openLog.confidence !== null && (
+                      <span className="text-muted-foreground">
+                        Confiança: {Math.round(openLog.confidence * 100)}%
+                      </span>
+                    )}
+                  </div>
+                  {openLog.reason && (
+                    <p className="text-xs text-muted-foreground">{openLog.reason}</p>
+                  )}
+                  <p className="text-xs text-muted-foreground">
+                    {new Date(openLog.created_at).toLocaleString("pt-BR")}
+                  </p>
+                </div>
+              </div>
+            );
+          })()}
+          <DialogFooter className="flex flex-col gap-2 sm:flex-row">
+            {openLog && (
+              <Button asChild variant="outline" className="sm:mr-auto">
+                <Link to="/pretendentes/$id" params={{ id: openLog.user_id }}>
+                  <ExternalLink className="mr-1 h-4 w-4" /> Ver perfil
+                </Link>
+              </Button>
+            )}
+            <Button variant="ghost" onClick={() => setOpenLog(null)}>Fechar</Button>
+            <Button
+              variant="destructive"
+              onClick={() => openLog && deleteLogPhoto(openLog)}
+              disabled={deletingPhoto || !openLog?.photo_url}
+            >
+              <Trash2 className="mr-1 h-4 w-4" /> Apagar foto
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
