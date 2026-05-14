@@ -2,7 +2,16 @@ import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { Header } from "@/components/layout/Header";
 import { useNotifications, type AppNotification } from "@/lib/notifications";
 import { Button } from "@/components/ui/button";
-import { Bell, Check, Trash2, Heart, MessageCircle, Sparkles, Shield, BadgeCheck } from "lucide-react";
+import {
+  Bell,
+  Check,
+  Trash2,
+  Heart,
+  MessageCircle,
+  Sparkles,
+  Shield,
+  BadgeCheck,
+} from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -18,12 +27,18 @@ export const Route = createFileRoute("/notificacoes")({
 
 function iconFor(type: string) {
   switch (type) {
-    case "interest": return <Sparkles className="h-4 w-4" />;
-    case "match": return <Heart className="h-4 w-4" />;
-    case "message": return <MessageCircle className="h-4 w-4" />;
-    case "profile_approved": return <Shield className="h-4 w-4" />;
-    case "profile_verified": return <BadgeCheck className="h-4 w-4" />;
-    default: return <Bell className="h-4 w-4" />;
+    case "interest":
+      return <Sparkles className="h-4 w-4" />;
+    case "match":
+      return <Heart className="h-4 w-4" />;
+    case "message":
+      return <MessageCircle className="h-4 w-4" />;
+    case "profile_approved":
+      return <Shield className="h-4 w-4" />;
+    case "profile_verified":
+      return <BadgeCheck className="h-4 w-4" />;
+    default:
+      return <Bell className="h-4 w-4" />;
   }
 }
 
@@ -73,18 +88,30 @@ function NotificacoesPage() {
               <li
                 key={n.id}
                 className={`group flex items-start gap-3 rounded-2xl border p-4 transition ${
-                  n.read_at ? "border-border bg-card/40" : "border-[var(--rose)]/30 bg-[var(--petal)]/30"
+                  n.read_at
+                    ? "border-border bg-card/40"
+                    : "border-[var(--rose)]/30 bg-[var(--petal)]/30"
                 }`}
               >
-                <button onClick={() => onClick(n)} className="flex flex-1 items-start gap-3 text-left">
+                <button
+                  onClick={() => onClick(n)}
+                  className="flex flex-1 items-start gap-3 text-left"
+                >
                   <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--petal)] text-[var(--rose)]">
                     {iconFor(n.type)}
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className="block break-words text-sm font-medium">{n.title}</span>
-                    {n.body && <span className="mt-0.5 block break-words text-xs text-muted-foreground">{n.body}</span>}
+                    {n.body && (
+                      <span className="mt-0.5 block break-words text-xs text-muted-foreground">
+                        {n.body}
+                      </span>
+                    )}
                     <span className="mt-1 block text-[11px] text-muted-foreground">
-                      {formatDistanceToNow(new Date(n.created_at), { addSuffix: true, locale: ptBR })}
+                      {formatDistanceToNow(new Date(n.created_at), {
+                        addSuffix: true,
+                        locale: ptBR,
+                      })}
                     </span>
                   </span>
                 </button>
@@ -101,7 +128,9 @@ function NotificacoesPage() {
         )}
 
         <div className="mt-6 text-center">
-          <Link to="/dashboard" className="text-sm text-muted-foreground hover:underline">Voltar ao início</Link>
+          <Link to="/inicio" className="text-sm text-muted-foreground hover:underline">
+            Voltar ao início
+          </Link>
         </div>
       </main>
     </div>

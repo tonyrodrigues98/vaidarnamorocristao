@@ -4,9 +4,30 @@ import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import {
-  Heart, LogOut, Shield, MessageCircle, Sparkles, Menu, X,
-  User as UserIcon, Users, Newspaper, Globe, Ban, Share2, Gem, Sun, Moon, MoreHorizontal,
-  ChevronDown, Heart as HeartIcon, LifeBuoy, BookHeart, Settings, Bell,
+  Heart,
+  LogOut,
+  Shield,
+  MessageCircle,
+  Sparkles,
+  Menu,
+  X,
+  User as UserIcon,
+  Users,
+  Newspaper,
+  Globe,
+  Ban,
+  Share2,
+  Gem,
+  Sun,
+  Moon,
+  MoreHorizontal,
+  ChevronDown,
+  Heart as HeartIcon,
+  LifeBuoy,
+  BookHeart,
+  Settings,
+  Bell,
+  LayoutDashboard,
 } from "lucide-react";
 import { toast } from "sonner";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
@@ -36,8 +57,8 @@ async function shareSite() {
     }
     await navigator.clipboard.writeText(url);
     toast.success("Link copiado!");
-  } catch (e: any) {
-    if (e?.name === "AbortError") return;
+  } catch (e: unknown) {
+    if (e instanceof DOMException && e.name === "AbortError") return;
     try {
       await navigator.clipboard.writeText(url);
       toast.success("Link copiado!");
@@ -58,16 +79,33 @@ export function Header() {
   const [newsCount, setNewsCount] = useState(0);
   const [communityCount, setCommunityCount] = useState(0);
   const [open, setOpen] = useState(false);
-  const [profile, setProfile] = useState<{ photo_url: string | null; full_name: string | null; verified: boolean | null } | null>(null);
+  const [profile, setProfile] = useState<{
+    photo_url: string | null;
+    full_name: string | null;
+    verified: boolean | null;
+  } | null>(null);
 
   useEffect(() => {
-    if (!user) { setProfile(null); return; }
-    supabase.from("profiles").select("photo_url, full_name, verified").eq("id", user.id).maybeSingle()
+    if (!user) {
+      setProfile(null);
+      return;
+    }
+    supabase
+      .from("profiles")
+      .select("photo_url, full_name, verified")
+      .eq("id", user.id)
+      .maybeSingle()
       .then(({ data }) => setProfile(data ?? null));
   }, [user]);
 
   useEffect(() => {
-    if (!user) { setInterestCount(0); setUnreadCount(0); setNewsCount(0); setCommunityCount(0); return; }
+    if (!user) {
+      setInterestCount(0);
+      setUnreadCount(0);
+      setNewsCount(0);
+      setCommunityCount(0);
+      return;
+    }
     let ignore = false;
     const loadInterests = async () => {
       const since = getLastSeen(user.id, "interests");
@@ -80,10 +118,14 @@ export function Header() {
     };
     const loadUnread = async () => {
       const { data: matches } = await supabase
-        .from("matches").select("id")
+        .from("matches")
+        .select("id")
         .or(`user_a.eq.${user.id},user_b.eq.${user.id}`);
       const ids = (matches ?? []).map((m) => m.id);
-      if (!ids.length) { if (!ignore) setUnreadCount(0); return; }
+      if (!ids.length) {
+        if (!ignore) setUnreadCount(0);
+        return;
+      }
       const { count } = await supabase
         .from("messages")
         .select("id", { count: "exact", head: true })
@@ -110,13 +152,25 @@ export function Header() {
         .gt("created_at", since);
       if (!ignore) setCommunityCount(count ?? 0);
     };
-    loadInterests(); loadUnread(); loadNews(); loadCommunity();
-    const ch = supabase.channel("hdr-counters")
-      .on("postgres_changes", { event: "*", schema: "public", table: "interests", filter: `receiver_id=eq.${user.id}` }, loadInterests)
+    loadInterests();
+    loadUnread();
+    loadNews();
+    loadCommunity();
+    const ch = supabase
+      .channel("hdr-counters")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "interests", filter: `receiver_id=eq.${user.id}` },
+        loadInterests,
+      )
       .on("postgres_changes", { event: "*", schema: "public", table: "messages" }, loadUnread)
       .on("postgres_changes", { event: "*", schema: "public", table: "matches" }, loadUnread)
       .on("postgres_changes", { event: "*", schema: "public", table: "daily_posts" }, loadNews)
-      .on("postgres_changes", { event: "*", schema: "public", table: "global_messages" }, loadCommunity)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "global_messages" },
+        loadCommunity,
+      )
       .subscribe();
     const onSeen = (e: Event) => {
       const detail = (e as CustomEvent).detail as { key?: string } | undefined;
@@ -136,12 +190,19 @@ export function Header() {
   const close = () => setOpen(false);
   const Badge = ({ n }: { n: number }) =>
     n > 0 ? (
-      <span className="ml-1 rounded-full bg-[var(--rose)] px-1.5 py-[1px] text-[10px] font-bold text-white">{n > 99 ? "99+" : n}</span>
+      <span className="ml-1 rounded-full bg-[var(--rose)] px-1.5 py-[1px] text-[10px] font-bold text-white">
+        {n > 99 ? "99+" : n}
+      </span>
     ) : null;
 
   const relCount = unreadCount + interestCount;
   const initials = (profile?.full_name ?? user?.email ?? "?")
-    .split(" ").map((s) => s[0]).filter(Boolean).slice(0, 2).join("").toUpperCase();
+    .split(" ")
+    .map((s) => s[0])
+    .filter(Boolean)
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
 
   return (
     <header className="sticky top-0 z-50 glass">
@@ -159,7 +220,14 @@ export function Header() {
         <nav className="hidden min-w-0 flex-1 items-center justify-end gap-1 md:flex">
           {user ? (
             <>
-              <Button variant="ghost" size="sm" asChild><Link to="/inicio">Início</Link></Button>
+              <Button variant="ghost" size="sm" asChild>
+                <Link to="/inicio">Início</Link>
+              </Button>
+              <Button variant="ghost" size="sm" asChild>
+                <Link to="/dashboard">
+                  <LayoutDashboard className="mr-1 h-4 w-4" /> Dashboard
+                </Link>
+              </Button>
               {isApproved && (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -174,24 +242,49 @@ export function Header() {
                       Conexões
                     </DropdownMenuLabel>
                     <div className="grid grid-cols-2 gap-2">
-                      <MegaItem to="/pretendentes" icon={<Gem className="h-4 w-4" />} title="Pretendentes" desc="Descobrir perfis" />
-                      <MegaItem to="/interesses" icon={<Sparkles className="h-4 w-4" />} title="Interesses" desc="Quem te quer" badge={interestCount} />
-                      <MegaItem to="/matches" icon={<Users className="h-4 w-4" />} title="Matches" desc="Conexões mútuas" />
-                      <MegaItem to="/conversas" icon={<MessageCircle className="h-4 w-4" />} title="Conversas" desc="Suas mensagens" badge={unreadCount} />
+                      <MegaItem
+                        to="/pretendentes"
+                        icon={<Gem className="h-4 w-4" />}
+                        title="Pretendentes"
+                        desc="Descobrir perfis"
+                      />
+                      <MegaItem
+                        to="/interesses"
+                        icon={<Sparkles className="h-4 w-4" />}
+                        title="Interesses"
+                        desc="Quem te quer"
+                        badge={interestCount}
+                      />
+                      <MegaItem
+                        to="/matches"
+                        icon={<Users className="h-4 w-4" />}
+                        title="Matches"
+                        desc="Conexões mútuas"
+                      />
+                      <MegaItem
+                        to="/conversas"
+                        icon={<MessageCircle className="h-4 w-4" />}
+                        title="Conversas"
+                        desc="Suas mensagens"
+                        badge={unreadCount}
+                      />
                     </div>
                   </DropdownMenuContent>
                 </DropdownMenu>
               )}
               {isApproved && (
                 <Button variant="ghost" size="sm" asChild>
-                  <Link to="/comunidade"><Globe className="mr-1 h-4 w-4" /> Comunidade<Badge n={communityCount} /></Link>
+                  <Link to="/comunidade">
+                    <Globe className="mr-1 h-4 w-4" /> Comunidade
+                    <Badge n={communityCount} />
+                  </Link>
                 </Button>
               )}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="sm" aria-label="Mais opções">
                     <MoreHorizontal className="h-4 w-4" />
-                    {(newsCount > 0) && <Badge n={newsCount} />}
+                    {newsCount > 0 && <Badge n={newsCount} />}
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-52">
@@ -210,10 +303,21 @@ export function Header() {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-              <Button variant="ghost" size="icon" onClick={toggleTheme} aria-label={theme === "dark" ? "Modo claro" : "Modo escuro"}>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={toggleTheme}
+                aria-label={theme === "dark" ? "Modo claro" : "Modo escuro"}
+              >
                 {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
               </Button>
-              <Button variant="ghost" size="icon" asChild aria-label="Notificações" className="relative">
+              <Button
+                variant="ghost"
+                size="icon"
+                asChild
+                aria-label="Notificações"
+                className="relative"
+              >
                 <Link to="/notificacoes">
                   <Bell className="h-4 w-4" />
                   {notifUnread > 0 && (
@@ -225,11 +329,20 @@ export function Header() {
               </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="ml-1 flex items-center gap-2 rounded-full border border-border bg-card/60 p-1 pr-2 hover:bg-muted shrink-0" aria-label="Menu do perfil">
+                  <button
+                    className="ml-1 flex items-center gap-2 rounded-full border border-border bg-card/60 p-1 pr-2 hover:bg-muted shrink-0"
+                    aria-label="Menu do perfil"
+                  >
                     <span className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-gradient-love text-xs font-bold text-white">
                       {profile?.photo_url ? (
-                        <img src={profile.photo_url} alt="" className="h-full w-full object-cover" />
-                      ) : initials}
+                        <img
+                          src={profile.photo_url}
+                          alt=""
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        initials
+                      )}
                     </span>
                     <ChevronDown className="h-3.5 w-3.5 opacity-70" />
                   </button>
@@ -241,31 +354,48 @@ export function Header() {
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
-                    <Link to="/perfil" className="flex items-center gap-2"><UserIcon className="h-4 w-4" /> Ver perfil</Link>
+                    <Link to="/perfil" className="flex items-center gap-2">
+                      <UserIcon className="h-4 w-4" /> Ver perfil
+                    </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link to="/conta" className="flex items-center gap-2"><Settings className="h-4 w-4" /> Conta</Link>
+                    <Link to="/conta" className="flex items-center gap-2">
+                      <Settings className="h-4 w-4" /> Conta
+                    </Link>
                   </DropdownMenuItem>
                   {isApproved && (
                     <DropdownMenuItem asChild>
-                      <Link to="/verificacao" className="flex items-center gap-2"><Shield className="h-4 w-4" /> Verificação</Link>
+                      <Link to="/verificacao" className="flex items-center gap-2">
+                        <Shield className="h-4 w-4" /> Verificação
+                      </Link>
                     </DropdownMenuItem>
                   )}
                   <DropdownMenuItem asChild>
-                    <Link to="/suporte" className="flex items-center gap-2"><LifeBuoy className="h-4 w-4" /> Suporte</Link>
+                    <Link to="/suporte" className="flex items-center gap-2">
+                      <LifeBuoy className="h-4 w-4" /> Suporte
+                    </Link>
                   </DropdownMenuItem>
                   {canSeeAdminPanel && (
                     <DropdownMenuItem asChild>
-                      <Link to="/admin" className="flex items-center gap-2"><Shield className="h-4 w-4" /> Admin</Link>
+                      <Link to="/admin" className="flex items-center gap-2">
+                        <Shield className="h-4 w-4" /> Admin
+                      </Link>
                     </DropdownMenuItem>
                   )}
                   {isApproved && (
                     <DropdownMenuItem asChild>
-                      <Link to="/bloqueados" className="flex items-center gap-2"><Ban className="h-4 w-4" /> Bloqueados</Link>
+                      <Link to="/bloqueados" className="flex items-center gap-2">
+                        <Ban className="h-4 w-4" /> Bloqueados
+                      </Link>
                     </DropdownMenuItem>
                   )}
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onSelect={async () => { await signOut(); navigate({ to: "/" }); }}>
+                  <DropdownMenuItem
+                    onSelect={async () => {
+                      await signOut();
+                      navigate({ to: "/" });
+                    }}
+                  >
                     <LogOut className="mr-2 h-4 w-4" /> Sair
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -273,12 +403,21 @@ export function Header() {
             </>
           ) : (
             <>
-              <Button variant="ghost" size="sm" asChild><Link to="/auth/login">Entrar</Link></Button>
-              <Button size="sm" asChild className="rounded-full px-5"><Link to="/auth/signup">Criar conta</Link></Button>
+              <Button variant="ghost" size="sm" asChild>
+                <Link to="/auth/login">Entrar</Link>
+              </Button>
+              <Button size="sm" asChild className="rounded-full px-5">
+                <Link to="/auth/signup">Criar conta</Link>
+              </Button>
               <Button variant="ghost" size="sm" onClick={shareSite}>
                 <Share2 className="mr-1 h-4 w-4" /> Compartilhar
               </Button>
-              <Button variant="ghost" size="icon" onClick={toggleTheme} aria-label={theme === "dark" ? "Modo claro" : "Modo escuro"}>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={toggleTheme}
+                aria-label={theme === "dark" ? "Modo claro" : "Modo escuro"}
+              >
                 {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
               </Button>
             </>
@@ -306,7 +445,9 @@ export function Header() {
                   <span className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full bg-gradient-love text-sm font-bold text-white">
                     {profile?.photo_url ? (
                       <img src={profile.photo_url} alt="" className="h-full w-full object-cover" />
-                    ) : initials}
+                    ) : (
+                      initials
+                    )}
                   </span>
                   <div className="min-w-0 flex-1">
                     <p className="flex items-center gap-1.5 truncate text-sm font-semibold">
@@ -321,28 +462,46 @@ export function Header() {
                 </div>
 
                 <MobileItem to="/inicio" onClick={close}>
-                  <span className="flex items-center gap-2"><Heart className="h-4 w-4" /> Início</span>
+                  <span className="flex items-center gap-2">
+                    <Heart className="h-4 w-4" /> Início
+                  </span>
+                </MobileItem>
+
+                <MobileItem to="/dashboard" onClick={close}>
+                  <span className="flex items-center gap-2">
+                    <LayoutDashboard className="h-4 w-4" /> Dashboard
+                  </span>
                 </MobileItem>
 
                 <MobileItem to="/notificacoes" onClick={close}>
-                  <span className="flex items-center gap-2"><Bell className="h-4 w-4" /> Notificações</span>
+                  <span className="flex items-center gap-2">
+                    <Bell className="h-4 w-4" /> Notificações
+                  </span>
                   <Badge n={notifUnread} />
                 </MobileItem>
 
                 {isApproved && (
                   <MobileSection label="Relacionamento" defaultOpen>
                     <MobileItem to="/pretendentes" onClick={close}>
-                      <span className="flex items-center gap-2"><Gem className="h-4 w-4" /> Pretendentes</span>
+                      <span className="flex items-center gap-2">
+                        <Gem className="h-4 w-4" /> Pretendentes
+                      </span>
                     </MobileItem>
                     <MobileItem to="/interesses" onClick={close}>
-                      <span className="flex items-center gap-2"><Sparkles className="h-4 w-4" /> Interesses</span>
+                      <span className="flex items-center gap-2">
+                        <Sparkles className="h-4 w-4" /> Interesses
+                      </span>
                       <Badge n={interestCount} />
                     </MobileItem>
                     <MobileItem to="/matches" onClick={close}>
-                      <span className="flex items-center gap-2"><Users className="h-4 w-4" /> Matches</span>
+                      <span className="flex items-center gap-2">
+                        <Users className="h-4 w-4" /> Matches
+                      </span>
                     </MobileItem>
                     <MobileItem to="/conversas" onClick={close}>
-                      <span className="flex items-center gap-2"><MessageCircle className="h-4 w-4" /> Conversas</span>
+                      <span className="flex items-center gap-2">
+                        <MessageCircle className="h-4 w-4" /> Conversas
+                      </span>
                       <Badge n={unreadCount} />
                     </MobileItem>
                   </MobileSection>
@@ -350,21 +509,30 @@ export function Header() {
 
                 {isApproved && (
                   <MobileItem to="/comunidade" onClick={close}>
-                    <span className="flex items-center gap-2"><Globe className="h-4 w-4" /> Comunidade</span>
+                    <span className="flex items-center gap-2">
+                      <Globe className="h-4 w-4" /> Comunidade
+                    </span>
                     <Badge n={communityCount} />
                   </MobileItem>
                 )}
 
                 <MobileSection label="Mais">
                   <MobileItem to="/devocional" onClick={close}>
-                    <span className="flex items-center gap-2"><BookHeart className="h-4 w-4" /> Devocional</span>
+                    <span className="flex items-center gap-2">
+                      <BookHeart className="h-4 w-4" /> Devocional
+                    </span>
                   </MobileItem>
                   <MobileItem to="/noticias" onClick={close}>
-                    <span className="flex items-center gap-2"><Newspaper className="h-4 w-4" /> Notícias</span>
+                    <span className="flex items-center gap-2">
+                      <Newspaper className="h-4 w-4" /> Notícias
+                    </span>
                     <Badge n={newsCount} />
                   </MobileItem>
                   <button
-                    onClick={() => { close(); shareSite(); }}
+                    onClick={() => {
+                      close();
+                      shareSite();
+                    }}
                     className="flex items-center gap-2 rounded-xl px-3 py-3 text-left text-sm font-medium hover:bg-muted"
                   >
                     <Share2 className="h-4 w-4" /> Compartilhar
@@ -373,31 +541,47 @@ export function Header() {
 
                 <MobileSection label="Perfil">
                   <MobileItem to="/perfil" onClick={close}>
-                    <span className="flex items-center gap-2"><UserIcon className="h-4 w-4" /> Ver perfil</span>
+                    <span className="flex items-center gap-2">
+                      <UserIcon className="h-4 w-4" /> Ver perfil
+                    </span>
                   </MobileItem>
                   <MobileItem to="/conta" onClick={close}>
-                    <span className="flex items-center gap-2"><Settings className="h-4 w-4" /> Conta</span>
+                    <span className="flex items-center gap-2">
+                      <Settings className="h-4 w-4" /> Conta
+                    </span>
                   </MobileItem>
                   {isApproved && (
                     <MobileItem to="/verificacao" onClick={close}>
-                      <span className="flex items-center gap-2"><Shield className="h-4 w-4" /> Verificação</span>
+                      <span className="flex items-center gap-2">
+                        <Shield className="h-4 w-4" /> Verificação
+                      </span>
                     </MobileItem>
                   )}
                   <MobileItem to="/suporte" onClick={close}>
-                    <span className="flex items-center gap-2"><LifeBuoy className="h-4 w-4" /> Suporte</span>
+                    <span className="flex items-center gap-2">
+                      <LifeBuoy className="h-4 w-4" /> Suporte
+                    </span>
                   </MobileItem>
                   {canSeeAdminPanel && (
                     <MobileItem to="/admin" onClick={close}>
-                      <span className="flex items-center gap-2"><Shield className="h-4 w-4" /> Admin</span>
+                      <span className="flex items-center gap-2">
+                        <Shield className="h-4 w-4" /> Admin
+                      </span>
                     </MobileItem>
                   )}
                   {isApproved && (
                     <MobileItem to="/bloqueados" onClick={close}>
-                      <span className="flex items-center gap-2"><Ban className="h-4 w-4" /> Bloqueados</span>
+                      <span className="flex items-center gap-2">
+                        <Ban className="h-4 w-4" /> Bloqueados
+                      </span>
                     </MobileItem>
                   )}
                   <button
-                    onClick={async () => { close(); await signOut(); navigate({ to: "/" }); }}
+                    onClick={async () => {
+                      close();
+                      await signOut();
+                      navigate({ to: "/" });
+                    }}
                     className="flex items-center gap-2 rounded-xl px-3 py-3 text-left text-sm text-muted-foreground hover:bg-muted"
                   >
                     <LogOut className="h-4 w-4" /> Sair
@@ -406,10 +590,17 @@ export function Header() {
               </>
             ) : (
               <>
-                <MobileItem to="/auth/login" onClick={close}>Entrar</MobileItem>
-                <MobileItem to="/auth/signup" onClick={close}>Criar conta</MobileItem>
+                <MobileItem to="/auth/login" onClick={close}>
+                  Entrar
+                </MobileItem>
+                <MobileItem to="/auth/signup" onClick={close}>
+                  Criar conta
+                </MobileItem>
                 <button
-                  onClick={() => { close(); shareSite(); }}
+                  onClick={() => {
+                    close();
+                    shareSite();
+                  }}
                   className="flex items-center gap-2 rounded-xl px-3 py-3 text-left text-sm font-medium hover:bg-muted"
                 >
                   <Share2 className="h-4 w-4" /> Compartilhar
@@ -418,7 +609,15 @@ export function Header() {
                   onClick={toggleTheme}
                   className="flex items-center gap-2 rounded-xl px-3 py-3 text-left text-sm font-medium hover:bg-muted"
                 >
-                  {theme === "dark" ? <><Sun className="h-4 w-4" /> Modo claro</> : <><Moon className="h-4 w-4" /> Modo escuro</>}
+                  {theme === "dark" ? (
+                    <>
+                      <Sun className="h-4 w-4" /> Modo claro
+                    </>
+                  ) : (
+                    <>
+                      <Moon className="h-4 w-4" /> Modo escuro
+                    </>
+                  )}
                 </button>
               </>
             )}
@@ -430,8 +629,14 @@ export function Header() {
 }
 
 function MobileItem({
-  to, onClick, children,
-}: { to: string; onClick: () => void; children: React.ReactNode }) {
+  to,
+  onClick,
+  children,
+}: {
+  to: string;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
   return (
     <Link
       to={to}
@@ -445,8 +650,14 @@ function MobileItem({
 }
 
 function MobileSection({
-  label, defaultOpen, children,
-}: { label: string; defaultOpen?: boolean; children: React.ReactNode }) {
+  label,
+  defaultOpen,
+  children,
+}: {
+  label: string;
+  defaultOpen?: boolean;
+  children: React.ReactNode;
+}) {
   const [open, setOpen] = useState(!!defaultOpen);
   return (
     <div className="mt-1 rounded-xl border border-border/60 bg-background/40">
@@ -464,13 +675,20 @@ function MobileSection({
 }
 
 function MegaItem({
-  to, icon, title, desc, badge,
-}: { to: string; icon: React.ReactNode; title: string; desc: string; badge?: number }) {
+  to,
+  icon,
+  title,
+  desc,
+  badge,
+}: {
+  to: string;
+  icon: React.ReactNode;
+  title: string;
+  desc: string;
+  badge?: number;
+}) {
   return (
-    <Link
-      to={to}
-      className="group flex items-start gap-3 rounded-lg p-3 hover:bg-muted"
-    >
+    <Link to={to} className="group flex items-start gap-3 rounded-lg p-3 hover:bg-muted">
       <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-[var(--petal)] text-[var(--rose)]">
         {icon}
       </span>

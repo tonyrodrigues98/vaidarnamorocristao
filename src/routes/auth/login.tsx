@@ -25,13 +25,19 @@ function Login() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const parsed = schema.safeParse({ email, password });
-    if (!parsed.success) { toast.error(parsed.error.issues[0].message); return; }
+    if (!parsed.success) {
+      toast.error(parsed.error.issues[0].message);
+      return;
+    }
     setLoading(true);
     const { error } = await supabase.auth.signInWithPassword(parsed.data);
     setLoading(false);
-    if (error) { toast.error("Email ou senha incorretos"); return; }
+    if (error) {
+      toast.error("Email ou senha incorretos");
+      return;
+    }
     toast.success("Bem-vindo(a) de volta!");
-    navigate({ to: "/dashboard" });
+    navigate({ to: "/inicio" });
   }
 
   return (
@@ -44,14 +50,33 @@ function Login() {
           <form onSubmit={handleSubmit} className="mt-6 space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+              <Input
+                id="email"
+                type="email"
+                autoComplete="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
             </div>
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="password">Senha</Label>
-                <Link to="/auth/forgot-password" className="text-xs text-[var(--rose)] hover:underline">Esqueci a senha</Link>
+                <Link
+                  to="/auth/forgot-password"
+                  className="text-xs text-[var(--rose)] hover:underline"
+                >
+                  Esqueci a senha
+                </Link>
               </div>
-              <Input id="password" type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+              <Input
+                id="password"
+                type="password"
+                autoComplete="current-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
             </div>
             <Button type="submit" className="w-full" size="lg" disabled={loading}>
               {loading ? "Entrando..." : "Entrar"}
@@ -59,7 +84,10 @@ function Login() {
           </form>
           <SocialAuthButtons mode="login" />
           <p className="mt-6 text-center text-sm text-muted-foreground">
-            Novo por aqui? <Link to="/auth/signup" className="font-medium text-[var(--rose)] hover:underline">Criar conta</Link>
+            Novo por aqui?{" "}
+            <Link to="/auth/signup" className="font-medium text-[var(--rose)] hover:underline">
+              Criar conta
+            </Link>
           </p>
         </div>
       </main>

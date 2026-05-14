@@ -5,7 +5,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { BR_STATES } from "@/lib/constants";
 import { SlidersHorizontal, X, Sparkles, Flame } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -19,11 +25,20 @@ import { LOVE_LANGUAGE, MINISTRY, type AdvancedProfile } from "@/lib/profileAdva
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
 import { PhotoCarousel } from "@/components/PhotoCarousel";
+import { markHomeChecklistStep } from "@/lib/homeChecklist";
 
 type Profile = {
-  id: string; full_name: string; age: number; city: string; state: string;
-  church: string; bio: string | null; photo_url: string | null; sex: "masculino" | "feminino";
-  marital: "solteiro" | "divorciado"; verified?: boolean;
+  id: string;
+  full_name: string;
+  age: number;
+  city: string;
+  state: string;
+  church: string;
+  bio: string | null;
+  photo_url: string | null;
+  sex: "masculino" | "feminino";
+  marital: "solteiro" | "divorciado";
+  verified?: boolean;
   created_at?: string;
 };
 type StaffInfo = { role: AppRole; color: RoleColor | null };
@@ -43,7 +58,11 @@ const searchSchema = z.object({
 });
 
 export const Route = createFileRoute("/pretendentes/")({
-  component: () => (<RequireApproved><List /></RequireApproved>),
+  component: () => (
+    <RequireApproved>
+      <List />
+    </RequireApproved>
+  ),
   validateSearch: zodValidator(searchSchema),
 });
 
@@ -53,7 +72,10 @@ function List() {
   const navigate = useNavigate({ from: "/pretendentes/" });
 
   function update<K extends keyof typeof search>(key: K, value: (typeof search)[K] | undefined) {
-    navigate({ search: (prev: typeof search) => ({ ...prev, [key]: value }) as any, replace: true });
+    navigate({
+      search: (prev: typeof search) => ({ ...prev, [key]: value }) as any,
+      replace: true,
+    });
   }
   function clearAll() {
     navigate({ search: { sort: search.sort } as any, replace: true });
@@ -72,8 +94,13 @@ function List() {
 
   useEffect(() => {
     if (!user) return;
+    markHomeChecklistStep(user.id, "explore");
     (async () => {
-      const { data: me } = await supabase.from("profiles").select("status, sex, state").eq("id", user.id).maybeSingle();
+      const { data: me } = await supabase
+        .from("profiles")
+        .select("status, sex, state")
+        .eq("id", user.id)
+        .maybeSingle();
       setMyStatus(me?.status ?? null);
       setMySex(me?.sex ?? null);
       const { data: prefs } = await supabase
@@ -88,29 +115,44 @@ function List() {
       });
       if (me?.status === "approved") {
         const targetSex = me.sex === "masculino" ? "feminino" : "masculino";
-        const [profsRes, blocksRes, blockedByRes, hiddenRes, rolesRes, myAdvRes] = await Promise.all([
-          supabase.from("profiles")
-            .select("id, full_name, age, city, state, church, bio, photo_url, sex, marital, verified, created_at")
-            .eq("status", "approved").eq("sex", targetSex).neq("id", user.id)
-            .order("created_at", { ascending: false }),
-          supabase.from("blocks").select("blocked_id").eq("blocker_id", user.id),
-          supabase.from("blocks").select("blocker_id").eq("blocked_id", user.id),
-          supabase.rpc("get_hidden_staff_ids"),
-          supabase.from("user_roles").select("user_id, role, badge_color").neq("role", "user"),
-          supabase.from("profile_advanced").select("*").eq("user_id", user.id).maybeSingle(),
-        ]);
+        const [profsRes, blocksRes, blockedByRes, hiddenRes, rolesRes, myAdvRes] =
+          await Promise.all([
+            supabase
+              .from("profiles")
+              .select(
+                "id, full_name, age, city, state, church, bio, photo_url, sex, marital, verified, created_at",
+              )
+              .eq("status", "approved")
+              .eq("sex", targetSex)
+              .neq("id", user.id)
+              .order("created_at", { ascending: false }),
+            supabase.from("blocks").select("blocked_id").eq("blocker_id", user.id),
+            supabase.from("blocks").select("blocker_id").eq("blocked_id", user.id),
+            supabase.rpc("get_hidden_staff_ids"),
+            supabase.from("user_roles").select("user_id, role, badge_color").neq("role", "user"),
+            supabase.from("profile_advanced").select("*").eq("user_id", user.id).maybeSingle(),
+          ]);
         const hidden = new Set<string>([
           ...(blocksRes.data ?? []).map((b: any) => b.blocked_id),
           ...(blockedByRes.data ?? []).map((b: any) => b.blocker_id),
-          ...(((hiddenRes as any).data ?? []) as any[]).map((x: any) =>
-            typeof x === "string" ? x : (x.get_hidden_staff_ids ?? x.user_id ?? "")
-          ).filter(Boolean),
+          ...(((hiddenRes as any).data ?? []) as any[])
+            .map((x: any) =>
+              typeof x === "string" ? x : (x.get_hidden_staff_ids ?? x.user_id ?? ""),
+            )
+            .filter(Boolean),
         ]);
         const map: Record<string, StaffInfo> = {};
-        for (const row of (rolesRes.data ?? []) as Array<{ user_id: string; role: AppRole; badge_color: string | null }>) {
+        for (const row of (rolesRes.data ?? []) as Array<{
+          user_id: string;
+          role: AppRole;
+          badge_color: string | null;
+        }>) {
           const existing = map[row.user_id];
           if (!existing || ROLE_PRIORITY.indexOf(row.role) < ROLE_PRIORITY.indexOf(existing.role)) {
-            map[row.user_id] = { role: row.role, color: (row.badge_color as RoleColor | null) ?? null };
+            map[row.user_id] = {
+              role: row.role,
+              color: (row.badge_color as RoleColor | null) ?? null,
+            };
           }
         }
         setStaffMap(map);
@@ -162,13 +204,15 @@ function List() {
     const list = profiles.filter((p) => {
       if (search.q) {
         const qq = search.q.toLowerCase();
-        if (!p.full_name.toLowerCase().includes(qq) && !p.city.toLowerCase().includes(qq)) return false;
+        if (!p.full_name.toLowerCase().includes(qq) && !p.city.toLowerCase().includes(qq))
+          return false;
       }
       if (search.state !== "all" && p.state !== search.state) return false;
       if (search.marital !== "all" && p.marital !== search.marital) return false;
       if (search.ageMin != null && p.age < search.ageMin) return false;
       if (search.ageMax != null && p.age > search.ageMax) return false;
-      if (search.church && !p.church.toLowerCase().includes(search.church.toLowerCase())) return false;
+      if (search.church && !p.church.toLowerCase().includes(search.church.toLowerCase()))
+        return false;
       if (search.verified && !p.verified) return false;
       if (search.ministry !== "all") {
         const adv = advancedMap[p.id];
@@ -215,9 +259,15 @@ function List() {
   }
 
   const hasFilters =
-    !!search.q || search.state !== "all" || search.marital !== "all" ||
-    search.ageMin != null || search.ageMax != null || !!search.church ||
-    search.ministry !== "all" || search.loveLang !== "all" || search.verified;
+    !!search.q ||
+    search.state !== "all" ||
+    search.marital !== "all" ||
+    search.ageMin != null ||
+    search.ageMax != null ||
+    !!search.church ||
+    search.ministry !== "all" ||
+    search.loveLang !== "all" ||
+    search.verified;
 
   if (!loading && !user) return <Navigate to="/auth/login" />;
 
@@ -228,180 +278,246 @@ function List() {
         <div className="animate-fade-up">
           <h1 className="text-4xl font-semibold">Pretendentes</h1>
           <p className="mt-1 text-muted-foreground">
-            {mySex === "masculino" ? "Mulheres" : mySex === "feminino" ? "Homens" : "Pessoas"} cristãs aprovados na plataforma.
+            {mySex === "masculino" ? "Mulheres" : mySex === "feminino" ? "Homens" : "Pessoas"}{" "}
+            cristãs aprovados na plataforma.
           </p>
         </div>
 
         {myStatus !== "approved" ? (
           <div className="glass mt-8 rounded-2xl p-8 text-center shadow-soft">
-            <p className="text-muted-foreground">Você precisa ter o perfil aprovado para ver os pretendentes.</p>
+            <p className="text-muted-foreground">
+              Você precisa ter o perfil aprovado para ver os pretendentes.
+            </p>
           </div>
         ) : (
           <>
-          <div className="mt-6 flex flex-wrap items-center gap-2">
-            <Input
-              placeholder="Buscar por nome ou cidade..."
-              value={search.q}
-              onChange={(e) => update("q", e.target.value)}
-              className="max-w-sm"
-            />
-            <Button variant="outline" size="sm" onClick={() => setFiltersOpen((o) => !o)}>
-              <SlidersHorizontal className="mr-1 h-4 w-4" /> Filtros
-            </Button>
-            {hasFilters && (
-              <Button variant="ghost" size="sm" onClick={clearAll}><X className="mr-1 h-4 w-4" /> Limpar</Button>
-            )}
-            <Button
-              variant={search.verified ? "default" : "outline"}
-              size="sm"
-              onClick={() => update("verified", !search.verified)}
-            >
-              ✔ Verificados
-            </Button>
-            <div className="ml-auto flex items-center gap-2">
-              <Select value={search.sort} onValueChange={(v) => update("sort", v as any)}>
-                <SelectTrigger className="h-9 w-[180px]"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="affinity">🔥 Afinidade</SelectItem>
-                  <SelectItem value="recent">Mais recentes</SelectItem>
-                  <SelectItem value="geographic">Mais próximos</SelectItem>
-                </SelectContent>
-              </Select>
-              <span className="text-sm text-muted-foreground">{filtered.length}</span>
+            <div className="mt-6 flex flex-wrap items-center gap-2">
+              <Input
+                placeholder="Buscar por nome ou cidade..."
+                value={search.q}
+                onChange={(e) => update("q", e.target.value)}
+                className="max-w-sm"
+              />
+              <Button variant="outline" size="sm" onClick={() => setFiltersOpen((o) => !o)}>
+                <SlidersHorizontal className="mr-1 h-4 w-4" /> Filtros
+              </Button>
+              {hasFilters && (
+                <Button variant="ghost" size="sm" onClick={clearAll}>
+                  <X className="mr-1 h-4 w-4" /> Limpar
+                </Button>
+              )}
+              <Button
+                variant={search.verified ? "default" : "outline"}
+                size="sm"
+                onClick={() => update("verified", !search.verified)}
+              >
+                ✔ Verificados
+              </Button>
+              <div className="ml-auto flex items-center gap-2">
+                <Select value={search.sort} onValueChange={(v) => update("sort", v as any)}>
+                  <SelectTrigger className="h-9 w-[180px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="affinity">🔥 Afinidade</SelectItem>
+                    <SelectItem value="recent">Mais recentes</SelectItem>
+                    <SelectItem value="geographic">Mais próximos</SelectItem>
+                  </SelectContent>
+                </Select>
+                <span className="text-sm text-muted-foreground">{filtered.length}</span>
+              </div>
             </div>
-          </div>
 
-          {filtersOpen && (
-            <div className="glass mt-3 grid gap-3 rounded-2xl p-4 shadow-soft sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-              <div>
-                <label className="text-xs text-muted-foreground">Estado</label>
-                <Select value={search.state} onValueChange={(v) => update("state", v)}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todos</SelectItem>
-                    {BR_STATES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-                  </SelectContent>
-                </Select>
+            {filtersOpen && (
+              <div className="glass mt-3 grid gap-3 rounded-2xl p-4 shadow-soft sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                <div>
+                  <label className="text-xs text-muted-foreground">Estado</label>
+                  <Select value={search.state} onValueChange={(v) => update("state", v)}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos</SelectItem>
+                      {BR_STATES.map((s) => (
+                        <SelectItem key={s} value={s}>
+                          {s}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <label className="text-xs text-muted-foreground">Estado civil</label>
+                  <Select value={search.marital} onValueChange={(v) => update("marital", v as any)}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos</SelectItem>
+                      <SelectItem value="solteiro">Solteiro(a)</SelectItem>
+                      <SelectItem value="divorciado">Divorciado(a)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <label className="text-xs text-muted-foreground">Idade mín.</label>
+                  <Input
+                    type="number"
+                    min={18}
+                    max={110}
+                    value={search.ageMin ?? ""}
+                    onChange={(e) =>
+                      update("ageMin", e.target.value ? Number(e.target.value) : undefined)
+                    }
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-muted-foreground">Idade máx.</label>
+                  <Input
+                    type="number"
+                    min={18}
+                    max={110}
+                    value={search.ageMax ?? ""}
+                    onChange={(e) =>
+                      update("ageMax", e.target.value ? Number(e.target.value) : undefined)
+                    }
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-muted-foreground">Igreja</label>
+                  <Input
+                    value={search.church}
+                    onChange={(e) => update("church", e.target.value)}
+                    placeholder="Ex: Batista"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-muted-foreground">Ministério</label>
+                  <Select value={search.ministry} onValueChange={(v) => update("ministry", v)}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos</SelectItem>
+                      {MINISTRY.map((m) => (
+                        <SelectItem key={m.v} value={m.v}>
+                          {m.l}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <label className="text-xs text-muted-foreground">Linguagem do amor</label>
+                  <Select value={search.loveLang} onValueChange={(v) => update("loveLang", v)}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todas</SelectItem>
+                      {LOVE_LANGUAGE.map((m) => (
+                        <SelectItem key={m.v} value={m.v}>
+                          {m.l}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
-              <div>
-                <label className="text-xs text-muted-foreground">Estado civil</label>
-                <Select value={search.marital} onValueChange={(v) => update("marital", v as any)}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todos</SelectItem>
-                    <SelectItem value="solteiro">Solteiro(a)</SelectItem>
-                    <SelectItem value="divorciado">Divorciado(a)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <label className="text-xs text-muted-foreground">Idade mín.</label>
-                <Input
-                  type="number" min={18} max={110}
-                  value={search.ageMin ?? ""}
-                  onChange={(e) => update("ageMin", e.target.value ? Number(e.target.value) : undefined)}
-                />
-              </div>
-              <div>
-                <label className="text-xs text-muted-foreground">Idade máx.</label>
-                <Input
-                  type="number" min={18} max={110}
-                  value={search.ageMax ?? ""}
-                  onChange={(e) => update("ageMax", e.target.value ? Number(e.target.value) : undefined)}
-                />
-              </div>
-              <div>
-                <label className="text-xs text-muted-foreground">Igreja</label>
-                <Input value={search.church} onChange={(e) => update("church", e.target.value)} placeholder="Ex: Batista" />
-              </div>
-              <div>
-                <label className="text-xs text-muted-foreground">Ministério</label>
-                <Select value={search.ministry} onValueChange={(v) => update("ministry", v)}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todos</SelectItem>
-                    {MINISTRY.map((m) => <SelectItem key={m.v} value={m.v}>{m.l}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <label className="text-xs text-muted-foreground">Linguagem do amor</label>
-                <Select value={search.loveLang} onValueChange={(v) => update("loveLang", v)}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todas</SelectItem>
-                    {LOVE_LANGUAGE.map((m) => <SelectItem key={m.v} value={m.v}>{m.l}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          )}
+            )}
           </>
         )}
 
-        {myStatus === "approved" && (loadingList ? (
-          <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {[1,2,3].map((i) => <div key={i} className="glass h-80 animate-pulse rounded-2xl" />)}
-          </div>
-        ) : filtered.length === 0 ? (
-          <div className="glass mt-8 rounded-2xl p-12 text-center shadow-soft">
-            <p className="text-xl">{hasFilters ? "Nenhum perfil corresponde aos filtros." : "Ainda não há pretendentes para mostrar."}</p>
-            {hasFilters && <Button variant="outline" className="mt-4" onClick={clearAll}>Limpar filtros</Button>}
-          </div>
-        ) : (
-          <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {filtered.map((p, i) => {
-              const chips = affinityByProfile[p.id] ?? [];
-              const score = maxScore > 0 ? Math.min(99, Math.round((chips.length / maxScore) * 100)) : 0;
-              const showScore = chips.length >= 3 && score >= 50 && !!myAdvanced;
-              return (
-                <Link key={p.id} to="/pretendentes/$id" params={{ id: p.id }}
-                  className="glass group animate-fade-up overflow-hidden rounded-2xl shadow-soft transition hover:shadow-elegant"
-                  style={{ animationDelay: `${i * 50}ms` }}>
-                  <div className="relative aspect-[4/5] overflow-hidden bg-muted">
-                    <PhotoCarousel
-                      photos={[...(p.photo_url ? [p.photo_url] : []), ...(extraPhotos[p.id] ?? [])]}
-                      alt={p.full_name}
-                      eager={i < 3}
-                      imgClassName="transition duration-500 group-hover:scale-105"
-                      fallback={
-                        <div className="flex h-full w-full items-center justify-center bg-gradient-love">
-                          <span className="text-5xl text-white">{p.full_name.charAt(0)}</span>
-                        </div>
-                      }
-                    />
-                    {showScore ? (
-                      <span className="absolute left-2 top-2 z-10 inline-flex max-w-[calc(100%-3rem)] items-center gap-1 rounded-full bg-[var(--rose)] px-2.5 py-1 text-[11px] font-bold text-white shadow-md sm:text-[10px]">
-                        <Flame className="h-3.5 w-3.5 shrink-0 sm:h-3 sm:w-3" />
-                        <span className="whitespace-nowrap">{score}% afinidade</span>
-                      </span>
-                    ) : isSuggestion(p) && (
-                      <span className="absolute left-2 top-2 z-10 inline-flex max-w-[calc(100%-3rem)] items-center gap-1 rounded-full bg-[var(--rose)] px-2.5 py-1 text-[11px] font-semibold text-white shadow-md sm:text-[10px]">
-                        <Sparkles className="h-3.5 w-3.5 shrink-0 sm:h-3 sm:w-3" />
-                        <span className="whitespace-nowrap">Sugestão pra você</span>
-                      </span>
-                    )}
-                    <span className="absolute right-2 top-2"><OnlineDot userId={p.id} size="md" /></span>
-                  </div>
-                  <div className="p-5">
-                    <h3 className="flex flex-wrap items-center gap-2 text-xl font-semibold">
-                      {p.full_name.split(" ")[0]}, {p.age}
-                      {p.verified && <VerifiedBadge size="md" />}
-                      {staffMap[p.id] && (
-                        <RoleBadge role={staffMap[p.id].role} color={staffMap[p.id].color} />
+        {myStatus === "approved" &&
+          (loadingList ? (
+            <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="glass h-80 animate-pulse rounded-2xl" />
+              ))}
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="glass mt-8 rounded-2xl p-12 text-center shadow-soft">
+              <p className="text-xl">
+                {hasFilters
+                  ? "Nenhum perfil corresponde aos filtros."
+                  : "Ainda não há pretendentes para mostrar."}
+              </p>
+              {hasFilters && (
+                <Button variant="outline" className="mt-4" onClick={clearAll}>
+                  Limpar filtros
+                </Button>
+              )}
+            </div>
+          ) : (
+            <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {filtered.map((p, i) => {
+                const chips = affinityByProfile[p.id] ?? [];
+                const score =
+                  maxScore > 0 ? Math.min(99, Math.round((chips.length / maxScore) * 100)) : 0;
+                const showScore = chips.length >= 3 && score >= 50 && !!myAdvanced;
+                return (
+                  <Link
+                    key={p.id}
+                    to="/pretendentes/$id"
+                    params={{ id: p.id }}
+                    className="glass group animate-fade-up overflow-hidden rounded-2xl shadow-soft transition hover:shadow-elegant"
+                    style={{ animationDelay: `${i * 50}ms` }}
+                  >
+                    <div className="relative aspect-[4/5] overflow-hidden bg-muted">
+                      <PhotoCarousel
+                        photos={[
+                          ...(p.photo_url ? [p.photo_url] : []),
+                          ...(extraPhotos[p.id] ?? []),
+                        ]}
+                        alt={p.full_name}
+                        eager={i < 3}
+                        imgClassName="transition duration-500 group-hover:scale-105"
+                        fallback={
+                          <div className="flex h-full w-full items-center justify-center bg-gradient-love">
+                            <span className="text-5xl text-white">{p.full_name.charAt(0)}</span>
+                          </div>
+                        }
+                      />
+                      {showScore ? (
+                        <span className="absolute left-2 top-2 z-10 inline-flex max-w-[calc(100%-3rem)] items-center gap-1 rounded-full bg-[var(--rose)] px-2.5 py-1 text-[11px] font-bold text-white shadow-md sm:text-[10px]">
+                          <Flame className="h-3.5 w-3.5 shrink-0 sm:h-3 sm:w-3" />
+                          <span className="whitespace-nowrap">{score}% afinidade</span>
+                        </span>
+                      ) : (
+                        isSuggestion(p) && (
+                          <span className="absolute left-2 top-2 z-10 inline-flex max-w-[calc(100%-3rem)] items-center gap-1 rounded-full bg-[var(--rose)] px-2.5 py-1 text-[11px] font-semibold text-white shadow-md sm:text-[10px]">
+                            <Sparkles className="h-3.5 w-3.5 shrink-0 sm:h-3 sm:w-3" />
+                            <span className="whitespace-nowrap">Sugestão pra você</span>
+                          </span>
+                        )
                       )}
-                    </h3>
-                    <p className="mt-0.5 text-sm text-muted-foreground">{p.city} · {p.state}</p>
-                    <p className="mt-1 text-xs text-[var(--rose)]">{p.church}</p>
-                    <UserBadges userId={p.id} size="xs" max={2} className="mt-2" />
-                    <AffinityChips chips={chips} />
-                    {p.bio && <p className="mt-3 line-clamp-2 text-sm text-foreground/70">{p.bio}</p>}
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-        ))}
+                      <span className="absolute right-2 top-2">
+                        <OnlineDot userId={p.id} size="md" />
+                      </span>
+                    </div>
+                    <div className="p-5">
+                      <h3 className="flex flex-wrap items-center gap-2 text-xl font-semibold">
+                        {p.full_name.split(" ")[0]}, {p.age}
+                        {p.verified && <VerifiedBadge size="md" />}
+                        {staffMap[p.id] && (
+                          <RoleBadge role={staffMap[p.id].role} color={staffMap[p.id].color} />
+                        )}
+                      </h3>
+                      <p className="mt-0.5 text-sm text-muted-foreground">
+                        {p.city} · {p.state}
+                      </p>
+                      <p className="mt-1 text-xs text-[var(--rose)]">{p.church}</p>
+                      <UserBadges userId={p.id} size="xs" max={2} className="mt-2" />
+                      <AffinityChips chips={chips} />
+                      {p.bio && (
+                        <p className="mt-3 line-clamp-2 text-sm text-foreground/70">{p.bio}</p>
+                      )}
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          ))}
       </main>
     </div>
   );

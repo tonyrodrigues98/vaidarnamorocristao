@@ -4,9 +4,23 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
+import { getHomeChecklistSteps, type HomeChecklistStep } from "@/lib/homeChecklist";
 import {
-  Sparkles, CheckCircle2, Circle, ArrowRight, BookHeart, Users,
-  Heart, MessageCircle, Camera, Globe, Compass, ShieldCheck, ChevronLeft, ChevronRight, Flame,
+  Sparkles,
+  CheckCircle2,
+  Circle,
+  ArrowRight,
+  BookHeart,
+  Users,
+  Heart,
+  MessageCircle,
+  Camera,
+  Globe,
+  Compass,
+  ShieldCheck,
+  ChevronLeft,
+  ChevronRight,
+  Flame,
 } from "lucide-react";
 
 export const Route = createFileRoute("/inicio")({
@@ -48,13 +62,39 @@ type Suggestion = {
   state: string | null;
   photo_url: string | null;
 };
+type ActivityState = {
+  explored: boolean;
+  interestSent: boolean;
+  community: boolean;
+  devotional: boolean;
+};
 
 const TIPS = [
-  { icon: Camera, title: "Capriche nas fotos", text: "Use luz natural, mostre seu sorriso e evite filtros pesados. A primeira impressão importa." },
-  { icon: ShieldCheck, title: "Segurança em primeiro lugar", text: "Nunca compartilhe dados sensíveis no início. Conheça a pessoa devagar e com calma." },
-  { icon: BookHeart, title: "Conexões com propósito", text: "Comece conversas com perguntas reais sobre fé, sonhos e o dia a dia — fuja do 'oi'." },
-  { icon: Sparkles, title: "Mostre quem você é", text: "Seu testemunho, versículo favorito e linguagem do amor falam mais que mil fotos." },
-  { icon: Heart, title: "Demonstre interesse", text: "Não tenha medo de dar o primeiro passo. Um interesse pode mudar uma história." },
+  {
+    icon: Camera,
+    title: "Capriche nas fotos",
+    text: "Use luz natural, mostre seu sorriso e evite filtros pesados. A primeira impressão importa.",
+  },
+  {
+    icon: ShieldCheck,
+    title: "Segurança em primeiro lugar",
+    text: "Nunca compartilhe dados sensíveis no início. Conheça a pessoa devagar e com calma.",
+  },
+  {
+    icon: BookHeart,
+    title: "Conexões com propósito",
+    text: "Comece conversas com perguntas reais sobre fé, sonhos e o dia a dia — fuja do 'oi'.",
+  },
+  {
+    icon: Sparkles,
+    title: "Mostre quem você é",
+    text: "Seu testemunho, versículo favorito e linguagem do amor falam mais que mil fotos.",
+  },
+  {
+    icon: Heart,
+    title: "Demonstre interesse",
+    text: "Não tenha medo de dar o primeiro passo. Um interesse pode mudar uma história.",
+  },
 ];
 
 function greeting(name: string | null) {
@@ -78,29 +118,85 @@ function InicioPage() {
   const [advCount, setAdvCount] = useState<{ done: number; total: number }>({ done: 0, total: 8 });
   const [devo, setDevo] = useState<Devotional | null>(null);
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
+  const [activity, setActivity] = useState<ActivityState>({
+    explored: false,
+    interestSent: false,
+    community: false,
+    devotional: false,
+  });
+  const [completedSteps, setCompletedSteps] = useState<Set<HomeChecklistStep>>(new Set());
   const [community, setCommunity] = useState({ newProfiles: 0, online: 0, newComments: 0 });
   const [tipIndex, setTipIndex] = useState(0);
+
+  useEffect(() => {
+    if (!user) {
+      setCompletedSteps(new Set());
+      return;
+    }
+    setCompletedSteps(getHomeChecklistSteps(user.id));
+  }, [user]);
 
   useEffect(() => {
     if (!user) return;
     let cancel = false;
     (async () => {
-      const [{ data: p }, { data: adv }, { data: d }] = await Promise.all([
-        supabase.from("profiles")
+      const [
+        { data: p },
+        { data: adv },
+        { data: d },
+        viewedRes,
+        interestRes,
+        communityRes,
+        prayedRes,
+        reactionRes,
+      ] = await Promise.all([
+        supabase
+          .from("profiles")
           .select("id, full_name, photo_url, bio, height_cm, status, city, state, age, sex")
-          .eq("id", user.id).maybeSingle(),
-        supabase.from("profile_advanced")
-          .select("life_verse, testimony, seeking, essential_quality, hobbies, love_language, wants_marriage, wants_children")
-          .eq("user_id", user.id).maybeSingle(),
-        supabase.from("daily_posts")
+          .eq("id", user.id)
+          .maybeSingle(),
+        supabase
+          .from("profile_advanced")
+          .select(
+            "life_verse, testimony, seeking, essential_quality, hobbies, love_language, wants_marriage, wants_children",
+          )
+          .eq("user_id", user.id)
+          .maybeSingle(),
+        supabase
+          .from("daily_posts")
           .select("id, title, content, bible_reference, bible_text, published_at")
-          .eq("kind", "devotional").eq("published", true)
-          .order("published_at", { ascending: false }).limit(1).maybeSingle(),
+          .eq("kind", "devotional")
+          .eq("published", true)
+          .order("published_at", { ascending: false })
+          .limit(1)
+          .maybeSingle(),
+        supabase.from("profile_views").select("id").eq("viewer_id", user.id).limit(1),
+        supabase.from("interests").select("id").eq("sender_id", user.id).limit(1),
+        supabase.from("global_messages").select("id").eq("sender_id", user.id).limit(1),
+        supabase.from("devotional_prayed").select("id").eq("user_id", user.id).limit(1),
+        supabase.from("devotional_reactions").select("post_id").eq("user_id", user.id).limit(1),
       ]);
       if (cancel) return;
       setProfile(p as Profile | null);
       setDevo(d as Devotional | null);
-      const fields = adv ? [adv.life_verse, adv.testimony, adv.seeking, adv.essential_quality, adv.hobbies, adv.love_language, adv.wants_marriage, adv.wants_children] : [];
+      setActivity({
+        explored: !!viewedRes.data?.length || !!interestRes.data?.length,
+        interestSent: !!interestRes.data?.length,
+        community: !!communityRes.data?.length,
+        devotional: !!prayedRes.data?.length || !!reactionRes.data?.length,
+      });
+      const fields = adv
+        ? [
+            adv.life_verse,
+            adv.testimony,
+            adv.seeking,
+            adv.essential_quality,
+            adv.hobbies,
+            adv.love_language,
+            adv.wants_marriage,
+            adv.wants_children,
+          ]
+        : [];
       setAdvCount({ done: fields.filter(Boolean).length, total: 8 });
 
       if ((p as Profile | null)?.status === "approved") {
@@ -109,16 +205,22 @@ function InicioPage() {
         const sinceWeek = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
 
         const [{ data: sugg }, newProfilesRes, newCommentsRes] = await Promise.all([
-          supabase.from("profiles")
+          supabase
+            .from("profiles")
             .select("id, full_name, age, city, state, photo_url")
-            .eq("status", "approved").eq("sex", targetSex).neq("id", user.id)
+            .eq("status", "approved")
+            .eq("sex", targetSex)
+            .neq("id", user.id)
             .not("photo_url", "is", null)
             .order("created_at", { ascending: false })
             .limit(6),
-          supabase.from("profiles")
+          supabase
+            .from("profiles")
             .select("id", { count: "exact", head: true })
-            .eq("status", "approved").gte("created_at", sinceWeek),
-          supabase.from("messages")
+            .eq("status", "approved")
+            .gte("created_at", sinceWeek),
+          supabase
+            .from("messages")
             .select("id", { count: "exact", head: true })
             .gte("created_at", since24h),
         ]);
@@ -131,20 +233,61 @@ function InicioPage() {
         });
       }
     })();
-    return () => { cancel = true; };
+    return () => {
+      cancel = true;
+    };
   }, [user]);
 
   const checklist = useMemo(() => {
     const p = profile;
     return [
-      { key: "photo", label: "Adicione uma boa foto", done: !!p?.photo_url, to: "/perfil" as const },
-      { key: "bio", label: "Capriche na sua bio", done: !!(p?.bio && p.bio.trim().length >= 30), to: "/perfil" as const },
-      { key: "advanced", label: "Conte sobre você (testemunho, versículo…)", done: advCount.done >= 5, to: "/perfil" as const },
-      { key: "explore", label: "Explore pretendentes", done: false, to: "/pretendentes" as const },
-      { key: "community", label: "Participe da comunidade", done: false, to: "/comunidade" as const },
-      { key: "devotional", label: "Leia o devocional do dia", done: false, to: "/devocional" as const },
+      {
+        key: "photo",
+        label: "Adicione uma boa foto",
+        done: !!p?.photo_url,
+        to: "/perfil" as const,
+      },
+      {
+        key: "bio",
+        label: "Capriche na sua bio",
+        done: !!(p?.bio && p.bio.trim().length >= 30),
+        to: "/perfil" as const,
+      },
+      {
+        key: "advanced",
+        label: "Conte sobre você (testemunho, versículo…)",
+        done: advCount.done >= 5,
+        to: "/perfil" as const,
+      },
+      {
+        key: "interest",
+        label: "Demonstre interesse",
+        done: activity.interestSent,
+        to: "/pretendentes" as const,
+      },
+      {
+        key: "explore",
+        label: "Explore pretendentes",
+        done: activity.explored || completedSteps.has("explore"),
+        to: "/pretendentes" as const,
+        manual: true,
+      },
+      {
+        key: "community",
+        label: "Participe da comunidade",
+        done: activity.community,
+        to: "/comunidade" as const,
+        manual: true,
+      },
+      {
+        key: "devotional",
+        label: "Leia o devocional do dia",
+        done: activity.devotional || completedSteps.has("devotional"),
+        to: "/devocional" as const,
+        manual: true,
+      },
     ];
-  }, [profile, advCount]);
+  }, [profile, advCount, activity, completedSteps]);
 
   const completion = useMemo(() => {
     const p = profile;
@@ -178,30 +321,64 @@ function InicioPage() {
       <main className="relative mx-auto w-full max-w-6xl px-4 pb-16 pt-6 sm:px-6 sm:pt-10">
         {/* HERO */}
         <section className="relative overflow-hidden rounded-[2rem] border border-border/60 bg-gradient-warm px-6 py-10 shadow-soft sm:px-10 sm:py-14">
-          <div aria-hidden className="pointer-events-none absolute -top-32 -left-20 h-[420px] w-[420px] rounded-full bg-[var(--petal)] opacity-70 blur-3xl" />
-          <div aria-hidden className="pointer-events-none absolute -bottom-24 -right-16 h-[380px] w-[380px] rounded-full bg-[var(--coral)]/20 blur-3xl" />
-          <div aria-hidden className="pointer-events-none absolute top-10 right-1/3 h-2 w-2 animate-pulse rounded-full bg-[var(--rose)]/60" />
-          <div aria-hidden className="pointer-events-none absolute bottom-16 left-1/4 h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--coral)]/70" style={{ animationDelay: "1.2s" }} />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -top-32 -left-20 h-[420px] w-[420px] rounded-full bg-[var(--petal)] opacity-70 blur-3xl"
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -bottom-24 -right-16 h-[380px] w-[380px] rounded-full bg-[var(--coral)]/20 blur-3xl"
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute top-10 right-1/3 h-2 w-2 animate-pulse rounded-full bg-[var(--rose)]/60"
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute bottom-16 left-1/4 h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--coral)]/70"
+            style={{ animationDelay: "1.2s" }}
+          />
 
           <div className="relative">
             <div className="animate-fade-up inline-flex items-center gap-2 rounded-full border border-[var(--rose)]/15 bg-white/60 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--rose)] backdrop-blur dark:bg-white/10">
               <Sparkles className="h-3 w-3" /> Seu espaço
             </div>
-            <h1 className="animate-fade-up mt-5 text-3xl font-extrabold leading-[1.1] tracking-tight sm:text-5xl" style={{ animationDelay: "60ms" }}>
+            <h1
+              className="animate-fade-up mt-5 text-3xl font-extrabold leading-[1.1] tracking-tight sm:text-5xl"
+              style={{ animationDelay: "60ms" }}
+            >
               {greeting(profile.full_name)} <span className="inline-block">👋</span>
             </h1>
-            <p className="animate-fade-up mt-3 max-w-xl text-base text-muted-foreground sm:text-lg" style={{ animationDelay: "140ms" }}>
-              {subGreeting()} {isApproved ? "Sua jornada continua — explore, converse e deixe Deus surpreender você." : "Logo seu perfil será revisado e você poderá começar a explorar."}
+            <p
+              className="animate-fade-up mt-3 max-w-xl text-base text-muted-foreground sm:text-lg"
+              style={{ animationDelay: "140ms" }}
+            >
+              {subGreeting()}{" "}
+              {isApproved
+                ? "Sua jornada continua — explore, converse e deixe Deus surpreender você."
+                : "Logo seu perfil será revisado e você poderá começar a explorar."}
             </p>
 
-            <div className="animate-fade-up mt-7 flex flex-wrap gap-3" style={{ animationDelay: "220ms" }}>
+            <div
+              className="animate-fade-up mt-7 flex flex-wrap gap-3"
+              style={{ animationDelay: "220ms" }}
+            >
               {isApproved ? (
                 <>
                   <Button asChild size="lg" className="rounded-full px-6">
-                    <Link to="/pretendentes"><Compass className="mr-2 h-4 w-4" /> Ver pretendentes</Link>
+                    <Link to="/pretendentes">
+                      <Compass className="mr-2 h-4 w-4" /> Ver pretendentes
+                    </Link>
                   </Button>
-                  <Button asChild size="lg" variant="outline" className="rounded-full px-6 backdrop-blur bg-white/40 dark:bg-white/5">
-                    <Link to="/devocional"><BookHeart className="mr-2 h-4 w-4" /> Devocional do dia</Link>
+                  <Button
+                    asChild
+                    size="lg"
+                    variant="outline"
+                    className="rounded-full px-6 backdrop-blur bg-white/40 dark:bg-white/5"
+                  >
+                    <Link to="/devocional">
+                      <BookHeart className="mr-2 h-4 w-4" /> Devocional do dia
+                    </Link>
                   </Button>
                 </>
               ) : (
@@ -223,7 +400,9 @@ function InicioPage() {
               </span>
               <h2 className="text-lg font-semibold">Como começar</h2>
             </div>
-            <p className="mt-1 text-sm text-muted-foreground">Pequenos passos que abrem grandes histórias.</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Pequenos passos que abrem grandes histórias.
+            </p>
             <ul className="mt-5 space-y-2">
               {checklist.map((item) => (
                 <li key={item.key}>
@@ -231,12 +410,22 @@ function InicioPage() {
                     to={item.to}
                     className="group flex items-center gap-3 rounded-2xl border border-transparent px-3 py-3 transition hover:border-border/60 hover:bg-muted/40"
                   >
-                    <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition ${
-                      item.done ? "bg-[var(--rose)]/15 text-[var(--rose)]" : "bg-muted text-muted-foreground"
-                    }`}>
-                      {item.done ? <CheckCircle2 className="h-4 w-4" /> : <Circle className="h-4 w-4" />}
+                    <span
+                      className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition ${
+                        item.done
+                          ? "bg-[var(--rose)]/15 text-[var(--rose)]"
+                          : "bg-muted text-muted-foreground"
+                      }`}
+                    >
+                      {item.done ? (
+                        <CheckCircle2 className="h-4 w-4" />
+                      ) : (
+                        <Circle className="h-4 w-4" />
+                      )}
                     </span>
-                    <span className={`flex-1 text-sm ${item.done ? "text-muted-foreground line-through" : "font-medium"}`}>
+                    <span
+                      className={`flex-1 text-sm ${item.done ? "text-muted-foreground line-through" : "font-medium"}`}
+                    >
                       {item.label}
                     </span>
                     <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 transition group-hover:translate-x-0.5 group-hover:opacity-100" />
@@ -247,12 +436,17 @@ function InicioPage() {
           </div>
 
           {/* PERFIL */}
-          <div className="animate-fade-up rounded-3xl border border-border/60 bg-card/70 p-6 shadow-soft backdrop-blur" style={{ animationDelay: "80ms" }}>
+          <div
+            className="animate-fade-up rounded-3xl border border-border/60 bg-card/70 p-6 shadow-soft backdrop-blur"
+            style={{ animationDelay: "80ms" }}
+          >
             <div className="flex items-center gap-3">
               <span className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-gradient-love text-lg font-bold text-white">
                 {profile.photo_url ? (
                   <img src={profile.photo_url} alt="" className="h-full w-full object-cover" />
-                ) : firstName.charAt(0).toUpperCase()}
+                ) : (
+                  firstName.charAt(0).toUpperCase()
+                )}
               </span>
               <div className="min-w-0">
                 <p className="truncate text-sm text-muted-foreground">Seu perfil</p>
@@ -272,11 +466,17 @@ function InicioPage() {
                 />
               </div>
               <p className="mt-3 text-xs text-muted-foreground">
-                {completion >= 90 ? "Seu perfil está brilhando ✨" : "Perfis completos recebem mais interesses."}
+                {completion >= 90
+                  ? "Seu perfil está brilhando ✨"
+                  : "Perfis completos recebem mais interesses."}
               </p>
             </div>
 
-            <Button asChild className="mt-5 w-full rounded-full" variant={completion >= 90 ? "outline" : "default"}>
+            <Button
+              asChild
+              className="mt-5 w-full rounded-full"
+              variant={completion >= 90 ? "outline" : "default"}
+            >
               <Link to="/perfil">{completion >= 90 ? "Ver meu perfil" : "Completar perfil"}</Link>
             </Button>
           </div>
@@ -286,7 +486,10 @@ function InicioPage() {
         <section className="mt-6 grid gap-6 lg:grid-cols-3">
           {/* DEVOCIONAL */}
           <div className="animate-fade-up relative overflow-hidden rounded-3xl border border-border/60 bg-card/70 p-6 shadow-soft backdrop-blur lg:col-span-2">
-            <div aria-hidden className="pointer-events-none absolute -top-12 -right-12 h-44 w-44 rounded-full bg-[var(--petal)] opacity-60 blur-3xl" />
+            <div
+              aria-hidden
+              className="pointer-events-none absolute -top-12 -right-12 h-44 w-44 rounded-full bg-[var(--petal)] opacity-60 blur-3xl"
+            />
             <div className="relative">
               <div className="flex items-center gap-2">
                 <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-[var(--petal)] text-[var(--rose)]">
@@ -297,7 +500,9 @@ function InicioPage() {
               {devo ? (
                 <>
                   {devo.bible_reference && (
-                    <p className="mt-5 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--rose)]">{devo.bible_reference}</p>
+                    <p className="mt-5 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--rose)]">
+                      {devo.bible_reference}
+                    </p>
                   )}
                   {devo.bible_text && (
                     <blockquote className="mt-2 border-l-2 border-[var(--rose)]/40 pl-4 text-base italic leading-relaxed text-foreground/90 sm:text-lg">
@@ -305,21 +510,34 @@ function InicioPage() {
                     </blockquote>
                   )}
                   <h3 className="mt-5 text-xl font-semibold tracking-tight">{devo.title}</h3>
-                  <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-muted-foreground">{devo.content}</p>
+                  <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-muted-foreground">
+                    {devo.content}
+                  </p>
                   <div className="mt-5">
-                    <Button asChild variant="outline" className="rounded-full bg-white/50 backdrop-blur dark:bg-white/5">
-                      <Link to="/devocional">Ler agora <ArrowRight className="ml-1 h-4 w-4" /></Link>
+                    <Button
+                      asChild
+                      variant="outline"
+                      className="rounded-full bg-white/50 backdrop-blur dark:bg-white/5"
+                    >
+                      <Link to="/devocional">
+                        Ler agora <ArrowRight className="ml-1 h-4 w-4" />
+                      </Link>
                     </Button>
                   </div>
                 </>
               ) : (
-                <p className="mt-6 text-sm text-muted-foreground">Em breve, um novo devocional para o seu dia.</p>
+                <p className="mt-6 text-sm text-muted-foreground">
+                  Em breve, um novo devocional para o seu dia.
+                </p>
               )}
             </div>
           </div>
 
           {/* COMUNIDADE VIVA */}
-          <div className="animate-fade-up rounded-3xl border border-border/60 bg-card/70 p-6 shadow-soft backdrop-blur" style={{ animationDelay: "80ms" }}>
+          <div
+            className="animate-fade-up rounded-3xl border border-border/60 bg-card/70 p-6 shadow-soft backdrop-blur"
+            style={{ animationDelay: "80ms" }}
+          >
             <div className="flex items-center gap-2">
               <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-[var(--petal)] text-[var(--rose)]">
                 <Flame className="h-4 w-4" />
@@ -329,9 +547,22 @@ function InicioPage() {
             <p className="mt-1 text-sm text-muted-foreground">O que está acontecendo agora.</p>
 
             <ul className="mt-5 space-y-3">
-              <PulseRow icon={<Users className="h-4 w-4" />} label="Novos perfis (7d)" value={community.newProfiles} />
-              <PulseRow icon={<MessageCircle className="h-4 w-4" />} label="Mensagens (24h)" value={community.newComments} />
-              <PulseRow icon={<Globe className="h-4 w-4" />} label="Espaço da comunidade" value="ativo" cta={{ to: "/comunidade", label: "Entrar" }} />
+              <PulseRow
+                icon={<Users className="h-4 w-4" />}
+                label="Novos perfis (7d)"
+                value={community.newProfiles}
+              />
+              <PulseRow
+                icon={<MessageCircle className="h-4 w-4" />}
+                label="Mensagens (24h)"
+                value={community.newComments}
+              />
+              <PulseRow
+                icon={<Globe className="h-4 w-4" />}
+                label="Espaço da comunidade"
+                value="ativo"
+                cta={{ to: "/comunidade", label: "Entrar" }}
+              />
             </ul>
           </div>
         </section>
@@ -342,10 +573,14 @@ function InicioPage() {
             <div className="flex items-end justify-between gap-4">
               <div>
                 <h2 className="text-xl font-semibold">Possíveis conexões</h2>
-                <p className="text-sm text-muted-foreground">Pessoas que podem combinar com você.</p>
+                <p className="text-sm text-muted-foreground">
+                  Pessoas que podem combinar com você.
+                </p>
               </div>
               <Button asChild variant="ghost" size="sm" className="shrink-0 rounded-full">
-                <Link to="/pretendentes">Ver todos <ArrowRight className="ml-1 h-4 w-4" /></Link>
+                <Link to="/pretendentes">
+                  Ver todos <ArrowRight className="ml-1 h-4 w-4" />
+                </Link>
               </Button>
             </div>
 
@@ -359,7 +594,12 @@ function InicioPage() {
                 >
                   <div className="aspect-[4/5] w-full overflow-hidden bg-muted">
                     {s.photo_url ? (
-                      <img src={s.photo_url} alt={s.full_name} className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.04]" loading="lazy" />
+                      <img
+                        src={s.photo_url}
+                        alt={s.full_name}
+                        className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.04]"
+                        loading="lazy"
+                      />
                     ) : (
                       <div className="flex h-full w-full items-center justify-center bg-gradient-love text-4xl text-white">
                         {s.full_name.charAt(0)}
@@ -369,10 +609,13 @@ function InicioPage() {
                   <div className="pointer-events-none absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
                   <div className="absolute inset-x-0 bottom-0 p-4 text-white">
                     <p className="truncate text-base font-semibold">
-                      {s.full_name.split(" ")[0]}{s.age ? `, ${s.age}` : ""}
+                      {s.full_name.split(" ")[0]}
+                      {s.age ? `, ${s.age}` : ""}
                     </p>
                     {(s.city || s.state) && (
-                      <p className="truncate text-xs opacity-80">{[s.city, s.state].filter(Boolean).join(" · ")}</p>
+                      <p className="truncate text-xs opacity-80">
+                        {[s.city, s.state].filter(Boolean).join(" · ")}
+                      </p>
                     )}
                   </div>
                 </Link>
@@ -386,7 +629,9 @@ function InicioPage() {
           <div className="flex items-end justify-between gap-4">
             <div>
               <h2 className="text-xl font-semibold">Dicas da plataforma</h2>
-              <p className="text-sm text-muted-foreground">Pequenos guias para uma jornada mais leve.</p>
+              <p className="text-sm text-muted-foreground">
+                Pequenos guias para uma jornada mais leve.
+              </p>
             </div>
             <div className="flex items-center gap-2">
               <button
@@ -414,14 +659,19 @@ function InicioPage() {
               {TIPS.map((t, i) => (
                 <div key={i} className="w-full shrink-0 px-1">
                   <div className="relative overflow-hidden rounded-3xl border border-border/60 bg-card/70 p-6 shadow-soft backdrop-blur sm:p-8">
-                    <div aria-hidden className="pointer-events-none absolute -right-16 -top-16 h-44 w-44 rounded-full bg-[var(--petal)] opacity-60 blur-3xl" />
+                    <div
+                      aria-hidden
+                      className="pointer-events-none absolute -right-16 -top-16 h-44 w-44 rounded-full bg-[var(--petal)] opacity-60 blur-3xl"
+                    />
                     <div className="relative flex items-start gap-4">
                       <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[var(--petal)] text-[var(--rose)]">
                         <t.icon className="h-5 w-5" />
                       </span>
                       <div className="min-w-0">
                         <h3 className="text-base font-semibold sm:text-lg">{t.title}</h3>
-                        <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{t.text}</p>
+                        <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+                          {t.text}
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -447,9 +697,14 @@ function InicioPage() {
 }
 
 function PulseRow({
-  icon, label, value, cta,
+  icon,
+  label,
+  value,
+  cta,
 }: {
-  icon: React.ReactNode; label: string; value: number | string;
+  icon: React.ReactNode;
+  label: string;
+  value: number | string;
   cta?: { to: "/comunidade"; label: string };
 }) {
   return (
