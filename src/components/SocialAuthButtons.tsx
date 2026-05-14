@@ -16,7 +16,7 @@ export function SocialAuthButtons({ mode = "login" }: { mode?: "login" | "signup
     setLoading(provider);
     try {
       const result = await lovable.auth.signInWithOAuth(provider, {
-        redirect_uri: window.location.origin + "/dashboard",
+        redirect_uri: window.location.origin + "/inicio",
       });
       if (result.error) {
         toast.error("Não foi possível entrar. Tente novamente.");
