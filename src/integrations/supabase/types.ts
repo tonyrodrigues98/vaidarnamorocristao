@@ -14,6 +14,209 @@ export type Database = {
   }
   public: {
     Tables: {
+      anonymous_hint_options: {
+        Row: {
+          active: boolean
+          category: Database["public"]["Enums"]["anonymous_hint_category"]
+          created_at: string
+          id: string
+          text: string
+        }
+        Insert: {
+          active?: boolean
+          category: Database["public"]["Enums"]["anonymous_hint_category"]
+          created_at?: string
+          id?: string
+          text: string
+        }
+        Update: {
+          active?: boolean
+          category?: Database["public"]["Enums"]["anonymous_hint_category"]
+          created_at?: string
+          id?: string
+          text?: string
+        }
+        Relationships: []
+      }
+      anonymous_message_hints: {
+        Row: {
+          category:
+            | Database["public"]["Enums"]["anonymous_hint_category"]
+            | null
+          created_at: string
+          hint_text: string | null
+          id: string
+          message_id: string
+          requested_at: string
+          sent_at: string | null
+        }
+        Insert: {
+          category?:
+            | Database["public"]["Enums"]["anonymous_hint_category"]
+            | null
+          created_at?: string
+          hint_text?: string | null
+          id?: string
+          message_id: string
+          requested_at?: string
+          sent_at?: string | null
+        }
+        Update: {
+          category?:
+            | Database["public"]["Enums"]["anonymous_hint_category"]
+            | null
+          created_at?: string
+          hint_text?: string | null
+          id?: string
+          message_id?: string
+          requested_at?: string
+          sent_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "anonymous_message_hints_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "anonymous_messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "anonymous_message_hints_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "anonymous_messages_inbox"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "anonymous_message_hints_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "anonymous_messages_outbox"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      anonymous_message_reports: {
+        Row: {
+          created_at: string
+          id: string
+          message_id: string
+          reason: string
+          reporter_id: string
+          sender_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message_id: string
+          reason: string
+          reporter_id: string
+          sender_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message_id?: string
+          reason?: string
+          reporter_id?: string
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "anonymous_message_reports_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "anonymous_messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "anonymous_message_reports_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "anonymous_messages_inbox"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "anonymous_message_reports_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "anonymous_messages_outbox"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      anonymous_message_settings: {
+        Row: {
+          accept_anonymous: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          accept_anonymous?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          accept_anonymous?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      anonymous_messages: {
+        Row: {
+          closed_at: string | null
+          content: string
+          created_at: string
+          expires_at: string
+          id: string
+          match_id: string | null
+          receiver_id: string
+          receiver_reveal_requested_at: string | null
+          replied_at: string | null
+          reply_text: string | null
+          revealed_at: string | null
+          sender_id: string
+          sender_reveal_requested_at: string | null
+          status: Database["public"]["Enums"]["anonymous_message_status"]
+          updated_at: string
+        }
+        Insert: {
+          closed_at?: string | null
+          content: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          match_id?: string | null
+          receiver_id: string
+          receiver_reveal_requested_at?: string | null
+          replied_at?: string | null
+          reply_text?: string | null
+          revealed_at?: string | null
+          sender_id: string
+          sender_reveal_requested_at?: string | null
+          status?: Database["public"]["Enums"]["anonymous_message_status"]
+          updated_at?: string
+        }
+        Update: {
+          closed_at?: string | null
+          content?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          match_id?: string | null
+          receiver_id?: string
+          receiver_reveal_requested_at?: string | null
+          replied_at?: string | null
+          reply_text?: string | null
+          revealed_at?: string | null
+          sender_id?: string
+          sender_reveal_requested_at?: string | null
+          status?: Database["public"]["Enums"]["anonymous_message_status"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       badges: {
         Row: {
           active: boolean
@@ -1702,7 +1905,110 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      anonymous_messages_inbox: {
+        Row: {
+          content: string | null
+          created_at: string | null
+          expires_at: string | null
+          id: string | null
+          match_id: string | null
+          receiver_id: string | null
+          receiver_reveal_requested_at: string | null
+          replied_at: string | null
+          reply_text: string | null
+          revealed_at: string | null
+          sender_id: string | null
+          sender_reveal_requested_at: string | null
+          status: Database["public"]["Enums"]["anonymous_message_status"] | null
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string | null
+          match_id?: string | null
+          receiver_id?: string | null
+          receiver_reveal_requested_at?: string | null
+          replied_at?: string | null
+          reply_text?: string | null
+          revealed_at?: string | null
+          sender_id?: never
+          sender_reveal_requested_at?: string | null
+          status?:
+            | Database["public"]["Enums"]["anonymous_message_status"]
+            | null
+        }
+        Update: {
+          content?: string | null
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string | null
+          match_id?: string | null
+          receiver_id?: string | null
+          receiver_reveal_requested_at?: string | null
+          replied_at?: string | null
+          reply_text?: string | null
+          revealed_at?: string | null
+          sender_id?: never
+          sender_reveal_requested_at?: string | null
+          status?:
+            | Database["public"]["Enums"]["anonymous_message_status"]
+            | null
+        }
+        Relationships: []
+      }
+      anonymous_messages_outbox: {
+        Row: {
+          content: string | null
+          created_at: string | null
+          expires_at: string | null
+          id: string | null
+          match_id: string | null
+          receiver_id_revealed: string | null
+          receiver_reveal_requested_at: string | null
+          replied_at: string | null
+          reply_text: string | null
+          revealed_at: string | null
+          sender_id: string | null
+          sender_reveal_requested_at: string | null
+          status: Database["public"]["Enums"]["anonymous_message_status"] | null
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string | null
+          match_id?: string | null
+          receiver_id_revealed?: never
+          receiver_reveal_requested_at?: string | null
+          replied_at?: string | null
+          reply_text?: string | null
+          revealed_at?: string | null
+          sender_id?: string | null
+          sender_reveal_requested_at?: string | null
+          status?:
+            | Database["public"]["Enums"]["anonymous_message_status"]
+            | null
+        }
+        Update: {
+          content?: string | null
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string | null
+          match_id?: string | null
+          receiver_id_revealed?: never
+          receiver_reveal_requested_at?: string | null
+          replied_at?: string | null
+          reply_text?: string | null
+          revealed_at?: string | null
+          sender_id?: string | null
+          sender_reveal_requested_at?: string | null
+          status?:
+            | Database["public"]["Enums"]["anonymous_message_status"]
+            | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       admin_ban_user: {
@@ -1728,6 +2034,7 @@ export type Database = {
         Returns: undefined
       }
       admin_unban_user: { Args: { _user_id: string }; Returns: undefined }
+      anon_check_restricted: { Args: { _text: string }; Returns: undefined }
       award_contributor_badge: {
         Args: { _amount?: number; _note?: string; _user_id: string }
         Returns: undefined
@@ -1748,6 +2055,7 @@ export type Database = {
         Returns: string
       }
       current_terms_version: { Args: never; Returns: string }
+      expire_anonymous_messages: { Args: never; Returns: number }
       get_active_streak: {
         Args: { _user_id: string }
         Returns: {
@@ -1758,6 +2066,14 @@ export type Database = {
         }[]
       }
       get_admin_ids: { Args: never; Returns: string[] }
+      get_anonymous_cooldown: {
+        Args: { _receiver_id: string }
+        Returns: {
+          can_send: boolean
+          reason: string
+          seconds_remaining: number
+        }[]
+      }
       get_flagged_message_ids: { Args: never; Returns: string[] }
       get_hidden_staff_ids: { Args: never; Returns: string[] }
       get_my_missions: {
@@ -1808,6 +2124,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      ignore_anonymous_message: {
+        Args: { _message_id: string }
+        Returns: undefined
+      }
       increment_article_views: { Args: { _slug: string }; Returns: undefined }
       is_staff: { Args: { _user_id: string }; Returns: boolean }
       is_support_staff: { Args: { _user_id: string }; Returns: boolean }
@@ -1815,16 +2135,57 @@ export type Database = {
       mark_message_read: { Args: { _message_id: string }; Returns: undefined }
       recompute_all_badges: { Args: never; Returns: undefined }
       recompute_user_badges: { Args: { _user_id: string }; Returns: undefined }
+      reply_anonymous_message: {
+        Args: { _message_id: string; _reply: string }
+        Returns: undefined
+      }
+      report_anonymous_message: {
+        Args: { _message_id: string; _reason: string }
+        Returns: undefined
+      }
       request_account_deactivation: { Args: never; Returns: undefined }
       request_account_deletion: { Args: { _confirm: string }; Returns: string }
       request_account_reactivation: { Args: never; Returns: undefined }
+      request_anonymous_hint: {
+        Args: { _message_id: string }
+        Returns: undefined
+      }
+      request_anonymous_reveal: {
+        Args: { _message_id: string }
+        Returns: string
+      }
       request_reverification: { Args: { _message: string }; Returns: string }
       run_reactivation_reminders: { Args: never; Returns: number }
+      send_anonymous_hint: {
+        Args: { _hint_option_id: string; _message_id: string }
+        Returns: undefined
+      }
+      send_anonymous_message: {
+        Args: { _content: string; _receiver_id: string }
+        Returns: string
+      }
+      set_anonymous_optout: { Args: { _accept: boolean }; Returns: undefined }
       touch_my_activity: { Args: never; Returns: undefined }
       unaccent_safe: { Args: { input: string }; Returns: string }
       unmatch: { Args: { _match_id: string }; Returns: undefined }
     }
     Enums: {
+      anonymous_hint_category:
+        | "idade"
+        | "regiao"
+        | "personalidade"
+        | "fe"
+        | "compatibilidade"
+      anonymous_message_status:
+        | "pending"
+        | "hint_requested"
+        | "hint_sent"
+        | "replied"
+        | "reveal_requested"
+        | "revealed"
+        | "ignored"
+        | "reported"
+        | "expired"
       app_role: "admin" | "user" | "super_admin" | "apresentador" | "moderador"
       couple_status: "aceitaram_conversar" | "namorando" | "casamento_marcado"
       daily_post_kind: "news" | "devotional"
@@ -1988,6 +2349,24 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      anonymous_hint_category: [
+        "idade",
+        "regiao",
+        "personalidade",
+        "fe",
+        "compatibilidade",
+      ],
+      anonymous_message_status: [
+        "pending",
+        "hint_requested",
+        "hint_sent",
+        "replied",
+        "reveal_requested",
+        "revealed",
+        "ignored",
+        "reported",
+        "expired",
+      ],
       app_role: ["admin", "user", "super_admin", "apresentador", "moderador"],
       couple_status: ["aceitaram_conversar", "namorando", "casamento_marcado"],
       daily_post_kind: ["news", "devotional"],
