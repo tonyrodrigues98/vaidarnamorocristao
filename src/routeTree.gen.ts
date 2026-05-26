@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as VerificacaoRouteImport } from './routes/verificacao'
 import { Route as TermosRouteImport } from './routes/termos'
 import { Route as SobreRouteImport } from './routes/sobre'
+import { Route as RecadosRouteImport } from './routes/recados'
 import { Route as PerfilRouteImport } from './routes/perfil'
 import { Route as OracoesRouteImport } from './routes/oracoes'
 import { Route as NotificacoesRouteImport } from './routes/notificacoes'
@@ -61,6 +62,11 @@ const TermosRoute = TermosRouteImport.update({
 const SobreRoute = SobreRouteImport.update({
   id: '/sobre',
   path: '/sobre',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RecadosRoute = RecadosRouteImport.update({
+  id: '/recados',
+  path: '/recados',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PerfilRoute = PerfilRouteImport.update({
@@ -255,6 +261,7 @@ export interface FileRoutesByFullPath {
   '/notificacoes': typeof NotificacoesRoute
   '/oracoes': typeof OracoesRoute
   '/perfil': typeof PerfilRoute
+  '/recados': typeof RecadosRoute
   '/sobre': typeof SobreRoute
   '/termos': typeof TermosRoute
   '/verificacao': typeof VerificacaoRoute
@@ -295,6 +302,7 @@ export interface FileRoutesByTo {
   '/notificacoes': typeof NotificacoesRoute
   '/oracoes': typeof OracoesRoute
   '/perfil': typeof PerfilRoute
+  '/recados': typeof RecadosRoute
   '/sobre': typeof SobreRoute
   '/termos': typeof TermosRoute
   '/verificacao': typeof VerificacaoRoute
@@ -336,6 +344,7 @@ export interface FileRoutesById {
   '/notificacoes': typeof NotificacoesRoute
   '/oracoes': typeof OracoesRoute
   '/perfil': typeof PerfilRoute
+  '/recados': typeof RecadosRoute
   '/sobre': typeof SobreRoute
   '/termos': typeof TermosRoute
   '/verificacao': typeof VerificacaoRoute
@@ -378,6 +387,7 @@ export interface FileRouteTypes {
     | '/notificacoes'
     | '/oracoes'
     | '/perfil'
+    | '/recados'
     | '/sobre'
     | '/termos'
     | '/verificacao'
@@ -418,6 +428,7 @@ export interface FileRouteTypes {
     | '/notificacoes'
     | '/oracoes'
     | '/perfil'
+    | '/recados'
     | '/sobre'
     | '/termos'
     | '/verificacao'
@@ -458,6 +469,7 @@ export interface FileRouteTypes {
     | '/notificacoes'
     | '/oracoes'
     | '/perfil'
+    | '/recados'
     | '/sobre'
     | '/termos'
     | '/verificacao'
@@ -499,6 +511,7 @@ export interface RootRouteChildren {
   NotificacoesRoute: typeof NotificacoesRoute
   OracoesRoute: typeof OracoesRoute
   PerfilRoute: typeof PerfilRoute
+  RecadosRoute: typeof RecadosRoute
   SobreRoute: typeof SobreRoute
   TermosRoute: typeof TermosRoute
   VerificacaoRoute: typeof VerificacaoRoute
@@ -545,6 +558,13 @@ declare module '@tanstack/react-router' {
       path: '/sobre'
       fullPath: '/sobre'
       preLoaderRoute: typeof SobreRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/recados': {
+      id: '/recados'
+      path: '/recados'
+      fullPath: '/recados'
+      preLoaderRoute: typeof RecadosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/perfil': {
@@ -811,6 +831,7 @@ const rootRouteChildren: RootRouteChildren = {
   NotificacoesRoute: NotificacoesRoute,
   OracoesRoute: OracoesRoute,
   PerfilRoute: PerfilRoute,
+  RecadosRoute: RecadosRoute,
   SobreRoute: SobreRoute,
   TermosRoute: TermosRoute,
   VerificacaoRoute: VerificacaoRoute,
@@ -838,12 +859,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}
