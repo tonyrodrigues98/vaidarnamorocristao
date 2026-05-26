@@ -10,7 +10,7 @@ import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
-import { Mail, Sparkles, Heart, Eye, Flag, EyeOff, Unlock, MessageCircle } from "lucide-react";
+import { Mail, Sparkles, Heart, Eye, Flag, EyeOff, Unlock, MessageCircle, Send, Lightbulb, Reply, HeartHandshake, Clock } from "lucide-react";
 import { toast } from "sonner";
 import { friendlyError } from "@/lib/errors";
 
@@ -34,16 +34,22 @@ type OutboxRow = {
 type HintOption = { id: string; category: string; text: string };
 type Hint = { id: string; message_id: string; category: string | null; hint_text: string | null; sent_at: string | null; requested_at: string };
 
-function statusEmoji(s: string) {
-  switch (s) {
-    case "pending": return "💌";
-    case "hint_requested": return "👀";
-    case "hint_sent": return "✨";
-    case "replied": return "❤️";
-    case "reveal_requested": return "🔓";
-    case "revealed": return "💞";
-    default: return "·";
-  }
+function StatusBadge({ status }: { status: string }) {
+  const map: Record<string, { icon: React.ReactNode; label: string }> = {
+    pending: { icon: <Send className="h-3 w-3" />, label: "Aguardando" },
+    hint_requested: { icon: <Eye className="h-3 w-3" />, label: "Dica solicitada" },
+    hint_sent: { icon: <Lightbulb className="h-3 w-3" />, label: "Dica enviada" },
+    replied: { icon: <Reply className="h-3 w-3" />, label: "Respondido" },
+    reveal_requested: { icon: <Unlock className="h-3 w-3" />, label: "Revelação pedida" },
+    revealed: { icon: <HeartHandshake className="h-3 w-3" />, label: "Revelado" },
+    expired: { icon: <Clock className="h-3 w-3" />, label: "Expirado" },
+  };
+  const it = map[status] ?? { icon: <Sparkles className="h-3 w-3" />, label: status };
+  return (
+    <span className="inline-flex items-center gap-1">
+      {it.icon} {it.label}
+    </span>
+  );
 }
 
 function RecadosPage() {
@@ -117,7 +123,9 @@ function RecadosPage() {
           <TabsContent value="inbox" className="space-y-3">
             {inbox.length === 0 && (
               <p className="rounded-2xl border border-dashed p-8 text-center text-sm text-muted-foreground">
-                Nenhum recado por enquanto. 💌
+                <span className="inline-flex items-center gap-2">
+                  <Mail className="h-4 w-4" /> Nenhum recado por enquanto.
+                </span>
               </p>
             )}
             {inbox.map((m) => (
@@ -174,7 +182,7 @@ function InboxCard({ m, hints, hintOptions, onChange }: { m: InboxRow; hints: Hi
   return (
     <div className="glass rounded-2xl p-5 shadow-soft">
       <div className="mb-2 flex items-center justify-between text-xs text-muted-foreground">
-        <span>{statusEmoji(m.status)} {m.status}</span>
+        <StatusBadge status={m.status} />
         <span>Expira em {new Date(m.expires_at).toLocaleDateString("pt-BR")}</span>
       </div>
       <p className="whitespace-pre-wrap text-foreground/90">{m.content}</p>
@@ -283,7 +291,7 @@ function OutboxCard({ m, hints, hintOptions, onChange }: { m: OutboxRow; hints: 
   return (
     <div className="glass rounded-2xl p-5 shadow-soft">
       <div className="mb-2 flex items-center justify-between text-xs text-muted-foreground">
-        <span>{statusEmoji(m.status)} {m.status}</span>
+        <StatusBadge status={m.status} />
         <span>{new Date(m.created_at).toLocaleDateString("pt-BR")}</span>
       </div>
       <p className="whitespace-pre-wrap text-foreground/90">{m.content}</p>
