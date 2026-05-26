@@ -9,11 +9,12 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
-import { Mail, Sparkles, Heart, Eye, Flag, EyeOff, Unlock, MessageCircle, Send, Lightbulb, Reply, HeartHandshake, Clock } from "lucide-react";
+import { Mail, Sparkles, Heart, Eye, Flag, EyeOff, Unlock, MessageCircle, Send, Lightbulb, Reply, HeartHandshake, Clock, Wand2, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { friendlyError } from "@/lib/errors";
 import { RevealCeremony, type RevealTarget } from "@/components/anonymous/RevealCeremony";
+import { AnimatePresence, motion } from "framer-motion";
+import { fetchSenderProfile, buildHintPool, pickThree, type GeneratedHint } from "@/lib/anonymousHints";
 
 export const Route = createFileRoute("/recados")({
   component: () => (<RequireApproved><RecadosPage /></RequireApproved>),
@@ -32,7 +33,6 @@ type OutboxRow = {
   receiver_reveal_requested_at: string | null; revealed_at: string | null;
   match_id: string | null; created_at: string;
 };
-type HintOption = { id: string; category: string; text: string };
 type Hint = { id: string; message_id: string; category: string | null; hint_text: string | null; sent_at: string | null; requested_at: string };
 
 function StatusBadge({ status }: { status: string }) {
@@ -59,7 +59,6 @@ function RecadosPage() {
   const [inbox, setInbox] = useState<InboxRow[]>([]);
   const [outbox, setOutbox] = useState<OutboxRow[]>([]);
   const [hints, setHints] = useState<Record<string, Hint[]>>({});
-  const [hintOptions, setHintOptions] = useState<HintOption[]>([]);
   const [accept, setAccept] = useState(true);
   const [reveal, setReveal] = useState<RevealTarget | null>(null);
   const seenRevealed = useRef<Set<string>>(new Set());
@@ -68,15 +67,13 @@ function RecadosPage() {
   const load = useCallback(async () => {
     if (!user) return;
     await supabase.rpc("expire_anonymous_messages");
-    const [{ data: inb }, { data: out }, { data: opts }, { data: settings }] = await Promise.all([
+    const [{ data: inb }, { data: out }, { data: settings }] = await Promise.all([
       supabase.from("anonymous_messages_inbox").select("*").order("created_at", { ascending: false }),
       supabase.from("anonymous_messages_outbox").select("*").order("created_at", { ascending: false }),
-      supabase.from("anonymous_hint_options").select("*").eq("active", true).order("category"),
       supabase.from("anonymous_message_settings").select("accept_anonymous").eq("user_id", user.id).maybeSingle(),
     ]);
     setInbox((inb ?? []) as InboxRow[]);
     setOutbox((out ?? []) as OutboxRow[]);
-    setHintOptions((opts ?? []) as HintOption[]);
     setAccept(settings?.accept_anonymous ?? true);
 
     // Detect newly revealed messages (skip the first load to avoid retriggering on refresh)
@@ -161,7 +158,7 @@ function RecadosPage() {
               </p>
             )}
             {inbox.map((m) => (
-              <InboxCard key={m.id} m={m} hints={hints[m.id] ?? []} hintOptions={hintOptions} onChange={load} />
+              <InboxCard key={m.id} m={m} hints={hints[m.id] ?? []} onChange={load} />
             ))}
           </TabsContent>
 
@@ -172,7 +169,7 @@ function RecadosPage() {
               </p>
             )}
             {outbox.map((m) => (
-              <OutboxCard key={m.id} m={m} hints={hints[m.id] ?? []} hintOptions={hintOptions} onChange={load} />
+              <OutboxCard key={m.id} m={m} hints={hints[m.id] ?? []} onChange={load} />
             ))}
           </TabsContent>
 
@@ -193,7 +190,7 @@ function RecadosPage() {
   );
 }
 
-function InboxCard({ m, hints, hintOptions, onChange }: { m: InboxRow; hints: Hint[]; hintOptions: HintOption[]; onChange: () => void; }) {
+function InboxCard({ m, hints, onChange }: { m: InboxRow; hints: Hint[]; onChange: () => void; }) {
   const [replyOpen, setReplyOpen] = useState(false);
   const [reply, setReply] = useState("");
   const [reportOpen, setReportOpen] = useState(false);
