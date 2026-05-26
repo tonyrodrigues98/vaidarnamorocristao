@@ -2160,6 +2160,14 @@ export type Database = {
         Args: { _hint_option_id: string; _message_id: string }
         Returns: undefined
       }
+      send_anonymous_hint_text: {
+        Args: {
+          _category: Database["public"]["Enums"]["anonymous_hint_category"]
+          _message_id: string
+          _text: string
+        }
+        Returns: undefined
+      }
       send_anonymous_message: {
         Args: { _content: string; _receiver_id: string }
         Returns: string
