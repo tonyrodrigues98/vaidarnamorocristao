@@ -166,7 +166,7 @@ function InboxCard({ m, hints, hintOptions, onChange }: { m: InboxRow; hints: Hi
   const canReveal = ["replied", "reveal_requested", "hint_sent"].includes(m.status);
   const myRevealed = !!m.receiver_reveal_requested_at;
 
-  const action = async (fn: () => Promise<any>) => {
+  const action = async (fn: () => PromiseLike<any>) => {
     setBusy(true); const { error } = await fn(); setBusy(false);
     if (error) toast.error(friendlyError(error)); else onChange();
   };
