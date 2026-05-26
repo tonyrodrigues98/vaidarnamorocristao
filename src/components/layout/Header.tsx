@@ -229,7 +229,7 @@ export function Header() {
       </span>
     ) : null;
 
-  const relCount = unreadCount + interestCount;
+  const relCount = unreadCount + interestCount + anonCount;
   const initials = (profile?.full_name ?? user?.email ?? "?")
     .split(" ")
     .map((s) => s[0])
