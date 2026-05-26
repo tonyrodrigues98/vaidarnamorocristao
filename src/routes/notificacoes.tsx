@@ -11,6 +11,12 @@ import {
   Sparkles,
   Shield,
   BadgeCheck,
+  Mail,
+  Lightbulb,
+  Reply,
+  Unlock,
+  HeartHandshake,
+  Flag,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -25,20 +31,36 @@ export const Route = createFileRoute("/notificacoes")({
   component: NotificacoesPage,
 });
 
-function iconFor(type: string) {
+const EMOJI_RE = /[\p{Extended_Pictographic}\u{1F3FB}-\u{1F3FF}\u{FE0F}\u200D]/gu;
+const stripEmoji = (s: string) => s.replace(EMOJI_RE, "").replace(/\s+/g, " ").trim();
+
+function iconMeta(type: string): { icon: React.ReactNode; bg: string; fg: string } {
   switch (type) {
     case "interest":
-      return <Sparkles className="h-4 w-4" />;
+      return { icon: <Sparkles className="h-4 w-4" />, bg: "bg-amber-100", fg: "text-amber-600" };
     case "match":
-      return <Heart className="h-4 w-4" />;
+      return { icon: <Heart className="h-4 w-4" />, bg: "bg-pink-100", fg: "text-pink-600" };
     case "message":
-      return <MessageCircle className="h-4 w-4" />;
+      return { icon: <MessageCircle className="h-4 w-4" />, bg: "bg-sky-100", fg: "text-sky-600" };
     case "profile_approved":
-      return <Shield className="h-4 w-4" />;
+      return { icon: <Shield className="h-4 w-4" />, bg: "bg-emerald-100", fg: "text-emerald-600" };
     case "profile_verified":
-      return <BadgeCheck className="h-4 w-4" />;
+      return { icon: <BadgeCheck className="h-4 w-4" />, bg: "bg-indigo-100", fg: "text-indigo-600" };
+    case "anonymous_message":
+      return { icon: <Mail className="h-4 w-4" />, bg: "bg-violet-100", fg: "text-violet-600" };
+    case "anonymous_hint_requested":
+    case "anonymous_hint_sent":
+      return { icon: <Lightbulb className="h-4 w-4" />, bg: "bg-yellow-100", fg: "text-yellow-700" };
+    case "anonymous_reply":
+      return { icon: <Reply className="h-4 w-4" />, bg: "bg-rose-100", fg: "text-rose-600" };
+    case "anonymous_reveal_requested":
+      return { icon: <Unlock className="h-4 w-4" />, bg: "bg-amber-100", fg: "text-amber-700" };
+    case "anonymous_revealed":
+      return { icon: <HeartHandshake className="h-4 w-4" />, bg: "bg-fuchsia-100", fg: "text-fuchsia-600" };
+    case "anonymous_report":
+      return { icon: <Flag className="h-4 w-4" />, bg: "bg-red-100", fg: "text-red-600" };
     default:
-      return <Bell className="h-4 w-4" />;
+      return { icon: <Bell className="h-4 w-4" />, bg: "bg-[var(--petal)]", fg: "text-[var(--rose)]" };
   }
 }
 
@@ -97,14 +119,19 @@ function NotificacoesPage() {
                   onClick={() => onClick(n)}
                   className="flex flex-1 items-start gap-3 text-left"
                 >
-                  <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--petal)] text-[var(--rose)]">
-                    {iconFor(n.type)}
-                  </span>
+                  {(() => {
+                    const meta = iconMeta(n.type);
+                    return (
+                      <span className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${meta.bg} ${meta.fg}`}>
+                        {meta.icon}
+                      </span>
+                    );
+                  })()}
                   <span className="min-w-0 flex-1">
-                    <span className="block break-words text-sm font-medium">{n.title}</span>
+                    <span className="block break-words text-sm font-medium">{stripEmoji(n.title)}</span>
                     {n.body && (
                       <span className="mt-0.5 block break-words text-xs text-muted-foreground">
-                        {n.body}
+                        {stripEmoji(n.body)}
                       </span>
                     )}
                     {n.image_url && (
