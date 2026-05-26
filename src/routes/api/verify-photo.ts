@@ -224,14 +224,8 @@ export const Route = createFileRoute("/api/verify-photo")({
                 { status: 200, headers: { "Content-Type": "application/json" } }
               );
             }
-            if (isExplicit && confidence >= extraReject) {
-              const ev = await uploadRejectEvidence();
-              await logDecision("rejected", confidence, reason, result, ev ? { storage_bucket: ev.bucket, storage_path: ev.path } : undefined);
-              return new Response(
-                JSON.stringify({ approved: false, needsReview: false, result: { ...result, reason: reason || "Conteúdo não permitido nesta foto." } }),
-                { status: 200, headers: { "Content-Type": "application/json" } }
-              );
-            }
+            // Conteúdo explícito ou qualquer outra reprovação por IA segue para revisão manual,
+            // não bloqueia automaticamente. Apenas documentos (acima) são bloqueados de imediato.
             if (isExplicit && confidence >= extraReview) {
               const ev = await uploadRejectEvidence();
               await logDecision("needs_review", confidence, reason, result, ev ? { storage_bucket: ev.bucket, storage_path: ev.path } : undefined);
@@ -257,8 +251,10 @@ export const Route = createFileRoute("/api/verify-photo")({
 
           const pass = result.is_human && result.is_real_photo && result.has_single_face;
           const approved = pass && result.confidence >= mainApprove;
-          const needsReview = pass && !approved && result.confidence >= mainReview;
-          const decisionMain = approved ? "approved" : needsReview ? "needs_review" : "rejected";
+          // Qualquer foto que não seja auto-aprovada vai para revisão manual,
+          // em vez de ser bloqueada pela IA. O admin decide na fila de Pendentes.
+          const needsReview = !approved;
+          const decisionMain = approved ? "approved" : "needs_review";
           let evMain: { bucket: string; path: string } | null = null;
           if (decisionMain !== "approved") {
             evMain = await uploadRejectEvidence();
