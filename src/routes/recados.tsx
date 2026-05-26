@@ -309,13 +309,49 @@ function InboxCard({ m, hints, onChange }: { m: InboxRow; hints: Hint[]; onChang
   );
 }
 
-function OutboxCard({ m, hints, hintOptions, onChange }: { m: OutboxRow; hints: Hint[]; hintOptions: HintOption[]; onChange: () => void; }) {
+function OutboxCard({ m, hints, onChange }: { m: OutboxRow; hints: Hint[]; onChange: () => void; }) {
+  const { user } = useAuth();
   const [hintOpen, setHintOpen] = useState(false);
-  const [hintId, setHintId] = useState<string>("");
+  const [selected, setSelected] = useState<GeneratedHint | null>(null);
+  const [pool, setPool] = useState<GeneratedHint[]>([]);
+  const [shown, setShown] = useState<GeneratedHint[]>([]);
+  const [usedTexts, setUsedTexts] = useState<Set<string>>(new Set());
+  const [loadingPool, setLoadingPool] = useState(false);
   const [busy, setBusy] = useState(false);
   const pendingHint = hints.find((h) => !h.sent_at);
   const canReveal = ["replied", "reveal_requested", "hint_sent"].includes(m.status);
   const myRevealed = !!m.sender_reveal_requested_at;
+
+  async function openHintDialog() {
+    setSelected(null);
+    setUsedTexts(new Set());
+    setHintOpen(true);
+    if (pool.length === 0 && user) {
+      setLoadingPool(true);
+      const profile = await fetchSenderProfile(user.id);
+      const built = profile ? buildHintPool(profile) : [];
+      setPool(built);
+      const first = pickThree(built, new Set());
+      setShown(first);
+      setUsedTexts(new Set(first.map((h) => h.text)));
+      setLoadingPool(false);
+    } else {
+      const first = pickThree(pool, new Set());
+      setShown(first);
+      setUsedTexts(new Set(first.map((h) => h.text)));
+    }
+  }
+
+  function regenerate() {
+    const next = pickThree(pool, usedTexts);
+    setShown(next);
+    setSelected(null);
+    const merged = new Set(usedTexts);
+    next.forEach((h) => merged.add(h.text));
+    // Reset cycle once we've exhausted the pool
+    if (merged.size >= pool.length) setUsedTexts(new Set(next.map((h) => h.text)));
+    else setUsedTexts(merged);
+  }
 
   return (
     <div className="glass rounded-2xl p-5 shadow-soft">
@@ -347,7 +383,7 @@ function OutboxCard({ m, hints, hintOptions, onChange }: { m: OutboxRow; hints: 
       ) : (
         <div className="mt-4 flex flex-wrap gap-2">
           {pendingHint && (
-            <Button size="sm" variant="default" onClick={() => setHintOpen(true)}>
+            <Button size="sm" variant="default" onClick={openHintDialog}>
               <Sparkles className="mr-1 h-3 w-3" /> Enviar dica
             </Button>
           )}
@@ -369,26 +405,101 @@ function OutboxCard({ m, hints, hintOptions, onChange }: { m: OutboxRow; hints: 
       )}
 
       <Dialog open={hintOpen} onOpenChange={setHintOpen}>
-        <DialogContent>
-          <DialogHeader><DialogTitle>Escolha uma dica para enviar</DialogTitle></DialogHeader>
-          <p className="text-xs text-muted-foreground">As dicas são amplas e mantêm o mistério.</p>
-          <Select value={hintId} onValueChange={setHintId}>
-            <SelectTrigger><SelectValue placeholder="Selecione uma dica..." /></SelectTrigger>
-            <SelectContent>
-              {hintOptions.map((o) => (
-                <SelectItem key={o.id} value={o.id}>[{o.category}] {o.text}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Wand2 className="h-4 w-4 text-[var(--rose)]" /> Escolha uma dica
+            </DialogTitle>
+          </DialogHeader>
+          <p className="text-xs text-muted-foreground">
+            Sugestões geradas com base no seu perfil — sempre amplas, mantendo o mistério.
+          </p>
+
+          <div className="min-h-[140px] py-2">
+            {loadingPool ? (
+              <div className="flex flex-wrap gap-2">
+                {[0, 1, 2].map((i) => (
+                  <div key={i} className="h-9 w-40 animate-pulse rounded-full bg-muted" />
+                ))}
+              </div>
+            ) : shown.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                Preencha mais detalhes no seu perfil para receber dicas personalizadas.
+              </p>
+            ) : (
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={shown.map((h) => h.text).join("|")}
+                  initial={{ opacity: 0, y: 8, filter: "blur(6px)" }}
+                  animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                  exit={{ opacity: 0, y: -8, filter: "blur(6px)" }}
+                  transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+                  className="flex flex-wrap gap-2"
+                >
+                  {shown.map((h) => {
+                    const isSel = selected?.text === h.text;
+                    return (
+                      <motion.button
+                        key={h.text}
+                        type="button"
+                        onClick={() => setSelected(h)}
+                        whileHover={{ scale: 1.03 }}
+                        whileTap={{ scale: 0.97 }}
+                        className={[
+                          "rounded-full border px-4 py-2 text-sm transition-all",
+                          "backdrop-blur-sm",
+                          isSel
+                            ? "border-[var(--rose)] bg-[var(--rose)]/15 text-foreground shadow-[0_0_20px_-4px_var(--rose)]"
+                            : "border-border bg-background/60 text-foreground/85 hover:border-[var(--rose)]/40 hover:bg-[var(--rose)]/5",
+                        ].join(" ")}
+                      >
+                        <Sparkles className="mr-1 inline h-3 w-3 text-[var(--rose)]" />
+                        {h.text}
+                      </motion.button>
+                    );
+                  })}
+                </motion.div>
+              </AnimatePresence>
+            )}
+          </div>
+
+          <div className="flex justify-center">
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              disabled={loadingPool || pool.length === 0}
+              onClick={regenerate}
+              className="text-xs text-muted-foreground hover:text-foreground"
+            >
+              <RefreshCw className="mr-1 h-3 w-3" /> Gerar novas sugestões
+            </Button>
+          </div>
+
           <DialogFooter>
             <Button variant="outline" onClick={() => setHintOpen(false)}>Cancelar</Button>
-            <Button disabled={busy || !hintId} onClick={async () => {
-              setBusy(true);
-              const { error } = await supabase.rpc("send_anonymous_hint", { _message_id: m.id, _hint_option_id: hintId });
-              setBusy(false);
-              if (error) toast.error(friendlyError(error));
-              else { toast.success("Dica enviada"); setHintOpen(false); setHintId(""); onChange(); }
-            }}>Enviar dica</Button>
+            <Button
+              disabled={busy || !selected}
+              onClick={async () => {
+                if (!selected) return;
+                setBusy(true);
+                const { error } = await supabase.rpc("send_anonymous_hint_text", {
+                  _message_id: m.id,
+                  _category: selected.category,
+                  _text: selected.text,
+                });
+                setBusy(false);
+                if (error) toast.error(friendlyError(error));
+                else {
+                  toast.success("Dica enviada");
+                  setHintOpen(false);
+                  setSelected(null);
+                  onChange();
+                }
+              }}
+            >
+              Enviar dica
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
