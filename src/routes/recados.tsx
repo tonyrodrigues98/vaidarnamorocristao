@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
@@ -13,6 +13,7 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@
 import { Mail, Sparkles, Heart, Eye, Flag, EyeOff, Unlock, MessageCircle, Send, Lightbulb, Reply, HeartHandshake, Clock } from "lucide-react";
 import { toast } from "sonner";
 import { friendlyError } from "@/lib/errors";
+import { RevealCeremony, type RevealTarget } from "@/components/anonymous/RevealCeremony";
 
 export const Route = createFileRoute("/recados")({
   component: () => (<RequireApproved><RecadosPage /></RequireApproved>),
@@ -60,6 +61,9 @@ function RecadosPage() {
   const [hints, setHints] = useState<Record<string, Hint[]>>({});
   const [hintOptions, setHintOptions] = useState<HintOption[]>([]);
   const [accept, setAccept] = useState(true);
+  const [reveal, setReveal] = useState<RevealTarget | null>(null);
+  const seenRevealed = useRef<Set<string>>(new Set());
+  const initializedRef = useRef(false);
 
   const load = useCallback(async () => {
     if (!user) return;
@@ -74,6 +78,29 @@ function RecadosPage() {
     setOutbox((out ?? []) as OutboxRow[]);
     setHintOptions((opts ?? []) as HintOption[]);
     setAccept(settings?.accept_anonymous ?? true);
+
+    // Detect newly revealed messages (skip the first load to avoid retriggering on refresh)
+    const allRevealed = [...((inb ?? []) as InboxRow[]), ...((out ?? []) as OutboxRow[])]
+      .filter((r: any) => r.status === "revealed" && r.match_id);
+    if (!initializedRef.current) {
+      allRevealed.forEach((r: any) => seenRevealed.current.add(r.id));
+      initializedRef.current = true;
+    } else {
+      const fresh = allRevealed.find((r: any) => !seenRevealed.current.has(r.id));
+      if (fresh) {
+        const otherUserId =
+          (fresh as any).sender_id ?? (fresh as any).receiver_id_revealed ?? null;
+        if (otherUserId) {
+          setReveal({
+            messageId: (fresh as any).id,
+            matchId: (fresh as any).match_id,
+            otherUserId,
+          });
+        }
+        allRevealed.forEach((r: any) => seenRevealed.current.add(r.id));
+      }
+    }
+
     const allIds = [...(inb ?? []), ...(out ?? [])].map((r: any) => r.id);
     if (allIds.length) {
       const { data: h } = await supabase.from("anonymous_message_hints").select("*").in("message_id", allIds);
@@ -103,6 +130,7 @@ function RecadosPage() {
   return (
     <div className="min-h-screen">
       <Header />
+      <RevealCeremony target={reveal} onClose={() => setReveal(null)} />
       <main className="mx-auto max-w-3xl px-4 py-8">
         <div className="mb-6">
           <h1 className="flex items-center gap-2 text-3xl font-semibold">
