@@ -79,6 +79,7 @@ export function Header() {
   const [newsCount, setNewsCount] = useState(0);
   const [devotionalCount, setDevotionalCount] = useState(0);
   const [communityCount, setCommunityCount] = useState(0);
+  const [anonCount, setAnonCount] = useState(0);
   const [open, setOpen] = useState(false);
   const [profile, setProfile] = useState<{
     photo_url: string | null;
@@ -106,6 +107,7 @@ export function Header() {
       setNewsCount(0);
       setDevotionalCount(0);
       setCommunityCount(0);
+      setAnonCount(0);
       return;
     }
     let ignore = false;
@@ -165,11 +167,20 @@ export function Header() {
         .gt("created_at", since);
       if (!ignore) setCommunityCount(count ?? 0);
     };
+    const loadAnon = async () => {
+      const { count } = await supabase
+        .from("anonymous_messages")
+        .select("id", { count: "exact", head: true })
+        .eq("receiver_id", user.id)
+        .in("status", ["pending", "hint_sent", "reveal_requested", "replied"]);
+      if (!ignore) setAnonCount(count ?? 0);
+    };
     loadInterests();
     loadUnread();
     loadNews();
     loadDevotional();
     loadCommunity();
+    loadAnon();
     const ch = supabase
       .channel("hdr-counters")
       .on(
@@ -187,6 +198,11 @@ export function Header() {
         "postgres_changes",
         { event: "*", schema: "public", table: "global_messages" },
         loadCommunity,
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "anonymous_messages", filter: `receiver_id=eq.${user.id}` },
+        loadAnon,
       )
       .subscribe();
     const onSeen = (e: Event) => {
@@ -285,6 +301,13 @@ export function Header() {
                         title="Conversas"
                         desc="Suas mensagens"
                         badge={unreadCount}
+                      />
+                      <MegaItem
+                        to="/recados"
+                        icon={<Sparkles className="h-4 w-4" />}
+                        title="Recados"
+                        desc="Mensagens anônimas"
+                        badge={anonCount}
                       />
                     </div>
                   </DropdownMenuContent>
