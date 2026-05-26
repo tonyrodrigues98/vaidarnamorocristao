@@ -1,110 +1,45 @@
-# Sistema de Recados Anônimos (Mystery Match)
+# Finalizar Recados Anônimos (Mystery Match)
 
-Implementação completa em 4 partes: banco de dados, RPCs, UI de envio/recebimento, e integrações (notificações, perfil, configurações).
+O backend e os componentes-base já existem. Este plano cobre apenas a **integração faltante** no frontend para a feature ficar visível e funcional ponta a ponta.
 
-## 1. Banco de Dados (migração)
+## 1. Perfil do pretendente
+Arquivo: `src/routes/pretendentes/$id.tsx`
+- Importar e renderizar `<SendAnonymousButton receiverId={id} />` no bloco de ações do perfil (próximo dos botões de interesse / mensagem).
+- O próprio componente já trata sexo oposto, opt-out, cooldown, limite diário e recado ativo — não precisa de gate adicional na página.
+- Garantir que funcione também quando o alvo é um moderador que não aparece em `/pretendentes` (acessando direto pela URL do perfil).
 
-### Enum de estado
-```
-anonymous_message_status:
-  pending          -- recém-enviado
-  hint_requested   -- destinatário pediu dica, aguardando remetente
-  hint_sent        -- dica enviada, destinatário pode responder
-  replied          -- destinatário respondeu
-  reveal_requested -- alguém pediu revelação
-  revealed         -- ambos aceitaram → match automático
-  ignored          -- destinatário ignorou (terminal)
-  reported         -- denunciado (terminal)
-  expired          -- 5 dias sem ação (terminal)
-```
+## 2. Header global
+Arquivo: `src/components/layout/Header.tsx`
+- Adicionar item de navegação **“Recados”** (ícone `Sparkles` da lucide-react) apontando para `/recados`, tanto no menu desktop quanto no drawer mobile.
+- Badge com contagem de recados não lidos na caixa de entrada (status `pending`, `hint_sent`, `reveal_requested` direcionados ao usuário atual).
+- Query simples via `supabase.from('anonymous_messages').select('id', { count: 'exact', head: true })` filtrando `receiver_id = auth.uid()` e status relevante.
 
-### Tabelas
+## 3. Realtime e notificações
+Arquivos: `src/lib/useRealtimeNotifications.tsx`, `src/routes/recados.tsx`
+- Subscrever canal Postgres em `anonymous_messages` e `anonymous_message_hints` para atualizar inbox/outbox e o badge do header em tempo real.
+- Inserir linha em `notifications` (via trigger SQL **ou** dentro de cada RPC já existente — preferir trigger para não duplicar lógica) nos eventos:
+  - novo recado recebido
+  - dica solicitada / dica enviada
+  - pedido de revelação
+  - revelação concluída (cria match)
+  - resposta recebida
+- Mapear novos `type` de notificação no `useRealtimeNotifications` para roteamento até `/recados`.
 
-**`anonymous_messages`**
-- id, sender_id, receiver_id, content (≤280)
-- status, created_at, expires_at (+5 dias)
-- reply_text, replied_at
-- sender_reveal_requested_at, receiver_reveal_requested_at
-- revealed_at, match_id (FK opcional)
-- closed_at (para cooldown)
+## 4. Polimento visual (mobile-first 390px)
+Arquivo: `src/styles.css` e componentes em `src/components/anonymous/`
+- Tokens CSS específicos: `--mystery-gradient` (rose → âmbar suave), `--mystery-blur` para o “envelope lacrado”.
+- Keyframe `reveal` (fade + scale + blur out) para a animação no momento em que ambos aceitam se revelar.
+- Revisar `recados.tsx` em 390px: tabs, cards de recado, dialogs sem overflow.
 
-**`anonymous_message_hints`**
-- id, message_id, requested_at, hint_category, hint_text, sent_at
-- max 2 por message_id (validado em trigger)
+## 5. QA no navegador (obrigatório antes de fechar)
+- Conta A (masculino) → enviar recado para conta B (feminino): valida regra de sexo oposto.
+- Conta B recebe, pede dica, A envia dica, B responde, A pede revelação, B aceita → match criado.
+- Conta C com `accept_anonymous = false` → botão aparece como bloqueado com mensagem certa.
+- Tentar enviar 4º recado no dia → bloqueio por `daily_limit`.
+- Revalidar badge do header atualizando em tempo real.
 
-**`anonymous_message_settings`** (opt-out)
-- user_id PK, accept_anonymous bool default true
-
-**`anonymous_message_reports`**
-- id, message_id, reporter_id (= receiver), reason, created_at
-
-### RLS
-- Sender vê seus próprios (apenas se não revealed, e nunca o receiver_id real até revelado — mas como sender sabe a quem mandou, sender vê tudo dele).
-- Receiver vê recados destinados a ele MAS sem sender_id exposto: usamos VIEW `anonymous_messages_for_me` que omite sender_id quando status != 'revealed'.
-- Admins/super_admins veem tudo (denúncias).
-
-### Triggers
-- Bloquear envio se: mesmo sexo, sender não aprovado, receiver opt-out, receiver tem recado ativo do mesmo sender, sender já enviou 3 hoje, sender bloqueado/banido.
-- Validar restricted_words no content/hint/reply.
-- Auto-expirar via função `expire_anonymous_messages()` (chamada por cron ou on-read).
-- Após `revealed`, criar `matches` row, copiar para match_id, notificar ambos.
-
-## 2. RPCs (SECURITY DEFINER)
-
-- `send_anonymous_message(_receiver_id uuid, _content text)` → valida tudo, insere, notifica receiver.
-- `request_hint(_message_id uuid)` → receiver pede dica, status=hint_requested, notifica sender.
-- `send_hint(_message_id uuid, _category text, _text text)` → sender envia uma das dicas permitidas (validar contra lista whitelist de categorias), status=hint_sent.
-- `reply_anonymous_message(_message_id uuid, _reply text)` → receiver responde, status=replied, notifica sender.
-- `request_reveal(_message_id uuid)` → marca sender ou receiver; se ambos marcados → status=revealed, cria match, notifica ambos.
-- `ignore_anonymous_message(_message_id uuid)` → status=ignored, closed_at=now().
-- `report_anonymous_message(_message_id uuid, _reason text)` → status=reported, insere em reports, notifica admins.
-- `get_anonymous_cooldown(_receiver_id uuid)` → retorna segundos restantes (7 dias após closed_at do último encerrado, ou 0).
-- `set_anonymous_optout(_accept bool)` → upsert settings.
-
-### Helpers
-- `can_send_anonymous_to(_sender, _receiver)` → bool + razão (opt-out, cooldown, sexo igual, ativo já existente, limite diário).
-
-## 3. Frontend
-
-### Componentes novos (`src/components/anonymous/`)
-- `SendAnonymousButton.tsx` — botão no perfil do pretendente (e em moderadores/staff também). Mostra cooldown em tempo real se aplicável.
-- `SendAnonymousDialog.tsx` — modal de envio (textarea 280 chars, contador, validação de palavras).
-- `AnonymousInbox.tsx` — caixa de entrada com lista de recados recebidos.
-- `AnonymousOutbox.tsx` — recados enviados (mostra estado, sem revelar receiver até revealed).
-- `AnonymousMessageCard.tsx` — card individual com estados visuais (💌👀✨❤️🔓💞), blur/glow.
-- `HintRequestDialog.tsx` — receiver escolhe categoria de dica.
-- `HintSendDialog.tsx` — sender escolhe uma dica da whitelist (combobox por categoria).
-- `RevealRequestBanner.tsx` — banner com botão "Revelar quem eu sou" + texto explicativo.
-- `RevealAnimation.tsx` — animação de blur→glow→nome+foto.
-
-### Rota nova
-- `src/routes/recados.tsx` — página principal com tabs: Recebidos / Enviados / Configurações (opt-out switch).
-
-### Integrações
-- `src/routes/pretendentes/$id.tsx` — adicionar `<SendAnonymousButton />` (apenas se sexo oposto, aprovado, sem cooldown).
-- Adicionar entrada no Header / menu para "Recados" com badge de não lidos.
-- `src/lib/notifications.tsx` — já lida via realtime; adicionar tipos `anonymous_message`, `anonymous_hint_requested`, `anonymous_hint_sent`, `anonymous_reply`, `anonymous_reveal_requested`, `anonymous_revealed`.
-
-### Realtime
-- Habilitar realtime em `anonymous_messages` e `anonymous_message_hints` para atualização instantânea.
-
-## 4. Design / UX
-
-- Tokens novos em `src/styles.css`: `--mystery-glow`, `--mystery-blur`, gradient suave roxo/dourado para o envelope.
-- Ícones: `Mail`, `MailOpen`, `Sparkles`, `Eye`, `EyeOff`, `Lock`, `Unlock`, `Heart`, `Flag` (lucide-react).
-- Animações: `fade-in`, `scale-in` existentes; nova `reveal` (blur→clear + glow pulse).
-- Mobile-first, sem overflow, contadores, tooltips de cooldown.
-
-## Limites (constantes)
-- MAX_CONTENT = 280
-- MAX_PER_DAY = 3
-- MAX_HINTS = 2
-- EXPIRY_DAYS = 5
-- COOLDOWN_DAYS = 7
-- HINT_CATEGORIES = ['idade','regiao','personalidade','fe','compatibilidade'] com whitelist de frases por categoria.
-
-## Ordem de execução
-1. Migração SQL completa (tabelas + enum + RLS + triggers + RPCs).
-2. Aguardar aprovação do usuário.
-3. Frontend: componentes + rota + integração no perfil + header.
-4. Verificar fluxo no preview.
+## Detalhes técnicos
+- Não alterar o schema do banco (já está completo). Se for necessário trigger de notificação, criar nova migração isolada.
+- Reaproveitar `friendlyError` para todos os erros de RPC.
+- Ícones somente `lucide-react`.
+- Sem cores hex inline — usar tokens semânticos de `src/styles.css`.
