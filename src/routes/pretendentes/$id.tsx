@@ -18,6 +18,7 @@ import { OnlineDot } from "@/components/OnlineDot";
 import { UserBadges } from "@/components/UserBadges";
 import { ProfileAdvancedView } from "@/components/ProfileAdvancedView";
 import { ROLE_PRIORITY, type AppRole, type RoleColor } from "@/lib/roles";
+import { SendAnonymousButton } from "@/components/anonymous/SendAnonymousButton";
 
 type Full = {
   id: string; full_name: string; age: number; height_cm: number | null;
@@ -380,6 +381,10 @@ function Detail() {
                   <Ban className="mr-1 h-4 w-4" /> {blocked ? "Bloqueado" : "Bloquear"}
                 </Button>
               </div>
+
+              {user && user.id !== profile.id && mySex && profile.sex !== mySex && (
+                <SendAnonymousButton receiverId={profile.id} />
+              )}
             </div>
           </div>
         </div>
