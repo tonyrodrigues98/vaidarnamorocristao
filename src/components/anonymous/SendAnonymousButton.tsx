@@ -58,7 +58,7 @@ export function SendAnonymousButton({ receiverId }: Props) {
     });
     setBusy(false);
     if (error) { toast.error(friendlyError(error)); return; }
-    toast.success("Recado anônimo enviado ✨");
+    toast.success("Recado anônimo enviado");
     setOpen(false); setContent(""); setCanSend(false); setReason("active_exists");
   };
 
