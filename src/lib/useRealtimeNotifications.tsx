@@ -42,7 +42,7 @@ export function useRealtimeNotifications() {
             .select("full_name")
             .eq("id", senderId)
             .maybeSingle();
-          toast("✨ + Interesse", {
+          toast("Novo interesse", {
             description: `${prof?.full_name?.split(" ")[0] ?? "Alguém"} demonstrou interesse em você.`,
             action: {
               label: "Ver",
@@ -67,7 +67,7 @@ export function useRealtimeNotifications() {
             .select("full_name")
             .eq("id", v.viewer_id)
             .maybeSingle();
-          toast("👀 Visualizou seu perfil", {
+          toast("Visualizou seu perfil", {
             description: `${prof?.full_name?.split(" ")[0] ?? "Alguém"} acabou de ver seu perfil.`,
             action: {
               label: "Ver dashboard",
@@ -114,7 +114,7 @@ export function useRealtimeNotifications() {
             .select("full_name")
             .eq("id", m.sender_id)
             .maybeSingle();
-          toast("💬 Nova mensagem", {
+          toast("Nova mensagem", {
             description: `${prof?.full_name?.split(" ")[0] ?? "Alguém"}: ${m.content.slice(0, 60)}`,
             action: {
               label: "Abrir",
@@ -150,7 +150,7 @@ export function useRealtimeNotifications() {
             .select("full_name")
             .eq("id", m.sender_id)
             .maybeSingle();
-          toast("🌐 Comunidade", {
+          toast("Comunidade", {
             description: `${prof?.full_name?.split(" ")[0] ?? "Alguém"}: ${m.content.slice(0, 60)}`,
             action: { label: "Abrir", onClick: () => router.navigate({ to: "/comunidade" }) },
           });
@@ -174,7 +174,7 @@ export function useRealtimeNotifications() {
               action: { label: "Detalhes", onClick: () => router.navigate({ to: "/verificacao" }) },
             });
           } else if (n.status === "more_info") {
-            toast("ℹ Mais informações necessárias", {
+            toast("Mais informações necessárias", {
               description: n.admin_notes || "Por favor, envie informações adicionais.",
               action: { label: "Abrir", onClick: () => router.navigate({ to: "/verificacao" }) },
             });
