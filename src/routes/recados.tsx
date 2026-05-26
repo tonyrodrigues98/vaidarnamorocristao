@@ -80,24 +80,28 @@ function RecadosPage() {
     setAccept(settings?.accept_anonymous ?? true);
 
     // Detect newly revealed messages (skip the first load to avoid retriggering on refresh)
-    const allRevealed = [...((inb ?? []) as InboxRow[]), ...((out ?? []) as OutboxRow[])]
-      .filter((r: any) => r.status === "revealed" && r.match_id);
+    const allRevealed = [
+      ...((inb ?? []) as InboxRow[]).map((r: any) => ({ row: r, side: "inbox" as const })),
+      ...((out ?? []) as OutboxRow[]).map((r: any) => ({ row: r, side: "outbox" as const })),
+    ].filter(({ row }) => row.status === "revealed" && row.match_id);
     if (!initializedRef.current) {
-      allRevealed.forEach((r: any) => seenRevealed.current.add(r.id));
+      allRevealed.forEach(({ row }) => seenRevealed.current.add(row.id));
       initializedRef.current = true;
     } else {
-      const fresh = allRevealed.find((r: any) => !seenRevealed.current.has(r.id));
+      const fresh = allRevealed.find(({ row }) => !seenRevealed.current.has(row.id));
       if (fresh) {
         const otherUserId =
-          (fresh as any).sender_id ?? (fresh as any).receiver_id_revealed ?? null;
+          fresh.side === "inbox"
+            ? (fresh.row as any).sender_id
+            : (fresh.row as any).receiver_id_revealed;
         if (otherUserId) {
           setReveal({
-            messageId: (fresh as any).id,
-            matchId: (fresh as any).match_id,
+            messageId: fresh.row.id,
+            matchId: fresh.row.match_id,
             otherUserId,
           });
         }
-        allRevealed.forEach((r: any) => seenRevealed.current.add(r.id));
+        allRevealed.forEach(({ row }) => seenRevealed.current.add(row.id));
       }
     }
 
