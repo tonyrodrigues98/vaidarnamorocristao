@@ -68,16 +68,28 @@ export function DecoratedAvatar({
       style={{ width: size, height: size }}
     >
       {aura?.css_value && (
-        <div
-          aria-hidden
-          className="pointer-events-none absolute rounded-full"
-          style={{
-            inset: `-${Math.round(size * 0.18)}px`,
-            background: `radial-gradient(circle, ${aura.css_value}AA 0%, ${aura.css_value}55 45%, transparent 70%)`,
-            filter: `blur(${Math.max(8, size * 0.12)}px)`,
-            zIndex: 0,
-          }}
-        />
+        <>
+          <div
+            aria-hidden
+            className="pointer-events-none absolute rounded-full"
+            style={{
+              inset: `-${Math.round(size * 0.3)}px`,
+              background: `radial-gradient(circle, ${aura.css_value} 0%, ${aura.css_value}CC 35%, ${aura.css_value}66 60%, transparent 78%)`,
+              filter: `blur(${Math.max(12, size * 0.18)}px)`,
+              zIndex: 0,
+            }}
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute rounded-full"
+            style={{
+              inset: `-${Math.round(size * 0.12)}px`,
+              background: `radial-gradient(circle, ${aura.css_value}EE 0%, ${aura.css_value}88 50%, transparent 75%)`,
+              filter: `blur(${Math.max(6, size * 0.08)}px)`,
+              zIndex: 1,
+            }}
+          />
+        </>
       )}
       <div
         className="relative h-full w-full overflow-hidden rounded-full bg-muted"
@@ -116,10 +128,10 @@ export function DecoratedAvatar({
           aria-hidden
           className="pointer-events-none absolute"
           style={{
-            width: size * 0.42,
-            height: size * 0.42,
-            right: -size * 0.04,
-            bottom: -size * 0.04,
+            width: size * 0.6,
+            height: size * 0.6,
+            right: -size * 0.06,
+            bottom: -size * 0.06,
             zIndex: 30,
             filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.25))",
           }}
