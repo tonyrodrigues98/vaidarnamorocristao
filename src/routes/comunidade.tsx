@@ -48,8 +48,6 @@ function Comunidade() {
   const isStaffViewer = canFlagMessages;
   const [messages, setMessages] = useState<GMsg[]>([]);
   const [profiles, setProfiles] = useState<Record<string, Profile>>({});
-  const [text, setText] = useState("");
-  const [sending, setSending] = useState(false);
   const [approved, setApproved] = useState<boolean | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -61,16 +59,12 @@ function Comunidade() {
   const [staffMap, setStaffMap] = useState<Record<string, { role: AppRole; color: RoleColor | null }>>({});
   const [contribIds, setContribIds] = useState<Set<string>>(new Set());
   const restrictedWords = useRestrictedWords();
-  const [cooldownLeft, setCooldownLeft] = useState(0);
-  const lastSentRef = useRef<number>(0);
   const [warning, setWarning] = useState<string | null>(null);
   const [flaggedIds, setFlaggedIds] = useState<Set<string>>(new Set());
   const [myFlags, setMyFlags] = useState<Record<string, { id: string; reason: string }>>({});
   const [flagDialog, setFlagDialog] = useState<{ msg: GMsg; existingId?: string } | null>(null);
   const [flagReason, setFlagReason] = useState("");
   const [flagBusy, setFlagBusy] = useState(false);
-  const [pickerOpen, setPickerOpen] = useState(false);
-  const [plusOpen, setPlusOpen] = useState(false);
   const [stickerCache, setStickerCache] = useState<Record<string, Sticker>>({});
   const stickerCacheRef = useRef<Record<string, Sticker>>({});
   useEffect(() => { stickerCacheRef.current = stickerCache; }, [stickerCache]);
