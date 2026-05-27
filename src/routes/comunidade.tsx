@@ -8,7 +8,7 @@ import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Send, Trash2, Users, Pencil, Check, X, Reply, MoreHorizontal, Pin, PinOff, ShieldCheck, Flag, HandHeart } from "lucide-react";
+import { Send, Trash2, Users, Pencil, Check, X, Reply, MoreHorizontal, Pin, PinOff, ShieldCheck, Flag, HandHeart, Plus, Sticker as StickerIcon } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { markSeen } from "@/lib/lastSeen";
 import { RoleBadge } from "@/components/RoleBadge";
@@ -20,6 +20,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Textarea } from "@/components/ui/textarea";
 import { OnlineDot } from "@/components/OnlineDot";
 import { UserBadges } from "@/components/UserBadges";
+import { StickerPicker } from "@/components/stickers/StickerPicker";
+import { StickerMessage } from "@/components/stickers/StickerMessage";
+import { fetchStickers, type Sticker } from "@/lib/stickers";
+import { AnimatePresence, motion } from "framer-motion";
 
 const COOLDOWN_MS = 10_000;
 
@@ -31,6 +35,7 @@ type GMsg = {
   edited_at?: string | null;
   reply_to_id?: string | null;
   pinned_at?: string | null;
+  sticker_id?: string | null;
 };
 type Profile = { id: string; full_name: string; photo_url: string | null; verified?: boolean | null; contributor_highlight?: boolean | null };
 
