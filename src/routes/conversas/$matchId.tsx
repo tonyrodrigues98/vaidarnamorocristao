@@ -418,7 +418,7 @@ function BubbleContent({
         mine ? "bg-gradient-love text-white" : "glass text-foreground"
       } ${enableLongPress ? "select-none md:select-text touch-none" : ""} ${
         pressing ? "scale-[0.97] ring-2 ring-primary/40" : ""
-      } ${highlighted ? "ring-2 ring-primary shadow-glow" : ""}`}
+      } ${highlighted ? "ring-2 ring-primary/40" : ""}`}
       style={enableLongPress ? { WebkitUserSelect: "none", WebkitTouchCallout: "none" } : undefined}
     >
       {children}
