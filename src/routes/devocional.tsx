@@ -532,7 +532,8 @@ function Devocional() {
   return (
     <div className="min-h-screen">
       <Header />
-      <main className="mx-auto max-w-3xl px-4 py-8 sm:py-10">
+      <main className="relative mx-auto max-w-3xl px-4 py-8 sm:py-10">
+        <AtmosphereLayer intensity="medium" />
         <header className="animate-fade-up flex items-start gap-3">
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-love shadow-glow">
             <BookHeart className="h-5 w-5 text-white" />
