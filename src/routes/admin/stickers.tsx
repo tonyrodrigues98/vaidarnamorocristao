@@ -270,6 +270,7 @@ function StickersAdmin() {
                 );
               })}
             </ul>
+            </div>
           </aside>
 
           {/* Stickers grid */}
