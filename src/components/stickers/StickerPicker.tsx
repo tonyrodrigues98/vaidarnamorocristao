@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { fetchCategories, fetchStickers, type Sticker, type StickerCategory } from "@/lib/stickers";
 import { Loader2, Smile } from "lucide-react";
-import { CoinIcon } from "@/components/CoinsCard";
+import { CoinIcon } from "@/components/icons/CoinIcon";
 import { COIN_STICKER_COST } from "@/lib/coins";
 
 type Props = {

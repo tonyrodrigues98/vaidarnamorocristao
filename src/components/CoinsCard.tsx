@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Loader2, Sparkles } from "lucide-react";
+import coinIcon from "@/assets/coin.png";
 import coinSound from "@/assets/coin-reward.mp3";
 import {
   claimDailyCoins,
@@ -10,8 +11,6 @@ import {
   timeUntilMidnight,
   type CoinsStatus,
 } from "@/lib/coins";
-import { CoinIcon } from "@/components/icons/CoinIcon";
-export { CoinIcon };
 
 export function CoinsCard() {
   const [status, setStatus] = useState<CoinsStatus | null>(null);
@@ -103,7 +102,7 @@ export function CoinsCard() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <CoinIcon className={`h-9 w-9 drop-shadow ${pulse ? "animate-bounce" : ""}`} />
+          <img src={coinIcon} alt="moeda" className={`h-9 w-9 drop-shadow ${pulse ? "animate-bounce" : ""}`} />
           <span
             className={`text-4xl font-bold tabular-nums tracking-tight ${pulse ? "animate-scale-in text-amber-500" : ""}`}
           >
