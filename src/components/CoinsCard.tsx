@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Loader2, Sparkles } from "lucide-react";
+import coinIcon from "@/assets/coin.png";
 import coinSound from "@/assets/coin-reward.mp3";
 import {
   claimDailyCoins,
@@ -10,8 +11,6 @@ import {
   timeUntilMidnight,
   type CoinsStatus,
 } from "@/lib/coins";
-import { CoinIcon } from "@/components/icons/CoinIcon";
-export { CoinIcon };
 
 export function CoinsCard() {
   const [status, setStatus] = useState<CoinsStatus | null>(null);
