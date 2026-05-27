@@ -26,6 +26,9 @@ const TYPE_LABEL: Record<DecorationType, string> = {
   sticker: "Sticker",
 };
 
+// Stickers temporariamente desativados na UI até definirmos um novo design.
+const VISIBLE_TYPES: DecorationType[] = ["frame", "aura"];
+
 export function DecorationsCard({
   photoUrl,
   onChange,
@@ -92,7 +95,9 @@ export function DecorationsCard({
 
   const grouped = useMemo(() => {
     const g: Record<DecorationType, Decoration[]> = { frame: [], aura: [], sticker: [] };
-    catalog.forEach((d) => g[d.type].push(d));
+    catalog.forEach((d) => {
+      if (VISIBLE_TYPES.includes(d.type)) g[d.type].push(d);
+    });
     return g;
   }, [catalog]);
 
@@ -264,7 +269,7 @@ export function DecorationsCard({
             <Sparkles className="h-4 w-4 text-[var(--rose)]" /> Decorações de Perfil
           </h3>
           <p className="text-xs text-muted-foreground">
-            Personalize sua foto com molduras, auras e stickers. Salva automaticamente.
+            Personalize sua foto com molduras e auras. Salva automaticamente.
           </p>
         </div>
         <div className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1.5 text-sm font-semibold text-amber-700">
@@ -282,9 +287,8 @@ export function DecorationsCard({
           size={140}
           frameId={preview.frame ?? equipped.frame}
           auraId={preview.aura ?? equipped.aura}
-          stickerId={preview.sticker ?? equipped.sticker}
         />
-        {(preview.frame || preview.aura || preview.sticker) && (
+        {(preview.frame || preview.aura) && (
           <Button
             variant="ghost"
             size="sm"
@@ -300,17 +304,15 @@ export function DecorationsCard({
       </div>
 
       <Tabs
-        value={activeTab}
+        value={activeTab === "sticker" ? "frame" : activeTab}
         onValueChange={(v) => setActiveTab(v as DecorationType)}
       >
         <TabsList className="w-full">
           <TabsTrigger value="frame" className="flex-1">Moldura</TabsTrigger>
           <TabsTrigger value="aura" className="flex-1">Aura</TabsTrigger>
-          <TabsTrigger value="sticker" className="flex-1">Sticker</TabsTrigger>
         </TabsList>
         <TabsContent value="frame" className="mt-4">{renderItems("frame")}</TabsContent>
         <TabsContent value="aura" className="mt-4">{renderItems("aura")}</TabsContent>
-        <TabsContent value="sticker" className="mt-4">{renderItems("sticker")}</TabsContent>
       </Tabs>
     </section>
   );

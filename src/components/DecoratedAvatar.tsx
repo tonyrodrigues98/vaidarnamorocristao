@@ -2,6 +2,18 @@ import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { fetchDecorationCatalog, assetFor, type Decoration } from "@/lib/decorations";
 
+// Fração do canvas (1024) ocupada pelo "buraco" interno de cada moldura.
+// Usada para escalar a imagem da moldura de forma que o círculo interno
+// se alinhe exatamente ao círculo da foto.
+const FRAME_INNER_RATIO: Record<string, number> = {
+  "frame-alianca-ouro.png": 0.78,
+  "frame-coroa-espinhos.png": 0.62,
+  "frame-louros-dourados.png": 0.55,
+  "frame-floral-rosa.png": 0.55,
+  "frame-vitral-sagrado.png": 0.55,
+};
+const DEFAULT_FRAME_INNER_RATIO = 0.6;
+
 export type DecoratedAvatarProps = {
   photoUrl?: string | null;
   fallback?: string;
@@ -34,10 +46,12 @@ export function DecoratedAvatar({
   className,
   frameId,
   auraId,
-  stickerId,
+  // stickerId mantido na API para compatibilidade, mas não é renderizado por enquanto.
+  stickerId: _stickerId,
   alt = "",
 }: DecoratedAvatarProps) {
-  const hasAny = !!(frameId || auraId || stickerId);
+  void _stickerId;
+  const hasAny = !!(frameId || auraId);
   const [catalog, setCatalog] = useState<Decoration[] | null>(cachedCatalog);
 
   useEffect(() => {
@@ -58,7 +72,6 @@ export function DecoratedAvatar({
     id && catalog ? catalog.find((d) => d.id === id) ?? null : null;
   const frame = find(frameId);
   const aura = find(auraId);
-  const sticker = find(stickerId);
 
   const initial = fallback ?? "?";
 
@@ -106,37 +119,28 @@ export function DecoratedAvatar({
           </div>
         )}
       </div>
-      {frame && assetFor(frame) && (
-        <img
-          src={assetFor(frame)!}
-          alt=""
-          aria-hidden
-          className="pointer-events-none absolute"
-          style={{
-            top: `-${Math.round(size * 0.1)}px`,
-            left: `-${Math.round(size * 0.1)}px`,
-            width: size * 1.2,
-            height: size * 1.2,
-            zIndex: 20,
-          }}
-        />
-      )}
-      {sticker && assetFor(sticker) && (
-        <img
-          src={assetFor(sticker)!}
-          alt=""
-          aria-hidden
-          className="pointer-events-none absolute"
-          style={{
-            width: size * 0.75,
-            height: size * 0.75,
-            right: -size * 0.075,
-            bottom: -size * 0.075,
-            zIndex: 30,
-            filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.25))",
-          }}
-        />
-      )}
+      {frame && assetFor(frame) && (() => {
+        const ratio =
+          (frame.image_url && FRAME_INNER_RATIO[frame.image_url]) ||
+          DEFAULT_FRAME_INNER_RATIO;
+        const frameSize = size / ratio;
+        const offset = (size - frameSize) / 2;
+        return (
+          <img
+            src={assetFor(frame)!}
+            alt=""
+            aria-hidden
+            className="pointer-events-none absolute"
+            style={{
+              top: offset,
+              left: offset,
+              width: frameSize,
+              height: frameSize,
+              zIndex: 20,
+            }}
+          />
+        );
+      })()}
     </div>
   );
 }
