@@ -42,7 +42,11 @@ export function DecoratedAvatar({
 
   useEffect(() => {
     if (!hasAny || catalog) return;
-    ensureCatalog();
+    const sync = ensureCatalog();
+    if (sync) {
+      setCatalog(sync);
+      return;
+    }
     const handler = (c: Decoration[]) => setCatalog(c);
     listeners.add(handler);
     return () => {
