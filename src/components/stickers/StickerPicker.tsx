@@ -4,6 +4,8 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { fetchCategories, fetchStickers, type Sticker, type StickerCategory } from "@/lib/stickers";
 import { Loader2, Smile } from "lucide-react";
+import { CoinIcon } from "@/components/CoinsCard";
+import { COIN_STICKER_COST } from "@/lib/coins";
 
 type Props = {
   open: boolean;
@@ -77,6 +79,10 @@ export function StickerPicker({ open, onClose, onPick }: Props) {
                   draggable={false}
                   className="h-full w-full object-contain"
                 />
+                <span className="pointer-events-none absolute bottom-1 left-1/2 flex -translate-x-1/2 items-center gap-0.5 rounded-full bg-black/60 px-1.5 py-0.5 text-[10px] font-semibold text-amber-200 shadow-sm backdrop-blur-sm">
+                  <CoinIcon className="h-3 w-3" />
+                  {COIN_STICKER_COST}
+                </span>
               </button>
             ))}
           </div>

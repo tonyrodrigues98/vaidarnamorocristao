@@ -24,6 +24,7 @@ import { Switch } from "@/components/ui/switch";
 import { ROLE_CONFIG, COLOR_HEX, type RoleColor } from "@/lib/roles";
 import { RoleBadge } from "@/components/RoleBadge";
 import { MissionsPanel } from "@/components/MissionsPanel";
+import { CoinsCard } from "@/components/CoinsCard";
 import { recomputeMyBadges } from "@/lib/recomputeBadges";
 import { ProfileAdvancedForm } from "@/components/ProfileAdvancedForm";
 import { ProfilePhotosManager } from "@/components/ProfilePhotosManager";
@@ -714,6 +715,9 @@ function PerfilPage() {
 
           <TabsContent value="missions" className="mt-6">
             {/* placeholder anchor */}
+            <div className="mb-4">
+              <CoinsCard />
+            </div>
             {user && <MissionsPanel userId={user.id} />}
             {hasContributorBadge && (
               <div className="glass mt-4 flex items-center justify-between rounded-2xl p-4 shadow-soft sm:p-5">

@@ -24,6 +24,7 @@ import { StickerPicker } from "@/components/stickers/StickerPicker";
 import { StickerMessage } from "@/components/stickers/StickerMessage";
 import { fetchStickers, type Sticker } from "@/lib/stickers";
 import { AnimatePresence, motion } from "framer-motion";
+import { spendCoin } from "@/lib/coins";
 
 const COOLDOWN_MS = 10_000;
 
@@ -274,6 +275,23 @@ function Comunidade() {
 
   const sendSticker = useCallback(async (s: Sticker): Promise<boolean> => {
     if (!user) return false;
+    // Cobrar 1 moeda antes do envio
+    try {
+      await spendCoin(1);
+    } catch (e: unknown) {
+      const msg = (e as { message?: string })?.message ?? "";
+      if (msg.includes("insufficient_coins")) {
+        toast.error("Você não possui moedas suficientes.", {
+          action: {
+            label: "Ir para Conquistas",
+            onClick: () => { window.location.href = "/perfil?tab=missions"; },
+          },
+        });
+      } else {
+        toast.error("Não foi possível enviar o sticker.");
+      }
+      return false;
+    }
     const { error } = await supabase.from("global_messages").insert({
       sender_id: user.id,
       content: "",
