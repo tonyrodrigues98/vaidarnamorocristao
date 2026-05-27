@@ -177,7 +177,7 @@ export function StickersChatBanner() {
                 left: s.left,
                 width: s.size,
                 height: s.size,
-                transform: `rotate(${s.rotate}deg)`,
+                ["--r" as never]: `${s.rotate}deg`,
                 animation: `sticker-float ${s.duration}s ease-in-out ${s.delay}s infinite`,
                 zIndex: s.z,
                 filter: "drop-shadow(0 8px 16px rgba(120,80,160,0.18))",
@@ -196,7 +196,7 @@ export function StickersChatBanner() {
                   top: SLOTS[i].top,
                   left: SLOTS[i].left,
                   fontSize: SLOTS[i].size,
-                  transform: `rotate(${SLOTS[i].rotate}deg)`,
+                  ["--r" as never]: `${SLOTS[i].rotate}deg`,
                   animation: `sticker-float ${SLOTS[i].duration}s ease-in-out ${SLOTS[i].delay}s infinite`,
                   filter: "drop-shadow(0 8px 16px rgba(120,80,160,0.18))",
                 }}
