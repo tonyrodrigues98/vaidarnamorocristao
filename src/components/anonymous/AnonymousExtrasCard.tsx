@@ -115,9 +115,9 @@ export function AnonymousExtrasCard() {
             size="sm"
             onClick={() => setOpen(true)}
             disabled={insufficient}
-            className="bg-[var(--rose)] text-white hover:bg-[var(--rose)]/90"
+            className="justify-center bg-[var(--rose)] text-white hover:bg-[var(--rose)]/90"
           >
-            <Plus className="mr-1 h-4 w-4" /> Comprar +1 recado extra
+            <Plus className="mr-1 h-4 w-4" /> +1 Recado Anônimo
           </Button>
         </div>
         {insufficient && (
