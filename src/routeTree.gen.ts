@@ -47,6 +47,7 @@ import { Route as AuthLoginRouteImport } from './routes/auth/login'
 import { Route as AuthForgotPasswordRouteImport } from './routes/auth/forgot-password'
 import { Route as ApiVerifyPhotoRouteImport } from './routes/api/verify-photo'
 import { Route as AdminVerificacoesRouteImport } from './routes/admin/verificacoes'
+import { Route as AdminStickersRouteImport } from './routes/admin/stickers'
 import { Route as AdminFotosRouteImport } from './routes/admin/fotos'
 
 const VerificacaoRoute = VerificacaoRouteImport.update({
@@ -239,6 +240,11 @@ const AdminVerificacoesRoute = AdminVerificacoesRouteImport.update({
   path: '/admin/verificacoes',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminStickersRoute = AdminStickersRouteImport.update({
+  id: '/admin/stickers',
+  path: '/admin/stickers',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminFotosRoute = AdminFotosRouteImport.update({
   id: '/admin/fotos',
   path: '/admin/fotos',
@@ -266,6 +272,7 @@ export interface FileRoutesByFullPath {
   '/termos': typeof TermosRoute
   '/verificacao': typeof VerificacaoRoute
   '/admin/fotos': typeof AdminFotosRoute
+  '/admin/stickers': typeof AdminStickersRoute
   '/admin/verificacoes': typeof AdminVerificacoesRoute
   '/api/verify-photo': typeof ApiVerifyPhotoRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
@@ -307,6 +314,7 @@ export interface FileRoutesByTo {
   '/termos': typeof TermosRoute
   '/verificacao': typeof VerificacaoRoute
   '/admin/fotos': typeof AdminFotosRoute
+  '/admin/stickers': typeof AdminStickersRoute
   '/admin/verificacoes': typeof AdminVerificacoesRoute
   '/api/verify-photo': typeof ApiVerifyPhotoRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
@@ -349,6 +357,7 @@ export interface FileRoutesById {
   '/termos': typeof TermosRoute
   '/verificacao': typeof VerificacaoRoute
   '/admin/fotos': typeof AdminFotosRoute
+  '/admin/stickers': typeof AdminStickersRoute
   '/admin/verificacoes': typeof AdminVerificacoesRoute
   '/api/verify-photo': typeof ApiVerifyPhotoRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
@@ -392,6 +401,7 @@ export interface FileRouteTypes {
     | '/termos'
     | '/verificacao'
     | '/admin/fotos'
+    | '/admin/stickers'
     | '/admin/verificacoes'
     | '/api/verify-photo'
     | '/auth/forgot-password'
@@ -433,6 +443,7 @@ export interface FileRouteTypes {
     | '/termos'
     | '/verificacao'
     | '/admin/fotos'
+    | '/admin/stickers'
     | '/admin/verificacoes'
     | '/api/verify-photo'
     | '/auth/forgot-password'
@@ -474,6 +485,7 @@ export interface FileRouteTypes {
     | '/termos'
     | '/verificacao'
     | '/admin/fotos'
+    | '/admin/stickers'
     | '/admin/verificacoes'
     | '/api/verify-photo'
     | '/auth/forgot-password'
@@ -516,6 +528,7 @@ export interface RootRouteChildren {
   TermosRoute: typeof TermosRoute
   VerificacaoRoute: typeof VerificacaoRoute
   AdminFotosRoute: typeof AdminFotosRoute
+  AdminStickersRoute: typeof AdminStickersRoute
   AdminVerificacoesRoute: typeof AdminVerificacoesRoute
   ApiVerifyPhotoRoute: typeof ApiVerifyPhotoRoute
   AuthForgotPasswordRoute: typeof AuthForgotPasswordRoute
@@ -805,6 +818,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminVerificacoesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/stickers': {
+      id: '/admin/stickers'
+      path: '/admin/stickers'
+      fullPath: '/admin/stickers'
+      preLoaderRoute: typeof AdminStickersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/fotos': {
       id: '/admin/fotos'
       path: '/admin/fotos'
@@ -836,6 +856,7 @@ const rootRouteChildren: RootRouteChildren = {
   TermosRoute: TermosRoute,
   VerificacaoRoute: VerificacaoRoute,
   AdminFotosRoute: AdminFotosRoute,
+  AdminStickersRoute: AdminStickersRoute,
   AdminVerificacoesRoute: AdminVerificacoesRoute,
   ApiVerifyPhotoRoute: ApiVerifyPhotoRoute,
   AuthForgotPasswordRoute: AuthForgotPasswordRoute,
