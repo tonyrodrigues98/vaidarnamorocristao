@@ -40,6 +40,12 @@ export function DecorationsCard({
   const [balance, setBalance] = useState(0);
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [preview, setPreview] = useState<{ frame: string | null; aura: string | null; sticker: string | null }>({
+    frame: null,
+    aura: null,
+    sticker: null,
+  });
+  const [activeTab, setActiveTab] = useState<DecorationType>("frame");
 
   useEffect(() => {
     if (!user) return;
@@ -156,6 +162,7 @@ export function DecorationsCard({
           const isOwned = owned.has(d.id);
           const isEquipped = equipped[type] === d.id;
           const busy = busyId === d.id;
+          const isPreviewing = preview[type] === d.id;
           const previewProps = {
             photoUrl,
             fallback: user?.email?.[0]?.toUpperCase() ?? "?",
@@ -168,8 +175,15 @@ export function DecorationsCard({
           return (
             <div
               key={d.id}
-              className={`rounded-xl border bg-card p-3 text-center transition ${
-                isEquipped ? "border-[var(--rose)] shadow-soft" : "hover:border-[var(--rose-soft)]"
+              onClick={() =>
+                setPreview((p) => ({ ...p, [type]: p[type] === d.id ? null : d.id }))
+              }
+              className={`cursor-pointer rounded-xl border bg-card p-3 text-center transition ${
+                isPreviewing
+                  ? "border-[var(--rose)] ring-2 ring-[var(--rose)]/40 shadow-soft"
+                  : isEquipped
+                    ? "border-[var(--rose)] shadow-soft"
+                    : "hover:border-[var(--rose-soft)]"
               }`}
             >
               <div className="mx-auto mb-2 flex h-20 w-20 items-center justify-center">
@@ -178,7 +192,7 @@ export function DecorationsCard({
               <p className="truncate text-xs font-medium" title={d.name}>
                 {d.name}
               </p>
-              <div className="mt-2">
+              <div className="mt-2" onClick={(e) => e.stopPropagation()}>
                 {isEquipped ? (
                   <Button
                     variant="outline"
@@ -258,7 +272,37 @@ export function DecorationsCard({
         </div>
       </div>
 
-      <Tabs defaultValue="frame">
+      <div className="mb-5 flex flex-col items-center gap-2 rounded-xl border border-dashed bg-background/60 p-4">
+        <p className="text-xs uppercase tracking-wide text-muted-foreground">
+          Pré-visualização
+        </p>
+        <DecoratedAvatar
+          photoUrl={photoUrl}
+          fallback={user?.email?.[0]?.toUpperCase() ?? "?"}
+          size={140}
+          frameId={preview.frame ?? equipped.frame}
+          auraId={preview.aura ?? equipped.aura}
+          stickerId={preview.sticker ?? equipped.sticker}
+        />
+        {(preview.frame || preview.aura || preview.sticker) && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-xs text-muted-foreground"
+            onClick={() => setPreview({ frame: null, aura: null, sticker: null })}
+          >
+            <X className="mr-1 h-3 w-3" /> Limpar pré-visualização
+          </Button>
+        )}
+        <p className="text-[11px] text-muted-foreground">
+          Toque em um item para visualizar. Use "Comprar" ou "Usar" para aplicar.
+        </p>
+      </div>
+
+      <Tabs
+        value={activeTab}
+        onValueChange={(v) => setActiveTab(v as DecorationType)}
+      >
         <TabsList className="w-full">
           <TabsTrigger value="frame" className="flex-1">Moldura</TabsTrigger>
           <TabsTrigger value="aura" className="flex-1">Aura</TabsTrigger>
