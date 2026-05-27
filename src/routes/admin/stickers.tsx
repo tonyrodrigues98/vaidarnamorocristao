@@ -300,13 +300,10 @@ function StickersAdmin() {
             ) : (
               <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6">
                 {filtered.map((s) => (
-                  <motion.div
+                  <div
                     key={s.id}
-                    layout
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
                     draggable
-                    onDragStart={(e: React.DragEvent<HTMLDivElement>) => {
+                    onDragStart={(e) => {
                       setDraggingId(s.id);
                       e.dataTransfer.effectAllowed = "move";
                       e.dataTransfer.setData("text/sticker-id", s.id);
@@ -348,7 +345,7 @@ function StickersAdmin() {
                         <Trash2 className="h-3.5 w-3.5" />
                       </button>
                     </div>
-                  </motion.div>
+                  </div>
                 ))}
               </div>
             )}
