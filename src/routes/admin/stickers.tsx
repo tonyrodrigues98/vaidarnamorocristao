@@ -180,7 +180,8 @@ function StickersAdmin() {
 
         <div className="grid gap-6 md:grid-cols-[260px_1fr]">
           {/* Categories */}
-          <aside className="space-y-3 rounded-2xl border border-border bg-card/40 p-3 md:sticky md:top-20 md:self-start md:max-h-[calc(100vh-6rem)] md:overflow-y-auto">
+          <aside className="rounded-2xl border border-border bg-card/40 p-3 md:sticky md:top-4 md:h-[calc(100vh-2rem)] md:overflow-y-auto">
+            <div className="space-y-3">
             <div className="flex gap-2">
               <Input
                 placeholder="Nova categoria"
@@ -269,6 +270,7 @@ function StickersAdmin() {
                 );
               })}
             </ul>
+            </div>
           </aside>
 
           {/* Stickers grid */}
