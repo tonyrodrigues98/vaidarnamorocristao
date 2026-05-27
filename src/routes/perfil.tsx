@@ -714,6 +714,9 @@ function PerfilPage() {
 
           <TabsContent value="missions" className="mt-6">
             {/* placeholder anchor */}
+            <div className="mb-4">
+              <CoinsCard />
+            </div>
             {user && <MissionsPanel userId={user.id} />}
             {hasContributorBadge && (
               <div className="glass mt-4 flex items-center justify-between rounded-2xl p-4 shadow-soft sm:p-5">
