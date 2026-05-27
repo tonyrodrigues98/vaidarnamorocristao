@@ -2,18 +2,17 @@ import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { fetchDecorationCatalog, assetFor, type Decoration } from "@/lib/decorations";
 
-// Fração do canvas (1024) ocupada pelo "buraco" interno de cada moldura.
-// Usada para escalar a imagem da moldura de forma que o círculo interno
-// se alinhe exatamente ao círculo da foto.
-// Valores medidos diretamente dos PNGs (diâmetro do furo interno / largura do canvas).
-const FRAME_INNER_RATIO: Record<string, number> = {
-  "frame-alianca-ouro.png": 0.57,
-  "frame-coroa-espinhos.png": 0.58,
-  "frame-louros-dourados.png": 0.5,
-  "frame-floral-rosa.png": 0.36,
-  "frame-vitral-sagrado.png": 0.48,
+// O `size` do componente é o canvas final da decoração. A foto é posicionada
+// dentro do vão visual de cada PNG, evitando que a moldura estoure para fora
+// do componente ou pareça deslocada nas miniaturas.
+const FRAME_PLACEMENT: Record<string, { photoScale: number; centerX?: number; centerY?: number }> = {
+  "frame-alianca-ouro.png": { photoScale: 0.57, centerY: 0.498 },
+  "frame-coroa-espinhos.png": { photoScale: 0.58, centerX: 0.504, centerY: 0.49 },
+  "frame-louros-dourados.png": { photoScale: 0.5, centerX: 0.5, centerY: 0.51 },
+  "frame-floral-rosa.png": { photoScale: 0.38, centerX: 0.501, centerY: 0.506 },
+  "frame-vitral-sagrado.png": { photoScale: 0.48, centerX: 0.496, centerY: 0.478 },
 };
-const DEFAULT_FRAME_INNER_RATIO = 0.55;
+const DEFAULT_FRAME_PLACEMENT = { photoScale: 0.56, centerX: 0.5, centerY: 0.5 };
 
 export type DecoratedAvatarProps = {
   photoUrl?: string | null;
@@ -75,6 +74,13 @@ export function DecoratedAvatar({
   const aura = find(auraId);
 
   const initial = fallback ?? "?";
+  const frameAsset = frame ? assetFor(frame) : null;
+  const placement = frame?.image_url
+    ? FRAME_PLACEMENT[frame.image_url] ?? DEFAULT_FRAME_PLACEMENT
+    : DEFAULT_FRAME_PLACEMENT;
+  const photoSize = frameAsset ? size * placement.photoScale : size;
+  const photoCenterX = size * (placement.centerX ?? 0.5);
+  const photoCenterY = size * (placement.centerY ?? 0.5);
 
   return (
     <div
@@ -106,8 +112,14 @@ export function DecoratedAvatar({
         </>
       )}
       <div
-        className="relative h-full w-full overflow-hidden rounded-full bg-muted"
-        style={{ zIndex: 10 }}
+        className="absolute overflow-hidden rounded-full bg-muted"
+        style={{
+          top: photoCenterY - photoSize / 2,
+          left: photoCenterX - photoSize / 2,
+          width: photoSize,
+          height: photoSize,
+          zIndex: 10,
+        }}
       >
         {photoUrl ? (
           <img src={photoUrl} alt={alt} className="h-full w-full object-cover" loading="lazy" />
@@ -120,28 +132,15 @@ export function DecoratedAvatar({
           </div>
         )}
       </div>
-      {frame && assetFor(frame) && (() => {
-        const ratio =
-          (frame.image_url && FRAME_INNER_RATIO[frame.image_url]) ||
-          DEFAULT_FRAME_INNER_RATIO;
-        const frameSize = size / ratio;
-        const offset = (size - frameSize) / 2;
-        return (
-          <img
-            src={assetFor(frame)!}
-            alt=""
-            aria-hidden
-            className="pointer-events-none absolute"
-            style={{
-              top: offset,
-              left: offset,
-              width: frameSize,
-              height: frameSize,
-              zIndex: 20,
-            }}
-          />
-        );
-      })()}
+      {frameAsset && (
+        <img
+          src={frameAsset}
+          alt=""
+          aria-hidden
+          className="pointer-events-none absolute inset-0 h-full w-full object-contain"
+          style={{ zIndex: 20 }}
+        />
+      )}
     </div>
   );
 }
