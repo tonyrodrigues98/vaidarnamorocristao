@@ -93,28 +93,16 @@ export function DecoratedAvatar({
       style={{ width: canvas, height: canvas }}
     >
       {aura?.css_value && (
-        <>
-          <div
-            aria-hidden
-            className="pointer-events-none absolute rounded-full"
-            style={{
-              inset: `-${Math.round(canvas * 0.3)}px`,
-              background: `radial-gradient(circle, ${aura.css_value} 0%, ${aura.css_value}CC 35%, ${aura.css_value}66 60%, transparent 78%)`,
-              filter: `blur(${Math.max(12, canvas * 0.18)}px)`,
-              zIndex: 0,
-            }}
-          />
-          <div
-            aria-hidden
-            className="pointer-events-none absolute rounded-full"
-            style={{
-              inset: `-${Math.round(canvas * 0.12)}px`,
-              background: `radial-gradient(circle, ${aura.css_value}EE 0%, ${aura.css_value}88 50%, transparent 75%)`,
-              filter: `blur(${Math.max(6, canvas * 0.08)}px)`,
-              zIndex: 1,
-            }}
-          />
-        </>
+        <div
+          aria-hidden
+          className="pointer-events-none absolute rounded-full"
+          style={{
+            inset: `-${Math.round(canvas * 0.1)}px`,
+            background: `radial-gradient(circle, ${aura.css_value}66 0%, ${aura.css_value}33 45%, transparent 72%)`,
+            filter: `blur(${Math.max(6, canvas * 0.09)}px)`,
+            zIndex: 0,
+          }}
+        />
       )}
       <div
         className="absolute overflow-hidden rounded-full bg-muted"
