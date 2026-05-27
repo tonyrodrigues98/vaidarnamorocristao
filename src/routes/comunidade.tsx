@@ -812,3 +812,158 @@ function ActionRow({
     </button>
   );
 }
+
+const ChatComposer = memo(function ChatComposer({
+  approved,
+  replyTo,
+  replyToName,
+  replyToStickerUrl,
+  onCancelReply,
+  onSend,
+  onSendSticker,
+}: {
+  approved: boolean;
+  replyTo: GMsg | null;
+  replyToName: string;
+  replyToStickerUrl: string | null;
+  onCancelReply: () => void;
+  onSend: (content: string) => Promise<boolean>;
+  onSendSticker: (s: Sticker) => Promise<boolean>;
+}) {
+  const [text, setText] = useState("");
+  const [sending, setSending] = useState(false);
+  const [cooldownLeft, setCooldownLeft] = useState(0);
+  const [plusOpen, setPlusOpen] = useState(false);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const lastSentRef = useRef<number>(0);
+
+  useEffect(() => {
+    if (cooldownLeft <= 0) return;
+    const t = setInterval(() => {
+      const remaining = Math.max(0, COOLDOWN_MS - (Date.now() - lastSentRef.current));
+      setCooldownLeft(remaining);
+      if (remaining <= 0) clearInterval(t);
+    }, 250);
+    return () => clearInterval(t);
+  }, [cooldownLeft]);
+
+  async function handleSubmit(e: FormEvent) {
+    e.preventDefault();
+    const content = text.trim();
+    if (!content) return;
+    const since = Date.now() - lastSentRef.current;
+    if (since < COOLDOWN_MS) {
+      toast.error(`Aguarde ${Math.ceil((COOLDOWN_MS - since) / 1000)}s para enviar outra mensagem`);
+      return;
+    }
+    setSending(true);
+    const ok = await onSend(content);
+    setSending(false);
+    if (ok) {
+      setText("");
+      lastSentRef.current = Date.now();
+      setCooldownLeft(COOLDOWN_MS);
+    }
+  }
+
+  async function handleSticker(s: Sticker) {
+    const since = Date.now() - lastSentRef.current;
+    if (since < COOLDOWN_MS) {
+      toast.error(`Aguarde ${Math.ceil((COOLDOWN_MS - since) / 1000)}s para enviar outro sticker`);
+      return;
+    }
+    const ok = await onSendSticker(s);
+    if (ok) {
+      lastSentRef.current = Date.now();
+      setCooldownLeft(COOLDOWN_MS);
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="flex flex-col gap-2 border-t border-border bg-background/60 p-3">
+      {replyTo && (
+        <div className="flex items-stretch gap-2 rounded-lg border border-border bg-muted/40 px-3 py-2">
+          <span className="w-1 shrink-0 rounded bg-primary" />
+          <div className="min-w-0 flex-1">
+            <p className="text-xs font-semibold text-primary">Respondendo a {replyToName}</p>
+            {replyToStickerUrl ? (
+              <p className="text-xs text-muted-foreground">Sticker</p>
+            ) : (
+              <p className="line-clamp-1 text-xs text-muted-foreground">{replyTo.content}</p>
+            )}
+          </div>
+          {replyToStickerUrl && (
+            <img
+              src={replyToStickerUrl}
+              alt=""
+              className="h-10 w-10 shrink-0 select-none object-contain"
+              draggable={false}
+            />
+          )}
+          <button
+            type="button"
+            onClick={onCancelReply}
+            className="rounded-full p-1 text-muted-foreground hover:text-foreground"
+            aria-label="Cancelar resposta"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
+      <div className="relative flex items-center gap-2">
+        <div className="relative">
+          <button
+            type="button"
+            onClick={() => setPlusOpen((v) => !v)}
+            disabled={!approved}
+            aria-label="Mais opções de envio"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-muted/40 text-muted-foreground transition hover:bg-accent hover:text-foreground disabled:opacity-50"
+          >
+            <motion.span animate={{ rotate: plusOpen ? 45 : 0 }} transition={{ type: "spring", stiffness: 380, damping: 22 }}>
+              <Plus className="h-4 w-4" />
+            </motion.span>
+          </button>
+          <AnimatePresence>
+            {plusOpen && (
+              <>
+                <div className="fixed inset-0 z-30" onClick={() => setPlusOpen(false)} />
+                <motion.div
+                  initial={{ opacity: 0, y: 6, scale: 0.94 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 6, scale: 0.94 }}
+                  transition={{ type: "spring", stiffness: 380, damping: 28 }}
+                  className="absolute bottom-full left-0 z-40 mb-2 min-w-[160px] overflow-hidden rounded-xl border border-border bg-background/95 p-1 shadow-xl backdrop-blur"
+                >
+                  <button
+                    type="button"
+                    onClick={() => { setPlusOpen(false); setPickerOpen(true); }}
+                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm transition hover:bg-accent"
+                  >
+                    <StickerIcon className="h-4 w-4 text-primary" />
+                    Sticker
+                  </button>
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>
+          <StickerPicker open={pickerOpen} onClose={() => setPickerOpen(false)} onPick={handleSticker} />
+        </div>
+        <Input
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          placeholder={!approved ? "Aguardando aprovação para enviar mensagens" : "Escreva uma mensagem para a comunidade..."}
+          maxLength={2000}
+          disabled={!approved || sending}
+          className="flex-1"
+        />
+        <Button type="submit" disabled={!approved || sending || !text.trim() || cooldownLeft > 0} size="icon" className="rounded-full">
+          {cooldownLeft > 0 ? (
+            <span className="text-[10px] font-semibold">{Math.ceil(cooldownLeft / 1000)}s</span>
+          ) : (
+            <Send className="h-4 w-4" />
+          )}
+        </Button>
+      </div>
+    </form>
+  );
+});
