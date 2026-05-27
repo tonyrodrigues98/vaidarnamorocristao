@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { fetchCategories, fetchStickers, type Sticker, type StickerCategory } from "@/lib/stickers";
 import { Loader2, Smile } from "lucide-react";
 import { CoinIcon } from "@/components/CoinsCard";
@@ -93,14 +92,37 @@ export function StickerPicker({ open, onClose, onPick }: Props) {
 
   if (isMobile) {
     return (
-      <Drawer open={open} onOpenChange={(o) => !o && onClose()}>
-        <DrawerContent className="h-[70vh]">
-          <DrawerHeader className="pb-1">
-            <DrawerTitle className="text-base">Stickers</DrawerTitle>
-          </DrawerHeader>
-          <div className="min-h-0 flex-1">{content}</div>
-        </DrawerContent>
-      </Drawer>
+      <AnimatePresence>
+        {open && (
+          <>
+            <motion.div
+              key="sp-m-overlay"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25 }}
+              onClick={onClose}
+              className="fixed inset-0 z-40 bg-black/40"
+            />
+            <motion.div
+              key="sp-m-panel"
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              transition={{ type: "spring", stiffness: 300, damping: 32 }}
+              className="fixed inset-x-0 bottom-0 z-50 h-[70vh] overflow-hidden rounded-t-2xl border-t border-border bg-background shadow-2xl"
+            >
+              <div className="flex h-full flex-col">
+                <div className="flex shrink-0 flex-col items-center pt-2 pb-1">
+                  <div className="h-1.5 w-10 rounded-full bg-muted" />
+                  <h2 className="mt-2 text-base font-semibold">Stickers</h2>
+                </div>
+                <div className="min-h-0 flex-1">{content}</div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     );
   }
 
