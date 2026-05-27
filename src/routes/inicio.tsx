@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
+import { StickersChatBanner } from "@/components/StickersChatBanner";
 import { getHomeChecklistSteps, type HomeChecklistStep } from "@/lib/homeChecklist";
 import {
   Sparkles,
@@ -621,6 +622,11 @@ function InicioPage() {
           </div>
         </section>
         ); })()}
+
+        {/* BANNER STICKERS CHAT GLOBAL */}
+        <div className="mt-8 animate-fade-up" style={{ animationDelay: "300ms" }}>
+          <StickersChatBanner />
+        </div>
 
         {/* PAINEL DE BANIMENTO */}
         {isBanned && (
