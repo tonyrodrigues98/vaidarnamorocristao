@@ -411,7 +411,7 @@ function Comunidade() {
                   return (
                     <div
                       key={`pin-${m.id}`}
-                      className="flex items-stretch gap-2 rounded-lg bg-background/60 px-2 py-1.5 text-xs"
+                      className="flex items-stretch gap-2 rounded-lg border border-border bg-card px-2 py-1.5 text-xs"
                     >
                       <button
                         type="button"
