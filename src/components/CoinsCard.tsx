@@ -102,7 +102,7 @@ export function CoinsCard() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <CoinIcon className={`h-9 w-9 drop-shadow ${pulse ? "animate-bounce" : ""}`} />
+          <img src={coinIcon} alt="moeda" className={`h-9 w-9 drop-shadow ${pulse ? "animate-bounce" : ""}`} />
           <span
             className={`text-4xl font-bold tabular-nums tracking-tight ${pulse ? "animate-scale-in text-amber-500" : ""}`}
           >
