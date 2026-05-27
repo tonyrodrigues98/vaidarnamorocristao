@@ -9,7 +9,8 @@ import {
   DialogFooter,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { Mail, Sparkles, Plus, Trophy, Coins } from "lucide-react";
+import { Mail, Sparkles, Plus, Trophy } from "lucide-react";
+import { CoinIcon } from "@/components/icons/CoinIcon";
 import { toast } from "sonner";
 import { friendlyError } from "@/lib/errors";
 import { getMyCoins } from "@/lib/coins";
@@ -65,7 +66,7 @@ export function AnonymousExtrasCard() {
             <h3 className="text-base font-semibold">Recados Extras</h3>
           </div>
           <div className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2.5 py-1 text-xs font-medium text-amber-600 dark:text-amber-400">
-            <Coins className="h-3.5 w-3.5" />
+            <CoinIcon className="h-3.5 w-3.5" />
             <AnimatePresence mode="popLayout">
               <motion.span
                 key={coins}
