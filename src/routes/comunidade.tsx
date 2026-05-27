@@ -615,8 +615,20 @@ function Comunidade() {
                   <p className="text-xs font-semibold text-primary">
                     Respondendo a {profiles[replyTo.sender_id]?.full_name?.split(" ")[0] ?? "Alguém"}
                   </p>
-                  <p className="line-clamp-1 text-xs text-muted-foreground">{replyTo.content}</p>
+                  {replyTo.sticker_id && stickerCache[replyTo.sticker_id] ? (
+                    <p className="text-xs text-muted-foreground">Sticker</p>
+                  ) : (
+                    <p className="line-clamp-1 text-xs text-muted-foreground">{replyTo.content}</p>
+                  )}
                 </div>
+                {replyTo.sticker_id && stickerCache[replyTo.sticker_id] && (
+                  <img
+                    src={stickerCache[replyTo.sticker_id].public_url}
+                    alt=""
+                    className="h-10 w-10 shrink-0 select-none object-contain"
+                    draggable={false}
+                  />
+                )}
                 <button
                   type="button"
                   onClick={() => setReplyTo(null)}
