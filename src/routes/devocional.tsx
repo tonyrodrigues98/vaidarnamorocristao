@@ -821,12 +821,12 @@ function PostCard(props: PostCardProps) {
               className={`group inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition-all hover-scale ${
                 active
                   ? "border-[var(--rose)] bg-[var(--rose)]/10 text-foreground"
-                  : "border-border bg-card/50 hover:bg-muted"
+                  : "border-border/80 bg-card hover:bg-accent"
               }`}
               title={r.label}
               aria-label={r.label}
             >
-              <Icon className={`h-4 w-4 ${active ? r.activeClass : "text-muted-foreground"}`} />
+              <Icon className={`h-4 w-4 ${active ? r.activeClass : "text-foreground/70"}`} />
               <span className="text-xs font-semibold tabular-nums">{counts[r.key]}</span>
             </button>
           );
