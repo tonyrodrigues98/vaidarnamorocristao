@@ -69,6 +69,20 @@ function Comunidade() {
   const [flagDialog, setFlagDialog] = useState<{ msg: GMsg; existingId?: string } | null>(null);
   const [flagReason, setFlagReason] = useState("");
   const [flagBusy, setFlagBusy] = useState(false);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [plusOpen, setPlusOpen] = useState(false);
+  const [stickerCache, setStickerCache] = useState<Record<string, Sticker>>({});
+
+  useEffect(() => {
+    // Preload all active stickers once to render in messages without per-row fetch
+    fetchStickers({ activeOnly: true })
+      .then((all) => {
+        const m: Record<string, Sticker> = {};
+        for (const s of all) m[s.id] = s;
+        setStickerCache(m);
+      })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (cooldownLeft <= 0) return;
