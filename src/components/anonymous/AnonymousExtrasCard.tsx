@@ -107,7 +107,10 @@ export function AnonymousExtrasCard() {
 
         <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div className="text-xs text-muted-foreground">
-            Cada recado extra custa <span className="font-medium text-foreground">🪙 {EXTRA_COST} moedas</span>
+            Cada recado extra custa{" "}
+            <span className="inline-flex items-center gap-1 font-medium text-foreground">
+              <CoinIcon className="h-3.5 w-3.5" /> {EXTRA_COST} moedas
+            </span>
           </div>
           <Button
             size="sm"
