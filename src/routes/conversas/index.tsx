@@ -8,10 +8,20 @@ import { MessageCircle } from "lucide-react";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { OnlineDot } from "@/components/OnlineDot";
 import { UserBadges } from "@/components/UserBadges";
+import { DecoratedAvatar } from "@/components/DecoratedAvatar";
 
 type Item = {
   matchId: string;
-  partner: { id: string; full_name: string; photo_url: string | null; city: string; state: string; verified?: boolean | null };
+  partner: {
+    id: string;
+    full_name: string;
+    photo_url: string | null;
+    city: string;
+    state: string;
+    verified?: boolean | null;
+    equipped_frame_id?: string | null;
+    equipped_aura_id?: string | null;
+  };
   lastMessage: string | null;
   lastAt: string;
   unread: boolean;
@@ -39,7 +49,10 @@ function List() {
     });
     if (!visibleMatches.length) { setItems([]); setLoadingList(false); return; }
     const partnerIds = visibleMatches.map((m) => (m.user_a === user.id ? m.user_b : m.user_a));
-    const { data: profs } = await supabase.from("profiles").select("id,full_name,photo_url,city,state,verified").in("id", partnerIds);
+    const { data: profs } = await supabase
+      .from("profiles")
+      .select("id,full_name,photo_url,city,state,verified,equipped_frame_id,equipped_aura_id")
+      .in("id", partnerIds);
     const profMap = new Map((profs ?? []).map((p) => [p.id, p]));
     const list: Item[] = await Promise.all(visibleMatches.map(async (m) => {
       const partnerId = m.user_a === user.id ? m.user_b : m.user_a;
@@ -92,11 +105,14 @@ function List() {
           ) : items.map((i) => (
             <Link key={i.matchId} to="/conversas/$matchId" params={{ matchId: i.matchId }}
               className="glass hover-lift flex items-center gap-4 rounded-2xl p-4 shadow-soft">
-              <div className="relative h-14 w-14 shrink-0">
-                <div className="h-full w-full overflow-hidden rounded-full bg-muted">
-                  {i.partner.photo_url ? <img src={i.partner.photo_url} alt="" className="h-full w-full object-cover" /> :
-                    <div className="flex h-full w-full items-center justify-center bg-gradient-love text-xl text-white">{i.partner.full_name.charAt(0)}</div>}
-                </div>
+              <div className="relative flex h-14 w-14 shrink-0 items-center justify-center">
+                <DecoratedAvatar
+                  photoUrl={i.partner.photo_url}
+                  fallback={i.partner.full_name.charAt(0)}
+                  size={56}
+                  frameId={i.partner.equipped_frame_id ?? null}
+                  auraId={i.partner.equipped_aura_id ?? null}
+                />
                 <span className="absolute bottom-0 right-0"><OnlineDot userId={i.partner.id} size="sm" /></span>
               </div>
               <div className="min-w-0 flex-1">
