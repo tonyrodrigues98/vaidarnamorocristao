@@ -615,7 +615,44 @@ function Comunidade() {
                 </button>
               </div>
             )}
-            <div className="flex items-center gap-2">
+            <div className="relative flex items-center gap-2">
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setPlusOpen((v) => !v)}
+                  disabled={!approved}
+                  aria-label="Mais opções de envio"
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-muted/40 text-muted-foreground transition hover:bg-accent hover:text-foreground disabled:opacity-50"
+                >
+                  <motion.span animate={{ rotate: plusOpen ? 45 : 0 }} transition={{ type: "spring", stiffness: 380, damping: 22 }}>
+                    <Plus className="h-4 w-4" />
+                  </motion.span>
+                </button>
+                <AnimatePresence>
+                  {plusOpen && (
+                    <>
+                      <div className="fixed inset-0 z-30" onClick={() => setPlusOpen(false)} />
+                      <motion.div
+                        initial={{ opacity: 0, y: 6, scale: 0.94 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 6, scale: 0.94 }}
+                        transition={{ type: "spring", stiffness: 380, damping: 28 }}
+                        className="absolute bottom-full left-0 z-40 mb-2 min-w-[160px] overflow-hidden rounded-xl border border-border bg-background/95 p-1 shadow-xl backdrop-blur"
+                      >
+                        <button
+                          type="button"
+                          onClick={() => { setPlusOpen(false); setPickerOpen(true); }}
+                          className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm transition hover:bg-accent"
+                        >
+                          <StickerIcon className="h-4 w-4 text-primary" />
+                          Sticker
+                        </button>
+                      </motion.div>
+                    </>
+                  )}
+                </AnimatePresence>
+                <StickerPicker open={pickerOpen} onClose={() => setPickerOpen(false)} onPick={(s) => sendSticker(s)} />
+              </div>
               <Input
                 value={text}
                 onChange={(e) => setText(e.target.value)}
