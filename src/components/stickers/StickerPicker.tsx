@@ -62,13 +62,13 @@ export function StickerPicker({ open, onClose, onPick }: Props) {
             Nenhum sticker disponível ainda.
           </div>
         ) : (
-          <div className="grid grid-cols-4 gap-x-2 gap-y-5 sm:grid-cols-5">
+          <div className="grid grid-cols-4 gap-x-3 gap-y-7 px-1 pb-3 pt-2">
             {filtered.map((s) => (
               <button
                 key={s.id}
                 type="button"
                 onClick={() => { onPick(s); onClose(); }}
-                className="group relative aspect-square overflow-hidden rounded-xl bg-muted/30 p-1.5 transition-transform duration-150 hover:scale-105 hover:bg-accent/40 active:scale-95"
+                className="group relative aspect-square rounded-xl bg-muted/30 p-3 transition-transform duration-150 hover:scale-105 hover:bg-accent/40 active:scale-95"
                 aria-label={s.name}
               >
                 <img
@@ -79,7 +79,7 @@ export function StickerPicker({ open, onClose, onPick }: Props) {
                   draggable={false}
                   className="h-full w-full object-contain"
                 />
-                <span className="pointer-events-none absolute -bottom-1 left-1/2 flex -translate-x-1/2 items-center gap-0.5 rounded-full bg-black/60 px-1.5 py-0.5 text-[10px] font-semibold text-amber-200 shadow-sm backdrop-blur-sm">
+                <span className="pointer-events-none absolute -bottom-2.5 left-1/2 flex -translate-x-1/2 items-center gap-0.5 rounded-full bg-black/70 px-1.5 py-0.5 text-[10px] font-semibold text-amber-200 shadow-md backdrop-blur-sm">
                   <CoinIcon className="h-3 w-3" />
                   {COIN_STICKER_COST}
                 </span>
