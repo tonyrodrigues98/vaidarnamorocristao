@@ -16,18 +16,21 @@ type FloatingSticker = {
 };
 
 const SLOTS: Omit<FloatingSticker, "url">[] = [
-  // positions use translate(-50%, -50%) so left/top are the sticker CENTER
-  { top: "18%", left: "22%", size: 78, rotate: -8, delay: 0, duration: 6, z: 20 },
-  { top: "12%", left: "52%", size: 64, rotate: 6, delay: 0.6, duration: 7, z: 15 },
-  { top: "18%", left: "80%", size: 70, rotate: -4, delay: 1.2, duration: 6.5, z: 18 },
-  { top: "52%", left: "18%", size: 72, rotate: 10, delay: 0.3, duration: 7.5, z: 22 },
-  { top: "55%", left: "50%", size: 84, rotate: -6, delay: 0.9, duration: 6.2, z: 25 },
-  { top: "50%", left: "82%", size: 68, rotate: 8, delay: 1.5, duration: 7.2, z: 16 },
-  { top: "35%", left: "36%", size: 56, rotate: -12, delay: 0.2, duration: 6.8, z: 19 },
-  { top: "82%", left: "28%", size: 62, rotate: 14, delay: 0.7, duration: 7.0, z: 21 },
-  { top: "38%", left: "66%", size: 52, rotate: -10, delay: 1.0, duration: 6.5, z: 17 },
-  { top: "82%", left: "72%", size: 58, rotate: 5, delay: 1.3, duration: 7.3, z: 20 },
-  { top: "82%", left: "50%", size: 50, rotate: -15, delay: 0.4, duration: 6.0, z: 15 },
+  // positions use translate(-50%, -50%) so left/top are the sticker CENTER.
+  // Mobile renders via grid (ignores top/left); desktop uses absolute layout.
+  // Distribution: 3 rows (top / middle / bottom) spread across the full height
+  // for a balanced, organic composition.
+  { top: "14%", left: "22%", size: 86, rotate: -8, delay: 0, duration: 6, z: 22 },
+  { top: "10%", left: "52%", size: 70, rotate: 6, delay: 0.6, duration: 7, z: 15 },
+  { top: "16%", left: "82%", size: 76, rotate: -4, delay: 1.2, duration: 6.5, z: 18 },
+  { top: "48%", left: "16%", size: 64, rotate: 10, delay: 0.3, duration: 7.5, z: 19 },
+  { top: "50%", left: "44%", size: 96, rotate: -6, delay: 0.9, duration: 6.2, z: 28 },
+  { top: "52%", left: "72%", size: 80, rotate: 8, delay: 1.5, duration: 7.2, z: 24 },
+  { top: "32%", left: "36%", size: 56, rotate: -12, delay: 0.2, duration: 6.8, z: 17 },
+  { top: "84%", left: "26%", size: 74, rotate: 14, delay: 0.7, duration: 7.0, z: 21 },
+  { top: "34%", left: "64%", size: 54, rotate: -10, delay: 1.0, duration: 6.5, z: 16 },
+  { top: "86%", left: "78%", size: 68, rotate: 5, delay: 1.3, duration: 7.3, z: 20 },
+  { top: "88%", left: "52%", size: 60, rotate: -15, delay: 0.4, duration: 6.0, z: 18 },
 ];
 
 export function StickersChatBanner() {
@@ -208,7 +211,7 @@ export function StickersChatBanner() {
         </div>
 
         {/* DESKTOP: floating absolute composition */}
-        <div className="relative hidden lg:block lg:h-[340px]">
+        <div className="relative hidden lg:block lg:h-[420px] xl:h-[460px]">
           {/* soft inner glow */}
           <div
             aria-hidden
