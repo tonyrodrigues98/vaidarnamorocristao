@@ -58,8 +58,11 @@ export function AtmosphereLayer({
     >
       {wantsParticles && <Particles />}
       {wantsCelestial && (
-        <div className="absolute top-6 right-6 sm:top-8 sm:right-10 opacity-90">
-          <CelestialIcon size={72} />
+        <div
+          className="absolute -top-2 -right-2 sm:top-4 sm:right-6 opacity-100"
+          style={{ filter: "drop-shadow(0 0 24px var(--atmos-celestial)) drop-shadow(0 0 60px var(--atmos-celestial))" }}
+        >
+          <CelestialIcon size={140} />
         </div>
       )}
     </div>
