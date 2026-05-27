@@ -34,6 +34,8 @@ function StickersAdmin() {
   const [editingStickerId, setEditingStickerId] = useState<string | null>(null);
   const [editingStickerName, setEditingStickerName] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
+  const [draggingId, setDraggingId] = useState<string | null>(null);
+  const [dragOverCat, setDragOverCat] = useState<string | "none" | null>(null);
 
   async function reload() {
     try {
@@ -145,6 +147,23 @@ function StickersAdmin() {
     }
   }
 
+  async function moveStickerToCategory(stickerId: string, categoryId: string | null) {
+    const sticker = stickers.find((x) => x.id === stickerId);
+    if (!sticker) return;
+    if (sticker.category_id === categoryId) return;
+    // optimistic update
+    setStickers((prev) => prev.map((x) => (x.id === stickerId ? { ...x, category_id: categoryId } : x)));
+    const { error } = await supabase.from("stickers").update({ category_id: categoryId }).eq("id", stickerId);
+    if (error) {
+      toast.error(error.message);
+      // revert
+      setStickers((prev) => prev.map((x) => (x.id === stickerId ? { ...x, category_id: sticker.category_id } : x)));
+      return;
+    }
+    const target = categoryId ? cats.find((c) => c.id === categoryId)?.name ?? "categoria" : "Sem categoria";
+    toast.success(`Movido para ${target}`);
+  }
+
   return (
     <div className="min-h-screen">
       <Header />
@@ -178,7 +197,15 @@ function StickersAdmin() {
                 <button
                   type="button"
                   onClick={() => setActiveCat(null)}
-                  className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm transition ${activeCat === null ? "bg-primary/10 font-semibold text-primary" : "hover:bg-accent"}`}
+                  onDragOver={(e) => { if (draggingId) { e.preventDefault(); setDragOverCat("none"); } }}
+                  onDragLeave={() => setDragOverCat((v) => (v === "none" ? null : v))}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    const id = e.dataTransfer.getData("text/sticker-id") || draggingId;
+                    setDragOverCat(null);
+                    if (id) void moveStickerToCategory(id, null);
+                  }}
+                  className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm transition ${activeCat === null ? "bg-primary/10 font-semibold text-primary" : "hover:bg-accent"} ${dragOverCat === "none" ? "ring-2 ring-primary/60 bg-primary/5" : ""}`}
                 >
                   Sem categoria
                   <span className="text-xs text-muted-foreground">{stickers.filter((s) => !s.category_id).length}</span>
@@ -201,7 +228,17 @@ function StickersAdmin() {
                         <Button size="icon" variant="ghost" onClick={() => { setEditingCatId(null); setEditingCatName(""); }}><X className="h-4 w-4" /></Button>
                       </div>
                     ) : (
-                      <div className={`flex items-center rounded-lg ${activeCat === c.id ? "bg-primary/10" : "hover:bg-accent"}`}>
+                      <div
+                        onDragOver={(e) => { if (draggingId) { e.preventDefault(); setDragOverCat(c.id); } }}
+                        onDragLeave={() => setDragOverCat((v) => (v === c.id ? null : v))}
+                        onDrop={(e) => {
+                          e.preventDefault();
+                          const id = e.dataTransfer.getData("text/sticker-id") || draggingId;
+                          setDragOverCat(null);
+                          if (id) void moveStickerToCategory(id, c.id);
+                        }}
+                        className={`flex items-center rounded-lg transition ${activeCat === c.id ? "bg-primary/10" : "hover:bg-accent"} ${dragOverCat === c.id ? "ring-2 ring-primary/60 bg-primary/5" : ""}`}
+                      >
                         <button
                           type="button"
                           onClick={() => setActiveCat(c.id)}
@@ -263,12 +300,16 @@ function StickersAdmin() {
             ) : (
               <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6">
                 {filtered.map((s) => (
-                  <motion.div
+                  <div
                     key={s.id}
-                    layout
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className={`group relative flex flex-col items-center gap-1 rounded-xl border border-border bg-background/60 p-2 ${!s.active ? "opacity-50" : ""}`}
+                    draggable
+                    onDragStart={(e) => {
+                      setDraggingId(s.id);
+                      e.dataTransfer.effectAllowed = "move";
+                      e.dataTransfer.setData("text/sticker-id", s.id);
+                    }}
+                    onDragEnd={() => { setDraggingId(null); setDragOverCat(null); }}
+                    className={`group relative flex cursor-grab flex-col items-center gap-1 rounded-xl border border-border bg-background/60 p-2 active:cursor-grabbing ${!s.active ? "opacity-50" : ""} ${draggingId === s.id ? "opacity-40" : ""}`}
                   >
                     <div className="aspect-square w-full overflow-hidden rounded-lg bg-muted/30 p-2">
                       <img src={s.public_url} alt={s.name} loading="lazy" className="h-full w-full object-contain" />
@@ -304,7 +345,7 @@ function StickersAdmin() {
                         <Trash2 className="h-3.5 w-3.5" />
                       </button>
                     </div>
-                  </motion.div>
+                  </div>
                 ))}
               </div>
             )}
