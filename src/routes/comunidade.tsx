@@ -255,53 +255,36 @@ function Comunidade() {
 
   if (!loading && !user) return <Navigate to="/auth/login" />;
 
-  async function send(e: FormEvent) {
-    e.preventDefault();
-    const content = text.trim();
-    if (!content || !user) return;
+  const sendMessage = useCallback(async (content: string): Promise<boolean> => {
+    if (!content || !user) return false;
     const hit = findRestrictedWord(content, restrictedWords);
     if (hit) {
       setWarning(hit);
-      return;
+      return false;
     }
-    const since = Date.now() - lastSentRef.current;
-    if (since < COOLDOWN_MS) {
-      toast.error(`Aguarde ${Math.ceil((COOLDOWN_MS - since) / 1000)}s para enviar outra mensagem`);
-      return;
-    }
-    setSending(true);
     const { error } = await supabase.from("global_messages").insert({
       sender_id: user.id,
       content,
       reply_to_id: replyTo?.id ?? null,
     });
-    setSending(false);
-    if (error) { toast.error(friendlyError(error)); return; }
-    setText("");
+    if (error) { toast.error(friendlyError(error)); return false; }
     setReplyTo(null);
-    lastSentRef.current = Date.now();
-    setCooldownLeft(COOLDOWN_MS);
-  }
+    return true;
+  }, [user, restrictedWords, replyTo]);
 
-  async function sendSticker(s: Sticker) {
-    if (!user) return;
-    const since = Date.now() - lastSentRef.current;
-    if (since < COOLDOWN_MS) {
-      toast.error(`Aguarde ${Math.ceil((COOLDOWN_MS - since) / 1000)}s para enviar outro sticker`);
-      return;
-    }
+  const sendSticker = useCallback(async (s: Sticker): Promise<boolean> => {
+    if (!user) return false;
     const { error } = await supabase.from("global_messages").insert({
       sender_id: user.id,
       content: "",
       sticker_id: s.id,
       reply_to_id: replyTo?.id ?? null,
     });
-    if (error) { toast.error(friendlyError(error)); return; }
+    if (error) { toast.error(friendlyError(error)); return false; }
     setStickerCache((prev) => (prev[s.id] ? prev : { ...prev, [s.id]: s }));
     setReplyTo(null);
-    lastSentRef.current = Date.now();
-    setCooldownLeft(COOLDOWN_MS);
-  }
+    return true;
+  }, [user, replyTo]);
 
   async function remove(id: string) {
     const { error } = await supabase.from("global_messages").delete().eq("id", id);
