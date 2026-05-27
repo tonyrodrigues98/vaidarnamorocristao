@@ -24,6 +24,7 @@ import { useMemo, useRef, useState } from "react";
 import {
   AnimatePresence,
   motion,
+  useAnimation,
   useMotionValue,
   useTransform,
   type PanInfo,
