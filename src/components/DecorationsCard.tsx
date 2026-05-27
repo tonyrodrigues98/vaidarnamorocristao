@@ -96,10 +96,10 @@ export function DecorationsCard({
   const grouped = useMemo(() => {
     const g: Record<DecorationType, Decoration[]> = { frame: [], aura: [], sticker: [] };
     catalog.forEach((d) => {
-      if (VISIBLE_TYPES.includes(d.type)) g[d.type].push(d);
+      if (VISIBLE_TYPES.includes(d.type) && owned.has(d.id)) g[d.type].push(d);
     });
     return g;
-  }, [catalog]);
+  }, [catalog, owned]);
 
   const updateEquipped = (next: EquippedMap) => {
     setEquipped(next);
