@@ -835,6 +835,7 @@ function ActionRow({
 
 const ChatComposer = memo(function ChatComposer({
   approved,
+  userId,
   replyTo,
   replyToName,
   replyToStickerUrl,
@@ -843,6 +844,7 @@ const ChatComposer = memo(function ChatComposer({
   onSendSticker,
 }: {
   approved: boolean;
+  userId: string | null;
   replyTo: GMsg | null;
   replyToName: string;
   replyToStickerUrl: string | null;
@@ -856,6 +858,7 @@ const ChatComposer = memo(function ChatComposer({
   const [plusOpen, setPlusOpen] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
   const lastSentRef = useRef<number>(0);
+  const broadcastTyping = useTypingBroadcaster(userId);
 
   useEffect(() => {
     if (cooldownLeft <= 0) return;
@@ -900,7 +903,9 @@ const ChatComposer = memo(function ChatComposer({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-2 border-t border-border bg-background/60 p-3">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-0 border-t border-border bg-background/60">
+      <TypingIndicator selfId={userId} />
+      <div className="flex flex-col gap-2 p-3 pt-2">
       {replyTo && (
         <div className="flex items-stretch gap-2 rounded-lg border border-border bg-muted/40 px-3 py-2">
           <span className="w-1 shrink-0 rounded bg-primary" />
@@ -970,7 +975,10 @@ const ChatComposer = memo(function ChatComposer({
         </div>
         <Input
           value={text}
-          onChange={(e) => setText(e.target.value)}
+          onChange={(e) => {
+            setText(e.target.value);
+            if (e.target.value.trim().length > 0) broadcastTyping();
+          }}
           placeholder={!approved ? "Aguardando aprovação para enviar mensagens" : "Escreva uma mensagem para a comunidade..."}
           maxLength={2000}
           disabled={!approved || sending}
@@ -983,6 +991,7 @@ const ChatComposer = memo(function ChatComposer({
             <Send className="h-4 w-4" />
           )}
         </Button>
+      </div>
       </div>
     </form>
   );
