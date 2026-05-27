@@ -9,7 +9,8 @@ import {
   DialogFooter,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { Mail, Coins, Sparkles, Plus, Trophy } from "lucide-react";
+import { Mail, Sparkles, Plus, Trophy } from "lucide-react";
+import { CoinIcon } from "@/components/icons/CoinIcon";
 import { toast } from "sonner";
 import { friendlyError } from "@/lib/errors";
 import { getMyCoins } from "@/lib/coins";
