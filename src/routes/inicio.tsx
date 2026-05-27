@@ -623,6 +623,11 @@ function InicioPage() {
         </section>
         ); })()}
 
+        {/* BANNER STICKERS CHAT GLOBAL */}
+        <div className="mt-8 animate-fade-up" style={{ animationDelay: "300ms" }}>
+          <StickersChatBanner />
+        </div>
+
         {/* PAINEL DE BANIMENTO */}
         {isBanned && (
           <section className="mt-6 rounded-3xl border border-red-500/30 bg-red-500/5 p-6 shadow-soft">
