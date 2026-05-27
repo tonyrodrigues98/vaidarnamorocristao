@@ -377,7 +377,8 @@ function Comunidade() {
   return (
     <div className="flex min-h-screen flex-col">
       <Header />
-      <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col px-4 py-6">
+      <main className="relative mx-auto flex w-full max-w-4xl flex-1 flex-col px-4 py-6">
+        <AtmosphereLayer intensity="low" />
         <div className="animate-fade-up flex items-center gap-3">
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-love shadow-glow">
             <Users className="h-5 w-5 text-white" />
