@@ -79,14 +79,18 @@ export function DecoratedAvatar({
   const placement = frame?.image_url
     ? FRAME_PLACEMENT[frame.image_url] ?? DEFAULT_FRAME_PLACEMENT
     : DEFAULT_FRAME_PLACEMENT;
-  const photoSize = frameAsset ? size * placement.photoScale : size;
-  const photoCenterX = size * placement.centerX;
-  const photoCenterY = size * placement.centerY;
+  // `size` representa o diâmetro da FOTO (constante). Quando existe moldura,
+  // o canvas externo cresce para `size / photoScale` para acomodar a moldura
+  // ao redor sem encolher a foto.
+  const photoSize = size;
+  const canvas = frameAsset ? size / placement.photoScale : size;
+  const photoCenterX = canvas * placement.centerX;
+  const photoCenterY = canvas * placement.centerY;
 
   return (
     <div
       className={cn("relative inline-block shrink-0", className)}
-      style={{ width: size, height: size }}
+      style={{ width: canvas, height: canvas }}
     >
       {aura?.css_value && (
         <>
@@ -94,9 +98,9 @@ export function DecoratedAvatar({
             aria-hidden
             className="pointer-events-none absolute rounded-full"
             style={{
-              inset: `-${Math.round(size * 0.3)}px`,
+              inset: `-${Math.round(canvas * 0.3)}px`,
               background: `radial-gradient(circle, ${aura.css_value} 0%, ${aura.css_value}CC 35%, ${aura.css_value}66 60%, transparent 78%)`,
-              filter: `blur(${Math.max(12, size * 0.18)}px)`,
+              filter: `blur(${Math.max(12, canvas * 0.18)}px)`,
               zIndex: 0,
             }}
           />
@@ -104,9 +108,9 @@ export function DecoratedAvatar({
             aria-hidden
             className="pointer-events-none absolute rounded-full"
             style={{
-              inset: `-${Math.round(size * 0.12)}px`,
+              inset: `-${Math.round(canvas * 0.12)}px`,
               background: `radial-gradient(circle, ${aura.css_value}EE 0%, ${aura.css_value}88 50%, transparent 75%)`,
-              filter: `blur(${Math.max(6, size * 0.08)}px)`,
+              filter: `blur(${Math.max(6, canvas * 0.08)}px)`,
               zIndex: 1,
             }}
           />
