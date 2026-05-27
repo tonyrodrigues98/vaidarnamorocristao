@@ -2227,6 +2227,10 @@ export type Database = {
       }
     }
     Functions: {
+      admin_add_user_coins: {
+        Args: { _amount: number; _user_id: string }
+        Returns: number
+      }
       admin_ban_user: {
         Args: { _reason: string; _user_id: string }
         Returns: undefined
