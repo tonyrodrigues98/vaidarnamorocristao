@@ -306,7 +306,7 @@ function StickersAdmin() {
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     draggable
-                    onDragStart={(e) => {
+                    onDragStart={(e: React.DragEvent<HTMLDivElement>) => {
                       setDraggingId(s.id);
                       e.dataTransfer.effectAllowed = "move";
                       e.dataTransfer.setData("text/sticker-id", s.id);
