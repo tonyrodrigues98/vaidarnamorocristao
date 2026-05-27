@@ -371,6 +371,16 @@
   50%      { transform: translateY(-6px) rotate(var(--r, 0deg)); }
 }
 
+@keyframes anon-float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-8px); }
+}
+
+@keyframes anon-twinkle {
+  0%, 100% { opacity: 0.3; transform: scale(0.9); }
+  50%      { opacity: 1;   transform: scale(1.1); }
+}
+
 /* Fallback para navegadores sem View Transitions API (Firefox, Safari < 18).
    Aplica fade-in suave no <main>/Outlet ao trocar de rota. */
 @supports not (view-transition-name: none) {

@@ -5,6 +5,7 @@ import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { StickersChatBanner } from "@/components/StickersChatBanner";
+import { AnonymousMessagesBanner } from "@/components/AnonymousMessagesBanner";
 import { getHomeChecklistSteps, type HomeChecklistStep } from "@/lib/homeChecklist";
 import {
   Sparkles,
@@ -626,6 +627,11 @@ function InicioPage() {
         {/* BANNER STICKERS CHAT GLOBAL */}
         <div className="mt-8 animate-fade-up" style={{ animationDelay: "300ms" }}>
           <StickersChatBanner />
+        </div>
+
+        {/* BANNER RECADOS ANÔNIMOS */}
+        <div className="mt-8 animate-fade-up" style={{ animationDelay: "350ms" }}>
+          <AnonymousMessagesBanner />
         </div>
 
         {/* PAINEL DE BANIMENTO */}
