@@ -192,7 +192,7 @@ export function StickersChatBanner() {
           ))}
           {/* fallback emoji placeholders while loading */}
           {stickers.length === 0 &&
-            ["😊", "🌹", "⭐", "💖", "🍦", "😎"].map((e, i) => (
+            ["😊", "🌹", "⭐", "💖", "🍦", "😎", "🦋", "🌈", "🍭", "🎈", "🐻"].map((e, i) => (
               <span
                 key={i}
                 aria-hidden
