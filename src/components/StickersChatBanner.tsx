@@ -162,7 +162,7 @@ export function StickersChatBanner() {
         </div>
 
         {/* RIGHT — sticker composition */}
-        <div className="relative h-[220px] sm:h-[260px] lg:h-[300px]">
+        <div className="relative h-[260px] sm:h-[300px] lg:h-[340px]">
           {/* soft inner glow */}
           <div
             aria-hidden
