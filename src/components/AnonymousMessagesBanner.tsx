@@ -115,8 +115,8 @@ export function AnonymousMessagesBanner() {
           </Link>
         </div>
 
-        {/* RIGHT — illustration (3:2 aspect, matches reference proportions) */}
-        <div className="relative w-full aspect-[3/2] max-h-[440px] mt-2 md:mt-0 flex items-center justify-center">
+        {/* RIGHT — illustration (keeps full 3:2 image visible) */}
+        <div className="relative w-full mt-2 md:mt-0 flex items-center justify-center">
           <Illustration />
         </div>
       </div>
@@ -134,11 +134,11 @@ function Illustration() {
         style={{ background: "radial-gradient(circle, #C7B6FF 0%, transparent 70%)" }}
       />
 
-      {/* Letter illustration with subtle float */}
+      {/* Letter illustration with subtle float — scales with column width, full image visible */}
       <img
         src={letterImage}
         alt="Envelope com carta anônima"
-        className="relative w-auto h-full max-w-full max-h-full object-contain"
+        className="relative block w-full h-auto max-w-[520px] object-contain"
         style={{ animation: "anon-float 7s ease-in-out infinite" }}
       />
     </div>
