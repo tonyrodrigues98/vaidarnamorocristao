@@ -1,33 +1,26 @@
-# Preview manual de períodos da atmosfera
+## Diferenciar Manhã (inverno) vs Tarde (alaranjada)
 
-Objetivo: permitir que você visualize ao vivo como ficam manhã, tarde, noite e madrugada, sem mexer na hora do dispositivo nem na lógica automática.
+Atualmente os dois períodos usam tons quentes amarelados muito parecidos (hue 65-90). Vou reposicionar cada um numa direção distinta, sem mexer em evening/night.
 
-## Como vai funcionar
+### Manhã — "manhã de inverno" (fria, suave, menos ensolarada)
+Paleta deslocada para azul-pálido/lavanda frio + um toque dourado tímido só no canto. Sensação de neblina fria e luz baixa.
 
-- A hora real continua sendo a fonte padrão (nada muda para usuários finais).
-- Em `/conta`, no card do `AtmosphereToggle`, adiciono um segundo controle: **"Visualizar período"** com 5 opções: `Automático (real)`, `Manhã`, `Tarde`, `Noite`, `Madrugada`.
-- Ao escolher um período, todo o app passa a renderizar como se fosse aquele horário (sky, glow, partículas, ícone celestial, acentos roxos da madrugada — tudo).
-- Ao escolher `Automático`, volta a seguir a hora real.
-- A preferência é salva em `localStorage` (`atmos-period-override`) para você navegar entre páginas mantendo o preview.
+- `--atmos-overlay`: radial azul-acinzentado frio no topo (hue ~230, baixa saturação) + leve pêssego pálido no canto (hue ~50, opacidade reduzida ~0.15).
+- `--atmos-glow`: glow frio sutil (hue ~220, opacidade menor ~0.35).
+- `--atmos-tint`: véu branco-azulado leve (hue ~230, alpha ~0.10).
+- `--atmos-particle`: partículas brancas frias (quase neutras, hue ~230).
+- `--atmos-celestial`: sol pálido de inverno (claridade alta, croma baixíssimo ~0.05, hue ~80).
 
-## Mudanças técnicas
+### Tarde — mais alaranjada (golden hour suave)
+Deslocar do amarelo neutro atual para laranja-âmbar mais quente e visível.
 
-1. **`src/lib/timeOfDay.ts`**
-   - Adicionar `getPeriodOverride()` / `setPeriodOverride(p | null)` (localStorage `atmos-period-override`).
-   - Disparar evento `atmos-period-change` no set.
+- `--atmos-overlay`: radial âmbar-laranja no topo (hue ~50, alpha ~0.45) + segundo radial pêssego quente no canto (hue ~35, alpha ~0.30). Remover o azul atual.
+- `--atmos-glow`: glow âmbar mais saturado (hue ~55, alpha ~0.65).
+- `--atmos-tint`: véu âmbar quente (hue ~55, alpha ~0.14).
+- `--atmos-particle`: partículas douradas-alaranjadas (hue ~55).
+- `--atmos-celestial`: sol âmbar quente (hue ~60, croma ~0.18).
 
-2. **`src/hooks/useTimeOfDay.ts`**
-   - No `apply()`, se houver override, usar ele em vez de `getPeriod()`.
-   - Escutar `atmos-period-change` além dos eventos já existentes.
-
-3. **`src/components/atmosphere/AtmosphereToggle.tsx`**
-   - Adicionar um grupo de botões/segmented control com as 5 opções.
-   - Marcador visual sutil (ex.: badge "preview ativo") quando não está em Automático.
-
-Nenhuma outra página é alterada — o efeito é puramente visual, controlado pelo atributo `data-period` no `<html>` que o resto do CSS já consome.
-
-## O que NÃO muda
-
-- `getPeriod()` (lógica por hora) permanece intacta.
-- CSS/cores/partículas/ícone celestial: nenhuma alteração.
-- Comportamento padrão para qualquer usuário sem override: idêntico ao atual.
+### Escopo
+- Arquivo único: `src/styles.css`, blocos `:root[data-period="morning"]` e `:root[data-period="afternoon"]` (linhas 394–409).
+- Sem mudanças em evening, night, lógica JS, componentes ou seletor de preview.
+- Validação: usar o seletor manual em `/conta` para alternar Manhã ↔ Tarde e confirmar contraste visual claro.
