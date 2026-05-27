@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Sparkles, Smile, Coins, Zap, MessageCircleHeart } from "lucide-react";
+import { Sparkles, Smile, Zap, MessageCircleHeart } from "lucide-react";
+import { CoinIcon } from "@/components/icons/CoinIcon";
 import { supabase } from "@/integrations/supabase/client";
 
 type FloatingSticker = {
@@ -133,9 +134,7 @@ export function StickersChatBanner() {
               Stickers exclusivos
             </li>
             <li className="inline-flex items-center gap-1.5 rounded-full border border-white/60 bg-white/55 px-3 py-1.5 font-medium text-foreground/80 backdrop-blur dark:bg-white/10">
-              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[oklch(0.92_0.10_340)]/80 text-[oklch(0.55_0.20_340)]">
-                <Coins className="h-3 w-3" />
-              </span>
+              <CoinIcon className="h-5 w-5" />
               Custa apenas 1 moeda
             </li>
             <li className="inline-flex items-center gap-1.5 rounded-full border border-white/60 bg-white/55 px-3 py-1.5 font-medium text-foreground/80 backdrop-blur dark:bg-white/10">
