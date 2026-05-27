@@ -23,7 +23,6 @@ import { UserBadges } from "@/components/UserBadges";
 import { StickerPicker } from "@/components/stickers/StickerPicker";
 import { StickerMessage } from "@/components/stickers/StickerMessage";
 import { fetchStickers, type Sticker } from "@/lib/stickers";
-import { supabase as _sb } from "@/integrations/supabase/client";
 import { AnimatePresence, motion } from "framer-motion";
 
 const COOLDOWN_MS = 10_000;
