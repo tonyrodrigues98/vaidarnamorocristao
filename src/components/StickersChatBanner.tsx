@@ -60,7 +60,7 @@ export function StickersChatBanner() {
   return (
     <section
       aria-label="Novidade: stickers no chat global"
-      className="relative isolate overflow-hidden rounded-3xl border border-white/40 bg-gradient-to-br from-[oklch(0.96_0.03_20)] via-[oklch(0.95_0.04_330)] to-[oklch(0.94_0.05_290)] shadow-soft dark:border-white/5 dark:from-[oklch(0.24_0.05_310)] dark:via-[oklch(0.22_0.06_330)] dark:to-[oklch(0.20_0.06_290)]"
+      className="relative isolate overflow-hidden rounded-[2rem] border border-white/40 bg-gradient-to-br from-[oklch(0.96_0.03_20)] via-[oklch(0.95_0.04_330)] to-[oklch(0.94_0.05_290)] shadow-soft dark:border-white/5 dark:from-[oklch(0.24_0.05_310)] dark:via-[oklch(0.22_0.06_330)] dark:to-[oklch(0.20_0.06_290)]"
     >
       {/* glow/blur backdrops */}
       <div
