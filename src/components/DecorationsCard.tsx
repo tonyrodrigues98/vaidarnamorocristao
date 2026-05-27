@@ -162,7 +162,7 @@ export function DecorationsCard({
       return <p className="py-8 text-center text-sm text-muted-foreground">Em breve</p>;
     }
     return (
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
         {items.map((d) => {
           const isOwned = owned.has(d.id);
           const isEquipped = equipped[type] === d.id;
@@ -171,7 +171,7 @@ export function DecorationsCard({
           const previewProps = {
             photoUrl,
             fallback: user?.email?.[0]?.toUpperCase() ?? "?",
-            size: 64,
+            size: 80,
             frameId: type === "frame" ? d.id : equipped.frame,
             auraId: type === "aura" ? d.id : equipped.aura,
             stickerId: type === "sticker" ? d.id : equipped.sticker,
@@ -183,7 +183,7 @@ export function DecorationsCard({
               onClick={() =>
                 setPreview((p) => ({ ...p, [type]: p[type] === d.id ? null : d.id }))
               }
-              className={`cursor-pointer rounded-xl border bg-card p-3 text-center transition ${
+              className={`flex cursor-pointer flex-col items-center rounded-2xl border bg-card p-3 text-center transition ${
                 isPreviewing
                   ? "border-[var(--rose)] ring-2 ring-[var(--rose)]/40 shadow-soft"
                   : isEquipped
@@ -191,13 +191,16 @@ export function DecorationsCard({
                     : "hover:border-[var(--rose-soft)]"
               }`}
             >
-              <div className="mx-auto mb-2 flex h-20 w-20 items-center justify-center">
+              <div className="flex h-20 w-20 items-center justify-center">
                 <DecoratedAvatar {...previewProps} />
               </div>
-              <p className="truncate text-xs font-medium" title={d.name}>
+              <p
+                className="mt-2 line-clamp-2 min-h-[2.25rem] text-xs font-semibold leading-tight"
+                title={d.name}
+              >
                 {d.name}
               </p>
-              <div className="mt-2" onClick={(e) => e.stopPropagation()}>
+              <div className="mt-2 w-full" onClick={(e) => e.stopPropagation()}>
                 {isEquipped ? (
                   <Button
                     variant="outline"
