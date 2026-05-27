@@ -1,35 +1,35 @@
-## Melhorar legibilidade — subtítulos e abas
+## Legibilidade — chips e superfícies translúcidas sobre a atmosfera
 
 ### Diagnóstico
 
-Os pontos circulados nas screenshots têm a mesma causa raiz:
+O problema circulado no print é o filtro `Mais comentados` / `Mais reações` em `/devocional`. O chip inativo usa `bg-card/60` (40% transparente). Por baixo passa o `--atmos-overlay` azul da Noite/Madrugada — o chip "desaparece" sobre o azul e a borda `border-border` quase some.
 
-1. **Subtítulos de página** (`"Edite suas informações..."`, `"Chat global em tempo real..."`) usam `text-muted-foreground`. Esse token tem contraste apertado contra o `background` e, com o overlay de atmosfera por cima, fica abaixo do limite confortável de leitura — visível em modo claro com atmosfera ativa, ainda pior na atmosfera noite/madrugada.
-2. **Abas inativas do shadcn Tabs** (`Sobre mim` / `Preferências` / `Conquistas` / `Cargo`) herdam `text-muted-foreground` do `TabsList`, ficando quase indistinguíveis do fundo da lista (`bg-muted`).
-3. O mesmo padrão se repete em outras telas: descrições de cards, labels de role, "Sticker" em prévias de respostas, etc.
+Esse mesmo padrão (`bg-card/60`, `bg-background/60`, `bg-muted/40` em superfícies pequenas) aparece em vários pontos. Os casos que mais sofrem com a atmosfera são os **interativos pequenos**, onde o usuário precisa identificar rapidamente o controle:
 
-### Solução (2 mudanças cirúrgicas, escopo global)
+| Componente | Arquivo | Problema |
+|---|---|---|
+| `FilterChip` (Mais recentes / comentados / reações) | `src/routes/devocional.tsx` (linha 672) | inativo translúcido, sem peso visual |
+| Chips de reação (curtir/amar/etc.) no PostCard | `src/routes/devocional.tsx` (linha 818) | inativo translúcido sobre fundo do post |
+| Stats compactos do header devocional | já são `glass` opacas — OK |
 
-#### A. Reforçar o token `--muted-foreground` em `src/styles.css`
+### Solução (mudanças localizadas)
 
-Aumentar contraste sem mudar a hue (mantém harmonia visual):
+#### A. `FilterChip` em `/devocional` (linhas 672–693)
+- Inativo: `bg-card/60` → `bg-card` (opaco) + `border-border/80` + `shadow-soft` discreto.
+- Ativo: manter `bg-[var(--rose)]` + `text-white` + `shadow-glow`.
+- Texto inativo: `text-foreground/70` → `text-foreground/85` para ganhar contraste.
+- Estado `hover` inativo: `hover:bg-muted` → `hover:bg-accent` para feedback mais nítido.
 
-- Claro: `oklch(0.48 0.02 30)` → `oklch(0.40 0.02 30)` (de ~4.6:1 para ~6.5:1).
-- Escuro: `oklch(0.72 0.02 30)` → `oklch(0.78 0.02 30)` (de ~5.0:1 para ~7.0:1).
+#### B. Chips de reação no PostCard (linha 818)
+- Inativo: `bg-card/50` → `bg-card` (opaco) + `border-border/80`.
+- Ativo: já tem fundo rose tintado, mantém.
+- Ícone inativo: `text-muted-foreground` → `text-foreground/70`.
 
-Isso corrige automaticamente todos os subtítulos, labels secundários e descrições da app, inclusive dentro do header `Comunidade` e do header `Meu perfil`.
-
-#### B. Aumentar contraste de abas inativas em `src/components/ui/tabs.tsx`
-
-- `TabsList`: remover `text-muted-foreground` (não deve ditar a cor dos triggers).
-- `TabsTrigger`: adicionar estado explícito inativo — `data-[state=inactive]:text-foreground/70 hover:text-foreground` — e manter `data-[state=active]:text-foreground data-[state=active]:bg-background data-[state=active]:shadow`.
-
-### Sem alterações
-- Atmosfera (overlays/tints/celestial): intactos.
-- Tema dark vs light, gradientes, marca (rose/coral/petal): intocados.
-- Componentes shadcn fora do Tabs: intocados.
+#### C. Nada mais
+- Não mexer em superfícies grandes (`.glass`, cards de post, footers) — elas já têm tamanho suficiente para contraste e a translucidez faz parte da estética.
+- Não tocar em `comunidade`, `inicio`, `__root`, `conversas`: as superfícies translúcidas ali são grandes (footers, painéis de chat) e não causam o mesmo problema de identificação rápida.
+- Tokens globais (`--muted-foreground`, atmosfera, marca): intactos.
 
 ### Verificação
-- `/perfil` modo claro e escuro: subtítulo "Edite suas informações..." legível; abas "Preferências/Conquistas/Cargo" claramente visíveis.
-- `/comunidade`: "Chat global em tempo real..." legível em ambos os modos e em todas as 4 atmosferas (Manhã, Tarde, Noite, Madrugada) via seletor de `/conta`.
-- Outras páginas (`/inicio`, `/pretendentes`, `/conta`, `/dashboard`): textos secundários ganham contraste sem efeitos colaterais.
+- `/devocional` em Manhã, Tarde, Noite e Madrugada via seletor em `/conta`: os 3 chips de filtro continuam claramente visíveis em todas as atmosferas; o chip ativo se destaca.
+- Reações em um post: igualmente legíveis.
