@@ -62,7 +62,7 @@ export function StickerPicker({ open, onClose, onPick }: Props) {
             Nenhum sticker disponível ainda.
           </div>
         ) : (
-          <div className="grid grid-cols-4 gap-2 sm:grid-cols-5">
+          <div className="grid grid-cols-4 gap-x-2 gap-y-5 sm:grid-cols-5">
             {filtered.map((s) => (
               <button
                 key={s.id}
