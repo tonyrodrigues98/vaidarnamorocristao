@@ -870,6 +870,12 @@ const ChatComposer = memo(function ChatComposer({
     return () => clearInterval(t);
   }, [cooldownLeft]);
 
+  // Garante broadcast em teclados mobile que não disparam onChange a cada caractere
+  useEffect(() => {
+    if (text.trim().length > 0) broadcastTyping();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [text]);
+
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     const content = text.trim();
