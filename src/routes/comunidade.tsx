@@ -597,93 +597,15 @@ function Comunidade() {
             )}
           </div>
 
-          <form onSubmit={send} className="flex flex-col gap-2 border-t border-border bg-background/60 p-3">
-            {replyTo && (
-              <div className="flex items-stretch gap-2 rounded-lg border border-border bg-muted/40 px-3 py-2">
-                <span className="w-1 shrink-0 rounded bg-primary" />
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs font-semibold text-primary">
-                    Respondendo a {profiles[replyTo.sender_id]?.full_name?.split(" ")[0] ?? "Alguém"}
-                  </p>
-                  {replyTo.sticker_id && stickerCache[replyTo.sticker_id] ? (
-                    <p className="text-xs text-muted-foreground">Sticker</p>
-                  ) : (
-                    <p className="line-clamp-1 text-xs text-muted-foreground">{replyTo.content}</p>
-                  )}
-                </div>
-                {replyTo.sticker_id && stickerCache[replyTo.sticker_id] && (
-                  <img
-                    src={stickerCache[replyTo.sticker_id].public_url}
-                    alt=""
-                    className="h-10 w-10 shrink-0 select-none object-contain"
-                    draggable={false}
-                  />
-                )}
-                <button
-                  type="button"
-                  onClick={() => setReplyTo(null)}
-                  className="rounded-full p-1 text-muted-foreground hover:text-foreground"
-                  aria-label="Cancelar resposta"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-            )}
-            <div className="relative flex items-center gap-2">
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => setPlusOpen((v) => !v)}
-                  disabled={!approved}
-                  aria-label="Mais opções de envio"
-                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-muted/40 text-muted-foreground transition hover:bg-accent hover:text-foreground disabled:opacity-50"
-                >
-                  <motion.span animate={{ rotate: plusOpen ? 45 : 0 }} transition={{ type: "spring", stiffness: 380, damping: 22 }}>
-                    <Plus className="h-4 w-4" />
-                  </motion.span>
-                </button>
-                <AnimatePresence>
-                  {plusOpen && (
-                    <>
-                      <div className="fixed inset-0 z-30" onClick={() => setPlusOpen(false)} />
-                      <motion.div
-                        initial={{ opacity: 0, y: 6, scale: 0.94 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: 6, scale: 0.94 }}
-                        transition={{ type: "spring", stiffness: 380, damping: 28 }}
-                        className="absolute bottom-full left-0 z-40 mb-2 min-w-[160px] overflow-hidden rounded-xl border border-border bg-background/95 p-1 shadow-xl backdrop-blur"
-                      >
-                        <button
-                          type="button"
-                          onClick={() => { setPlusOpen(false); setPickerOpen(true); }}
-                          className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm transition hover:bg-accent"
-                        >
-                          <StickerIcon className="h-4 w-4 text-primary" />
-                          Sticker
-                        </button>
-                      </motion.div>
-                    </>
-                  )}
-                </AnimatePresence>
-                <StickerPicker open={pickerOpen} onClose={() => setPickerOpen(false)} onPick={(s) => sendSticker(s)} />
-              </div>
-              <Input
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                placeholder={approved === false ? "Aguardando aprovação para enviar mensagens" : "Escreva uma mensagem para a comunidade..."}
-                maxLength={2000}
-                disabled={!approved || sending}
-                className="flex-1"
-              />
-              <Button type="submit" disabled={!approved || sending || !text.trim() || cooldownLeft > 0} size="icon" className="rounded-full">
-                {cooldownLeft > 0 ? (
-                  <span className="text-[10px] font-semibold">{Math.ceil(cooldownLeft / 1000)}s</span>
-                ) : (
-                  <Send className="h-4 w-4" />
-                )}
-              </Button>
-            </div>
-          </form>
+          <ChatComposer
+            approved={!!approved}
+            replyTo={replyTo}
+            replyToName={replyTo ? profiles[replyTo.sender_id]?.full_name?.split(" ")[0] ?? "Alguém" : ""}
+            replyToStickerUrl={replyTo?.sticker_id ? stickerCache[replyTo.sticker_id]?.public_url ?? null : null}
+            onCancelReply={() => setReplyTo(null)}
+            onSend={sendMessage}
+            onSendSticker={sendSticker}
+          />
         </div>
       </main>
       <RestrictedWordDialog word={warning} onClose={() => setWarning(null)} />
