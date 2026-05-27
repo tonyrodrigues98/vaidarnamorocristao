@@ -40,7 +40,7 @@ export function StickersChatBanner() {
         .select("public_url")
         .eq("active", true)
         .order("sort_order", { ascending: true })
-        .limit(6);
+        .limit(11);
       if (!cancel && data) setUrls(data.map((s) => s.public_url));
     })();
     return () => {
