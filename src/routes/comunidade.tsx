@@ -69,17 +69,6 @@ function Comunidade() {
   const stickerCacheRef = useRef<Record<string, Sticker>>({});
   useEffect(() => { stickerCacheRef.current = stickerCache; }, [stickerCache]);
 
-
-  useEffect(() => {
-    if (cooldownLeft <= 0) return;
-    const t = setInterval(() => {
-      const remaining = Math.max(0, COOLDOWN_MS - (Date.now() - lastSentRef.current));
-      setCooldownLeft(remaining);
-      if (remaining <= 0) clearInterval(t);
-    }, 250);
-    return () => clearInterval(t);
-  }, [cooldownLeft]);
-
   useEffect(() => {
     if (!user) return;
     (async () => {
