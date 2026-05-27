@@ -116,7 +116,7 @@ export function AnonymousMessagesBanner() {
         </div>
 
         {/* RIGHT — illustration */}
-        <div className="relative h-[320px] sm:h-[420px] md:h-[520px] xl:h-[560px] mt-2 md:mt-0">
+        <div className="relative h-[200px] sm:h-[260px] md:h-[340px] xl:h-[380px] mt-2 md:mt-0 flex items-center justify-center">
           <Illustration />
         </div>
       </div>
@@ -126,11 +126,11 @@ export function AnonymousMessagesBanner() {
 
 function Illustration() {
   return (
-    <div className="absolute inset-0">
+    <div className="relative w-full h-full flex items-center justify-center">
       {/* glow halo behind envelope */}
       <div
         aria-hidden
-        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-56 w-56 md:h-72 md:w-72 rounded-full blur-3xl opacity-60"
+        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-48 w-48 md:h-60 md:w-60 rounded-full blur-3xl opacity-60"
         style={{ background: "radial-gradient(circle, #C7B6FF 0%, transparent 70%)" }}
       />
 
@@ -138,7 +138,7 @@ function Illustration() {
       <img
         src={letterImage}
         alt="Envelope com carta anônima"
-        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 min-w-[115%] min-h-[115%] w-auto h-auto max-w-none max-h-none object-contain"
+        className="relative w-auto h-full max-w-full max-h-full object-contain"
         style={{ animation: "anon-float 7s ease-in-out infinite" }}
       />
     </div>
