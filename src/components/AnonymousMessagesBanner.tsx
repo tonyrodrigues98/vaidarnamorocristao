@@ -138,7 +138,7 @@ function Illustration() {
       <img
         src={letterImage}
         alt="Envelope com carta anônima"
-        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full object-contain"
+        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 min-w-[115%] min-h-[115%] w-auto h-auto max-w-none max-h-none object-contain"
         style={{ animation: "anon-float 7s ease-in-out infinite" }}
       />
     </div>
