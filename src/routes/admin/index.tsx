@@ -6,7 +6,7 @@ import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Check, X, Ban, ShieldAlert, Flag, Newspaper, Trash2, Users as UsersIcon, ClipboardList, MessageSquareWarning, ShieldX, Heart, Plus, UserPlus, Search, BadgeCheck, LifeBuoy, Settings, AlertTriangle, MessageSquare, Eye, MailOpen, Gavel } from "lucide-react";
+import { Check, X, Ban, ShieldAlert, Flag, Newspaper, Trash2, Users as UsersIcon, ClipboardList, MessageSquareWarning, ShieldX, Heart, Plus, UserPlus, Search, BadgeCheck, LifeBuoy, Settings, AlertTriangle, MessageSquare, Eye, MailOpen, Gavel, Coins, Loader2 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -409,6 +409,7 @@ function Admin() {
                 canVerify={isSuperAdmin || isAdmin}
                 onToggleSupportAgent={toggleSupportAgent}
                 canManageSupportAgents={isSuperAdmin}
+                canGrantCoins={isSuperAdmin}
               />
             ) : tab === "restricted_words" ? (
               <RestrictedWordsPanel />
@@ -689,7 +690,7 @@ function Admin() {
 }
 
 function UsersPanel({
-  users, busy, onChangeRole, onToggleVerified, canVerify, onToggleSupportAgent, canManageSupportAgents,
+  users, busy, onChangeRole, onToggleVerified, canVerify, onToggleSupportAgent, canManageSupportAgents, canGrantCoins,
 }: {
   users: AdminUserRowWithSupport[];
   busy: string | null;
@@ -698,6 +699,7 @@ function UsersPanel({
   canVerify: boolean;
   onToggleSupportAgent: (userId: string, currentRole: AppRole, current: boolean) => void;
   canManageSupportAgents: boolean;
+  canGrantCoins: boolean;
 }) {
   if (users.length === 0) {
     return <div className="glass rounded-2xl p-10 text-center text-muted-foreground shadow-soft">Nenhum usuário.</div>;
@@ -748,6 +750,9 @@ function UsersPanel({
               >
                 <LifeBuoy className="h-4 w-4" />
               </Button>
+            )}
+            {canGrantCoins && (
+              <GrantCoinsButton userId={u.id} userName={u.full_name} />
             )}
             <div className="flex-1 sm:w-52">
             <Select
