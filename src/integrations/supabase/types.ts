@@ -2153,6 +2153,10 @@ export type Database = {
         Args: { _amount?: number; _note?: string; _user_id: string }
         Returns: undefined
       }
+      can_access_support_ticket: {
+        Args: { _ticket_id: string }
+        Returns: boolean
+      }
       cancel_account_deletion: { Args: never; Returns: undefined }
       claim_daily_coins: {
         Args: never
@@ -2258,6 +2262,7 @@ export type Database = {
         Returns: undefined
       }
       increment_article_views: { Args: { _slug: string }; Returns: undefined }
+      is_match_participant: { Args: { _match_id: string }; Returns: boolean }
       is_staff: { Args: { _user_id: string }; Returns: boolean }
       is_support_staff: { Args: { _user_id: string }; Returns: boolean }
       mark_all_notifications_read: { Args: never; Returns: number }
