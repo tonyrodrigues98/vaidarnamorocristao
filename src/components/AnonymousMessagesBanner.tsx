@@ -116,7 +116,7 @@ export function AnonymousMessagesBanner() {
         </div>
 
         {/* RIGHT — illustration */}
-        <div className="relative h-[260px] sm:h-[320px] md:h-[400px] mt-2 md:mt-0">
+        <div className="relative h-[320px] sm:h-[420px] md:h-[520px] xl:h-[560px] mt-2 md:mt-0">
           <Illustration />
         </div>
       </div>
@@ -138,7 +138,7 @@ function Illustration() {
       <img
         src={letterImage}
         alt="Envelope com carta anônima"
-        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full object-contain"
+        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 min-w-[115%] min-h-[115%] w-auto h-auto max-w-none max-h-none object-contain"
         style={{ animation: "anon-float 7s ease-in-out infinite" }}
       />
     </div>
