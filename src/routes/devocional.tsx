@@ -684,7 +684,7 @@ function FilterChip({
       className={`rounded-full border px-3.5 py-1.5 text-sm font-medium transition-all ${
         active
           ? "border-[var(--rose)] bg-[var(--rose)] text-white shadow-glow"
-          : "border-border bg-card/60 text-foreground/70 hover:bg-muted"
+          : "border-border/80 bg-card text-foreground/85 shadow-soft hover:bg-accent"
       }`}
     >
       {children}
