@@ -14,6 +14,7 @@ type AuthCtx = {
   isSupportAgent: boolean;
   profileStatus: "pending" | "approved" | "rejected" | "banned" | null;
   isApproved: boolean;
+  rolesLoaded: boolean;
   refreshRole: () => Promise<void>;
   signOut: () => Promise<void>;
 };
@@ -29,6 +30,7 @@ const Ctx = createContext<AuthCtx>({
   isSupportAgent: false,
   profileStatus: null,
   isApproved: false,
+  rolesLoaded: false,
   refreshRole: async () => {},
   signOut: async () => {},
 });
@@ -41,6 +43,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [publicListing, setPublicListing] = useState(false);
   const [isSupportAgent, setIsSupportAgent] = useState(false);
   const [profileStatus, setProfileStatus] = useState<AuthCtx["profileStatus"]>(null);
+  const [rolesLoaded, setRolesLoaded] = useState(false);
 
   async function loadRoles(uid: string) {
     const { data } = await supabase
@@ -60,6 +63,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .eq("id", uid)
       .maybeSingle();
     setProfileStatus((prof?.status as AuthCtx["profileStatus"]) ?? null);
+    setRolesLoaded(true);
   }
 
   useEffect(() => {
@@ -74,6 +78,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setPublicListing(false);
         setIsSupportAgent(false);
         setProfileStatus(null);
+        setRolesLoaded(true);
       }
     });
 
@@ -81,6 +86,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(s);
       setLoading(false);
       if (s?.user) loadRoles(s.user.id);
+      else setRolesLoaded(true);
     });
 
     return () => sub.subscription.unsubscribe();
@@ -116,6 +122,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     isSupportAgent,
     profileStatus,
     isApproved,
+    rolesLoaded,
     refreshRole: async () => {
       if (session?.user) await loadRoles(session.user.id);
     },
