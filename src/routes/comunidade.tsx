@@ -169,6 +169,22 @@ function Comunidade() {
     }
   };
 
+  const loadStickersByIds = useCallback(async (ids: string[]) => {
+    const missing = ids.filter((id) => id && !stickerCache[id]);
+    if (missing.length === 0) return;
+    const { data } = await supabase
+      .from("stickers")
+      .select("id, category_id, name, storage_path, public_url, mime_type, is_animated, active, sort_order")
+      .in("id", missing);
+    if (data && data.length) {
+      setStickerCache((prev) => {
+        const next = { ...prev };
+        for (const s of data as Sticker[]) next[s.id] = s;
+        return next;
+      });
+    }
+  }, [stickerCache]);
+
   useEffect(() => {
     if (!user) return;
     let ignore = false;
