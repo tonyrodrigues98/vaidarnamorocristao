@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
+import { AtmosphereLayer } from "@/components/atmosphere/AtmosphereLayer";
 import { Textarea } from "@/components/ui/textarea";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { recomputeMyBadges } from "@/lib/recomputeBadges";
