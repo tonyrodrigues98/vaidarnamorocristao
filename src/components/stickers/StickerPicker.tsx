@@ -62,23 +62,22 @@ export function StickerPicker({ open, onClose, onPick }: Props) {
         ) : (
           <div className="grid grid-cols-4 gap-2 sm:grid-cols-5">
             {filtered.map((s) => (
-              <motion.button
+              <button
                 key={s.id}
                 type="button"
-                whileHover={{ scale: 1.08 }}
-                whileTap={{ scale: 0.88 }}
                 onClick={() => { onPick(s); onClose(); }}
-                className="group relative aspect-square overflow-hidden rounded-xl bg-muted/30 p-1.5 transition hover:bg-accent/40"
+                className="group relative aspect-square overflow-hidden rounded-xl bg-muted/30 p-1.5 transition-transform duration-150 hover:scale-105 hover:bg-accent/40 active:scale-95"
                 aria-label={s.name}
               >
                 <img
                   src={s.public_url}
                   alt={s.name}
                   loading="lazy"
+                  decoding="async"
                   draggable={false}
                   className="h-full w-full object-contain"
                 />
-              </motion.button>
+              </button>
             ))}
           </div>
         )}

@@ -1,7 +1,7 @@
 import { friendlyError } from "@/lib/errors";
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { RequireApproved } from "@/components/RequireApproved";
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
@@ -48,8 +48,6 @@ function Comunidade() {
   const isStaffViewer = canFlagMessages;
   const [messages, setMessages] = useState<GMsg[]>([]);
   const [profiles, setProfiles] = useState<Record<string, Profile>>({});
-  const [text, setText] = useState("");
-  const [sending, setSending] = useState(false);
   const [approved, setApproved] = useState<boolean | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -61,38 +59,15 @@ function Comunidade() {
   const [staffMap, setStaffMap] = useState<Record<string, { role: AppRole; color: RoleColor | null }>>({});
   const [contribIds, setContribIds] = useState<Set<string>>(new Set());
   const restrictedWords = useRestrictedWords();
-  const [cooldownLeft, setCooldownLeft] = useState(0);
-  const lastSentRef = useRef<number>(0);
   const [warning, setWarning] = useState<string | null>(null);
   const [flaggedIds, setFlaggedIds] = useState<Set<string>>(new Set());
   const [myFlags, setMyFlags] = useState<Record<string, { id: string; reason: string }>>({});
   const [flagDialog, setFlagDialog] = useState<{ msg: GMsg; existingId?: string } | null>(null);
   const [flagReason, setFlagReason] = useState("");
   const [flagBusy, setFlagBusy] = useState(false);
-  const [pickerOpen, setPickerOpen] = useState(false);
-  const [plusOpen, setPlusOpen] = useState(false);
   const [stickerCache, setStickerCache] = useState<Record<string, Sticker>>({});
-
-  useEffect(() => {
-    // Preload all active stickers once to render in messages without per-row fetch
-    fetchStickers({ activeOnly: true })
-      .then((all) => {
-        const m: Record<string, Sticker> = {};
-        for (const s of all) m[s.id] = s;
-        setStickerCache(m);
-      })
-      .catch(() => {});
-  }, []);
-
-  useEffect(() => {
-    if (cooldownLeft <= 0) return;
-    const t = setInterval(() => {
-      const remaining = Math.max(0, COOLDOWN_MS - (Date.now() - lastSentRef.current));
-      setCooldownLeft(remaining);
-      if (remaining <= 0) clearInterval(t);
-    }, 250);
-    return () => clearInterval(t);
-  }, [cooldownLeft]);
+  const stickerCacheRef = useRef<Record<string, Sticker>>({});
+  useEffect(() => { stickerCacheRef.current = stickerCache; }, [stickerCache]);
 
   useEffect(() => {
     if (!user) return;
@@ -179,6 +154,23 @@ function Comunidade() {
     }
   };
 
+  const loadStickersByIds = useCallback(async (ids: string[]) => {
+    const cache = stickerCacheRef.current;
+    const missing = Array.from(new Set(ids.filter((id) => id && !cache[id])));
+    if (missing.length === 0) return;
+    const { data } = await supabase
+      .from("stickers")
+      .select("id, category_id, name, storage_path, public_url, mime_type, is_animated, active, sort_order")
+      .in("id", missing);
+    if (data && data.length) {
+      setStickerCache((prev) => {
+        const next = { ...prev };
+        for (const s of data as Sticker[]) next[s.id] = s;
+        return next;
+      });
+    }
+  }, []);
+
   useEffect(() => {
     if (!user) return;
     let ignore = false;
@@ -193,6 +185,8 @@ function Comunidade() {
       const list = ((data ?? []) as GMsg[]).slice().reverse();
       setMessages(list);
       await loadProfiles(Array.from(new Set(list.map((m) => m.sender_id))));
+      const stickerIds = Array.from(new Set(list.map((m) => m.sticker_id).filter(Boolean) as string[]));
+      if (stickerIds.length) loadStickersByIds(stickerIds);
       markSeen(user.id, "community");
       requestAnimationFrame(() => {
         if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -208,6 +202,7 @@ function Comunidade() {
           const m = payload.new as GMsg;
           setMessages((prev) => [...prev, m]);
           await loadProfiles([m.sender_id]);
+          if (m.sticker_id) loadStickersByIds([m.sticker_id]);
           if (user) markSeen(user.id, "community");
           requestAnimationFrame(() => {
             if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -235,55 +230,61 @@ function Comunidade() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
+  // Derived lookups — memoized to avoid O(n^2) reply scans and inline filters
+  const messagesById = useMemo(() => {
+    const m = new Map<string, GMsg>();
+    for (const msg of messages) m.set(msg.id, msg);
+    return m;
+  }, [messages]);
+
+  const pinnedMessages = useMemo(
+    () => messages.filter((m) => m.pinned_at).sort((a, b) => (b.pinned_at ?? "").localeCompare(a.pinned_at ?? "")),
+    [messages]
+  );
+
+  const visibleMessages = useMemo(
+    () =>
+      messages.filter((m) => {
+        if (!flaggedIds.has(m.id)) return true;
+        if (isStaffViewer) return true;
+        if (user && m.sender_id === user.id) return true;
+        return false;
+      }),
+    [messages, flaggedIds, isStaffViewer, user]
+  );
+
   if (!loading && !user) return <Navigate to="/auth/login" />;
 
-  async function send(e: FormEvent) {
-    e.preventDefault();
-    const content = text.trim();
-    if (!content || !user) return;
+  const sendMessage = useCallback(async (content: string): Promise<boolean> => {
+    if (!content || !user) return false;
     const hit = findRestrictedWord(content, restrictedWords);
     if (hit) {
       setWarning(hit);
-      return;
+      return false;
     }
-    const since = Date.now() - lastSentRef.current;
-    if (since < COOLDOWN_MS) {
-      toast.error(`Aguarde ${Math.ceil((COOLDOWN_MS - since) / 1000)}s para enviar outra mensagem`);
-      return;
-    }
-    setSending(true);
     const { error } = await supabase.from("global_messages").insert({
       sender_id: user.id,
       content,
       reply_to_id: replyTo?.id ?? null,
     });
-    setSending(false);
-    if (error) { toast.error(friendlyError(error)); return; }
-    setText("");
+    if (error) { toast.error(friendlyError(error)); return false; }
     setReplyTo(null);
-    lastSentRef.current = Date.now();
-    setCooldownLeft(COOLDOWN_MS);
-  }
+    return true;
+  }, [user, restrictedWords, replyTo]);
 
-  async function sendSticker(s: Sticker) {
-    if (!user) return;
-    const since = Date.now() - lastSentRef.current;
-    if (since < COOLDOWN_MS) {
-      toast.error(`Aguarde ${Math.ceil((COOLDOWN_MS - since) / 1000)}s para enviar outro sticker`);
-      return;
-    }
+  const sendSticker = useCallback(async (s: Sticker): Promise<boolean> => {
+    if (!user) return false;
     const { error } = await supabase.from("global_messages").insert({
       sender_id: user.id,
       content: "",
       sticker_id: s.id,
       reply_to_id: replyTo?.id ?? null,
     });
-    if (error) { toast.error(friendlyError(error)); return; }
+    if (error) { toast.error(friendlyError(error)); return false; }
     setStickerCache((prev) => (prev[s.id] ? prev : { ...prev, [s.id]: s }));
     setReplyTo(null);
-    lastSentRef.current = Date.now();
-    setCooldownLeft(COOLDOWN_MS);
-  }
+    return true;
+  }, [user, replyTo]);
 
   async function remove(id: string) {
     const { error } = await supabase.from("global_messages").delete().eq("id", id);
@@ -377,15 +378,12 @@ function Comunidade() {
         </div>
 
         <div className="glass mt-6 flex flex-1 flex-col overflow-hidden rounded-3xl shadow-soft">
-          {messages.some((m) => m.pinned_at) && (
+          {pinnedMessages.length > 0 && (
             <div className="space-y-2 border-b border-primary/20 bg-primary/5 p-3">
               <div className="flex items-center gap-2 text-xs font-semibold text-primary">
                 <Pin className="h-3.5 w-3.5" /> Mensagens fixadas
               </div>
-              {messages
-                .filter((m) => m.pinned_at)
-                .sort((a, b) => (b.pinned_at ?? "").localeCompare(a.pinned_at ?? ""))
-                .map((m) => {
+              {pinnedMessages.map((m) => {
                   const p = profiles[m.sender_id];
                   const name = p?.full_name?.split(" ")[0] ?? "Alguém";
                   const senderStaff = staffMap[m.sender_id];
@@ -432,15 +430,7 @@ function Comunidade() {
                 Nenhuma mensagem ainda. Seja o primeiro!
               </div>
             ) : (
-              messages
-                .filter((m) => {
-                  // Mensagens sinalizadas: visíveis ao autor e a staff; ocultas para os demais
-                  if (!flaggedIds.has(m.id)) return true;
-                  if (isStaffViewer) return true;
-                  if (user && m.sender_id === user.id) return true;
-                  return false;
-                })
-                .map((m) => {
+              visibleMessages.map((m) => {
                 const p = profiles[m.sender_id];
                 const mine = user && m.sender_id === user.id;
                 const canDelete = mine || canModerateMessages;
@@ -448,7 +438,7 @@ function Comunidade() {
                 const isEditing = editingId === m.id;
                 const name = p?.full_name?.split(" ")[0] ?? "Alguém";
                 const showActions = actionsOpenId === m.id;
-                const replied = m.reply_to_id ? messages.find((x) => x.id === m.reply_to_id) : null;
+                const replied = m.reply_to_id ? messagesById.get(m.reply_to_id) ?? null : null;
                 const repliedName = replied
                   ? (profiles[replied.sender_id]?.full_name?.split(" ")[0] ?? "Alguém")
                   : "";
@@ -607,98 +597,20 @@ function Comunidade() {
             )}
           </div>
 
-          <form onSubmit={send} className="flex flex-col gap-2 border-t border-border bg-background/60 p-3">
-            {replyTo && (
-              <div className="flex items-stretch gap-2 rounded-lg border border-border bg-muted/40 px-3 py-2">
-                <span className="w-1 shrink-0 rounded bg-primary" />
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs font-semibold text-primary">
-                    Respondendo a {profiles[replyTo.sender_id]?.full_name?.split(" ")[0] ?? "Alguém"}
-                  </p>
-                  {replyTo.sticker_id && stickerCache[replyTo.sticker_id] ? (
-                    <p className="text-xs text-muted-foreground">Sticker</p>
-                  ) : (
-                    <p className="line-clamp-1 text-xs text-muted-foreground">{replyTo.content}</p>
-                  )}
-                </div>
-                {replyTo.sticker_id && stickerCache[replyTo.sticker_id] && (
-                  <img
-                    src={stickerCache[replyTo.sticker_id].public_url}
-                    alt=""
-                    className="h-10 w-10 shrink-0 select-none object-contain"
-                    draggable={false}
-                  />
-                )}
-                <button
-                  type="button"
-                  onClick={() => setReplyTo(null)}
-                  className="rounded-full p-1 text-muted-foreground hover:text-foreground"
-                  aria-label="Cancelar resposta"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-            )}
-            <div className="relative flex items-center gap-2">
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => setPlusOpen((v) => !v)}
-                  disabled={!approved}
-                  aria-label="Mais opções de envio"
-                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-muted/40 text-muted-foreground transition hover:bg-accent hover:text-foreground disabled:opacity-50"
-                >
-                  <motion.span animate={{ rotate: plusOpen ? 45 : 0 }} transition={{ type: "spring", stiffness: 380, damping: 22 }}>
-                    <Plus className="h-4 w-4" />
-                  </motion.span>
-                </button>
-                <AnimatePresence>
-                  {plusOpen && (
-                    <>
-                      <div className="fixed inset-0 z-30" onClick={() => setPlusOpen(false)} />
-                      <motion.div
-                        initial={{ opacity: 0, y: 6, scale: 0.94 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: 6, scale: 0.94 }}
-                        transition={{ type: "spring", stiffness: 380, damping: 28 }}
-                        className="absolute bottom-full left-0 z-40 mb-2 min-w-[160px] overflow-hidden rounded-xl border border-border bg-background/95 p-1 shadow-xl backdrop-blur"
-                      >
-                        <button
-                          type="button"
-                          onClick={() => { setPlusOpen(false); setPickerOpen(true); }}
-                          className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm transition hover:bg-accent"
-                        >
-                          <StickerIcon className="h-4 w-4 text-primary" />
-                          Sticker
-                        </button>
-                      </motion.div>
-                    </>
-                  )}
-                </AnimatePresence>
-                <StickerPicker open={pickerOpen} onClose={() => setPickerOpen(false)} onPick={(s) => sendSticker(s)} />
-              </div>
-              <Input
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                placeholder={approved === false ? "Aguardando aprovação para enviar mensagens" : "Escreva uma mensagem para a comunidade..."}
-                maxLength={2000}
-                disabled={!approved || sending}
-                className="flex-1"
-              />
-              <Button type="submit" disabled={!approved || sending || !text.trim() || cooldownLeft > 0} size="icon" className="rounded-full">
-                {cooldownLeft > 0 ? (
-                  <span className="text-[10px] font-semibold">{Math.ceil(cooldownLeft / 1000)}s</span>
-                ) : (
-                  <Send className="h-4 w-4" />
-                )}
-              </Button>
-            </div>
-          </form>
+          <ChatComposer
+            approved={!!approved}
+            replyTo={replyTo}
+            replyToName={replyTo ? profiles[replyTo.sender_id]?.full_name?.split(" ")[0] ?? "Alguém" : ""}
+            replyToStickerUrl={replyTo?.sticker_id ? stickerCache[replyTo.sticker_id]?.public_url ?? null : null}
+            onCancelReply={() => setReplyTo(null)}
+            onSend={sendMessage}
+            onSendSticker={sendSticker}
+          />
         </div>
       </main>
       <RestrictedWordDialog word={warning} onClose={() => setWarning(null)} />
       <ActionsSheet
-        msg={actionsOpenId ? messages.find((m) => m.id === actionsOpenId) ?? null : null}
+        msg={actionsOpenId ? messagesById.get(actionsOpenId) ?? null : null}
         onClose={() => setActionsOpenId(null)}
         currentUserId={user?.id ?? null}
         canModerateMessages={canModerateMessages}
@@ -900,3 +812,158 @@ function ActionRow({
     </button>
   );
 }
+
+const ChatComposer = memo(function ChatComposer({
+  approved,
+  replyTo,
+  replyToName,
+  replyToStickerUrl,
+  onCancelReply,
+  onSend,
+  onSendSticker,
+}: {
+  approved: boolean;
+  replyTo: GMsg | null;
+  replyToName: string;
+  replyToStickerUrl: string | null;
+  onCancelReply: () => void;
+  onSend: (content: string) => Promise<boolean>;
+  onSendSticker: (s: Sticker) => Promise<boolean>;
+}) {
+  const [text, setText] = useState("");
+  const [sending, setSending] = useState(false);
+  const [cooldownLeft, setCooldownLeft] = useState(0);
+  const [plusOpen, setPlusOpen] = useState(false);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const lastSentRef = useRef<number>(0);
+
+  useEffect(() => {
+    if (cooldownLeft <= 0) return;
+    const t = setInterval(() => {
+      const remaining = Math.max(0, COOLDOWN_MS - (Date.now() - lastSentRef.current));
+      setCooldownLeft(remaining);
+      if (remaining <= 0) clearInterval(t);
+    }, 250);
+    return () => clearInterval(t);
+  }, [cooldownLeft]);
+
+  async function handleSubmit(e: FormEvent) {
+    e.preventDefault();
+    const content = text.trim();
+    if (!content) return;
+    const since = Date.now() - lastSentRef.current;
+    if (since < COOLDOWN_MS) {
+      toast.error(`Aguarde ${Math.ceil((COOLDOWN_MS - since) / 1000)}s para enviar outra mensagem`);
+      return;
+    }
+    setSending(true);
+    const ok = await onSend(content);
+    setSending(false);
+    if (ok) {
+      setText("");
+      lastSentRef.current = Date.now();
+      setCooldownLeft(COOLDOWN_MS);
+    }
+  }
+
+  async function handleSticker(s: Sticker) {
+    const since = Date.now() - lastSentRef.current;
+    if (since < COOLDOWN_MS) {
+      toast.error(`Aguarde ${Math.ceil((COOLDOWN_MS - since) / 1000)}s para enviar outro sticker`);
+      return;
+    }
+    const ok = await onSendSticker(s);
+    if (ok) {
+      lastSentRef.current = Date.now();
+      setCooldownLeft(COOLDOWN_MS);
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="flex flex-col gap-2 border-t border-border bg-background/60 p-3">
+      {replyTo && (
+        <div className="flex items-stretch gap-2 rounded-lg border border-border bg-muted/40 px-3 py-2">
+          <span className="w-1 shrink-0 rounded bg-primary" />
+          <div className="min-w-0 flex-1">
+            <p className="text-xs font-semibold text-primary">Respondendo a {replyToName}</p>
+            {replyToStickerUrl ? (
+              <p className="text-xs text-muted-foreground">Sticker</p>
+            ) : (
+              <p className="line-clamp-1 text-xs text-muted-foreground">{replyTo.content}</p>
+            )}
+          </div>
+          {replyToStickerUrl && (
+            <img
+              src={replyToStickerUrl}
+              alt=""
+              className="h-10 w-10 shrink-0 select-none object-contain"
+              draggable={false}
+            />
+          )}
+          <button
+            type="button"
+            onClick={onCancelReply}
+            className="rounded-full p-1 text-muted-foreground hover:text-foreground"
+            aria-label="Cancelar resposta"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
+      <div className="relative flex items-center gap-2">
+        <div className="relative">
+          <button
+            type="button"
+            onClick={() => setPlusOpen((v) => !v)}
+            disabled={!approved}
+            aria-label="Mais opções de envio"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-muted/40 text-muted-foreground transition hover:bg-accent hover:text-foreground disabled:opacity-50"
+          >
+            <motion.span animate={{ rotate: plusOpen ? 45 : 0 }} transition={{ type: "spring", stiffness: 380, damping: 22 }}>
+              <Plus className="h-4 w-4" />
+            </motion.span>
+          </button>
+          <AnimatePresence>
+            {plusOpen && (
+              <>
+                <div className="fixed inset-0 z-30" onClick={() => setPlusOpen(false)} />
+                <motion.div
+                  initial={{ opacity: 0, y: 6, scale: 0.94 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 6, scale: 0.94 }}
+                  transition={{ type: "spring", stiffness: 380, damping: 28 }}
+                  className="absolute bottom-full left-0 z-40 mb-2 min-w-[160px] overflow-hidden rounded-xl border border-border bg-background/95 p-1 shadow-xl backdrop-blur"
+                >
+                  <button
+                    type="button"
+                    onClick={() => { setPlusOpen(false); setPickerOpen(true); }}
+                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm transition hover:bg-accent"
+                  >
+                    <StickerIcon className="h-4 w-4 text-primary" />
+                    Sticker
+                  </button>
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>
+          <StickerPicker open={pickerOpen} onClose={() => setPickerOpen(false)} onPick={handleSticker} />
+        </div>
+        <Input
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          placeholder={!approved ? "Aguardando aprovação para enviar mensagens" : "Escreva uma mensagem para a comunidade..."}
+          maxLength={2000}
+          disabled={!approved || sending}
+          className="flex-1"
+        />
+        <Button type="submit" disabled={!approved || sending || !text.trim() || cooldownLeft > 0} size="icon" className="rounded-full">
+          {cooldownLeft > 0 ? (
+            <span className="text-[10px] font-semibold">{Math.ceil(cooldownLeft / 1000)}s</span>
+          ) : (
+            <Send className="h-4 w-4" />
+          )}
+        </Button>
+      </div>
+    </form>
+  );
+});

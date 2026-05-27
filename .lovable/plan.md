@@ -1,65 +1,54 @@
-# Sistema de Stickers — Chat Global
+## Diagnóstico
 
-## Visão geral
-Adicionar envio de stickers no chat global (`/comunidade`) com biblioteca curada gerenciada por super_admin em nova aba `/admin/stickers`.
+A página `/comunidade` carrega até 100 mensagens e re-renderiza tudo a cada mudança de estado (digitar no input, hover, abrir menu, novo cooldown, nova mensagem em tempo real). Os pontos mais pesados:
 
-## Banco de dados (migração única)
+1. **Renderização de todas as mensagens em uma única árvore**, sem `React.memo`, sem virtualização. Cada item monta `OnlineDot`, `UserBadges`, `RoleBadge`, `VerifiedBadge`, avatar, etc.
+2. **`UserBadges` e `OnlineDot` por linha** — cada componente abre seu próprio fetch / subscription por `userId`. Com muitas mensagens repetidas do mesmo autor, são vários hooks duplicados.
+3. **Busca O(n²) do "reply_to"**: `messages.find(x => x.id === m.reply_to_id)` dentro do `.map()`.
+4. **`messages.some(...pinned)` e `messages.filter(...)` recomputados inline** a cada render.
+5. **Pré-carga de stickers**: `fetchStickers({ activeOnly: true })` traz **todos** os stickers do banco (sem `limit`) só para o cache de miniaturas, mesmo que a comunidade só use alguns.
+6. **`framer-motion` em cada sticker**: `StickerMessage` faz spring animation no mount de cada `<img>`, e o `StickerPicker` usa `motion.button` com `whileHover/whileTap` por sticker.
+7. **Lookups de `staffMap`/`contribIds`/`flaggedIds`** ok, mas tudo dentro do mesmo componente gigante — qualquer setState global re-renderiza a lista inteira.
 
-**Novas tabelas:**
-- `sticker_categories` — `id`, `name`, `slug`, `sort_order`, `created_at`
-- `stickers` — `id`, `category_id`, `name`, `storage_path`, `public_url`, `mime_type`, `is_animated`, `active`, `sort_order`, `created_at`, `created_by`
+## Plano
 
-**Storage:**
-- Bucket público `stickers` (somente super_admin escreve; leitura pública)
+### 1. Extrair e memoizar a linha de mensagem
+- Criar `MessageRow` (componente novo, dentro de `comunidade.tsx`) envolvido em `React.memo` recebendo apenas o que precisa: `m`, `p` (profile), `repliedMsg`, `repliedName`, `senderStaff`, flags booleanas e callbacks estáveis.
+- Estabilizar callbacks com `useCallback` (`onReply`, `onOpenActions`, `jumpToMessage`, `togglePin`, etc.).
+- Resultado: digitar no input ou atualizar cooldown deixa de re-renderizar 100 linhas.
 
-**Alteração em `global_messages`:**
-- Coluna `sticker_id uuid REFERENCES stickers(id)` (nullable)
-- Relaxar `content_check` para permitir `content` curto quando sticker é enviado (ex: usar conteúdo fixo `"[sticker]"`), ou tornar content nullable quando `sticker_id IS NOT NULL` via novo CHECK.
+### 2. Índices pré-computados com `useMemo`
+- `messagesById = useMemo(() => new Map(messages.map(m => [m.id, m])), [messages])` para o lookup de reply em O(1).
+- `pinnedMessages = useMemo(...)` e `visibleMessages = useMemo(...)` (já com filtro de flagged).
+- `hasPinned = pinnedMessages.length > 0` em vez de `messages.some(...)`.
 
-**RLS:**
-- `stickers` / `sticker_categories`: SELECT para `authenticated` (apenas ativos); INSERT/UPDATE/DELETE apenas `super_admin`.
-- GRANTs explícitos para `authenticated` e `service_role`.
+### 3. Compartilhar badges/presence por autor
+- Pré-calcular `uniqueSenderIds` com `useMemo` a partir de `messages`.
+- Renderizar `UserBadges`/`OnlineDot` apenas uma vez por autor visível, passando o resultado já resolvido para `MessageRow` via prop (evita fetches/subscriptions duplicados). Alternativa simpler: manter `UserBadges` por linha mas garantir que o cache global é hit (já é) e que `MessageRow.memo` evita re-render redundante.
 
-**Storage policies:**
-- SELECT público no bucket `stickers`
-- INSERT/UPDATE/DELETE apenas super_admin
+### 4. Pré-carga de stickers mais leve
+- Limitar a pré-carga a stickers efetivamente usados na lista de mensagens carregadas: após `setMessages`, coletar os `sticker_id` distintos e buscar só esses por `in('id', ids)`.
+- Quando chega nova mensagem com `sticker_id` não cacheado, buscar só aquele.
+- Quando o usuário envia um sticker (já populado em cache via `sendSticker`), nada muda.
 
-## Frontend — Chat global (`src/routes/comunidade.tsx`)
+### 5. Aliviar animações
+- `StickerMessage`: remover `framer-motion`, substituir o spring por uma animação CSS leve (`animate-scale-in` já existente em `styles.css`) ou simplesmente uma transição de opacity. Continua "vivo" mas sem custo de JS por sticker.
+- `StickerPicker`: trocar `motion.button` com `whileHover/whileTap` por `<button>` com `transition active:scale-95 hover:scale-105` no Tailwind. Manter o `motion.div` do popover (é só 1 elemento).
+- O botão "+" pode manter o `motion.span` (1 elemento), sem impacto.
 
-- Adicionar botão `+` na barra de envio → menu com opção "Sticker" (framer-motion, fade+scale).
-- Componente novo `src/components/stickers/StickerPicker.tsx`:
-  - Desktop: popover ancorado ao botão
-  - Mobile: `Drawer` (bottom sheet) usando `@/components/ui/drawer`
-  - Tabs horizontais por categoria, grid 4 colunas, scroll vertical
-  - Lazy load com `loading="lazy"`, hover scale, tap bounce
-- Ao tocar em sticker: insert em `global_messages` com `sticker_id` e content `"[sticker]"`.
-- Renderização: detectar `sticker_id` na lista de mensagens; renderizar imagem (max ~140px) com pop animation de entrada (framer-motion initial scale 0.6 → 1 spring).
+### 6. Pequenos ajustes
+- Adicionar `decoding="async"` e `width`/`height` explícitos nos `<img>` de avatar e de sticker para evitar layout shift e ajudar o navegador.
+- Trocar `.slice().reverse()` por `[...data].reverse()` (mesma coisa, só estética).
+- Garantir `loading="lazy"` nas miniaturas de sticker dentro de mensagens fora da viewport (o `StickerMessage` ainda não usa lazy quando renderizado direto).
 
-## Frontend — Admin (`src/routes/admin/stickers.tsx`)
+## Detalhes técnicos
 
-- Rota nova, gated por `has_role(uid, 'super_admin')` (checar via `useAuth` + roles client).
-- Link na nav admin visível só para super_admin.
-- UI:
-  - Sidebar de categorias (criar/renomear/excluir)
-  - Grid de stickers da categoria selecionada, com preview, toggle ativo, editar nome, excluir
-  - Botão upload (drag&drop) — aceita .webp/.png, multi-arquivo
-  - Upload via `supabase.storage.from('stickers').upload()` direto (RLS bloqueia não-super_admin)
+- Nada de alteração de schema, RLS, server functions ou rotas.
+- Mudanças localizadas em: `src/routes/comunidade.tsx`, `src/components/stickers/StickerMessage.tsx`, `src/components/stickers/StickerPicker.tsx`.
+- Sem novas dependências. Continuamos com `framer-motion` apenas onde realmente agrega (overlays únicos).
+- Comportamento visual preservado: mesmas animações de entrada (via CSS), mesmas interações.
 
-## Animações
-- Framer Motion: picker slide-up + fade; sticker enter pop/bounce; chips hover; "+" menu micro.
+## Fora de escopo
 
-## Arquivos
-```text
-supabase/migrations/<ts>_stickers.sql        (NOVA)
-src/components/stickers/StickerPicker.tsx    (NOVA)
-src/components/stickers/StickerMessage.tsx   (NOVA)
-src/routes/admin/stickers.tsx                (NOVA)
-src/routes/admin/index.tsx                   (link condicional)
-src/routes/comunidade.tsx                    (botão +, render sticker)
-src/lib/stickers.ts                          (helpers: list, upload)
-```
-
-## Observações
-- Sem stickers iniciais — super_admin sobe a primeira leva pelo painel.
-- Sem fallback de GIF; apenas WEBP/PNG.
-- Cobertura de testes não incluída neste escopo.
+- Virtualização (`react-window`) — só compensa acima de algumas centenas de itens; o limite atual é 100 e o ganho dos passos 1–3 já deve ser suficiente. Posso adicionar depois se ainda travar.
+- Mudar o limite de 100 mensagens ou paginar histórico.
