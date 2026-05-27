@@ -464,15 +464,7 @@ function Comunidade() {
                 Nenhuma mensagem ainda. Seja o primeiro!
               </div>
             ) : (
-              messages
-                .filter((m) => {
-                  // Mensagens sinalizadas: visíveis ao autor e a staff; ocultas para os demais
-                  if (!flaggedIds.has(m.id)) return true;
-                  if (isStaffViewer) return true;
-                  if (user && m.sender_id === user.id) return true;
-                  return false;
-                })
-                .map((m) => {
+              visibleMessages.map((m) => {
                 const p = profiles[m.sender_id];
                 const mine = user && m.sender_id === user.id;
                 const canDelete = mine || canModerateMessages;
@@ -480,7 +472,7 @@ function Comunidade() {
                 const isEditing = editingId === m.id;
                 const name = p?.full_name?.split(" ")[0] ?? "Alguém";
                 const showActions = actionsOpenId === m.id;
-                const replied = m.reply_to_id ? messages.find((x) => x.id === m.reply_to_id) : null;
+                const replied = m.reply_to_id ? messagesById.get(m.reply_to_id) ?? null : null;
                 const repliedName = replied
                   ? (profiles[replied.sender_id]?.full_name?.split(" ")[0] ?? "Alguém")
                   : "";
