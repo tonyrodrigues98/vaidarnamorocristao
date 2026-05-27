@@ -775,6 +775,92 @@ function UsersPanel({
   );
 }
 
+function GrantCoinsButton({ userId, userName }: { userId: string; userName: string }) {
+  const [open, setOpen] = useState(false);
+  const [amount, setAmount] = useState<string>("10");
+  const [busy, setBusy] = useState(false);
+
+  async function submit() {
+    const n = Number(amount);
+    if (!Number.isFinite(n) || n <= 0 || n > 500 || !Number.isInteger(n)) {
+      toast.error("Informe um valor inteiro entre 1 e 500");
+      return;
+    }
+    setBusy(true);
+    const { data, error } = await supabase.rpc("admin_add_user_coins", {
+      _user_id: userId,
+      _amount: n,
+    });
+    setBusy(false);
+    if (error) {
+      if (error.message.includes("forbidden")) toast.error("Sem permissão");
+      else if (error.message.includes("invalid_amount")) toast.error("Valor inválido");
+      else toast.error(error.message);
+      return;
+    }
+    toast.success(`Saldo atualizado: ${data} moedas`);
+    setOpen(false);
+    setAmount("10");
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <Button
+        size="sm"
+        variant="outline"
+        onClick={() => setOpen(true)}
+        title="Adicionar moedas"
+      >
+        <Coins className="h-4 w-4" />
+      </Button>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Adicionar moedas</DialogTitle>
+          <DialogDescription>
+            Adicione moedas ao saldo de <strong>{userName}</strong>. O saldo máximo
+            por conta é 500 moedas.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-2">
+          <Label htmlFor="grant-coins-amount">Quantidade</Label>
+          <Input
+            id="grant-coins-amount"
+            type="number"
+            min={1}
+            max={500}
+            step={1}
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            disabled={busy}
+          />
+          <div className="flex flex-wrap gap-2 pt-1">
+            {[10, 50, 100, 250, 500].map((v) => (
+              <Button
+                key={v}
+                type="button"
+                size="sm"
+                variant="ghost"
+                onClick={() => setAmount(String(v))}
+                disabled={busy}
+              >
+                +{v}
+              </Button>
+            ))}
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setOpen(false)} disabled={busy}>
+            Cancelar
+          </Button>
+          <Button onClick={submit} disabled={busy}>
+            {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : "Confirmar"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 function PreCadastrosPanel({
   items, editing, draft, setDraft, onEdit, onCancel, onSave, onDelete, busy, currentUserId, isSuperAdmin,
 }: {
