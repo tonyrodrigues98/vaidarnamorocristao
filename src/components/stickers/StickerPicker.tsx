@@ -116,7 +116,7 @@ export function StickerPicker({ open, onClose, onPick }: Props) {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 12, scale: 0.96 }}
             transition={{ type: "spring", stiffness: 380, damping: 30 }}
-            className="absolute bottom-full right-0 z-50 mb-2 w-[360px] max-w-[92vw] overflow-hidden rounded-2xl border border-border bg-background/95 shadow-2xl backdrop-blur-xl"
+            className="absolute bottom-full left-0 z-50 mb-2 w-[360px] max-w-[92vw] overflow-hidden rounded-2xl border border-border bg-background/95 shadow-2xl backdrop-blur-xl"
             style={{ height: 380 }}
           >
             {content}
