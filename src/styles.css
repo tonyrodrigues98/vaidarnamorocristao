@@ -423,6 +423,30 @@
   --atmos-tint: oklch(0.70 0.12 280 / 0.22);
   --atmos-particle: oklch(0.98 0.02 280 / 0.95);
   --atmos-celestial: oklch(0.96 0.05 90);
+
+  /* Madrugada — brand accents shift to lilac/roxeado to combinar com o céu */
+  --rose: oklch(0.62 0.18 285);
+  --rose-soft: oklch(0.78 0.13 285);
+  --coral: oklch(0.70 0.16 295);
+  --petal: oklch(0.93 0.06 290);
+  --primary: oklch(0.62 0.18 285);
+  --primary-foreground: oklch(1 0 0);
+  --ring: oklch(0.62 0.18 285);
+  --accent: oklch(0.93 0.06 290);
+  --accent-foreground: oklch(0.32 0.14 285);
+
+  --gradient-text: linear-gradient(120deg, oklch(0.62 0.18 285) 0%, oklch(0.72 0.16 305) 100%);
+  --gradient-love: linear-gradient(135deg, oklch(0.70 0.16 295) 0%, oklch(0.62 0.18 285) 60%, oklch(0.30 0.12 285) 130%);
+  --shadow-glow: 0 10px 40px oklch(0.62 0.18 285 / 0.25);
+}
+
+.dark[data-period="night"], :root.dark[data-period="night"] {
+  --rose: oklch(0.74 0.16 285);
+  --rose-soft: oklch(0.62 0.14 285);
+  --coral: oklch(0.78 0.14 295);
+  --petal: oklch(0.34 0.08 285);
+  --primary: oklch(0.74 0.16 285);
+  --ring: oklch(0.74 0.16 285);
 }
 
 /* Hard off — user-disabled or reduced-motion (with mode != "on") */
