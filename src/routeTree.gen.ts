@@ -18,6 +18,7 @@ import { Route as OracoesRouteImport } from './routes/oracoes'
 import { Route as NotificacoesRouteImport } from './routes/notificacoes'
 import { Route as MatchesRouteImport } from './routes/matches'
 import { Route as ManualRouteImport } from './routes/manual'
+import { Route as LojaRouteImport } from './routes/loja'
 import { Route as InteressesRouteImport } from './routes/interesses'
 import { Route as InicioRouteImport } from './routes/inicio'
 import { Route as DevocionalRouteImport } from './routes/devocional'
@@ -93,6 +94,11 @@ const MatchesRoute = MatchesRouteImport.update({
 const ManualRoute = ManualRouteImport.update({
   id: '/manual',
   path: '/manual',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LojaRoute = LojaRouteImport.update({
+  id: '/loja',
+  path: '/loja',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InteressesRoute = InteressesRouteImport.update({
@@ -262,6 +268,7 @@ export interface FileRoutesByFullPath {
   '/devocional': typeof DevocionalRoute
   '/inicio': typeof InicioRoute
   '/interesses': typeof InteressesRoute
+  '/loja': typeof LojaRoute
   '/manual': typeof ManualRoute
   '/matches': typeof MatchesRoute
   '/notificacoes': typeof NotificacoesRoute
@@ -304,6 +311,7 @@ export interface FileRoutesByTo {
   '/devocional': typeof DevocionalRoute
   '/inicio': typeof InicioRoute
   '/interesses': typeof InteressesRoute
+  '/loja': typeof LojaRoute
   '/manual': typeof ManualRoute
   '/matches': typeof MatchesRoute
   '/notificacoes': typeof NotificacoesRoute
@@ -347,6 +355,7 @@ export interface FileRoutesById {
   '/devocional': typeof DevocionalRoute
   '/inicio': typeof InicioRoute
   '/interesses': typeof InteressesRoute
+  '/loja': typeof LojaRoute
   '/manual': typeof ManualRoute
   '/matches': typeof MatchesRoute
   '/notificacoes': typeof NotificacoesRoute
@@ -391,6 +400,7 @@ export interface FileRouteTypes {
     | '/devocional'
     | '/inicio'
     | '/interesses'
+    | '/loja'
     | '/manual'
     | '/matches'
     | '/notificacoes'
@@ -433,6 +443,7 @@ export interface FileRouteTypes {
     | '/devocional'
     | '/inicio'
     | '/interesses'
+    | '/loja'
     | '/manual'
     | '/matches'
     | '/notificacoes'
@@ -475,6 +486,7 @@ export interface FileRouteTypes {
     | '/devocional'
     | '/inicio'
     | '/interesses'
+    | '/loja'
     | '/manual'
     | '/matches'
     | '/notificacoes'
@@ -518,6 +530,7 @@ export interface RootRouteChildren {
   DevocionalRoute: typeof DevocionalRoute
   InicioRoute: typeof InicioRoute
   InteressesRoute: typeof InteressesRoute
+  LojaRoute: typeof LojaRoute
   ManualRoute: typeof ManualRoute
   MatchesRoute: typeof MatchesRoute
   NotificacoesRoute: typeof NotificacoesRoute
@@ -613,6 +626,13 @@ declare module '@tanstack/react-router' {
       path: '/manual'
       fullPath: '/manual'
       preLoaderRoute: typeof ManualRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/loja': {
+      id: '/loja'
+      path: '/loja'
+      fullPath: '/loja'
+      preLoaderRoute: typeof LojaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/interesses': {
@@ -846,6 +866,7 @@ const rootRouteChildren: RootRouteChildren = {
   DevocionalRoute: DevocionalRoute,
   InicioRoute: InicioRoute,
   InteressesRoute: InteressesRoute,
+  LojaRoute: LojaRoute,
   ManualRoute: ManualRoute,
   MatchesRoute: MatchesRoute,
   NotificacoesRoute: NotificacoesRoute,
