@@ -1,54 +1,160 @@
-## Diagnóstico
+# Ambientação Dinâmica por Horário — Estudo Conceitual
 
-A página `/comunidade` carrega até 100 mensagens e re-renderiza tudo a cada mudança de estado (digitar no input, hover, abrir menu, novo cooldown, nova mensagem em tempo real). Os pontos mais pesados:
+> Apenas planejamento. Nada será codado nesta etapa.
 
-1. **Renderização de todas as mensagens em uma única árvore**, sem `React.memo`, sem virtualização. Cada item monta `OnlineDot`, `UserBadges`, `RoleBadge`, `VerifiedBadge`, avatar, etc.
-2. **`UserBadges` e `OnlineDot` por linha** — cada componente abre seu próprio fetch / subscription por `userId`. Com muitas mensagens repetidas do mesmo autor, são vários hooks duplicados.
-3. **Busca O(n²) do "reply_to"**: `messages.find(x => x.id === m.reply_to_id)` dentro do `.map()`.
-4. **`messages.some(...pinned)` e `messages.filter(...)` recomputados inline** a cada render.
-5. **Pré-carga de stickers**: `fetchStickers({ activeOnly: true })` traz **todos** os stickers do banco (sem `limit`) só para o cache de miniaturas, mesmo que a comunidade só use alguns.
-6. **`framer-motion` em cada sticker**: `StickerMessage` faz spring animation no mount de cada `<img>`, e o `StickerPicker` usa `motion.button` com `whileHover/whileTap` por sticker.
-7. **Lookups de `staffMap`/`contribIds`/`flaggedIds`** ok, mas tudo dentro do mesmo componente gigante — qualquer setState global re-renderiza a lista inteira.
+A imagem do `/inicio` (madrugada, "Boa madrugada, Tony", lua + estrelas discretas, gradiente lavanda→pêssego) já é a prova de conceito do tom certo: **emocional, premium, quase imperceptível**. A proposta é generalizar esse mesmo princípio para os 4 períodos, mantendo a identidade VaiDarNamoro intacta.
 
-## Plano
+---
 
-### 1. Extrair e memoizar a linha de mensagem
-- Criar `MessageRow` (componente novo, dentro de `comunidade.tsx`) envolvido em `React.memo` recebendo apenas o que precisa: `m`, `p` (profile), `repliedMsg`, `repliedName`, `senderStaff`, flags booleanas e callbacks estáveis.
-- Estabilizar callbacks com `useCallback` (`onReply`, `onOpenActions`, `jumpToMessage`, `togglePin`, etc.).
-- Resultado: digitar no input ou atualizar cooldown deixa de re-renderizar 100 linhas.
+## 1. Princípios norteadores
 
-### 2. Índices pré-computados com `useMemo`
-- `messagesById = useMemo(() => new Map(messages.map(m => [m.id, m])), [messages])` para o lookup de reply em O(1).
-- `pinnedMessages = useMemo(...)` e `visibleMessages = useMemo(...)` (já com filtro de flagged).
-- `hasPinned = pinnedMessages.length > 0` em vez de `messages.some(...)`.
+- **Sutileza acima de tudo**: o usuário deve *sentir*, não *notar*. Se ele consegue descrever a mudança em palavras técnicas, foi longe demais.
+- **Identidade preservada**: tokens primários (rosa/coral, gradiente do logo, botão "Ver pretendentes") **não mudam**. Só muda a *atmosfera ao redor*.
+- **Mudança gradual, nunca abrupta**: transições em minutos, não em segundos. Crossfade longo (~60–90s) entre períodos. Sem flash ao virar a hora.
+- **Camada cosmética, não estrutural**: zero alteração em layout, tipografia, espaçamento, hierarquia ou componentes. Só luz, cor de fundo e micro-partículas.
+- **Opt-out respeitoso**: respeitar `prefers-reduced-motion` (sem partículas/animação) e oferecer toggle nas configurações.
 
-### 3. Compartilhar badges/presence por autor
-- Pré-calcular `uniqueSenderIds` com `useMemo` a partir de `messages`.
-- Renderizar `UserBadges`/`OnlineDot` apenas uma vez por autor visível, passando o resultado já resolvido para `MessageRow` via prop (evita fetches/subscriptions duplicados). Alternativa simpler: manter `UserBadges` por linha mas garantir que o cache global é hit (já é) e que `MessageRow.memo` evita re-render redundante.
+---
 
-### 4. Pré-carga de stickers mais leve
-- Limitar a pré-carga a stickers efetivamente usados na lista de mensagens carregadas: após `setMessages`, coletar os `sticker_id` distintos e buscar só esses por `in('id', ids)`.
-- Quando chega nova mensagem com `sticker_id` não cacheado, buscar só aquele.
-- Quando o usuário envia um sticker (já populado em cache via `sendSticker`), nada muda.
+## 2. Os 4 períodos
 
-### 5. Aliviar animações
-- `StickerMessage`: remover `framer-motion`, substituir o spring por uma animação CSS leve (`animate-scale-in` já existente em `styles.css`) ou simplesmente uma transição de opacity. Continua "vivo" mas sem custo de JS por sticker.
-- `StickerPicker`: trocar `motion.button` com `whileHover/whileTap` por `<button>` com `transition active:scale-95 hover:scale-105` no Tailwind. Manter o `motion.div` do popover (é só 1 elemento).
-- O botão "+" pode manter o `motion.span` (1 elemento), sem impacto.
+Faixas sugeridas (horário local do device):
 
-### 6. Pequenos ajustes
-- Adicionar `decoding="async"` e `width`/`height` explícitos nos `<img>` de avatar e de sticker para evitar layout shift e ajudar o navegador.
-- Trocar `.slice().reverse()` por `[...data].reverse()` (mesma coisa, só estética).
-- Garantir `loading="lazy"` nas miniaturas de sticker dentro de mensagens fora da viewport (o `StickerMessage` ainda não usa lazy quando renderizado direto).
+| Período    | Faixa        | Metáfora sensorial                  |
+|------------|--------------|-------------------------------------|
+| Manhã      | 05:00–11:59  | Luz dourada entrando pela janela    |
+| Tarde      | 12:00–17:59  | Luz natural, neutra, equilibrada    |
+| Noite      | 18:00–23:59  | Aconchego, lâmpada quente, intimidade |
+| Madrugada  | 00:00–04:59  | Silêncio, lua, contemplação         |
 
-## Detalhes técnicos
+### Paleta atmosférica (apenas tokens de *ambiente*, não de marca)
 
-- Nada de alteração de schema, RLS, server functions ou rotas.
-- Mudanças localizadas em: `src/routes/comunidade.tsx`, `src/components/stickers/StickerMessage.tsx`, `src/components/stickers/StickerPicker.tsx`.
-- Sem novas dependências. Continuamos com `framer-motion` apenas onde realmente agrega (overlays únicos).
-- Comportamento visual preservado: mesmas animações de entrada (via CSS), mesmas interações.
+- **Manhã** — overlay quente translúcido: dourado pálido + pêssego claro. Glow do hero levemente âmbar. Sombras suaves e altas (sol baixo).
+- **Tarde** — quase neutro: branco levemente perolado, contraste limpo, sem glow extra. É o "estado base" — referência para os outros.
+- **Noite** — overlay frio translúcido: índigo suave + violeta esfumaçado. Glow do hero rosa-quente (contraste lâmpada vs. fora). Sombras mais densas e curtas.
+- **Madrugada** — exatamente o que está na imagem: lavanda → pêssego desbotado, lua crescente, estrelas mínimas, brilho global -10%.
 
-## Fora de escopo
+Todos os overlays são **<8% de opacidade** sobre o fundo atual. Nenhum substitui cor existente.
 
-- Virtualização (`react-window`) — só compensa acima de algumas centenas de itens; o limite atual é 100 e o ganho dos passos 1–3 já deve ser suficiente. Posso adicionar depois se ainda travar.
-- Mudar o limite de 100 mensagens ou paginar histórico.
+---
+
+## 3. O que pode mudar (camadas permitidas)
+
+Em ordem de sutileza (do mais discreto ao mais expressivo):
+
+1. **Temperatura de cor do background global** — gradiente atmosférico no `<body>` ou no card hero, deslocando ±3–5° de matiz.
+2. **Glow do card principal** — `box-shadow` colorido do hero muda de tom (âmbar / neutro / rosa-quente / lavanda-frio).
+3. **Saudação contextual** — "Bom dia / Boa tarde / Boa noite / Boa madrugada" + emoji discreto (☀️ ☀️ 🌙 ✨). *Já existe na imagem*.
+4. **Ícone celestial no hero** — sol baixo / sol alto / lua cheia / lua crescente. Apenas no card de boas-vindas do `/inicio`.
+5. **Partículas ambientais** — densidade e tipo variam:
+   - Manhã: 2–3 motas de poeira douradas, flutuação muito lenta.
+   - Tarde: nenhuma (silêncio visual).
+   - Noite: 3–5 pontos de luz quentes, pulsação lenta.
+   - Madrugada: 4–6 estrelinhas (como já existe), brilho intermitente lento.
+6. **Intensidade de blur/glassmorphism** — +5% à noite/madrugada (sensação de neblina), padrão de dia.
+7. **Microcopy de incentivo** — frase secundária do hero adaptada ao período (já existe parcialmente).
+
+### O que NÃO muda (lista de proibições)
+
+- Cores de marca (logo, primário, gradientes de CTA).
+- Tipografia, tamanhos, pesos.
+- Layout, grid, espaçamento, raios de borda.
+- Ícones funcionais (menu, ações, navegação).
+- Modo escuro vs claro — isso é controle do usuário, ortogonal à hora.
+- Componentes de conteúdo do usuário (mensagens, fotos, cards de perfil).
+
+---
+
+## 4. Aplicação por página
+
+| Página              | Recebe ambientação? | Intensidade | Justificativa                                                        |
+|---------------------|---------------------|-------------|----------------------------------------------------------------------|
+| `/inicio` (Home)    | **Sim — total**     | Alta        | Página emocional de boas-vindas, é o "lobby". Já tem hero perfeito.  |
+| `/devocional`       | **Sim**             | Média       | Contemplativa por natureza; combina com atmosfera.                   |
+| `/comunidade` (chat global) | **Sim — leve**| Baixa       | Só fundo + glow; sem partículas (distrai durante leitura/digitação). |
+| `/perfil` (próprio) | **Sim — leve**      | Baixa       | Reforça "espaço seu", mas sem competir com fotos/dados.              |
+| `/matches` / pretendentes | **Não**       | —           | Fotos dos usuários devem dominar; ambiente neutro evita interferir.  |
+| Conversa privada 1:1| **Não** (ou mínimo) | Mínima      | Intimidade já é dada pelas mensagens; partícula seria ruído.         |
+| Onboarding / Auth   | **Não**             | —           | Primeira impressão deve ser consistente para todos.                  |
+| Admin / Moderação   | **Não**             | —           | Contexto de trabalho, ambientação atrapalha.                         |
+
+---
+
+## 5. Micro-detalhes premium (banco de ideias)
+
+- **Lua que muda de fase** ao longo do mês (madrugada/noite) — detalhe de fidelidade absurda, custo zero de performance.
+- **Sol que sobe/desce de altura** dentro do card hero conforme avança a manhã/tarde.
+- **Estrelas com paralaxe sutilíssima** ao scroll (já temos as estrelas — falta o paralax de 2–4px).
+- **Transições crepusculares** — nas janelas 5:00–6:00, 11:30–12:30, 17:30–18:30, 23:30–00:30, blend de 30–60min entre dois períodos em vez de switch.
+- **Glow do CTA "Ver pretendentes"** ganha +3% de saturação à noite (lâmpada destacando).
+- **Cursor/tap ripple** levemente dourado de manhã, levemente azul à noite (desktop).
+- **Loader/skeleton shimmer** muda de tom quente↔frio.
+
+---
+
+## 6. UX — como não cansar nem poluir
+
+- **Regra de ouro**: se o usuário fica numa página por >5min, *nada deve continuar se mexendo agressivamente*. Partículas com período de animação ≥8s.
+- **Limite de elementos animados simultâneos**: máx. 6 partículas + 1 elemento celestial + 1 glow. Nada mais.
+- **Sem som**, sem haptics, sem notificação da mudança ("Bom dia!" pop-up = ❌).
+- **Acessibilidade**: `prefers-reduced-motion` → desliga partículas, mantém só a cor de fundo estática do período.
+- **Toggle em Configurações**: "Ambiente dinâmico: ligado / só cores / desligado".
+
+---
+
+## 7. Performance
+
+- **Tudo em CSS quando possível**: variáveis CSS atualizadas por um único hook que detecta o período. Crossfade via `transition: background 60s ease`.
+- **Partículas em SVG/CSS, não canvas**: 4–6 nodes absolutos animados via `@keyframes`, GPU-friendly (`transform` + `opacity` apenas). Zero JS por frame.
+- **Imagem da lua/sol**: SVG inline (<2KB cada), 4 assets totais. Sem requests.
+- **Detecção de período**: 1 timer leve que recalcula a cada minuto e atualiza um `data-period` no `<html>`. CSS faz o resto.
+- **Sem libs novas**: aproveita Framer Motion já presente apenas onde precisar de entrada/saída de partícula.
+- **Custo total estimado**: <5KB de CSS extra, <8KB de SVGs, ~0% CPU em idle.
+
+---
+
+## 8. Arquitetura proposta (alto nível, sem código)
+
+```text
+useTimeOfDay() hook
+   └─ retorna 'morning' | 'afternoon' | 'evening' | 'night'
+   └─ aplica data-period no <html>
+
+styles.css
+   └─ [data-period="morning"]  { --atmos-overlay: ...; --atmos-glow: ...; }
+   └─ [data-period="afternoon"]{ ... }
+   └─ [data-period="evening"]  { ... }
+   └─ [data-period="night"]    { ... }
+
+<AtmosphereLayer />  (componente decorativo, opcional por página)
+   └─ renderiza partículas + celestial conforme data-period
+   └─ pointer-events: none, aria-hidden, respeita reduced-motion
+
+Páginas escolhem se montam <AtmosphereLayer /> ou não.
+```
+
+---
+
+## 9. Roadmap sugerido (quando for implementar)
+
+1. **Fase 1 — Tokens atmosféricos**: definir as 4 paletas de overlay/glow em `styles.css`, aplicar só no `/inicio` (que já está pronto visualmente).
+2. **Fase 2 — Hook + crossfade**: detecção de período + transição suave global.
+3. **Fase 3 — Partículas modulares**: componente `<AtmosphereLayer>` plugável.
+4. **Fase 4 — Expansão controlada**: aplicar em `/devocional`, depois `/comunidade` (leve), depois `/perfil`.
+5. **Fase 5 — Toggle + acessibilidade**: configuração do usuário + `prefers-reduced-motion`.
+6. **Fase 6 — Polimento**: fases da lua, paralaxe, microcopy contextual por período.
+
+---
+
+## 10. Riscos a evitar
+
+- ❌ Virar "app temático" (estilo Halloween/Natal).
+- ❌ Mudar cor de marca para combinar com período.
+- ❌ Notificar a mudança ("Boa noite chegou!").
+- ❌ Partículas em páginas de leitura intensa (chat, devocional longo).
+- ❌ Dependência de timezone do servidor — sempre horário local do device.
+- ❌ Confundir com modo escuro/claro — são sistemas independentes.
+
+---
+
+**Próximo passo possível**: definir as 4 paletas de overlay em hex/oklch e validar visualmente antes de qualquer código. Posso preparar mockups de cada período sobre o `/inicio` atual para você comparar lado a lado, ou avançamos direto para a Fase 1 do roadmap quando quiser construir.
