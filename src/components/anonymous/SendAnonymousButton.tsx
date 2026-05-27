@@ -42,7 +42,7 @@ export function SendAnonymousButton({ receiverId }: Props) {
     if (r === "incompatible") return "Disponível apenas para o sexo oposto.";
     if (r === "opted_out") return "Esta pessoa não aceita recados anônimos.";
     if (r === "active_exists") return "Você já tem um recado ativo com esta pessoa.";
-    if (r === "daily_limit") return "Você atingiu o limite de 3 recados hoje.";
+    if (r === "daily_limit") return "Limite diário atingido. Compre recados extras em Recados › Configurações.";
     if (r === "cooldown") {
       const d = Math.ceil(secondsLeft / 86400);
       return `Aguarde ${d} dia${d > 1 ? "s" : ""} para enviar outro recado.`;
