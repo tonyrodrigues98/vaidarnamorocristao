@@ -684,7 +684,7 @@ function InicioPage() {
         )}
 
         {adminRequests.length > 0 && (
-          <section className="mt-6 rounded-3xl border border-border/60 bg-card/70 p-6 shadow-soft backdrop-blur">
+          <section className="mt-6 rounded-3xl border border-border bg-card p-6 shadow-soft">
             <div className="flex items-center gap-2">
               <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-[var(--petal)] text-[var(--rose)]">
                 <ClipboardList className="h-4 w-4" />
@@ -729,7 +729,7 @@ function InicioPage() {
         {!isBanned && !isRejected && <>
         <section className="mt-8 grid gap-6 lg:grid-cols-3">
           {/* CHECKLIST */}
-          <div className="animate-fade-up rounded-3xl border border-border/60 bg-card/70 p-6 shadow-soft backdrop-blur lg:col-span-2">
+          <div className="animate-fade-up rounded-3xl border border-border bg-card p-6 shadow-soft lg:col-span-2">
             <div className="flex items-center gap-2">
               <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-[var(--petal)] text-[var(--rose)]">
                 <Sparkles className="h-4 w-4" />
@@ -773,7 +773,7 @@ function InicioPage() {
 
           {/* PERFIL */}
           <div
-            className="animate-fade-up rounded-3xl border border-border/60 bg-card/70 p-6 shadow-soft backdrop-blur"
+            className="animate-fade-up rounded-3xl border border-border bg-card p-6 shadow-soft"
             style={{ animationDelay: "80ms" }}
           >
             <div className="flex items-center gap-3">
@@ -821,7 +821,7 @@ function InicioPage() {
         {/* DEVOCIONAL + COMUNIDADE */}
         <section className="mt-6 grid gap-6 lg:grid-cols-3">
           {/* DEVOCIONAL */}
-          <div className="animate-fade-up relative overflow-hidden rounded-3xl border border-border/60 bg-card/70 p-6 shadow-soft backdrop-blur lg:col-span-2">
+          <div className="animate-fade-up relative overflow-hidden rounded-3xl border border-border bg-card p-6 shadow-soft lg:col-span-2">
             <div
               aria-hidden
               className="pointer-events-none absolute -top-12 -right-12 h-44 w-44 rounded-full bg-[var(--petal)] opacity-60 blur-3xl"
@@ -871,7 +871,7 @@ function InicioPage() {
 
           {/* COMUNIDADE VIVA */}
           <div
-            className="animate-fade-up rounded-3xl border border-border/60 bg-card/70 p-6 shadow-soft backdrop-blur"
+            className="animate-fade-up rounded-3xl border border-border bg-card p-6 shadow-soft"
             style={{ animationDelay: "80ms" }}
           >
             <div className="flex items-center gap-2">
@@ -994,7 +994,7 @@ function InicioPage() {
             >
               {TIPS.map((t, i) => (
                 <div key={i} className="w-full shrink-0 px-1">
-                  <div className="relative overflow-hidden rounded-3xl border border-border/60 bg-card/70 p-6 shadow-soft backdrop-blur sm:p-8">
+                  <div className="relative overflow-hidden rounded-3xl border border-border bg-card p-6 shadow-soft sm:p-8">
                     <div
                       aria-hidden
                       className="pointer-events-none absolute -right-16 -top-16 h-44 w-44 rounded-full bg-[var(--petal)] opacity-60 blur-3xl"
