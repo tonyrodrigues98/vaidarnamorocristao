@@ -386,7 +386,7 @@ function Comunidade() {
           </div>
           <div className="flex-1 min-w-0">
             <h1 className="text-3xl font-semibold">Comunidade</h1>
-            <p className="text-sm text-muted-foreground">Chat global em tempo real — converse com todos</p>
+            <p className="text-sm text-soft">Chat global em tempo real — converse com todos</p>
           </div>
           <Link
             to="/oracoes"
@@ -411,7 +411,7 @@ function Comunidade() {
                   return (
                     <div
                       key={`pin-${m.id}`}
-                      className="flex items-stretch gap-2 rounded-lg bg-background/60 px-2 py-1.5 text-xs"
+                      className="flex items-stretch gap-2 rounded-lg border border-border bg-card px-2 py-1.5 text-xs"
                     >
                       <button
                         type="button"
