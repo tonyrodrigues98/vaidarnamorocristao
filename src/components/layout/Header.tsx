@@ -31,6 +31,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
+import { DecoratedAvatar } from "@/components/DecoratedAvatar";
 import { getLastSeen } from "@/lib/lastSeen";
 import { useTheme } from "@/lib/theme";
 import { useNotifications } from "@/lib/notifications";
@@ -85,6 +86,8 @@ export function Header() {
     photo_url: string | null;
     full_name: string | null;
     verified: boolean | null;
+    equipped_frame_id: string | null;
+    equipped_aura_id: string | null;
   } | null>(null);
 
   useEffect(() => {
@@ -94,7 +97,7 @@ export function Header() {
     }
     supabase
       .from("profiles")
-      .select("photo_url, full_name, verified")
+      .select("photo_url, full_name, verified, equipped_frame_id, equipped_aura_id")
       .eq("id", user.id)
       .maybeSingle()
       .then(({ data }) => setProfile(data ?? null));
@@ -374,16 +377,14 @@ export function Header() {
                     className="ml-1 flex items-center gap-2 rounded-full border border-border bg-card/60 p-1 pr-2 hover:bg-muted shrink-0"
                     aria-label="Menu do perfil"
                   >
-                    <span className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-gradient-love text-xs font-bold text-white">
-                      {profile?.photo_url ? (
-                        <img
-                          src={profile.photo_url}
-                          alt=""
-                          className="h-full w-full object-cover"
-                        />
-                      ) : (
-                        initials
-                      )}
+                    <span className="flex h-8 w-8 items-center justify-center">
+                      <DecoratedAvatar
+                        photoUrl={profile?.photo_url ?? null}
+                        fallback={initials}
+                        size={32}
+                        frameId={profile?.equipped_frame_id ?? null}
+                        auraId={profile?.equipped_aura_id ?? null}
+                      />
                     </span>
                     <ChevronDown className="h-3.5 w-3.5 opacity-70" />
                   </button>
@@ -483,12 +484,14 @@ export function Header() {
               <>
                 {/* Profile header */}
                 <div className="mb-2 flex items-center gap-3 rounded-xl border border-border bg-card/60 p-3">
-                  <span className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full bg-gradient-love text-sm font-bold text-white">
-                    {profile?.photo_url ? (
-                      <img src={profile.photo_url} alt="" className="h-full w-full object-cover" />
-                    ) : (
-                      initials
-                    )}
+                  <span className="flex h-11 w-11 items-center justify-center">
+                    <DecoratedAvatar
+                      photoUrl={profile?.photo_url ?? null}
+                      fallback={initials}
+                      size={44}
+                      frameId={profile?.equipped_frame_id ?? null}
+                      auraId={profile?.equipped_aura_id ?? null}
+                    />
                   </span>
                   <div className="min-w-0 flex-1">
                     <p className="flex items-center gap-1.5 truncate text-sm font-semibold">
