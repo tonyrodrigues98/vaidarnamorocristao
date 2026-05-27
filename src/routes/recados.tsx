@@ -15,6 +15,7 @@ import { friendlyError } from "@/lib/errors";
 import { RevealCeremony, type RevealTarget } from "@/components/anonymous/RevealCeremony";
 import { AnimatePresence, motion } from "framer-motion";
 import { fetchSenderProfile, buildHintPool, pickThree, type GeneratedHint } from "@/lib/anonymousHints";
+import { AnonymousExtrasCard } from "@/components/anonymous/AnonymousExtrasCard";
 
 export const Route = createFileRoute("/recados")({
   component: () => (<RequireApproved><RecadosPage /></RequireApproved>),
@@ -174,7 +175,9 @@ function RecadosPage() {
           </TabsContent>
 
           <TabsContent value="config">
-            <div className="rounded-2xl border p-5">
+            <div className="space-y-4">
+              <AnonymousExtrasCard />
+              <div className="rounded-2xl border p-5">
               <label className="flex items-center justify-between">
                 <div>
                   <div className="font-medium">Aceitar recados anônimos</div>
@@ -182,6 +185,7 @@ function RecadosPage() {
                 </div>
                 <Switch checked={accept} onCheckedChange={toggleOptout} />
               </label>
+              </div>
             </div>
           </TabsContent>
         </Tabs>
