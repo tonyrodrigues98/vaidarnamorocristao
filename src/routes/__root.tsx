@@ -9,6 +9,7 @@ import { PresenceProvider } from "@/lib/presence";
 import { BanGuard } from "@/components/BanGuard";
 
 import appCss from "../styles.css?url";
+import coinPng from "@/assets/coin.png";
 
 function NotFoundComponent() {
   return (
@@ -53,6 +54,7 @@ export const Route = createRootRoute({
       { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [
+      { rel: "preload", as: "image", href: coinPng },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       { rel: "icon", href: "/favicon.ico", sizes: "any" },
