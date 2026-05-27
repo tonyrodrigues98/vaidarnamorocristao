@@ -249,6 +249,29 @@ function Comunidade() {
 
   if (!loading && !user) return <Navigate to="/auth/login" />;
 
+  // Derived lookups — memoized to avoid O(n^2) reply scans and inline filters
+  const messagesById = useMemo(() => {
+    const m = new Map<string, GMsg>();
+    for (const msg of messages) m.set(msg.id, msg);
+    return m;
+  }, [messages]);
+
+  const pinnedMessages = useMemo(
+    () => messages.filter((m) => m.pinned_at).sort((a, b) => (b.pinned_at ?? "").localeCompare(a.pinned_at ?? "")),
+    [messages]
+  );
+
+  const visibleMessages = useMemo(
+    () =>
+      messages.filter((m) => {
+        if (!flaggedIds.has(m.id)) return true;
+        if (isStaffViewer) return true;
+        if (user && m.sender_id === user.id) return true;
+        return false;
+      }),
+    [messages, flaggedIds, isStaffViewer, user]
+  );
+
   async function send(e: FormEvent) {
     e.preventDefault();
     const content = text.trim();
