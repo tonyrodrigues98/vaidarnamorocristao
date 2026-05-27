@@ -568,7 +568,15 @@ function Comunidade() {
                           </div>
                         </div>
                       ) : (
-                        <p className="mt-0.5 whitespace-pre-wrap break-words text-sm text-foreground/90">{m.content}</p>
+                        m.sticker_id ? (
+                          stickerCache[m.sticker_id] ? (
+                            <StickerMessage url={stickerCache[m.sticker_id].public_url} alt={stickerCache[m.sticker_id].name} />
+                          ) : (
+                            <div className="mt-1 h-32 w-32 animate-pulse rounded-xl bg-muted/40" />
+                          )
+                        ) : (
+                          <p className="mt-0.5 whitespace-pre-wrap break-words text-sm text-foreground/90">{m.content}</p>
+                        )
                       )}
                     </BubbleWrap>
                     {!isEditing && (
