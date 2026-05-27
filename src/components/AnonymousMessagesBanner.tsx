@@ -11,7 +11,7 @@ import letterImage from "@/assets/anonymous-letter.png";
 export function AnonymousMessagesBanner() {
   return (
     <div
-      className="relative overflow-hidden rounded-[28px] md:rounded-[32px] border border-white/60"
+      className="relative overflow-hidden rounded-[2rem] border border-white/60"
       style={{
         background:
           "linear-gradient(90deg, #FFF0F5 0%, #F8EDFF 50%, #FDEEFF 100%)",
