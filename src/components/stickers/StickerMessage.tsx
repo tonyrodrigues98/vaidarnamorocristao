@@ -10,7 +10,7 @@ export function StickerMessage({ url, alt }: { url: string; alt?: string }) {
       transition={{ type: "spring", stiffness: 380, damping: 18 }}
       loading="lazy"
       draggable={false}
-      className="mt-1 h-20 w-20 select-none object-contain sm:h-24 sm:w-24"
+      className="mt-1 h-10 w-10 select-none object-contain sm:h-12 sm:w-12"
     />
   );
 }
