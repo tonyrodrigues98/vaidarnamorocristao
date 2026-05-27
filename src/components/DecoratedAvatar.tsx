@@ -5,14 +5,14 @@ import { fetchDecorationCatalog, assetFor, type Decoration } from "@/lib/decorat
 // O `size` do componente é o canvas final da decoração. A foto é posicionada
 // dentro do vão visual de cada PNG, evitando que a moldura estoure para fora
 // do componente ou pareça deslocada nas miniaturas.
-const FRAME_PLACEMENT: Record<string, { photoScale: number; centerX?: number; centerY?: number }> = {
-  "frame-alianca-ouro.png": { photoScale: 0.57, centerY: 0.498 },
-  "frame-coroa-espinhos.png": { photoScale: 0.58, centerX: 0.504, centerY: 0.49 },
-  "frame-louros-dourados.png": { photoScale: 0.5, centerX: 0.5, centerY: 0.51 },
-  "frame-floral-rosa.png": { photoScale: 0.38, centerX: 0.501, centerY: 0.506 },
-  "frame-vitral-sagrado.png": { photoScale: 0.48, centerX: 0.496, centerY: 0.478 },
+const FRAME_PLACEMENT: Record<string, { frameScale: number; photoScale: number; centerX?: number; centerY?: number }> = {
+  "frame-alianca-ouro.png": { frameScale: 1.04, photoScale: 0.59, centerY: 0.498 },
+  "frame-coroa-espinhos.png": { frameScale: 1.08, photoScale: 0.61, centerX: 0.504, centerY: 0.49 },
+  "frame-louros-dourados.png": { frameScale: 1.08, photoScale: 0.5, centerX: 0.5, centerY: 0.51 },
+  "frame-floral-rosa.png": { frameScale: 1.14, photoScale: 0.43, centerX: 0.501, centerY: 0.506 },
+  "frame-vitral-sagrado.png": { frameScale: 1.14, photoScale: 0.55, centerX: 0.496, centerY: 0.478 },
 };
-const DEFAULT_FRAME_PLACEMENT = { photoScale: 0.56, centerX: 0.5, centerY: 0.5 };
+const DEFAULT_FRAME_PLACEMENT = { frameScale: 1.08, photoScale: 0.56, centerX: 0.5, centerY: 0.5 };
 
 export type DecoratedAvatarProps = {
   photoUrl?: string | null;
@@ -78,9 +78,11 @@ export function DecoratedAvatar({
   const placement = frame?.image_url
     ? FRAME_PLACEMENT[frame.image_url] ?? DEFAULT_FRAME_PLACEMENT
     : DEFAULT_FRAME_PLACEMENT;
-  const photoSize = frameAsset ? size * placement.photoScale : size;
-  const photoCenterX = size * (placement.centerX ?? 0.5);
-  const photoCenterY = size * (placement.centerY ?? 0.5);
+  const frameSize = frameAsset ? size * placement.frameScale : size;
+  const frameOffset = (size - frameSize) / 2;
+  const photoSize = frameAsset ? frameSize * placement.photoScale : size;
+  const photoCenterX = frameOffset + frameSize * (placement.centerX ?? 0.5);
+  const photoCenterY = frameOffset + frameSize * (placement.centerY ?? 0.5);
 
   return (
     <div
@@ -137,8 +139,14 @@ export function DecoratedAvatar({
           src={frameAsset}
           alt=""
           aria-hidden
-          className="pointer-events-none absolute inset-0 h-full w-full object-contain"
-          style={{ zIndex: 20 }}
+          className="pointer-events-none absolute object-contain"
+          style={{
+            top: frameOffset,
+            left: frameOffset,
+            width: frameSize,
+            height: frameSize,
+            zIndex: 20,
+          }}
         />
       )}
     </div>
