@@ -81,7 +81,7 @@ export function TypingIndicator({ selfId }: { selfId: string | null | undefined 
   const visible = Object.keys(typers).length > 0;
 
   return (
-    <div className="pointer-events-none px-4" aria-live="polite" aria-atomic="true">
+    <div className="pointer-events-none px-3 sm:px-4" aria-live="polite" aria-atomic="true">
       <AnimatePresence>
         {visible && (
           <motion.div
@@ -90,10 +90,11 @@ export function TypingIndicator({ selfId }: { selfId: string | null | undefined 
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 4 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
-            className="flex items-center gap-2 py-1.5 text-xs text-muted-foreground/80"
+            className="flex items-center gap-1.5 sm:gap-2 py-1 sm:py-1.5 text-[11px] sm:text-xs text-muted-foreground/80 will-change-transform"
+            style={{ contain: "layout style paint" }}
           >
-            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/10 backdrop-blur">
-              <MessageCircle className="h-3 w-3 text-primary/70" />
+            <span className="flex h-4 w-4 sm:h-5 sm:w-5 items-center justify-center rounded-full bg-primary/10 backdrop-blur">
+              <MessageCircle className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-primary/70" />
             </span>
             <span className="font-medium tracking-tight">Alguém está digitando</span>
             <span className="inline-flex items-end gap-0.5 pb-0.5" aria-hidden="true">
@@ -111,7 +112,7 @@ export function TypingIndicator({ selfId }: { selfId: string | null | undefined 
 function Dot({ delay }: { delay: number }) {
   return (
     <motion.span
-      className="block h-1 w-1 rounded-full bg-primary/60"
+      className="block h-0.5 w-0.5 sm:h-1 sm:w-1 rounded-full bg-primary/60"
       animate={{ y: [0, -2, 0], opacity: [0.4, 1, 0.4] }}
       transition={{ duration: 1, repeat: Infinity, delay, ease: "easeInOut" }}
     />
