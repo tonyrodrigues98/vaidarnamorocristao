@@ -541,7 +541,7 @@ function Devocional() {
           </div>
           <div className="flex-1">
             <h1 className="text-3xl font-semibold tracking-tight">Devocional</h1>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-soft">
               Sua jornada espiritual diária — ore, reflita e compartilhe.
             </p>
           </div>
@@ -557,12 +557,12 @@ function Devocional() {
 
         <div className="animate-fade-up mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
           <StatCard
-            icon={<Flame className="h-4 w-4 text-orange-500" />}
+            icon={<Flame className="h-4 w-4 text-[var(--rose)]" />}
             label="Sequência"
             value={`${streak.current} ${streak.current === 1 ? "dia" : "dias"}`}
           />
           <StatCard
-            icon={<Trophy className="h-4 w-4 text-amber-500" />}
+            icon={<Trophy className="h-4 w-4 text-[var(--gold)]" />}
             label="Recorde"
             value={`${streak.best}`}
           />
@@ -683,7 +683,7 @@ function FilterChip({
       onClick={onClick}
       className={`rounded-full border px-3.5 py-1.5 text-sm font-medium transition-all ${
         active
-          ? "border-[var(--rose)] bg-[var(--rose)] text-white shadow-glow"
+          ? "border-[var(--rose)] bg-[var(--rose)] text-white ring-2 ring-[var(--rose)]/25"
           : "border-border/80 bg-card text-foreground/85 shadow-soft hover:bg-accent"
       }`}
     >
