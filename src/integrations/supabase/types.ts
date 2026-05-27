@@ -1894,6 +1894,30 @@ export type Database = {
         }
         Relationships: []
       }
+      user_coins: {
+        Row: {
+          balance: number
+          created_at: string
+          last_claim_date: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          balance?: number
+          created_at?: string
+          last_claim_date?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          balance?: number
+          created_at?: string
+          last_claim_date?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_donations: {
         Row: {
           amount: number | null
@@ -2130,6 +2154,13 @@ export type Database = {
         Returns: undefined
       }
       cancel_account_deletion: { Args: never; Returns: undefined }
+      claim_daily_coins: {
+        Args: never
+        Returns: {
+          awarded: number
+          balance: number
+        }[]
+      }
       cleanup_photo_moderation_rejects: { Args: never; Returns: number }
       count_advanced_sections: { Args: { _user_id: string }; Returns: number }
       create_notification: {
@@ -2166,6 +2197,14 @@ export type Database = {
       }
       get_flagged_message_ids: { Args: never; Returns: string[] }
       get_hidden_staff_ids: { Args: never; Returns: string[] }
+      get_my_coins: {
+        Args: never
+        Returns: {
+          balance: number
+          can_claim_today: boolean
+          last_claim_date: string
+        }[]
+      }
       get_my_missions: {
         Args: never
         Returns: {
@@ -2263,6 +2302,7 @@ export type Database = {
         Returns: string
       }
       set_anonymous_optout: { Args: { _accept: boolean }; Returns: undefined }
+      spend_coin: { Args: { _amount?: number }; Returns: number }
       touch_my_activity: { Args: never; Returns: undefined }
       unaccent_safe: { Args: { input: string }; Returns: string }
       unmatch: { Args: { _match_id: string }; Returns: undefined }
