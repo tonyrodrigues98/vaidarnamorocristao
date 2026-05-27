@@ -272,7 +272,37 @@ export function DecorationsCard({
         </div>
       </div>
 
-      <Tabs defaultValue="frame">
+      <div className="mb-5 flex flex-col items-center gap-2 rounded-xl border border-dashed bg-background/60 p-4">
+        <p className="text-xs uppercase tracking-wide text-muted-foreground">
+          Pré-visualização
+        </p>
+        <DecoratedAvatar
+          photoUrl={photoUrl}
+          fallback={user?.email?.[0]?.toUpperCase() ?? "?"}
+          size={140}
+          frameId={preview.frame ?? equipped.frame}
+          auraId={preview.aura ?? equipped.aura}
+          stickerId={preview.sticker ?? equipped.sticker}
+        />
+        {(preview.frame || preview.aura || preview.sticker) && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-xs text-muted-foreground"
+            onClick={() => setPreview({ frame: null, aura: null, sticker: null })}
+          >
+            <X className="mr-1 h-3 w-3" /> Limpar pré-visualização
+          </Button>
+        )}
+        <p className="text-[11px] text-muted-foreground">
+          Toque em um item para visualizar. Use "Comprar" ou "Usar" para aplicar.
+        </p>
+      </div>
+
+      <Tabs
+        value={activeTab}
+        onValueChange={(v) => setActiveTab(v as DecorationType)}
+      >
         <TabsList className="w-full">
           <TabsTrigger value="frame" className="flex-1">Moldura</TabsTrigger>
           <TabsTrigger value="aura" className="flex-1">Aura</TabsTrigger>
