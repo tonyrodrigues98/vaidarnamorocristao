@@ -116,7 +116,7 @@ export function AnonymousMessagesBanner() {
         </div>
 
         {/* RIGHT — illustration */}
-        <div className="relative h-[260px] sm:h-[320px] md:h-[400px] mt-2 md:mt-0">
+        <div className="relative h-[320px] sm:h-[420px] md:h-[520px] xl:h-[560px] mt-2 md:mt-0">
           <Illustration />
         </div>
       </div>
