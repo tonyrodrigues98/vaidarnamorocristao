@@ -34,6 +34,8 @@ function StickersAdmin() {
   const [editingStickerId, setEditingStickerId] = useState<string | null>(null);
   const [editingStickerName, setEditingStickerName] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
+  const [draggingId, setDraggingId] = useState<string | null>(null);
+  const [dragOverCat, setDragOverCat] = useState<string | "none" | null>(null);
 
   async function reload() {
     try {
@@ -143,6 +145,23 @@ function StickersAdmin() {
     } catch (e: unknown) {
       toast.error((e as Error)?.message ?? "Erro ao excluir");
     }
+  }
+
+  async function moveStickerToCategory(stickerId: string, categoryId: string | null) {
+    const sticker = stickers.find((x) => x.id === stickerId);
+    if (!sticker) return;
+    if (sticker.category_id === categoryId) return;
+    // optimistic update
+    setStickers((prev) => prev.map((x) => (x.id === stickerId ? { ...x, category_id: categoryId } : x)));
+    const { error } = await supabase.from("stickers").update({ category_id: categoryId }).eq("id", stickerId);
+    if (error) {
+      toast.error(error.message);
+      // revert
+      setStickers((prev) => prev.map((x) => (x.id === stickerId ? { ...x, category_id: sticker.category_id } : x)));
+      return;
+    }
+    const target = categoryId ? cats.find((c) => c.id === categoryId)?.name ?? "categoria" : "Sem categoria";
+    toast.success(`Movido para ${target}`);
   }
 
   return (
