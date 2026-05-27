@@ -193,16 +193,47 @@ function NotificationRow({
   onDelete: (n: AppNotification) => void;
 }) {
   const x = useMotionValue(0);
-  const bgOpacity = useTransform(x, [-160, -40, 0], [1, 0.35, 0]);
-  const iconScale = useTransform(x, [-160, -60, -20], [1.15, 1, 0.6]);
+  const controls = useAnimation();
+  const ACTION_W = 96; // width of the revealed delete action
+  const OPEN_X = -ACTION_W;
+  const bgOpacity = useTransform(x, [OPEN_X, -20, 0], [1, 0.35, 0]);
+  const iconScale = useTransform(x, [OPEN_X, -40, -10], [1, 0.9, 0.6]);
   const meta = iconMeta(n.type);
+
+  const snapTo = (to: number) =>
+    controls.start({
+      x: to,
+      transition: { type: "spring", stiffness: 500, damping: 40, mass: 0.6 },
+    });
 
   const onDragEnd = (_: unknown, info: PanInfo) => {
     const offset = info.offset.x;
     const velocity = info.velocity.x;
-    if (offset < -140 || velocity < -600) {
+    const current = x.get();
+    // Strong fling left → delete immediately
+    if (velocity < -900 || current < -ACTION_W * 1.6) {
       onDelete(n);
+      return;
     }
+    // Past threshold (or moderate left velocity) → snap open
+    if (current < -ACTION_W / 2 || velocity < -350) {
+      snapTo(OPEN_X);
+    } else {
+      snapTo(0);
+    }
+  };
+
+  const handleActionDelete = () => {
+    onDelete(n);
+  };
+
+  const handleOpenItem = () => {
+    // If revealed, tapping the row should close it instead of opening
+    if (x.get() < -8) {
+      snapTo(0);
+      return;
+    }
+    onOpen(n);
   };
 
   return (
@@ -214,25 +245,34 @@ function NotificationRow({
       transition={{ type: "spring", stiffness: 380, damping: 32 }}
       className="relative overflow-hidden rounded-2xl"
     >
-      {/* Swipe action background */}
+      {/* Swipe action background (red gradient that follows the swipe) */}
       <motion.div
         aria-hidden
         style={{ opacity: bgOpacity }}
-        className="pointer-events-none absolute inset-0 flex items-center justify-end rounded-2xl bg-gradient-to-l from-red-500 to-red-500/70 pr-6"
+        className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-l from-red-500 to-red-500/70"
+      />
+      {/* Tappable delete action revealed by the swipe */}
+      <button
+        type="button"
+        onClick={handleActionDelete}
+        aria-label="Apagar notificação"
+        style={{ width: ACTION_W }}
+        className="absolute inset-y-0 right-0 flex items-center justify-center rounded-r-2xl text-white"
       >
-        <motion.div style={{ scale: iconScale }} className="flex items-center gap-2 text-white">
+        <motion.span style={{ scale: iconScale }} className="flex flex-col items-center gap-1">
           <Trash2 className="h-5 w-5" />
-          <span className="text-sm font-medium">Apagar</span>
-        </motion.div>
-      </motion.div>
+          <span className="text-xs font-medium">Apagar</span>
+        </motion.span>
+      </button>
 
       <motion.div
         drag="x"
         dragDirectionLock
-        dragConstraints={{ left: -200, right: 0 }}
-        dragElastic={{ left: 0.15, right: 0 }}
+        dragConstraints={{ left: -ACTION_W * 1.8, right: 0 }}
+        dragElastic={{ left: 0.08, right: 0 }}
         dragMomentum={false}
         onDragEnd={onDragEnd}
+        animate={controls}
         style={{ x }}
         className={`group relative flex items-start gap-3 rounded-2xl border p-4 backdrop-blur-sm transition-colors ${
           n.read_at
@@ -241,7 +281,7 @@ function NotificationRow({
         }`}
       >
         <button
-          onClick={() => onOpen(n)}
+          onClick={handleOpenItem}
           className="flex flex-1 items-start gap-3 text-left"
         >
           <span
