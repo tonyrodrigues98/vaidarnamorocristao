@@ -131,6 +131,18 @@ function MatchesPage() {
                     <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-[var(--rose)] shadow-soft backdrop-blur">
                       <Heart className="h-3 w-3" fill="currentColor" /> Match
                     </span>
+                    {(it.partner.equipped_frame_id || it.partner.equipped_aura_id || it.partner.equipped_sticker_id) && (
+                      <div className="absolute bottom-3 left-3">
+                        <DecoratedAvatar
+                          photoUrl={it.partner.photo_url}
+                          fallback={it.partner.full_name.charAt(0)}
+                          size={56}
+                          frameId={it.partner.equipped_frame_id}
+                          auraId={it.partner.equipped_aura_id}
+                          stickerId={it.partner.equipped_sticker_id}
+                        />
+                      </div>
+                    )}
                   </div>
                 </Link>
                 <div className="space-y-3 p-4">

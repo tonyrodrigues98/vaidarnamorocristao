@@ -29,6 +29,7 @@ import { recomputeMyBadges } from "@/lib/recomputeBadges";
 import { ProfileAdvancedForm } from "@/components/ProfileAdvancedForm";
 import { ProfilePhotosManager } from "@/components/ProfilePhotosManager";
 import { AdminWarningBanner } from "@/components/AdminWarningBanner";
+import { DecorationsCard } from "@/components/DecorationsCard";
 
 export const Route = createFileRoute("/perfil")({ component: PerfilPage });
 
@@ -461,6 +462,8 @@ function PerfilPage() {
                   <ProfilePhotosManager userId={user.id} />
                 </div>
               )}
+
+              {user && <DecorationsCard photoUrl={photoPreview ?? null} />}
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2 sm:col-span-2">
