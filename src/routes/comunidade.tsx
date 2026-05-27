@@ -25,6 +25,7 @@ import { StickerMessage } from "@/components/stickers/StickerMessage";
 import { fetchStickers, type Sticker } from "@/lib/stickers";
 import { AnimatePresence, motion } from "framer-motion";
 import { spendCoin } from "@/lib/coins";
+import { TypingIndicator, useTypingBroadcaster } from "@/components/TypingIndicator";
 
 const COOLDOWN_MS = 10_000;
 
