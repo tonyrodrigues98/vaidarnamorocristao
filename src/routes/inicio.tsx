@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
+import { StickersChatBanner } from "@/components/StickersChatBanner";
 import { getHomeChecklistSteps, type HomeChecklistStep } from "@/lib/homeChecklist";
 import {
   Sparkles,
