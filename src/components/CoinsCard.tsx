@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Loader2, Sparkles } from "lucide-react";
-import coinIcon from "@/assets/coin.avif";
+import coinIcon from "@/assets/coin.png";
 import {
   claimDailyCoins,
   COIN_DAILY,
@@ -90,34 +90,34 @@ export function CoinsCard() {
         className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full blur-3xl"
         style={{ background: "radial-gradient(circle, rgba(251,191,36,0.35), transparent 70%)" }}
       />
-      <div className="relative flex items-start justify-between gap-4">
-        <div>
-          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+      <div className="relative flex items-center justify-between gap-4">
+        <div className="flex flex-col">
+          <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground/70">
             Suas moedas
           </p>
-          <div className="mt-1 flex items-center gap-2">
-            <CoinIcon className={`h-9 w-9 drop-shadow ${pulse ? "animate-bounce" : ""}`} />
-            <span
-              className={`text-4xl font-bold tabular-nums tracking-tight ${pulse ? "animate-scale-in text-amber-500" : ""}`}
-            >
-              {status.balance}
-            </span>
-            <span className="text-sm text-muted-foreground">/ {COIN_MAX}</span>
-          </div>
-          <p className="mt-2 max-w-xs text-sm text-muted-foreground">
+          <p className="mt-2 max-w-[200px] text-[11px] leading-relaxed text-muted-foreground/50">
             Use moedas para enviar stickers no chat global.
           </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <span
+            className={`text-4xl font-bold tabular-nums tracking-tight ${pulse ? "animate-scale-in text-amber-500" : ""}`}
+          >
+            {status.balance}
+          </span>
+          <span className="text-sm text-muted-foreground/60">/ {COIN_MAX}</span>
+          <CoinIcon className={`h-9 w-9 drop-shadow ${pulse ? "animate-bounce" : ""}`} />
         </div>
       </div>
 
       <div className="relative mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="text-xs text-muted-foreground">
+        <div className="text-[10px] text-muted-foreground/50">
           {canClaim ? (
             <>Resgate disponível agora ✨</>
           ) : atMax ? (
             <>Limite máximo atingido</>
           ) : (
-            <>Próximo resgate em <span className="font-medium text-foreground">{countdown}</span></>
+            <>Próximo resgate em <span className="font-medium text-foreground/60">{countdown}</span></>
           )}
         </div>
         <button
