@@ -748,7 +748,7 @@ function PerfilPage() {
                   </div>
                   <div>
                     <h2 className="text-xl font-semibold">Seu cargo</h2>
-                    <p className="text-sm text-muted-foreground">{roleCfg.description}</p>
+                    <p className="text-sm text-soft">{roleCfg.description}</p>
                   </div>
                 </div>
 
