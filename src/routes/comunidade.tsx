@@ -247,8 +247,6 @@ function Comunidade() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
-  if (!loading && !user) return <Navigate to="/auth/login" />;
-
   // Derived lookups — memoized to avoid O(n^2) reply scans and inline filters
   const messagesById = useMemo(() => {
     const m = new Map<string, GMsg>();
@@ -271,6 +269,8 @@ function Comunidade() {
       }),
     [messages, flaggedIds, isStaffViewer, user]
   );
+
+  if (!loading && !user) return <Navigate to="/auth/login" />;
 
   async function send(e: FormEvent) {
     e.preventDefault();
