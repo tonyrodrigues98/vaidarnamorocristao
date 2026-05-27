@@ -92,32 +92,32 @@ export function CoinsCard() {
       />
       <div className="relative flex items-center justify-between gap-4">
         <div className="flex flex-col">
-          <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground/70">
+          <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
             Suas moedas
           </p>
-          <p className="mt-2 max-w-[200px] text-[11px] leading-relaxed text-muted-foreground/50">
+          <p className="mt-2 max-w-[200px] text-[11px] leading-relaxed text-muted-foreground/80">
             Use moedas para enviar stickers no chat global.
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <CoinIcon className={`h-9 w-9 drop-shadow ${pulse ? "animate-bounce" : ""}`} />
           <span
             className={`text-4xl font-bold tabular-nums tracking-tight ${pulse ? "animate-scale-in text-amber-500" : ""}`}
           >
             {status.balance}
           </span>
-          <span className="text-sm text-muted-foreground/60">/ {COIN_MAX}</span>
-          <CoinIcon className={`h-9 w-9 drop-shadow ${pulse ? "animate-bounce" : ""}`} />
+          <span className="text-sm text-muted-foreground/80">/ {COIN_MAX}</span>
         </div>
       </div>
 
       <div className="relative mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="text-[10px] text-muted-foreground/50">
+        <div className="text-[10px] text-muted-foreground/80">
           {canClaim ? (
             <>Resgate disponível agora ✨</>
           ) : atMax ? (
             <>Limite máximo atingido</>
           ) : (
-            <>Próximo resgate em <span className="font-medium text-foreground/60">{countdown}</span></>
+            <>Próximo resgate em <span className="font-medium text-foreground">{countdown}</span></>
           )}
         </div>
         <button
