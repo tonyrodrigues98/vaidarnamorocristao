@@ -15,21 +15,30 @@ export function Particles({ density }: Props = {}) {
   if (period === "afternoon") return null;
 
   const defaults: Record<string, number> = {
-    morning: 3,
-    evening: 4,
-    night: 5,
+    morning: 8,
+    afternoon: 0,
+    evening: 10,
+    night: 14,
   };
-  const n = density ?? defaults[period] ?? 4;
+  const n = density ?? defaults[period] ?? 8;
   const isStar = period === "night";
 
   // Deterministic pseudo-random positions (no JS randomness per render)
   const positions = [
-    { top: "12%", left: "82%", size: 4, delay: "0s",   dur: "9s"  },
-    { top: "68%", left: "18%", size: 3, delay: "2.4s", dur: "11s" },
-    { top: "32%", left: "8%",  size: 5, delay: "1.1s", dur: "10s" },
-    { top: "78%", left: "72%", size: 3, delay: "3.6s", dur: "12s" },
-    { top: "22%", left: "62%", size: 4, delay: "0.8s", dur: "9.5s" },
-    { top: "50%", left: "90%", size: 3, delay: "4.2s", dur: "10.5s" },
+    { top: "10%", left: "78%", size: 3, delay: "0s",   dur: "4s"  },
+    { top: "18%", left: "88%", size: 2, delay: "1.2s", dur: "5s"  },
+    { top: "28%", left: "70%", size: 4, delay: "0.4s", dur: "4.5s" },
+    { top: "8%",  left: "60%", size: 2, delay: "2.0s", dur: "5.5s" },
+    { top: "22%", left: "48%", size: 3, delay: "0.8s", dur: "4.2s" },
+    { top: "38%", left: "82%", size: 2, delay: "3.0s", dur: "4.8s" },
+    { top: "48%", left: "92%", size: 3, delay: "1.6s", dur: "5.2s" },
+    { top: "62%", left: "85%", size: 2, delay: "2.4s", dur: "4.6s" },
+    { top: "72%", left: "65%", size: 3, delay: "0.6s", dur: "5.1s" },
+    { top: "84%", left: "80%", size: 2, delay: "3.6s", dur: "4.3s" },
+    { top: "55%", left: "55%", size: 2, delay: "1.8s", dur: "5.6s" },
+    { top: "40%", left: "30%", size: 2, delay: "2.8s", dur: "4.9s" },
+    { top: "68%", left: "20%", size: 3, delay: "0.2s", dur: "5.3s" },
+    { top: "30%", left: "15%", size: 2, delay: "3.2s", dur: "4.7s" },
   ];
 
   return (
