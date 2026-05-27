@@ -265,6 +265,26 @@ function Comunidade() {
     setCooldownLeft(COOLDOWN_MS);
   }
 
+  async function sendSticker(s: Sticker) {
+    if (!user) return;
+    const since = Date.now() - lastSentRef.current;
+    if (since < COOLDOWN_MS) {
+      toast.error(`Aguarde ${Math.ceil((COOLDOWN_MS - since) / 1000)}s para enviar outro sticker`);
+      return;
+    }
+    const { error } = await supabase.from("global_messages").insert({
+      sender_id: user.id,
+      content: "",
+      sticker_id: s.id,
+      reply_to_id: replyTo?.id ?? null,
+    });
+    if (error) { toast.error(friendlyError(error)); return; }
+    setStickerCache((prev) => (prev[s.id] ? prev : { ...prev, [s.id]: s }));
+    setReplyTo(null);
+    lastSentRef.current = Date.now();
+    setCooldownLeft(COOLDOWN_MS);
+  }
+
   async function remove(id: string) {
     const { error } = await supabase.from("global_messages").delete().eq("id", id);
     if (error) toast.error(friendlyError(error));
