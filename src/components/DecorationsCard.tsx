@@ -96,10 +96,10 @@ export function DecorationsCard({
   const grouped = useMemo(() => {
     const g: Record<DecorationType, Decoration[]> = { frame: [], aura: [], sticker: [] };
     catalog.forEach((d) => {
-      if (VISIBLE_TYPES.includes(d.type)) g[d.type].push(d);
+      if (VISIBLE_TYPES.includes(d.type) && owned.has(d.id)) g[d.type].push(d);
     });
     return g;
-  }, [catalog]);
+  }, [catalog, owned]);
 
   const updateEquipped = (next: EquippedMap) => {
     setEquipped(next);
@@ -159,7 +159,14 @@ export function DecorationsCard({
   const renderItems = (type: DecorationType) => {
     const items = grouped[type];
     if (items.length === 0) {
-      return <p className="py-8 text-center text-sm text-muted-foreground">Em breve</p>;
+      return (
+        <div className="py-8 text-center text-sm text-muted-foreground">
+          Você ainda não possui {type === "frame" ? "molduras" : "auras"}.{" "}
+          <a href="/loja" className="font-medium text-[var(--rose)] hover:underline">
+            Visitar a loja
+          </a>
+        </div>
+      );
     }
     return (
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
