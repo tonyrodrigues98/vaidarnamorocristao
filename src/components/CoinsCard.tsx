@@ -92,7 +92,7 @@ export function CoinsCard() {
       />
       <div className="relative flex items-center justify-between gap-4">
         <div className="flex flex-col">
-          <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+          <p className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
             Suas moedas
           </p>
           <p className="mt-2 max-w-[200px] text-[11px] leading-relaxed text-muted-foreground/80">
