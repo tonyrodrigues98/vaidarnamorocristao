@@ -1,5 +1,12 @@
 import { useEffect, useState } from "react";
-import { getAtmosMode, setAtmosMode, type AtmosMode } from "@/lib/timeOfDay";
+import {
+  getAtmosMode,
+  setAtmosMode,
+  getPeriodOverride,
+  setPeriodOverride,
+  type AtmosMode,
+  type Period,
+} from "@/lib/timeOfDay";
 import { Sparkles } from "lucide-react";
 
 const OPTIONS: { value: AtmosMode; label: string; hint: string }[] = [
@@ -8,16 +15,32 @@ const OPTIONS: { value: AtmosMode; label: string; hint: string }[] = [
   { value: "off", label: "Desligado", hint: "Sem ambientação" },
 ];
 
+type PeriodChoice = "auto" | Period;
+const PERIOD_OPTIONS: { value: PeriodChoice; label: string }[] = [
+  { value: "auto", label: "Automático" },
+  { value: "morning", label: "Manhã" },
+  { value: "afternoon", label: "Tarde" },
+  { value: "evening", label: "Noite" },
+  { value: "night", label: "Madrugada" },
+];
+
 export function AtmosphereToggle() {
   const [mode, setMode] = useState<AtmosMode>("on");
+  const [period, setPeriod] = useState<PeriodChoice>("auto");
 
   useEffect(() => {
     setMode(getAtmosMode());
+    setPeriod(getPeriodOverride() ?? "auto");
   }, []);
 
   const update = (v: AtmosMode) => {
     setMode(v);
     setAtmosMode(v);
+  };
+
+  const updatePeriod = (v: PeriodChoice) => {
+    setPeriod(v);
+    setPeriodOverride(v === "auto" ? null : v);
   };
 
   return (
@@ -54,6 +77,42 @@ export function AtmosphereToggle() {
             </button>
           );
         })}
+      </div>
+
+      <div className="mt-5 border-t border-border/60 pt-4">
+        <div className="flex items-center justify-between gap-2">
+          <div>
+            <h3 className="text-sm font-semibold">Visualizar período</h3>
+            <p className="text-[11px] text-muted-foreground">
+              Pré-visualize como o app fica em cada horário. Não afeta outros usuários.
+            </p>
+          </div>
+          {period !== "auto" && (
+            <span className="rounded-full bg-[var(--rose)]/15 px-2 py-0.5 text-[10px] font-medium text-[var(--rose)]">
+              preview ativo
+            </span>
+          )}
+        </div>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {PERIOD_OPTIONS.map((o) => {
+            const active = period === o.value;
+            return (
+              <button
+                key={o.value}
+                type="button"
+                onClick={() => updatePeriod(o.value)}
+                className={`rounded-full border px-3 py-1.5 text-xs transition ${
+                  active
+                    ? "border-[var(--rose)] bg-[var(--rose)]/10 text-foreground shadow-soft"
+                    : "border-border bg-background text-muted-foreground hover:bg-accent"
+                }`}
+                aria-pressed={active}
+              >
+                {o.label}
+              </button>
+            );
+          })}
+        </div>
       </div>
     </section>
   );
