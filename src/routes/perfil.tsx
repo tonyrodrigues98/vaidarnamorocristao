@@ -406,7 +406,8 @@ function PerfilPage() {
   return (
     <div className="min-h-screen">
       <Header />
-      <main className="mx-auto max-w-3xl px-4 py-10">
+      <main className="relative mx-auto max-w-3xl px-4 py-10">
+        <AtmosphereLayer intensity="low" />
         <AdminWarningBanner />
         <div className="animate-fade-up flex items-center justify-between gap-4">
           <div>
