@@ -147,6 +147,18 @@ function subGreeting() {
   return "Esperamos que seu dia tenha sido abençoado.";
 }
 
+function getHeroTheme() {
+  const h = new Date().getHours();
+  const isNight = h >= 18 || h < 5;
+  return {
+    isNight,
+    sectionClass: isNight ? "bg-gradient-night" : "bg-gradient-warm",
+    blobA: isNight ? "bg-[oklch(0.82_0.08_285)]" : "bg-[var(--petal)]",
+    blobB: isNight ? "bg-[oklch(0.92_0.06_40)]/60" : "bg-[var(--coral)]/20",
+    titleStyle: isNight ? { color: "oklch(0.18 0.04 270)" } : undefined,
+  };
+}
+
 function InicioPage() {
   const { user, loading } = useAuth();
   const [profile, setProfile] = useState<Profile | null | undefined>(undefined);
