@@ -346,7 +346,7 @@ function Chat() {
         })}
       </main>
 
-      <form onSubmit={send} className="sticky bottom-0 border-t border-border bg-background/80 px-4 py-3 backdrop-blur">
+      <form onSubmit={send} className="sticky bottom-0 border-t border-border bg-background/85 px-4 py-3 backdrop-blur-sm">
         <div className="mx-auto flex max-w-3xl flex-col gap-2">
           {replyTo && (
             <div className="flex items-stretch gap-2 rounded-lg border border-border bg-muted/40 px-3 py-2">
