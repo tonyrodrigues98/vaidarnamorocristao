@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
+import { AtmosphereLayer } from "@/components/atmosphere/AtmosphereLayer";
 import { Textarea } from "@/components/ui/textarea";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { recomputeMyBadges } from "@/lib/recomputeBadges";
@@ -532,7 +533,8 @@ function Devocional() {
   return (
     <div className="min-h-screen">
       <Header />
-      <main className="mx-auto max-w-3xl px-4 py-8 sm:py-10">
+      <main className="relative mx-auto max-w-3xl px-4 py-8 sm:py-10">
+        <AtmosphereLayer intensity="medium" />
         <header className="animate-fade-up flex items-start gap-3">
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-love shadow-glow">
             <BookHeart className="h-5 w-5 text-white" />

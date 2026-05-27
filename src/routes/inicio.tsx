@@ -5,6 +5,7 @@ import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { getHomeChecklistSteps, type HomeChecklistStep } from "@/lib/homeChecklist";
+import { AtmosphereLayer } from "@/components/atmosphere/AtmosphereLayer";
 import {
   Sparkles,
   CheckCircle2,
@@ -471,6 +472,7 @@ function InicioPage() {
 
         {/* HERO */}
         <section className="relative overflow-hidden rounded-[2rem] border border-border/60 bg-gradient-warm px-6 py-10 shadow-soft sm:px-10 sm:py-14">
+          <AtmosphereLayer intensity="high" />
           <div
             aria-hidden
             className="pointer-events-none absolute -top-32 -left-20 h-[420px] w-[420px] rounded-full bg-[var(--petal)] opacity-70 blur-3xl"

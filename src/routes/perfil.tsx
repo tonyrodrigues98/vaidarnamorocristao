@@ -5,6 +5,7 @@ import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
+import { AtmosphereLayer } from "@/components/atmosphere/AtmosphereLayer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -405,7 +406,8 @@ function PerfilPage() {
   return (
     <div className="min-h-screen">
       <Header />
-      <main className="mx-auto max-w-3xl px-4 py-10">
+      <main className="relative mx-auto max-w-3xl px-4 py-10">
+        <AtmosphereLayer intensity="low" />
         <AdminWarningBanner />
         <div className="animate-fade-up flex items-center justify-between gap-4">
           <div>
