@@ -484,14 +484,18 @@ function InicioPage() {
         {/* HERO */}
         {(() => { const hero = getHeroTheme(); return (
         <section className={`relative overflow-hidden rounded-[2rem] border border-border/60 ${hero.sectionClass} px-6 py-10 shadow-soft sm:px-10 sm:py-14`}>
-          <div
-            aria-hidden
-            className={`pointer-events-none absolute -top-32 -left-20 h-[420px] w-[420px] rounded-full ${hero.blobA} opacity-70 blur-3xl`}
-          />
-          <div
-            aria-hidden
-            className={`pointer-events-none absolute -bottom-24 -right-16 h-[380px] w-[380px] rounded-full ${hero.blobB} blur-3xl`}
-          />
+          {!hero.isNight && (
+            <>
+              <div
+                aria-hidden
+                className={`pointer-events-none absolute -top-32 -left-20 h-[420px] w-[420px] rounded-full ${hero.blobA} opacity-70 blur-3xl`}
+              />
+              <div
+                aria-hidden
+                className={`pointer-events-none absolute -bottom-24 -right-16 h-[380px] w-[380px] rounded-full ${hero.blobB} blur-3xl`}
+              />
+            </>
+          )}
           {hero.isNight && (
             <>
               {/* Lua crescente */}
