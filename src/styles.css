@@ -360,6 +360,12 @@
   from { opacity: 0; transform: translateY(6px); }
 }
 
+/* Floating animation for sticker composition banners */
+@keyframes sticker-float {
+  0%, 100% { transform: translateY(0) rotate(var(--r, 0deg)); }
+  50%      { transform: translateY(-8px) rotate(var(--r, 0deg)); }
+}
+
 /* Fallback para navegadores sem View Transitions API (Firefox, Safari < 18).
    Aplica fade-in suave no <main>/Outlet ao trocar de rota. */
 @supports not (view-transition-name: none) {
