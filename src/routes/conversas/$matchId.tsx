@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
+import { DecoratedAvatar } from "@/components/DecoratedAvatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ArrowLeft, Send, Trash2, Pencil, Check, X, Reply, MoreHorizontal, CheckCheck } from "lucide-react";
