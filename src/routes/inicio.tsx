@@ -5,6 +5,7 @@ import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { getHomeChecklistSteps, type HomeChecklistStep } from "@/lib/homeChecklist";
+import { AtmosphereLayer } from "@/components/atmosphere/AtmosphereLayer";
 import {
   Sparkles,
   CheckCircle2,
