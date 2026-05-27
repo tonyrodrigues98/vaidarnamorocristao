@@ -452,7 +452,7 @@ function Comunidade() {
                 })}
             </div>
           )}
-          <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto p-4 sm:p-6" style={{ maxHeight: "calc(100vh - 280px)" }}>
+          <div ref={scrollRef} className="flex-1 space-y-5 overflow-y-auto p-4 sm:p-6" style={{ maxHeight: "calc(100vh - 280px)" }}>
             {messages.length === 0 ? (
               <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
                 Nenhuma mensagem ainda. Seja o primeiro!
