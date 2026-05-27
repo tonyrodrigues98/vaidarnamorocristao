@@ -5,7 +5,6 @@ import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
-import { AtmosphereLayer } from "@/components/atmosphere/AtmosphereLayer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -406,13 +405,12 @@ function PerfilPage() {
   return (
     <div className="min-h-screen">
       <Header />
-      <main className="relative mx-auto max-w-3xl px-4 py-10">
-        <AtmosphereLayer intensity="low" />
+      <main className="mx-auto max-w-3xl px-4 py-10">
         <AdminWarningBanner />
         <div className="animate-fade-up flex items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-semibold sm:text-4xl">Meu perfil</h1>
-            <p className="mt-1 text-sm text-soft">
+            <p className="mt-1 text-sm text-muted-foreground">
               Edite suas informações e preferências de match.
             </p>
           </div>
@@ -748,7 +746,7 @@ function PerfilPage() {
                   </div>
                   <div>
                     <h2 className="text-xl font-semibold">Seu cargo</h2>
-                    <p className="text-sm text-soft">{roleCfg.description}</p>
+                    <p className="text-sm text-muted-foreground">{roleCfg.description}</p>
                   </div>
                 </div>
 

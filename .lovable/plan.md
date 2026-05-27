@@ -1,135 +1,54 @@
-## Auditoria profunda de legibilidade — diagnóstico + reforma estrutural
+## Diagnóstico
 
-### Diagnóstico raiz (não é problema de página, é sistêmico)
+A página `/comunidade` carrega até 100 mensagens e re-renderiza tudo a cada mudança de estado (digitar no input, hover, abrir menu, novo cooldown, nova mensagem em tempo real). Os pontos mais pesados:
 
-A app combina 4 camadas que se acumulam por cima do texto e roubam contraste:
+1. **Renderização de todas as mensagens em uma única árvore**, sem `React.memo`, sem virtualização. Cada item monta `OnlineDot`, `UserBadges`, `RoleBadge`, `VerifiedBadge`, avatar, etc.
+2. **`UserBadges` e `OnlineDot` por linha** — cada componente abre seu próprio fetch / subscription por `userId`. Com muitas mensagens repetidas do mesmo autor, são vários hooks duplicados.
+3. **Busca O(n²) do "reply_to"**: `messages.find(x => x.id === m.reply_to_id)` dentro do `.map()`.
+4. **`messages.some(...pinned)` e `messages.filter(...)` recomputados inline** a cada render.
+5. **Pré-carga de stickers**: `fetchStickers({ activeOnly: true })` traz **todos** os stickers do banco (sem `limit`) só para o cache de miniaturas, mesmo que a comunidade só use alguns.
+6. **`framer-motion` em cada sticker**: `StickerMessage` faz spring animation no mount de cada `<img>`, e o `StickerPicker` usa `motion.button` com `whileHover/whileTap` por sticker.
+7. **Lookups de `staffMap`/`contribIds`/`flaggedIds`** ok, mas tudo dentro do mesmo componente gigante — qualquer setState global re-renderiza a lista inteira.
 
-```
-[ texto / chip / botão ]      ← muitas vezes em /60–/70 (translúcido)
-[ blur backdrop ]             ← 14–20px, amplia hue do fundo
-[ atmos-tint ]                ← véu de cor (azul/lilás/âmbar) global
-[ atmos-overlay ]             ← radiais coloridos fortes (0.45–0.65 alpha)
-[ background base ]
-```
+## Plano
 
-Quando o fundo é claro e a atmosfera é morna isso passa. Quando a atmosfera vira Noite/Madrugada (radiais azul/lilás 0.65) qualquer chip com `bg-card/60` desaparece. Os sintomas que você lista — "lavado", "elementos sumindo", "estado inativo apagado", "tabs sem peso" — todos saem disto.
+### 1. Extrair e memoizar a linha de mensagem
+- Criar `MessageRow` (componente novo, dentro de `comunidade.tsx`) envolvido em `React.memo` recebendo apenas o que precisa: `m`, `p` (profile), `repliedMsg`, `repliedName`, `senderStaff`, flags booleanas e callbacks estáveis.
+- Estabilizar callbacks com `useCallback` (`onReply`, `onOpenActions`, `jumpToMessage`, `togglePin`, etc.).
+- Resultado: digitar no input ou atualizar cooldown deixa de re-renderizar 100 linhas.
 
-Outros vetores que pioram:
+### 2. Índices pré-computados com `useMemo`
+- `messagesById = useMemo(() => new Map(messages.map(m => [m.id, m])), [messages])` para o lookup de reply em O(1).
+- `pinnedMessages = useMemo(...)` e `visibleMessages = useMemo(...)` (já com filtro de flagged).
+- `hasPinned = pinnedMessages.length > 0` em vez de `messages.some(...)`.
 
-- `shadow-glow` aplicado a **fundos brancos** (cards `bg-card/70 backdrop-blur`) — borra o contorno e tira definição.
-- Estado ativo de pills/chips com `shadow-glow` rose por cima de overlay rose-tintado → o ativo "vaza" e se confunde com o inativo.
-- `text-muted-foreground` em subtítulos longos sobre `atmos-tint` colorido (já reforcei o token; ainda há casos de `text-foreground/70` em cima de gradiente que precisam virar `/85`).
-- Cores arbitrárias (`text-orange-500`, `text-amber-500` em ícones de stat) que ignoram o sistema e mudam de leitura entre temas.
+### 3. Compartilhar badges/presence por autor
+- Pré-calcular `uniqueSenderIds` com `useMemo` a partir de `messages`.
+- Renderizar `UserBadges`/`OnlineDot` apenas uma vez por autor visível, passando o resultado já resolvido para `MessageRow` via prop (evita fetches/subscriptions duplicados). Alternativa simpler: manter `UserBadges` por linha mas garantir que o cache global é hit (já é) e que `MessageRow.memo` evita re-render redundante.
 
-### Princípios da reforma (regras globais, aplicadas como sistema)
+### 4. Pré-carga de stickers mais leve
+- Limitar a pré-carga a stickers efetivamente usados na lista de mensagens carregadas: após `setMessages`, coletar os `sticker_id` distintos e buscar só esses por `in('id', ids)`.
+- Quando chega nova mensagem com `sticker_id` não cacheado, buscar só aquele.
+- Quando o usuário envia um sticker (já populado em cache via `sendSticker`), nada muda.
 
-1. **Pirâmide de superfícies**: cada elemento tem uma "altitude" e sua opacidade mínima cresce com a importância.
+### 5. Aliviar animações
+- `StickerMessage`: remover `framer-motion`, substituir o spring por uma animação CSS leve (`animate-scale-in` já existente em `styles.css`) ou simplesmente uma transição de opacity. Continua "vivo" mas sem custo de JS por sticker.
+- `StickerPicker`: trocar `motion.button` com `whileHover/whileTap` por `<button>` com `transition active:scale-95 hover:scale-105` no Tailwind. Manter o `motion.div` do popover (é só 1 elemento).
+- O botão "+" pode manter o `motion.span` (1 elemento), sem impacto.
 
-   | Camada | Uso | Opacidade mínima |
-   |---|---|---|
-   | Tela / fundo | bg da página | n/a (recebe atmosfera) |
-   | Superfície base | grandes painéis (`.glass`, hero cards) | 0.85 (era 0.7) |
-   | Superfície de conteúdo | cards de post, listas | **1.0 (opaco)** |
-   | Controle inativo | chips, pills, tabs inativas | **1.0 (opaco)** + borda visível |
-   | Controle ativo | chip ativo, botão primário | 1.0 + cor de marca cheia |
-   | Overlay efêmero (modal, popover) | dialog/dropdown | 0.95 + blur |
+### 6. Pequenos ajustes
+- Adicionar `decoding="async"` e `width`/`height` explícitos nos `<img>` de avatar e de sticker para evitar layout shift e ajudar o navegador.
+- Trocar `.slice().reverse()` por `[...data].reverse()` (mesma coisa, só estética).
+- Garantir `loading="lazy"` nas miniaturas de sticker dentro de mensagens fora da viewport (o `StickerMessage` ainda não usa lazy quando renderizado direto).
 
-   Regra: **nenhum controle clicável < 0.85 de opacidade**. Para isso troco `bg-card/60`, `bg-background/60`, `bg-muted/40` em chips/pills/botões por classes opacas com borda.
+## Detalhes técnicos
 
-2. **Blur intencional**: blur é só para overlays flutuantes (header sticky, modal, popover, sticker picker). Cards de conteúdo perdem `backdrop-blur`. Padronizo só duas intensidades:
+- Nada de alteração de schema, RLS, server functions ou rotas.
+- Mudanças localizadas em: `src/routes/comunidade.tsx`, `src/components/stickers/StickerMessage.tsx`, `src/components/stickers/StickerPicker.tsx`.
+- Sem novas dependências. Continuamos com `framer-motion` apenas onde realmente agrega (overlays únicos).
+- Comportamento visual preservado: mesmas animações de entrada (via CSS), mesmas interações.
 
-   - `backdrop-blur-sm` (8px) → header sticky, footer chat, dropdown.
-   - `backdrop-blur-md` (12px) → modal/sheet/dialog overlay.
-   - Remover de: cards do `/inicio` (`bg-card/70 backdrop-blur`), chips de seta do carrossel, listas de stats. Esses viram superfície opaca.
+## Fora de escopo
 
-3. **Glow controlado**: `shadow-glow` só em CTAs primários ("Iniciar agora", "Demonstrar interesse", "Novo chamado"). Removido de chips ativos (filtros do devocional já trocados; vou padronizar como ring de marca em vez de glow) e de logo do header (já é pequeno o suficiente para não atrapalhar).
-
-4. **Hierarquia de texto** (3 níveis, oklch fixo):
-   - Título → `text-foreground` (token).
-   - Subtítulo / lead → **novo token `--foreground-soft`** (light 0.30, dark 0.86) — mais legível que `muted-foreground` mas sem virar título. Aplicado via nova classe utilitária `.text-soft`.
-   - Auxiliar / metadado → `text-muted-foreground` (já reforçado).
-   - Aboli o uso de `text-foreground/70` solto: vira `.text-soft`.
-
-5. **Estado de controles segmentados** (tabs, filtros, pills) — padrão único:
-   - Inativo: `bg-card` opaco + `border-border` + `text-foreground/85`.
-   - Hover: `bg-accent` + `text-foreground`.
-   - Ativo: `bg-[var(--rose)]` + `text-white` + **`ring-2 ring-[var(--rose)]/30`** (substitui `shadow-glow`, que vazava).
-   - Diferença ativo vs inativo: cor de fundo cheia, não brilho. Funciona em qualquer atmosfera.
-
-6. **Atmosfera mais discreta nas áreas de leitura**: reduzir alpha do `--atmos-tint` em ~25% (já que o overlay radial já dá ambiente). Subtítulos param de "lavar".
-
-### Mudanças concretas
-
-#### Em `src/styles.css`
-- Adicionar token `--foreground-soft` (light + dark) e classe `.text-soft`.
-- Diminuir alpha de `--atmos-tint` nos 4 períodos em ~25%.
-- Atualizar `.glass` para 0.85/0.82 (era 0.7/0.7) e blur 12px (era 14px).
-- Definir utilitárias `.surface-1` (card opaco com border + shadow-soft) e `.surface-control` (controle opaco interativo) para reuso.
-
-#### Em `src/components/ui/tabs.tsx`
-- Aplicar padrão segmentado: TabsList com `bg-muted/70` opaco; TabsTrigger inativo `text-foreground/85`, ativo com `ring-2 ring-ring/25` em vez de `shadow`.
-
-#### Em `src/routes/devocional.tsx`
-- `FilterChip` ativo: trocar `shadow-glow` por `ring-2 ring-[var(--rose)]/30`.
-- Chips de reação inativos: já estão opacos; só ajustar texto para `.text-soft`.
-- Subtítulo do header → `.text-soft`.
-
-#### Em `src/routes/inicio.tsx` (foco mobile)
-- Remover `backdrop-blur` dos 6 cards de seção principais (`bg-card/70` → `bg-card` + `shadow-soft`).
-- Botões secundários com `bg-white/40 backdrop-blur` viram `variant="outline"` padrão (opaco).
-- Itens de lista `bg-background/40` → `bg-card` + border.
-
-#### Em `src/routes/comunidade.tsx`
-- Subtítulo do header e prévia de mensagens citadas → `.text-soft`.
-- Item de mensagem fixada (`bg-background/60`) → opaco.
-
-#### Em `src/routes/perfil.tsx`
-- Subtítulo → `.text-soft`.
-- Card de role (`text-muted-foreground` em descrição) → `.text-soft`.
-
-#### Em `src/components/layout/Header.tsx`
-- Confirmar que mobile menu sticky (`bg-card/95 backdrop-blur`) mantém — está no nível "overlay efêmero".
-
-#### Em `src/routes/conversas/$matchId.tsx`
-- Footer do chat (`bg-background/80 backdrop-blur`) → mantém (header sticky), reduz blur para `backdrop-blur-sm`.
-- `shadow-glow` em mensagem destacada → `ring-2 ring-primary/40`.
-
-#### Cores arbitrárias para alinhamento ao sistema
-- `text-orange-500`, `text-amber-500` (ícones de stat) → `text-[var(--rose)]` e `text-[var(--gold)]`. Mantém a função semântica e responde ao tema.
-
-### O que NÃO muda
-
-- Identidade visual: rose/coral/petal/gold intactos.
-- Animações e micro-interações.
-- Tipografia (fontes, escalas).
-- Lógica de atmosfera (apenas o tint ganha alpha menor).
-- Modais, dialogs, sheets: já estão no nível correto.
-
-### Como vou validar (mobile-first 390x844)
-
-Checklist por página, em modo claro e escuro, alternando os 4 períodos via seletor de `/conta`:
-
-1. `/inicio` — hero, cards de seção, listas.
-2. `/devocional` — filtros, reações, post.
-3. `/comunidade` — header, lista de mensagens, input.
-4. `/perfil` — header, tabs, cards de role.
-5. `/conversas/:id` — bolhas, footer.
-6. `/matches` — cards de match.
-7. Modais (criar recado, novo chamado).
-
-Critério de aprovação por elemento:
-- Texto principal: contraste ≥ 7:1.
-- Texto secundário: ≥ 5:1.
-- Controle inativo: identificável sem hover, em qualquer atmosfera.
-- Controle ativo: distinguível do inativo por cor (não só por brilho).
-- Nenhum chip clicável transparente sobre o radial da atmosfera.
-
-### Escopo desta entrega
-
-A reforma é grande mas localizada a:
-- 1 arquivo de tokens (`src/styles.css`)
-- 1 primitivo (`tabs.tsx`)
-- 6 rotas (`inicio`, `devocional`, `comunidade`, `perfil`, `conversas/$matchId`, `notificacoes`)
-- 1 utilitário compartilhado novo: classe `.text-soft`
-
-Sem novas dependências, sem mudança de layout, sem mudança de identidade.
+- Virtualização (`react-window`) — só compensa acima de algumas centenas de itens; o limite atual é 100 e o ganho dos passos 1–3 já deve ser suficiente. Posso adicionar depois se ainda travar.
+- Mudar o limite de 100 mensagens ou paginar histórico.

@@ -1,7 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Header } from "@/components/layout/Header";
 import { AccountDangerZone } from "@/components/AccountDangerZone";
-import { AtmosphereToggle } from "@/components/atmosphere/AtmosphereToggle";
 import { ChevronLeft } from "lucide-react";
 
 export const Route = createFileRoute("/conta")({
@@ -29,9 +28,6 @@ function ContaPage() {
         <p className="mt-1 text-sm text-muted-foreground">
           Gerencie a desativação ou exclusão da sua conta.
         </p>
-        <div className="mt-8">
-          <AtmosphereToggle />
-        </div>
         <div className="mt-8">
           <AccountDangerZone />
         </div>

@@ -6,7 +6,6 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
-import { AtmosphereLayer } from "@/components/atmosphere/AtmosphereLayer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Send, Trash2, Users, Pencil, Check, X, Reply, MoreHorizontal, Pin, PinOff, ShieldCheck, Flag, HandHeart, Plus, Sticker as StickerIcon } from "lucide-react";
@@ -378,15 +377,14 @@ function Comunidade() {
   return (
     <div className="flex min-h-screen flex-col">
       <Header />
-      <main className="relative mx-auto flex w-full max-w-4xl flex-1 flex-col px-4 py-6">
-        <AtmosphereLayer intensity="low" />
+      <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col px-4 py-6">
         <div className="animate-fade-up flex items-center gap-3">
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-love shadow-glow">
             <Users className="h-5 w-5 text-white" />
           </div>
           <div className="flex-1 min-w-0">
             <h1 className="text-3xl font-semibold">Comunidade</h1>
-            <p className="text-sm text-soft">Chat global em tempo real — converse com todos</p>
+            <p className="text-sm text-muted-foreground">Chat global em tempo real — converse com todos</p>
           </div>
           <Link
             to="/oracoes"
@@ -411,7 +409,7 @@ function Comunidade() {
                   return (
                     <div
                       key={`pin-${m.id}`}
-                      className="flex items-stretch gap-2 rounded-lg border border-border bg-card px-2 py-1.5 text-xs"
+                      className="flex items-stretch gap-2 rounded-lg bg-background/60 px-2 py-1.5 text-xs"
                     >
                       <button
                         type="button"

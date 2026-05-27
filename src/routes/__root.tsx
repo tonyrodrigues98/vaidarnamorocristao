@@ -7,7 +7,6 @@ import { TermsGate } from "@/components/TermsGate";
 import { SupportFooterButton } from "@/components/SupportFooterButton";
 import { PresenceProvider } from "@/lib/presence";
 import { BanGuard } from "@/components/BanGuard";
-import { useTimeOfDay } from "@/hooks/useTimeOfDay";
 
 import appCss from "../styles.css?url";
 import coinPng from "@/assets/coin.png";
@@ -90,7 +89,6 @@ function RootShell({ children }: { children: React.ReactNode }) {
 }
 
 function RootComponent() {
-  useTimeOfDay();
   return (
     <ThemeProvider>
       <AuthProvider>

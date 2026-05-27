@@ -5,7 +5,6 @@ import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { getHomeChecklistSteps, type HomeChecklistStep } from "@/lib/homeChecklist";
-import { AtmosphereLayer } from "@/components/atmosphere/AtmosphereLayer";
 import {
   Sparkles,
   CheckCircle2,
@@ -472,7 +471,6 @@ function InicioPage() {
 
         {/* HERO */}
         <section className="relative overflow-hidden rounded-[2rem] border border-border/60 bg-gradient-warm px-6 py-10 shadow-soft sm:px-10 sm:py-14">
-          <AtmosphereLayer intensity="high" />
           <div
             aria-hidden
             className="pointer-events-none absolute -top-32 -left-20 h-[420px] w-[420px] rounded-full bg-[var(--petal)] opacity-70 blur-3xl"
@@ -521,7 +519,7 @@ function InicioPage() {
               style={{ animationDelay: "220ms" }}
             >
               {isBanned ? (
-                <Button asChild size="lg" variant="outline" className="rounded-full px-6">
+                <Button asChild size="lg" variant="outline" className="rounded-full px-6 backdrop-blur bg-white/40 dark:bg-white/5">
                   <Link to="/suporte">
                     <MessageSquareWarning className="mr-2 h-4 w-4" /> Falar com o suporte
                   </Link>
@@ -537,7 +535,7 @@ function InicioPage() {
                     asChild
                     size="lg"
                     variant="outline"
-                    className="rounded-full px-6"
+                    className="rounded-full px-6 backdrop-blur bg-white/40 dark:bg-white/5"
                   >
                     <Link to="/devocional">
                       <BookHeart className="mr-2 h-4 w-4" /> Devocional do dia
@@ -684,7 +682,7 @@ function InicioPage() {
         )}
 
         {adminRequests.length > 0 && (
-          <section className="mt-6 rounded-3xl border border-border bg-card p-6 shadow-soft">
+          <section className="mt-6 rounded-3xl border border-border/60 bg-card/70 p-6 shadow-soft backdrop-blur">
             <div className="flex items-center gap-2">
               <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-[var(--petal)] text-[var(--rose)]">
                 <ClipboardList className="h-4 w-4" />
@@ -698,7 +696,7 @@ function InicioPage() {
               {adminRequests.map((r) => (
                 <li
                   key={r.id}
-                  className="rounded-2xl border border-border bg-card p-4"
+                  className="rounded-2xl border border-border/50 bg-background/40 p-4"
                 >
                   <p className="text-xs font-semibold uppercase tracking-wide text-[var(--rose)]">
                     {r.kind === "photo" && "Foto"}
@@ -729,7 +727,7 @@ function InicioPage() {
         {!isBanned && !isRejected && <>
         <section className="mt-8 grid gap-6 lg:grid-cols-3">
           {/* CHECKLIST */}
-          <div className="animate-fade-up rounded-3xl border border-border bg-card p-6 shadow-soft lg:col-span-2">
+          <div className="animate-fade-up rounded-3xl border border-border/60 bg-card/70 p-6 shadow-soft backdrop-blur lg:col-span-2">
             <div className="flex items-center gap-2">
               <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-[var(--petal)] text-[var(--rose)]">
                 <Sparkles className="h-4 w-4" />
@@ -773,7 +771,7 @@ function InicioPage() {
 
           {/* PERFIL */}
           <div
-            className="animate-fade-up rounded-3xl border border-border bg-card p-6 shadow-soft"
+            className="animate-fade-up rounded-3xl border border-border/60 bg-card/70 p-6 shadow-soft backdrop-blur"
             style={{ animationDelay: "80ms" }}
           >
             <div className="flex items-center gap-3">
@@ -821,7 +819,7 @@ function InicioPage() {
         {/* DEVOCIONAL + COMUNIDADE */}
         <section className="mt-6 grid gap-6 lg:grid-cols-3">
           {/* DEVOCIONAL */}
-          <div className="animate-fade-up relative overflow-hidden rounded-3xl border border-border bg-card p-6 shadow-soft lg:col-span-2">
+          <div className="animate-fade-up relative overflow-hidden rounded-3xl border border-border/60 bg-card/70 p-6 shadow-soft backdrop-blur lg:col-span-2">
             <div
               aria-hidden
               className="pointer-events-none absolute -top-12 -right-12 h-44 w-44 rounded-full bg-[var(--petal)] opacity-60 blur-3xl"
@@ -853,7 +851,7 @@ function InicioPage() {
                     <Button
                       asChild
                       variant="outline"
-                      className="rounded-full border border-border bg-card"
+                      className="rounded-full bg-white/50 backdrop-blur dark:bg-white/5"
                     >
                       <Link to="/devocional">
                         Ler agora <ArrowRight className="ml-1 h-4 w-4" />
@@ -871,7 +869,7 @@ function InicioPage() {
 
           {/* COMUNIDADE VIVA */}
           <div
-            className="animate-fade-up rounded-3xl border border-border bg-card p-6 shadow-soft"
+            className="animate-fade-up rounded-3xl border border-border/60 bg-card/70 p-6 shadow-soft backdrop-blur"
             style={{ animationDelay: "80ms" }}
           >
             <div className="flex items-center gap-2">
@@ -973,14 +971,14 @@ function InicioPage() {
               <button
                 onClick={() => setTipIndex((i) => (i - 1 + TIPS.length) % TIPS.length)}
                 aria-label="Dica anterior"
-                className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-card transition hover:bg-muted"
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-card/60 backdrop-blur transition hover:bg-muted"
               >
                 <ChevronLeft className="h-4 w-4" />
               </button>
               <button
                 onClick={() => setTipIndex((i) => (i + 1) % TIPS.length)}
                 aria-label="Próxima dica"
-                className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-card transition hover:bg-muted"
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-card/60 backdrop-blur transition hover:bg-muted"
               >
                 <ChevronRight className="h-4 w-4" />
               </button>
@@ -994,7 +992,7 @@ function InicioPage() {
             >
               {TIPS.map((t, i) => (
                 <div key={i} className="w-full shrink-0 px-1">
-                  <div className="relative overflow-hidden rounded-3xl border border-border bg-card p-6 shadow-soft sm:p-8">
+                  <div className="relative overflow-hidden rounded-3xl border border-border/60 bg-card/70 p-6 shadow-soft backdrop-blur sm:p-8">
                     <div
                       aria-hidden
                       className="pointer-events-none absolute -right-16 -top-16 h-44 w-44 rounded-full bg-[var(--petal)] opacity-60 blur-3xl"
@@ -1045,7 +1043,7 @@ function PulseRow({
   cta?: { to: "/comunidade"; label: string };
 }) {
   return (
-    <li className="flex items-center gap-3 rounded-2xl border border-border bg-card px-3 py-2.5">
+    <li className="flex items-center gap-3 rounded-2xl border border-border/50 bg-background/40 px-3 py-2.5 backdrop-blur">
       <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--petal)] text-[var(--rose)]">
         {icon}
       </span>

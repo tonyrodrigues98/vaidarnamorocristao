@@ -6,7 +6,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
-import { AtmosphereLayer } from "@/components/atmosphere/AtmosphereLayer";
 import { Textarea } from "@/components/ui/textarea";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { recomputeMyBadges } from "@/lib/recomputeBadges";
@@ -533,15 +532,14 @@ function Devocional() {
   return (
     <div className="min-h-screen">
       <Header />
-      <main className="relative mx-auto max-w-3xl px-4 py-8 sm:py-10">
-        <AtmosphereLayer intensity="medium" />
+      <main className="mx-auto max-w-3xl px-4 py-8 sm:py-10">
         <header className="animate-fade-up flex items-start gap-3">
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-love shadow-glow">
             <BookHeart className="h-5 w-5 text-white" />
           </div>
           <div className="flex-1">
             <h1 className="text-3xl font-semibold tracking-tight">Devocional</h1>
-            <p className="text-sm text-soft">
+            <p className="text-sm text-muted-foreground">
               Sua jornada espiritual diária — ore, reflita e compartilhe.
             </p>
           </div>
@@ -557,12 +555,12 @@ function Devocional() {
 
         <div className="animate-fade-up mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
           <StatCard
-            icon={<Flame className="h-4 w-4 text-[var(--rose)]" />}
+            icon={<Flame className="h-4 w-4 text-orange-500" />}
             label="Sequência"
             value={`${streak.current} ${streak.current === 1 ? "dia" : "dias"}`}
           />
           <StatCard
-            icon={<Trophy className="h-4 w-4 text-[var(--gold)]" />}
+            icon={<Trophy className="h-4 w-4 text-amber-500" />}
             label="Recorde"
             value={`${streak.best}`}
           />
@@ -683,8 +681,8 @@ function FilterChip({
       onClick={onClick}
       className={`rounded-full border px-3.5 py-1.5 text-sm font-medium transition-all ${
         active
-          ? "border-[var(--rose)] bg-[var(--rose)] text-white ring-2 ring-[var(--rose)]/25"
-          : "border-border/80 bg-card text-foreground/85 shadow-soft hover:bg-accent"
+          ? "border-[var(--rose)] bg-[var(--rose)] text-white shadow-glow"
+          : "border-border bg-card/60 text-foreground/70 hover:bg-muted"
       }`}
     >
       {children}
@@ -821,12 +819,12 @@ function PostCard(props: PostCardProps) {
               className={`group inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition-all hover-scale ${
                 active
                   ? "border-[var(--rose)] bg-[var(--rose)]/10 text-foreground"
-                  : "border-border/80 bg-card hover:bg-accent"
+                  : "border-border bg-card/50 hover:bg-muted"
               }`}
               title={r.label}
               aria-label={r.label}
             >
-              <Icon className={`h-4 w-4 ${active ? r.activeClass : "text-foreground/70"}`} />
+              <Icon className={`h-4 w-4 ${active ? r.activeClass : "text-muted-foreground"}`} />
               <span className="text-xs font-semibold tabular-nums">{counts[r.key]}</span>
             </button>
           );
