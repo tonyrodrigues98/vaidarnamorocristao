@@ -5,6 +5,17 @@ import coroa from "@/assets/decorations/frame-coroa-espinhos.png";
 import louros from "@/assets/decorations/frame-louros-dourados.png";
 import floral from "@/assets/decorations/frame-floral-rosa.png";
 import vitral from "@/assets/decorations/frame-vitral-sagrado.png";
+import eclipseDourado from "@/assets/decorations/frame-eclipse-dourado.png";
+import neonVioleta from "@/assets/decorations/frame-neon-violeta.png";
+import horizonte from "@/assets/decorations/frame-horizonte.png";
+import cristalRei from "@/assets/decorations/frame-cristal-do-rei.png";
+import chamaSagrada from "@/assets/decorations/frame-chama-sagrada.png";
+import galaxia from "@/assets/decorations/frame-galaxia.png";
+import auroraBoreal from "@/assets/decorations/frame-aurora-boreal.png";
+import minimalistaPrata from "@/assets/decorations/frame-minimalista-prata.png";
+import coracaoRadiante from "@/assets/decorations/frame-coracao-radiante.png";
+import vortice from "@/assets/decorations/frame-vortice.png";
+import folhasOliveiras from "@/assets/decorations/frame-folhas-oliveiras.png";
 import pomba from "@/assets/decorations/sticker-pomba.png";
 import cruz from "@/assets/decorations/sticker-cruz-dourada.png";
 import coracao from "@/assets/decorations/sticker-coracao-sagrado.png";
@@ -29,6 +40,17 @@ export const DECORATION_ASSETS: Record<string, string> = {
   "frame-louros-dourados.png": louros,
   "frame-floral-rosa.png": floral,
   "frame-vitral-sagrado.png": vitral,
+  "frame-eclipse-dourado.png": eclipseDourado,
+  "frame-neon-violeta.png": neonVioleta,
+  "frame-horizonte.png": horizonte,
+  "frame-cristal-do-rei.png": cristalRei,
+  "frame-chama-sagrada.png": chamaSagrada,
+  "frame-galaxia.png": galaxia,
+  "frame-aurora-boreal.png": auroraBoreal,
+  "frame-minimalista-prata.png": minimalistaPrata,
+  "frame-coracao-radiante.png": coracaoRadiante,
+  "frame-vortice.png": vortice,
+  "frame-folhas-oliveiras.png": folhasOliveiras,
   "sticker-pomba.png": pomba,
   "sticker-cruz-dourada.png": cruz,
   "sticker-coracao-sagrado.png": coracao,

@@ -12,6 +12,17 @@ const FRAME_PLACEMENT: Record<string, { photoScale: number; centerX: number; cen
   "frame-louros-dourados.png": { photoScale: 0.50, centerX: 0.500, centerY: 0.500 },
   "frame-floral-rosa.png":     { photoScale: 0.38, centerX: 0.501, centerY: 0.506 },
   "frame-vitral-sagrado.png":  { photoScale: 0.48, centerX: 0.496, centerY: 0.479 },
+  "frame-eclipse-dourado.png":    { photoScale: 0.74, centerX: 0.500, centerY: 0.470 },
+  "frame-neon-violeta.png":       { photoScale: 0.62, centerX: 0.500, centerY: 0.500 },
+  "frame-horizonte.png":          { photoScale: 0.74, centerX: 0.500, centerY: 0.500 },
+  "frame-cristal-do-rei.png":     { photoScale: 0.52, centerX: 0.500, centerY: 0.490 },
+  "frame-chama-sagrada.png":      { photoScale: 0.58, centerX: 0.500, centerY: 0.500 },
+  "frame-galaxia.png":            { photoScale: 0.52, centerX: 0.500, centerY: 0.500 },
+  "frame-aurora-boreal.png":      { photoScale: 0.54, centerX: 0.500, centerY: 0.500 },
+  "frame-minimalista-prata.png":  { photoScale: 0.80, centerX: 0.500, centerY: 0.495 },
+  "frame-coracao-radiante.png":   { photoScale: 0.72, centerX: 0.500, centerY: 0.490 },
+  "frame-vortice.png":            { photoScale: 0.55, centerX: 0.500, centerY: 0.500 },
+  "frame-folhas-oliveiras.png":   { photoScale: 0.62, centerX: 0.500, centerY: 0.500 },
 };
 const DEFAULT_FRAME_PLACEMENT = { photoScale: 0.56, centerX: 0.5, centerY: 0.5 };
 
