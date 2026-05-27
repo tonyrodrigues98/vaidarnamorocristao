@@ -1,7 +1,7 @@
 import { friendlyError } from "@/lib/errors";
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { RequireApproved } from "@/components/RequireApproved";
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
@@ -23,6 +23,7 @@ import { UserBadges } from "@/components/UserBadges";
 import { StickerPicker } from "@/components/stickers/StickerPicker";
 import { StickerMessage } from "@/components/stickers/StickerMessage";
 import { fetchStickers, type Sticker } from "@/lib/stickers";
+import { supabase as _sb } from "@/integrations/supabase/client";
 import { AnimatePresence, motion } from "framer-motion";
 
 const COOLDOWN_MS = 10_000;
@@ -73,16 +74,6 @@ function Comunidade() {
   const [plusOpen, setPlusOpen] = useState(false);
   const [stickerCache, setStickerCache] = useState<Record<string, Sticker>>({});
 
-  useEffect(() => {
-    // Preload all active stickers once to render in messages without per-row fetch
-    fetchStickers({ activeOnly: true })
-      .then((all) => {
-        const m: Record<string, Sticker> = {};
-        for (const s of all) m[s.id] = s;
-        setStickerCache(m);
-      })
-      .catch(() => {});
-  }, []);
 
   useEffect(() => {
     if (cooldownLeft <= 0) return;
