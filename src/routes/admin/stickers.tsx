@@ -21,7 +21,7 @@ import { motion } from "framer-motion";
 export const Route = createFileRoute("/admin/stickers")({ component: StickersAdmin });
 
 function StickersAdmin() {
-  const { user, role, loading } = useAuth();
+  const { user, role, loading, rolesLoaded } = useAuth();
   const isSuperAdmin = role === "super_admin";
 
   const [cats, setCats] = useState<StickerCategory[]>([]);
@@ -57,7 +57,7 @@ function StickersAdmin() {
     [stickers, activeCat]
   );
 
-  if (loading) return null;
+  if (loading || (user && !rolesLoaded)) return null;
   if (!user) return <Navigate to="/auth/login" />;
   if (!isSuperAdmin) return <Navigate to="/admin" />;
 
