@@ -171,7 +171,7 @@ export function DecorationsCard({
           const previewProps = {
             photoUrl,
             fallback: user?.email?.[0]?.toUpperCase() ?? "?",
-            size: 80,
+            size: 40,
             frameId: type === "frame" ? d.id : equipped.frame,
             auraId: type === "aura" ? d.id : equipped.aura,
             stickerId: type === "sticker" ? d.id : equipped.sticker,
@@ -191,7 +191,7 @@ export function DecorationsCard({
                     : "hover:border-[var(--rose-soft)]"
               }`}
             >
-              <div className="flex h-20 w-20 items-center justify-center">
+              <div className="flex h-28 w-28 items-center justify-center">
                 <DecoratedAvatar {...previewProps} />
               </div>
               <p
@@ -284,13 +284,15 @@ export function DecorationsCard({
         <p className="text-xs uppercase tracking-wide text-muted-foreground">
           Pré-visualização
         </p>
-        <DecoratedAvatar
-          photoUrl={photoUrl}
-          fallback={user?.email?.[0]?.toUpperCase() ?? "?"}
-          size={140}
-          frameId={preview.frame ?? equipped.frame}
-          auraId={preview.aura ?? equipped.aura}
-        />
+        <div className="flex h-52 w-52 items-center justify-center">
+          <DecoratedAvatar
+            photoUrl={photoUrl}
+            fallback={user?.email?.[0]?.toUpperCase() ?? "?"}
+            size={72}
+            frameId={preview.frame ?? equipped.frame}
+            auraId={preview.aura ?? equipped.aura}
+          />
+        </div>
         {(preview.frame || preview.aura) && (
           <Button
             variant="ghost"
