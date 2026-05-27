@@ -20,6 +20,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Textarea } from "@/components/ui/textarea";
 import { OnlineDot } from "@/components/OnlineDot";
 import { UserBadges } from "@/components/UserBadges";
+import { DecoratedAvatar } from "@/components/DecoratedAvatar";
 import { StickerPicker } from "@/components/stickers/StickerPicker";
 import { StickerMessage } from "@/components/stickers/StickerMessage";
 import { fetchStickers, type Sticker } from "@/lib/stickers";
@@ -39,7 +40,15 @@ type GMsg = {
   pinned_at?: string | null;
   sticker_id?: string | null;
 };
-type Profile = { id: string; full_name: string; photo_url: string | null; verified?: boolean | null; contributor_highlight?: boolean | null };
+type Profile = {
+  id: string;
+  full_name: string;
+  photo_url: string | null;
+  verified?: boolean | null;
+  contributor_highlight?: boolean | null;
+  equipped_frame_id?: string | null;
+  equipped_aura_id?: string | null;
+};
 
 export const Route = createFileRoute("/comunidade")({ component: () => (<RequireApproved><Comunidade /></RequireApproved>) });
 
@@ -129,7 +138,7 @@ function Comunidade() {
     if (missing.length === 0) return;
     const { data } = await supabase
       .from("profiles")
-      .select("id, full_name, photo_url, verified, contributor_highlight")
+      .select("id, full_name, photo_url, verified, contributor_highlight, equipped_frame_id, equipped_aura_id")
       .in("id", missing);
     if (data) {
       setProfiles((p) => {
@@ -475,31 +484,29 @@ function Comunidade() {
                     className={`group relative flex scroll-mt-24 items-start gap-3 rounded-xl transition-colors duration-500 ${isFlash ? "bg-primary/10" : ""} ${isFlagged && isStaffViewer ? "bg-destructive/5 ring-1 ring-destructive/30 px-2 py-1" : ""}`}
                   >
                     {mine ? (
-                      <div className={`h-9 w-9 shrink-0 overflow-hidden rounded-full bg-muted ${senderIsAdmin ? "ring-2 ring-[var(--gold)] ring-offset-2 ring-offset-background" : senderContribOn ? "ring-2 ring-emerald-500 ring-offset-2 ring-offset-background" : senderIsStaff ? "ring-2 ring-primary/40 ring-offset-2 ring-offset-background" : ""}`}>
-                        {p?.photo_url ? (
-                          <img src={p.photo_url} alt="" className="h-full w-full object-cover" />
-                        ) : (
-                          <div className="flex h-full w-full items-center justify-center bg-gradient-love text-sm font-semibold text-white">
-                            {name.charAt(0).toUpperCase()}
-                          </div>
-                        )}
+                      <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${senderIsAdmin ? "ring-2 ring-[var(--gold)] ring-offset-2 ring-offset-background" : senderContribOn ? "ring-2 ring-emerald-500 ring-offset-2 ring-offset-background" : senderIsStaff ? "ring-2 ring-primary/40 ring-offset-2 ring-offset-background" : ""}`}>
+                        <DecoratedAvatar
+                          photoUrl={p?.photo_url ?? null}
+                          fallback={name.charAt(0).toUpperCase()}
+                          size={36}
+                          frameId={p?.equipped_frame_id ?? null}
+                          auraId={p?.equipped_aura_id ?? null}
+                        />
                       </div>
                     ) : (
                       <Link
                         to="/pretendentes/$id"
                         params={{ id: m.sender_id }}
-                        className={`relative h-9 w-9 shrink-0 overflow-visible rounded-full bg-muted transition hover:ring-2 hover:ring-primary/40 ${senderIsAdmin ? "ring-2 ring-[var(--gold)] ring-offset-2 ring-offset-background" : senderContribOn ? "ring-2 ring-emerald-500 ring-offset-2 ring-offset-background" : senderIsStaff ? "ring-2 ring-primary/40 ring-offset-2 ring-offset-background" : "ring-0"}`}
+                        className={`relative flex h-9 w-9 shrink-0 items-center justify-center overflow-visible rounded-full transition hover:ring-2 hover:ring-primary/40 ${senderIsAdmin ? "ring-2 ring-[var(--gold)] ring-offset-2 ring-offset-background" : senderContribOn ? "ring-2 ring-emerald-500 ring-offset-2 ring-offset-background" : senderIsStaff ? "ring-2 ring-primary/40 ring-offset-2 ring-offset-background" : "ring-0"}`}
                         aria-label={`Ver perfil de ${name}`}
                       >
-                        <span className="absolute inset-0 overflow-hidden rounded-full">
-                        {p?.photo_url ? (
-                          <img src={p.photo_url} alt="" className="h-full w-full object-cover" />
-                        ) : (
-                          <div className="flex h-full w-full items-center justify-center bg-gradient-love text-sm font-semibold text-white">
-                            {name.charAt(0).toUpperCase()}
-                          </div>
-                        )}
-                        </span>
+                        <DecoratedAvatar
+                          photoUrl={p?.photo_url ?? null}
+                          fallback={name.charAt(0).toUpperCase()}
+                          size={36}
+                          frameId={p?.equipped_frame_id ?? null}
+                          auraId={p?.equipped_aura_id ?? null}
+                        />
                         <span className="absolute -bottom-0.5 -right-0.5"><OnlineDot userId={m.sender_id} size="xs" /></span>
                       </Link>
                     )}
