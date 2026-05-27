@@ -23,6 +23,23 @@ export function setAtmosMode(mode: AtmosMode) {
   window.dispatchEvent(new CustomEvent("atmos-mode-change", { detail: mode }));
 }
 
+export function getPeriodOverride(): Period | null {
+  if (typeof window === "undefined") return null;
+  const v = window.localStorage.getItem("atmos-period-override");
+  if (v === "morning" || v === "afternoon" || v === "evening" || v === "night") return v;
+  return null;
+}
+
+export function setPeriodOverride(period: Period | null) {
+  if (typeof window === "undefined") return;
+  if (period === null) {
+    window.localStorage.removeItem("atmos-period-override");
+  } else {
+    window.localStorage.setItem("atmos-period-override", period);
+  }
+  window.dispatchEvent(new CustomEvent("atmos-period-change", { detail: period }));
+}
+
 export function prefersReducedMotion(): boolean {
   if (typeof window === "undefined") return false;
   return window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
