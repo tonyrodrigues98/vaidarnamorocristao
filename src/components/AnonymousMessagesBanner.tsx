@@ -115,8 +115,8 @@ export function AnonymousMessagesBanner() {
           </Link>
         </div>
 
-        {/* RIGHT — illustration */}
-        <div className="relative h-[200px] sm:h-[260px] md:h-[340px] xl:h-[380px] mt-2 md:mt-0 flex items-center justify-center">
+        {/* RIGHT — illustration (3:2 aspect, matches reference proportions) */}
+        <div className="relative w-full aspect-[3/2] max-h-[440px] mt-2 md:mt-0 flex items-center justify-center">
           <Illustration />
         </div>
       </div>
