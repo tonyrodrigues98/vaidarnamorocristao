@@ -5,14 +5,15 @@ import { fetchDecorationCatalog, assetFor, type Decoration } from "@/lib/decorat
 // Fração do canvas (1024) ocupada pelo "buraco" interno de cada moldura.
 // Usada para escalar a imagem da moldura de forma que o círculo interno
 // se alinhe exatamente ao círculo da foto.
+// Valores medidos diretamente dos PNGs (diâmetro do furo interno / largura do canvas).
 const FRAME_INNER_RATIO: Record<string, number> = {
-  "frame-alianca-ouro.png": 0.78,
-  "frame-coroa-espinhos.png": 0.62,
-  "frame-louros-dourados.png": 0.55,
-  "frame-floral-rosa.png": 0.55,
-  "frame-vitral-sagrado.png": 0.55,
+  "frame-alianca-ouro.png": 0.57,
+  "frame-coroa-espinhos.png": 0.58,
+  "frame-louros-dourados.png": 0.5,
+  "frame-floral-rosa.png": 0.36,
+  "frame-vitral-sagrado.png": 0.48,
 };
-const DEFAULT_FRAME_INNER_RATIO = 0.6;
+const DEFAULT_FRAME_INNER_RATIO = 0.55;
 
 export type DecoratedAvatarProps = {
   photoUrl?: string | null;
