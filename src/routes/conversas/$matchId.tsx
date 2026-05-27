@@ -24,7 +24,7 @@ type Msg = {
   edited_at?: string | null;
   reply_to_id?: string | null;
 };
-type Partner = { id: string; full_name: string; photo_url: string | null; verified?: boolean | null };
+type Partner = { id: string; full_name: string; photo_url: string | null; verified?: boolean | null; equipped_frame_id?: string | null; equipped_aura_id?: string | null };
 
 export const Route = createFileRoute("/conversas/$matchId")({ component: () => (<RequireApproved><Chat /></RequireApproved>) });
 
@@ -56,7 +56,7 @@ function Chat() {
         .eq("blocker_id", user.id).eq("blocked_id", partnerId).maybeSingle();
       if (blk) { setAuthorized(false); return; }
       setAuthorized(true);
-      const { data: p } = await supabase.from("profiles").select("id,full_name,photo_url,verified").eq("id", partnerId).maybeSingle();
+      const { data: p } = await supabase.from("profiles").select("id,full_name,photo_url,verified,equipped_frame_id,equipped_aura_id").eq("id", partnerId).maybeSingle();
       setPartner(p as Partner | null);
       const { data: msgs } = await supabase.from("messages").select("*").eq("match_id", matchId).order("created_at");
       setMessages((msgs ?? []) as Msg[]);
@@ -176,9 +176,14 @@ function Chat() {
             params={{ id: partner.id }}
             className="flex flex-1 items-center gap-3 rounded-lg -mx-1 px-1 py-1 transition hover:bg-accent/50"
           >
-            <div className="h-10 w-10 overflow-hidden rounded-full bg-muted">
-              {partner.photo_url ? <img src={partner.photo_url} alt="" className="h-full w-full object-cover" /> :
-                <div className="flex h-full w-full items-center justify-center bg-gradient-love text-sm text-white">{partner.full_name?.charAt(0) ?? "?"}</div>}
+            <div className="flex h-10 w-10 items-center justify-center">
+              <DecoratedAvatar
+                photoUrl={partner.photo_url}
+                fallback={partner.full_name?.charAt(0) ?? "?"}
+                size={40}
+                frameId={partner.equipped_frame_id ?? null}
+                auraId={partner.equipped_aura_id ?? null}
+              />
             </div>
             <div className="flex-1">
               <h2 className="flex items-center gap-1.5 font-semibold leading-none hover:underline">
