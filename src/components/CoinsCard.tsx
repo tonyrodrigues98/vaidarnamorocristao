@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Loader2, Sparkles } from "lucide-react";
 import coinIcon from "@/assets/coin.png";
+import coinSound from "@/assets/coin-reward.mp3";
 import {
   claimDailyCoins,
   COIN_DAILY,
@@ -46,6 +47,11 @@ export function CoinsCard() {
     setClaiming(true);
     try {
       const r = await claimDailyCoins();
+      try {
+        const audio = new Audio(coinSound);
+        audio.volume = 0.6;
+        void audio.play().catch(() => {});
+      } catch {}
       setStatus({
         balance: r.balance,
         last_claim_date: new Date().toISOString().slice(0, 10),
