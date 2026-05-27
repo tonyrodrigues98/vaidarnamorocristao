@@ -85,6 +85,8 @@ export function Header() {
     photo_url: string | null;
     full_name: string | null;
     verified: boolean | null;
+    equipped_frame_id: string | null;
+    equipped_aura_id: string | null;
   } | null>(null);
 
   useEffect(() => {
@@ -94,7 +96,7 @@ export function Header() {
     }
     supabase
       .from("profiles")
-      .select("photo_url, full_name, verified")
+      .select("photo_url, full_name, verified, equipped_frame_id, equipped_aura_id")
       .eq("id", user.id)
       .maybeSingle()
       .then(({ data }) => setProfile(data ?? null));
