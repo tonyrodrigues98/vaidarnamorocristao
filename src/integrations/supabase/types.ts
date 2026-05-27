@@ -148,16 +148,19 @@ export type Database = {
       anonymous_message_settings: {
         Row: {
           accept_anonymous: boolean
+          extras_balance: number
           updated_at: string
           user_id: string
         }
         Insert: {
           accept_anonymous?: boolean
+          extras_balance?: number
           updated_at?: string
           user_id: string
         }
         Update: {
           accept_anonymous?: boolean
+          extras_balance?: number
           updated_at?: string
           user_id?: string
         }
@@ -2153,6 +2156,13 @@ export type Database = {
         Args: { _amount?: number; _note?: string; _user_id: string }
         Returns: undefined
       }
+      buy_anonymous_extra: {
+        Args: never
+        Returns: {
+          coin_balance: number
+          extras: number
+        }[]
+      }
       can_access_support_ticket: {
         Args: { _ticket_id: string }
         Returns: boolean
@@ -2197,6 +2207,16 @@ export type Database = {
           can_send: boolean
           reason: string
           seconds_remaining: number
+        }[]
+      }
+      get_anonymous_quota: {
+        Args: never
+        Returns: {
+          daily_free: number
+          daily_used: number
+          extras: number
+          free_remaining: number
+          total_remaining: number
         }[]
       }
       get_flagged_message_ids: { Args: never; Returns: string[] }
