@@ -544,8 +544,20 @@ function Comunidade() {
                           <span className="w-0.5 shrink-0 rounded bg-primary" />
                           <span className="min-w-0 flex-1">
                             <span className="block font-semibold text-primary">{repliedName}</span>
-                            <span className="line-clamp-2 text-muted-foreground">{replied.content}</span>
+                            {replied.sticker_id && stickerCache[replied.sticker_id] ? (
+                              <span className="text-muted-foreground">Sticker</span>
+                            ) : (
+                              <span className="line-clamp-2 text-muted-foreground">{replied.content}</span>
+                            )}
                           </span>
+                          {replied.sticker_id && stickerCache[replied.sticker_id] && (
+                            <img
+                              src={stickerCache[replied.sticker_id].public_url}
+                              alt=""
+                              className="h-10 w-10 shrink-0 select-none object-contain"
+                              draggable={false}
+                            />
+                          )}
                         </button>
                       )}
                       {isEditing ? (
