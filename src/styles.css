@@ -366,6 +366,11 @@
   50%      { transform: translate(-50%, calc(-50% - 8px)) rotate(var(--r, 0deg)); }
 }
 
+@keyframes sticker-float-m {
+  0%, 100% { transform: translateY(0) rotate(var(--r, 0deg)); }
+  50%      { transform: translateY(-6px) rotate(var(--r, 0deg)); }
+}
+
 /* Fallback para navegadores sem View Transitions API (Firefox, Safari < 18).
    Aplica fade-in suave no <main>/Outlet ao trocar de rota. */
 @supports not (view-transition-name: none) {
