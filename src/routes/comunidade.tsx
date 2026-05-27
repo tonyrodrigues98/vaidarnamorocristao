@@ -72,6 +72,8 @@ function Comunidade() {
   const [pickerOpen, setPickerOpen] = useState(false);
   const [plusOpen, setPlusOpen] = useState(false);
   const [stickerCache, setStickerCache] = useState<Record<string, Sticker>>({});
+  const stickerCacheRef = useRef<Record<string, Sticker>>({});
+  useEffect(() => { stickerCacheRef.current = stickerCache; }, [stickerCache]);
 
 
   useEffect(() => {
@@ -170,7 +172,8 @@ function Comunidade() {
   };
 
   const loadStickersByIds = useCallback(async (ids: string[]) => {
-    const missing = ids.filter((id) => id && !stickerCache[id]);
+    const cache = stickerCacheRef.current;
+    const missing = Array.from(new Set(ids.filter((id) => id && !cache[id])));
     if (missing.length === 0) return;
     const { data } = await supabase
       .from("stickers")
@@ -183,7 +186,7 @@ function Comunidade() {
         return next;
       });
     }
-  }, [stickerCache]);
+  }, []);
 
   useEffect(() => {
     if (!user) return;
