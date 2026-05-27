@@ -8,7 +8,7 @@ import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Send, Trash2, Users, Pencil, Check, X, Reply, MoreHorizontal, Pin, PinOff, ShieldCheck, Flag, HandHeart } from "lucide-react";
+import { Send, Trash2, Users, Pencil, Check, X, Reply, MoreHorizontal, Pin, PinOff, ShieldCheck, Flag, HandHeart, Plus, Sticker as StickerIcon } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { markSeen } from "@/lib/lastSeen";
 import { RoleBadge } from "@/components/RoleBadge";
@@ -20,6 +20,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Textarea } from "@/components/ui/textarea";
 import { OnlineDot } from "@/components/OnlineDot";
 import { UserBadges } from "@/components/UserBadges";
+import { StickerPicker } from "@/components/stickers/StickerPicker";
+import { StickerMessage } from "@/components/stickers/StickerMessage";
+import { fetchStickers, type Sticker } from "@/lib/stickers";
+import { AnimatePresence, motion } from "framer-motion";
 
 const COOLDOWN_MS = 10_000;
 
@@ -31,6 +35,7 @@ type GMsg = {
   edited_at?: string | null;
   reply_to_id?: string | null;
   pinned_at?: string | null;
+  sticker_id?: string | null;
 };
 type Profile = { id: string; full_name: string; photo_url: string | null; verified?: boolean | null; contributor_highlight?: boolean | null };
 
@@ -64,6 +69,20 @@ function Comunidade() {
   const [flagDialog, setFlagDialog] = useState<{ msg: GMsg; existingId?: string } | null>(null);
   const [flagReason, setFlagReason] = useState("");
   const [flagBusy, setFlagBusy] = useState(false);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [plusOpen, setPlusOpen] = useState(false);
+  const [stickerCache, setStickerCache] = useState<Record<string, Sticker>>({});
+
+  useEffect(() => {
+    // Preload all active stickers once to render in messages without per-row fetch
+    fetchStickers({ activeOnly: true })
+      .then((all) => {
+        const m: Record<string, Sticker> = {};
+        for (const s of all) m[s.id] = s;
+        setStickerCache(m);
+      })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (cooldownLeft <= 0) return;
@@ -241,6 +260,26 @@ function Comunidade() {
     setSending(false);
     if (error) { toast.error(friendlyError(error)); return; }
     setText("");
+    setReplyTo(null);
+    lastSentRef.current = Date.now();
+    setCooldownLeft(COOLDOWN_MS);
+  }
+
+  async function sendSticker(s: Sticker) {
+    if (!user) return;
+    const since = Date.now() - lastSentRef.current;
+    if (since < COOLDOWN_MS) {
+      toast.error(`Aguarde ${Math.ceil((COOLDOWN_MS - since) / 1000)}s para enviar outro sticker`);
+      return;
+    }
+    const { error } = await supabase.from("global_messages").insert({
+      sender_id: user.id,
+      content: "",
+      sticker_id: s.id,
+      reply_to_id: replyTo?.id ?? null,
+    });
+    if (error) { toast.error(friendlyError(error)); return; }
+    setStickerCache((prev) => (prev[s.id] ? prev : { ...prev, [s.id]: s }));
     setReplyTo(null);
     lastSentRef.current = Date.now();
     setCooldownLeft(COOLDOWN_MS);
@@ -529,7 +568,15 @@ function Comunidade() {
                           </div>
                         </div>
                       ) : (
-                        <p className="mt-0.5 whitespace-pre-wrap break-words text-sm text-foreground/90">{m.content}</p>
+                        m.sticker_id ? (
+                          stickerCache[m.sticker_id] ? (
+                            <StickerMessage url={stickerCache[m.sticker_id].public_url} alt={stickerCache[m.sticker_id].name} />
+                          ) : (
+                            <div className="mt-1 h-32 w-32 animate-pulse rounded-xl bg-muted/40" />
+                          )
+                        ) : (
+                          <p className="mt-0.5 whitespace-pre-wrap break-words text-sm text-foreground/90">{m.content}</p>
+                        )
                       )}
                     </BubbleWrap>
                     {!isEditing && (
@@ -568,7 +615,44 @@ function Comunidade() {
                 </button>
               </div>
             )}
-            <div className="flex items-center gap-2">
+            <div className="relative flex items-center gap-2">
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setPlusOpen((v) => !v)}
+                  disabled={!approved}
+                  aria-label="Mais opções de envio"
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-muted/40 text-muted-foreground transition hover:bg-accent hover:text-foreground disabled:opacity-50"
+                >
+                  <motion.span animate={{ rotate: plusOpen ? 45 : 0 }} transition={{ type: "spring", stiffness: 380, damping: 22 }}>
+                    <Plus className="h-4 w-4" />
+                  </motion.span>
+                </button>
+                <AnimatePresence>
+                  {plusOpen && (
+                    <>
+                      <div className="fixed inset-0 z-30" onClick={() => setPlusOpen(false)} />
+                      <motion.div
+                        initial={{ opacity: 0, y: 6, scale: 0.94 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 6, scale: 0.94 }}
+                        transition={{ type: "spring", stiffness: 380, damping: 28 }}
+                        className="absolute bottom-full left-0 z-40 mb-2 min-w-[160px] overflow-hidden rounded-xl border border-border bg-background/95 p-1 shadow-xl backdrop-blur"
+                      >
+                        <button
+                          type="button"
+                          onClick={() => { setPlusOpen(false); setPickerOpen(true); }}
+                          className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm transition hover:bg-accent"
+                        >
+                          <StickerIcon className="h-4 w-4 text-primary" />
+                          Sticker
+                        </button>
+                      </motion.div>
+                    </>
+                  )}
+                </AnimatePresence>
+                <StickerPicker open={pickerOpen} onClose={() => setPickerOpen(false)} onPick={(s) => sendSticker(s)} />
+              </div>
               <Input
                 value={text}
                 onChange={(e) => setText(e.target.value)}

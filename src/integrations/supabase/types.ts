@@ -501,6 +501,7 @@ export type Database = {
           pinned_at: string | null
           reply_to_id: string | null
           sender_id: string
+          sticker_id: string | null
         }
         Insert: {
           content: string
@@ -510,6 +511,7 @@ export type Database = {
           pinned_at?: string | null
           reply_to_id?: string | null
           sender_id: string
+          sticker_id?: string | null
         }
         Update: {
           content?: string
@@ -519,6 +521,7 @@ export type Database = {
           pinned_at?: string | null
           reply_to_id?: string | null
           sender_id?: string
+          sticker_id?: string | null
         }
         Relationships: [
           {
@@ -526,6 +529,13 @@ export type Database = {
             columns: ["reply_to_id"]
             isOneToOne: false
             referencedRelation: "global_messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "global_messages_sticker_id_fkey"
+            columns: ["sticker_id"]
+            isOneToOne: false
+            referencedRelation: "stickers"
             referencedColumns: ["id"]
           },
         ]
@@ -1505,6 +1515,86 @@ export type Database = {
           word?: string
         }
         Relationships: []
+      }
+      sticker_categories: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          slug: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          slug: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          slug?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      stickers: {
+        Row: {
+          active: boolean
+          category_id: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          is_animated: boolean
+          mime_type: string
+          name: string
+          public_url: string
+          sort_order: number
+          storage_path: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          category_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_animated?: boolean
+          mime_type: string
+          name: string
+          public_url: string
+          sort_order?: number
+          storage_path: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          category_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_animated?: boolean
+          mime_type?: string
+          name?: string
+          public_url?: string
+          sort_order?: number
+          storage_path?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stickers_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "sticker_categories"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       support_articles: {
         Row: {
