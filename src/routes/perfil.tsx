@@ -412,7 +412,7 @@ function PerfilPage() {
         <div className="animate-fade-up flex items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-semibold sm:text-4xl">Meu perfil</h1>
-            <p className="mt-1 text-sm text-muted-foreground">
+            <p className="mt-1 text-sm text-soft">
               Edite suas informações e preferências de match.
             </p>
           </div>
