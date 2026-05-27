@@ -25,7 +25,8 @@ export async function claimDailyCoins(): Promise<{ balance: number; awarded: num
 }
 
 export async function spendCoin(amount = 1): Promise<number> {
-  const { data, error } = await supabase.rpc("spend_coin" as never, { _amount: amount });
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (supabase as any).rpc("spend_coin", { _amount: amount });
   if (error) throw error;
   return Number(data ?? 0);
 }
