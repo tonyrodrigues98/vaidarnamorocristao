@@ -618,6 +618,7 @@ function Comunidade() {
 
           <ChatComposer
             approved={!!approved}
+            userId={user?.id ?? null}
             replyTo={replyTo}
             replyToName={replyTo ? profiles[replyTo.sender_id]?.full_name?.split(" ")[0] ?? "Alguém" : ""}
             replyToStickerUrl={replyTo?.sticker_id ? stickerCache[replyTo.sticker_id]?.public_url ?? null : null}
