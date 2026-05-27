@@ -8,6 +8,7 @@ import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { Heart, MessageCircle, User as UserIcon, HeartCrack } from "lucide-react";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
+import { DecoratedAvatar } from "@/components/DecoratedAvatar";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
@@ -24,6 +25,9 @@ type MatchItem = {
     state: string;
     photo_url: string | null;
     verified: boolean;
+    equipped_frame_id: string | null;
+    equipped_aura_id: string | null;
+    equipped_sticker_id: string | null;
   };
 };
 
@@ -45,7 +49,7 @@ function MatchesPage() {
     const partnerIds = matches.map((m) => (m.user_a === user.id ? m.user_b : m.user_a));
     const { data: profs } = await supabase
       .from("profiles")
-      .select("id, full_name, age, city, state, photo_url, verified")
+      .select("id, full_name, age, city, state, photo_url, verified, equipped_frame_id, equipped_aura_id, equipped_sticker_id")
       .in("id", partnerIds);
     const map = new Map((profs ?? []).map((p) => [p.id, p]));
     const list: MatchItem[] = matches
@@ -127,6 +131,18 @@ function MatchesPage() {
                     <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-[var(--rose)] shadow-soft backdrop-blur">
                       <Heart className="h-3 w-3" fill="currentColor" /> Match
                     </span>
+                    {(it.partner.equipped_frame_id || it.partner.equipped_aura_id || it.partner.equipped_sticker_id) && (
+                      <div className="absolute bottom-3 left-3">
+                        <DecoratedAvatar
+                          photoUrl={it.partner.photo_url}
+                          fallback={it.partner.full_name.charAt(0)}
+                          size={56}
+                          frameId={it.partner.equipped_frame_id}
+                          auraId={it.partner.equipped_aura_id}
+                          stickerId={it.partner.equipped_sticker_id}
+                        />
+                      </div>
+                    )}
                   </div>
                 </Link>
                 <div className="space-y-3 p-4">

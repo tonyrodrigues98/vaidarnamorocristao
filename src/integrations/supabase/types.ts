@@ -220,6 +220,45 @@ export type Database = {
         }
         Relationships: []
       }
+      avatar_decorations: {
+        Row: {
+          active: boolean
+          created_at: string
+          css_value: string | null
+          id: string
+          image_url: string | null
+          name: string
+          price_coins: number
+          slug: string
+          sort_order: number
+          type: Database["public"]["Enums"]["decoration_type"]
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          css_value?: string | null
+          id?: string
+          image_url?: string | null
+          name: string
+          price_coins?: number
+          slug: string
+          sort_order?: number
+          type: Database["public"]["Enums"]["decoration_type"]
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          css_value?: string | null
+          id?: string
+          image_url?: string | null
+          name?: string
+          price_coins?: number
+          slug?: string
+          sort_order?: number
+          type?: Database["public"]["Enums"]["decoration_type"]
+        }
+        Relationships: []
+      }
       badges: {
         Row: {
           active: boolean
@@ -1362,6 +1401,9 @@ export type Database = {
           deactivated_at: string | null
           deletion_requested_at: string | null
           deletion_scheduled_for: string | null
+          equipped_aura_id: string | null
+          equipped_frame_id: string | null
+          equipped_sticker_id: string | null
           full_name: string
           height_cm: number | null
           id: string
@@ -1394,6 +1436,9 @@ export type Database = {
           deactivated_at?: string | null
           deletion_requested_at?: string | null
           deletion_scheduled_for?: string | null
+          equipped_aura_id?: string | null
+          equipped_frame_id?: string | null
+          equipped_sticker_id?: string | null
           full_name: string
           height_cm?: number | null
           id: string
@@ -1426,6 +1471,9 @@ export type Database = {
           deactivated_at?: string | null
           deletion_requested_at?: string | null
           deletion_scheduled_for?: string | null
+          equipped_aura_id?: string | null
+          equipped_frame_id?: string | null
+          equipped_sticker_id?: string | null
           full_name?: string
           height_cm?: number | null
           id?: string
@@ -1442,7 +1490,29 @@ export type Database = {
           verified_by?: string | null
           years_baptized?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_equipped_aura_id_fkey"
+            columns: ["equipped_aura_id"]
+            isOneToOne: false
+            referencedRelation: "avatar_decorations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_equipped_frame_id_fkey"
+            columns: ["equipped_frame_id"]
+            isOneToOne: false
+            referencedRelation: "avatar_decorations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_equipped_sticker_id_fkey"
+            columns: ["equipped_sticker_id"]
+            isOneToOne: false
+            referencedRelation: "avatar_decorations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       reactivation_reminders: {
         Row: {
@@ -1921,6 +1991,35 @@ export type Database = {
         }
         Relationships: []
       }
+      user_decorations: {
+        Row: {
+          decoration_id: string
+          id: string
+          purchased_at: string
+          user_id: string
+        }
+        Insert: {
+          decoration_id: string
+          id?: string
+          purchased_at?: string
+          user_id: string
+        }
+        Update: {
+          decoration_id?: string
+          id?: string
+          purchased_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_decorations_decoration_id_fkey"
+            columns: ["decoration_id"]
+            isOneToOne: false
+            referencedRelation: "avatar_decorations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_donations: {
         Row: {
           amount: number | null
@@ -2190,6 +2289,7 @@ export type Database = {
         Returns: string
       }
       current_terms_version: { Args: never; Returns: string }
+      equip_decoration: { Args: { _decoration_id: string }; Returns: Json }
       expire_anonymous_messages: { Args: never; Returns: number }
       get_active_streak: {
         Args: { _user_id: string }
@@ -2287,6 +2387,7 @@ export type Database = {
       is_support_staff: { Args: { _user_id: string }; Returns: boolean }
       mark_all_notifications_read: { Args: never; Returns: number }
       mark_message_read: { Args: { _message_id: string }; Returns: undefined }
+      purchase_decoration: { Args: { _decoration_id: string }; Returns: Json }
       recompute_all_badges: { Args: never; Returns: undefined }
       recompute_user_badges: { Args: { _user_id: string }; Returns: undefined }
       reply_anonymous_message: {
@@ -2330,6 +2431,10 @@ export type Database = {
       spend_coin: { Args: { _amount?: number }; Returns: number }
       touch_my_activity: { Args: never; Returns: undefined }
       unaccent_safe: { Args: { input: string }; Returns: string }
+      unequip_decoration: {
+        Args: { _type: Database["public"]["Enums"]["decoration_type"] }
+        Returns: Json
+      }
       unmatch: { Args: { _match_id: string }; Returns: undefined }
     }
     Enums: {
@@ -2352,6 +2457,7 @@ export type Database = {
       app_role: "admin" | "user" | "super_admin" | "apresentador" | "moderador"
       couple_status: "aceitaram_conversar" | "namorando" | "casamento_marcado"
       daily_post_kind: "news" | "devotional"
+      decoration_type: "frame" | "aura" | "sticker"
       devotional_reaction: "heart" | "prayed" | "edify"
       location_scope: "regiao" | "brasil" | "mundo" | "personalizado"
       marital_status: "solteiro" | "divorciado"
@@ -2533,6 +2639,7 @@ export const Constants = {
       app_role: ["admin", "user", "super_admin", "apresentador", "moderador"],
       couple_status: ["aceitaram_conversar", "namorando", "casamento_marcado"],
       daily_post_kind: ["news", "devotional"],
+      decoration_type: ["frame", "aura", "sticker"],
       devotional_reaction: ["heart", "prayed", "edify"],
       location_scope: ["regiao", "brasil", "mundo", "personalizado"],
       marital_status: ["solteiro", "divorciado"],
