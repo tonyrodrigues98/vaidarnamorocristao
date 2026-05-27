@@ -163,7 +163,52 @@ export function StickersChatBanner() {
         </div>
 
         {/* RIGHT — sticker composition */}
-        <div className="relative h-[260px] sm:h-[300px] lg:h-[340px]">
+        {/* MOBILE: clean centered grid (safe area, no overlap with CTA) */}
+        <div className="relative mt-2 lg:hidden">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 rounded-3xl bg-[radial-gradient(circle_at_50%_50%,oklch(0.95_0.06_330)/0.55,transparent_70%)]"
+          />
+          <div className="relative mx-auto grid max-w-[320px] grid-cols-4 place-items-center gap-x-3 gap-y-4 px-2 py-4">
+            {(stickers.length > 0
+              ? stickers.slice(0, 8)
+              : ["😊", "🌹", "⭐", "💖", "🍦", "😎", "🦋", "🎈"].map((e, i) => ({
+                  url: "",
+                  emoji: e,
+                  rotate: SLOTS[i].rotate,
+                  delay: SLOTS[i].delay,
+                  duration: SLOTS[i].duration,
+                })) as any
+            ).map((s: any, i: number) => (
+              <div
+                key={i}
+                className="flex h-14 w-14 items-center justify-center"
+                style={{
+                  ["--r" as never]: `${s.rotate}deg`,
+                  animation: `sticker-float-m ${s.duration}s ease-in-out ${s.delay}s infinite`,
+                  filter: "drop-shadow(0 6px 12px rgba(120,80,160,0.18))",
+                }}
+              >
+                {s.url ? (
+                  <img
+                    src={s.url}
+                    alt=""
+                    aria-hidden
+                    loading="lazy"
+                    decoding="async"
+                    draggable={false}
+                    className="pointer-events-none h-full w-full select-none object-contain"
+                  />
+                ) : (
+                  <span className="text-3xl leading-none">{s.emoji}</span>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* DESKTOP: floating absolute composition */}
+        <div className="relative hidden lg:block lg:h-[340px]">
           {/* soft inner glow */}
           <div
             aria-hidden
