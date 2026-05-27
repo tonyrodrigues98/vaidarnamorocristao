@@ -199,6 +199,8 @@ function Comunidade() {
       const list = ((data ?? []) as GMsg[]).slice().reverse();
       setMessages(list);
       await loadProfiles(Array.from(new Set(list.map((m) => m.sender_id))));
+      const stickerIds = Array.from(new Set(list.map((m) => m.sticker_id).filter(Boolean) as string[]));
+      if (stickerIds.length) loadStickersByIds(stickerIds);
       markSeen(user.id, "community");
       requestAnimationFrame(() => {
         if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -214,6 +216,7 @@ function Comunidade() {
           const m = payload.new as GMsg;
           setMessages((prev) => [...prev, m]);
           await loadProfiles([m.sender_id]);
+          if (m.sticker_id) loadStickersByIds([m.sticker_id]);
           if (user) markSeen(user.id, "community");
           requestAnimationFrame(() => {
             if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
