@@ -482,15 +482,69 @@ function InicioPage() {
         )}
 
         {/* HERO */}
-        <section className="relative overflow-hidden rounded-[2rem] border border-border/60 bg-gradient-warm px-6 py-10 shadow-soft sm:px-10 sm:py-14">
+        {(() => { const hero = getHeroTheme(); return (
+        <section className={`relative overflow-hidden rounded-[2rem] border border-border/60 ${hero.sectionClass} px-6 py-10 shadow-soft sm:px-10 sm:py-14`}>
           <div
             aria-hidden
-            className="pointer-events-none absolute -top-32 -left-20 h-[420px] w-[420px] rounded-full bg-[var(--petal)] opacity-70 blur-3xl"
+            className={`pointer-events-none absolute -top-32 -left-20 h-[420px] w-[420px] rounded-full ${hero.blobA} opacity-70 blur-3xl`}
           />
           <div
             aria-hidden
-            className="pointer-events-none absolute -bottom-24 -right-16 h-[380px] w-[380px] rounded-full bg-[var(--coral)]/20 blur-3xl"
+            className={`pointer-events-none absolute -bottom-24 -right-16 h-[380px] w-[380px] rounded-full ${hero.blobB} blur-3xl`}
           />
+          {hero.isNight && (
+            <>
+              {/* Lua crescente */}
+              <svg
+                aria-hidden
+                viewBox="0 0 64 64"
+                className="pointer-events-none absolute top-6 right-6 h-24 w-24 sm:h-32 sm:w-32"
+                style={{ filter: "drop-shadow(0 4px 18px oklch(0.94 0.08 85 / 0.45))" }}
+              >
+                <defs>
+                  <radialGradient id="moonGlow" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stopColor="oklch(0.96 0.09 85)" />
+                    <stop offset="100%" stopColor="oklch(0.88 0.10 75)" />
+                  </radialGradient>
+                </defs>
+                <path
+                  d="M44 8a24 24 0 1 0 12 42A20 20 0 0 1 44 8z"
+                  fill="url(#moonGlow)"
+                />
+              </svg>
+              {/* Estrelinhas cintilantes */}
+              {[
+                { top: "18%", left: "55%", size: 8, delay: "0s" },
+                { top: "8%", left: "42%", size: 6, delay: "0.6s" },
+                { top: "62%", left: "82%", size: 7, delay: "1.2s" },
+                { top: "78%", left: "70%", size: 5, delay: "1.8s" },
+                { top: "48%", left: "92%", size: 6, delay: "2.4s" },
+                { top: "34%", left: "78%", size: 5, delay: "0.3s" },
+                { top: "86%", left: "58%", size: 7, delay: "1.5s" },
+              ].map((s, i) => (
+                <svg
+                  key={i}
+                  aria-hidden
+                  viewBox="0 0 10 10"
+                  className="pointer-events-none absolute animate-pulse"
+                  style={{
+                    top: s.top,
+                    left: s.left,
+                    width: s.size,
+                    height: s.size,
+                    animationDelay: s.delay,
+                    animationDuration: "2.5s",
+                  }}
+                >
+                  <path
+                    d="M5 0 L6 4 L10 5 L6 6 L5 10 L4 6 L0 5 L4 4 Z"
+                    fill="oklch(0.96 0.08 85)"
+                    opacity="0.85"
+                  />
+                </svg>
+              ))}
+            </>
+          )}
           <div
             aria-hidden
             className="pointer-events-none absolute top-10 right-1/3 h-2 w-2 animate-pulse rounded-full bg-[var(--rose)]/60"
@@ -507,7 +561,7 @@ function InicioPage() {
             </div>
             <h1
               className="animate-fade-up mt-5 text-3xl font-extrabold leading-[1.1] tracking-tight sm:text-5xl"
-              style={{ animationDelay: "60ms" }}
+              style={{ animationDelay: "60ms", ...hero.titleStyle }}
             >
               {greeting(profile.full_name)}{" "}
               <Hand className="ml-1 inline-block h-7 w-7 -translate-y-0.5 text-[var(--rose)] sm:h-9 sm:w-9" aria-hidden />
@@ -562,6 +616,7 @@ function InicioPage() {
             </div>
           </div>
         </section>
+        ); })()}
 
         {/* PAINEL DE BANIMENTO */}
         {isBanned && (
