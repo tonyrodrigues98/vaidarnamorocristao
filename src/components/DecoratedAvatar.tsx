@@ -128,10 +128,10 @@ export function DecoratedAvatar({
           aria-hidden
           className="pointer-events-none absolute"
           style={{
-            width: size * 0.6,
-            height: size * 0.6,
-            right: -size * 0.06,
-            bottom: -size * 0.06,
+            width: size * 0.5,
+            height: size * 0.5,
+            right: -size * 0.05,
+            bottom: -size * 0.05,
             zIndex: 30,
             filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.25))",
           }}
