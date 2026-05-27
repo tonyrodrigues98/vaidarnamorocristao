@@ -123,7 +123,7 @@ export function AnonymousExtrasCard() {
         {insufficient && (
           <div className="mt-3 flex items-center justify-between rounded-xl border border-dashed border-amber-500/40 bg-amber-500/5 px-3 py-2 text-xs">
             <span className="text-amber-700 dark:text-amber-300">Você não possui moedas suficientes.</span>
-            <Link to="/inicio" className="inline-flex items-center gap-1 font-medium text-[var(--rose)] hover:underline">
+            <Link to="/perfil" className="inline-flex items-center gap-1 font-medium text-[var(--rose)] hover:underline">
               <Trophy className="h-3.5 w-3.5" /> Ir para Conquistas
             </Link>
           </div>
