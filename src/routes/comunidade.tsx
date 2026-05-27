@@ -722,7 +722,7 @@ function Comunidade() {
       </main>
       <RestrictedWordDialog word={warning} onClose={() => setWarning(null)} />
       <ActionsSheet
-        msg={actionsOpenId ? messages.find((m) => m.id === actionsOpenId) ?? null : null}
+        msg={actionsOpenId ? messagesById.get(actionsOpenId) ?? null : null}
         onClose={() => setActionsOpenId(null)}
         currentUserId={user?.id ?? null}
         canModerateMessages={canModerateMessages}
