@@ -316,6 +316,48 @@ export type Database = {
         }
         Relationships: []
       }
+      coin_transactions: {
+        Row: {
+          amount: number
+          balance_after: number
+          created_at: string
+          direction: string
+          icon_url: string | null
+          id: string
+          kind: string
+          ref_id: string | null
+          subtitle: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          balance_after: number
+          created_at?: string
+          direction: string
+          icon_url?: string | null
+          id?: string
+          kind: string
+          ref_id?: string | null
+          subtitle?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          balance_after?: number
+          created_at?: string
+          direction?: string
+          icon_url?: string | null
+          id?: string
+          kind?: string
+          ref_id?: string | null
+          subtitle?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       daily_posts: {
         Row: {
           author_id: string
@@ -2389,6 +2431,20 @@ export type Database = {
       is_match_participant: { Args: { _match_id: string }; Returns: boolean }
       is_staff: { Args: { _user_id: string }; Returns: boolean }
       is_support_staff: { Args: { _user_id: string }; Returns: boolean }
+      log_coin_tx: {
+        Args: {
+          _amount: number
+          _balance_after: number
+          _direction: string
+          _icon_url?: string
+          _kind: string
+          _ref_id?: string
+          _subtitle?: string
+          _title: string
+          _user_id: string
+        }
+        Returns: string
+      }
       mark_all_notifications_read: { Args: never; Returns: number }
       mark_message_read: { Args: { _message_id: string }; Returns: undefined }
       purchase_decoration: { Args: { _decoration_id: string }; Returns: Json }
