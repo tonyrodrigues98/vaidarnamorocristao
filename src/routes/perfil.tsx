@@ -5,6 +5,7 @@ import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
+import { PhotoImg } from "@/components/PhotoImg";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -488,7 +489,7 @@ function PerfilPage() {
               <div className="flex flex-col items-center gap-3">
                 <label className="group relative h-32 w-32 cursor-pointer overflow-hidden rounded-full border-2 border-dashed border-[var(--rose-soft)] bg-card/60 shadow-soft transition hover:border-[var(--rose)]">
                   {photoPreview ? (
-                    <img src={photoPreview} alt="" className="h-full w-full object-cover" />
+                    <PhotoImg src={photoPreview} alt="" className="h-full w-full object-cover" />
                   ) : (
                     <div className="flex h-full w-full flex-col items-center justify-center text-muted-foreground">
                       <Camera className="h-6 w-6" />
