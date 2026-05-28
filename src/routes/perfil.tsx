@@ -432,7 +432,7 @@ function PerfilPage() {
           >
             {[
               { value: "profile", label: "Sobre mim", icon: UserIcon },
-              { value: "customizacao", label: "Customização", icon: Sparkles },
+              { value: "prefs", label: "Preferências", icon: Heart },
             ].map(({ value, label, icon: Icon }) => (
               <TabsTrigger
                 key={value}
@@ -455,9 +455,9 @@ function PerfilPage() {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
                 <DropdownMenuLabel>Mais opções</DropdownMenuLabel>
-                <DropdownMenuItem onSelect={() => setActiveTab("prefs")}>
-                  <Heart className="mr-2 h-4 w-4" />
-                  Preferências
+                <DropdownMenuItem onSelect={() => setActiveTab("customizacao")}>
+                  <Sparkles className="mr-2 h-4 w-4" />
+                  Customização
                 </DropdownMenuItem>
                 <DropdownMenuItem onSelect={() => setActiveTab("saldo")}>
                   <Wallet className="mr-2 h-4 w-4" />
