@@ -11,6 +11,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { ArrowLeft, Check, X, RefreshCw, Settings, History, Image as ImageIcon, Eye, Trash2, ExternalLink } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+import { PhotoImg } from "@/components/PhotoImg";
 
 export const Route = createFileRoute("/admin/fotos")({ component: AdminFotos });
 
@@ -380,7 +381,7 @@ function AdminFotos() {
                     <section key={uid} className="rounded-2xl border bg-card p-4">
                       <header className="mb-3 flex items-center gap-3">
                         {prof?.photo_url ? (
-                          <img
+                          <PhotoImg
                             src={prof.photo_url}
                             alt=""
                             className="h-10 w-10 rounded-full object-cover"
@@ -401,7 +402,7 @@ function AdminFotos() {
                       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                         {items.map((it) => (
                           <div key={it.id} className="overflow-hidden rounded-xl border bg-background">
-                            <img src={it.photo_url} alt="" className="aspect-square w-full object-cover" />
+                            <PhotoImg src={it.photo_url} alt="" className="aspect-square w-full object-cover" />
                             <div className="space-y-2 p-3">
                               <div className="flex items-center justify-between text-xs">
                                 <span
@@ -471,7 +472,7 @@ function AdminFotos() {
                     <section key={uid} className="rounded-2xl border bg-card p-4">
                       <header className="mb-3 flex items-center gap-3">
                         {prof?.photo_url ? (
-                          <img
+                          <PhotoImg
                             src={prof.photo_url}
                             alt=""
                             className="h-9 w-9 rounded-full object-cover"
@@ -656,7 +657,7 @@ function AdminFotos() {
                 <div className="space-y-3 text-sm">
                   <div className="flex items-center gap-3">
                     {prof?.photo_url ? (
-                      <img src={prof.photo_url} alt="" className="h-12 w-12 rounded-full object-cover" />
+                      <PhotoImg src={prof.photo_url} alt="" className="h-12 w-12 rounded-full object-cover" />
                     ) : (
                       <div className="h-12 w-12 rounded-full bg-muted" />
                     )}
