@@ -19,6 +19,7 @@ import {
   type Ticket, type TicketMessage,
 } from "@/lib/support";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { PhotoAvatarImage } from "@/components/PhotoImg";
 
 type ProfileLite = { id: string; full_name: string; photo_url: string | null };
 type StaffOption = { user_id: string; full_name: string; photo_url: string | null; role: string };
@@ -211,7 +212,7 @@ function TicketPage() {
               <h1 className="break-words text-xl font-semibold">{ticket.title}</h1>
               <div className="mt-2 flex items-center gap-2">
                 <Avatar className="h-7 w-7">
-                  <AvatarImage src={profiles[ticket.user_id]?.photo_url ?? undefined} />
+                  <PhotoAvatarImage src={profiles[ticket.user_id]?.photo_url ?? undefined} />
                   <AvatarFallback>{(profiles[ticket.user_id]?.full_name ?? "?").charAt(0)}</AvatarFallback>
                 </Avatar>
                 <span className="text-sm font-medium">{profiles[ticket.user_id]?.full_name ?? "Usuário"}</span>
@@ -277,7 +278,7 @@ function TicketPage() {
               <div key={m.id} className={`flex items-end gap-2 ${mine ? "justify-end" : "justify-start"}`}>
                 {!mine && (
                   <Avatar className="h-7 w-7 shrink-0">
-                    <AvatarImage src={sender?.photo_url ?? undefined} />
+                    <PhotoAvatarImage src={sender?.photo_url ?? undefined} />
                     <AvatarFallback>{(sender?.full_name ?? "?").charAt(0)}</AvatarFallback>
                   </Avatar>
                 )}
