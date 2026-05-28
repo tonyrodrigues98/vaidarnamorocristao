@@ -56,6 +56,7 @@ const profileSchema = z.object({
 function PerfilPage() {
   const { user, loading, role, badgeColor, publicListing, refreshRole } = useAuth();
   const [savingRole, setSavingRole] = useState(false);
+  const [activeTab, setActiveTab] = useState<string>("profile");
   const [localColor, setLocalColor] = useState<RoleColor | null>(null);
   const [localPublic, setLocalPublic] = useState(false);
   const [hasContributorBadge, setHasContributorBadge] = useState(false);
