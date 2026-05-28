@@ -3,6 +3,7 @@ import { toast } from "sonner";
 import { Loader2, Sparkles, ArrowDownLeft, ArrowUpRight, Wallet, Inbox } from "lucide-react";
 import coinIcon from "@/assets/coin.png";
 import coinSound from "@/assets/coin-reward.mp3";
+import { DECORATION_ASSETS } from "@/lib/decorations";
 import {
   claimDailyCoins, COIN_DAILY, COIN_MAX, getMyCoins, timeUntilMidnight,
   type CoinsStatus,
@@ -246,14 +247,18 @@ function TxRow({ tx }: { tx: CoinTx }) {
   const d = new Date(tx.created_at);
   const date = d.toLocaleDateString("pt-BR");
   const time = d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+  const resolvedIcon =
+    tx.icon_url
+      ? (DECORATION_ASSETS[tx.icon_url] ?? (tx.icon_url.startsWith("http") || tx.icon_url.startsWith("/") ? tx.icon_url : null))
+      : null;
   return (
     <li className="group flex items-center gap-3 rounded-2xl border border-border/60 bg-card/50 p-3 shadow-soft backdrop-blur transition hover:border-border hover:bg-card/80">
       <div className="relative shrink-0">
-        {tx.icon_url ? (
+        {resolvedIcon ? (
           <img
-            src={tx.icon_url}
+            src={resolvedIcon}
             alt=""
-            className="h-11 w-11 rounded-xl border border-border/40 object-cover"
+            className="h-11 w-11 rounded-xl border border-border/40 bg-card object-contain p-1"
             loading="lazy"
           />
         ) : (
@@ -267,9 +272,10 @@ function TxRow({ tx }: { tx: CoinTx }) {
         {tx.subtitle && <p className="truncate text-xs text-muted-foreground">{tx.subtitle}</p>}
       </div>
       <div className="flex flex-col items-end gap-0.5 text-right">
-        <span className={`text-sm font-semibold tabular-nums ${valueColor}`}>
-          {isIn ? "+" : "−"}{tx.amount} 🪙
-        </span>
+          <span className={`inline-flex items-center gap-1 text-sm font-semibold tabular-nums ${valueColor}`}>
+            {isIn ? "+" : "−"}{tx.amount}
+            <img src={coinIcon} alt="moedas" className="h-4 w-4 drop-shadow" />
+          </span>
         <span className="text-[11px] text-muted-foreground tabular-nums">{date} · {time}</span>
       </div>
     </li>
