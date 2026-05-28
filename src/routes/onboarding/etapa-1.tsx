@@ -14,6 +14,7 @@ import { Progress } from "@/components/ui/progress";
 import { BR_STATES } from "@/lib/constants";
 import { Camera } from "lucide-react";
 import { PhotoImg } from "@/components/PhotoImg";
+import { normalizeImageFile } from "@/lib/imageNormalize";
 
 const schema = z.object({
   full_name: z.string().trim().min(2).max(100),
@@ -61,13 +62,29 @@ function Etapa1() {
 
   if (!loading && !user) return <Navigate to="/auth/login" />;
 
-  function handlePhoto(e: React.ChangeEvent<HTMLInputElement>) {
-    const f = e.target.files?.[0]; if (!f) return;
-    if (!f.type.startsWith("image/")) {
-      toast.error("Selecione um arquivo de imagem (JPG, PNG, WEBP).");
+  async function handlePhoto(e: React.ChangeEvent<HTMLInputElement>) {
+    const raw = e.target.files?.[0]; if (!raw) return;
+    const name = (raw.name || "").toLowerCase();
+    const looksHeic = name.endsWith(".heic") || name.endsWith(".heif");
+    if (!raw.type.startsWith("image/") && !looksHeic) {
+      toast.error("Selecione um arquivo de imagem (JPG, PNG, WEBP, HEIC).");
       return;
     }
-    if (f.size > 5 * 1024 * 1024) { toast.error("Foto até 5MB"); return; }
+    if (raw.size > 10 * 1024 * 1024) {
+      toast.error("Foto muito grande (máx. 10MB).");
+      return;
+    }
+    const t = toast.loading("Preparando sua foto...");
+    let f = raw;
+    try {
+      f = await normalizeImageFile(raw);
+    } finally {
+      toast.dismiss(t);
+    }
+    if (f.size > 8 * 1024 * 1024) {
+      toast.error("Foto até 8MB após conversão. Tente uma imagem menor.");
+      return;
+    }
     setPhotoFile(f);
     setPhotoPreview(URL.createObjectURL(f));
   }
