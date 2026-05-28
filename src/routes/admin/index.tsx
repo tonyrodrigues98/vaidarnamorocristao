@@ -599,7 +599,7 @@ function Admin() {
                       <div key={r.id} className="glass flex flex-col gap-4 rounded-2xl p-5 shadow-soft sm:flex-row">
                         <div className="h-24 w-24 shrink-0 overflow-hidden rounded-2xl bg-muted">
                           {r.photo_url ? (
-                            <img src={r.photo_url} alt="" className="h-full w-full object-cover" />
+                            <PhotoImg src={r.photo_url} alt="" className="h-full w-full object-cover" />
                           ) : (
                             <div className="flex h-full w-full items-center justify-center bg-gradient-love text-2xl text-white">
                               {r.full_name.charAt(0)}
@@ -647,7 +647,7 @@ function Admin() {
                 {rows.map((r) => (
                   <div key={r.id} className="glass flex flex-col gap-4 rounded-2xl p-5 shadow-soft sm:flex-row">
                     <div className="h-24 w-24 shrink-0 overflow-hidden rounded-2xl bg-muted">
-                      {r.photo_url ? <img src={r.photo_url} alt="" className="h-full w-full object-cover" /> :
+                      {r.photo_url ? <PhotoImg src={r.photo_url} alt="" className="h-full w-full object-cover" /> :
                         <div className="flex h-full w-full items-center justify-center bg-gradient-love text-2xl text-white">{r.full_name.charAt(0)}</div>}
                     </div>
                     <div className="flex-1">
@@ -710,7 +710,7 @@ function UsersPanel({
       {users.map((u) => (
         <div key={u.id} className="glass flex flex-col gap-3 rounded-2xl p-4 shadow-soft sm:flex-row sm:items-center">
           <div className="h-14 w-14 shrink-0 overflow-hidden rounded-full bg-muted">
-            {u.photo_url ? <img src={u.photo_url} alt="" className="h-full w-full object-cover" /> :
+            {u.photo_url ? <PhotoImg src={u.photo_url} alt="" className="h-full w-full object-cover" /> :
               <div className="flex h-full w-full items-center justify-center bg-gradient-love text-white">{u.full_name.charAt(0)}</div>}
           </div>
           <div className="flex-1 min-w-0">
@@ -1032,7 +1032,7 @@ function PreCadastrosPanel({
           <div className="mt-4 flex items-center gap-4">
           <div className="h-20 w-20 shrink-0 overflow-hidden rounded-2xl bg-muted">
             {draft.photo_url ? (
-              <img src={draft.photo_url} alt="" className="h-full w-full object-cover" />
+              <PhotoImg src={draft.photo_url} alt="" className="h-full w-full object-cover" />
             ) : (
               <div className="flex h-full w-full items-center justify-center text-xs text-muted-foreground">Sem foto</div>
             )}
@@ -1242,7 +1242,7 @@ function PreCadastrosPanel({
           {viewing && (
             <div className="space-y-4">
               {viewing.photo_url && (
-                <img src={viewing.photo_url} alt="" className="w-full rounded-xl object-cover" />
+                <PhotoImg src={viewing.photo_url} alt="" className="w-full rounded-xl object-cover" />
               )}
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <Field label="Idade" value={viewing.age?.toString()} />
@@ -1415,7 +1415,7 @@ function PreCadastroCard({
           aria-label="Ver detalhes"
         >
           {p.photo_url ? (
-            <img src={p.photo_url} alt="" className="h-full w-full object-cover" />
+            <PhotoImg src={p.photo_url} alt="" className="h-full w-full object-cover" />
           ) : (
             <div className="flex h-full w-full items-center justify-center bg-gradient-love text-lg text-white">
               {(p.full_name ?? "?").charAt(0).toUpperCase()}
@@ -2463,7 +2463,7 @@ function BannedAppealsPanel({ kind = "ban" }: { kind?: "ban" | "rejection" } = {
             <div className="flex items-start gap-3">
               <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full bg-muted">
                 {prof?.photo_url ? (
-                  <img src={prof.photo_url} alt="" className="h-full w-full object-cover" />
+                  <PhotoImg src={prof.photo_url} alt="" className="h-full w-full object-cover" />
                 ) : (
                   <div className="flex h-full w-full items-center justify-center bg-gradient-love text-white">
                     {(prof?.full_name ?? "?").charAt(0)}

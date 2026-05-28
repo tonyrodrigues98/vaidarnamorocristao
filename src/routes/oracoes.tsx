@@ -308,7 +308,7 @@ function Page() {
                           <EyeOff className="h-4 w-4 text-muted-foreground" />
                         </div>
                       ) : author?.photo_url ? (
-                        <img src={author.photo_url} alt={author.full_name} className="h-10 w-10 rounded-full object-cover shrink-0" loading="lazy" />
+                        <PhotoImg src={author.photo_url} alt={author.full_name} className="h-10 w-10 rounded-full object-cover shrink-0" loading="lazy" />
                       ) : (
                         <div className="h-10 w-10 rounded-full bg-muted shrink-0" />
                       )}
