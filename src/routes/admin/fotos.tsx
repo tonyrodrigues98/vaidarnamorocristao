@@ -497,14 +497,14 @@ function AdminFotos() {
                               aria-label="Abrir detalhes"
                             >
                               {it.photo_url ? (
-                                <img
+                                <PhotoImg
                                 src={it.signed_url ?? it.photo_url}
                                   alt=""
                                   className="h-12 w-12 rounded-md object-cover"
                                   loading="lazy"
                                 />
                             ) : it.signed_url ? (
-                              <img
+                              <PhotoImg
                                 src={it.signed_url}
                                 alt=""
                                 className="h-12 w-12 rounded-md object-cover"
@@ -643,7 +643,7 @@ function AdminFotos() {
               <div className="grid gap-4 sm:grid-cols-[1fr_1fr]">
                 <div className="overflow-hidden rounded-xl border bg-muted">
                   {openLog.photo_url || openLog.signed_url ? (
-                    <img
+                    <PhotoImg
                       src={openLog.signed_url ?? openLog.photo_url ?? ""}
                       alt=""
                       className="h-full max-h-[60vh] w-full object-contain"
