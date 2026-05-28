@@ -428,12 +428,11 @@ function PerfilPage() {
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-8">
           <TabsList
-            className="grid h-auto w-full grid-cols-4 items-stretch gap-2 bg-transparent p-0"
+            className="grid h-auto w-full grid-cols-3 items-stretch gap-2 bg-transparent p-0"
           >
             {[
               { value: "profile", label: "Sobre mim", icon: UserIcon },
               { value: "prefs", label: "Preferências", icon: Heart },
-              { value: "missions", label: "Conquistas", icon: Trophy },
             ].map(({ value, label, icon: Icon }) => (
               <TabsTrigger
                 key={value}
@@ -459,6 +458,10 @@ function PerfilPage() {
                 <DropdownMenuItem onSelect={() => setActiveTab("saldo")}>
                   <Wallet className="mr-2 h-4 w-4" />
                   Saldo
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setActiveTab("missions")}>
+                  <Trophy className="mr-2 h-4 w-4" />
+                  Conquistas
                 </DropdownMenuItem>
                 {isStaff && (
                   <DropdownMenuItem
