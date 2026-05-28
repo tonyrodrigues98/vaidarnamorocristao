@@ -781,6 +781,10 @@ function PerfilPage() {
             {user && <SaldoTab />}
           </TabsContent>
 
+          <TabsContent value="customizacao" className="mt-6">
+            {user && <CustomizacaoTab photoUrl={photoPreview ?? null} />}
+          </TabsContent>
+
           {isStaff && (
             <TabsContent value="role" className="mt-6">
               <div className="glass animate-fade-up space-y-6 rounded-3xl p-6 shadow-elegant sm:p-8">
