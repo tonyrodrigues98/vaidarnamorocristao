@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
 import { CURRENT_TERMS_VERSION } from "@/lib/terms";
 import { toast } from "sonner";
 
@@ -40,12 +39,16 @@ export function TermsGate() {
 
   async function accept() {
     if (!user) return;
+    if (submitting) return;
     setSubmitting(true);
     const { error } = await supabase
       .from("terms_acceptances")
       .insert({ user_id: user.id, version: CURRENT_TERMS_VERSION });
     setSubmitting(false);
-    if (error) { toast.error("Não foi possível registrar o aceite."); return; }
+    if (error) {
+      toast.error("Não foi possível registrar o aceite.");
+      return;
+    }
     toast.success("Aceite registrado. Obrigado!");
     setNeedsAccept(false);
   }
@@ -72,14 +75,32 @@ export function TermsGate() {
         <p className="mt-3 text-sm text-muted-foreground">
           Versão atual: <span className="font-mono">{CURRENT_TERMS_VERSION}</span>
         </p>
-        <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-          <Button variant="outline" asChild>
-            <Link to="/termos">Ler Termos</Link>
-          </Button>
-          <Button onClick={accept} disabled={submitting || !checked} className="bg-gradient-love">
-            {submitting ? "Registrando..." : checked ? "Aceito" : "Aguarde…"}
-          </Button>
-        </div>
+        <label
+          htmlFor="terms-gate-accept"
+          className="mt-6 flex cursor-pointer items-start gap-3 rounded-2xl border border-border/60 bg-background/40 p-4 transition active:scale-[0.99]"
+        >
+          <input
+            id="terms-gate-accept"
+            type="checkbox"
+            className="mt-1 h-5 w-5 flex-shrink-0 accent-[var(--rose)]"
+            disabled={submitting || !checked}
+            onChange={(e) => {
+              if (e.target.checked) accept();
+            }}
+          />
+          <span className="text-sm text-foreground/90">
+            Li e concordo com os{" "}
+            <Link to="/termos" className="font-medium text-[var(--rose)] underline">
+              Termos e Condições
+            </Link>
+            .{" "}
+            {submitting ? (
+              <span className="text-muted-foreground">Registrando…</span>
+            ) : !checked ? (
+              <span className="text-muted-foreground">Carregando…</span>
+            ) : null}
+          </span>
+        </label>
       </div>
     </div>
   );
