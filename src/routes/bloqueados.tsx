@@ -1,3 +1,4 @@
+import { PhotoImg } from "@/components/PhotoImg";
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { RequireApproved } from "@/components/RequireApproved";
 import { useEffect, useState } from "react";
@@ -92,7 +93,7 @@ function BlockedPage() {
               <li key={r.blocked_id} className="flex items-center gap-3 rounded-2xl border border-border bg-card p-3">
                 <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full bg-muted">
                   {r.profile?.photo_url ? (
-                    <img src={r.profile.photo_url} alt="" className="h-full w-full object-cover grayscale" />
+                    <PhotoImg src={r.profile.photo_url} alt="" className="h-full w-full object-cover grayscale" />
                   ) : null}
                 </div>
                 <div className="min-w-0 flex-1">

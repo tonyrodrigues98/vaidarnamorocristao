@@ -1,3 +1,4 @@
+import { PhotoImg } from "@/components/PhotoImg";
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -860,7 +861,7 @@ function InicioPage() {
             <div className="flex items-center gap-3">
               <span className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-gradient-love text-lg font-bold text-white">
                 {profile.photo_url ? (
-                  <img src={profile.photo_url} alt="" className="h-full w-full object-cover" />
+                  <PhotoImg src={profile.photo_url} alt="" className="h-full w-full object-cover" />
                 ) : (
                   firstName.charAt(0).toUpperCase()
                 )}

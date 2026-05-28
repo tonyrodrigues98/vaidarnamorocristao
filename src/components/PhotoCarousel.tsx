@@ -1,6 +1,7 @@
 import { useRef, useState, type MouseEvent, type TouchEvent } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useSignedPhotoUrl } from "@/lib/photoUrl";
 
 interface Props {
   photos: string[];
@@ -17,6 +18,7 @@ export function PhotoCarousel({ photos, alt, fallback, className, imgClassName, 
   const deltaX = useRef(0);
   const total = photos.length;
   const has = total > 0;
+  const currentSrc = useSignedPhotoUrl(has ? photos[index] : null);
 
   const stop = (e: MouseEvent) => {
     e.preventDefault();
@@ -53,7 +55,7 @@ export function PhotoCarousel({ photos, alt, fallback, className, imgClassName, 
     >
       {has ? (
         <img
-          src={photos[index]}
+          src={currentSrc ?? undefined}
           alt={alt}
           loading={eager ? "eager" : "lazy"}
           decoding="async"

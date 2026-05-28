@@ -1,3 +1,4 @@
+import { PhotoImg } from "@/components/PhotoImg";
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -129,7 +130,7 @@ function AdminVerifs() {
                 <div className="flex flex-wrap items-center gap-3">
                   <div className="h-12 w-12 overflow-hidden rounded-full bg-muted">
                     {req.profile?.photo_url
-                      ? <img src={req.profile.photo_url} alt="" className="h-full w-full object-cover" />
+                      ? <PhotoImg src={req.profile.photo_url} alt="" className="h-full w-full object-cover" />
                       : <div className="flex h-full w-full items-center justify-center bg-gradient-love text-white">
                           {(req.profile?.full_name ?? "?").charAt(0).toUpperCase()}
                         </div>}

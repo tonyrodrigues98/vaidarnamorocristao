@@ -1,3 +1,4 @@
+import { PhotoImg } from "@/components/PhotoImg";
 import { friendlyError } from "@/lib/errors";
 import { createFileRoute, Navigate, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
@@ -901,7 +902,7 @@ function Avatar({ profile, size = 8 }: { profile?: ProfileLite; size?: number })
       style={{ width: `${size * 4}px`, height: `${size * 4}px` }}
     >
       {profile?.photo_url ? (
-        <img src={profile.photo_url} alt="" className="h-full w-full object-cover" />
+        <PhotoImg src={profile.photo_url} alt="" className="h-full w-full object-cover" />
       ) : (
         initials
       )}
