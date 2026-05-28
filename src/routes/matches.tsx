@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Heart, MessageCircle, User as UserIcon, HeartCrack } from "lucide-react";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { DecoratedAvatar } from "@/components/DecoratedAvatar";
+import { PhotoImg } from "@/components/PhotoImg";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
