@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ArrowLeft, MapPin, Church, Heart, Flag, Ban, MessageCircle, Check, Sparkles, Baby, Globe2, ShieldOff, MoreVertical, Ruler, HandHeart, Quote } from "lucide-react";
+import { ArrowLeft, MapPin, Church, Heart, Flag, Ban, MessageCircle, Check, Sparkles, Baby, Globe2, ShieldOff, Ruler, HandHeart, Quote } from "lucide-react";
 import { RoleBadge } from "@/components/RoleBadge";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { OnlineDot } from "@/components/OnlineDot";
@@ -19,7 +19,6 @@ import { UserBadges } from "@/components/UserBadges";
 import { ProfileAdvancedView } from "@/components/ProfileAdvancedView";
 import { ROLE_PRIORITY, type AppRole, type RoleColor } from "@/lib/roles";
 import { SendAnonymousButton } from "@/components/anonymous/SendAnonymousButton";
-import { PhotoImg } from "@/components/PhotoImg";
 
 type Full = {
   id: string; full_name: string; age: number; height_cm: number | null;
@@ -54,7 +53,6 @@ function Detail() {
   const [mySex, setMySex] = useState<string | null>(null);
   const [targetRole, setTargetRole] = useState<{ role: AppRole; color: RoleColor | null } | null>(null);
   const [extraPhotos, setExtraPhotos] = useState<string[]>([]);
-  const [activeSection, setActiveSection] = useState<"sobre" | "fe" | "estilo" | "chamado" | "mais">("sobre");
 
   useEffect(() => {
     (async () => {
