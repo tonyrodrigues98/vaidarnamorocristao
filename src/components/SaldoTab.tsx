@@ -3,6 +3,7 @@ import { toast } from "sonner";
 import { Loader2, Sparkles, ArrowDownLeft, ArrowUpRight, Wallet, Inbox } from "lucide-react";
 import coinIcon from "@/assets/coin.png";
 import coinSound from "@/assets/coin-reward.mp3";
+import { DECORATION_ASSETS } from "@/lib/decorations";
 import {
   claimDailyCoins, COIN_DAILY, COIN_MAX, getMyCoins, timeUntilMidnight,
   type CoinsStatus,
@@ -267,9 +268,10 @@ function TxRow({ tx }: { tx: CoinTx }) {
         {tx.subtitle && <p className="truncate text-xs text-muted-foreground">{tx.subtitle}</p>}
       </div>
       <div className="flex flex-col items-end gap-0.5 text-right">
-        <span className={`text-sm font-semibold tabular-nums ${valueColor}`}>
-          {isIn ? "+" : "−"}{tx.amount} 🪙
-        </span>
+          <span className={`inline-flex items-center gap-1 text-sm font-semibold tabular-nums ${valueColor}`}>
+            {isIn ? "+" : "−"}{tx.amount}
+            <img src={coinIcon} alt="moedas" className="h-4 w-4 drop-shadow" />
+          </span>
         <span className="text-[11px] text-muted-foreground tabular-nums">{date} · {time}</span>
       </div>
     </li>
