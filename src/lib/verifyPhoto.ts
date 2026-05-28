@@ -31,19 +31,19 @@ export async function verifyProfilePhoto(
   scope: PhotoScope = "main",
   photoUrl?: string | null
 ): Promise<VerifyOutcome> {
-  // Stage 1 — face count (only for main avatar)
+  // Stage 1 — face count (only for main avatar).
+  // We HARD-block only the unambiguous case of "more than one face".
+  // "Zero faces" can be a false negative (HEIC the browser can't decode,
+  // low light, sunglasses, angle, etc.), so we let the server AI decide
+  // and route ambiguous photos to manual review instead of bouncing the user.
   if (scope === "main") {
-    let faceCount = 0;
     try {
-      faceCount = await detectFaceCount(file);
+      const faceCount = await detectFaceCount(file);
+      if (faceCount > 1) {
+        return { ok: false, reason: "Envie uma foto somente com você (mais de um rosto detectado)." };
+      }
     } catch (e) {
-      console.warn("face-api failed, skipping local check", e);
-    }
-    if (faceCount === 0) {
-      return { ok: false, reason: "Não detectamos um rosto. Envie uma foto sua bem iluminada e de frente." };
-    }
-    if (faceCount > 1) {
-      return { ok: false, reason: "Envie uma foto somente com você (mais de um rosto detectado)." };
+      console.warn("face-api failed, deferring to server AI", e);
     }
   }
 

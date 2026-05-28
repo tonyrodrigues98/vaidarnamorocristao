@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
 import { PhotoImg } from "@/components/PhotoImg";
+import { normalizeImageFile } from "@/lib/imageNormalize";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -258,11 +259,28 @@ function PerfilPage() {
     toast.success(next ? "Aparecendo em Pretendentes" : "Oculto de Pretendentes");
   }
 
-  function handlePhoto(e: React.ChangeEvent<HTMLInputElement>) {
-    const f = e.target.files?.[0];
-    if (!f) return;
-    if (f.size > 5 * 1024 * 1024) {
-      toast.error("Foto até 5MB");
+  async function handlePhoto(e: React.ChangeEvent<HTMLInputElement>) {
+    const raw = e.target.files?.[0];
+    if (!raw) return;
+    const name = (raw.name || "").toLowerCase();
+    const looksHeic = name.endsWith(".heic") || name.endsWith(".heif");
+    if (!raw.type.startsWith("image/") && !looksHeic) {
+      toast.error("Selecione uma imagem (JPG, PNG, WEBP, HEIC).");
+      return;
+    }
+    if (raw.size > 10 * 1024 * 1024) {
+      toast.error("Foto muito grande (máx. 10MB).");
+      return;
+    }
+    const t = toast.loading("Preparando sua foto...");
+    let f = raw;
+    try {
+      f = await normalizeImageFile(raw);
+    } finally {
+      toast.dismiss(t);
+    }
+    if (f.size > 8 * 1024 * 1024) {
+      toast.error("Foto até 8MB após conversão. Tente uma imagem menor.");
       return;
     }
     setPhotoFile(f);
