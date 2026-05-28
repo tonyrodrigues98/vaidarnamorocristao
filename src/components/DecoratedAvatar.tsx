@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { fetchDecorationCatalog, assetFor, type Decoration } from "@/lib/decorations";
+import { useSignedPhotoUrl } from "@/lib/photoUrl";
 
 // `size` é o canvas total do componente. A moldura SEMPRE preenche esse
 // canvas (assim os cards ficam com altura/largura estáveis e idênticas em
@@ -65,6 +66,7 @@ export function DecoratedAvatar({
   void _stickerId;
   const hasAny = !!(frameId || auraId);
   const [catalog, setCatalog] = useState<Decoration[] | null>(cachedCatalog);
+  const resolvedPhoto = useSignedPhotoUrl(photoUrl ?? null);
 
   useEffect(() => {
     if (!hasAny || catalog) return;
@@ -125,8 +127,8 @@ export function DecoratedAvatar({
           zIndex: 10,
         }}
       >
-        {photoUrl ? (
-          <img src={photoUrl} alt={alt} className="h-full w-full object-cover" loading="lazy" />
+        {resolvedPhoto ? (
+          <img src={resolvedPhoto} alt={alt} className="h-full w-full object-cover" loading="lazy" />
         ) : (
           <div
             className="flex h-full w-full items-center justify-center bg-gradient-love font-semibold text-white"

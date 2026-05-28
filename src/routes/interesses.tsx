@@ -1,3 +1,4 @@
+import { PhotoImg } from "@/components/PhotoImg";
 import { friendlyError } from "@/lib/errors";
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { RequireApproved } from "@/components/RequireApproved";
@@ -156,7 +157,7 @@ function ProfileCard({ p, children }: { p: ProfileLite; children: React.ReactNod
     <div className="glass animate-fade-up overflow-hidden rounded-2xl shadow-soft">
       <Link to="/pretendentes/$id" params={{ id: p.id }} className="block">
         <div className="aspect-[4/5] overflow-hidden bg-muted">
-          {p.photo_url ? <img src={p.photo_url} alt={p.full_name} className="h-full w-full object-cover" /> :
+          {p.photo_url ? <PhotoImg src={p.photo_url} alt={p.full_name} className="h-full w-full object-cover" /> :
             <div className="flex h-full w-full items-center justify-center bg-gradient-love text-5xl text-white">{p.full_name.charAt(0)}</div>}
         </div>
         <div className="p-4">

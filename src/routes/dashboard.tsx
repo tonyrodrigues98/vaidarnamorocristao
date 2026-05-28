@@ -1,3 +1,4 @@
+import { PhotoImg } from "@/components/PhotoImg";
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -339,7 +340,7 @@ function Dashboard() {
                     >
                       <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full bg-muted">
                         {p.photo_url ? (
-                          <img src={p.photo_url} alt={p.full_name} className="h-full w-full object-cover" />
+                          <PhotoImg src={p.photo_url} alt={p.full_name} className="h-full w-full object-cover" />
                         ) : (
                           <div className="flex h-full w-full items-center justify-center bg-gradient-love text-lg text-white">
                             {p.full_name.charAt(0)}
