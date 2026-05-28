@@ -19,7 +19,14 @@ import {
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { BR_STATES } from "@/lib/constants";
-import { Camera, Save, CheckCircle2, Clock, XCircle, Shield, User as UserIcon, Heart, Trophy, Briefcase } from "lucide-react";
+import { Camera, Save, CheckCircle2, Clock, XCircle, Shield, User as UserIcon, Heart, Trophy, Briefcase, MoreHorizontal } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+} from "@/components/ui/dropdown-menu";
 import { Switch } from "@/components/ui/switch";
 import { ROLE_CONFIG, COLOR_HEX, type RoleColor } from "@/lib/roles";
 import { RoleBadge } from "@/components/RoleBadge";
@@ -420,23 +427,57 @@ function PerfilPage() {
 
         <Tabs defaultValue="profile" className="mt-8">
           <TabsList
-            className="-mx-4 flex h-auto w-[calc(100%+2rem)] snap-x snap-mandatory items-stretch gap-2 overflow-x-auto bg-transparent p-0 px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:w-full"
+            className="flex h-auto w-full snap-x snap-mandatory items-stretch gap-2 overflow-x-auto bg-transparent p-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           >
             {[
               { value: "profile", label: "Sobre mim", icon: UserIcon },
               { value: "prefs", label: "Preferências", icon: Heart },
               { value: "missions", label: "Conquistas", icon: Trophy },
-              ...(isStaff ? [{ value: "role", label: "Cargo", icon: Briefcase }] : []),
             ].map(({ value, label, icon: Icon }) => (
               <TabsTrigger
                 key={value}
                 value={value}
-                className="group flex h-auto min-w-[84px] shrink-0 snap-start flex-col items-center justify-center gap-1.5 rounded-2xl border border-border/60 bg-card/60 px-3 py-3 text-xs font-medium text-muted-foreground shadow-soft transition data-[state=active]:border-[var(--rose)]/50 data-[state=active]:bg-[var(--rose-soft)]/40 data-[state=active]:text-[var(--rose)] data-[state=active]:shadow-elegant"
+                className="group flex h-auto flex-1 min-w-[72px] shrink-0 snap-start flex-col items-center justify-center gap-1.5 rounded-2xl border border-border/60 bg-card/60 px-2 py-3 text-xs font-medium text-muted-foreground shadow-soft transition data-[state=active]:border-[var(--rose)]/50 data-[state=active]:bg-[var(--rose-soft)]/40 data-[state=active]:text-[var(--rose)] data-[state=active]:shadow-elegant"
               >
                 <Icon className="h-5 w-5" />
                 <span className="whitespace-nowrap">{label}</span>
               </TabsTrigger>
             ))}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  type="button"
+                  className="group flex h-auto flex-1 min-w-[72px] shrink-0 snap-start flex-col items-center justify-center gap-1.5 rounded-2xl border border-border/60 bg-card/60 px-2 py-3 text-xs font-medium text-muted-foreground shadow-soft transition hover:text-foreground"
+                >
+                  <MoreHorizontal className="h-5 w-5" />
+                  <span className="whitespace-nowrap">Mais</span>
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>Mais opções</DropdownMenuLabel>
+                {isStaff ? (
+                  <DropdownMenuItem
+                    onSelect={(e) => {
+                      e.preventDefault();
+                      const trigger = document.querySelector<HTMLButtonElement>(
+                        '[data-tab-role="role-hidden"]',
+                      );
+                      trigger?.click();
+                    }}
+                  >
+                    <Briefcase className="mr-2 h-4 w-4" />
+                    Cargo
+                  </DropdownMenuItem>
+                ) : (
+                  <DropdownMenuItem disabled>
+                    Em breve
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+            {isStaff && (
+              <TabsTrigger value="role" data-tab-role="role-hidden" className="hidden" />
+            )}
           </TabsList>
 
           {/* Profile tab */}
