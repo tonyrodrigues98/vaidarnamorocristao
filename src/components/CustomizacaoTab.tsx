@@ -151,7 +151,6 @@ export function CustomizacaoTab({ photoUrl }: { photoUrl: string | null }) {
               type="button"
               key={d.id}
               onClick={() => {
-                if (!isOwned) return;
                 setPreview((p) => ({ ...p, [type]: p[type] === d.id ? null : d.id }));
               }}
               className={`group relative flex flex-col items-center rounded-2xl border bg-card/70 p-3 text-center transition-all duration-200 active:scale-[0.98] ${
