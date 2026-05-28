@@ -19,7 +19,7 @@ import {
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { BR_STATES } from "@/lib/constants";
-import { Camera, Save, CheckCircle2, Clock, XCircle, Shield, User as UserIcon, Heart, Trophy, Briefcase, MoreHorizontal } from "lucide-react";
+import { Camera, Save, CheckCircle2, Clock, XCircle, Shield, User as UserIcon, Heart, Trophy, Briefcase, MoreHorizontal, Wallet } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -31,7 +31,7 @@ import { Switch } from "@/components/ui/switch";
 import { ROLE_CONFIG, COLOR_HEX, type RoleColor } from "@/lib/roles";
 import { RoleBadge } from "@/components/RoleBadge";
 import { MissionsPanel } from "@/components/MissionsPanel";
-import { CoinsCard } from "@/components/CoinsCard";
+import { SaldoTab } from "@/components/SaldoTab";
 import { recomputeMyBadges } from "@/lib/recomputeBadges";
 import { ProfileAdvancedForm } from "@/components/ProfileAdvancedForm";
 import { ProfilePhotosManager } from "@/components/ProfilePhotosManager";
@@ -433,6 +433,7 @@ function PerfilPage() {
             {[
               { value: "profile", label: "Sobre mim", icon: UserIcon },
               { value: "prefs", label: "Preferências", icon: Heart },
+              { value: "saldo", label: "Saldo", icon: Wallet },
               { value: "missions", label: "Conquistas", icon: Trophy },
             ].map(({ value, label, icon: Icon }) => (
               <TabsTrigger
@@ -753,10 +754,6 @@ function PerfilPage() {
           </TabsContent>
 
           <TabsContent value="missions" className="mt-6">
-            {/* placeholder anchor */}
-            <div className="mb-4">
-              <CoinsCard />
-            </div>
             {user && <MissionsPanel userId={user.id} />}
             {hasContributorBadge && (
               <div className="glass mt-4 flex items-center justify-between rounded-2xl p-4 shadow-soft sm:p-5">
