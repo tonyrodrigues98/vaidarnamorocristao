@@ -772,6 +772,10 @@ function PerfilPage() {
             )}
           </TabsContent>
 
+          <TabsContent value="saldo" className="mt-6">
+            {user && <SaldoTab userId={user.id} />}
+          </TabsContent>
+
           {isStaff && (
             <TabsContent value="role" className="mt-6">
               <div className="glass animate-fade-up space-y-6 rounded-3xl p-6 shadow-elegant sm:p-8">
