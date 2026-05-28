@@ -39,9 +39,10 @@ export function CustomizacaoTab({ photoUrl }: { photoUrl: string | null }) {
   const [catalog, setCatalog] = useState<Decoration[]>([]);
   const [owned, setOwned] = useState<Set<string>>(new Set());
   const [equipped, setEquipped] = useState<EquippedMap>({ frame: null, aura: null, sticker: null });
-  const [preview, setPreview] = useState<{ frame: string | null; aura: string | null }>({
+  const [preview, setPreview] = useState<EquippedMap>({
     frame: null,
     aura: null,
+    sticker: null,
   });
   const [balance, setBalance] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -292,7 +293,7 @@ export function CustomizacaoTab({ photoUrl }: { photoUrl: string | null }) {
               variant="ghost"
               size="sm"
               className="text-xs text-muted-foreground"
-              onClick={() => setPreview({ frame: null, aura: null })}
+              onClick={() => setPreview({ frame: null, aura: null, sticker: null })}
             >
               <X className="mr-1 h-3 w-3" /> Limpar pré-visualização
             </Button>
