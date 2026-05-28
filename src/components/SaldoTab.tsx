@@ -247,14 +247,18 @@ function TxRow({ tx }: { tx: CoinTx }) {
   const d = new Date(tx.created_at);
   const date = d.toLocaleDateString("pt-BR");
   const time = d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+  const resolvedIcon =
+    tx.icon_url
+      ? (DECORATION_ASSETS[tx.icon_url] ?? (tx.icon_url.startsWith("http") || tx.icon_url.startsWith("/") ? tx.icon_url : null))
+      : null;
   return (
     <li className="group flex items-center gap-3 rounded-2xl border border-border/60 bg-card/50 p-3 shadow-soft backdrop-blur transition hover:border-border hover:bg-card/80">
       <div className="relative shrink-0">
-        {tx.icon_url ? (
+        {resolvedIcon ? (
           <img
-            src={tx.icon_url}
+            src={resolvedIcon}
             alt=""
-            className="h-11 w-11 rounded-xl border border-border/40 object-cover"
+            className="h-11 w-11 rounded-xl border border-border/40 bg-card object-contain p-1"
             loading="lazy"
           />
         ) : (
