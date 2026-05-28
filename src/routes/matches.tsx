@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Heart, MessageCircle, User as UserIcon, HeartCrack } from "lucide-react";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { DecoratedAvatar } from "@/components/DecoratedAvatar";
+import { PhotoImg } from "@/components/PhotoImg";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
@@ -122,7 +123,7 @@ function MatchesPage() {
                 <Link to="/pretendentes/$id" params={{ id: it.partner.id }} className="block">
                   <div className="relative aspect-[4/5] overflow-hidden bg-muted">
                     {it.partner.photo_url ? (
-                      <img src={it.partner.photo_url} alt={it.partner.full_name} className="h-full w-full object-cover" />
+                      <PhotoImg src={it.partner.photo_url} alt={it.partner.full_name} className="h-full w-full object-cover" />
                     ) : (
                       <div className="flex h-full w-full items-center justify-center bg-gradient-love text-5xl text-white">
                         {it.partner.full_name.charAt(0)}

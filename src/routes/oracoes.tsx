@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { friendlyError } from "@/lib/errors";
 import { recomputeMyBadges } from "@/lib/recomputeBadges";
+import { PhotoImg } from "@/components/PhotoImg";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from "@/components/ui/dialog";
@@ -308,7 +309,7 @@ function Page() {
                           <EyeOff className="h-4 w-4 text-muted-foreground" />
                         </div>
                       ) : author?.photo_url ? (
-                        <img src={author.photo_url} alt={author.full_name} className="h-10 w-10 rounded-full object-cover shrink-0" loading="lazy" />
+                        <PhotoImg src={author.photo_url} alt={author.full_name} className="h-10 w-10 rounded-full object-cover shrink-0" loading="lazy" />
                       ) : (
                         <div className="h-10 w-10 rounded-full bg-muted shrink-0" />
                       )}
