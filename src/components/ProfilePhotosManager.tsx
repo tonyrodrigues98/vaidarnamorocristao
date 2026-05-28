@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Plus, Trash2, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { PhotoImg } from "@/components/PhotoImg";
 
 interface Photo {
   id: string;
@@ -162,7 +163,7 @@ export function ProfilePhotosManager({ userId }: { userId: string }) {
       <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
         {photos.map((p) => (
           <div key={p.id} className="group relative aspect-square overflow-hidden rounded-xl border bg-muted">
-            <img src={p.url} alt="" className="h-full w-full object-cover" loading="lazy" />
+            <PhotoImg src={p.url} alt="" className="h-full w-full object-cover" loading="lazy" />
             <button
               type="button"
               onClick={() => remove(p)}
