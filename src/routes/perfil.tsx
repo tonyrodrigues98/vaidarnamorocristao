@@ -19,7 +19,7 @@ import {
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { BR_STATES } from "@/lib/constants";
-import { Camera, Save, CheckCircle2, Clock, XCircle, Shield } from "lucide-react";
+import { Camera, Save, CheckCircle2, Clock, XCircle, Shield, User as UserIcon, Heart, Trophy, Briefcase } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { ROLE_CONFIG, COLOR_HEX, type RoleColor } from "@/lib/roles";
 import { RoleBadge } from "@/components/RoleBadge";
@@ -419,21 +419,24 @@ function PerfilPage() {
         </div>
 
         <Tabs defaultValue="profile" className="mt-8">
-          <TabsList className="w-full sm:w-auto">
-            <TabsTrigger value="profile" className="flex-1 sm:flex-none">
-              Sobre mim
-            </TabsTrigger>
-            <TabsTrigger value="prefs" className="flex-1 sm:flex-none">
-              Preferências
-            </TabsTrigger>
-            <TabsTrigger value="missions" className="flex-1 sm:flex-none">
-              Conquistas
-            </TabsTrigger>
-            {isStaff && (
-              <TabsTrigger value="role" className="flex-1 sm:flex-none">
-                Cargo
+          <TabsList
+            className="-mx-4 flex h-auto w-[calc(100%+2rem)] snap-x snap-mandatory items-stretch gap-2 overflow-x-auto bg-transparent p-0 px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:w-full"
+          >
+            {[
+              { value: "profile", label: "Sobre mim", icon: UserIcon },
+              { value: "prefs", label: "Preferências", icon: Heart },
+              { value: "missions", label: "Conquistas", icon: Trophy },
+              ...(isStaff ? [{ value: "role", label: "Cargo", icon: Briefcase }] : []),
+            ].map(({ value, label, icon: Icon }) => (
+              <TabsTrigger
+                key={value}
+                value={value}
+                className="group flex h-auto min-w-[84px] shrink-0 snap-start flex-col items-center justify-center gap-1.5 rounded-2xl border border-border/60 bg-card/60 px-3 py-3 text-xs font-medium text-muted-foreground shadow-soft transition data-[state=active]:border-[var(--rose)]/50 data-[state=active]:bg-[var(--rose-soft)]/40 data-[state=active]:text-[var(--rose)] data-[state=active]:shadow-elegant"
+              >
+                <Icon className="h-5 w-5" />
+                <span className="whitespace-nowrap">{label}</span>
               </TabsTrigger>
-            )}
+            ))}
           </TabsList>
 
           {/* Profile tab */}
