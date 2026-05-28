@@ -92,6 +92,27 @@ function List() {
   const [advancedMap, setAdvancedMap] = useState<Record<string, AdvancedProfile>>({});
   const [extraPhotos, setExtraPhotos] = useState<Record<string, string[]>>({});
 
+  const [ageMinInput, setAgeMinInput] = useState<string>(
+    search.ageMin != null ? String(search.ageMin) : "",
+  );
+  const [ageMaxInput, setAgeMaxInput] = useState<string>(
+    search.ageMax != null ? String(search.ageMax) : "",
+  );
+
+  function commitAge(field: "ageMin" | "ageMax", raw: string) {
+    const digits = raw.replace(/\D/g, "");
+    if (field === "ageMin") setAgeMinInput(digits);
+    else setAgeMaxInput(digits);
+    if (digits === "") {
+      update(field, undefined);
+      return;
+    }
+    const n = Number(digits);
+    if (Number.isFinite(n) && n >= 18 && n <= 110) {
+      update(field, n);
+    }
+  }
+
   useEffect(() => {
     if (!user) return;
     markHomeChecklistStep(user.id, "explore");
