@@ -19,7 +19,7 @@ import {
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { BR_STATES } from "@/lib/constants";
-import { Camera, Save, CheckCircle2, Clock, XCircle, Shield, User as UserIcon, Heart, Trophy, Briefcase, MoreHorizontal, Wallet } from "lucide-react";
+import { Camera, Save, CheckCircle2, Clock, XCircle, Shield, User as UserIcon, Heart, Trophy, Briefcase, MoreHorizontal, Wallet, Sparkles } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -36,7 +36,7 @@ import { recomputeMyBadges } from "@/lib/recomputeBadges";
 import { ProfileAdvancedForm } from "@/components/ProfileAdvancedForm";
 import { ProfilePhotosManager } from "@/components/ProfilePhotosManager";
 import { AdminWarningBanner } from "@/components/AdminWarningBanner";
-import { DecorationsCard } from "@/components/DecorationsCard";
+import { CustomizacaoTab } from "@/components/CustomizacaoTab";
 
 export const Route = createFileRoute("/perfil")({ component: PerfilPage });
 
@@ -432,7 +432,7 @@ function PerfilPage() {
           >
             {[
               { value: "profile", label: "Sobre mim", icon: UserIcon },
-              { value: "prefs", label: "Preferências", icon: Heart },
+              { value: "customizacao", label: "Customização", icon: Sparkles },
             ].map(({ value, label, icon: Icon }) => (
               <TabsTrigger
                 key={value}
@@ -455,6 +455,10 @@ function PerfilPage() {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
                 <DropdownMenuLabel>Mais opções</DropdownMenuLabel>
+                <DropdownMenuItem onSelect={() => setActiveTab("prefs")}>
+                  <Heart className="mr-2 h-4 w-4" />
+                  Preferências
+                </DropdownMenuItem>
                 <DropdownMenuItem onSelect={() => setActiveTab("saldo")}>
                   <Wallet className="mr-2 h-4 w-4" />
                   Saldo
@@ -501,8 +505,6 @@ function PerfilPage() {
                   <ProfilePhotosManager userId={user.id} />
                 </div>
               )}
-
-              {user && <DecorationsCard photoUrl={photoPreview ?? null} />}
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2 sm:col-span-2">
@@ -777,6 +779,10 @@ function PerfilPage() {
 
           <TabsContent value="saldo" className="mt-6">
             {user && <SaldoTab />}
+          </TabsContent>
+
+          <TabsContent value="customizacao" className="mt-6">
+            {user && <CustomizacaoTab photoUrl={photoPreview ?? null} />}
           </TabsContent>
 
           {isStaff && (
