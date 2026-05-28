@@ -1,6 +1,6 @@
 import { friendlyError } from "@/lib/errors";
 import { PhotoCarousel } from "@/components/PhotoCarousel";
-import { createFileRoute, Link, Navigate, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { RequireApproved } from "@/components/RequireApproved";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -40,7 +40,6 @@ export const Route = createFileRoute("/pretendentes/$id")({ component: () => (<R
 function Detail() {
   const { id } = Route.useParams();
   const { user, loading, isAdmin } = useAuth();
-  const navigate = useNavigate();
   const [profile, setProfile] = useState<Full | null | undefined>(undefined);
   const [prefs, setPrefs] = useState<Prefs | null>(null);
   const [interestSent, setInterestSent] = useState(false);
