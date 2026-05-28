@@ -383,25 +383,41 @@ function List() {
                 <div>
                   <label className="text-xs text-muted-foreground">Idade mín.</label>
                   <Input
-                    type="number"
-                    min={18}
-                    max={110}
-                    value={search.ageMin ?? ""}
-                    onChange={(e) =>
-                      update("ageMin", e.target.value ? Number(e.target.value) : undefined)
-                    }
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    maxLength={3}
+                    placeholder="18"
+                    value={ageMinInput}
+                    onChange={(e) => commitAge("ageMin", e.target.value)}
+                    onBlur={() => {
+                      if (ageMinInput === "") return;
+                      const n = Number(ageMinInput);
+                      if (!Number.isFinite(n) || n < 18 || n > 110) {
+                        setAgeMinInput("");
+                        update("ageMin", undefined);
+                      }
+                    }}
                   />
                 </div>
                 <div>
                   <label className="text-xs text-muted-foreground">Idade máx.</label>
                   <Input
-                    type="number"
-                    min={18}
-                    max={110}
-                    value={search.ageMax ?? ""}
-                    onChange={(e) =>
-                      update("ageMax", e.target.value ? Number(e.target.value) : undefined)
-                    }
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    maxLength={3}
+                    placeholder="110"
+                    value={ageMaxInput}
+                    onChange={(e) => commitAge("ageMax", e.target.value)}
+                    onBlur={() => {
+                      if (ageMaxInput === "") return;
+                      const n = Number(ageMaxInput);
+                      if (!Number.isFinite(n) || n < 18 || n > 110) {
+                        setAgeMaxInput("");
+                        update("ageMax", undefined);
+                      }
+                    }}
                   />
                 </div>
                 <div>
