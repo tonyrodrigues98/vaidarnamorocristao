@@ -433,7 +433,6 @@ function PerfilPage() {
             {[
               { value: "profile", label: "Sobre mim", icon: UserIcon },
               { value: "prefs", label: "Preferências", icon: Heart },
-              { value: "saldo", label: "Saldo", icon: Wallet },
               { value: "missions", label: "Conquistas", icon: Trophy },
             ].map(({ value, label, icon: Icon }) => (
               <TabsTrigger
@@ -457,16 +456,16 @@ function PerfilPage() {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
                 <DropdownMenuLabel>Mais opções</DropdownMenuLabel>
-                {isStaff ? (
+                <DropdownMenuItem onSelect={() => setActiveTab("saldo")}>
+                  <Wallet className="mr-2 h-4 w-4" />
+                  Saldo
+                </DropdownMenuItem>
+                {isStaff && (
                   <DropdownMenuItem
                     onSelect={() => setActiveTab("role")}
                   >
                     <Briefcase className="mr-2 h-4 w-4" />
                     Cargo
-                  </DropdownMenuItem>
-                ) : (
-                  <DropdownMenuItem disabled>
-                    Em breve
                   </DropdownMenuItem>
                 )}
               </DropdownMenuContent>
@@ -771,6 +770,10 @@ function PerfilPage() {
                 />
               </div>
             )}
+          </TabsContent>
+
+          <TabsContent value="saldo" className="mt-6">
+            {user && <SaldoTab />}
           </TabsContent>
 
           {isStaff && (
