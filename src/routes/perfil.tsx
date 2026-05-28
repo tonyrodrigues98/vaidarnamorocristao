@@ -425,7 +425,7 @@ function PerfilPage() {
           <StatusPill status={status} />
         </div>
 
-        <Tabs defaultValue="profile" className="mt-8">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-8">
           <TabsList
             className="flex h-auto w-full items-stretch gap-2 bg-transparent p-0"
           >
@@ -457,13 +457,7 @@ function PerfilPage() {
                 <DropdownMenuLabel>Mais opções</DropdownMenuLabel>
                 {isStaff ? (
                   <DropdownMenuItem
-                    onSelect={(e) => {
-                      e.preventDefault();
-                      const trigger = document.querySelector<HTMLButtonElement>(
-                        '[data-tab-role="role-hidden"]',
-                      );
-                      trigger?.click();
-                    }}
+                    onSelect={() => setActiveTab("role")}
                   >
                     <Briefcase className="mr-2 h-4 w-4" />
                     Cargo
@@ -475,9 +469,6 @@ function PerfilPage() {
                 )}
               </DropdownMenuContent>
             </DropdownMenu>
-            {isStaff && (
-              <TabsTrigger value="role" data-tab-role="role-hidden" className="hidden" />
-            )}
           </TabsList>
 
           {/* Profile tab */}
