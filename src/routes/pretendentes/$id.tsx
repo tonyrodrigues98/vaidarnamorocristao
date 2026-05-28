@@ -253,7 +253,7 @@ function Detail() {
               <PhotoImg
                 src={profile.photo_url}
                 alt={profile.full_name}
-                eager
+                loading="eager"
                 className="h-full w-full object-cover"
               />
             ) : (
