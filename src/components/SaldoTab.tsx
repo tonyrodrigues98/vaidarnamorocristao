@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Loader2, Sparkles, ArrowDownLeft, ArrowUpRight, Wallet, Inbox } from "lucide-react";
+import { Loader2, Sparkles, ArrowDownLeft, ArrowUpRight, Wallet, Inbox, DollarSign, VenetianMask } from "lucide-react";
 import coinIcon from "@/assets/coin.png";
 import coinSound from "@/assets/coin-reward.mp3";
 import { DECORATION_ASSETS } from "@/lib/decorations";
@@ -251,6 +251,11 @@ function TxRow({ tx }: { tx: CoinTx }) {
     tx.icon_url
       ? (DECORATION_ASSETS[tx.icon_url] ?? (tx.icon_url.startsWith("http") || tx.icon_url.startsWith("/") ? tx.icon_url : null))
       : null;
+  const KindIcon = tx.kind === "daily_claim"
+    ? DollarSign
+    : tx.kind === "anonymous_extra"
+    ? VenetianMask
+    : isIn ? ArrowDownLeft : ArrowUpRight;
   return (
     <li className="group flex items-center gap-3 rounded-2xl border border-border/60 bg-card/50 p-3 shadow-soft backdrop-blur transition hover:border-border hover:bg-card/80">
       <div className="relative shrink-0">
@@ -263,7 +268,7 @@ function TxRow({ tx }: { tx: CoinTx }) {
           />
         ) : (
           <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${iconWrap}`}>
-            {isIn ? <ArrowDownLeft className="h-5 w-5" /> : <ArrowUpRight className="h-5 w-5" />}
+            <KindIcon className="h-5 w-5" />
           </div>
         )}
       </div>
