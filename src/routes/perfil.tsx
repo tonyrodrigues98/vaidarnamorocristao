@@ -134,6 +134,7 @@ function PerfilPage() {
 
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [savingProfile, setSavingProfile] = useState(false);
   const [savingPrefs, setSavingPrefs] = useState(false);
   const [status, setStatus] = useState<"pending" | "approved" | "rejected" | "banned" | null>(null);
@@ -505,17 +506,30 @@ function PerfilPage() {
               className="glass animate-fade-up space-y-6 rounded-3xl p-6 shadow-elegant sm:p-8"
             >
               <div className="flex flex-col items-center gap-3">
-                <label className="group relative h-32 w-32 cursor-pointer overflow-hidden rounded-full border-2 border-dashed border-[var(--rose-soft)] bg-card/60 shadow-soft transition hover:border-[var(--rose)]">
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  aria-label="Trocar foto de perfil"
+                  className="group relative h-32 w-32 cursor-pointer overflow-hidden rounded-full border-2 border-dashed border-[var(--rose-soft)] bg-card/60 shadow-soft transition hover:border-[var(--rose)]"
+                >
                   {photoPreview ? (
-                    <PhotoImg src={photoPreview} alt="" className="h-full w-full object-cover" />
+                    <PhotoImg src={photoPreview} alt="" className="pointer-events-none h-full w-full object-cover" />
                   ) : (
-                    <div className="flex h-full w-full flex-col items-center justify-center text-muted-foreground">
+                    <div className="pointer-events-none flex h-full w-full flex-col items-center justify-center text-muted-foreground">
                       <Camera className="h-6 w-6" />
                       <span className="mt-1 text-xs">Foto</span>
                     </div>
                   )}
-                  <input type="file" accept="image/*" onChange={handlePhoto} className="hidden" />
-                </label>
+                </button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*,image/heic,image/heif"
+                  onChange={handlePhoto}
+                  className="sr-only"
+                  tabIndex={-1}
+                  aria-hidden="true"
+                />
                 <p className="text-xs text-muted-foreground">Clique para trocar (até 5MB)</p>
               </div>
 
