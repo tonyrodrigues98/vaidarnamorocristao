@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Progress } from "@/components/ui/progress";
 import { BR_STATES } from "@/lib/constants";
 import { Camera } from "lucide-react";
+import { PhotoImg } from "@/components/PhotoImg";
 
 const schema = z.object({
   full_name: z.string().trim().min(2).max(100),
@@ -191,7 +192,7 @@ function Etapa1() {
               className={`group relative h-32 w-32 cursor-pointer overflow-hidden rounded-full border-2 border-dashed bg-card/60 shadow-soft transition ${photoPreview ? "border-[var(--rose-soft)] hover:border-[var(--rose)]" : "border-destructive/60 hover:border-destructive"}`}
             >
               {photoPreview ? (
-                <img src={photoPreview} alt="" className="h-full w-full object-cover" />
+                <PhotoImg src={photoPreview} alt="" className="h-full w-full object-cover" />
               ) : (
                 <div className="flex h-full w-full flex-col items-center justify-center text-muted-foreground">
                   <Camera className="h-6 w-6" />
