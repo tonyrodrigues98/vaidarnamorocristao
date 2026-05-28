@@ -427,7 +427,7 @@ function PerfilPage() {
 
         <Tabs defaultValue="profile" className="mt-8">
           <TabsList
-            className="flex h-auto w-full snap-x snap-mandatory items-stretch gap-2 overflow-x-auto bg-transparent p-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            className="flex h-auto w-full items-stretch gap-2 bg-transparent p-0"
           >
             {[
               { value: "profile", label: "Sobre mim", icon: UserIcon },
@@ -437,20 +437,20 @@ function PerfilPage() {
               <TabsTrigger
                 key={value}
                 value={value}
-                className="group flex h-auto flex-1 min-w-[72px] shrink-0 snap-start flex-col items-center justify-center gap-1.5 rounded-2xl border border-border/60 bg-card/60 px-2 py-3 text-xs font-medium text-muted-foreground shadow-soft transition data-[state=active]:border-[var(--rose)]/50 data-[state=active]:bg-[var(--rose-soft)]/40 data-[state=active]:text-[var(--rose)] data-[state=active]:shadow-elegant"
+                className="group flex h-auto min-h-[84px] flex-1 cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border border-border/60 bg-card/60 px-2 py-4 text-sm font-medium text-muted-foreground shadow-soft transition active:scale-[0.98] data-[state=active]:border-[var(--rose)]/50 data-[state=active]:bg-[var(--rose-soft)]/40 data-[state=active]:text-[var(--rose)] data-[state=active]:shadow-elegant"
               >
-                <Icon className="h-5 w-5" />
-                <span className="whitespace-nowrap">{label}</span>
+                <Icon className="h-6 w-6" />
+                <span className="whitespace-nowrap text-[13px] leading-none">{label}</span>
               </TabsTrigger>
             ))}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
                   type="button"
-                  className="group flex h-auto flex-1 min-w-[72px] shrink-0 snap-start flex-col items-center justify-center gap-1.5 rounded-2xl border border-border/60 bg-card/60 px-2 py-3 text-xs font-medium text-muted-foreground shadow-soft transition hover:text-foreground"
+                  className="group flex h-auto min-h-[84px] flex-1 cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border border-border/60 bg-card/60 px-2 py-4 text-sm font-medium text-muted-foreground shadow-soft transition active:scale-[0.98] hover:text-foreground"
                 >
-                  <MoreHorizontal className="h-5 w-5" />
-                  <span className="whitespace-nowrap">Mais</span>
+                  <MoreHorizontal className="h-6 w-6" />
+                  <span className="whitespace-nowrap text-[13px] leading-none">Mais</span>
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
