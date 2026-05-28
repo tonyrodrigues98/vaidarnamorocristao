@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate, Navigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
@@ -37,6 +37,7 @@ function Etapa1() {
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [form, setForm] = useState({
     full_name: "", age: "", height_cm: "", sex: "" as "" | "masculino" | "feminino",
     marital: "" as "" | "solteiro" | "divorciado", city: "", state: "",
@@ -204,20 +205,31 @@ function Etapa1() {
 
         <form onSubmit={handleSubmit} className="glass animate-fade-up space-y-6 rounded-3xl p-8 shadow-elegant">
           <div className="flex flex-col items-center gap-3">
-            <label
-              htmlFor="profile-photo-input"
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              aria-label="Selecionar foto de perfil"
               className={`group relative h-32 w-32 cursor-pointer overflow-hidden rounded-full border-2 border-dashed bg-card/60 shadow-soft transition ${photoPreview ? "border-[var(--rose-soft)] hover:border-[var(--rose)]" : "border-destructive/60 hover:border-destructive"}`}
             >
               {photoPreview ? (
-                <PhotoImg src={photoPreview} alt="" className="h-full w-full object-cover" />
+                <PhotoImg src={photoPreview} alt="" className="pointer-events-none h-full w-full object-cover" />
               ) : (
-                <div className="flex h-full w-full flex-col items-center justify-center text-muted-foreground">
+                <div className="pointer-events-none flex h-full w-full flex-col items-center justify-center text-muted-foreground">
                   <Camera className="h-6 w-6" />
                   <span className="mt-1 text-xs">Foto</span>
                 </div>
               )}
-              <input id="profile-photo-input" type="file" accept="image/*" onChange={handlePhoto} className="hidden" />
-            </label>
+            </button>
+            <input
+              ref={fileInputRef}
+              id="profile-photo-input"
+              type="file"
+              accept="image/*,image/heic,image/heif"
+              onChange={handlePhoto}
+              className="sr-only"
+              tabIndex={-1}
+              aria-hidden="true"
+            />
             <p className="text-xs text-muted-foreground">
               <span className="font-medium text-foreground">Foto de perfil obrigatória</span> · Clique para enviar (até 5MB)
             </p>
