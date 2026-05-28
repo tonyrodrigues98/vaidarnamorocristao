@@ -773,7 +773,7 @@ function PerfilPage() {
           </TabsContent>
 
           <TabsContent value="saldo" className="mt-6">
-            {user && <SaldoTab userId={user.id} />}
+            {user && <SaldoTab />}
           </TabsContent>
 
           {isStaff && (
