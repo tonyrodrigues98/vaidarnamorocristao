@@ -1012,7 +1012,7 @@ function InicioPage() {
                 >
                   <div className="aspect-[4/5] w-full overflow-hidden bg-muted">
                     {s.photo_url ? (
-                      <img
+                      <PhotoImg
                         src={s.photo_url}
                         alt={s.full_name}
                         className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.04]"
