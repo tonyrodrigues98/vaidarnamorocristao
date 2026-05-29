@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ArrowLeft, MapPin, Church, Heart, Flag, Ban, MessageCircle, Check, Sparkles, Baby, Globe2, ShieldOff, Ruler, HandHeart, Quote } from "lucide-react";
+import { ArrowLeft, MapPin, Church, Heart, Flag, Ban, MessageCircle, Check, Sparkles, Baby, Globe2, ShieldOff, Ruler, HandHeart, Quote, CalendarHeart, Cake, Target, Users2 } from "lucide-react";
 import { RoleBadge } from "@/components/RoleBadge";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { OnlineDot } from "@/components/OnlineDot";
@@ -265,7 +265,7 @@ function Detail() {
         </div>
 
         {/* Identidade */}
-        <div className="mt-5 space-y-3">
+        <div className="mt-6 space-y-4">
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
             <h1 className="text-3xl font-bold leading-tight text-foreground">
               {profile.full_name}, {profile.age}
@@ -278,35 +278,44 @@ function Detail() {
           </div>
           <UserBadges userId={profile.id} size="sm" max={6} />
 
-          <div className="flex flex-wrap gap-x-4 gap-y-1.5 pt-1 text-sm text-muted-foreground">
+          {/* Chips de informações principais */}
+          <div className="flex flex-wrap gap-2 pt-1">
             {profile.city && (
-              <span className="inline-flex items-center gap-1.5">
-                <MapPin className="h-4 w-4 text-[var(--rose)]" /> {profile.city}, {profile.state}
-              </span>
+              <Chip icon={<MapPin className="h-3.5 w-3.5" />} tone="rose">
+                {profile.city}, {profile.state}
+              </Chip>
             )}
             {profile.height_cm && (
-              <span className="inline-flex items-center gap-1.5">
-                <Ruler className="h-4 w-4 text-[var(--rose)]" /> {profile.height_cm} cm
-              </span>
+              <Chip icon={<Ruler className="h-3.5 w-3.5" />} tone="sky">
+                {profile.height_cm} cm
+              </Chip>
             )}
             {profile.church && (
-              <span className="inline-flex items-center gap-1.5">
-                <Church className="h-4 w-4 text-[var(--rose)]" /> {profile.church}
-              </span>
+              <Chip icon={<Church className="h-3.5 w-3.5" />} tone="violet">
+                {profile.church}
+              </Chip>
             )}
-            <span className="inline-flex items-center gap-1.5">
-              <Sparkles className="h-4 w-4 text-[var(--rose)]" />
+            <Chip icon={<Sparkles className="h-3.5 w-3.5" />} tone="amber">
               {profile.marital === "solteiro" ? "Solteiro(a)" : "Divorciado(a)"}
-              {profile.years_baptized ? ` · ${profile.years_baptized} anos de batismo` : ""}
-            </span>
+            </Chip>
+            {profile.years_baptized ? (
+              <Chip icon={<CalendarHeart className="h-3.5 w-3.5" />} tone="emerald">
+                {profile.years_baptized} anos de batismo
+              </Chip>
+            ) : null}
           </div>
         </div>
 
         {/* Bio */}
         {profile.bio && (
-          <section className="mt-6 rounded-2xl border border-border bg-card p-5">
-            <h2 className="text-base font-semibold text-foreground">Sobre mim</h2>
-            <p className="mt-2 text-[15px] leading-relaxed text-foreground/85">{profile.bio}</p>
+          <section className="mt-6 rounded-2xl border border-border bg-gradient-to-br from-card via-card to-[var(--rose)]/5 p-6 shadow-soft">
+            <h2 className="flex items-center gap-2 text-base font-semibold text-foreground">
+              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[var(--rose)]/10 text-[var(--rose)]">
+                <Quote className="h-4 w-4" />
+              </span>
+              Sobre mim
+            </h2>
+            <p className="mt-3 text-[15px] leading-relaxed text-foreground/85">{profile.bio}</p>
           </section>
         )}
 
@@ -317,43 +326,51 @@ function Detail() {
 
         {/* Preferências */}
         {prefs && (
-          <section className="mt-6 rounded-2xl border border-border bg-card p-5">
+          <section className="mt-6 rounded-2xl border border-border bg-card p-6 shadow-soft">
             <h2 className="flex items-center gap-2 text-base font-semibold text-foreground">
-              <Quote className="h-4 w-4 text-[var(--rose)]" /> O que está buscando
+              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-pink-500/10 text-pink-500">
+                <Target className="h-4 w-4" />
+              </span>
+              O que está buscando
             </h2>
-            <dl className="mt-3 space-y-2 text-sm">
-              <div className="flex flex-wrap gap-2">
-                <dt className="text-muted-foreground">Idade desejada:</dt>
-                <dd className="font-medium">{prefs.age_min}–{prefs.age_max} anos</dd>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <dt className="flex items-center gap-1 text-muted-foreground"><Baby className="h-3.5 w-3.5" /> Aceita filhos:</dt>
-                <dd className="font-medium">{prefs.accepts_children ? "Sim" : "Não"}</dd>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <dt className="flex items-center gap-1 text-muted-foreground"><Globe2 className="h-3.5 w-3.5" /> Localização:</dt>
-                <dd className="font-medium">
-                  {prefs.location_scope === "personalizado"
-                    ? ((prefs.custom_states ?? []).length > 0 ? (prefs.custom_states ?? []).join(", ") : "—")
-                    : prefs.location_scope === "regiao" ? "Mesma região"
-                    : prefs.location_scope === "brasil" ? "Brasil todo"
-                    : prefs.location_scope === "mundo" ? "Mundo todo"
-                    : prefs.location_scope}
-                </dd>
-              </div>
-              {prefs.desired_quality && (
-                <div>
-                  <dt className="text-muted-foreground">Qualidade que mais valoriza:</dt>
-                  <dd className="mt-0.5 font-medium">{prefs.desired_quality}</dd>
-                </div>
-              )}
-              {prefs.looking_for_bio && (
-                <div>
-                  <dt className="text-muted-foreground">Sobre o que busca:</dt>
-                  <dd className="mt-0.5 leading-relaxed text-foreground/85">{prefs.looking_for_bio}</dd>
-                </div>
-              )}
-            </dl>
+
+            <div className="mt-4 flex flex-wrap gap-2">
+              <Chip icon={<Cake className="h-3.5 w-3.5" />} tone="rose">
+                {prefs.age_min}–{prefs.age_max} anos
+              </Chip>
+              <Chip icon={<Baby className="h-3.5 w-3.5" />} tone={prefs.accepts_children ? "emerald" : "slate"}>
+                {prefs.accepts_children ? "Aceita filhos" : "Sem filhos"}
+              </Chip>
+              <Chip icon={<Globe2 className="h-3.5 w-3.5" />} tone="sky">
+                {prefs.location_scope === "personalizado"
+                  ? ((prefs.custom_states ?? []).length > 0 ? (prefs.custom_states ?? []).join(", ") : "—")
+                  : prefs.location_scope === "regiao" ? "Mesma região"
+                  : prefs.location_scope === "brasil" ? "Brasil todo"
+                  : prefs.location_scope === "mundo" ? "Mundo todo"
+                  : prefs.location_scope}
+              </Chip>
+            </div>
+
+            {(prefs.desired_quality || prefs.looking_for_bio) && (
+              <dl className="mt-5 space-y-4 text-sm">
+                {prefs.desired_quality && (
+                  <div className="rounded-xl bg-amber-500/5 p-3.5 ring-1 ring-amber-500/15">
+                    <dt className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-amber-700 dark:text-amber-400">
+                      <Sparkles className="h-3.5 w-3.5" /> Qualidade que mais valoriza
+                    </dt>
+                    <dd className="mt-1 font-medium text-foreground">{prefs.desired_quality}</dd>
+                  </div>
+                )}
+                {prefs.looking_for_bio && (
+                  <div className="rounded-xl bg-[var(--rose)]/5 p-3.5 ring-1 ring-[var(--rose)]/15">
+                    <dt className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-[var(--rose)]">
+                      <Users2 className="h-3.5 w-3.5" /> Sobre o que busca
+                    </dt>
+                    <dd className="mt-1 leading-relaxed text-foreground/90">{prefs.looking_for_bio}</dd>
+                  </div>
+                )}
+              </dl>
+            )}
           </section>
         )}
 
@@ -433,5 +450,24 @@ function Detail() {
         </div>
       </main>
     </div>
+  );
+}
+
+type ChipTone = "rose" | "sky" | "violet" | "amber" | "emerald" | "slate";
+const CHIP_TONES: Record<ChipTone, string> = {
+  rose: "bg-[var(--rose)]/10 text-[var(--rose)] ring-[var(--rose)]/20",
+  sky: "bg-sky-500/10 text-sky-600 dark:text-sky-400 ring-sky-500/20",
+  violet: "bg-violet-500/10 text-violet-600 dark:text-violet-400 ring-violet-500/20",
+  amber: "bg-amber-500/10 text-amber-700 dark:text-amber-400 ring-amber-500/20",
+  emerald: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 ring-emerald-500/20",
+  slate: "bg-slate-500/10 text-slate-600 dark:text-slate-400 ring-slate-500/20",
+};
+
+function Chip({ icon, tone = "rose", children }: { icon?: React.ReactNode; tone?: ChipTone; children: React.ReactNode }) {
+  return (
+    <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium ring-1 ${CHIP_TONES[tone]}`}>
+      {icon}
+      {children}
+    </span>
   );
 }
