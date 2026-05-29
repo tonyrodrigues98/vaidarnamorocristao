@@ -11,14 +11,59 @@ import {
   labelOf, labelsOf, hasAny,
 } from "@/lib/profileAdvanced";
 
-function Card({ icon, title, children }: { icon: React.ReactNode; title: string; children: React.ReactNode }) {
+type Tone = "rose" | "sky" | "violet" | "amber" | "emerald" | "indigo" | "pink" | "teal" | "fuchsia" | "orange";
+
+const TONE_BG: Record<Tone, string> = {
+  rose: "bg-[var(--rose)]/10 text-[var(--rose)]",
+  sky: "bg-sky-500/10 text-sky-600 dark:text-sky-400",
+  violet: "bg-violet-500/10 text-violet-600 dark:text-violet-400",
+  amber: "bg-amber-500/15 text-amber-700 dark:text-amber-400",
+  emerald: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+  indigo: "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400",
+  pink: "bg-pink-500/10 text-pink-600 dark:text-pink-400",
+  teal: "bg-teal-500/10 text-teal-600 dark:text-teal-400",
+  fuchsia: "bg-fuchsia-500/10 text-fuchsia-600 dark:text-fuchsia-400",
+  orange: "bg-orange-500/10 text-orange-600 dark:text-orange-400",
+};
+
+const TONE_RING: Record<Tone, string> = {
+  rose: "ring-[var(--rose)]/15",
+  sky: "ring-sky-500/15",
+  violet: "ring-violet-500/15",
+  amber: "ring-amber-500/20",
+  emerald: "ring-emerald-500/15",
+  indigo: "ring-indigo-500/15",
+  pink: "ring-pink-500/15",
+  teal: "ring-teal-500/15",
+  fuchsia: "ring-fuchsia-500/15",
+  orange: "ring-orange-500/15",
+};
+
+function Card({
+  icon,
+  title,
+  subtitle,
+  tone = "rose",
+  children,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  subtitle?: string;
+  tone?: Tone;
+  children: React.ReactNode;
+}) {
   return (
-    <section className="glass animate-fade-up rounded-2xl p-5 shadow-soft">
-      <header className="mb-3 flex items-center gap-2.5">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--rose)]/10 text-[var(--rose)]">{icon}</div>
-        <h3 className="text-base font-semibold leading-none">{title}</h3>
+    <section className={`glass animate-fade-up rounded-2xl p-6 shadow-soft ring-1 ${TONE_RING[tone]}`}>
+      <header className="mb-5 flex items-center gap-3">
+        <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${TONE_BG[tone]}`}>
+          {icon}
+        </div>
+        <div>
+          <h3 className="text-base font-semibold leading-tight">{title}</h3>
+          {subtitle && <p className="mt-0.5 text-[11px] text-muted-foreground">{subtitle}</p>}
+        </div>
       </header>
-      <div className="space-y-3 text-sm">{children}</div>
+      <div className="space-y-4 text-sm">{children}</div>
     </section>
   );
 }
@@ -28,17 +73,22 @@ function Row({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div>
       <dt className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{label}</dt>
-      <dd className="mt-0.5 leading-relaxed text-foreground/90">{value}</dd>
+      <dd className="mt-1 leading-relaxed text-foreground/90">{value}</dd>
     </div>
   );
 }
 
-function Tags({ items }: { items: string[] }) {
+function Tags({ items, tone = "rose" }: { items: string[]; tone?: Tone }) {
   if (!items.length) return null;
   return (
     <div className="flex flex-wrap gap-1.5">
       {items.map((t) => (
-        <span key={t} className="rounded-full border border-border bg-card/60 px-2.5 py-0.5 text-xs">{t}</span>
+        <span
+          key={t}
+          className={`rounded-full px-2.5 py-1 text-xs font-medium ring-1 ${TONE_BG[tone]} ${TONE_RING[tone]}`}
+        >
+          {t}
+        </span>
       ))}
     </div>
   );
@@ -75,12 +125,12 @@ export function ProfileAdvancedView({ userId }: { userId: string }) {
   if (!anything) return null;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       {showSpiritual && (
-        <Card icon={<BookHeart className="h-4 w-4" />} title="Identidade Espiritual">
+        <Card icon={<BookHeart className="h-5 w-5" />} title="Identidade Espiritual" subtitle="Fé e caminhada" tone="violet">
           {d.life_verse && (
-            <div className="rounded-xl bg-[var(--rose)]/5 p-3 text-foreground/90">
-              <Quote className="mb-1 h-3.5 w-3.5 text-[var(--rose)]" />
+            <div className="rounded-xl bg-violet-500/5 p-4 ring-1 ring-violet-500/15 text-foreground/90">
+              <Quote className="mb-1.5 h-4 w-4 text-violet-500" />
               <p className="italic leading-relaxed">{d.life_verse}</p>
             </div>
           )}
@@ -92,17 +142,17 @@ export function ProfileAdvancedView({ userId }: { userId: string }) {
       )}
 
       {showLifestyle && (
-        <Card icon={<HeartHandshake className="h-4 w-4" />} title="Estilo de Vida Cristão">
+        <Card icon={<HeartHandshake className="h-5 w-5" />} title="Estilo de Vida Cristão" subtitle="Rotina e prática" tone="emerald">
           <dl className="space-y-3">
-            <Row label="Participa de" value={<Tags items={labelsOf(PARTICIPATES, d.participates)} />} />
-            <Row label="Rotina espiritual" value={<Tags items={labelsOf(SPIRITUAL_ROUTINE, d.spiritual_routine)} />} />
+            <Row label="Participa de" value={<Tags items={labelsOf(PARTICIPATES, d.participates)} tone="emerald" />} />
+            <Row label="Rotina espiritual" value={<Tags items={labelsOf(SPIRITUAL_ROUTINE, d.spiritual_routine)} tone="emerald" />} />
             <Row label="Frequência na igreja" value={labelOf(CHURCH_FREQUENCY, d.church_frequency)} />
           </dl>
         </Card>
       )}
 
       {showMinistry && (
-        <Card icon={<Users className="h-4 w-4" />} title="Ministério e Chamado">
+        <Card icon={<Users className="h-5 w-5" />} title="Ministério e Chamado" subtitle="Serviço e propósito" tone="indigo">
           <dl className="space-y-2">
             <Row label="Ministério" value={d.ministry === "outro" ? d.ministry_other ?? labelOf(MINISTRY, d.ministry) : labelOf(MINISTRY, d.ministry)} />
             <Row label="Sente um chamado?" value={labelOf(HAS_CALLING, d.has_calling)} />
@@ -112,7 +162,7 @@ export function ProfileAdvancedView({ userId }: { userId: string }) {
       )}
 
       {showRel && (
-        <Card icon={<MessageCircleHeart className="h-4 w-4" />} title="Relacionamento e Intenção">
+        <Card icon={<MessageCircleHeart className="h-5 w-5" />} title="Relacionamento e Intenção" subtitle="Como se relaciona" tone="pink">
           <dl className="space-y-2">
             <Row label="O que busca" value={labelOf(SEEKING, d.seeking)} />
             <Row label="Tempo / objetivo" value={labelOf(PACE, d.pace)} />
@@ -122,7 +172,7 @@ export function ProfileAdvancedView({ userId }: { userId: string }) {
       )}
 
       {showFuture && (
-        <Card icon={<Compass className="h-4 w-4" />} title="Visão de Futuro">
+        <Card icon={<Compass className="h-5 w-5" />} title="Visão de Futuro" subtitle="Sonhos e planos" tone="sky">
           <dl className="space-y-3">
             <Row label="Quer casar?" value={labelOf(SIM_NAO_TALVEZ, d.wants_marriage)} />
             <Row label="Quer filhos?" value={
@@ -131,13 +181,13 @@ export function ProfileAdvancedView({ userId }: { userId: string }) {
                 : null
             } />
             <Row label="Onde deseja viver" value={labelOf(LIVING_PLACE, d.living_place)} />
-            <Row label="Objetivos de vida" value={<Tags items={labelsOf(LIFE_GOALS, d.life_goals)} />} />
+            <Row label="Objetivos de vida" value={<Tags items={labelsOf(LIFE_GOALS, d.life_goals)} tone="sky" />} />
           </dl>
         </Card>
       )}
 
       {showPersonality && (
-        <Card icon={<Smile className="h-4 w-4" />} title="Personalidade">
+        <Card icon={<Smile className="h-5 w-5" />} title="Personalidade" subtitle="Jeito de ser" tone="amber">
           <div className="grid grid-cols-2 gap-3">
             {d.introversion && <PersonalityChip label="Social" value={labelOf(INTROVERSION, d.introversion)!} />}
             {d.energy && <PersonalityChip label="Energia" value={labelOf(ENERGY, d.energy)!} />}
@@ -148,7 +198,7 @@ export function ProfileAdvancedView({ userId }: { userId: string }) {
       )}
 
       {showLikes && (
-        <Card icon={<Music className="h-4 w-4" />} title="Gostos e Interesses">
+        <Card icon={<Music className="h-5 w-5" />} title="Gostos e Interesses" subtitle="Vida pessoal" tone="fuchsia">
           <dl className="space-y-2">
             <Row label="Hobbies" value={d.hobbies} />
             <Row label="Louvores favoritos" value={d.favorite_worships} />
@@ -159,7 +209,7 @@ export function ProfileAdvancedView({ userId }: { userId: string }) {
       )}
 
       {showRoutine && (
-        <Card icon={<Clock className="h-4 w-4" />} title="Rotina">
+        <Card icon={<Clock className="h-5 w-5" />} title="Rotina" subtitle="Dia a dia" tone="teal">
           <dl className="space-y-2">
             <Row label="Rotina" value={labelOf(ROUTINE, d.routine)} />
             <Row label="Tempo para relacionamento" value={labelOf(AVAILABLE_TIME, d.available_time)} />
@@ -168,13 +218,13 @@ export function ProfileAdvancedView({ userId }: { userId: string }) {
       )}
 
       {showEmotional && (
-        <Card icon={<Sparkles className="h-4 w-4" />} title="Em um relacionamento">
+        <Card icon={<Sparkles className="h-5 w-5" />} title="Em um relacionamento" subtitle="Como ama" tone="rose">
           <p className="leading-relaxed text-foreground/90">{d.in_relationship_iam}</p>
         </Card>
       )}
 
       {showSeeking && (
-        <Card icon={<Search className="h-4 w-4" />} title="O que busco">
+        <Card icon={<Search className="h-5 w-5" />} title="O que busco" subtitle="Valores no outro" tone="orange">
           <dl className="space-y-2">
             <Row label="Qualidade essencial" value={d.essential_quality} />
             <Row label="Não abre mão" value={d.non_negotiable} />
@@ -188,9 +238,9 @@ export function ProfileAdvancedView({ userId }: { userId: string }) {
 
 function PersonalityChip({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-xl border border-border bg-card/40 p-3">
-      <div className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">{label}</div>
-      <div className="mt-0.5 text-sm font-medium">{value}</div>
+    <div className="rounded-xl border border-amber-500/20 bg-gradient-to-br from-amber-500/5 to-orange-500/5 p-3.5">
+      <div className="text-[10px] font-semibold uppercase tracking-wide text-amber-700 dark:text-amber-400">{label}</div>
+      <div className="mt-1 text-sm font-medium text-foreground">{value}</div>
     </div>
   );
 }
