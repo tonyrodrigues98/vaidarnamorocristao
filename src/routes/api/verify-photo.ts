@@ -60,7 +60,16 @@ export const Route = createFileRoute("/api/verify-photo")({
 
           const body = await request.json().catch(() => null);
           const imageBase64: string | undefined = body?.imageBase64;
-          const mimeType: string = typeof body?.mimeType === "string" ? body.mimeType : "image/jpeg";
+          const ALLOWED_MIMES = new Set([
+            "image/jpeg",
+            "image/png",
+            "image/webp",
+            "image/gif",
+            "image/heic",
+            "image/heif",
+          ]);
+          const rawMime = typeof body?.mimeType === "string" ? body.mimeType.toLowerCase() : "";
+          const mimeType: string = ALLOWED_MIMES.has(rawMime) ? rawMime : "image/jpeg";
           const scope: "main" | "extra" = body?.scope === "extra" ? "extra" : "main";
           const photoUrl: string | null = typeof body?.photoUrl === "string" ? body.photoUrl : null;
           const dbScope = scope === "main" ? "avatar" : "extra";
