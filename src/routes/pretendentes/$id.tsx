@@ -397,6 +397,18 @@ function Detail() {
               <SendAnonymousButton receiverId={profile.id} />
             )}
 
+            {user && user.id !== profile.id && (
+              <Button
+                variant="outline"
+                className="w-full border-pink-400/50 bg-gradient-to-r from-pink-500/10 via-fuchsia-500/10 to-purple-500/10 hover:from-pink-500/20 hover:to-purple-500/20"
+                asChild
+              >
+                <Link to="/presentes" search={{ to: profile.id } as never}>
+                  🎁 Enviar Presente
+                </Link>
+              </Button>
+            )}
+
             <Button
               variant="outline"
               className="w-full"
