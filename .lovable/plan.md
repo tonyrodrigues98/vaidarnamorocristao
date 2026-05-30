@@ -1,32 +1,89 @@
-## Objetivo
+## Sistema de Presentes Virtuais
 
-Hoje, no `DecoratedAvatar`, o `size` representa o canvas total (moldura). A foto é renderizada como uma fração desse canvas (`size * photoScale`), então ao escolher uma moldura com furo pequeno (ex.: Floral Rosa com `photoScale: 0.38`) a foto encolhe visivelmente. O usuário quer o oposto: a foto deve manter sempre o mesmo tamanho, e a moldura cresce ao redor para envolvê-la.
+Feature grande. Vou implementar em camadas: backend → admin → loja `/presentes` → perfil → notificações.
 
-## Mudança em `src/components/DecoratedAvatar.tsx`
+### 1. Backend (migration única)
 
-Inverter a interpretação do prop `size`:
+**Tabelas novas:**
+- `virtual_gifts` — catálogo (id, name, slug, image_url, price_coins, category, rarity, active, sort_order)
+- `gift_transactions` — envios (id, sender_id, receiver_id, gift_id, price_paid, message, status: held|redeemed, created_at, redeemed_at, redeemed_coins)
 
-- `size` passa a representar o **diâmetro da foto** (constante, independente da moldura).
-- Quando existe moldura, o canvas externo do componente vira `frameCanvas = size / placement.photoScale`. A moldura ocupa esse canvas inteiro (`inset-0`).
-- A foto continua centralizada no furo da moldura usando `placement.centerX / centerY`, agora multiplicados por `frameCanvas` em vez de `size`.
-- Sem moldura, o canvas continua sendo `size` (comportamento atual preservado).
-- A aura passa a se basear em `frameCanvas` (quando há moldura) ou `size` (quando não há), para continuar envolvendo o conjunto.
+**Enums:** `gift_category` (romantic, spiritual, caring, friendship, fun, legendary), `gift_rarity` (common, rare, epic, legendary, exclusive)
 
-Resultado: trocar de "Aliança de Ouro" para "Floral Rosa" mantém a foto idêntica; o que muda é o tamanho ocupado pela moldura ao redor.
+**Funções RPC (SECURITY DEFINER):**
+- `send_virtual_gift(_receiver_id, _gift_id, _message)` — debita moedas, cria transação, envia notificação, loga `coin_transactions`
+- `redeem_virtual_gift(_tx_id)` — devolve 30% das moedas (arredondado, mínimo 1), marca `redeemed`
+- `get_received_gifts(_user_id)` — lista para perfil próprio/público (limita públicos a held)
 
-## Impacto nos call sites
+**RLS:**
+- `virtual_gifts`: SELECT público para `active=true`; ALL para admins
+- `gift_transactions`: SELECT para sender/receiver; INSERT/UPDATE só via RPC
 
-Os componentes que usam `DecoratedAvatar` (ex.: `DecorationsCard`, avatares de perfil, listas) hoje passam `size` esperando que esse seja o canvas total. Após a mudança:
+**Storage bucket:** `gift-images` público (SELECT all, INSERT/UPDATE admins)
 
-- Em locais com **espaço fixo** (miniaturas do `DecorationsCard` — stage 80×80, preview grande 80px), o container externo do `DecoratedAvatar` pode passar de 80px para até ~210px (caso Floral). Precisamos:
-  - Reduzir o `size` passado nessas miniaturas para um valor menor (ex.: foto de ~44–48px) para que o canvas com moldura caiba no stage de 80px.
-  - Ou aumentar o stage. Sugestão: manter o stage em 80px e reduzir o `size` para `Math.round(80 * minPhotoScale)` ≈ 30 px no pior caso — porém isso deixa a foto pequena demais. Melhor solução: usar `size = 44` e aumentar o stage para `96×96` (cabe Floral: 44/0.38 ≈ 116 — ainda estoura). 
-  - **Decisão proposta**: nas miniaturas usar `size = 40` e stage de `112×112`. Isso garante que mesmo o Floral (40/0.38 ≈ 105) caiba e que molduras menores fiquem visualmente equivalentes (foto sempre 40px). Para o preview grande do card selecionado, usar `size = 72` e stage `200×200`.
-- Em outros lugares (avatar do header, listas de pretendentes, etc.) o efeito é o mesmo: a moldura passa a "vazar" do tamanho antigo. Vou inspecionar os principais usos e ajustar localmente o `size` para preservar a área visual existente, mantendo a foto consistente.
+### 2. Catálogo inicial
 
-## Validação
+Seed ~18 presentes cobrindo as 6 categorias com emojis/placeholders (Rosa Encantada, Coração de Cristal, Oração, Café, etc.). Imagens via geração ou emoji renderizado.
 
-1. Navegar para `/perfil` → seção Decorações.
-2. Clicar em cada moldura (Aliança, Coroa, Louros, Floral, Vitral) e confirmar que a foto dentro do preview grande mantém o mesmo diâmetro.
-3. Conferir as miniaturas: todas com foto do mesmo tamanho e moldura crescendo ao redor sem cortes.
-4. Verificar avatares em outros pontos do app (header, lista de pretendentes) para garantir que não houve regressão de layout.
+### 3. Rota `/presentes`
+
+`src/routes/presentes/index.tsx` — fora da loja, identidade própria:
+- Header 220px gradiente `#FF5FA2 → #FF7BC3 → #A855F7 → #6D5BFF`, blur orbs flutuantes, partículas CSS
+- Card saldo glassmorphism + botão "Ver Extrato" → `/loja?tab=saldo`
+- Filtros por categoria (chips com ícones lucide)
+- Grid 2/3/4 colunas
+- `GiftCard` com glow por raridade (border + box-shadow coloridos), hover scale, badge raridade
+- `SendGiftModal` — escolhe pretendente (autocomplete pretendentes aprovados) ou recebe `?to=<id>`, campo mensagem 120 chars, confirma
+- `GiftSendAnimation` — overlay com presente subindo + partículas (CSS keyframes)
+
+### 4. Integração perfil
+
+- Nova aba "Presentes" em `/perfil` (junto com Sobre, Preferências, Saldo, etc.) — grid de recebidos com ações Guardar/Resgatar
+- Seção "🎁 Destaques" em `/pretendentes/$id` — carrossel horizontal últimos 6 presentes held
+- Botão "Enviar Presente" no perfil público → `/presentes?to=<id>`
+
+### 5. Admin
+
+`src/routes/admin/presentes.tsx` (super_admin only) — CRUD: nome, preço, imagem (upload), categoria, raridade, ativo. Lista com toggle.
+
+### 6. Notificações
+
+Notification type `gift_received` já cabe no schema existente (`create_notification`). Link `/perfil?tab=presentes`.
+
+### 7. Tokens visuais
+
+Adicionar em `src/styles.css`:
+- `--gift-gradient`, `--rarity-common/rare/epic/legendary/exclusive` (cores + glow shadows)
+- Keyframes `gift-float`, `gift-sparkle`, `gift-rise`
+
+---
+
+### Arquivos a criar/editar
+
+**Backend (migration):**
+- `supabase/migrations/<ts>_virtual_gifts.sql`
+- `supabase/migrations/<ts>_seed_gifts.sql` (ou via insert tool após primeira migration)
+
+**Frontend novo:**
+- `src/routes/presentes/index.tsx`
+- `src/routes/admin/presentes.tsx`
+- `src/components/gifts/GiftCard.tsx`
+- `src/components/gifts/SendGiftModal.tsx`
+- `src/components/gifts/GiftSendAnimation.tsx`
+- `src/components/gifts/CategoryFilter.tsx`
+- `src/components/gifts/ReceivedGiftsGrid.tsx` (aba perfil)
+- `src/components/gifts/GiftHighlights.tsx` (carrossel perfil público)
+- `src/lib/gifts.ts` (RPC wrappers)
+
+**Frontend editado:**
+- `src/routes/perfil.tsx` (adicionar aba)
+- `src/routes/pretendentes/$id.tsx` (seção destaques + botão enviar)
+- `src/routes/admin/index.tsx` (link menu)
+- `src/styles.css` (tokens raridade + keyframes)
+
+### Notas
+
+- Tipos do Supabase regeneram automaticamente após a migration; usaremos `as never` temporariamente nos casts onde necessário, como em `coinTx.ts`
+- Imagens dos presentes: uso emojis grandes renderizados sobre fundo gradiente como fallback (não bloqueia entrega); admin pode trocar depois
+- Resgate: 30% (configurável) — segue regra "sink de moedas"
+- Mobile-first: testar viewport 393px (atual do user)

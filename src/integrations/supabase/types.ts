@@ -576,6 +576,53 @@ export type Database = {
           },
         ]
       }
+      gift_transactions: {
+        Row: {
+          created_at: string
+          gift_id: string
+          id: string
+          message: string | null
+          price_paid: number
+          receiver_id: string
+          redeemed_at: string | null
+          redeemed_coins: number | null
+          sender_id: string
+          status: Database["public"]["Enums"]["gift_tx_status"]
+        }
+        Insert: {
+          created_at?: string
+          gift_id: string
+          id?: string
+          message?: string | null
+          price_paid: number
+          receiver_id: string
+          redeemed_at?: string | null
+          redeemed_coins?: number | null
+          sender_id: string
+          status?: Database["public"]["Enums"]["gift_tx_status"]
+        }
+        Update: {
+          created_at?: string
+          gift_id?: string
+          id?: string
+          message?: string | null
+          price_paid?: number
+          receiver_id?: string
+          redeemed_at?: string | null
+          redeemed_coins?: number | null
+          sender_id?: string
+          status?: Database["public"]["Enums"]["gift_tx_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gift_transactions_gift_id_fkey"
+            columns: ["gift_id"]
+            isOneToOne: false
+            referencedRelation: "virtual_gifts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       global_messages: {
         Row: {
           content: string
@@ -2161,6 +2208,54 @@ export type Database = {
         }
         Relationships: []
       }
+      virtual_gifts: {
+        Row: {
+          active: boolean
+          category: Database["public"]["Enums"]["gift_category"]
+          created_at: string
+          description: string | null
+          emoji: string | null
+          id: string
+          image_url: string | null
+          name: string
+          price_coins: number
+          rarity: Database["public"]["Enums"]["gift_rarity"]
+          slug: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          category: Database["public"]["Enums"]["gift_category"]
+          created_at?: string
+          description?: string | null
+          emoji?: string | null
+          id?: string
+          image_url?: string | null
+          name: string
+          price_coins: number
+          rarity?: Database["public"]["Enums"]["gift_rarity"]
+          slug: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          category?: Database["public"]["Enums"]["gift_category"]
+          created_at?: string
+          description?: string | null
+          emoji?: string | null
+          id?: string
+          image_url?: string | null
+          name?: string
+          price_coins?: number
+          rarity?: Database["public"]["Enums"]["gift_rarity"]
+          slug?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       anonymous_messages_inbox: {
@@ -2408,6 +2503,21 @@ export type Database = {
           last_day: string
         }[]
       }
+      get_received_gifts_public: {
+        Args: { _limit?: number; _user_id: string }
+        Returns: {
+          created_at: string
+          gift_category: Database["public"]["Enums"]["gift_category"]
+          gift_emoji: string
+          gift_id: string
+          gift_image_url: string
+          gift_name: string
+          gift_rarity: Database["public"]["Enums"]["gift_rarity"]
+          id: string
+          message: string
+          sender_id: string
+        }[]
+      }
       get_user_primary_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
@@ -2450,6 +2560,7 @@ export type Database = {
       purchase_decoration: { Args: { _decoration_id: string }; Returns: Json }
       recompute_all_badges: { Args: never; Returns: undefined }
       recompute_user_badges: { Args: { _user_id: string }; Returns: undefined }
+      redeem_virtual_gift: { Args: { _tx_id: string }; Returns: number }
       reply_anonymous_message: {
         Args: { _message_id: string; _reply: string }
         Returns: undefined
@@ -2487,6 +2598,10 @@ export type Database = {
         Args: { _content: string; _receiver_id: string }
         Returns: string
       }
+      send_virtual_gift: {
+        Args: { _gift_id: string; _message?: string; _receiver_id: string }
+        Returns: string
+      }
       set_anonymous_optout: { Args: { _accept: boolean }; Returns: undefined }
       spend_coin: { Args: { _amount?: number }; Returns: number }
       touch_my_activity: { Args: never; Returns: undefined }
@@ -2519,6 +2634,15 @@ export type Database = {
       daily_post_kind: "news" | "devotional"
       decoration_type: "frame" | "aura" | "sticker"
       devotional_reaction: "heart" | "prayed" | "edify"
+      gift_category:
+        | "romantic"
+        | "spiritual"
+        | "caring"
+        | "friendship"
+        | "fun"
+        | "legendary"
+      gift_rarity: "common" | "rare" | "epic" | "legendary" | "exclusive"
+      gift_tx_status: "held" | "redeemed"
       location_scope: "regiao" | "brasil" | "mundo" | "personalizado"
       marital_status: "solteiro" | "divorciado"
       photo_moderation_scope: "avatar" | "extra"
@@ -2701,6 +2825,16 @@ export const Constants = {
       daily_post_kind: ["news", "devotional"],
       decoration_type: ["frame", "aura", "sticker"],
       devotional_reaction: ["heart", "prayed", "edify"],
+      gift_category: [
+        "romantic",
+        "spiritual",
+        "caring",
+        "friendship",
+        "fun",
+        "legendary",
+      ],
+      gift_rarity: ["common", "rare", "epic", "legendary", "exclusive"],
+      gift_tx_status: ["held", "redeemed"],
       location_scope: ["regiao", "brasil", "mundo", "personalizado"],
       marital_status: ["solteiro", "divorciado"],
       photo_moderation_scope: ["avatar", "extra"],
