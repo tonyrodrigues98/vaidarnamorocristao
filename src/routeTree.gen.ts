@@ -31,6 +31,7 @@ import { Route as BloqueadosRouteImport } from './routes/bloqueados'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SuporteIndexRouteImport } from './routes/suporte/index'
 import { Route as PretendentesIndexRouteImport } from './routes/pretendentes/index'
+import { Route as PresentesIndexRouteImport } from './routes/presentes/index'
 import { Route as NoticiasIndexRouteImport } from './routes/noticias.index'
 import { Route as ConversasIndexRouteImport } from './routes/conversas/index'
 import { Route as BlogIndexRouteImport } from './routes/blog.index'
@@ -159,6 +160,11 @@ const SuporteIndexRoute = SuporteIndexRouteImport.update({
 const PretendentesIndexRoute = PretendentesIndexRouteImport.update({
   id: '/pretendentes/',
   path: '/pretendentes/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PresentesIndexRoute = PresentesIndexRouteImport.update({
+  id: '/presentes/',
+  path: '/presentes/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const NoticiasIndexRoute = NoticiasIndexRouteImport.update({
@@ -297,6 +303,7 @@ export interface FileRoutesByFullPath {
   '/blog/': typeof BlogIndexRoute
   '/conversas/': typeof ConversasIndexRoute
   '/noticias/': typeof NoticiasIndexRoute
+  '/presentes/': typeof PresentesIndexRoute
   '/pretendentes/': typeof PretendentesIndexRoute
   '/suporte/': typeof SuporteIndexRoute
 }
@@ -340,6 +347,7 @@ export interface FileRoutesByTo {
   '/blog': typeof BlogIndexRoute
   '/conversas': typeof ConversasIndexRoute
   '/noticias': typeof NoticiasIndexRoute
+  '/presentes': typeof PresentesIndexRoute
   '/pretendentes': typeof PretendentesIndexRoute
   '/suporte': typeof SuporteIndexRoute
 }
@@ -384,6 +392,7 @@ export interface FileRoutesById {
   '/blog/': typeof BlogIndexRoute
   '/conversas/': typeof ConversasIndexRoute
   '/noticias/': typeof NoticiasIndexRoute
+  '/presentes/': typeof PresentesIndexRoute
   '/pretendentes/': typeof PretendentesIndexRoute
   '/suporte/': typeof SuporteIndexRoute
 }
@@ -429,6 +438,7 @@ export interface FileRouteTypes {
     | '/blog/'
     | '/conversas/'
     | '/noticias/'
+    | '/presentes/'
     | '/pretendentes/'
     | '/suporte/'
   fileRoutesByTo: FileRoutesByTo
@@ -472,6 +482,7 @@ export interface FileRouteTypes {
     | '/blog'
     | '/conversas'
     | '/noticias'
+    | '/presentes'
     | '/pretendentes'
     | '/suporte'
   id:
@@ -515,6 +526,7 @@ export interface FileRouteTypes {
     | '/blog/'
     | '/conversas/'
     | '/noticias/'
+    | '/presentes/'
     | '/pretendentes/'
     | '/suporte/'
   fileRoutesById: FileRoutesById
@@ -559,6 +571,7 @@ export interface RootRouteChildren {
   BlogIndexRoute: typeof BlogIndexRoute
   ConversasIndexRoute: typeof ConversasIndexRoute
   NoticiasIndexRoute: typeof NoticiasIndexRoute
+  PresentesIndexRoute: typeof PresentesIndexRoute
   PretendentesIndexRoute: typeof PretendentesIndexRoute
   SuporteIndexRoute: typeof SuporteIndexRoute
 }
@@ -717,6 +730,13 @@ declare module '@tanstack/react-router' {
       path: '/pretendentes'
       fullPath: '/pretendentes/'
       preLoaderRoute: typeof PretendentesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/presentes/': {
+      id: '/presentes/'
+      path: '/presentes'
+      fullPath: '/presentes/'
+      preLoaderRoute: typeof PresentesIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/noticias/': {
@@ -895,18 +915,10 @@ const rootRouteChildren: RootRouteChildren = {
   BlogIndexRoute: BlogIndexRoute,
   ConversasIndexRoute: ConversasIndexRoute,
   NoticiasIndexRoute: NoticiasIndexRoute,
+  PresentesIndexRoute: PresentesIndexRoute,
   PretendentesIndexRoute: PretendentesIndexRoute,
   SuporteIndexRoute: SuporteIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}
