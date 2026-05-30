@@ -381,6 +381,29 @@
   50%      { opacity: 1;   transform: scale(1.1); }
 }
 
+/* Gifts system animations */
+@keyframes gift-float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-6px); }
+}
+@keyframes gift-sparkle {
+  0%, 100% { opacity: 0.2; transform: scale(0.6); }
+  50%      { opacity: 1;   transform: scale(1.2); }
+}
+@keyframes gift-rise {
+  0%   { opacity: 0; transform: translateY(40px) scale(0.6); }
+  40%  { opacity: 1; transform: translateY(-20px) scale(1.1); }
+  100% { opacity: 0; transform: translateY(-220px) scale(0.9); }
+}
+@keyframes gift-particle {
+  0%   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0; transform: translate(calc(-50% + var(--tx, 0px)), calc(-50% + var(--ty, 0px))) scale(0.3); }
+}
+@keyframes gift-header-orb {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%      { transform: translate(20px, -10px) scale(1.1); }
+}
+
 /* Fallback para navegadores sem View Transitions API (Firefox, Safari < 18).
    Aplica fade-in suave no <main>/Outlet ao trocar de rota. */
 @supports not (view-transition-name: none) {
