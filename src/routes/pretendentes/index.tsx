@@ -475,57 +475,21 @@ function List() {
                 const score = maxScore > 0 ? Math.min(99, Math.round((chips.length / maxScore) * 100)) : 0;
                 const showScore = chips.length >= 3 && score >= 50 && !!myAdvanced;
                 return (
-                  <Link
-                    key={p.id}
-                    to="/pretendentes/$id"
-                    params={{ id: p.id }}
-                    className="glass group animate-fade-up overflow-hidden rounded-2xl shadow-soft transition hover:shadow-elegant"
-                    style={{ animationDelay: `${i * 50}ms` }}
-                  >
-                    <div className="relative aspect-[4/5] overflow-hidden bg-muted">
-                      <PhotoCarousel
-                        photos={[...(p.photo_url ? [p.photo_url] : []), ...(extraPhotos[p.id] ?? [])]}
-                        alt={p.full_name}
-                        eager={i < 3}
-                        imgClassName="transition duration-500 group-hover:scale-105"
-                        fallback={
-                          <div className="flex h-full w-full items-center justify-center bg-gradient-love">
-                            <span className="text-5xl text-white">{p.full_name.charAt(0)}</span>
-                          </div>
-                        }
-                      />
-                      {showScore ? (
-                        <span className="absolute left-2 top-2 z-10 inline-flex max-w-[calc(100%-3rem)] items-center gap-1 rounded-full bg-[var(--rose)] px-2.5 py-1 text-[11px] font-bold text-white shadow-md sm:text-[10px]">
-                          <Flame className="h-3.5 w-3.5 shrink-0 sm:h-3 sm:w-3" />
-                          <span className="whitespace-nowrap">{score}% afinidade</span>
-                        </span>
-                      ) : (
-                        isSuggestion(p) && (
-                          <span className="absolute left-2 top-2 z-10 inline-flex max-w-[calc(100%-3rem)] items-center gap-1 rounded-full bg-[var(--rose)] px-2.5 py-1 text-[11px] font-semibold text-white shadow-md sm:text-[10px]">
-                            <Sparkles className="h-3.5 w-3.5 shrink-0 sm:h-3 sm:w-3" />
-                            <span className="whitespace-nowrap">Sugestão pra você</span>
-                          </span>
-                        )
-                      )}
-                      <span className="absolute right-2 top-2">
-                        <OnlineDot userId={p.id} size="md" />
-                      </span>
-                    </div>
-                    <div className="p-5">
-                      <h3 className="flex flex-wrap items-center gap-2 text-xl font-semibold">
-                        {p.full_name.split(" ")[0]}, {p.age}
-                        {p.verified && <VerifiedBadge size="md" />}
-                        {staffMap[p.id] && <RoleBadge role={staffMap[p.id].role} color={staffMap[p.id].color} />}
-                      </h3>
-                      <p className="mt-0.5 text-sm text-muted-foreground">
-                        {p.city} · {p.state}
-                      </p>
-                      <p className="mt-1 text-xs text-[var(--rose)]">{p.church}</p>
-                      <UserBadges userId={p.id} size="xs" max={2} className="mt-2" />
-                      <AffinityChips chips={chips} />
-                      {p.bio && <p className="mt-3 line-clamp-2 text-sm text-foreground/70">{p.bio}</p>}
-                    </div>
-                  </Link>
+  <PretendenteFeaturedCard
+    key={p.id}
+    profile={p}
+    photos={[
+      ...(p.photo_url ? [p.photo_url] : []),
+      ...(extraPhotos[p.id] ?? []),
+    ]}
+    score={score}
+    showScore={showScore}
+    chips={chips}
+    eager={i < 3}
+    isSuggestion={isSuggestion(p)}
+    staff={staffMap[p.id]}
+  />
+);
                 );
               })}
             </div>
