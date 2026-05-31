@@ -39,6 +39,8 @@ import { ProfileAdvancedForm } from "@/components/ProfileAdvancedForm";
 import { ProfilePhotosManager } from "@/components/ProfilePhotosManager";
 import { AdminWarningBanner } from "@/components/AdminWarningBanner";
 import { CustomizacaoTab } from "@/components/CustomizacaoTab";
+import { ReceivedGiftsTab } from "@/components/gifts/ReceivedGiftsTab";
+import { Gift as GiftIcon } from "lucide-react";
 
 export const Route = createFileRoute("/perfil")({ component: PerfilPage });
 
@@ -483,6 +485,10 @@ function PerfilPage() {
                   <Wallet className="mr-2 h-4 w-4" />
                   Saldo
                 </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setActiveTab("presentes")}>
+                  <GiftIcon className="mr-2 h-4 w-4" />
+                  Presentes
+                </DropdownMenuItem>
                 <DropdownMenuItem onSelect={() => setActiveTab("missions")}>
                   <Trophy className="mr-2 h-4 w-4" />
                   Conquistas
@@ -816,6 +822,10 @@ function PerfilPage() {
 
           <TabsContent value="customizacao" className="mt-6">
             {user && <CustomizacaoTab photoUrl={photoPreview ?? null} />}
+          </TabsContent>
+
+          <TabsContent value="presentes" className="mt-6">
+            {user && <ReceivedGiftsTab userId={user.id} />}
           </TabsContent>
 
           {isStaff && (

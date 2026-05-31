@@ -378,6 +378,9 @@ function Admin() {
               <Button asChild variant="outline" size="sm" className="mr-2">
                 <Link to="/admin/fotos">📷 Análise de Fotos</Link>
               </Button>
+              <Button asChild variant="outline" size="sm" className="mr-2">
+                <Link to="/presentes">🎁 Catálogo de Presentes</Link>
+              </Button>
               {isSuperAdmin && (
                 <Button asChild variant="outline" size="sm">
                   <Link to="/admin/stickers">😊 Stickers</Link>
