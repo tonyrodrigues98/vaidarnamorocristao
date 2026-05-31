@@ -410,6 +410,8 @@ function Detail() {
               </Button>
             )}
 
+            <GiftHighlights userId={profile.id} />
+
             <Button
               variant="outline"
               className="w-full"
