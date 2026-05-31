@@ -2,6 +2,7 @@ import { createFileRoute, Link, Navigate, useNavigate } from "@tanstack/react-ro
 import { RequireApproved } from "@/components/RequireApproved";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { PretendenteCarousel } from "./PretendenteCarousel";
 import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
 import { Input } from "@/components/ui/input";
@@ -222,6 +223,17 @@ function List() {
   }, [affinityByProfile]);
 
   const filtered = useMemo(() => {
+    const topMatches = useMemo(() => {
+  return [...filtered]
+    .sort((a, b) => {
+      const aScore = affinityByProfile[a.id]?.length ?? 0;
+      const bScore = affinityByProfile[b.id]?.length ?? 0;
+
+      return bScore - aScore;
+    })
+    .slice(0, 10);
+}, [filtered, affinityByProfile]);
+    
     const list = profiles.filter((p) => {
       if (search.q) {
         const qq = search.q.toLowerCase();
@@ -485,6 +497,19 @@ function List() {
                 </Button>
               )}
             </div>
+            <>
+  <PretendenteCarousel
+    title="Destaques para você"
+    subtitle="Maior afinidade espiritual e interesses em comum"
+    profiles={topMatches}
+    affinityByProfile={affinityByProfile}
+    maxScore={maxScore}
+    myAdvanced={myAdvanced}
+    extraPhotos={extraPhotos}
+    staffMap={staffMap}
+    isSuggestion={isSuggestion}
+  />
+  <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           ) : (
             <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {filtered.map((p, i) => {
@@ -532,6 +557,7 @@ function List() {
                         <OnlineDot userId={p.id} size="md" />
                       </span>
                     </div>
+                    </>
                     <div className="p-5">
                       <h3 className="flex flex-wrap items-center gap-2 text-xl font-semibold">
                         {p.full_name.split(" ")[0]}, {p.age}
