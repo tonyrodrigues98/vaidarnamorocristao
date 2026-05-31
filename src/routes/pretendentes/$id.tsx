@@ -19,6 +19,7 @@ import { UserBadges } from "@/components/UserBadges";
 import { ProfileAdvancedView } from "@/components/ProfileAdvancedView";
 import { ROLE_PRIORITY, type AppRole, type RoleColor } from "@/lib/roles";
 import { SendAnonymousButton } from "@/components/anonymous/SendAnonymousButton";
+import { GiftHighlights } from "@/components/gifts/GiftHighlights";
 
 type Full = {
   id: string; full_name: string; age: number; height_cm: number | null;
