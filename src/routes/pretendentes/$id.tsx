@@ -415,7 +415,7 @@ function Detail() {
             <Button
               variant="outline"
               className="w-full"
-              onClick={() => toast.success("🙏 Oração registrada com carinho")}
+              onClick={() => toast.success("Oração registrada com carinho")}
             >
               <HandHeart className="mr-2 h-4 w-4" /> Orar por ele(a)
             </Button>
