@@ -3,6 +3,7 @@ import { RequireApproved } from "@/components/RequireApproved";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PretendenteCarousel } from "./PretendenteCarousel";
+import { PretendenteFeaturedCard } from "./PretendenteFeaturedCard";
 import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
 import { Input } from "@/components/ui/input";
@@ -309,11 +310,38 @@ function List() {
       <Header />
       <main className="mx-auto max-w-6xl px-4 py-10">
         <div className="animate-fade-up">
-          <h1 className="text-4xl font-semibold">Pretendentes</h1>
-          <p className="mt-1 text-muted-foreground">
-            {mySex === "masculino" ? "Mulheres" : mySex === "feminino" ? "Homens" : "Pessoas"}{" "}
-            cristãs aprovados na plataforma.
-          </p>
+          <div className="overflow-hidden rounded-3xl border border-pink-100 bg-gradient-to-r from-pink-50 via-rose-50 to-purple-50 p-8">
+  <h1 className="text-4xl font-bold">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-6">
+  <path d="m11.645 20.91-.007-.003-.022-.012a15.247 15.247 0 0 1-.383-.218 25.18 25.18 0 0 1-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0 1 12 5.052 5.5 5.5 0 0 1 16.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 0 1-4.244 3.17 15.247 15.247 0 0 1-.383.219l-.022.012-.007.004-.003.001a.752.752 0 0 1-.704 0l-.003-.001Z" />
+</svg>
+ Pretendentes
+  </h1>
+
+  <p className="mt-2 text-lg text-muted-foreground">
+    Descubra pessoas compatíveis com sua fé, propósito e estilo de vida.
+  </p>
+
+  <div className="mt-4 flex flex-wrap gap-2">
+    <span className="rounded-full bg-white px-3 py-1 text-sm shadow">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-6">
+  <path fillRule="evenodd" d="M12.963 2.286a.75.75 0 0 0-1.071-.136 9.742 9.742 0 0 0-3.539 6.176 7.547 7.547 0 0 1-1.705-1.715.75.75 0 0 0-1.152-.082A9 9 0 1 0 15.68 4.534a7.46 7.46 0 0 1-2.717-2.248ZM15.75 14.25a3.75 3.75 0 1 1-7.313-1.172c.628.465 1.35.81 2.133 1a5.99 5.99 0 0 1 1.925-3.546 3.75 3.75 0 0 1 3.255 3.718Z" clipRule="evenodd" />
+</svg>
+ Afinidade
+    </span>
+
+    <span className="rounded-full bg-white px-3 py-1 text-sm shadow">
+     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-6">
+  <path fillRule="evenodd" d="m11.54 22.351.07.04.028.016a.76.76 0 0 0 .723 0l.028-.015.071-.041a16.975 16.975 0 0 0 1.144-.742 19.58 19.58 0 0 0 2.683-2.282c1.944-1.99 3.963-4.98 3.963-8.827a8.25 8.25 0 0 0-16.5 0c0 3.846 2.02 6.837 3.963 8.827a19.58 19.58 0 0 0 2.682 2.282 16.975 16.975 0 0 0 1.145.742ZM12 13.5a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" clipRule="evenodd" />
+</svg>
+  Próximos de você
+    </span>
+
+    <span className="rounded-full bg-white px-3 py-1 text-sm shadow">
+     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-church-icon lucide-church"><path d="M10 9h4"/><path d="M12 7v5"/><path d="M14 21v-3a2 2 0 0 0-4 0v3"/><path d="m18 9 3.52 2.147a1 1 0 0 1 .48.854V19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-6.999a1 1 0 0 1 .48-.854L6 9"/><path d="M6 21V7a1 1 0 0 1 .376-.782l5-3.999a1 1 0 0 1 1.249.001l5 4A1 1 0 0 1 18 7v14"/></svg> Mesma fé
+    </span>
+  </div>
+</div>
         </div>
 
         {myStatus !== "approved" ? (
@@ -352,7 +380,7 @@ function List() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="affinity">🔥 Afinidade</SelectItem>
+                    <SelectItem value="affinity">Afinidade</SelectItem>
                     <SelectItem value="recent">Mais recentes</SelectItem>
                     <SelectItem value="geographic">Mais próximos</SelectItem>
                   </SelectContent>
@@ -518,65 +546,20 @@ function List() {
                   maxScore > 0 ? Math.min(99, Math.round((chips.length / maxScore) * 100)) : 0;
                 const showScore = chips.length >= 3 && score >= 50 && !!myAdvanced;
                 return (
-                  <Link
-                    key={p.id}
-                    to="/pretendentes/$id"
-                    params={{ id: p.id }}
-                    className="glass group animate-fade-up overflow-hidden rounded-2xl shadow-soft transition hover:shadow-elegant"
-                    style={{ animationDelay: `${i * 50}ms` }}
-                  >
-                    <div className="relative aspect-[4/5] overflow-hidden bg-muted">
-                      <PhotoCarousel
-                        photos={[
-                          ...(p.photo_url ? [p.photo_url] : []),
-                          ...(extraPhotos[p.id] ?? []),
-                        ]}
-                        alt={p.full_name}
-                        eager={i < 3}
-                        imgClassName="transition duration-500 group-hover:scale-105"
-                        fallback={
-                          <div className="flex h-full w-full items-center justify-center bg-gradient-love">
-                            <span className="text-5xl text-white">{p.full_name.charAt(0)}</span>
-                          </div>
-                        }
-                      />
-                      {showScore ? (
-                        <span className="absolute left-2 top-2 z-10 inline-flex max-w-[calc(100%-3rem)] items-center gap-1 rounded-full bg-[var(--rose)] px-2.5 py-1 text-[11px] font-bold text-white shadow-md sm:text-[10px]">
-                          <Flame className="h-3.5 w-3.5 shrink-0 sm:h-3 sm:w-3" />
-                          <span className="whitespace-nowrap">{score}% afinidade</span>
-                        </span>
-                      ) : (
-                        isSuggestion(p) && (
-                          <span className="absolute left-2 top-2 z-10 inline-flex max-w-[calc(100%-3rem)] items-center gap-1 rounded-full bg-[var(--rose)] px-2.5 py-1 text-[11px] font-semibold text-white shadow-md sm:text-[10px]">
-                            <Sparkles className="h-3.5 w-3.5 shrink-0 sm:h-3 sm:w-3" />
-                            <span className="whitespace-nowrap">Sugestão pra você</span>
-                          </span>
-                        )
-                      )}
-                      <span className="absolute right-2 top-2">
-                        <OnlineDot userId={p.id} size="md" />
-                      </span>
-                    </div>
-                    </>
-                    <div className="p-5">
-                      <h3 className="flex flex-wrap items-center gap-2 text-xl font-semibold">
-                        {p.full_name.split(" ")[0]}, {p.age}
-                        {p.verified && <VerifiedBadge size="md" />}
-                        {staffMap[p.id] && (
-                          <RoleBadge role={staffMap[p.id].role} color={staffMap[p.id].color} />
-                        )}
-                      </h3>
-                      <p className="mt-0.5 text-sm text-muted-foreground">
-                        {p.city} · {p.state}
-                      </p>
-                      <p className="mt-1 text-xs text-[var(--rose)]">{p.church}</p>
-                      <UserBadges userId={p.id} size="xs" max={2} className="mt-2" />
-                      <AffinityChips chips={chips} />
-                      {p.bio && (
-                        <p className="mt-3 line-clamp-2 text-sm text-foreground/70">{p.bio}</p>
-                      )}
-                    </div>
-                  </Link>
+                 <PretendenteFeaturedCard
+  key={p.id}
+  profile={p}
+  photos={[
+    ...(p.photo_url ? [p.photo_url] : []),
+    ...(extraPhotos[p.id] ?? []),
+  ]}
+  score={score}
+  showScore={showScore}
+  chips={chips}
+  eager={i < 3}
+  isSuggestion={isSuggestion(p)}
+  staff={staffMap[p.id]}
+/>
                 );
               })}
             </div>
