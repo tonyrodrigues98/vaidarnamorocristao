@@ -284,7 +284,7 @@ function List() {
       <Header />
       <main className="mx-auto max-w-6xl px-4 py-10">
         <div className="animate-fade-up">
-          <h1 className="text-4xl font-semibold">Pretendentes</h1>
+          <h1 className="text-4xl font-semibold">Pretendente</h1>
           <p className="mt-1 text-muted-foreground">
             {mySex === "masculino" ? "Mulheres" : mySex === "feminino" ? "Homens" : "Pessoas"} cristãs aprovados na
             plataforma.
