@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+
 import {
   Gift,
   Plus,
@@ -8,19 +9,53 @@ import {
   EyeOff,
   Coins,
   Search,
-  Sparkles,
   Trash2,
   Upload,
   Crown,
   Heart,
-  Star,
+  Sparkles,
+  RefreshCw,
 } from "lucide-react";
 
 import { Header } from "@/components/layout/Header";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
-import { listAllGiftsAdmin, type VirtualGift } from "@/lib/gifts";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
+import { Switch } from "@/components/ui/switch";
+
+import { Card, CardContent } from "@/components/ui/card";
+
+import { Badge } from "@/components/ui/badge";
+
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+
+import { supabase } from "@/integrations/supabase/client";
+
+import {
+  listAllGiftsAdmin,
+  createGift,
+  updateGift,
+  deleteGift,
+  toggleGift,
+  CATEGORY_LABELS,
+  RARITY_STYLE,
+  type VirtualGift,
+  type GiftCategory,
+  type GiftRarity,
+} from "@/lib/gifts";
 
 export const Route = createFileRoute("/admin/presentes")({
   component: AdminPresentesPage,
@@ -29,6 +64,28 @@ export const Route = createFileRoute("/admin/presentes")({
 function AdminPresentesPage() {
   const [gifts, setGifts] = useState<VirtualGift[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const [search, setSearch] = useState("");
+
+  const [createOpen, setCreateOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+
+  const [selectedGift, setSelectedGift] = useState<VirtualGift | null>(null);
+
+  const [saving, setSaving] = useState(false);
+
+  const [form, setForm] = useState({
+    slug: "",
+    name: "",
+    description: "",
+    image_url: "",
+    emoji: "",
+    price_coins: 500,
+    category: "romantic" as GiftCategory,
+    rarity: "common" as GiftRarity,
+    active: true,
+  });
 
   useEffect(() => {
     load();
