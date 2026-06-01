@@ -344,11 +344,8 @@ category: v as GiftCategory,
 
 >
 
-```
 <SelectTrigger>
-```
 
-```
   <SelectValue />
 </SelectTrigger>
 
@@ -360,7 +357,6 @@ category: v as GiftCategory,
   <SelectItem value="fun">Divertido</SelectItem>
   <SelectItem value="legendary">Lendário</SelectItem>
 </SelectContent>
-```
 
   </Select>
 
@@ -375,11 +371,8 @@ rarity: v as GiftRarity,
 
 >
 
-```
 <SelectTrigger>
-```
 
-```
   <SelectValue />
 </SelectTrigger>
 
@@ -390,7 +383,6 @@ rarity: v as GiftRarity,
   <SelectItem value="legendary">Lendário</SelectItem>
   <SelectItem value="exclusive">Exclusivo</SelectItem>
 </SelectContent>
-```
 
   </Select>
 
@@ -681,7 +673,6 @@ onOpenChange={setDeleteOpen}
 
   <AlertDialogContent>
 
-```
 <AlertDialogHeader>
 
   <AlertDialogTitle>
@@ -723,7 +714,6 @@ console.error(err);
   </Button>
 
 </div>
-```
 
   </AlertDialogContent>
 
@@ -741,11 +731,8 @@ className="group overflow-hidden border bg-card transition-all duration-300 hove
 
 >
 
-```
 <div className="relative aspect-square overflow-hidden bg-gradient-to-br from-rose-100 via-pink-50 to-purple-100">
-```
 
-```
   {gift.image_url ? (
     <img
       src={gift.image_url}
@@ -868,7 +855,6 @@ setEditOpen(true);
   </div>
 
 </CardContent>
-```
 
   </Card>
 ))}
