@@ -11,16 +11,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { BR_STATES } from "@/lib/constants";
 import { SlidersHorizontal, X, Sparkles, Flame } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { RoleBadge } from "@/components/RoleBadge";
-import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { ROLE_PRIORITY, type AppRole, type RoleColor } from "@/lib/roles";
 import { UserBadges } from "@/components/UserBadges";
-import { OnlineDot } from "@/components/OnlineDot";
 import { computeAffinity, type AffinityChip } from "@/lib/affinity";
 import { LOVE_LANGUAGE, MINISTRY, type AdvancedProfile } from "@/lib/profileAdvanced";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
-import { PhotoCarousel } from "@/components/PhotoCarousel";
 import { markHomeChecklistStep } from "@/lib/homeChecklist";
 
 type Profile = {
