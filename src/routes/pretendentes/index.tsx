@@ -488,6 +488,57 @@ const newestProfiles = useMemo(() => {
               )}
             </div>
           ) : (
+            <div className="mb-10 overflow-hidden rounded-3xl bg-gradient-to-r from-pink-500 via-rose-500 to-purple-500 p-8 text-white">
+  <div className="max-w-2xl">
+    <p className="text-sm font-semibold uppercase tracking-wider opacity-90">
+      Descobertas
+    </p>
+
+    <h2 className="mt-2 text-4xl font-bold">
+      Pessoas compatíveis com você
+    </h2>
+
+    <p className="mt-3 text-white/90">
+      Baseado na sua fé, afinidade,
+      localização e interesses.
+    </p>
+  </div>
+</div>
+            <PretendenteCarousel
+  title="Mais compatíveis"
+  subtitle="Perfis com maior afinidade"
+  profiles={topMatches}
+  affinityByProfile={affinityByProfile}
+  maxScore={maxScore}
+  myAdvanced={myAdvanced}
+  extraPhotos={extraPhotos}
+  staffMap={staffMap}
+  isSuggestion={isSuggestion}
+/>
+
+<PretendenteCarousel
+  title="Perto de você"
+  subtitle="Pessoas da mesma região"
+  profiles={nearbyProfiles}
+  affinityByProfile={affinityByProfile}
+  maxScore={maxScore}
+  myAdvanced={myAdvanced}
+  extraPhotos={extraPhotos}
+  staffMap={staffMap}
+  isSuggestion={isSuggestion}
+/>
+
+<PretendenteCarousel
+  title="Novos na plataforma"
+  subtitle="Perfis adicionados recentemente"
+  profiles={newestProfiles}
+  affinityByProfile={affinityByProfile}
+  maxScore={maxScore}
+  myAdvanced={myAdvanced}
+  extraPhotos={extraPhotos}
+  staffMap={staffMap}
+  isSuggestion={isSuggestion}
+/>
             <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {filtered.map((p, i) => {
                 const chips = affinityByProfile[p.id] ?? [];
