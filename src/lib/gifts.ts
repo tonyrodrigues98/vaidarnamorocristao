@@ -185,6 +185,17 @@ export async function createGift(payload: {
   rarity: GiftRarity;
   active?: boolean;
 }) {
+  const { data: lastGift } = await supabase
+    .from("virtual_gifts" as never)
+    .select("sort_order")
+    .order("sort_order", {
+      ascending: false,
+    })
+    .limit(1)
+    .maybeSingle();
+
+  const nextSortOrder = ((lastGift as any)?.sort_order ?? 0) + 1;
+
   const { data, error } = await supabase
     .from("virtual_gifts" as never)
     .insert({
@@ -197,6 +208,7 @@ export async function createGift(payload: {
       category: payload.category,
       rarity: payload.rarity,
       active: payload.active ?? true,
+      sort_order: nextSortOrder,
     } as never)
     .select()
     .single();

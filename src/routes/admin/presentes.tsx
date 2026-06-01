@@ -393,7 +393,7 @@ function AdminPresentesPage() {
                   try {
                     setSaving(true);
 
-                    await createGift({
+                    const result = await createGift({
                       slug: form.slug,
                       name: form.name,
                       description: form.description,
@@ -405,9 +405,15 @@ function AdminPresentesPage() {
                       active: form.active,
                     });
 
+                    console.log(result);
+
                     await load();
 
                     setCreateOpen(false);
+                  } catch (err) {
+                    console.error(err);
+
+                    alert(JSON.stringify(err, null, 2));
                   } finally {
                     setSaving(false);
                   }
