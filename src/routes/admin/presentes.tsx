@@ -91,9 +91,9 @@ function AdminPresentesPage() {
     return gifts.filter((gift) => {
       const text = `${gift.name} ${gift.description ?? ""}`.toLowerCase();
 
-      ```
+      
 return text.includes(search.toLowerCase());
-```;
+
     });
   }, [gifts, search]);
 
@@ -231,7 +231,7 @@ return text.includes(search.toLowerCase());
 >
   <DialogContent className="max-w-2xl">
 
-```
+
 <DialogHeader>
   <DialogTitle>
     Novo Presente
@@ -280,7 +280,7 @@ return text.includes(search.toLowerCase());
 
   <label className="flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed p-8 transition hover:bg-muted/50">
 
-```
+
 <Upload className="mb-3 h-10 w-10 text-muted-foreground" />
 
 <span className="font-medium">
@@ -495,11 +495,122 @@ return text.includes(search.toLowerCase());
   </Button>
 
 </div>
-```
+
 
   </DialogContent>
 </Dialog>
 
+<Dialog
+  open={editOpen}
+  onOpenChange={setEditOpen}
+>
+  <DialogContent className="max-w-2xl">
+
+
+<DialogHeader>
+  <DialogTitle>
+    Editar Presente
+  </DialogTitle>
+</DialogHeader>
+
+<div className="grid gap-4">
+
+  <Input
+    placeholder="Nome"
+    value={form.name}
+    onChange={(e) =>
+      setForm({
+        ...form,
+        name: e.target.value,
+      })
+    }
+  />
+
+  <Input
+    placeholder="Slug"
+    value={form.slug}
+    onChange={(e) =>
+      setForm({
+        ...form,
+        slug: e.target.value,
+      })
+    }
+  />
+
+  <Textarea
+    placeholder="Descrição"
+    value={form.description}
+    onChange={(e) =>
+      setForm({
+        ...form,
+        description: e.target.value,
+      })
+    }
+  />
+
+  {form.image_url && (
+    <img
+      src={form.image_url}
+      alt="preview"
+      className="h-48 w-full rounded-xl object-cover"
+    />
+  )}
+
+  <Input
+    type="number"
+    value={form.price_coins}
+    onChange={(e) =>
+      setForm({
+        ...form,
+        price_coins: Number(e.target.value),
+      })
+    }
+  />
+
+  <Button
+    disabled={
+      saving ||
+      !selectedGift
+    }
+    onClick={async () => {
+      if (!selectedGift) return;
+
+      try {
+        setSaving(true);
+
+        await updateGift(
+          selectedGift.id,
+          {
+            slug: form.slug,
+            name: form.name,
+            description: form.description,
+            image_url: form.image_url,
+            price_coins: form.price_coins,
+            category: form.category,
+            rarity: form.rarity,
+            active: form.active,
+          }
+        );
+
+        await load();
+
+        setEditOpen(false);
+
+      } finally {
+        setSaving(false);
+      }
+    }}
+  >
+    Salvar Alterações
+  </Button>
+
+</div>
+
+
+  </DialogContent>
+</Dialog>
+
+  
         {loading ? (
           <div>Carregando...</div>
         ) : (
