@@ -91,7 +91,9 @@ function AdminPresentesPage() {
     return gifts.filter((gift) => {
       const text = `${gift.name} ${gift.description ?? ""}`.toLowerCase();
 
+      ```
 return text.includes(search.toLowerCase());
+```;
     });
   }, [gifts, search]);
 
@@ -181,8 +183,29 @@ return text.includes(search.toLowerCase());
         </div>
 
         <div className="mb-8 rounded-3xl border bg-card p-6 shadow-sm">
-          <div className="flex flex-col gap-4 lg:flex-row">
-            <div className="relative flex-1">
+  <div className="flex flex-col gap-4 lg:flex-row">
+    <div className="relative flex-1">
+      <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+
+      <Input
+        placeholder="Buscar presente..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        className="pl-10"
+      />
+    </div>
+
+    <Button variant="outline" onClick={load}>
+      <RefreshCw className="mr-2 h-4 w-4" />
+      Atualizar
+    </Button>
+
+    <Button onClick={() => setCreateOpen(true)}>
+      <Plus className="mr-2 h-4 w-4" />
+      Novo Presente
+    </Button>
+  </div>
+</div>
               <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
 
               <Input
@@ -192,12 +215,10 @@ return text.includes(search.toLowerCase());
                 className="pl-10"
               />
             </div>
-
             <Button variant="outline" onClick={load}>
               <RefreshCw className="mr-2 h-4 w-4" />
               Atualizar
             </Button>
-
             <Button onClick={() => setCreateOpen(true)}>
               <Plus className="mr-2 h-4 w-4" />
               Novo Presente
@@ -210,6 +231,7 @@ return text.includes(search.toLowerCase());
 >
   <DialogContent className="max-w-2xl">
 
+```
 <DialogHeader>
   <DialogTitle>
     Novo Presente
@@ -250,18 +272,7 @@ return text.includes(search.toLowerCase());
       })
     }
   />
-
-  <Input
-    placeholder="URL da imagem"
-    value={form.image_url}
-    onChange={(e) =>
-      setForm({
-        ...form,
-        image_url: e.target.value,
-      })
-    }
-  />
-
+  
   <Input
     type="number"
     placeholder="Preço"
@@ -407,6 +418,7 @@ return text.includes(search.toLowerCase());
   </Button>
 
 </div>
+```
 
   </DialogContent>
 </Dialog>
@@ -422,8 +434,11 @@ className="group overflow-hidden border bg-card transition-all duration-300 hove
 
 >
 
+```
 <div className="relative aspect-square overflow-hidden bg-gradient-to-br from-rose-100 via-pink-50 to-purple-100">
+```
 
+```
   {gift.image_url ? (
     <img
       src={gift.image_url}
@@ -532,6 +547,7 @@ className="group overflow-hidden border bg-card transition-all duration-300 hove
   </div>
 
 </CardContent>
+```
 
   </Card>
 ))}
