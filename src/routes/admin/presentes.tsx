@@ -206,6 +206,25 @@ return text.includes(search.toLowerCase());
     </Button>
   </div>
 </div>
+              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+
+              <Input
+                placeholder="Buscar presente..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <Button variant="outline" onClick={load}>
+              <RefreshCw className="mr-2 h-4 w-4" />
+              Atualizar
+            </Button>
+            <Button onClick={() => setCreateOpen(true)}>
+              <Plus className="mr-2 h-4 w-4" />
+              Novo Presente
+            </Button>
+          </div>
+        </div>
         <Dialog
   open={createOpen}
   onOpenChange={setCreateOpen}
@@ -331,6 +350,88 @@ return text.includes(search.toLowerCase());
 
 </div>
 
+<div className="grid grid-cols-2 gap-4">
+
+<Select
+value={form.category}
+onValueChange={(v) =>
+setForm({
+...form,
+category: v as GiftCategory,
+})
+}
+
+>
+
+```
+<SelectTrigger>
+```
+
+```
+  <SelectValue />
+</SelectTrigger>
+
+<SelectContent>
+  <SelectItem value="romantic">Romântico</SelectItem>
+  <SelectItem value="spiritual">Espiritual</SelectItem>
+  <SelectItem value="caring">Carinhoso</SelectItem>
+  <SelectItem value="friendship">Amizade</SelectItem>
+  <SelectItem value="fun">Divertido</SelectItem>
+  <SelectItem value="legendary">Lendário</SelectItem>
+</SelectContent>
+```
+
+  </Select>
+
+<Select
+value={form.rarity}
+onValueChange={(v) =>
+setForm({
+...form,
+rarity: v as GiftRarity,
+})
+}
+
+>
+
+```
+<SelectTrigger>
+```
+
+```
+  <SelectValue />
+</SelectTrigger>
+
+<SelectContent>
+  <SelectItem value="common">Comum</SelectItem>
+  <SelectItem value="rare">Raro</SelectItem>
+  <SelectItem value="epic">Épico</SelectItem>
+  <SelectItem value="legendary">Lendário</SelectItem>
+  <SelectItem value="exclusive">Exclusivo</SelectItem>
+</SelectContent>
+```
+
+  </Select>
+
+</div>
+
+<div className="flex items-center justify-between">
+
+<span>Ativo</span>
+
+<Switch
+checked={form.active}
+onCheckedChange={(v) =>
+setForm({
+...form,
+active: v,
+})
+}
+/>
+
+</div>
+
+  
   <Input
     type="number"
     placeholder="Preço"
@@ -599,6 +700,7 @@ onOpenChange={setDeleteOpen}
 
   <AlertDialogContent>
 
+```
 <AlertDialogHeader>
 
   <AlertDialogTitle>
@@ -632,6 +734,7 @@ onOpenChange={setDeleteOpen}
   </AlertDialogAction>
 
 </div>
+```
 
   </AlertDialogContent>
 
@@ -649,8 +752,11 @@ className="group overflow-hidden border bg-card transition-all duration-300 hove
 
 >
 
+```
 <div className="relative aspect-square overflow-hidden bg-gradient-to-br from-rose-100 via-pink-50 to-purple-100">
+```
 
+```
   {gift.image_url ? (
     <img
       src={gift.image_url}
@@ -773,6 +879,7 @@ setEditOpen(true);
   </div>
 
 </CardContent>
+```
 
   </Card>
 ))}
