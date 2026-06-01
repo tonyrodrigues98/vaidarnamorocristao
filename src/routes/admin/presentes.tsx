@@ -610,6 +610,54 @@ return text.includes(search.toLowerCase());
   </DialogContent>
 </Dialog>
 
+  <AlertDialog
+open={deleteOpen}
+onOpenChange={setDeleteOpen}
+
+>
+
+  <AlertDialogContent>
+
+```
+<AlertDialogHeader>
+
+  <AlertDialogTitle>
+    Excluir presente?
+  </AlertDialogTitle>
+
+</AlertDialogHeader>
+
+<div className="text-sm text-muted-foreground">
+  Esta ação não pode ser desfeita.
+</div>
+
+<div className="mt-4 flex justify-end gap-2">
+
+  <AlertDialogCancel>
+    Cancelar
+  </AlertDialogCancel>
+
+  <AlertDialogAction
+    onClick={async () => {
+      if (!selectedGift) return;
+
+      await deleteGift(
+        selectedGift.id
+      );
+
+      await load();
+    }}
+  >
+    Excluir
+  </AlertDialogAction>
+
+</div>
+```
+
+  </AlertDialogContent>
+
+</AlertDialog>
+
   
         {loading ? (
           <div>Carregando...</div>
