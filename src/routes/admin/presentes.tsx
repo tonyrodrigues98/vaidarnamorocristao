@@ -90,7 +90,10 @@ function AdminPresentesPage() {
   const filteredGifts = useMemo(() => {
     return gifts.filter((gift) => {
       const text = `${gift.name} ${gift.description ?? ""}`.toLowerCase();
-      return text.includes(search.toLowerCase());
+
+      ```
+return text.includes(search.toLowerCase());
+```;
     });
   }, [gifts, search]);
 
@@ -180,9 +183,29 @@ function AdminPresentesPage() {
         </div>
 
         <div className="mb-8 rounded-3xl border bg-card p-6 shadow-sm">
-          <div className="flex flex-col gap-4 lg:flex-row">
-            ```
-            <div className="relative flex-1">
+  <div className="flex flex-col gap-4 lg:flex-row">
+    <div className="relative flex-1">
+      <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+
+      <Input
+        placeholder="Buscar presente..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        className="pl-10"
+      />
+    </div>
+
+    <Button variant="outline" onClick={load}>
+      <RefreshCw className="mr-2 h-4 w-4" />
+      Atualizar
+    </Button>
+
+    <Button onClick={() => setCreateOpen(true)}>
+      <Plus className="mr-2 h-4 w-4" />
+      Novo Presente
+    </Button>
+  </div>
+</div>
               <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
 
               <Input
