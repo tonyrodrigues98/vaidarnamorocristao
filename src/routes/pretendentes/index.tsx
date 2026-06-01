@@ -475,21 +475,17 @@ function List() {
                 const score = maxScore > 0 ? Math.min(99, Math.round((chips.length / maxScore) * 100)) : 0;
                 const showScore = chips.length >= 3 && score >= 50 && !!myAdvanced;
                 return (
-  <PretendenteFeaturedCard
-    key={p.id}
-    profile={p}
-    photos={[
-      ...(p.photo_url ? [p.photo_url] : []),
-      ...(extraPhotos[p.id] ?? []),
-    ]}
-    score={score}
-    showScore={showScore}
-    chips={chips}
-    eager={i < 3}
-    isSuggestion={isSuggestion(p)}
-    staff={staffMap[p.id]}
-  />
-);
+                  <PretendenteFeaturedCard
+                    key={p.id}
+                    profile={p}
+                    photos={[...(p.photo_url ? [p.photo_url] : []), ...(extraPhotos[p.id] ?? [])]}
+                    score={score}
+                    showScore={showScore}
+                    chips={chips}
+                    eager={i < 3}
+                    isSuggestion={isSuggestion(p)}
+                    staff={staffMap[p.id]}
+                  />
                 );
               })}
             </div>
