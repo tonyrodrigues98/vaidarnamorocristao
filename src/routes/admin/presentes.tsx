@@ -93,7 +93,6 @@ function AdminPresentesPage() {
 
       ```
 return text.includes(search.toLowerCase());
-```;
     });
   }, [gifts, search]);
 
@@ -231,7 +230,6 @@ return text.includes(search.toLowerCase());
 >
   <DialogContent className="max-w-2xl">
 
-```
 <DialogHeader>
   <DialogTitle>
     Novo Presente
@@ -280,7 +278,6 @@ return text.includes(search.toLowerCase());
 
   <label className="flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed p-8 transition hover:bg-muted/50">
 
-```
 <Upload className="mb-3 h-10 w-10 text-muted-foreground" />
 
 <span className="font-medium">
@@ -495,7 +492,6 @@ return text.includes(search.toLowerCase());
   </Button>
 
 </div>
-```
 
   </DialogContent>
 </Dialog>
@@ -511,11 +507,8 @@ className="group overflow-hidden border bg-card transition-all duration-300 hove
 
 >
 
-```
 <div className="relative aspect-square overflow-hidden bg-gradient-to-br from-rose-100 via-pink-50 to-purple-100">
-```
 
-```
   {gift.image_url ? (
     <img
       src={gift.image_url}
@@ -624,7 +617,6 @@ className="group overflow-hidden border bg-card transition-all duration-300 hove
   </div>
 
 </CardContent>
-```
 
   </Card>
 ))}
