@@ -273,6 +273,16 @@ function Admin() {
     if (status === "flags" || status === "restricted_words") {
       return;
     }
+    if (status === "deactivated") {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .or("deactivated_at.not.is.null,deletion_requested_at.not.is.null")
+        .order("deletion_requested_at", { ascending: false, nullsFirst: false });
+      if (error) toast.error(error.message);
+      setRows((data ?? []) as Row[]);
+      return;
+    }
     const { data, error } = await supabase
       .from("profiles")
       .select("*")
