@@ -215,11 +215,7 @@ className="group overflow-hidden border bg-card transition-all duration-300 hove
 
 >
 
-```
 <div className="relative aspect-square overflow-hidden bg-gradient-to-br from-rose-100 via-pink-50 to-purple-100">
-```
-
-```
   {gift.image_url ? (
     <img
       src={gift.image_url}
@@ -328,7 +324,6 @@ className="group overflow-hidden border bg-card transition-all duration-300 hove
   </div>
 
 </CardContent>
-```
 
   </Card>
 ))}
