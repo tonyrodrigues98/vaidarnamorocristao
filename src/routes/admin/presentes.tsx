@@ -15,6 +15,8 @@ import {
   Heart,
   Sparkles,
   RefreshCw,
+  ArrowUp,
+  ArrowDown,
 } from "lucide-react";
 
 import { Header } from "@/components/layout/Header";
@@ -105,6 +107,33 @@ function AdminPresentesPage() {
       setGifts(data);
     } finally {
       setLoading(false);
+    }
+  }
+  async function moveGift(gift: VirtualGift, direction: "up" | "down") {
+    const currentIndex = gifts.findIndex((g) => g.id === gift.id);
+
+    if (currentIndex === -1) return;
+
+    const targetIndex = direction === "up" ? currentIndex - 1 : currentIndex + 1;
+
+    if (targetIndex < 0 || targetIndex >= gifts.length) {
+      return;
+    }
+
+    const targetGift = gifts[targetIndex];
+
+    try {
+      await updateGift(gift.id, {
+        sort_order: targetGift.sort_order,
+      });
+
+      await updateGift(targetGift.id, {
+        sort_order: gift.sort_order,
+      });
+
+      await load();
+    } catch (err) {
+      console.error(err);
     }
   }
 
@@ -671,6 +700,14 @@ function AdminPresentesPage() {
                   </div>
 
                   <div className="mt-5 grid grid-cols-3 gap-2">
+                    <Button size="sm" variant="outline" onClick={() => moveGift(gift, "up")}>
+                      <ArrowUp className="h-4 w-4" />
+                    </Button>
+
+                    <Button size="sm" variant="outline" onClick={() => moveGift(gift, "down")}>
+                      <ArrowDown className="h-4 w-4" />
+                    </Button>
+
                     <Button
                       size="sm"
                       variant="outline"
