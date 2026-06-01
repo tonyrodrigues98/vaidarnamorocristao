@@ -133,6 +133,7 @@ function Admin() {
     | "approved"
     | "rejected"
     | "banned"
+    | "deactivated"
     | "reports"
     | "posts"
     | "users"
@@ -147,6 +148,7 @@ function Admin() {
         "approved",
         "rejected",
         "banned",
+        "deactivated",
         "reports",
         "posts",
         "users",
@@ -154,7 +156,7 @@ function Admin() {
         "restricted_words",
         "flags",
       ];
-    if (isAdmin) return ["pending", "approved", "rejected", "banned", "reports", "posts", "restricted_words", "flags"];
+    if (isAdmin) return ["pending", "approved", "rejected", "banned", "deactivated", "reports", "posts", "restricted_words", "flags"];
     if (isApresentador) return ["pre_cadastros", "reports", "posts", "restricted_words", "flags"];
     if (isModerador) return ["reports", "posts", "restricted_words", "flags"];
     return [];
