@@ -550,6 +550,9 @@ function Admin() {
             {availableTabs.includes("approved") && <TabsTrigger value="approved">Aprovados</TabsTrigger>}
             {availableTabs.includes("rejected") && <TabsTrigger value="rejected">Rejeitados</TabsTrigger>}
             {availableTabs.includes("banned") && <TabsTrigger value="banned">Banidos</TabsTrigger>}
+            {availableTabs.includes("deactivated") && (
+              <TabsTrigger value="deactivated">Desativados</TabsTrigger>
+            )}
             {availableTabs.includes("reports") && (
               <TabsTrigger value="reports">
                 <Flag className="mr-1 h-3 w-3" /> Denúncias
