@@ -90,7 +90,10 @@ function AdminPresentesPage() {
   const filteredGifts = useMemo(() => {
     return gifts.filter((gift) => {
       const text = `${gift.name} ${gift.description ?? ""}`.toLowerCase();
-      return text.includes(search.toLowerCase());
+
+      ```
+return text.includes(search.toLowerCase());
+```;
     });
   }, [gifts, search]);
 
@@ -203,53 +206,155 @@ function AdminPresentesPage() {
     </Button>
   </div>
 </div>
+              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+
+              <Input
+                placeholder="Buscar presente..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <Button variant="outline" onClick={load}>
+              <RefreshCw className="mr-2 h-4 w-4" />
+              Atualizar
+            </Button>
+            <Button onClick={() => setCreateOpen(true)}>
+              <Plus className="mr-2 h-4 w-4" />
+              Novo Presente
+            </Button>
+          </div>
+        </div>
 
         {loading ? (
           <div>Carregando...</div>
         ) : (
           <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
             {filteredGifts.map((gift) => (
-              <div key={gift.id} className="flex items-center justify-between rounded-3xl border bg-card p-5">
-                <div className="flex items-center gap-4">
-                  <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-pink-50 text-3xl">
-                    {gift.emoji ?? "🎁"}
-                  </div>
+<Card
+key={gift.id}
+className="group overflow-hidden border bg-card transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
 
-                  <div>
-                    <h3 className="font-semibold">{gift.name}</h3>
+>
 
-                    <p className="text-sm text-muted-foreground">{gift.description}</p>
+```
+<div className="relative aspect-square overflow-hidden bg-gradient-to-br from-rose-100 via-pink-50 to-purple-100">
+```
 
-                    <div className="mt-2 flex items-center gap-4 text-sm">
-                      <span className="flex items-center gap-1">
-                        <Coins className="h-4 w-4" />
-                        {gift.price_coins}
-                      </span>
+```
+  {gift.image_url ? (
+    <img
+      src={gift.image_url}
+      alt={gift.name}
+      className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+    />
+  ) : (
+    <div className="flex h-full items-center justify-center">
+      <Gift className="h-20 w-20 text-rose-300" />
+    </div>
+  )}
 
-                      <span>{gift.category}</span>
+  <div className="absolute left-3 top-3">
+    {gift.active ? (
+      <Badge className="bg-green-600 text-white">
+        Ativo
+      </Badge>
+    ) : (
+      <Badge variant="secondary">
+        Oculto
+      </Badge>
+    )}
+  </div>
 
-                      <span>{gift.rarity}</span>
-                    </div>
-                  </div>
-                </div>
+  <div className="absolute right-3 top-3">
+    <Badge className={RARITY_STYLE[gift.rarity].chip}>
+      {RARITY_STYLE[gift.rarity].label}
+    </Badge>
+  </div>
+</div>
 
-                <div className="flex items-center gap-2">
-                  {gift.active ? (
-                    <Button variant="outline">
-                      <Eye className="h-4 w-4" />
-                    </Button>
-                  ) : (
-                    <Button variant="outline">
-                      <EyeOff className="h-4 w-4" />
-                    </Button>
-                  )}
+<CardContent className="p-5">
 
-                  <Button variant="outline">
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            ))}
+  <h3 className="line-clamp-1 text-lg font-bold">
+    {gift.name}
+  </h3>
+
+  <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">
+    {gift.description || "Sem descrição"}
+  </p>
+
+  <div className="mt-4 flex flex-wrap gap-2">
+
+    <Badge variant="outline">
+      {CATEGORY_LABELS[gift.category].label}
+    </Badge>
+
+    <Badge variant="outline">
+      #{gift.slug}
+    </Badge>
+
+  </div>
+
+  <div className="mt-4 flex items-center justify-between">
+
+    <div className="flex items-center gap-2 font-semibold">
+      <Coins className="h-4 w-4 text-amber-500" />
+      {gift.price_coins.toLocaleString()}
+    </div>
+
+  </div>
+
+  <div className="mt-5 grid grid-cols-3 gap-2">
+
+    <Button
+      size="sm"
+      variant="outline"
+      onClick={() => {
+        setSelectedGift(gift);
+        setEditOpen(true);
+      }}
+    >
+      <Pencil className="h-4 w-4" />
+    </Button>
+
+    <Button
+      size="sm"
+      variant="outline"
+      onClick={async () => {
+        await toggleGift(
+          gift.id,
+          !gift.active
+        );
+
+        load();
+      }}
+    >
+      {gift.active ? (
+        <EyeOff className="h-4 w-4" />
+      ) : (
+        <Eye className="h-4 w-4" />
+      )}
+    </Button>
+
+    <Button
+      size="sm"
+      variant="destructive"
+      onClick={() => {
+        setSelectedGift(gift);
+        setDeleteOpen(true);
+      }}
+    >
+      <Trash2 className="h-4 w-4" />
+    </Button>
+
+  </div>
+
+</CardContent>
+```
+
+  </Card>
+))}
+
           </div>
         )}
       </div>
