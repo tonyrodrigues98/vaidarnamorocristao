@@ -107,7 +107,6 @@ function AdminPresentesPage() {
       <div className="mx-auto max-w-7xl p-6">
         <div className="mb-8 overflow-hidden rounded-3xl border bg-gradient-to-r from-rose-500 via-pink-500 to-purple-600 p-8 text-white">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-            ```
             <div>
               <div className="mb-3 flex items-center gap-3">
                 <Gift className="h-8 w-8" />
@@ -128,11 +127,9 @@ function AdminPresentesPage() {
               <Plus className="mr-2 h-5 w-5" />
               Novo Presente
             </Button>
-            ```
           </div>
 
           <div className="mt-8 grid gap-4 md:grid-cols-3">
-            ```
             <Card className="border-white/20 bg-white/10 backdrop-blur">
               <CardContent className="p-5">
                 <div className="flex items-center justify-between">
@@ -172,19 +169,30 @@ function AdminPresentesPage() {
                 </div>
               </CardContent>
             </Card>
-            ```
           </div>
         </div>
 
-        <div className="mb-6 rounded-3xl border bg-card p-6">
-          <div className="grid gap-4 md:grid-cols-4">
-            <Input placeholder="Nome do presente" />
+        <div className="mb-8 rounded-3xl border bg-card p-6 shadow-sm">
+          <div className="flex flex-col gap-4 lg:flex-row">
+            ```
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
 
-            <Input placeholder="Emoji" />
-
-            <Input placeholder="Preço" />
-
-            <Button>Salvar Presente</Button>
+              <Input
+                placeholder="Buscar presente..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <Button variant="outline" onClick={load}>
+              <RefreshCw className="mr-2 h-4 w-4" />
+              Atualizar
+            </Button>
+            <Button onClick={() => setCreateOpen(true)}>
+              <Plus className="mr-2 h-4 w-4" />
+              Novo Presente
+            </Button>
           </div>
         </div>
 
