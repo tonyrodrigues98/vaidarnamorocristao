@@ -474,7 +474,7 @@ function List() {
             </div>
           ) : (
             <>
-              <br>></br>
+              <br></br>
               <div className="mb-10 overflow-hidden rounded-3xl bg-gradient-to-r from-pink-500 via-rose-500 to-purple-500 p-8 text-white">
                 <div className="max-w-2xl">
                   <p className="text-sm font-semibold uppercase tracking-wider opacity-90">Descobertas</p>
