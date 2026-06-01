@@ -272,7 +272,84 @@ return text.includes(search.toLowerCase());
       })
     }
   />
-  
+  <div className="space-y-3">
+
+  <label className="text-sm font-medium">
+    Imagem do presente
+  </label>
+
+  <label className="flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed p-8 transition hover:bg-muted/50">
+
+```
+<Upload className="mb-3 h-10 w-10 text-muted-foreground" />
+
+<span className="font-medium">
+  Clique para enviar imagem
+</span>
+
+<span className="text-sm text-muted-foreground">
+  PNG, JPG ou WEBP
+</span>
+
+<input
+  type="file"
+  accept="image/*"
+  className="hidden"
+  onChange={async (e) => {
+    const file = e.target.files?.[0];
+
+    if (!file) return;
+
+    try {
+      setSaving(true);
+
+      const fileName =
+        `${Date.now()}-${file.name}`;
+
+      const { error } =
+        await supabase.storage
+          .from("gift-images")
+          .upload(fileName, file);
+
+      if (error) throw error;
+
+      const {
+        data: publicUrlData,
+      } = supabase.storage
+        .from("gift-images")
+        .getPublicUrl(fileName);
+
+      setForm({
+        ...form,
+        image_url:
+          publicUrlData.publicUrl,
+      });
+
+    } finally {
+      setSaving(false);
+    }
+  }}
+/>
+
+
+  </label>
+
+{form.image_url && ( <div className="overflow-hidden rounded-2xl border">
+
+
+  <img
+    src={form.image_url}
+    alt="preview"
+    className="h-56 w-full object-cover"
+  />
+
+</div>
+
+
+)}
+
+</div>
+
   <Input
     type="number"
     placeholder="Preço"
