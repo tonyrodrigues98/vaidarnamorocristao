@@ -42,7 +42,10 @@ export const CATEGORY_LABELS: Record<GiftCategory, { label: string; emoji: strin
   legendary: { label: "Lendários", emoji: "👑" },
 };
 
-export const RARITY_STYLE: Record<GiftRarity, { label: string; glow: string; border: string; ring: string; chip: string; gradient: string }> = {
+export const RARITY_STYLE: Record<
+  GiftRarity,
+  { label: string; glow: string; border: string; ring: string; chip: string; gradient: string }
+> = {
   common: {
     label: "Comum",
     glow: "shadow-[0_8px_30px_rgba(148,163,184,0.18)]",
@@ -105,11 +108,14 @@ export async function listAllGiftsAdmin(): Promise<VirtualGift[]> {
 }
 
 export async function sendGift(receiverId: string, giftId: string, message?: string): Promise<string> {
-  const { data, error } = await supabase.rpc("send_virtual_gift" as never, {
-    _receiver_id: receiverId,
-    _gift_id: giftId,
-    _message: message ?? null,
-  } as never);
+  const { data, error } = await supabase.rpc(
+    "send_virtual_gift" as never,
+    {
+      _receiver_id: receiverId,
+      _gift_id: giftId,
+      _message: message ?? null,
+    } as never,
+  );
   if (error) throw error;
   return data as unknown as string;
 }
@@ -130,11 +136,10 @@ export async function listMyReceivedGifts(userId: string): Promise<GiftTransacti
   const rows = (data ?? []) as unknown as GiftTransaction[];
   const senderIds = Array.from(new Set(rows.map((r) => r.sender_id)));
   if (senderIds.length > 0) {
-    const { data: profs } = await supabase
-      .from("profiles")
-      .select("id, full_name, photo_url")
-      .in("id", senderIds);
-    const map = new Map((profs ?? []).map((p: { id: string; full_name: string; photo_url: string | null }) => [p.id, p]));
+    const { data: profs } = await supabase.from("profiles").select("id, full_name, photo_url").in("id", senderIds);
+    const map = new Map(
+      (profs ?? []).map((p: { id: string; full_name: string; photo_url: string | null }) => [p.id, p]),
+    );
     rows.forEach((r) => {
       const p = map.get(r.sender_id);
       r.sender_name = p?.full_name ?? null;
@@ -158,10 +163,76 @@ export type PublicGiftHighlight = {
 };
 
 export async function listPublicGiftHighlights(userId: string, limit = 6): Promise<PublicGiftHighlight[]> {
-  const { data, error } = await supabase.rpc("get_received_gifts_public" as never, {
-    _user_id: userId,
-    _limit: limit,
-  } as never);
+  const { data, error } = await supabase.rpc(
+    "get_received_gifts_public" as never,
+    {
+      _user_id: userId,
+      _limit: limit,
+    } as never,
+  );
   if (error) throw error;
   return (data ?? []) as unknown as PublicGiftHighlight[];
+}
+
+export async function createGift(payload: {
+  slug: string;
+  name: string;
+  description?: string;
+  image_url?: string | null;
+  emoji?: string | null;
+  price_coins: number;
+  category: GiftCategory;
+  rarity: GiftRarity;
+  active?: boolean;
+}) {
+  const { data, error } = await supabase
+    .from("virtual_gifts" as never)
+    .insert({
+      slug: payload.slug,
+      name: payload.name,
+      description: payload.description ?? null,
+      image_url: payload.image_url ?? null,
+      emoji: payload.emoji ?? null,
+      price_coins: payload.price_coins,
+      category: payload.category,
+      rarity: payload.rarity,
+      active: payload.active ?? true,
+    } as never)
+    .select()
+    .single();
+
+  if (error) throw error;
+
+  return data;
+}
+
+export async function updateGift(id: string, payload: Partial<VirtualGift>) {
+  const { data, error } = await supabase
+    .from("virtual_gifts" as never)
+    .update(payload as never)
+    .eq("id", id)
+    .select()
+    .single();
+
+  if (error) throw error;
+
+  return data;
+}
+
+export async function toggleGift(id: string, active: boolean) {
+  const { error } = await supabase
+    .from("virtual_gifts" as never)
+    .update({ active } as never)
+    .eq("id", id);
+
+  if (error) throw error;
+}
+
+export async function deleteGift(id: string) {
+  const { error } = await supabase
+    .from("virtual_gifts" as never)
+    .delete()
+    .eq("id", id);
+
+  if (error) throw error;
 }
