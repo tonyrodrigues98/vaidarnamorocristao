@@ -1,15 +1,26 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Gift, Plus, Pencil, Eye, EyeOff, Coins } from "lucide-react";
+import {
+  Gift,
+  Plus,
+  Pencil,
+  Eye,
+  EyeOff,
+  Coins,
+  Search,
+  Sparkles,
+  Trash2,
+  Upload,
+  Crown,
+  Heart,
+  Star,
+} from "lucide-react";
 
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-import {
-  listAllGiftsAdmin,
-  type VirtualGift,
-} from "@/lib/gifts";
+import { listAllGiftsAdmin, type VirtualGift } from "@/lib/gifts";
 
 export const Route = createFileRoute("/admin/presentes")({
   component: AdminPresentesPage,
@@ -37,16 +48,11 @@ function AdminPresentesPage() {
       <Header />
 
       <div className="mx-auto max-w-7xl p-6">
-
         <div className="mb-8 flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold">
-              🎁 Catálogo de Presentes
-            </h1>
+          <div className="relative overflow-hidden rounded-3xl border bg-gradient-to-r from-pink-500 via-rose-500 to-purple-600 p-8 text-white">
+            <h1 className="text-3xl font-bold">🎁 Catálogo de Presentes</h1>
 
-            <p className="text-muted-foreground">
-              Gerencie presentes virtuais da plataforma
-            </p>
+            <p className="text-muted-foreground">Gerencie presentes virtuais da plataforma</p>
           </div>
 
           <Button>
@@ -57,67 +63,46 @@ function AdminPresentesPage() {
 
         <div className="mb-6 rounded-3xl border bg-card p-6">
           <div className="grid gap-4 md:grid-cols-4">
-
             <Input placeholder="Nome do presente" />
 
             <Input placeholder="Emoji" />
 
             <Input placeholder="Preço" />
 
-            <Button>
-              Salvar Presente
-            </Button>
-
+            <Button>Salvar Presente</Button>
           </div>
         </div>
 
         {loading ? (
           <div>Carregando...</div>
         ) : (
-          <div className="grid gap-4">
-
+          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
             {gifts.map((gift) => (
-              <div
-                key={gift.id}
-                className="flex items-center justify-between rounded-3xl border bg-card p-5"
-              >
+              <div key={gift.id} className="flex items-center justify-between rounded-3xl border bg-card p-5">
                 <div className="flex items-center gap-4">
-
                   <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-pink-50 text-3xl">
                     {gift.emoji ?? "🎁"}
                   </div>
 
                   <div>
-                    <h3 className="font-semibold">
-                      {gift.name}
-                    </h3>
+                    <h3 className="font-semibold">{gift.name}</h3>
 
-                    <p className="text-sm text-muted-foreground">
-                      {gift.description}
-                    </p>
+                    <p className="text-sm text-muted-foreground">{gift.description}</p>
 
                     <div className="mt-2 flex items-center gap-4 text-sm">
-
                       <span className="flex items-center gap-1">
                         <Coins className="h-4 w-4" />
                         {gift.price_coins}
                       </span>
 
-                      <span>
-                        {gift.category}
-                      </span>
+                      <span>{gift.category}</span>
 
-                      <span>
-                        {gift.rarity}
-                      </span>
-
+                      <span>{gift.rarity}</span>
                     </div>
                   </div>
-
                 </div>
 
                 <div className="flex items-center gap-2">
-
                   {gift.active ? (
                     <Button variant="outline">
                       <Eye className="h-4 w-4" />
@@ -131,11 +116,9 @@ function AdminPresentesPage() {
                   <Button variant="outline">
                     <Pencil className="h-4 w-4" />
                   </Button>
-
                 </div>
               </div>
             ))}
-
           </div>
         )}
       </div>
