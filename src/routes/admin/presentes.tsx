@@ -87,6 +87,16 @@ function AdminPresentesPage() {
     active: true,
   });
 
+  const filteredGifts = useMemo(() => {
+    return gifts.filter((gift) => {
+      const text = `${gift.name} ${gift.description ?? ""}`.toLowerCase();
+
+      ```
+return text.includes(search.toLowerCase());
+```;
+    });
+  }, [gifts, search]);
+
   useEffect(() => {
     load();
   }, []);
@@ -200,7 +210,7 @@ function AdminPresentesPage() {
           <div>Carregando...</div>
         ) : (
           <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
-            {gifts.map((gift) => (
+            {filteredGifts.map((gift) => (
               <div key={gift.id} className="flex items-center justify-between rounded-3xl border bg-card p-5">
                 <div className="flex items-center gap-4">
                   <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-pink-50 text-3xl">
