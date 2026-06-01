@@ -249,34 +249,19 @@ function List() {
   }, [profiles, search, advancedMap, affinityByProfile, myPrefs.state]);
 
   const topMatches = useMemo(() => {
-    const nearbyProfiles = useMemo(() => {
-  return filtered
-    .filter((p) => p.state === myPrefs.state)
-    .slice(0, 10);
-}, [filtered, myPrefs.state]);
+    return [...filtered]
+      .sort((a, b) => (affinityByProfile[b.id]?.length ?? 0) - (affinityByProfile[a.id]?.length ?? 0))
+      .slice(0, 10);
+  }, [filtered, affinityByProfile]);
 
-const churchProfiles = useMemo(() => {
-  return filtered
-    .filter((p) =>
-      p.church &&
-      myAdvanced?.church &&
-      p.church
-        .toLowerCase()
-        .includes(myAdvanced.church.toLowerCase())
-    )
-    .slice(0, 10);
-}, [filtered, myAdvanced]);
+  const nearbyProfiles = useMemo(() => {
+    return filtered.filter((p) => p.state === myPrefs.state).slice(0, 10);
+  }, [filtered, myPrefs.state]);
 
-const newestProfiles = useMemo(() => {
-  return [...filtered]
-    .sort((a, b) =>
-      (b.created_at ?? "").localeCompare(
-        a.created_at ?? ""
-      )
-    )
-    .slice(0, 10);
-}, [filtered]);
-    
+  const newestProfiles = useMemo(() => {
+    return [...filtered].sort((a, b) => (b.created_at ?? "").localeCompare(a.created_at ?? "")).slice(0, 10);
+  }, [filtered]);
+
   function isSuggestion(p: Profile): boolean {
     if (!myPrefs.state) return false;
     if (p.state !== myPrefs.state) return false;
@@ -488,77 +473,72 @@ const newestProfiles = useMemo(() => {
               )}
             </div>
           ) : (
-            <div className="mb-10 overflow-hidden rounded-3xl bg-gradient-to-r from-pink-500 via-rose-500 to-purple-500 p-8 text-white">
-  <div className="max-w-2xl">
-    <p className="text-sm font-semibold uppercase tracking-wider opacity-90">
-      Descobertas
-    </p>
+            <>
+              <div className="mb-10 overflow-hidden rounded-3xl bg-gradient-to-r from-pink-500 via-rose-500 to-purple-500 p-8 text-white">
+                <div className="max-w-2xl">
+                  <p className="text-sm font-semibold uppercase tracking-wider opacity-90">Descobertas</p>
 
-    <h2 className="mt-2 text-4xl font-bold">
-      Pessoas compatíveis com você
-    </h2>
+                  <h2 className="mt-2 text-4xl font-bold">Pessoas compatíveis com você</h2>
 
-    <p className="mt-3 text-white/90">
-      Baseado na sua fé, afinidade,
-      localização e interesses.
-    </p>
-  </div>
-</div>
-            <PretendenteCarousel
-  title="Mais compatíveis"
-  subtitle="Perfis com maior afinidade"
-  profiles={topMatches}
-  affinityByProfile={affinityByProfile}
-  maxScore={maxScore}
-  myAdvanced={myAdvanced}
-  extraPhotos={extraPhotos}
-  staffMap={staffMap}
-  isSuggestion={isSuggestion}
-/>
+                  <p className="mt-3 text-white/90">Baseado na sua fé, afinidade, localização e interesses.</p>
+                </div>
+              </div>
+              <PretendenteCarousel
+                title="Mais compatíveis"
+                subtitle="Perfis com maior afinidade"
+                profiles={topMatches}
+                affinityByProfile={affinityByProfile}
+                maxScore={maxScore}
+                myAdvanced={myAdvanced}
+                extraPhotos={extraPhotos}
+                staffMap={staffMap}
+                isSuggestion={isSuggestion}
+              />
 
-<PretendenteCarousel
-  title="Perto de você"
-  subtitle="Pessoas da mesma região"
-  profiles={nearbyProfiles}
-  affinityByProfile={affinityByProfile}
-  maxScore={maxScore}
-  myAdvanced={myAdvanced}
-  extraPhotos={extraPhotos}
-  staffMap={staffMap}
-  isSuggestion={isSuggestion}
-/>
+              <PretendenteCarousel
+                title="Perto de você"
+                subtitle="Pessoas da mesma região"
+                profiles={nearbyProfiles}
+                affinityByProfile={affinityByProfile}
+                maxScore={maxScore}
+                myAdvanced={myAdvanced}
+                extraPhotos={extraPhotos}
+                staffMap={staffMap}
+                isSuggestion={isSuggestion}
+              />
 
-<PretendenteCarousel
-  title="Novos na plataforma"
-  subtitle="Perfis adicionados recentemente"
-  profiles={newestProfiles}
-  affinityByProfile={affinityByProfile}
-  maxScore={maxScore}
-  myAdvanced={myAdvanced}
-  extraPhotos={extraPhotos}
-  staffMap={staffMap}
-  isSuggestion={isSuggestion}
-/>
-            <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {filtered.map((p, i) => {
-                const chips = affinityByProfile[p.id] ?? [];
-                const score = maxScore > 0 ? Math.min(99, Math.round((chips.length / maxScore) * 100)) : 0;
-                const showScore = chips.length >= 3 && score >= 50 && !!myAdvanced;
-                return (
-                  <PretendenteFeaturedCard
-                    key={p.id}
-                    profile={p}
-                    photos={[...(p.photo_url ? [p.photo_url] : []), ...(extraPhotos[p.id] ?? [])]}
-                    score={score}
-                    showScore={showScore}
-                    chips={chips}
-                    eager={i < 3}
-                    isSuggestion={isSuggestion(p)}
-                    staff={staffMap[p.id]}
-                  />
-                );
-              })}
-            </div>
+              <PretendenteCarousel
+                title="Novos na plataforma"
+                subtitle="Perfis adicionados recentemente"
+                profiles={newestProfiles}
+                affinityByProfile={affinityByProfile}
+                maxScore={maxScore}
+                myAdvanced={myAdvanced}
+                extraPhotos={extraPhotos}
+                staffMap={staffMap}
+                isSuggestion={isSuggestion}
+              />
+              <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                {filtered.map((p, i) => {
+                  const chips = affinityByProfile[p.id] ?? [];
+                  const score = maxScore > 0 ? Math.min(99, Math.round((chips.length / maxScore) * 100)) : 0;
+                  const showScore = chips.length >= 3 && score >= 50 && !!myAdvanced;
+                  return (
+                    <PretendenteFeaturedCard
+                      key={p.id}
+                      profile={p}
+                      photos={[...(p.photo_url ? [p.photo_url] : []), ...(extraPhotos[p.id] ?? [])]}
+                      score={score}
+                      showScore={showScore}
+                      chips={chips}
+                      eager={i < 3}
+                      isSuggestion={isSuggestion(p)}
+                      staff={staffMap[p.id]}
+                    />
+                  );
+                })}
+              </div>
+            </>
           ))}
       </main>
     </div>
