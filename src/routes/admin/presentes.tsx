@@ -312,6 +312,12 @@ function AdminPresentesPage() {
                     }}
                   />
                 </label>
+
+                {form.image_url && (
+                  <div className="overflow-hidden rounded-2xl border">
+                    <img src={form.image_url} alt="preview" className="h-56 w-full object-cover" />
+                  </div>
+                )}
               </div>
 
               <div className="grid grid-cols-2 gap-4">
