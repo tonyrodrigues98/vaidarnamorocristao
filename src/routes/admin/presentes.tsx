@@ -90,7 +90,10 @@ function AdminPresentesPage() {
   const filteredGifts = useMemo(() => {
     return gifts.filter((gift) => {
       const text = `${gift.name} ${gift.description ?? ""}`.toLowerCase();
-      return text.includes(search.toLowerCase());
+
+      ```
+return text.includes(search.toLowerCase());
+```;
     });
   }, [gifts, search]);
 
@@ -203,6 +206,233 @@ function AdminPresentesPage() {
     </Button>
   </div>
 </div>
+              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+
+              <Input
+                placeholder="Buscar presente..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <Button variant="outline" onClick={load}>
+              <RefreshCw className="mr-2 h-4 w-4" />
+              Atualizar
+            </Button>
+            <Button onClick={() => setCreateOpen(true)}>
+              <Plus className="mr-2 h-4 w-4" />
+              Novo Presente
+            </Button>
+          </div>
+        </div>
+        <Dialog
+  open={createOpen}
+  onOpenChange={setCreateOpen}
+>
+  <DialogContent className="max-w-2xl">
+
+```
+<DialogHeader>
+  <DialogTitle>
+    Novo Presente
+  </DialogTitle>
+</DialogHeader>
+
+<div className="grid gap-4">
+
+  <Input
+    placeholder="Nome"
+    value={form.name}
+    onChange={(e) =>
+      setForm({
+        ...form,
+        name: e.target.value,
+      })
+    }
+  />
+
+  <Input
+    placeholder="Slug"
+    value={form.slug}
+    onChange={(e) =>
+      setForm({
+        ...form,
+        slug: e.target.value,
+      })
+    }
+  />
+
+  <Textarea
+    placeholder="Descrição"
+    value={form.description}
+    onChange={(e) =>
+      setForm({
+        ...form,
+        description: e.target.value,
+      })
+    }
+  />
+
+  <Input
+    placeholder="URL da imagem"
+    value={form.image_url}
+    onChange={(e) =>
+      setForm({
+        ...form,
+        image_url: e.target.value,
+      })
+    }
+  />
+
+  <Input
+    type="number"
+    placeholder="Preço"
+    value={form.price_coins}
+    onChange={(e) =>
+      setForm({
+        ...form,
+        price_coins: Number(e.target.value),
+      })
+    }
+  />
+
+  <div className="grid grid-cols-2 gap-4">
+
+    <Select
+      value={form.category}
+      onValueChange={(v) =>
+        setForm({
+          ...form,
+          category: v as GiftCategory,
+        })
+      }
+    >
+      <SelectTrigger>
+        <SelectValue />
+      </SelectTrigger>
+
+      <SelectContent>
+
+        <SelectItem value="romantic">
+          Romântico
+        </SelectItem>
+
+        <SelectItem value="spiritual">
+          Espiritual
+        </SelectItem>
+
+        <SelectItem value="caring">
+          Carinhoso
+        </SelectItem>
+
+        <SelectItem value="friendship">
+          Amizade
+        </SelectItem>
+
+        <SelectItem value="fun">
+          Divertido
+        </SelectItem>
+
+        <SelectItem value="legendary">
+          Lendário
+        </SelectItem>
+
+      </SelectContent>
+    </Select>
+
+    <Select
+      value={form.rarity}
+      onValueChange={(v) =>
+        setForm({
+          ...form,
+          rarity: v as GiftRarity,
+        })
+      }
+    >
+      <SelectTrigger>
+        <SelectValue />
+      </SelectTrigger>
+
+      <SelectContent>
+
+        <SelectItem value="common">
+          Comum
+        </SelectItem>
+
+        <SelectItem value="rare">
+          Raro
+        </SelectItem>
+
+        <SelectItem value="epic">
+          Épico
+        </SelectItem>
+
+        <SelectItem value="legendary">
+          Lendário
+        </SelectItem>
+
+        <SelectItem value="exclusive">
+          Exclusivo
+        </SelectItem>
+
+      </SelectContent>
+    </Select>
+
+  </div>
+
+  <div className="flex items-center justify-between">
+
+    <span>
+      Ativo
+    </span>
+
+    <Switch
+      checked={form.active}
+      onCheckedChange={(v) =>
+        setForm({
+          ...form,
+          active: v,
+        })
+      }
+    />
+
+  </div>
+
+  <Button
+    disabled={saving}
+    onClick={async () => {
+      try {
+        setSaving(true);
+
+        await createGift({
+          slug: form.slug,
+          name: form.name,
+          description: form.description,
+          image_url: form.image_url,
+          emoji: null,
+          price_coins: form.price_coins,
+          category: form.category,
+          rarity: form.rarity,
+          active: form.active,
+        });
+
+        await load();
+
+        setCreateOpen(false);
+
+      } finally {
+        setSaving(false);
+      }
+    }}
+  >
+    Criar Presente
+  </Button>
+
+</div>
+```
+
+  </DialogContent>
+</Dialog>
 
         {loading ? (
           <div>Carregando...</div>
@@ -215,7 +445,11 @@ className="group overflow-hidden border bg-card transition-all duration-300 hove
 
 >
 
+```
 <div className="relative aspect-square overflow-hidden bg-gradient-to-br from-rose-100 via-pink-50 to-purple-100">
+```
+
+```
   {gift.image_url ? (
     <img
       src={gift.image_url}
@@ -324,6 +558,7 @@ className="group overflow-hidden border bg-card transition-all duration-300 hove
   </div>
 
 </CardContent>
+```
 
   </Card>
 ))}
