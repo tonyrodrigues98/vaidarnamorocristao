@@ -90,10 +90,7 @@ function AdminPresentesPage() {
   const filteredGifts = useMemo(() => {
     return gifts.filter((gift) => {
       const text = `${gift.name} ${gift.description ?? ""}`.toLowerCase();
-
-      ```
-return text.includes(search.toLowerCase());
-```;
+      return text.includes(search.toLowerCase());
     });
   }, [gifts, search]);
 
