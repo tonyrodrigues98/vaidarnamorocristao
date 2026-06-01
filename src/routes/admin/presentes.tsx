@@ -166,7 +166,7 @@ function AdminPresentesPage() {
             </Button>
           </div>
 
-          <div className="mt-8 grid gap-4 md:grid-cols-3">
+          <div className="mt-8 grid gap-4 md:grid-cols-5">
             <Card className="border-white/20 bg-white/10 backdrop-blur">
               <CardContent className="p-5">
                 <div className="flex items-center justify-between">
@@ -312,7 +312,6 @@ function AdminPresentesPage() {
                     }}
                   />
                 </label>
-
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -656,7 +655,7 @@ function AdminPresentesPage() {
                     </div>
                   </div>
 
-                  <div className="mt-5 grid grid-cols-3 gap-2">
+                  <div className="mt-5 grid grid-cols-5 gap-2">
                     <Button size="sm" variant="outline" onClick={() => moveGift(gift, "up")}>
                       <ArrowUp className="h-4 w-4" />
                     </Button>
