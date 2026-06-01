@@ -183,29 +183,8 @@ return text.includes(search.toLowerCase());
         </div>
 
         <div className="mb-8 rounded-3xl border bg-card p-6 shadow-sm">
-  <div className="flex flex-col gap-4 lg:flex-row">
-    <div className="relative flex-1">
-      <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-
-      <Input
-        placeholder="Buscar presente..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="pl-10"
-      />
-    </div>
-
-    <Button variant="outline" onClick={load}>
-      <RefreshCw className="mr-2 h-4 w-4" />
-      Atualizar
-    </Button>
-
-    <Button onClick={() => setCreateOpen(true)}>
-      <Plus className="mr-2 h-4 w-4" />
-      Novo Presente
-    </Button>
-  </div>
-</div>
+          <div className="flex flex-col gap-4 lg:flex-row">
+            <div className="relative flex-1">
               <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
 
               <Input
@@ -215,10 +194,12 @@ return text.includes(search.toLowerCase());
                 className="pl-10"
               />
             </div>
+
             <Button variant="outline" onClick={load}>
               <RefreshCw className="mr-2 h-4 w-4" />
               Atualizar
             </Button>
+
             <Button onClick={() => setCreateOpen(true)}>
               <Plus className="mr-2 h-4 w-4" />
               Novo Presente
@@ -363,11 +344,7 @@ category: v as GiftCategory,
 
 >
 
-```
 <SelectTrigger>
-```
-
-```
   <SelectValue />
 </SelectTrigger>
 
@@ -379,8 +356,6 @@ category: v as GiftCategory,
   <SelectItem value="fun">Divertido</SelectItem>
   <SelectItem value="legendary">Lendário</SelectItem>
 </SelectContent>
-```
-
   </Select>
 
 <Select
@@ -394,11 +369,7 @@ rarity: v as GiftRarity,
 
 >
 
-```
 <SelectTrigger>
-```
-
-```
   <SelectValue />
 </SelectTrigger>
 
@@ -409,8 +380,6 @@ rarity: v as GiftRarity,
   <SelectItem value="legendary">Lendário</SelectItem>
   <SelectItem value="exclusive">Exclusivo</SelectItem>
 </SelectContent>
-```
-
   </Select>
 
 </div>
