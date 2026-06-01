@@ -845,6 +845,71 @@ function Admin() {
                   ))}
                 </div>
               )
+            ) : tab === "deactivated" ? (
+              <div className="space-y-4">
+                {rows.length === 0 ? (
+                  <div className="glass rounded-2xl p-10 text-center text-muted-foreground shadow-soft">
+                    Ninguém desativou ou solicitou exclusão.
+                  </div>
+                ) : (
+                  <div className="grid gap-4">
+                    {rows.map((r) => {
+                      const rec = r as Row & {
+                        deactivated_at: string | null;
+                        deletion_requested_at: string | null;
+                        deletion_scheduled_for: string | null;
+                      };
+                      const pendingDeletion = !!rec.deletion_requested_at;
+                      const fmt = (s: string | null) =>
+                        s ? new Date(s).toLocaleString("pt-BR") : "—";
+                      return (
+                        <div
+                          key={r.id}
+                          className="glass flex flex-col gap-4 rounded-2xl p-5 shadow-soft sm:flex-row"
+                        >
+                          <div className="h-24 w-24 shrink-0 overflow-hidden rounded-2xl bg-muted">
+                            {r.photo_url ? (
+                              <PhotoImg src={r.photo_url} alt="" className="h-full w-full object-cover" />
+                            ) : (
+                              <div className="flex h-full w-full items-center justify-center bg-gradient-love text-2xl text-white">
+                                {r.full_name.charAt(0)}
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <h3 className="text-lg font-semibold">
+                                {r.full_name}, {r.age}
+                              </h3>
+                              <span
+                                className={`rounded-full px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide ${
+                                  pendingDeletion
+                                    ? "bg-destructive/15 text-destructive"
+                                    : "bg-muted text-muted-foreground"
+                                }`}
+                              >
+                                {pendingDeletion ? "Exclusão solicitada" : "Desativada"}
+                              </span>
+                            </div>
+                            <p className="text-sm text-muted-foreground">
+                              {r.sex} · {r.city}/{r.state} · {r.church}
+                            </p>
+                            <div className="mt-2 grid gap-1 text-xs text-muted-foreground sm:grid-cols-2">
+                              <span>Desativada em: {fmt(rec.deactivated_at)}</span>
+                              <span>Exclusão solicitada em: {fmt(rec.deletion_requested_at)}</span>
+                              {pendingDeletion && (
+                                <span className="sm:col-span-2">
+                                  Exclusão agendada para: {fmt(rec.deletion_scheduled_for)}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
             ) : tab === "banned" ? (
               <div className="space-y-6">
                 <BannedAppealsPanel />
