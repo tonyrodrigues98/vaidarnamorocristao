@@ -105,17 +105,75 @@ function AdminPresentesPage() {
       <Header />
 
       <div className="mx-auto max-w-7xl p-6">
-        <div className="mb-8 flex items-center justify-between">
-          <div className="relative overflow-hidden rounded-3xl border bg-gradient-to-r from-pink-500 via-rose-500 to-purple-600 p-8 text-white">
-            <h1 className="text-3xl font-bold">🎁 Catálogo de Presentes</h1>
+        <div className="mb-8 overflow-hidden rounded-3xl border bg-gradient-to-r from-rose-500 via-pink-500 to-purple-600 p-8 text-white">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+            ```
+            <div>
+              <div className="mb-3 flex items-center gap-3">
+                <Gift className="h-8 w-8" />
 
-            <p className="text-muted-foreground">Gerencie presentes virtuais da plataforma</p>
+                <h1 className="text-4xl font-bold">Gestão de Presentes</h1>
+              </div>
+
+              <p className="max-w-2xl text-white/90">
+                Crie, edite e gerencie todos os presentes virtuais da plataforma.
+              </p>
+            </div>
+            <Button
+              size="lg"
+              variant="secondary"
+              onClick={() => setCreateOpen(true)}
+              className="bg-white text-black hover:bg-white/90"
+            >
+              <Plus className="mr-2 h-5 w-5" />
+              Novo Presente
+            </Button>
+            ```
           </div>
 
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            Novo Presente
-          </Button>
+          <div className="mt-8 grid gap-4 md:grid-cols-3">
+            ```
+            <Card className="border-white/20 bg-white/10 backdrop-blur">
+              <CardContent className="p-5">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-white/70">Total</p>
+
+                    <h3 className="text-3xl font-bold">{gifts.length}</h3>
+                  </div>
+
+                  <Gift className="h-8 w-8" />
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="border-white/20 bg-white/10 backdrop-blur">
+              <CardContent className="p-5">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-white/70">Ativos</p>
+
+                    <h3 className="text-3xl font-bold">{gifts.filter((g) => g.active).length}</h3>
+                  </div>
+
+                  <Eye className="h-8 w-8" />
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="border-white/20 bg-white/10 backdrop-blur">
+              <CardContent className="p-5">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-white/70">Ocultos</p>
+
+                    <h3 className="text-3xl font-bold">{gifts.filter((g) => !g.active).length}</h3>
+                  </div>
+
+                  <EyeOff className="h-8 w-8" />
+                </div>
+              </CardContent>
+            </Card>
+            ```
+          </div>
         </div>
 
         <div className="mb-6 rounded-3xl border bg-card p-6">
