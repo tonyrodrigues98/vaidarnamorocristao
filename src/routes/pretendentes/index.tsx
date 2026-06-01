@@ -249,11 +249,34 @@ function List() {
   }, [profiles, search, advancedMap, affinityByProfile, myPrefs.state]);
 
   const topMatches = useMemo(() => {
-    return [...filtered]
-      .sort((a, b) => (affinityByProfile[b.id]?.length ?? 0) - (affinityByProfile[a.id]?.length ?? 0))
-      .slice(0, 10);
-  }, [filtered, affinityByProfile]);
+    const nearbyProfiles = useMemo(() => {
+  return filtered
+    .filter((p) => p.state === myPrefs.state)
+    .slice(0, 10);
+}, [filtered, myPrefs.state]);
 
+const churchProfiles = useMemo(() => {
+  return filtered
+    .filter((p) =>
+      p.church &&
+      myAdvanced?.church &&
+      p.church
+        .toLowerCase()
+        .includes(myAdvanced.church.toLowerCase())
+    )
+    .slice(0, 10);
+}, [filtered, myAdvanced]);
+
+const newestProfiles = useMemo(() => {
+  return [...filtered]
+    .sort((a, b) =>
+      (b.created_at ?? "").localeCompare(
+        a.created_at ?? ""
+      )
+    )
+    .slice(0, 10);
+}, [filtered]);
+    
   function isSuggestion(p: Profile): boolean {
     if (!myPrefs.state) return false;
     if (p.state !== myPrefs.state) return false;
