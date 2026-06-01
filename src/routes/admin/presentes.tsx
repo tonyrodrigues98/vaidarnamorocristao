@@ -284,11 +284,49 @@ function AdminPresentesPage() {
                   />
                 </label>
 
-                {form.image_url && (
-                  <div className="overflow-hidden rounded-2xl border">
-                    <img src={form.image_url} alt="preview" className="h-56 w-full object-cover" />
-                  </div>
-                )}
+                <div className="space-y-3">
+                  <label className="text-sm font-medium">Imagem do presente</label>
+
+                  <label className="flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed p-6 transition hover:bg-muted/50">
+                    <Upload className="mb-2 h-8 w-8 text-muted-foreground" />
+
+                    <span>Alterar imagem</span>
+
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+
+                        if (!file) return;
+
+                        try {
+                          setSaving(true);
+
+                          const fileName = `${Date.now()}-${file.name}`;
+
+                          const { error } = await supabase.storage.from("gift-images").upload(fileName, file);
+
+                          if (error) throw error;
+
+                          const { data } = supabase.storage.from("gift-images").getPublicUrl(fileName);
+
+                          setForm({
+                            ...form,
+                            image_url: data.publicUrl,
+                          });
+                        } finally {
+                          setSaving(false);
+                        }
+                      }}
+                    />
+                  </label>
+
+                  {form.image_url && (
+                    <img src={form.image_url} alt="preview" className="h-56 w-full rounded-xl object-cover" />
+                  )}
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -439,6 +477,67 @@ function AdminPresentesPage() {
               {form.image_url && (
                 <img src={form.image_url} alt="preview" className="h-48 w-full rounded-xl object-cover" />
               )}
+
+              <div className="grid grid-cols-2 gap-4">
+                <Select
+                  value={form.category}
+                  onValueChange={(v) =>
+                    setForm({
+                      ...form,
+                      category: v as GiftCategory,
+                    })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+
+                  <SelectContent>
+                    <SelectItem value="romantic">Romântico</SelectItem>
+                    <SelectItem value="spiritual">Espiritual</SelectItem>
+                    <SelectItem value="caring">Carinhoso</SelectItem>
+                    <SelectItem value="friendship">Amizade</SelectItem>
+                    <SelectItem value="fun">Divertido</SelectItem>
+                    <SelectItem value="legendary">Lendário</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                <Select
+                  value={form.rarity}
+                  onValueChange={(v) =>
+                    setForm({
+                      ...form,
+                      rarity: v as GiftRarity,
+                    })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+
+                  <SelectContent>
+                    <SelectItem value="common">Comum</SelectItem>
+                    <SelectItem value="rare">Raro</SelectItem>
+                    <SelectItem value="epic">Épico</SelectItem>
+                    <SelectItem value="legendary">Lendário</SelectItem>
+                    <SelectItem value="exclusive">Exclusivo</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <span>Ativo</span>
+
+                <Switch
+                  checked={form.active}
+                  onCheckedChange={(v) =>
+                    setForm({
+                      ...form,
+                      active: v,
+                    })
+                  }
+                />
+              </div>
 
               <Input
                 type="number"
