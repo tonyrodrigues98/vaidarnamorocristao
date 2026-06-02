@@ -139,67 +139,32 @@ function AdminPresentesPage() {
     }
   }
 
-async function reorderGifts(
-  sourceId: string,
-  targetId: string
-) {
-  const items = [...gifts];
+  async function reorderGifts(sourceId: string, targetId: string) {
+    const items = [...gifts];
 
-  const sourceIndex =
-    items.findIndex(
-      (g) => g.id === sourceId
-    );
+    const sourceIndex = items.findIndex((g) => g.id === sourceId);
 
-  const targetIndex =
-    items.findIndex(
-      (g) => g.id === targetId
-    );
+    const targetIndex = items.findIndex((g) => g.id === targetId);
 
-  if (
-    sourceIndex === -1 ||
-    targetIndex === -1
-  ) {
-    return;
-  }
-
-  const [moved] =
-    items.splice(
-      sourceIndex,
-      1
-    );
-
-  items.splice(
-    targetIndex,
-    0,
-    moved
-  );
-
-  try {
-
-    for (
-      let i = 0;
-      i < items.length;
-      i++
-    ) {
-
-      await updateGift(
-        items[i].id,
-        {
-          sort_order: i,
-        }
-      );
-
+    if (sourceIndex === -1 || targetIndex === -1) {
+      return;
     }
 
-    await load();
+    const [moved] = items.splice(sourceIndex, 1);
 
-  } catch (err) {
+    items.splice(targetIndex, 0, moved);
 
-    console.error(err);
-
+    try {
+      for (let i = 0; i < items.length; i++) {
+        await updateGift(items[i].id, {
+          sort_order: i,
+        });
+      }
+    } catch (err) {
+      console.error(err);
+    }
   }
-}
-  
+
   return (
     <div className="min-h-screen bg-background">
       <Header />

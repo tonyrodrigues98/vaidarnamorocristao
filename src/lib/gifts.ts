@@ -185,16 +185,28 @@ export async function createGift(payload: {
   rarity: GiftRarity;
   active?: boolean;
 }) {
+  const rarityOrder = {
+    common: 0,
+    rare: 1000,
+    epic: 2000,
+    legendary: 3000,
+    exclusive: 4000,
+  };
+
+  const base = rarityOrder[payload.rarity];
+
   const { data: lastGift } = await supabase
     .from("virtual_gifts" as never)
     .select("sort_order")
+    .gte("sort_order", base)
+    .lt("sort_order", base + 1000)
     .order("sort_order", {
       ascending: false,
     })
     .limit(1)
     .maybeSingle();
 
-  const nextSortOrder = ((lastGift as any)?.sort_order ?? 0) + 1;
+  const nextSortOrder = ((lastGift as any)?.sort_order ?? base - 1) + 1;
 
   const { data, error } = await supabase
     .from("virtual_gifts" as never)
