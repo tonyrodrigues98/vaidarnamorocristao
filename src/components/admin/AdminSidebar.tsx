@@ -9,6 +9,7 @@ import {
   XCircle,
   Ban,
   UserX,
+  Heart,
 } from "lucide-react";
 
 import {
@@ -32,7 +33,8 @@ export type AdminTab =
   | "users"
   | "pre_cadastros"
   | "restricted_words"
-  | "flags";
+  | "flags"
+  | "interests";
 
 interface AdminSidebarProps {
   currentTab: AdminTab;
@@ -100,6 +102,11 @@ export function AdminSidebar({
       key: "flags",
       label: "Sinalizações",
       icon: MessageSquareWarning,
+    },
+    {
+      key: "interests",
+      label: "Interesses & Matches",
+      icon: Heart,
     },
   ] as const;
 
