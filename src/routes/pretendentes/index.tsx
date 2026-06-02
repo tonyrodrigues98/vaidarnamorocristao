@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { PretendenteCarousel } from "./PretendenteCarousel";
 import { PretendenteFeaturedCard } from "./PretendenteFeaturedCard";
 import { useAuth } from "@/lib/auth";
+import { getActiveCommitmentByUser,} from "@/lib/commitments";
 import { Header } from "@/components/layout/Header";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -76,6 +77,7 @@ function List() {
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loadingList, setLoadingList] = useState(true);
   const [myStatus, setMyStatus] = useState<string | null>(null);
+  const [activeCommitment, setActiveCommitment] = useState<any>(null);
   const [mySex, setMySex] = useState<"masculino" | "feminino" | null>(null);
   const [myPrefs, setMyPrefs] = useState<MyPrefs>({ state: null, ageMin: null, ageMax: null });
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -103,6 +105,14 @@ function List() {
 
   useEffect(() => {
     if (!user) return;
+    const commitment =
+  await getActiveCommitmentByUser(
+    user.id
+  );
+
+setActiveCommitment(
+  commitment
+);
     markHomeChecklistStep(user.id, "explore");
     (async () => {
       const { data: me } = await supabase.from("profiles").select("status, sex, state").eq("id", user.id).maybeSingle();
@@ -295,6 +305,39 @@ function List() {
           </p>
         </div>
 
+        {activeCommitment ? (
+  <div className="glass mt-8 rounded-2xl p-12 text-center shadow-soft">
+
+    <h2 className="text-3xl font-semibold">
+      💍 Propósito Firmado
+    </h2>
+
+    <p className="mt-3 text-muted-foreground">
+      Você firmou propósito com outra pessoa.
+    </p>
+
+    <p className="mt-2 text-sm text-muted-foreground">
+      Enquanto o propósito estiver ativo,
+      novos pretendentes não são exibidos.
+    </p>
+
+    <Button
+      asChild
+      className="mt-6"
+    >
+      <Link
+        to="/proposito/$matchId"
+        params={{
+          matchId:
+            activeCommitment.match_id,
+        }}
+      >
+        Ver Página do Casal
+      </Link>
+    </Button>
+
+  </div>
+) : (
         {myStatus !== "approved" ? (
           <div className="glass mt-8 rounded-2xl p-8 text-center shadow-soft">
             <p className="text-muted-foreground">Você precisa ter o perfil aprovado para ver os pretendentes.</p>
@@ -568,5 +611,5 @@ function AffinityChips({ chips }: { chips: AffinityChip[] }) {
         </span>
       )}
     </div>
-  );
+ ) );
 }
