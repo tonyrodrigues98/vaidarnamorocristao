@@ -163,7 +163,6 @@ export function CommitmentProgressCard({ matchId }: CommitmentProgressCardProps)
     </Button>
 
   </div>
-)
         ) : commitment?.status === "pending" && commitment.requested_by !== user?.id ? (
           <div className="flex gap-2">
             <Button onClick={handleAccept}>Aceitar</Button>
