@@ -57,9 +57,14 @@ function PresentesPage() {
         <div
           className="absolute inset-0"
           style={{
-            background:
-              "linear-gradient(135deg, #F7D7E6, #F4DFF8, #EDE9FE)",
-          }}
+background:
+linear-gradient(
+135deg,
+#FF5FA2,
+#FF7BC3,
+#A855F7,
+#6D5BFF
+)          }}
         />
         {/* blur orbs */}
         <div
