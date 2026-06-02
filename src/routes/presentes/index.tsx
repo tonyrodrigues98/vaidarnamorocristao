@@ -32,18 +32,19 @@ function PresentesPage() {
   const [animation, setAnimation] = useState<VirtualGift | null>(null);
 
   useEffect(() => {
-    listGifts().then(setGifts).catch(() => setGifts([]));
+    listGifts()
+      .then(setGifts)
+      .catch(() => setGifts([]));
   }, []);
 
   useEffect(() => {
     if (!user) return;
-    getMyCoins().then((c) => setBalance(c.balance)).catch(() => {});
+    getMyCoins()
+      .then((c) => setBalance(c.balance))
+      .catch(() => {});
   }, [user]);
 
-  const filtered = useMemo(
-    () => (cat === "all" ? gifts : gifts.filter((g) => g.category === cat)),
-    [gifts, cat],
-  );
+  const filtered = useMemo(() => (cat === "all" ? gifts : gifts.filter((g) => g.category === cat)), [gifts, cat]);
 
   if (!loading && !user) return <Navigate to="/auth/login" />;
 
@@ -97,11 +98,14 @@ function PresentesPage() {
             </p>
           </div>
           <div className="hidden text-7xl drop-shadow-2xl sm:flex sm:gap-2">
-            <span style={{ animation: "gift-float 3s ease-in-out infinite" }}>🎁</span>
-            <span style={{ animation: "gift-float 3.4s ease-in-out infinite 0.3s" }}>💖</span>
-            <span style={{ animation: "gift-float 2.8s ease-in-out infinite 0.6s" }}>✨</span>
+            <span style={{ animation: "gift-float 3s ease-in-out infinite" }}>Gift,</span>
+            <span style={{ animation: "gift-float 3.4s ease-in-out infinite 0.3s" }}>Sparkles,</span>
+            <span style={{ animation: "gift-float 2.8s ease-in-out infinite 0.6s" }}>Receipt</span>
           </div>
-          <div className="text-6xl drop-shadow-2xl sm:hidden" style={{ animation: "gift-float 3s ease-in-out infinite" }}>
+          <div
+            className="text-6xl drop-shadow-2xl sm:hidden"
+            style={{ animation: "gift-float 3s ease-in-out infinite" }}
+          >
             🎁
           </div>
         </div>
@@ -117,7 +121,9 @@ function PresentesPage() {
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">Saldo atual</p>
-                <p className="text-2xl font-bold leading-tight">{balance} <span className="text-sm font-medium text-muted-foreground">moedas</span></p>
+                <p className="text-2xl font-bold leading-tight">
+                  {balance} <span className="text-sm font-medium text-muted-foreground">moedas</span>
+                </p>
               </div>
             </div>
             <Button asChild variant="outline" size="sm" className="rounded-full">
