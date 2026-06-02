@@ -98,7 +98,7 @@ export function SendGiftModal({ open, onOpenChange, gift, receiverId, balance, o
   className="relative border-b px-6 pb-5 pt-7"
   style={{
     background:
-      "linear-gradient(180deg, #FFF8FB 0%, #F8F4FF 100%)",
+      "linear-gradient(180deg, #FAF7FF 0%, #F3EEFF 100%)",
   }}
 >
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_30%_15%,rgba(255,255,255,0.35),transparent_60%)]" />
@@ -127,6 +127,8 @@ export function SendGiftModal({ open, onOpenChange, gift, receiverId, balance, o
   <CoinIcon className="h-4 w-4" />
   {gift.price_coins} moedas
 </div>
+              <CoinIcon className="h-4 w-4" /> {gift.price_coins} moedas
+            </div>
           </div>
         </div>
 
@@ -161,7 +163,7 @@ export function SendGiftModal({ open, onOpenChange, gift, receiverId, balance, o
               value={msg}
               onChange={(e) => setMsg(e.target.value)}
               placeholder="Escreva algo carinhoso..."
-              className="
+              className="className="
   mt-1.5
   border-zinc-200
   bg-zinc-50
