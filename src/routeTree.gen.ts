@@ -38,6 +38,7 @@ import { Route as BlogIndexRouteImport } from './routes/blog.index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as SuporteAjudaRouteImport } from './routes/suporte/ajuda'
 import { Route as SuporteIdRouteImport } from './routes/suporte/$id'
+import { Route as PropositoMatchIdRouteImport } from './routes/proposito/$matchId'
 import { Route as PretendentesIdRouteImport } from './routes/pretendentes/$id'
 import { Route as OnboardingEtapa2RouteImport } from './routes/onboarding/etapa-2'
 import { Route as OnboardingEtapa1RouteImport } from './routes/onboarding/etapa-1'
@@ -198,6 +199,11 @@ const SuporteIdRoute = SuporteIdRouteImport.update({
   path: '/suporte/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PropositoMatchIdRoute = PropositoMatchIdRouteImport.update({
+  id: '/proposito/$matchId',
+  path: '/proposito/$matchId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PretendentesIdRoute = PretendentesIdRouteImport.update({
   id: '/pretendentes/$id',
   path: '/pretendentes/$id',
@@ -304,6 +310,7 @@ export interface FileRoutesByFullPath {
   '/onboarding/etapa-1': typeof OnboardingEtapa1Route
   '/onboarding/etapa-2': typeof OnboardingEtapa2Route
   '/pretendentes/$id': typeof PretendentesIdRoute
+  '/proposito/$matchId': typeof PropositoMatchIdRoute
   '/suporte/$id': typeof SuporteIdRoute
   '/suporte/ajuda': typeof SuporteAjudaRoute
   '/admin/': typeof AdminIndexRoute
@@ -349,6 +356,7 @@ export interface FileRoutesByTo {
   '/onboarding/etapa-1': typeof OnboardingEtapa1Route
   '/onboarding/etapa-2': typeof OnboardingEtapa2Route
   '/pretendentes/$id': typeof PretendentesIdRoute
+  '/proposito/$matchId': typeof PropositoMatchIdRoute
   '/suporte/$id': typeof SuporteIdRoute
   '/suporte/ajuda': typeof SuporteAjudaRoute
   '/admin': typeof AdminIndexRoute
@@ -395,6 +403,7 @@ export interface FileRoutesById {
   '/onboarding/etapa-1': typeof OnboardingEtapa1Route
   '/onboarding/etapa-2': typeof OnboardingEtapa2Route
   '/pretendentes/$id': typeof PretendentesIdRoute
+  '/proposito/$matchId': typeof PropositoMatchIdRoute
   '/suporte/$id': typeof SuporteIdRoute
   '/suporte/ajuda': typeof SuporteAjudaRoute
   '/admin/': typeof AdminIndexRoute
@@ -442,6 +451,7 @@ export interface FileRouteTypes {
     | '/onboarding/etapa-1'
     | '/onboarding/etapa-2'
     | '/pretendentes/$id'
+    | '/proposito/$matchId'
     | '/suporte/$id'
     | '/suporte/ajuda'
     | '/admin/'
@@ -487,6 +497,7 @@ export interface FileRouteTypes {
     | '/onboarding/etapa-1'
     | '/onboarding/etapa-2'
     | '/pretendentes/$id'
+    | '/proposito/$matchId'
     | '/suporte/$id'
     | '/suporte/ajuda'
     | '/admin'
@@ -532,6 +543,7 @@ export interface FileRouteTypes {
     | '/onboarding/etapa-1'
     | '/onboarding/etapa-2'
     | '/pretendentes/$id'
+    | '/proposito/$matchId'
     | '/suporte/$id'
     | '/suporte/ajuda'
     | '/admin/'
@@ -578,6 +590,7 @@ export interface RootRouteChildren {
   OnboardingEtapa1Route: typeof OnboardingEtapa1Route
   OnboardingEtapa2Route: typeof OnboardingEtapa2Route
   PretendentesIdRoute: typeof PretendentesIdRoute
+  PropositoMatchIdRoute: typeof PropositoMatchIdRoute
   SuporteIdRoute: typeof SuporteIdRoute
   SuporteAjudaRoute: typeof SuporteAjudaRoute
   AdminIndexRoute: typeof AdminIndexRoute
@@ -794,6 +807,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SuporteIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/proposito/$matchId': {
+      id: '/proposito/$matchId'
+      path: '/proposito/$matchId'
+      fullPath: '/proposito/$matchId'
+      preLoaderRoute: typeof PropositoMatchIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/pretendentes/$id': {
       id: '/pretendentes/$id'
       path: '/pretendentes/$id'
@@ -930,6 +950,7 @@ const rootRouteChildren: RootRouteChildren = {
   OnboardingEtapa1Route: OnboardingEtapa1Route,
   OnboardingEtapa2Route: OnboardingEtapa2Route,
   PretendentesIdRoute: PretendentesIdRoute,
+  PropositoMatchIdRoute: PropositoMatchIdRoute,
   SuporteIdRoute: SuporteIdRoute,
   SuporteAjudaRoute: SuporteAjudaRoute,
   AdminIndexRoute: AdminIndexRoute,

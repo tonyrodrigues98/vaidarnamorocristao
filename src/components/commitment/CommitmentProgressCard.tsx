@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "@tanstack/react-router";
 import { Heart, HeartHandshake, CheckCircle2, Lock, Gem } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
@@ -129,12 +130,40 @@ export function CommitmentProgressCard({ matchId }: CommitmentProgressCardProps)
         </div>
 
         {commitment?.status === "active" ? (
-          <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3">
-            <div className="flex items-center gap-2">
-              <Gem className="h-4 w-4 text-emerald-600" />
-              <span className="font-semibold text-emerald-700">Propósito Firmado</span>
-            </div>
-          </div>
+  <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
+
+    <div className="flex items-center gap-2">
+
+      <Gem className="h-4 w-4 text-emerald-600" />
+
+      <span className="font-semibold text-emerald-700">
+        Propósito Firmado
+      </span>
+
+    </div>
+
+    <p className="mt-2 text-sm text-emerald-700/80">
+      O propósito foi aceito e está ativo.
+    </p>
+
+    <Button
+      asChild
+      className="mt-4 w-full gap-2"
+      variant="outline"
+    >
+      <Link
+        to="/proposito/$matchId"
+        params={{
+          matchId,
+        }}
+      >
+        <Gem className="h-4 w-4" />
+        Ver Página do Casal
+      </Link>
+    </Button>
+
+  </div>
+)
         ) : commitment?.status === "pending" && commitment.requested_by !== user?.id ? (
           <div className="flex gap-2">
             <Button onClick={handleAccept}>Aceitar</Button>
