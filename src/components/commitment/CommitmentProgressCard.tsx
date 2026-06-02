@@ -19,6 +19,9 @@ import { supabase } from "@/integrations/supabase/client";
 
 import {
   createCommitmentRequest,
+  getPendingCommitment,
+  acceptCommitment,
+  rejectCommitment,
 } from "@/lib/commitments";
 
 import { toast } from "sonner";
@@ -46,7 +49,11 @@ const { user } = useAuth();
 
 const [creating, setCreating] =
   useState(false);  
+const [commitment, setCommitment] =
+  useState<any>(null);
 
+const [loadingCommitment, setLoadingCommitment] =
+  useState(true);
 const [progress, setProgress] =
 useState<CommitmentProgress | null>(
 null
@@ -89,6 +96,71 @@ return () => {
 };
 }, [matchId]);
 
+useEffect(() => {
+
+  let mounted = true;
+
+  async function loadCommitment() {
+
+    try {
+
+      const data =
+        await getPendingCommitment(
+          matchId
+        );
+
+      if (!mounted) return;
+
+      setCommitment(data);
+
+    } catch (err) {
+
+      console.error(err);
+
+    } finally {
+
+      if (mounted) {
+        setLoadingCommitment(false);
+      }
+
+    }
+
+  }
+
+  loadCommitment();
+async function handleAccept() {
+
+  if (!commitment) return;
+
+  await acceptCommitment(
+    commitment.id
+  );
+
+  const updated =
+    await getPendingCommitment(
+      matchId
+    );
+
+  setCommitment(updated);
+}
+
+async function handleReject() {
+
+  if (!commitment) return;
+
+  await rejectCommitment(
+    commitment.id
+  );
+
+  setCommitment(null);
+}
+  
+  return () => {
+    mounted = false;
+  };
+
+}, [matchId]);
+  
   async function handleCommitment() {
 
   if (!user) return;
@@ -206,6 +278,47 @@ return ( <Card className="border-primary/20 bg-gradient-to-br from-background to
     </div>
 
     {progress.canCommit ? (
+  if (
+  commitment?.status ===
+  "active"
+) {
+  <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3">
+
+  <div className="flex items-center gap-2">
+
+    <Gem className="h-4 w-4 text-emerald-600" />
+
+    <span className="font-semibold text-emerald-700">
+      Propósito Firmado
+    </span>
+
+  </div>
+
+</div>
+  commitment &&
+commitment.status === "pending" &&
+commitment.requested_by !== user?.id
+  <Button
+  onClick={handleAccept}
+>
+  Aceitar
+</Button>
+
+<Button
+  variant="outline"
+  onClick={handleReject}
+>
+  Recusar
+</Button>
+  commitment &&
+commitment.requested_by === user?.id
+  <Button
+  onClick={handleCommitment}
+>
+  <HeartHandshake className="h-4 w-4" />
+
+  Firmar Propósito
+</Button>
       <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3">
 
   <div className="mb-3 flex items-center gap-2">
@@ -230,6 +343,7 @@ return ( <Card className="border-primary/20 bg-gradient-to-br from-background to
 
 </div>
 
+      </div>
     ) : (
       <div className="rounded-xl border border-border bg-muted/30 p-3">
 
