@@ -264,6 +264,7 @@ function Chat() {
       )}
 
       <main ref={scrollRef} className="mx-auto w-full max-w-3xl flex-1 space-y-5 overflow-y-auto px-4 py-8">
+        <CommitmentProgressCard matchId={matchId} />
         {messages.length === 0 && (
           <p className="mt-12 text-center text-sm text-muted-foreground">Comece a conversa com graça e respeito 💗</p>
         )}
