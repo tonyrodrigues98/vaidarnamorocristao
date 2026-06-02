@@ -73,6 +73,15 @@ import { UserBadges, invalidateUserBadges } from "@/components/UserBadges";
 import { BADGE_META, type BadgeCode } from "@/lib/badges";
 import { Award as AwardIcon } from "lucide-react";
 import { BibleVerseSelector, type BibleSelection } from "@/components/BibleVerseSelector";
+import {
+  SidebarProvider,
+  SidebarInset,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
+
+import {
+  AdminSidebar,
+} from "@/components/admin/AdminSidebar";
 
 type Row = Database["public"]["Tables"]["profiles"]["Row"];
 type ProfileUpdate = Database["public"]["Tables"]["profiles"]["Update"];
@@ -514,7 +523,19 @@ function Admin() {
   return (
     <div className="min-h-screen">
       <Header />
-      <main className="mx-auto max-w-6xl px-4 py-10">
+      <SidebarProvider>
+
+  <AdminSidebar
+    currentTab={tab}
+    availableTabs={availableTabs}
+    onTabChange={(value) =>
+      setTab(value)
+    }
+  />
+
+  <SidebarInset>
+
+    <main className="px-4 py-10">
         <div className="animate-fade-up">
           <h1 className="text-4xl font-semibold">Painel administrativo</h1>
           <p className="mt-1 text-muted-foreground">
@@ -545,43 +566,31 @@ function Admin() {
         </div>
 
         <Tabs value={tab} onValueChange={(v) => setTab(v as TabKey)} className="mt-8">
-          <TabsList className="flex h-auto w-full flex-wrap justify-start gap-1 overflow-x-auto">
-            {availableTabs.includes("pending") && <TabsTrigger value="pending">Pendentes</TabsTrigger>}
-            {availableTabs.includes("approved") && <TabsTrigger value="approved">Aprovados</TabsTrigger>}
-            {availableTabs.includes("rejected") && <TabsTrigger value="rejected">Rejeitados</TabsTrigger>}
-            {availableTabs.includes("banned") && <TabsTrigger value="banned">Banidos</TabsTrigger>}
+          
+            {availableTabs.includes("pending") && }
+            {availableTabs.includes("approved") && }
+            {availableTabs.includes("rejected") && }
+            {availableTabs.includes("banned") && }
             {availableTabs.includes("deactivated") && (
-              <TabsTrigger value="deactivated">Desativados</TabsTrigger>
+              
             )}
             {availableTabs.includes("reports") && (
-              <TabsTrigger value="reports">
-                <Flag className="mr-1 h-3 w-3" /> Denúncias
-              </TabsTrigger>
+              
             )}
             {availableTabs.includes("posts") && (
-              <TabsTrigger value="posts">
-                <Newspaper className="mr-1 h-3 w-3" /> Texto Diário
-              </TabsTrigger>
+              
             )}
             {availableTabs.includes("users") && (
-              <TabsTrigger value="users">
-                <UsersIcon className="mr-1 h-3 w-3" /> Usuários
-              </TabsTrigger>
+              
             )}
             {availableTabs.includes("pre_cadastros") && (
-              <TabsTrigger value="pre_cadastros">
-                <ClipboardList className="mr-1 h-3 w-3" /> Pré-cadastros
-              </TabsTrigger>
+              
             )}
             {availableTabs.includes("restricted_words") && (
-              <TabsTrigger value="restricted_words">
-                <ShieldX className="mr-1 h-3 w-3" /> Palavras Restritas
-              </TabsTrigger>
+              
             )}
             {availableTabs.includes("flags") && (
-              <TabsTrigger value="flags">
-                <MessageSquareWarning className="mr-1 h-3 w-3" /> Sinalizações
-              </TabsTrigger>
+             
             )}
           </TabsList>
 
@@ -1040,6 +1049,10 @@ function Admin() {
           </TabsContent>
         </Tabs>
       </main>
+
+  </SidebarInset>
+
+</SidebarProvider>
     </div>
   );
 }
