@@ -285,6 +285,9 @@ function Admin() {
     if (status === "flags" || status === "restricted_words") {
       return;
     }
+    if (status === "interests") {
+      return;
+    }
     if (status === "deactivated") {
       const { data, error } = await supabase
         .from("profiles")
