@@ -82,6 +82,7 @@ import {
 import {
   AdminSidebar,
 } from "@/components/admin/AdminSidebar";
+import { InterestsPanel } from "@/components/admin/InterestsPanel";
 
 type Row = Database["public"]["Tables"]["profiles"]["Row"];
 type ProfileUpdate = Database["public"]["Tables"]["profiles"]["Update"];
@@ -148,7 +149,8 @@ function Admin() {
     | "users"
     | "pre_cadastros"
     | "restricted_words"
-    | "flags";
+    | "flags"
+    | "interests";
 
   const availableTabs = useMemo<TabKey[]>(() => {
     if (isSuperAdmin)
@@ -164,6 +166,7 @@ function Admin() {
         "pre_cadastros",
         "restricted_words",
         "flags",
+        "interests",
       ];
     if (isAdmin) return ["pending", "approved", "rejected", "banned", "deactivated", "reports", "posts", "restricted_words", "flags"];
     if (isApresentador) return ["pre_cadastros", "reports", "posts", "restricted_words", "flags"];
@@ -280,6 +283,9 @@ function Admin() {
     // Tabs com painéis próprios (fazem fetch internamente).
     // Evita query inválida em profiles.status com valores que não são enum.
     if (status === "flags" || status === "restricted_words") {
+      return;
+    }
+    if (status === "interests") {
       return;
     }
     if (status === "deactivated") {
@@ -578,10 +584,13 @@ function Admin() {
             {availableTabs.includes("pre_cadastros") && <TabsTrigger value="pre_cadastros">Pré-cadastros</TabsTrigger>}
             {availableTabs.includes("restricted_words") && <TabsTrigger value="restricted_words">Palavras restritas</TabsTrigger>}
             {availableTabs.includes("flags") && <TabsTrigger value="flags">Sinalizações</TabsTrigger>}
+            {availableTabs.includes("interests") && <TabsTrigger value="interests">Interesses & Matches</TabsTrigger>}
           </TabsList>
 
           <TabsContent value={tab} className="mt-6">
-            {tab === "users" ? (
+            {tab === "interests" ? (
+              <InterestsPanel />
+            ) : tab === "users" ? (
               <UsersPanel
                 users={users}
                 busy={busy}
