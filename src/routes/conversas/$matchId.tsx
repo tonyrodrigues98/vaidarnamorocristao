@@ -2,6 +2,7 @@ import { friendlyError } from "@/lib/errors";
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { RequireApproved } from "@/components/RequireApproved";
 import { useEffect, useRef, useState } from "react";
+import { getActiveCommitmentByUser } from "@/lib/commitments";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
@@ -47,6 +48,8 @@ function Chat() {
   const { matchId } = Route.useParams();
   const { user, loading } = useAuth();
   const [partner, setPartner] = useState<Partner | null>(null);
+  const [partnerCommitted, setPartnerCommitted] = useState(false);
+  const [partnerCommitmentMatchId, setPartnerCommitmentMatchId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
@@ -87,6 +90,13 @@ function Chat() {
         .eq("id", partnerId)
         .maybeSingle();
       setPartner(p as Partner | null);
+      if (partnerId) {
+        const active = await getActiveCommitmentByUser(partnerId);
+
+        setPartnerCommitted(!!active);
+
+        setPartnerCommitmentMatchId(active?.match_id ?? null);
+      }
       const { data: msgs } = await supabase.from("messages").select("*").eq("match_id", matchId).order("created_at");
       setMessages((msgs ?? []) as Msg[]);
       // mark received as read via SECURITY DEFINER RPC (only updates read_at)
@@ -238,14 +248,39 @@ function Chat() {
                 size={40}
                 frameId={partner.equipped_frame_id ?? null}
                 auraId={partner.equipped_aura_id ?? null}
+                isCommitted={partnerCommitted}
               />
             </div>
             <div className="flex-1">
               <h2 className="flex items-center gap-1.5 font-semibold leading-none hover:underline">
                 {partner.full_name?.split(" ")[0] ?? "—"}
+
                 {partner.verified && <VerifiedBadge size="sm" />}
               </h2>
-              <p className="text-[11px] text-muted-foreground">ver perfil</p>
+
+              {partnerCommitted ? (
+                <div className="mt-1 flex items-center gap-2">
+                  <span className="text-[11px] font-medium text-emerald-600">Em Propósito</span>
+
+                  {partnerCommitmentMatchId && (
+                    <Link
+                      to="/proposito/$matchId"
+                      params={{
+                        matchId: partnerCommitmentMatchId,
+                      }}
+                      className="
+            text-[11px]
+            text-primary
+            hover:underline
+          "
+                    >
+                      Ver Página do Casal
+                    </Link>
+                  )}
+                </div>
+              ) : (
+                <p className="text-[11px] text-muted-foreground">ver perfil</p>
+              )}
             </div>
           </Link>
         ) : (

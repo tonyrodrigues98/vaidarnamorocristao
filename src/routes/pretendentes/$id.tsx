@@ -32,6 +32,7 @@ import {
   Cake,
   Target,
   Users2,
+  Gem,
 } from "lucide-react";
 import { RoleBadge } from "@/components/RoleBadge";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
@@ -85,7 +86,7 @@ function Detail() {
   const [blocked, setBlocked] = useState(false);
   const [busy, setBusy] = useState(false);
   const [hasCommitment, setHasCommitment] = useState(false);
-  const [profileCommitted, setProfileCommitted,] = useState(false);
+  const [profileCommitted, setProfileCommitted] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
   const [reportReason, setReportReason] = useState("");
   const [reportAlsoBlock, setReportAlsoBlock] = useState(true);
@@ -108,13 +109,13 @@ function Detail() {
     })();
   }, [id]);
 
-    useEffect(() => {
-      if (!user) return;
-      (async () => {
-        const active = await getActiveCommitmentByUser(user.id);
-        setHasCommitment(!!active);
-      })();
-    }, [user]);
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      const active = await getActiveCommitmentByUser(user.id);
+      setHasCommitment(!!active);
+    })();
+  }, [user]);
 
   useEffect(() => {
     if (!user) return;
@@ -395,45 +396,48 @@ function Detail() {
             ) : null}
           </div>
         </div>
-{profileCommitted && (
-  <div
-    className="
+        {profileCommitted && (
+          <div
+            className="
       mt-6
-      rounded-2xl
+      overflow-hidden
+      rounded-3xl
       border
-      border-emerald-200
-      bg-gradient-to-r
+      border-emerald-200/60
+      bg-gradient-to-br
       from-emerald-50
-      to-emerald-100
-      p-5
+      via-white
+      to-emerald-50
+      p-6
       shadow-soft
     "
-  >
+          >
+            <div className="flex items-start gap-4">
+              <div
+                className="
+          flex
+          h-12
+          w-12
+          shrink-0
+          items-center
+          justify-center
+          rounded-2xl
+          bg-emerald-100
+        "
+              >
+                <Gem className="h-6 w-6 text-emerald-600" />
+              </div>
 
-    <div className="flex items-center gap-3">
+              <div className="flex-1">
+                <h3 className="font-semibold text-emerald-800">Propósito Firmado</h3>
 
-      <div className="text-2xl">
-        💍
-      </div>
-
-      <div>
-
-        <h3 className="font-semibold text-emerald-800">
-          Em Propósito
-        </h3>
-
-        <p className="text-sm text-emerald-700">
-          Este usuário firmou propósito
-          e não está disponível para
-          novas conexões românticas.
-        </p>
-
-      </div>
-
-    </div>
-
-  </div>
-)}
+                <p className="mt-1 text-sm text-emerald-700">
+                  Este usuário está em um propósito ativo e não está disponível para novas conexões românticas.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
         {/* Bio */}
         {profile.bio && (
           <section className="mt-6 rounded-2xl border border-border bg-gradient-to-br from-card via-card to-[var(--rose)]/5 p-6 shadow-soft">
@@ -510,18 +514,13 @@ function Detail() {
         {/* Ações principais */}
         {!(profile && mySex && profile.sex === mySex) && !(targetRole && !isAdmin) && (
           <div className="mt-8 space-y-3">
-{profileCommitted ? (
-
-  <Button
-    size="lg"
-    className="w-full"
-    disabled
-    variant="outline"
-  >
-    💍 Usuário em Propósito
-  </Button>
-
-) : matchId ? (              <Button size="lg" className="w-full shadow-glow" asChild>
+            {profileCommitted ? (
+              <Button size="lg" className="w-full" disabled variant="outline">
+                <Gem className="mr-2 h-4 w-4" />
+                Usuário em Propósito
+              </Button>
+            ) : matchId ? (
+              <Button size="lg" className="w-full shadow-glow" asChild>
                 <Link to="/conversas/$matchId" params={{ matchId }}>
                   <MessageCircle className="mr-2 h-4 w-4" /> Conversar
                 </Link>
@@ -536,18 +535,18 @@ function Detail() {
               </Button>
             )}
 
-            {user && user.id !== profile.id && mySex && profile.sex !== mySex && (
+            {user && user.id !== profile.id && !profileCommitted && mySex && profile.sex !== mySex && (
               <SendAnonymousButton receiverId={profile.id} />
             )}
 
-            {user && user.id !== profile.id && (
+            {user && user.id !== profile.id && !profileCommitted && (
               <Button
                 variant="outline"
                 className="w-full border-pink-400/50 bg-gradient-to-r from-pink-500/10 via-fuchsia-500/10 to-purple-500/10 hover:from-pink-500/20 hover:to-purple-500/20"
                 asChild
               >
                 <Link to="/presentes" search={{ to: profile.id } as never}>
-                  🎁 Enviar Presente
+                  Enviar Presente
                 </Link>
               </Button>
             )}

@@ -11,17 +11,25 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { BR_STATES } from "@/lib/constants";
-import { Camera, Save, CheckCircle2, Clock, XCircle, Shield, User as UserIcon, Heart, Trophy, Briefcase, MoreHorizontal, Wallet, Sparkles } from "lucide-react";
+import {
+  Camera,
+  Save,
+  CheckCircle2,
+  Clock,
+  XCircle,
+  Shield,
+  User as UserIcon,
+  Heart,
+  Trophy,
+  Briefcase,
+  MoreHorizontal,
+  Wallet,
+  Sparkles,
+} from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -35,6 +43,8 @@ import { RoleBadge } from "@/components/RoleBadge";
 import { MissionsPanel } from "@/components/MissionsPanel";
 import { SaldoTab } from "@/components/SaldoTab";
 import { recomputeMyBadges } from "@/lib/recomputeBadges";
+import commitmentRing from "@/assets/commitment-ring.png";
+import { getActiveCommitmentByUser } from "@/lib/commitments";
 import { ProfileAdvancedForm } from "@/components/ProfileAdvancedForm";
 import { ProfilePhotosManager } from "@/components/ProfilePhotosManager";
 import { AdminWarningBanner } from "@/components/AdminWarningBanner";
@@ -77,30 +87,44 @@ function PerfilPage() {
           .select("active, expires_at, badges(code)")
           .eq("user_id", user.id)
           .eq("active", true),
-        supabase
-          .from("profiles")
-          .select("contributor_highlight")
-          .eq("id", user.id)
-          .maybeSingle(),
+        supabase.from("profiles").select("contributor_highlight").eq("id", user.id).maybeSingle(),
       ]);
       if (!alive) return;
-      const has = ((badgeData ?? []) as Array<{ active: boolean; expires_at: string | null; badges: { code: string } | null }>)
-        .some((r) => r.badges?.code === "contributor" && (!r.expires_at || new Date(r.expires_at) > new Date()));
+      const has = (
+        (badgeData ?? []) as Array<{ active: boolean; expires_at: string | null; badges: { code: string } | null }>
+      ).some((r) => r.badges?.code === "contributor" && (!r.expires_at || new Date(r.expires_at) > new Date()));
       setHasContributorBadge(has);
-      setContribHighlight((profData as { contributor_highlight?: boolean | null } | null)?.contributor_highlight !== false);
+      setContribHighlight(
+        (profData as { contributor_highlight?: boolean | null } | null)?.contributor_highlight !== false,
+      );
     })();
-    return () => { alive = false; };
+    return () => {
+      alive = false;
+    };
   }, [user]);
+  useEffect(() => {
+    if (!user) return;
 
+    (async () => {
+      const commitment = await getActiveCommitmentByUser(user.id);
+
+      setActiveCommitment(commitment);
+
+      if (!commitment) return;
+
+      const partnerId = commitment.user_a === user.id ? commitment.user_b : commitment.user_a;
+
+      const { data } = await supabase.from("profiles").select("full_name").eq("id", partnerId).maybeSingle();
+
+      setCommitmentPartner(data?.full_name ?? null);
+    })();
+  }, [user]);
   const toggleContribHighlight = async (next: boolean) => {
     if (!user) return;
     setSavingContrib(true);
     const prev = contribHighlight;
     setContribHighlight(next);
-    const { error } = await supabase
-      .from("profiles")
-      .update({ contributor_highlight: next })
-      .eq("id", user.id);
+    const { error } = await supabase.from("profiles").update({ contributor_highlight: next }).eq("id", user.id);
     setSavingContrib(false);
     if (error) {
       setContribHighlight(prev);
@@ -140,6 +164,9 @@ function PerfilPage() {
   const [savingProfile, setSavingProfile] = useState(false);
   const [savingPrefs, setSavingPrefs] = useState(false);
   const [status, setStatus] = useState<"pending" | "approved" | "rejected" | "banned" | null>(null);
+  const [activeCommitment, setActiveCommitment] = useState<any>(null);
+
+  const [commitmentPartner, setCommitmentPartner] = useState<string | null>(null);
 
   const [profile, setProfile] = useState({
     full_name: "",
@@ -423,14 +450,11 @@ function PerfilPage() {
     toast.success("Preferências salvas!");
   }
 
-  const setP = <K extends keyof typeof profile>(k: K, v: (typeof profile)[K]) =>
-    setProfile((p) => ({ ...p, [k]: v }));
+  const setP = <K extends keyof typeof profile>(k: K, v: (typeof profile)[K]) => setProfile((p) => ({ ...p, [k]: v }));
   const togglePrefState = (s: string) =>
     setPrefs((p) => ({
       ...p,
-      custom_states: p.custom_states.includes(s)
-        ? p.custom_states.filter((x) => x !== s)
-        : [...p.custom_states, s],
+      custom_states: p.custom_states.includes(s) ? p.custom_states.filter((x) => x !== s) : [...p.custom_states, s],
     }));
 
   return (
@@ -441,17 +465,61 @@ function PerfilPage() {
         <div className="animate-fade-up flex items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-semibold sm:text-4xl">Meu perfil</h1>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Edite suas informações e preferências de match.
-            </p>
+            <p className="mt-1 text-sm text-muted-foreground">Edite suas informações e preferências de match.</p>
           </div>
           <StatusPill status={status} />
+          {activeCommitment && (
+            <div
+              className="
+      mt-6
+      rounded-3xl
+      border
+      border-emerald-200
+      bg-gradient-to-r
+      from-emerald-50
+      via-white
+      to-emerald-50
+      p-5
+      shadow-soft
+    "
+            >
+              <div className="flex items-center gap-4">
+                <img
+                  src={commitmentRing}
+                  alt=""
+                  className="
+          h-12
+          w-12
+          object-contain
+          drop-shadow-sm
+        "
+                />
+
+                <div className="flex-1">
+                  <h2 className="font-semibold text-emerald-800">Propósito Firmado</h2>
+
+                  <p className="text-sm text-emerald-700">
+                    {commitmentPartner ? `Você está em propósito com ${commitmentPartner}.` : "Você está em propósito."}
+                  </p>
+                </div>
+
+                <Button asChild>
+                  <Link
+                    to="/proposito/$matchId"
+                    params={{
+                      matchId: activeCommitment.match_id,
+                    }}
+                  >
+                    Ver Página
+                  </Link>
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-8">
-          <TabsList
-            className="grid h-auto w-full grid-cols-3 items-stretch gap-2 bg-transparent p-0"
-          >
+          <TabsList className="grid h-auto w-full grid-cols-3 items-stretch gap-2 bg-transparent p-0">
             {[
               { value: "profile", label: "Sobre mim", icon: UserIcon },
               { value: "prefs", label: "Preferências", icon: Heart },
@@ -494,9 +562,7 @@ function PerfilPage() {
                   Conquistas
                 </DropdownMenuItem>
                 {isStaff && (
-                  <DropdownMenuItem
-                    onSelect={() => setActiveTab("role")}
-                  >
+                  <DropdownMenuItem onSelect={() => setActiveTab("role")}>
                     <Briefcase className="mr-2 h-4 w-4" />
                     Cargo
                   </DropdownMenuItem>
@@ -548,11 +614,7 @@ function PerfilPage() {
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2 sm:col-span-2">
                   <Label>Nome completo</Label>
-                  <Input
-                    value={profile.full_name}
-                    onChange={(e) => setP("full_name", e.target.value)}
-                    required
-                  />
+                  <Input value={profile.full_name} onChange={(e) => setP("full_name", e.target.value)} required />
                 </div>
                 <div className="space-y-2">
                   <Label>Idade</Label>
@@ -577,10 +639,7 @@ function PerfilPage() {
                 </div>
                 <div className="space-y-2">
                   <Label>Sexo</Label>
-                  <Select
-                    value={profile.sex}
-                    onValueChange={(v) => setP("sex", v as "masculino" | "feminino")}
-                  >
+                  <Select value={profile.sex} onValueChange={(v) => setP("sex", v as "masculino" | "feminino")}>
                     <SelectTrigger>
                       <SelectValue placeholder="Selecione" />
                     </SelectTrigger>
@@ -607,11 +666,7 @@ function PerfilPage() {
                 </div>
                 <div className="space-y-2">
                   <Label>Cidade</Label>
-                  <Input
-                    value={profile.city}
-                    onChange={(e) => setP("city", e.target.value)}
-                    required
-                  />
+                  <Input value={profile.city} onChange={(e) => setP("city", e.target.value)} required />
                 </div>
                 <div className="space-y-2">
                   <Label>Estado</Label>
@@ -630,11 +685,7 @@ function PerfilPage() {
                 </div>
                 <div className="space-y-2 sm:col-span-2">
                   <Label>Igreja que frequenta</Label>
-                  <Input
-                    value={profile.church}
-                    onChange={(e) => setP("church", e.target.value)}
-                    required
-                  />
+                  <Input value={profile.church} onChange={(e) => setP("church", e.target.value)} required />
                 </div>
                 <div className="space-y-2 sm:col-span-2">
                   <Label>Anos de batismo</Label>
@@ -704,9 +755,7 @@ function PerfilPage() {
                 <Label>Localização desejada</Label>
                 <RadioGroup
                   value={prefs.location_scope}
-                  onValueChange={(v) =>
-                    setPrefs({ ...prefs, location_scope: v as typeof prefs.location_scope })
-                  }
+                  onValueChange={(v) => setPrefs({ ...prefs, location_scope: v as typeof prefs.location_scope })}
                 >
                   {[
                     { v: "regiao", l: "Minha região" },
@@ -760,9 +809,7 @@ function PerfilPage() {
                 <Label>Aceita pessoa com filhos?</Label>
                 <RadioGroup
                   value={prefs.accepts_children}
-                  onValueChange={(v) =>
-                    setPrefs({ ...prefs, accepts_children: v as "sim" | "nao" })
-                  }
+                  onValueChange={(v) => setPrefs({ ...prefs, accepts_children: v as "sim" | "nao" })}
                   className="flex gap-3"
                 >
                   <label className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl border border-border bg-card/40 p-3">
@@ -785,8 +832,7 @@ function PerfilPage() {
               </div>
 
               <Button type="submit" size="lg" className="w-full" disabled={savingPrefs}>
-                <Save className="mr-2 h-4 w-4" />{" "}
-                {savingPrefs ? "Salvando..." : "Salvar preferências"}
+                <Save className="mr-2 h-4 w-4" /> {savingPrefs ? "Salvando..." : "Salvar preferências"}
               </Button>
             </form>
             {user && (
@@ -803,15 +849,11 @@ function PerfilPage() {
                 <div className="pr-4">
                   <p className="font-medium text-foreground">Destaque verde nas mensagens</p>
                   <p className="text-xs text-muted-foreground">
-                    Como Contribuidor, suas mensagens na comunidade ganham um destaque verde.
-                    A badge ao lado do seu nome continua visível mesmo desligada.
+                    Como Contribuidor, suas mensagens na comunidade ganham um destaque verde. A badge ao lado do seu
+                    nome continua visível mesmo desligada.
                   </p>
                 </div>
-                <Switch
-                  checked={contribHighlight}
-                  disabled={savingContrib}
-                  onCheckedChange={toggleContribHighlight}
-                />
+                <Switch checked={contribHighlight} disabled={savingContrib} onCheckedChange={toggleContribHighlight} />
               </div>
             )}
           </TabsContent>
@@ -844,12 +886,7 @@ function PerfilPage() {
                 <div className="space-y-3">
                   <Label>Pré-visualização</Label>
                   <div className="rounded-xl border border-border bg-card/40 p-4">
-                    <RoleBadge
-                      role={role}
-                      color={localColor ?? roleCfg.defaultColor}
-                      size="md"
-                      showDescription
-                    />
+                    <RoleBadge role={role} color={localColor ?? roleCfg.defaultColor} size="md" showDescription />
                   </div>
                 </div>
 
@@ -868,10 +905,7 @@ function PerfilPage() {
                             className={`flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium transition ${selected ? "border-foreground" : "border-border"}`}
                             style={selected ? { boxShadow: `0 0 0 2px ${hex.ring}` } : undefined}
                           >
-                            <span
-                              className="h-4 w-4 rounded-full"
-                              style={{ backgroundColor: hex.bg }}
-                            />
+                            <span className="h-4 w-4 rounded-full" style={{ backgroundColor: hex.bg }} />
                             {hex.name}
                           </button>
                         );
@@ -884,23 +918,14 @@ function PerfilPage() {
                   <div className="pr-4">
                     <p className="font-medium">Aparecer em Pretendentes</p>
                     <p className="text-xs text-muted-foreground">
-                      Ligado por padrão. Desative para ocultar seu perfil da busca de pretendentes —
-                      suas preferências são salvas automaticamente.
+                      Ligado por padrão. Desative para ocultar seu perfil da busca de pretendentes — suas preferências
+                      são salvas automaticamente.
                     </p>
                   </div>
-                  <Switch
-                    checked={localPublic}
-                    disabled={savingRole}
-                    onCheckedChange={togglePublicListing}
-                  />
+                  <Switch checked={localPublic} disabled={savingRole} onCheckedChange={togglePublicListing} />
                 </div>
 
-                <Button
-                  onClick={saveRoleSettings}
-                  disabled={savingRole}
-                  size="lg"
-                  className="w-full"
-                >
+                <Button onClick={saveRoleSettings} disabled={savingRole} size="lg" className="w-full">
                   <Save className="mr-2 h-4 w-4" /> {savingRole ? "Salvando..." : "Salvar cargo"}
                 </Button>
               </div>
