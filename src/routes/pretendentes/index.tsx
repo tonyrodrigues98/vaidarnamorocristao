@@ -105,7 +105,14 @@ function List() {
 
   useEffect(() => {
     if (!user) return;
-    getActiveCommitmentByUser(user.id).then(setActiveCommitment);
+    const commitment =
+  await getActiveCommitmentByUser(
+    user.id
+  );
+
+setActiveCommitment(
+  commitment
+);
     markHomeChecklistStep(user.id, "explore");
     (async () => {
       const { data: me } = await supabase.from("profiles").select("status, sex, state").eq("id", user.id).maybeSingle();
@@ -123,7 +130,12 @@ function List() {
       });
       if (me?.status === "approved") {
         const targetSex = me.sex === "masculino" ? "feminino" : "masculino";
-        const [profsRes, blocksRes, blockedByRes, hiddenRes, rolesRes, myAdvRes] = await Promise.all([
+        const [profsRes, blocksRes, blockedByRes, hiddenRes, rolesRes, myAdvRes, commitmentsRes,
+] = await Promise.all([
+          supabase
+  .from("relationship_commitments")
+  .select("user_a,user_b")
+  .eq("status", "active"),
           supabase
             .from("profiles")
             .select("id, full_name, age, city, state, church, bio, photo_url, sex, marital, verified, created_at")
@@ -159,7 +171,31 @@ function List() {
           }
         }
         setStaffMap(map);
-        const visible = ((profsRes.data ?? []) as Profile[]).filter((p) => !hidden.has(p.id));
+        const committedUsers =
+  new Set<string>();
+
+for (
+  const row of
+  (commitmentsRes.data ?? [])
+) {
+
+  committedUsers.add(
+    row.user_a
+  );
+
+  committedUsers.add(
+    row.user_b
+  );
+
+}
+
+const visible =
+  ((profsRes.data ?? []) as Profile[])
+    .filter(
+      (p) =>
+        !hidden.has(p.id) &&
+        !committedUsers.has(p.id)
+    );
         setProfiles(visible);
         setMyAdvanced(((myAdvRes as any)?.data ?? null) as AdvancedProfile | null);
         const ids = visible.map((p) => p.id);
@@ -330,7 +366,8 @@ function List() {
     </Button>
 
   </div>
-) : myStatus !== "approved" ? (
+) : (
+        {myStatus !== "approved" ? (
           <div className="glass mt-8 rounded-2xl p-8 text-center shadow-soft">
             <p className="text-muted-foreground">Você precisa ter o perfil aprovado para ver os pretendentes.</p>
           </div>
@@ -603,5 +640,5 @@ function AffinityChips({ chips }: { chips: AffinityChip[] }) {
         </span>
       )}
     </div>
-  );
+ ) );
 }
