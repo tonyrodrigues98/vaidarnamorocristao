@@ -110,13 +110,14 @@ function Detail() {
 
     useEffect(() => {
       if (!user) return;
-
       (async () => {
         const active = await getActiveCommitmentByUser(user.id);
-
         setHasCommitment(!!active);
       })();
     }, [user]);
+
+  useEffect(() => {
+    if (!user) return;
     (async () => {
       const { data } = await supabase.from("profiles").select("sex").eq("id", user.id).maybeSingle();
       setMySex((data?.sex as string | undefined) ?? null);
@@ -147,14 +148,13 @@ function Detail() {
       setExtraPhotos(((ph ?? []) as Array<{ url: string }>).map((r) => r.url));
     })();
   }, [id]);
-const activeCommitment =
-  await getActiveCommitmentByUser(
-    id
-  );
 
-setProfileCommitted(
-  !!activeCommitment
-);
+  useEffect(() => {
+    (async () => {
+      const activeCommitment = await getActiveCommitmentByUser(id);
+      setProfileCommitted(!!activeCommitment);
+    })();
+  }, [id]);
 
   useEffect(() => {
     if (!user) return;
