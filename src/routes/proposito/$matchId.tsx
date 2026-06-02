@@ -374,19 +374,20 @@ setFirstGiftAt(
             <p className="text-sm text-muted-foreground">
               Mensagens trocadas
             </p>
-<div className="glass rounded-3xl p-6 text-center shadow-soft">
+          </div>
 
-  <Gift className="mx-auto mb-3 h-7 w-7 text-amber-500" />
+          <div className="glass rounded-3xl p-6 text-center shadow-soft">
 
-  <div className="text-3xl font-bold">
-    {giftCount}
-  </div>
+            <Gift className="mx-auto mb-3 h-7 w-7 text-amber-500" />
 
-  <p className="text-sm text-muted-foreground">
-    Presentes trocados
-  </p>
+            <div className="text-3xl font-bold">
+              {giftCount}
+            </div>
 
-</div>
+            <p className="text-sm text-muted-foreground">
+              Presentes trocados
+            </p>
+
           </div>
 
         </section>
@@ -440,34 +441,31 @@ setFirstGiftAt(
             <h3 className="font-medium">
               Primeira conversa
             </h3>
-{firstGiftAt && (
-  <div className="flex gap-4">
-
-    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-100">
-
-      <Gift className="h-5 w-5 text-amber-600" />
-
-    </div>
-
-    <div>
-
-      <h3 className="font-medium">
-        Primeiro presente enviado
-      </h3>
-
-      <p className="text-sm text-muted-foreground">
-        {new Date(
-          firstGiftAt
-        ).toLocaleDateString("pt-BR")}
-      </p>
-
-    </div>
-
-  </div>
-)}
             <p className="text-sm text-muted-foreground">
               {new Date(
                 firstMessageAt
+              ).toLocaleDateString("pt-BR")}
+            </p>
+          </div>
+
+        </div>
+      )}
+
+      {firstGiftAt && (
+        <div className="flex gap-4">
+
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-100">
+            <Gift className="h-5 w-5 text-amber-600" />
+          </div>
+
+          <div>
+            <h3 className="font-medium">
+              Primeiro presente enviado
+            </h3>
+
+            <p className="text-sm text-muted-foreground">
+              {new Date(
+                firstGiftAt
               ).toLocaleDateString("pt-BR")}
             </p>
           </div>
@@ -502,19 +500,6 @@ setFirstGiftAt(
   </div>
 
 </section>
-
-            <ul className="space-y-2 text-sm text-muted-foreground">
-
-              <li>
-                ✅ Página do casal criada
-              </li>
-
-
-            </ul>
-
-          </div>
-
-        </section>
 <section className="mt-8">
 
   <div className="glass rounded-3xl p-6 shadow-soft">
