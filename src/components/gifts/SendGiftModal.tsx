@@ -10,7 +10,7 @@ import { friendlyError } from "@/lib/errors";
 import { supabase } from "@/integrations/supabase/client";
 import { PhotoAvatarImage } from "@/components/PhotoImg";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Send, X } from "lucide-react";
+import { Send, X, Heart, Gift, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type Receiver = { id: string; full_name: string; photo_url: string | null };
@@ -94,14 +94,36 @@ export function SendGiftModal({ open, onOpenChange, gift, receiverId, balance, o
 >
  
         {/* gradient header */}
-        <div
-  className="relative border-b px-6 pb-5 pt-7"
+<div
+  className="relative overflow-hidden border-b px-6 pb-5 pt-7"
   style={{
     background:
-      "linear-gradient(180deg, #FFF8FB 0%, #F8F4FF 100%)",
+      "linear-gradient(135deg, #FFF4F8 0%, #F8F1FF 50%, #EEF6FF 100%)",
   }}
 >
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_30%_15%,rgba(255,255,255,0.35),transparent_60%)]" />
+          <div className="pointer-events-none absolute inset-0 overflow-hidden">
+
+  <Gift
+    className="absolute left-6 top-6 h-5 w-5 text-violet-300/20"
+  />
+
+  <Heart
+    className="absolute right-10 top-8 h-4 w-4 text-pink-300/20"
+  />
+
+  <Gift
+    className="absolute left-16 bottom-8 h-4 w-4 text-fuchsia-300/15"
+  />
+
+  <Heart
+    className="absolute right-20 bottom-10 h-5 w-5 text-rose-300/15"
+  />
+
+  <Sparkles
+    className="absolute left-1/2 top-6 h-4 w-4 text-violet-300/15"
+  />
+
+</div>
           <DialogHeader className="relative">
             <DialogTitle className="text-center text-xl font-bold text-zinc-900 dark:text-white">
               Enviar presente
@@ -110,9 +132,24 @@ export function SendGiftModal({ open, onOpenChange, gift, receiverId, balance, o
           <div className="relative mt-3 flex flex-col items-center gap-2">
             <GiftMedia emoji={gift.emoji} imageUrl={gift.image_url} rarity={gift.rarity} size="xl" floating />
             <h3 className="mt-2 text-lg font-semibold text-zinc-900 dark:text-white">{gift.name}</h3>
-            <div className="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-4 py-1.5 text-sm font-semibold text-amber-700">
-              <CoinIcon className="h-4 w-4" />
-              {gift.price_coins} moedas
+            <div className="
+  inline-flex
+  items-center
+  gap-2
+  rounded-full
+  border
+  border-amber-200
+  bg-amber-50
+  px-4
+  py-1.5
+  text-sm
+  font-semibold
+  text-amber-700
+">
+  <CoinIcon className="h-4 w-4" />
+  {gift.price_coins} moedas
+</div>
+              <CoinIcon className="h-4 w-4" /> {gift.price_coins} moedas
             </div>
           </div>
         </div>
@@ -148,7 +185,13 @@ export function SendGiftModal({ open, onOpenChange, gift, receiverId, balance, o
               value={msg}
               onChange={(e) => setMsg(e.target.value)}
               placeholder="Escreva algo carinhoso..."
-              className="mt-1.5 border-zinc-200 bg-zinc-50 text-zinc-900 placeholder:text-zinc-400"
+              className="className="
+  mt-1.5
+  border-zinc-200
+  bg-zinc-50
+  text-zinc-900
+  placeholder:text-zinc-400
+"
             />
             <p className="mt-1 text-right text-[11px] text-white/80">{msg.length}/120</p>
           </div>
