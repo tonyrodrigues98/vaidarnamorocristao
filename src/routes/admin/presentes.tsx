@@ -243,12 +243,21 @@ function AdminPresentesPage() {
               <Input
                 placeholder="Nome"
                 value={form.name}
-                onChange={(e) =>
+                onChange={(e) => {
+                  const name = e.target.value;
+
+                  const slug = name
+                    .normalize("NFD")
+                    .replace(/[\u0300-\u036f]/g, "")
+                    .toLowerCase()
+                    .replaceAll(" ", "-");
+
                   setForm({
                     ...form,
-                    name: e.target.value,
-                  })
-                }
+                    name,
+                    slug,
+                  });
+                }}
               />
 
               <Input
@@ -471,9 +480,49 @@ function AdminPresentesPage() {
                 }
               />
 
-              {form.image_url && (
-                <img src={form.image_url} alt="preview" className="h-48 w-full rounded-xl object-cover" />
-              )}
+              <div className="space-y-3">
+                <label className="text-sm font-medium">Imagem do presente</label>
+
+                <label className="flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed p-6 transition hover:bg-muted/50">
+                  <Upload className="mb-2 h-8 w-8 text-muted-foreground" />
+
+                  <span>Alterar imagem</span>
+
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+
+                      if (!file) return;
+
+                      try {
+                        setSaving(true);
+
+                        const fileName = `${Date.now()}-${file.name}`;
+
+                        const { error } = await supabase.storage.from("gift-images").upload(fileName, file);
+
+                        if (error) throw error;
+
+                        const { data } = supabase.storage.from("gift-images").getPublicUrl(fileName);
+
+                        setForm({
+                          ...form,
+                          image_url: data.publicUrl,
+                        });
+                      } finally {
+                        setSaving(false);
+                      }
+                    }}
+                  />
+                </label>
+
+                {form.image_url && (
+                  <img src={form.image_url} alt="preview" className="h-56 w-full rounded-xl object-cover" />
+                )}
+              </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <Select
