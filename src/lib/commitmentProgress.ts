@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/integrations/supabase/client";
 
 export interface CommitmentProgress {
   percentage: number;
@@ -42,7 +42,9 @@ export async function getCommitmentProgress(
   }
 
   const days = new Set(
-    messages.map((m) => new Date(m.created_at).toDateString()),
+    messages.map((m: { created_at: string }) =>
+      new Date(m.created_at).toDateString(),
+    ),
   );
 
   if (days.size >= 3) {
@@ -50,12 +52,12 @@ export async function getCommitmentProgress(
     percentage += 35;
   }
 
-  const senderCount = messages.reduce(
-    (acc, msg) => {
+  const senderCount = messages.reduce<Record<string, number>>(
+    (acc, msg: { sender_id: string }) => {
       acc[msg.sender_id] = (acc[msg.sender_id] || 0) + 1;
       return acc;
     },
-    {} as Record<string, number>,
+    {},
   );
 
   const counts = Object.values(senderCount);
