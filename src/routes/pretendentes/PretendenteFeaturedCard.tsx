@@ -35,6 +35,7 @@ interface PretendenteFeaturedCardProps {
   chips: AffinityChip[];
   eager?: boolean;
   staff?: StaffInfo;
+  isCommitted?: boolean;
 }
 
 export function PretendenteFeaturedCard({
@@ -46,6 +47,7 @@ export function PretendenteFeaturedCard({
   chips,
   eager = false,
   staff,
+  isCommitted = false,
 }: PretendenteFeaturedCardProps) {
   return (
     <Link
@@ -74,15 +76,33 @@ export function PretendenteFeaturedCard({
           imgClassName="transition duration-700 group-hover:scale-105"
           fallback={
             <div className="flex h-full w-full items-center justify-center bg-gradient-love">
-              <span className="text-6xl text-white">
-                {profile.full_name.charAt(0)}
-              </span>
+              <span className="text-6xl text-white">{profile.full_name.charAt(0)}</span>
             </div>
           }
         />
 
         <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/15 to-transparent" />
-
+        {isCommitted && (
+          <div className="absolute left-3 top-3 z-10">
+            <div
+              className="
+      flex
+      items-center
+      gap-1
+      rounded-full
+      bg-emerald-600
+      px-3
+      py-1
+      text-xs
+      font-semibold
+      text-white
+      shadow-lg
+    "
+            >
+              💍 Em Propósito
+            </div>
+          </div>
+        )}
         {showScore ? (
           <div className="absolute left-3 top-3">
             <div className="flex items-center gap-1 rounded-full bg-pink-500 px-3 py-1 text-xs font-bold text-white shadow-lg">
@@ -115,32 +135,19 @@ export function PretendenteFeaturedCard({
 
             {profile.verified && <VerifiedBadge size="md" />}
 
-            {staff && (
-              <RoleBadge
-                role={staff.role}
-                color={staff.color}
-              />
-            )}
+            {staff && <RoleBadge role={staff.role} color={staff.color} />}
           </div>
 
           <p className="text-sm text-white/90">
             {profile.city} • {profile.state}
           </p>
 
-          {profile.church && (
-            <p className="mt-1 text-xs text-pink-200">
-              {profile.church}
-            </p>
-          )}
+          {profile.church && <p className="mt-1 text-xs text-pink-200">{profile.church}</p>}
         </div>
       </div>
 
       <div className="p-4">
-        <UserBadges
-          userId={profile.id}
-          size="xs"
-          max={2}
-        />
+        <UserBadges userId={profile.id} size="xs" max={2} />
 
         {chips.length > 0 && (
           <div className="mt-3 flex flex-wrap gap-1">
@@ -163,11 +170,7 @@ export function PretendenteFeaturedCard({
           </div>
         )}
 
-        {profile.bio && (
-          <p className="mt-3 line-clamp-2 text-sm text-muted-foreground">
-            {profile.bio}
-          </p>
-        )}
+        {profile.bio && <p className="mt-3 line-clamp-2 text-sm text-muted-foreground">{profile.bio}</p>}
       </div>
     </Link>
   );

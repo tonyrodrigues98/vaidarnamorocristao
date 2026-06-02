@@ -85,6 +85,7 @@ function Detail() {
   const [blocked, setBlocked] = useState(false);
   const [busy, setBusy] = useState(false);
   const [hasCommitment, setHasCommitment] = useState(false);
+  const [profileCommitted, setProfileCommitted,] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
   const [reportReason, setReportReason] = useState("");
   const [reportAlsoBlock, setReportAlsoBlock] = useState(true);
@@ -107,8 +108,6 @@ function Detail() {
     })();
   }, [id]);
 
-  useEffect(() => {
-    if (!user) return;
     useEffect(() => {
       if (!user) return;
 
@@ -148,6 +147,14 @@ function Detail() {
       setExtraPhotos(((ph ?? []) as Array<{ url: string }>).map((r) => r.url));
     })();
   }, [id]);
+const activeCommitment =
+  await getActiveCommitmentByUser(
+    id
+  );
+
+setProfileCommitted(
+  !!activeCommitment
+);
 
   useEffect(() => {
     if (!user) return;
@@ -388,7 +395,45 @@ function Detail() {
             ) : null}
           </div>
         </div>
+{profileCommitted && (
+  <div
+    className="
+      mt-6
+      rounded-2xl
+      border
+      border-emerald-200
+      bg-gradient-to-r
+      from-emerald-50
+      to-emerald-100
+      p-5
+      shadow-soft
+    "
+  >
 
+    <div className="flex items-center gap-3">
+
+      <div className="text-2xl">
+        💍
+      </div>
+
+      <div>
+
+        <h3 className="font-semibold text-emerald-800">
+          Em Propósito
+        </h3>
+
+        <p className="text-sm text-emerald-700">
+          Este usuário firmou propósito
+          e não está disponível para
+          novas conexões românticas.
+        </p>
+
+      </div>
+
+    </div>
+
+  </div>
+)}
         {/* Bio */}
         {profile.bio && (
           <section className="mt-6 rounded-2xl border border-border bg-gradient-to-br from-card via-card to-[var(--rose)]/5 p-6 shadow-soft">
@@ -465,8 +510,18 @@ function Detail() {
         {/* Ações principais */}
         {!(profile && mySex && profile.sex === mySex) && !(targetRole && !isAdmin) && (
           <div className="mt-8 space-y-3">
-            {matchId ? (
-              <Button size="lg" className="w-full shadow-glow" asChild>
+{profileCommitted ? (
+
+  <Button
+    size="lg"
+    className="w-full"
+    disabled
+    variant="outline"
+  >
+    💍 Usuário em Propósito
+  </Button>
+
+) : matchId ? (              <Button size="lg" className="w-full shadow-glow" asChild>
                 <Link to="/conversas/$matchId" params={{ matchId }}>
                   <MessageCircle className="mr-2 h-4 w-4" /> Conversar
                 </Link>
