@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/layout/Header";
 import { DecoratedAvatar } from "@/components/DecoratedAvatar";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Heart, MessageCircle, Gem } from "lucide-react";
+import { ArrowLeft, Heart, MessageCircle, Gem, Clock3, Gift } from "lucide-react";
 import { getCommitmentByMatch } from "@/lib/commitments";
 
 type CoupleProfile = {
@@ -39,7 +39,17 @@ function CouplePage() {
 
   const [messageCount, setMessageCount] =
     useState(0);
+const [matchCreatedAt, setMatchCreatedAt] =
+  useState<string | null>(null);
 
+const [firstMessageAt, setFirstMessageAt] =
+  useState<string | null>(null);
+const [firstGiftAt, setFirstGiftAt] =
+  useState<string | null>(null);
+
+const [giftCount, setGiftCount] =
+  useState(0);
+  
   useEffect(() => {
     if (!user) return;
 
@@ -108,7 +118,58 @@ function CouplePage() {
           .eq("match_id", matchId);
 
       setMessageCount(count ?? 0);
+      const { data: matchData } =
+  await supabase
+    .from("matches")
+    .select("created_at")
+    .eq("id", matchId)
+    .maybeSingle();
 
+setMatchCreatedAt(
+  matchData?.created_at ?? null
+);
+
+const { data: firstMessage } =
+  await supabase
+    .from("messages")
+    .select("created_at")
+    .eq("match_id", matchId)
+    .order("created_at", {
+      ascending: true,
+    })
+    .limit(1)
+    .maybeSingle();
+
+setFirstMessageAt(
+  firstMessage?.created_at ?? null
+);
+
+const { data: gifts } =
+  await supabase
+    .from("gift_transactions")
+    .select(`
+      created_at,
+      sender_id,
+      receiver_id
+    `)
+    .or(
+      `
+      and(sender_id.eq.${commitment.user_a},receiver_id.eq.${commitment.user_b}),
+      and(sender_id.eq.${commitment.user_b},receiver_id.eq.${commitment.user_a})
+      `
+    )
+    .order("created_at", {
+      ascending: true,
+    });
+
+setGiftCount(
+  gifts?.length ?? 0
+);
+
+setFirstGiftAt(
+  gifts?.[0]?.created_at ?? null
+);
+      
     })();
 
   }, [matchId, user]);
@@ -274,7 +335,7 @@ function CouplePage() {
 
         </section>
 
-        <section className="mt-8 grid gap-4 md:grid-cols-2">
+        <section className="mt-8 grid gap-4 md:grid-cols-3">
 
           <div className="glass rounded-3xl p-6 text-center shadow-soft">
 
@@ -301,24 +362,134 @@ function CouplePage() {
             <p className="text-sm text-muted-foreground">
               Mensagens trocadas
             </p>
+<div className="glass rounded-3xl p-6 text-center shadow-soft">
 
+  <Gift className="mx-auto mb-3 h-7 w-7 text-amber-500" />
+
+  <div className="text-3xl font-bold">
+    {giftCount}
+  </div>
+
+  <p className="text-sm text-muted-foreground">
+    Presentes trocados
+  </p>
+
+</div>
           </div>
 
         </section>
 
         <section className="mt-8">
 
-          <div className="glass rounded-3xl p-6 shadow-soft">
+  <div className="glass rounded-3xl p-6 shadow-soft">
 
-            <div className="mb-4 flex items-center gap-2">
+    <div className="mb-6 flex items-center gap-2">
 
-              <Gem className="h-5 w-5 text-emerald-600" />
+      <Clock3 className="h-5 w-5 text-primary" />
 
-              <h2 className="font-semibold">
-                Próximas etapas
-              </h2>
+      <h2 className="font-semibold">
+        Linha do Tempo
+      </h2>
 
-            </div>
+    </div>
+
+    <div className="space-y-6">
+
+      {matchCreatedAt && (
+        <div className="flex gap-4">
+
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-rose-100">
+            <Heart className="h-5 w-5 text-rose-600" />
+          </div>
+
+          <div>
+            <h3 className="font-medium">
+              Match realizado
+            </h3>
+
+            <p className="text-sm text-muted-foreground">
+              {new Date(
+                matchCreatedAt
+              ).toLocaleDateString("pt-BR")}
+            </p>
+          </div>
+
+        </div>
+      )}
+
+      {firstMessageAt && (
+        <div className="flex gap-4">
+
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100">
+            <MessageCircle className="h-5 w-5 text-blue-600" />
+          </div>
+
+          <div>
+            <h3 className="font-medium">
+              Primeira conversa
+            </h3>
+{firstGiftAt && (
+  <div className="flex gap-4">
+
+    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-100">
+
+      <Gift className="h-5 w-5 text-amber-600" />
+
+    </div>
+
+    <div>
+
+      <h3 className="font-medium">
+        Primeiro presente enviado
+      </h3>
+
+      <p className="text-sm text-muted-foreground">
+        {new Date(
+          firstGiftAt
+        ).toLocaleDateString("pt-BR")}
+      </p>
+
+    </div>
+
+  </div>
+)}
+            <p className="text-sm text-muted-foreground">
+              {new Date(
+                firstMessageAt
+              ).toLocaleDateString("pt-BR")}
+            </p>
+          </div>
+
+        </div>
+      )}
+
+      {acceptedAt && (
+        <div className="flex gap-4">
+
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100">
+            <Gem className="h-5 w-5 text-emerald-600" />
+          </div>
+
+          <div>
+            <h3 className="font-medium">
+              Propósito Firmado
+            </h3>
+
+            <p className="text-sm text-muted-foreground">
+              {new Date(
+                acceptedAt
+              ).toLocaleDateString("pt-BR")}
+            </p>
+          </div>
+
+        </div>
+      )}
+
+    </div>
+
+  </div>
+
+</section>
 
             <ul className="space-y-2 text-sm text-muted-foreground">
 
