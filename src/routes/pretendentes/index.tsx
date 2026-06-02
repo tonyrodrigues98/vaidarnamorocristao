@@ -640,5 +640,5 @@ function AffinityChips({ chips }: { chips: AffinityChip[] }) {
         </span>
       )}
     </div>
- ) );
+  );
 }
