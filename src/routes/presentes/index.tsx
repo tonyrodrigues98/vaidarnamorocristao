@@ -57,8 +57,13 @@ function PresentesPage() {
         <div
           className="absolute inset-0"
           style={{
-            background: "linear-gradient(135deg, #FF5FA2 0%, #FF7BC3 35%, #A855F7 70%, #6D5BFF 100%)",
-          }}
+background:
+linear-gradient(
+135deg,
+#F7D7E6,
+#F4DFF8,
+#EDE9FE
+)          }}
         />
         {/* blur orbs */}
         <div
@@ -71,7 +76,7 @@ function PresentesPage() {
         />
         {/* sparkle dots */}
         <div className="pointer-events-none absolute inset-0">
-          {Array.from({ length: 18 }).map((_, i) => (
+          {Array.from({ length: 6 }).map((_, i) => (
             <span
               key={i}
               className="absolute h-1 w-1 rounded-full bg-white/80"
@@ -124,7 +129,8 @@ function PresentesPage() {
         <div className="-mt-8 mb-6 rounded-3xl border border-white/30 bg-white/70 p-4 shadow-xl backdrop-blur-2xl dark:bg-slate-900/60">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-400 to-orange-400 shadow-lg shadow-amber-400/30">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br bg-bg-white
+border shadow-lg shadow-amber-400/30">
                 <CoinIcon className="h-7 w-7" />
               </div>
               <div>
