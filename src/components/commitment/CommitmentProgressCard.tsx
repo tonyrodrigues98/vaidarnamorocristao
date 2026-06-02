@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import {
 Heart,
+HeartHandshake,  
 CheckCircle2,
 Lock,
 Gem,
@@ -10,7 +11,17 @@ import {
 Card,
 CardContent,
 } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
+import { useAuth } from "@/lib/auth";
+
+import { supabase } from "@/integrations/supabase/client";
+
+import {
+  createCommitmentRequest,
+} from "@/lib/commitments";
+
+import { toast } from "sonner";
 import {
 Progress,
 } from "@/components/ui/progress";
@@ -30,6 +41,11 @@ matchId,
 
 const [loading, setLoading] =
 useState(true);
+
+const { user } = useAuth();
+
+const [creating, setCreating] =
+  useState(false);  
 
 const [progress, setProgress] =
 useState<CommitmentProgress | null>(
@@ -72,6 +88,57 @@ return () => {
   mounted = false;
 };
 }, [matchId]);
+
+  async function handleCommitment() {
+
+  if (!user) return;
+
+  try {
+
+    setCreating(true);
+
+    const { data: match } =
+      await supabase
+        .from("matches")
+        .select(
+          "user_a,user_b"
+        )
+        .eq("id", matchId)
+        .single();
+
+    if (!match) {
+      toast.error(
+        "Match não encontrado."
+      );
+      return;
+    }
+
+    await createCommitmentRequest(
+      matchId,
+      match.user_a,
+      match.user_b,
+      user.id
+    );
+
+    toast.success(
+      "Solicitação enviada."
+    );
+
+  } catch (err) {
+
+    console.error(err);
+
+    toast.error(
+      "Não foi possível enviar a solicitação."
+    );
+
+  } finally {
+
+    setCreating(false);
+
+  }
+
+}
 
 if (loading) {
 return ( <Card className="border-primary/15 bg-primary/5"> <CardContent className="p-4">
@@ -141,15 +208,27 @@ return ( <Card className="border-primary/20 bg-gradient-to-br from-background to
     {progress.canCommit ? (
       <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3">
 
-        <div className="flex items-center gap-2">
+  <div className="mb-3 flex items-center gap-2">
 
-          <Gem className="h-4 w-4 text-emerald-600" />
+    <Gem className="h-4 w-4 text-emerald-600" />
 
-          <span className="text-sm font-semibold text-emerald-700">
-            Prontos para firmar propósito
-          </span>
+    <span className="text-sm font-semibold text-emerald-700">
+      Prontos para firmar propósito
+    </span>
 
-        </div>
+  </div>
+
+  <Button
+  onClick={handleCommitment}
+  disabled={creating}
+  className="w-full gap-2"
+>
+  <HeartHandshake className="h-4 w-4" />
+
+  Firmar Propósito
+</Button>
+
+</div>
 
       </div>
     ) : (
