@@ -754,12 +754,9 @@ async function reorderGifts(
                     return;
                   }
 
-await reorderGifts(
-  sourceId,
-  gift.id
-);
-                    
-                    catch (err) {
+                  try {
+                    await reorderGifts(sourceId, gift.id);
+                  } catch (err) {
                     console.error(err);
                   }
                 }}
