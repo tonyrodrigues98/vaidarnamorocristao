@@ -105,14 +105,7 @@ function List() {
 
   useEffect(() => {
     if (!user) return;
-    const commitment =
-  await getActiveCommitmentByUser(
-    user.id
-  );
-
-setActiveCommitment(
-  commitment
-);
+    getActiveCommitmentByUser(user.id).then(setActiveCommitment);
     markHomeChecklistStep(user.id, "explore");
     (async () => {
       const { data: me } = await supabase.from("profiles").select("status, sex, state").eq("id", user.id).maybeSingle();
