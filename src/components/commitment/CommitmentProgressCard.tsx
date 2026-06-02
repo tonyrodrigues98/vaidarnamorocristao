@@ -230,7 +230,6 @@ return ( <Card className="border-primary/20 bg-gradient-to-br from-background to
 
 </div>
 
-      </div>
     ) : (
       <div className="rounded-xl border border-border bg-muted/30 p-3">
 
