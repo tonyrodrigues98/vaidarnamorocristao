@@ -77,6 +77,8 @@ function AdminPresentesPage() {
 
   const [saving, setSaving] = useState(false);
 
+  const [draggingId, setDraggingId] = useState<string | null>(null);
+
   const [form, setForm] = useState({
     slug: "",
     name: "",
@@ -665,10 +667,57 @@ function AdminPresentesPage() {
           <div>Carregando...</div>
         ) : (
           <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
-            {filteredGifts.map((gift) => (
+            {filteredGifts.map((gift, index) => (
               <Card
                 key={gift.id}
-                className="group overflow-hidden border bg-card transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+                draggable
+                onDragStart={(e) => {
+                  setDraggingId(gift.id);
+
+                  e.dataTransfer.effectAllowed = "move";
+
+                  e.dataTransfer.setData("text/gift-id", gift.id);
+                }}
+                onDragEnd={() => {
+                  setDraggingId(null);
+                }}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                }}
+                onDrop={async (e) => {
+                  e.preventDefault();
+
+                  const sourceId = e.dataTransfer.getData("text/gift-id") || draggingId;
+
+                  if (!sourceId || sourceId === gift.id) {
+                    return;
+                  }
+
+                  const sourceGift = gifts.find((g) => g.id === sourceId);
+
+                  if (!sourceGift) return;
+
+                  try {
+                    await updateGift(sourceGift.id, {
+                      sort_order: gift.sort_order,
+                    });
+
+                    await updateGift(gift.id, {
+                      sort_order: sourceGift.sort_order,
+                    });
+
+                    await load();
+                  } catch (err) {
+                    console.error(err);
+                  }
+                }}
+                className={`group overflow-hidden border bg-card transition-all duration-300
+hover:-translate-y-1
+hover:shadow-xl
+cursor-grab
+active:cursor-grabbing
+${draggingId === gift.id ? "opacity-40" : ""}
+`}
               >
                 <div className="relative aspect-square overflow-hidden bg-gradient-to-br from-rose-100 via-pink-50 to-purple-100">
                   {gift.image_url ? (
