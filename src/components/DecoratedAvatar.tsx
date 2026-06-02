@@ -2,28 +2,28 @@ import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { fetchDecorationCatalog, assetFor, type Decoration } from "@/lib/decorations";
 import { useSignedPhotoUrl } from "@/lib/photoUrl";
-
+import commitmentRing from "@/assets/commitment-ring.png";
 // `size` é o canvas total do componente. A moldura SEMPRE preenche esse
 // canvas (assim os cards ficam com altura/largura estáveis e idênticas em
 // todas as molduras). A foto é posicionada dentro do vão da moldura usando
 // valores medidos diretamente dos PNGs (diâmetro e centro do furo).
 const FRAME_PLACEMENT: Record<string, { photoScale: number; centerX: number; centerY: number }> = {
-  "frame-alianca-ouro.png":    { photoScale: 0.57, centerX: 0.501, centerY: 0.498 },
-  "frame-coroa-espinhos.png":  { photoScale: 0.58, centerX: 0.504, centerY: 0.490 },
-  "frame-louros-dourados.png": { photoScale: 0.50, centerX: 0.500, centerY: 0.500 },
-  "frame-floral-rosa.png":     { photoScale: 0.38, centerX: 0.501, centerY: 0.506 },
-  "frame-vitral-sagrado.png":  { photoScale: 0.48, centerX: 0.496, centerY: 0.479 },
-  "frame-eclipse-dourado.png":    { photoScale: 0.74, centerX: 0.500, centerY: 0.470 },
-  "frame-neon-violeta.png":       { photoScale: 0.62, centerX: 0.500, centerY: 0.500 },
-  "frame-horizonte.png":          { photoScale: 0.74, centerX: 0.500, centerY: 0.500 },
-  "frame-cristal-do-rei.png":     { photoScale: 0.52, centerX: 0.500, centerY: 0.490 },
-  "frame-chama-sagrada.png":      { photoScale: 0.58, centerX: 0.500, centerY: 0.500 },
-  "frame-galaxia.png":            { photoScale: 0.52, centerX: 0.500, centerY: 0.500 },
-  "frame-aurora-boreal.png":      { photoScale: 0.54, centerX: 0.500, centerY: 0.500 },
-  "frame-minimalista-prata.png":  { photoScale: 0.80, centerX: 0.500, centerY: 0.495 },
-  "frame-coracao-radiante.png":   { photoScale: 0.72, centerX: 0.500, centerY: 0.490 },
-  "frame-vortice.png":            { photoScale: 0.55, centerX: 0.500, centerY: 0.500 },
-  "frame-folhas-oliveiras.png":   { photoScale: 0.62, centerX: 0.500, centerY: 0.500 },
+  "frame-alianca-ouro.png": { photoScale: 0.57, centerX: 0.501, centerY: 0.498 },
+  "frame-coroa-espinhos.png": { photoScale: 0.58, centerX: 0.504, centerY: 0.49 },
+  "frame-louros-dourados.png": { photoScale: 0.5, centerX: 0.5, centerY: 0.5 },
+  "frame-floral-rosa.png": { photoScale: 0.38, centerX: 0.501, centerY: 0.506 },
+  "frame-vitral-sagrado.png": { photoScale: 0.48, centerX: 0.496, centerY: 0.479 },
+  "frame-eclipse-dourado.png": { photoScale: 0.74, centerX: 0.5, centerY: 0.47 },
+  "frame-neon-violeta.png": { photoScale: 0.62, centerX: 0.5, centerY: 0.5 },
+  "frame-horizonte.png": { photoScale: 0.74, centerX: 0.5, centerY: 0.5 },
+  "frame-cristal-do-rei.png": { photoScale: 0.52, centerX: 0.5, centerY: 0.49 },
+  "frame-chama-sagrada.png": { photoScale: 0.58, centerX: 0.5, centerY: 0.5 },
+  "frame-galaxia.png": { photoScale: 0.52, centerX: 0.5, centerY: 0.5 },
+  "frame-aurora-boreal.png": { photoScale: 0.54, centerX: 0.5, centerY: 0.5 },
+  "frame-minimalista-prata.png": { photoScale: 0.8, centerX: 0.5, centerY: 0.495 },
+  "frame-coracao-radiante.png": { photoScale: 0.72, centerX: 0.5, centerY: 0.49 },
+  "frame-vortice.png": { photoScale: 0.55, centerX: 0.5, centerY: 0.5 },
+  "frame-folhas-oliveiras.png": { photoScale: 0.62, centerX: 0.5, centerY: 0.5 },
 };
 const DEFAULT_FRAME_PLACEMENT = { photoScale: 0.56, centerX: 0.5, centerY: 0.5 };
 
@@ -36,6 +36,7 @@ export type DecoratedAvatarProps = {
   auraId?: string | null;
   stickerId?: string | null;
   alt?: string;
+  isCommitted?: boolean;
 };
 
 let cachedCatalog: Decoration[] | null = null;
@@ -62,6 +63,7 @@ export function DecoratedAvatar({
   // stickerId mantido na API para compatibilidade, mas não é renderizado por enquanto.
   stickerId: _stickerId,
   alt = "",
+  isCommitted = false,
 }: DecoratedAvatarProps) {
   void _stickerId;
   const hasAny = !!(frameId || auraId);
@@ -82,15 +84,14 @@ export function DecoratedAvatar({
     };
   }, [hasAny, catalog]);
 
-  const find = (id: string | null | undefined) =>
-    id && catalog ? catalog.find((d) => d.id === id) ?? null : null;
+  const find = (id: string | null | undefined) => (id && catalog ? (catalog.find((d) => d.id === id) ?? null) : null);
   const frame = find(frameId);
   const aura = find(auraId);
 
   const initial = fallback ?? "?";
   const frameAsset = frame ? assetFor(frame) : null;
   const placement = frame?.image_url
-    ? FRAME_PLACEMENT[frame.image_url] ?? DEFAULT_FRAME_PLACEMENT
+    ? (FRAME_PLACEMENT[frame.image_url] ?? DEFAULT_FRAME_PLACEMENT)
     : DEFAULT_FRAME_PLACEMENT;
   // `size` representa o diâmetro da FOTO (constante). Quando existe moldura,
   // o canvas externo cresce para `size / photoScale` para acomodar a moldura
@@ -101,10 +102,7 @@ export function DecoratedAvatar({
   const photoCenterY = canvas * placement.centerY;
 
   return (
-    <div
-      className={cn("relative inline-block shrink-0", className)}
-      style={{ width: canvas, height: canvas }}
-    >
+    <div className={cn("relative inline-block shrink-0", className)} style={{ width: canvas, height: canvas }}>
       {aura?.css_value && (
         <div
           aria-hidden
@@ -145,6 +143,24 @@ export function DecoratedAvatar({
           aria-hidden
           className="pointer-events-none absolute inset-0 h-full w-full object-contain"
           style={{ zIndex: 20 }}
+        />
+      )}
+      {isCommitted && (
+        <img
+          src={commitmentRing}
+          alt="Propósito Firmado"
+          className="pointer-events-none absolute object-contain"
+          style={{
+            width: Math.max(24, canvas * 0.24),
+            height: Math.max(24, canvas * 0.24),
+
+            right: -2,
+            bottom: -2,
+
+            zIndex: 50,
+
+            filter: "drop-shadow(0 2px 6px rgba(0,0,0,.25))",
+          }}
         />
       )}
     </div>
