@@ -7,6 +7,7 @@ import { Header } from "@/components/layout/Header";
 import { DecoratedAvatar } from "@/components/DecoratedAvatar";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Heart, MessageCircle, Gem, Clock3, Gift } from "lucide-react";
+import { GiftMedia } from "@/components/gifts/GiftMedia";
 import { getCommitmentByMatch } from "@/lib/commitments";
 
 type CoupleProfile = {
@@ -49,6 +50,8 @@ const [firstGiftAt, setFirstGiftAt] =
 
 const [giftCount, setGiftCount] =
   useState(0);
+const [galleryGifts, setGalleryGifts] =
+  useState<any[]>([]);
   
   useEffect(() => {
     if (!user) return;
@@ -150,7 +153,14 @@ const { data: gifts } =
     .select(`
       created_at,
       sender_id,
-      receiver_id
+      receiver_id,
+      gift:virtual_gifts(
+        id,
+        name,
+        image_url,
+        emoji,
+        rarity
+      )
     `)
     .or(
       `
@@ -165,7 +175,9 @@ const { data: gifts } =
 setGiftCount(
   gifts?.length ?? 0
 );
-
+setGalleryGifts(
+  (gifts ?? []).slice(0, 8)
+);
 setFirstGiftAt(
   gifts?.[0]?.created_at ?? null
 );
@@ -503,7 +515,84 @@ setFirstGiftAt(
           </div>
 
         </section>
+<section className="mt-8">
 
+  <div className="glass rounded-3xl p-6 shadow-soft">
+
+    <div className="mb-6 flex items-center gap-2">
+
+      <Gift className="h-5 w-5 text-amber-500" />
+
+      <h2 className="font-semibold">
+        Galeria do Relacionamento
+      </h2>
+
+    </div>
+
+    {galleryGifts.length > 0 ? (
+
+      <>
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+
+          {galleryGifts.map((item, index) => {
+
+            const gift = item.gift;
+
+            if (!gift) return null;
+
+            return (
+
+              <div
+                key={index}
+                className="
+                  rounded-2xl
+                  border
+                  bg-card
+                  p-4
+                  text-center
+                "
+              >
+
+                <GiftMedia
+                  imageUrl={gift.image_url}
+                  emoji={gift.emoji}
+                  rarity={gift.rarity}
+                  size="md"
+                />
+
+                <p className="mt-3 text-xs font-medium">
+                  {gift.name}
+                </p>
+
+              </div>
+
+            );
+
+          })}
+
+        </div>
+
+        <p className="mt-5 text-center text-sm text-muted-foreground">
+
+          {giftCount} presentes trocados
+
+        </p>
+
+      </>
+
+    ) : (
+
+      <div className="rounded-2xl border border-dashed p-6 text-center text-sm text-muted-foreground">
+
+        Nenhum presente foi trocado ainda.
+
+      </div>
+
+    )}
+
+  </div>
+
+</section>
       </main>
     </div>
   );
