@@ -11,7 +11,7 @@ import { GiftSendAnimation } from "@/components/gifts/GiftSendAnimation";
 import { CoinIcon } from "@/components/icons/CoinIcon";
 import { Button } from "@/components/ui/button";
 import { getMyCoins } from "@/lib/coins";
-import { Gift, Sparkles, Receipt } from "lucide-react";
+import { Gift, Sparkles, Receipt, HeartHandshake } from "lucide-react";
 
 const searchSchema = z.object({
   to: z.string().uuid().optional(),
