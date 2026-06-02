@@ -105,14 +105,7 @@ function List() {
 
   useEffect(() => {
     if (!user) return;
-    const commitment =
-  await getActiveCommitmentByUser(
-    user.id
-  );
-
-setActiveCommitment(
-  commitment
-);
+    getActiveCommitmentByUser(user.id).then(setActiveCommitment);
     markHomeChecklistStep(user.id, "explore");
     (async () => {
       const { data: me } = await supabase.from("profiles").select("status, sex, state").eq("id", user.id).maybeSingle();
@@ -337,8 +330,7 @@ setActiveCommitment(
     </Button>
 
   </div>
-) : (
-        {myStatus !== "approved" ? (
+) : myStatus !== "approved" ? (
           <div className="glass mt-8 rounded-2xl p-8 text-center shadow-soft">
             <p className="text-muted-foreground">Você precisa ter o perfil aprovado para ver os pretendentes.</p>
           </div>
@@ -611,5 +603,5 @@ function AffinityChips({ chips }: { chips: AffinityChip[] }) {
         </span>
       )}
     </div>
- ) );
+  );
 }
