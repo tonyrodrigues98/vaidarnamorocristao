@@ -566,32 +566,18 @@ function Admin() {
         </div>
 
         <Tabs value={tab} onValueChange={(v) => setTab(v as TabKey)} className="mt-8">
-          
-            {availableTabs.includes("pending") && }
-            {availableTabs.includes("approved") && }
-            {availableTabs.includes("rejected") && }
-            {availableTabs.includes("banned") && }
-            {availableTabs.includes("deactivated") && (
-              
-            )}
-            {availableTabs.includes("reports") && (
-              
-            )}
-            {availableTabs.includes("posts") && (
-              
-            )}
-            {availableTabs.includes("users") && (
-              
-            )}
-            {availableTabs.includes("pre_cadastros") && (
-              
-            )}
-            {availableTabs.includes("restricted_words") && (
-              
-            )}
-            {availableTabs.includes("flags") && (
-             
-            )}
+          <TabsList className="flex h-auto flex-wrap justify-start gap-1">
+            {availableTabs.includes("pending") && <TabsTrigger value="pending">Pendentes</TabsTrigger>}
+            {availableTabs.includes("approved") && <TabsTrigger value="approved">Aprovados</TabsTrigger>}
+            {availableTabs.includes("rejected") && <TabsTrigger value="rejected">Rejeitados</TabsTrigger>}
+            {availableTabs.includes("banned") && <TabsTrigger value="banned">Banidos</TabsTrigger>}
+            {availableTabs.includes("deactivated") && <TabsTrigger value="deactivated">Desativados</TabsTrigger>}
+            {availableTabs.includes("reports") && <TabsTrigger value="reports">Denúncias</TabsTrigger>}
+            {availableTabs.includes("posts") && <TabsTrigger value="posts">Texto diário</TabsTrigger>}
+            {availableTabs.includes("users") && <TabsTrigger value="users">Usuários</TabsTrigger>}
+            {availableTabs.includes("pre_cadastros") && <TabsTrigger value="pre_cadastros">Pré-cadastros</TabsTrigger>}
+            {availableTabs.includes("restricted_words") && <TabsTrigger value="restricted_words">Palavras restritas</TabsTrigger>}
+            {availableTabs.includes("flags") && <TabsTrigger value="flags">Sinalizações</TabsTrigger>}
           </TabsList>
 
           <TabsContent value={tab} className="mt-6">
