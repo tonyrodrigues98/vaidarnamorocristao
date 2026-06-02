@@ -6,12 +6,33 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
+import { getActiveCommitmentByUser } from "@/lib/commitments";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ArrowLeft, MapPin, Church, Heart, Flag, Ban, MessageCircle, Check, Sparkles, Baby, Globe2, ShieldOff, Ruler, HandHeart, Quote, CalendarHeart, Cake, Target, Users2 } from "lucide-react";
+import {
+  ArrowLeft,
+  MapPin,
+  Church,
+  Heart,
+  Flag,
+  Ban,
+  MessageCircle,
+  Check,
+  Sparkles,
+  Baby,
+  Globe2,
+  ShieldOff,
+  Ruler,
+  HandHeart,
+  Quote,
+  CalendarHeart,
+  Cake,
+  Target,
+  Users2,
+} from "lucide-react";
 import { RoleBadge } from "@/components/RoleBadge";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { OnlineDot } from "@/components/OnlineDot";
@@ -22,9 +43,19 @@ import { SendAnonymousButton } from "@/components/anonymous/SendAnonymousButton"
 import { GiftHighlights } from "@/components/gifts/GiftHighlights";
 
 type Full = {
-  id: string; full_name: string; age: number; height_cm: number | null;
-  city: string; state: string; church: string; bio: string | null;
-  photo_url: string | null; marital: string; years_baptized: number; sex: string; verified?: boolean;
+  id: string;
+  full_name: string;
+  age: number;
+  height_cm: number | null;
+  city: string;
+  state: string;
+  church: string;
+  bio: string | null;
+  photo_url: string | null;
+  marital: string;
+  years_baptized: number;
+  sex: string;
+  verified?: boolean;
 };
 type Prefs = {
   age_min: number;
@@ -36,7 +67,13 @@ type Prefs = {
   custom_states: string[] | null;
 };
 
-export const Route = createFileRoute("/pretendentes/$id")({ component: () => (<RequireApproved><Detail /></RequireApproved>) });
+export const Route = createFileRoute("/pretendentes/$id")({
+  component: () => (
+    <RequireApproved>
+      <Detail />
+    </RequireApproved>
+  ),
+});
 
 function Detail() {
   const { id } = Route.useParams();
@@ -47,6 +84,7 @@ function Detail() {
   const [matchId, setMatchId] = useState<string | null>(null);
   const [blocked, setBlocked] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [hasCommitment, setHasCommitment] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
   const [reportReason, setReportReason] = useState("");
   const [reportAlsoBlock, setReportAlsoBlock] = useState(true);
@@ -56,10 +94,7 @@ function Detail() {
 
   useEffect(() => {
     (async () => {
-      const { data } = await supabase
-        .from("user_roles")
-        .select("role, badge_color")
-        .eq("user_id", id);
+      const { data } = await supabase.from("user_roles").select("role, badge_color").eq("user_id", id);
       const rows = (data ?? []) as Array<{ role: AppRole; badge_color: string | null }>;
       let best: { role: AppRole; color: RoleColor | null } | null = null;
       for (const r of rows) {
@@ -74,6 +109,15 @@ function Detail() {
 
   useEffect(() => {
     if (!user) return;
+    useEffect(() => {
+      if (!user) return;
+
+      (async () => {
+        const active = await getActiveCommitmentByUser(user.id);
+
+        setHasCommitment(!!active);
+      })();
+    }, [user]);
     (async () => {
       const { data } = await supabase.from("profiles").select("sex").eq("id", user.id).maybeSingle();
       setMySex((data?.sex as string | undefined) ?? null);
@@ -83,12 +127,17 @@ function Detail() {
   useEffect(() => {
     (async () => {
       const { data: prof } = await supabase
-        .from("profiles").select("*").eq("id", id).eq("status", "approved").maybeSingle();
+        .from("profiles")
+        .select("*")
+        .eq("id", id)
+        .eq("status", "approved")
+        .maybeSingle();
       setProfile(prof as Full | null);
       const { data: pr } = await supabase
         .from("profile_preferences")
         .select("age_min,age_max,accepts_children,desired_quality,looking_for_bio,location_scope,custom_states")
-        .eq("user_id", id).maybeSingle();
+        .eq("user_id", id)
+        .maybeSingle();
       setPrefs((pr ?? null) as Prefs | null);
       const { data: ph } = await supabase
         .from("profile_photos")
@@ -105,7 +154,11 @@ function Detail() {
     (async () => {
       const [intRes, matchRes, blockRes] = await Promise.all([
         supabase.from("interests").select("id").eq("sender_id", user.id).eq("receiver_id", id).maybeSingle(),
-        supabase.from("matches").select("id").or(`and(user_a.eq.${user.id},user_b.eq.${id}),and(user_a.eq.${id},user_b.eq.${user.id})`).maybeSingle(),
+        supabase
+          .from("matches")
+          .select("id")
+          .or(`and(user_a.eq.${user.id},user_b.eq.${id}),and(user_a.eq.${id},user_b.eq.${user.id})`)
+          .maybeSingle(),
         supabase.from("blocks").select("id").eq("blocker_id", user.id).eq("blocked_id", id).maybeSingle(),
       ]);
       setInterestSent(!!intRes.data);
@@ -121,11 +174,7 @@ function Detail() {
     const last = typeof window !== "undefined" ? Number(window.sessionStorage.getItem(key) ?? 0) : 0;
     if (Date.now() - last < 30 * 60 * 1000) return;
     (async () => {
-      const { data: me } = await supabase
-        .from("profiles")
-        .select("age, city, state")
-        .eq("id", user.id)
-        .maybeSingle();
+      const { data: me } = await supabase.from("profiles").select("age, city, state").eq("id", user.id).maybeSingle();
       const { error } = await supabase.from("profile_views").insert({
         viewer_id: user.id,
         viewed_id: id,
@@ -141,14 +190,27 @@ function Detail() {
 
   async function demonstrarInteresse() {
     if (!user) return;
+
+    if (hasCommitment) {
+      toast.error("Você já firmou propósito com outra pessoa.");
+
+      return;
+    }
     setBusy(true);
     const { error } = await supabase.from("interests").insert({ sender_id: user.id, receiver_id: id });
     setBusy(false);
-    if (error) { toast.error(friendlyError(error)); return; }
+    if (error) {
+      toast.error(friendlyError(error));
+      return;
+    }
     toast.success("Interesse enviado 💗");
     setInterestSent(true);
     // refresh match
-    const { data: m } = await supabase.from("matches").select("id").or(`and(user_a.eq.${user.id},user_b.eq.${id}),and(user_a.eq.${id},user_b.eq.${user.id})`).maybeSingle();
+    const { data: m } = await supabase
+      .from("matches")
+      .select("id")
+      .or(`and(user_a.eq.${user.id},user_b.eq.${id}),and(user_a.eq.${id},user_b.eq.${user.id})`)
+      .maybeSingle();
     if (m) setMatchId(m.id);
   }
 
@@ -165,79 +227,99 @@ function Detail() {
   async function desbloquear() {
     if (!user) return;
     setBusy(true);
-    const { error } = await supabase.from("blocks").delete()
-      .eq("blocker_id", user.id).eq("blocked_id", id);
+    const { error } = await supabase.from("blocks").delete().eq("blocker_id", user.id).eq("blocked_id", id);
     setBusy(false);
-    if (error) { toast.error(friendlyError(error)); return; }
+    if (error) {
+      toast.error(friendlyError(error));
+      return;
+    }
     toast.success("Perfil desbloqueado");
     setBlocked(false);
   }
 
   async function enviarDenuncia() {
-    if (!user || reportReason.trim().length < 3) { toast.error("Descreva o motivo (mín. 3 caracteres)"); return; }
+    if (!user || reportReason.trim().length < 3) {
+      toast.error("Descreva o motivo (mín. 3 caracteres)");
+      return;
+    }
     setBusy(true);
     const { error } = await supabase.from("reports").insert({
-      reporter_id: user.id, reported_id: id, reason: reportReason.trim().slice(0, 1000),
+      reporter_id: user.id,
+      reported_id: id,
+      reason: reportReason.trim().slice(0, 1000),
     });
-    if (error) { setBusy(false); toast.error(friendlyError(error)); return; }
+    if (error) {
+      setBusy(false);
+      toast.error(friendlyError(error));
+      return;
+    }
     if (reportAlsoBlock && !blocked) {
       await supabase.from("blocks").insert({ blocker_id: user.id, blocked_id: id });
       setBlocked(true);
     }
     setBusy(false);
-    toast.success(reportAlsoBlock ? "Denúncia enviada e perfil bloqueado." : "Denúncia enviada. Nossa equipe vai analisar.");
-    setReportReason(""); setReportOpen(false);
+    toast.success(
+      reportAlsoBlock ? "Denúncia enviada e perfil bloqueado." : "Denúncia enviada. Nossa equipe vai analisar.",
+    );
+    setReportReason("");
+    setReportOpen(false);
   }
 
   if (!loading && !user) return <Navigate to="/auth/login" />;
-  if (profile === undefined) return (
-    <div className="min-h-screen">
-      <Header />
-      <main className="mx-auto max-w-4xl px-4 py-10">
-        <div className="mt-6 grid gap-8 md:grid-cols-[2fr_3fr]">
-          <div className="aspect-[4/5] animate-pulse rounded-3xl bg-muted shadow-elegant" />
-          <div className="space-y-4">
-            <div className="h-9 w-2/3 animate-pulse rounded-lg bg-muted" />
-            <div className="h-4 w-1/2 animate-pulse rounded-md bg-muted" />
-            <div className="h-4 w-2/5 animate-pulse rounded-md bg-muted" />
-            <div className="h-32 animate-pulse rounded-2xl bg-muted" />
-            <div className="h-24 animate-pulse rounded-2xl bg-muted" />
+  if (profile === undefined)
+    return (
+      <div className="min-h-screen">
+        <Header />
+        <main className="mx-auto max-w-4xl px-4 py-10">
+          <div className="mt-6 grid gap-8 md:grid-cols-[2fr_3fr]">
+            <div className="aspect-[4/5] animate-pulse rounded-3xl bg-muted shadow-elegant" />
+            <div className="space-y-4">
+              <div className="h-9 w-2/3 animate-pulse rounded-lg bg-muted" />
+              <div className="h-4 w-1/2 animate-pulse rounded-md bg-muted" />
+              <div className="h-4 w-2/5 animate-pulse rounded-md bg-muted" />
+              <div className="h-32 animate-pulse rounded-2xl bg-muted" />
+              <div className="h-24 animate-pulse rounded-2xl bg-muted" />
+            </div>
           </div>
-        </div>
-      </main>
-    </div>
-  );
-  if (!profile) return (
-    <div className="min-h-screen"><Header />
-      <main className="mx-auto max-w-3xl px-4 py-12 text-center">
-        <p>Perfil não encontrado.</p>
-        <Button asChild variant="outline" className="mt-4"><Link to="/pretendentes">Voltar</Link></Button>
-      </main>
-    </div>
-  );
+        </main>
+      </div>
+    );
+  if (!profile)
+    return (
+      <div className="min-h-screen">
+        <Header />
+        <main className="mx-auto max-w-3xl px-4 py-12 text-center">
+          <p>Perfil não encontrado.</p>
+          <Button asChild variant="outline" className="mt-4">
+            <Link to="/pretendentes">Voltar</Link>
+          </Button>
+        </main>
+      </div>
+    );
 
-  if (blocked) return (
-    <div className="min-h-screen">
-      <Header />
-      <main className="mx-auto max-w-md px-4 py-20 text-center">
-        <div className="glass rounded-3xl p-8 shadow-soft">
-          <Ban className="mx-auto h-10 w-10 text-muted-foreground" />
-          <h1 className="mt-4 text-2xl font-semibold">Perfil bloqueado</h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Você bloqueou este perfil. Mensagens e informações ficam ocultas até você desbloquear.
-          </p>
-          <div className="mt-6 flex flex-col gap-2">
-            <Button onClick={desbloquear} disabled={busy} className="w-full">
-              <ShieldOff className="mr-2 h-4 w-4" /> Desbloquear
-            </Button>
-            <Button asChild variant="outline" className="w-full">
-              <Link to="/pretendentes">Voltar</Link>
-            </Button>
+  if (blocked)
+    return (
+      <div className="min-h-screen">
+        <Header />
+        <main className="mx-auto max-w-md px-4 py-20 text-center">
+          <div className="glass rounded-3xl p-8 shadow-soft">
+            <Ban className="mx-auto h-10 w-10 text-muted-foreground" />
+            <h1 className="mt-4 text-2xl font-semibold">Perfil bloqueado</h1>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Você bloqueou este perfil. Mensagens e informações ficam ocultas até você desbloquear.
+            </p>
+            <div className="mt-6 flex flex-col gap-2">
+              <Button onClick={desbloquear} disabled={busy} className="w-full">
+                <ShieldOff className="mr-2 h-4 w-4" /> Desbloquear
+              </Button>
+              <Button asChild variant="outline" className="w-full">
+                <Link to="/pretendentes">Voltar</Link>
+              </Button>
+            </div>
           </div>
-        </div>
-      </main>
-    </div>
-  );
+        </main>
+      </div>
+    );
 
   return (
     <div className="min-h-screen bg-background">
@@ -344,11 +426,16 @@ function Detail() {
               </Chip>
               <Chip icon={<Globe2 className="h-3.5 w-3.5" />} tone="sky">
                 {prefs.location_scope === "personalizado"
-                  ? ((prefs.custom_states ?? []).length > 0 ? (prefs.custom_states ?? []).join(", ") : "—")
-                  : prefs.location_scope === "regiao" ? "Mesma região"
-                  : prefs.location_scope === "brasil" ? "Brasil todo"
-                  : prefs.location_scope === "mundo" ? "Mundo todo"
-                  : prefs.location_scope}
+                  ? (prefs.custom_states ?? []).length > 0
+                    ? (prefs.custom_states ?? []).join(", ")
+                    : "—"
+                  : prefs.location_scope === "regiao"
+                    ? "Mesma região"
+                    : prefs.location_scope === "brasil"
+                      ? "Brasil todo"
+                      : prefs.location_scope === "mundo"
+                        ? "Mundo todo"
+                        : prefs.location_scope}
               </Chip>
             </div>
 
@@ -412,11 +499,7 @@ function Detail() {
 
             <GiftHighlights userId={profile.id} />
 
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={() => toast.success("Oração registrada com carinho")}
-            >
+            <Button variant="outline" className="w-full" onClick={() => toast.success("Oração registrada com carinho")}>
               <HandHeart className="mr-2 h-4 w-4" /> Orar por ele(a)
             </Button>
           </div>
@@ -431,9 +514,16 @@ function Detail() {
               </Button>
             </DialogTrigger>
             <DialogContent>
-              <DialogHeader><DialogTitle>Denunciar perfil</DialogTitle></DialogHeader>
-              <Textarea rows={4} maxLength={1000} value={reportReason} onChange={(e) => setReportReason(e.target.value)}
-                placeholder="Conte o que aconteceu..." />
+              <DialogHeader>
+                <DialogTitle>Denunciar perfil</DialogTitle>
+              </DialogHeader>
+              <Textarea
+                rows={4}
+                maxLength={1000}
+                value={reportReason}
+                onChange={(e) => setReportReason(e.target.value)}
+                placeholder="Conte o que aconteceu..."
+              />
               <label className="mt-2 flex items-start gap-2 rounded-md border border-border bg-muted/40 p-3 text-sm">
                 <Checkbox
                   checked={reportAlsoBlock}
@@ -448,8 +538,12 @@ function Detail() {
                 </span>
               </label>
               <DialogFooter>
-                <Button variant="outline" onClick={() => setReportOpen(false)}>Cancelar</Button>
-                <Button onClick={enviarDenuncia} disabled={busy}>Enviar denúncia</Button>
+                <Button variant="outline" onClick={() => setReportOpen(false)}>
+                  Cancelar
+                </Button>
+                <Button onClick={enviarDenuncia} disabled={busy}>
+                  Enviar denúncia
+                </Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
@@ -478,9 +572,19 @@ const CHIP_TONES: Record<ChipTone, string> = {
   slate: "bg-slate-500/10 text-slate-600 dark:text-slate-400 ring-slate-500/20",
 };
 
-function Chip({ icon, tone = "rose", children }: { icon?: React.ReactNode; tone?: ChipTone; children: React.ReactNode }) {
+function Chip({
+  icon,
+  tone = "rose",
+  children,
+}: {
+  icon?: React.ReactNode;
+  tone?: ChipTone;
+  children: React.ReactNode;
+}) {
   return (
-    <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium ring-1 ${CHIP_TONES[tone]}`}>
+    <span
+      className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium ring-1 ${CHIP_TONES[tone]}`}
+    >
       {icon}
       {children}
     </span>
