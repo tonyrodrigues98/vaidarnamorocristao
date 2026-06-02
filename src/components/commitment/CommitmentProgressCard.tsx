@@ -37,8 +37,6 @@ null
 );
 
 useEffect(() => {
-
-```
 let mounted = true;
 
 async function load() {
@@ -73,8 +71,6 @@ load();
 return () => {
   mounted = false;
 };
-```
-
 }, [matchId]);
 
 if (loading) {
@@ -88,8 +84,6 @@ return null;
 }
 
 return ( <Card className="border-primary/20 bg-gradient-to-br from-background to-primary/5"> <CardContent className="space-y-4 p-4">
-
-```
     <div className="flex items-center gap-2">
 
       <div className="rounded-full bg-primary/10 p-2">
@@ -176,8 +170,6 @@ return ( <Card className="border-primary/20 bg-gradient-to-br from-background to
 
   </CardContent>
 </Card>
-```
-
 );
 }
 
@@ -189,8 +181,6 @@ done: boolean;
 label: string;
 }) {
 return ( <div className="flex items-center gap-2">
-
-```
   <CheckCircle2
     className={
       done
@@ -210,8 +200,6 @@ return ( <div className="flex items-center gap-2">
   </span>
 
 </div>
-```
-
 );
 }
 
