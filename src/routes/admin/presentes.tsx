@@ -139,6 +139,67 @@ function AdminPresentesPage() {
     }
   }
 
+async function reorderGifts(
+  sourceId: string,
+  targetId: string
+) {
+  const items = [...gifts];
+
+  const sourceIndex =
+    items.findIndex(
+      (g) => g.id === sourceId
+    );
+
+  const targetIndex =
+    items.findIndex(
+      (g) => g.id === targetId
+    );
+
+  if (
+    sourceIndex === -1 ||
+    targetIndex === -1
+  ) {
+    return;
+  }
+
+  const [moved] =
+    items.splice(
+      sourceIndex,
+      1
+    );
+
+  items.splice(
+    targetIndex,
+    0,
+    moved
+  );
+
+  try {
+
+    for (
+      let i = 0;
+      i < items.length;
+      i++
+    ) {
+
+      await updateGift(
+        items[i].id,
+        {
+          sort_order: i,
+        }
+      );
+
+    }
+
+    await load();
+
+  } catch (err) {
+
+    console.error(err);
+
+  }
+}
+  
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -693,21 +754,12 @@ function AdminPresentesPage() {
                     return;
                   }
 
-                  const sourceGift = gifts.find((g) => g.id === sourceId);
-
-                  if (!sourceGift) return;
-
-                  try {
-                    await updateGift(sourceGift.id, {
-                      sort_order: gift.sort_order,
-                    });
-
-                    await updateGift(gift.id, {
-                      sort_order: sourceGift.sort_order,
-                    });
-
-                    await load();
-                  } catch (err) {
+await reorderGifts(
+  sourceId,
+  gift.id
+);
+                    
+                    catch (err) {
                     console.error(err);
                   }
                 }}
