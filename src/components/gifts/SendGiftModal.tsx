@@ -110,24 +110,9 @@ export function SendGiftModal({ open, onOpenChange, gift, receiverId, balance, o
           <div className="relative mt-3 flex flex-col items-center gap-2">
             <GiftMedia emoji={gift.emoji} imageUrl={gift.image_url} rarity={gift.rarity} size="xl" floating />
             <h3 className="mt-2 text-lg font-semibold text-zinc-900 dark:text-white">{gift.name}</h3>
-            <div className="
-  inline-flex
-  items-center
-  gap-2
-  rounded-full
-  border
-  border-amber-200
-  bg-amber-50
-  px-4
-  py-1.5
-  text-sm
-  font-semibold
-  text-amber-700
-">
-  <CoinIcon className="h-4 w-4" />
-  {gift.price_coins} moedas
-</div>
-              <CoinIcon className="h-4 w-4" /> {gift.price_coins} moedas
+            <div className="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-4 py-1.5 text-sm font-semibold text-amber-700">
+              <CoinIcon className="h-4 w-4" />
+              {gift.price_coins} moedas
             </div>
           </div>
         </div>
@@ -163,13 +148,7 @@ export function SendGiftModal({ open, onOpenChange, gift, receiverId, balance, o
               value={msg}
               onChange={(e) => setMsg(e.target.value)}
               placeholder="Escreva algo carinhoso..."
-              className="className="
-  mt-1.5
-  border-zinc-200
-  bg-zinc-50
-  text-zinc-900
-  placeholder:text-zinc-400
-"
+              className="mt-1.5 border-zinc-200 bg-zinc-50 text-zinc-900 placeholder:text-zinc-400"
             />
             <p className="mt-1 text-right text-[11px] text-white/80">{msg.length}/120</p>
           </div>
