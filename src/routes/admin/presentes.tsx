@@ -154,8 +154,50 @@ function AdminPresentesPage() {
 
     items.splice(targetIndex, 0, moved);
 
-    try {
-      for (let i = 0; i < items.length; i++) {
+const optimisticItems = items.map(
+  (gift, index) => ({
+    ...gift,
+    sort_order: index,
+  })
+);
+
+setGifts(optimisticItems);
+
+try {
+      const rarityBase = {
+  common: 0,
+  rare: 1000,
+  epic: 2000,
+  legendary: 3000,
+  exclusive: 4000,
+};
+
+const rarityCounters = {
+  common: 0,
+  rare: 0,
+  epic: 0,
+  legendary: 0,
+  exclusive: 0,
+};
+
+for (const gift of items) {
+
+  const base =
+    rarityBase[gift.rarity];
+
+  const nextOrder =
+    base +
+    rarityCounters[gift.rarity];
+
+  rarityCounters[gift.rarity]++;
+
+  await updateGift(
+    gift.id,
+    {
+      sort_order: nextOrder,
+    }
+  );
+}
         await updateGift(items[i].id, {
           sort_order: i,
         });
