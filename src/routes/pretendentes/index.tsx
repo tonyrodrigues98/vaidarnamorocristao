@@ -367,7 +367,7 @@ const visible =
 
   </div>
 ) : (
-        {myStatus !== "approved" ? (
+        myStatus !== "approved" ? (
           <div className="glass mt-8 rounded-2xl p-8 text-center shadow-soft">
             <p className="text-muted-foreground">Você precisa ter o perfil aprovado para ver os pretendentes.</p>
           </div>
@@ -524,7 +524,7 @@ const visible =
               </div>
             )}
           </>
-        )}
+        ))}
 
         {myStatus === "approved" &&
           (loadingList ? (
@@ -640,5 +640,5 @@ function AffinityChips({ chips }: { chips: AffinityChip[] }) {
         </span>
       )}
     </div>
- ) );
+  );
 }
