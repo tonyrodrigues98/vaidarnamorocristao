@@ -198,10 +198,6 @@ for (const gift of items) {
     }
   );
 }
-        await updateGift(items[i].id, {
-          sort_order: i,
-        });
-      }
     } catch (err) {
       console.error(err);
     }
