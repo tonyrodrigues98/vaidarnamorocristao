@@ -1624,6 +1624,42 @@ export type Database = {
         }
         Relationships: []
       }
+      relationship_commitments: {
+        Row: {
+          accepted_at: string | null
+          created_at: string
+          id: string
+          match_id: string
+          requested_at: string
+          requested_by: string
+          status: string
+          user_a: string
+          user_b: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          created_at?: string
+          id?: string
+          match_id: string
+          requested_at?: string
+          requested_by: string
+          status?: string
+          user_a: string
+          user_b: string
+        }
+        Update: {
+          accepted_at?: string | null
+          created_at?: string
+          id?: string
+          match_id?: string
+          requested_at?: string
+          requested_by?: string
+          status?: string
+          user_a?: string
+          user_b?: string
+        }
+        Relationships: []
+      }
       reports: {
         Row: {
           admin_notes: string | null
