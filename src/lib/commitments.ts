@@ -117,29 +117,3 @@ export async function getPendingCommitment(matchId: string) {
 
   return data;
 }
-
-export async function acceptCommitment(commitmentId: string) {
-  const { data, error } = await supabase
-    .from("relationship_commitments")
-    .update({
-      status: "active",
-      accepted_at: new Date().toISOString(),
-    })
-    .eq("id", commitmentId)
-    .select()
-    .single();
-
-  if (error) {
-    throw error;
-  }
-
-  return data;
-}
-
-export async function rejectCommitment(commitmentId: string) {
-  const { error } = await supabase.from("relationship_commitments").delete().eq("id", commitmentId);
-
-  if (error) {
-    throw error;
-  }
-}
