@@ -105,16 +105,10 @@ function List() {
 
   useEffect(() => {
     if (!user) return;
-    const commitment =
-  await getActiveCommitmentByUser(
-    user.id
-  );
-
-setActiveCommitment(
-  commitment
-);
     markHomeChecklistStep(user.id, "explore");
     (async () => {
+      const commitment = await getActiveCommitmentByUser(user.id);
+      setActiveCommitment(commitment);
       const { data: me } = await supabase.from("profiles").select("status, sex, state").eq("id", user.id).maybeSingle();
       setMyStatus(me?.status ?? null);
       setMySex(me?.sex ?? null);
@@ -133,10 +127,6 @@ setActiveCommitment(
         const [profsRes, blocksRes, blockedByRes, hiddenRes, rolesRes, myAdvRes, commitmentsRes,
 ] = await Promise.all([
           supabase
-  .from("relationship_commitments")
-  .select("user_a,user_b")
-  .eq("status", "active"),
-          supabase
             .from("profiles")
             .select("id, full_name, age, city, state, church, bio, photo_url, sex, marital, verified, created_at")
             .eq("status", "approved")
@@ -148,6 +138,10 @@ setActiveCommitment(
           supabase.rpc("get_hidden_staff_ids"),
           supabase.from("user_roles").select("user_id, role, badge_color").neq("role", "user"),
           supabase.from("profile_advanced").select("*").eq("user_id", user.id).maybeSingle(),
+          supabase
+            .from("relationship_commitments")
+            .select("user_a,user_b")
+            .eq("status", "active"),
         ]);
         const hidden = new Set<string>([
           ...(blocksRes.data ?? []).map((b: any) => b.blocked_id),
