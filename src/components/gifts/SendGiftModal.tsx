@@ -149,8 +149,6 @@ export function SendGiftModal({ open, onOpenChange, gift, receiverId, balance, o
   <CoinIcon className="h-4 w-4" />
   {gift.price_coins} moedas
 </div>
-              <CoinIcon className="h-4 w-4" /> {gift.price_coins} moedas
-            </div>
           </div>
         </div>
 
@@ -185,13 +183,7 @@ export function SendGiftModal({ open, onOpenChange, gift, receiverId, balance, o
               value={msg}
               onChange={(e) => setMsg(e.target.value)}
               placeholder="Escreva algo carinhoso..."
-              className="className="
-  mt-1.5
-  border-zinc-200
-  bg-zinc-50
-  text-zinc-900
-  placeholder:text-zinc-400
-"
+              className="mt-1.5 border-zinc-200 bg-zinc-50 text-zinc-900 placeholder:text-zinc-400"
             />
             <p className="mt-1 text-right text-[11px] text-white/80">{msg.length}/120</p>
           </div>
