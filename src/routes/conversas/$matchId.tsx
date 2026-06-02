@@ -15,6 +15,7 @@ import { useRestrictedWords, findRestrictedWord } from "@/lib/profanity";
 import { ShieldAlert } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
+import { CommitmentProgressCard } from "@/components/commitment/CommitmentProgressCard";
 
 type Msg = {
   id: string;
@@ -25,9 +26,22 @@ type Msg = {
   edited_at?: string | null;
   reply_to_id?: string | null;
 };
-type Partner = { id: string; full_name: string; photo_url: string | null; verified?: boolean | null; equipped_frame_id?: string | null; equipped_aura_id?: string | null };
+type Partner = {
+  id: string;
+  full_name: string;
+  photo_url: string | null;
+  verified?: boolean | null;
+  equipped_frame_id?: string | null;
+  equipped_aura_id?: string | null;
+};
 
-export const Route = createFileRoute("/conversas/$matchId")({ component: () => (<RequireApproved><Chat /></RequireApproved>) });
+export const Route = createFileRoute("/conversas/$matchId")({
+  component: () => (
+    <RequireApproved>
+      <Chat />
+    </RequireApproved>
+  ),
+});
 
 function Chat() {
   const { matchId } = Route.useParams();
@@ -51,13 +65,27 @@ function Chat() {
     if (!user) return;
     (async () => {
       const { data: m } = await supabase.from("matches").select("user_a, user_b").eq("id", matchId).maybeSingle();
-      if (!m || (m.user_a !== user.id && m.user_b !== user.id)) { setAuthorized(false); return; }
+      if (!m || (m.user_a !== user.id && m.user_b !== user.id)) {
+        setAuthorized(false);
+        return;
+      }
       const partnerId = m.user_a === user.id ? m.user_b : m.user_a;
-      const { data: blk } = await supabase.from("blocks").select("id")
-        .eq("blocker_id", user.id).eq("blocked_id", partnerId).maybeSingle();
-      if (blk) { setAuthorized(false); return; }
+      const { data: blk } = await supabase
+        .from("blocks")
+        .select("id")
+        .eq("blocker_id", user.id)
+        .eq("blocked_id", partnerId)
+        .maybeSingle();
+      if (blk) {
+        setAuthorized(false);
+        return;
+      }
       setAuthorized(true);
-      const { data: p } = await supabase.from("profiles").select("id,full_name,photo_url,verified,equipped_frame_id,equipped_aura_id").eq("id", partnerId).maybeSingle();
+      const { data: p } = await supabase
+        .from("profiles")
+        .select("id,full_name,photo_url,verified,equipped_frame_id,equipped_aura_id")
+        .eq("id", partnerId)
+        .maybeSingle();
       setPartner(p as Partner | null);
       const { data: msgs } = await supabase.from("messages").select("*").eq("match_id", matchId).order("created_at");
       setMessages((msgs ?? []) as Msg[]);
@@ -66,29 +94,40 @@ function Chat() {
       await Promise.all(unread.map((m) => supabase.rpc("mark_message_read", { _message_id: m.id })));
     })();
 
-    const ch = supabase.channel(`chat-${matchId}`)
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages", filter: `match_id=eq.${matchId}` },
+    const ch = supabase
+      .channel(`chat-${matchId}`)
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "messages", filter: `match_id=eq.${matchId}` },
         (payload) => {
-          setMessages((prev) => prev.some((m) => m.id === (payload.new as Msg).id) ? prev : [...prev, payload.new as Msg]);
+          setMessages((prev) =>
+            prev.some((m) => m.id === (payload.new as Msg).id) ? prev : [...prev, payload.new as Msg],
+          );
           if ((payload.new as Msg).sender_id !== user.id) {
             supabase.rpc("mark_message_read", { _message_id: (payload.new as Msg).id });
           }
-        }
+        },
       )
-      .on("postgres_changes", { event: "DELETE", schema: "public", table: "messages", filter: `match_id=eq.${matchId}` },
+      .on(
+        "postgres_changes",
+        { event: "DELETE", schema: "public", table: "messages", filter: `match_id=eq.${matchId}` },
         (payload) => {
           const removed = payload.old as { id: string };
           setMessages((prev) => prev.filter((m) => m.id !== removed.id));
-        }
+        },
       )
-      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "messages", filter: `match_id=eq.${matchId}` },
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "messages", filter: `match_id=eq.${matchId}` },
         (payload) => {
           const updated = payload.new as Msg;
           setMessages((prev) => prev.map((m) => (m.id === updated.id ? { ...m, ...updated } : m)));
-        }
+        },
       )
       .subscribe();
-    return () => { supabase.removeChannel(ch); };
+    return () => {
+      supabase.removeChannel(ch);
+    };
   }, [matchId, user]);
 
   useEffect(() => {
@@ -96,14 +135,18 @@ function Chat() {
   }, [messages]);
 
   if (!loading && !user) return <Navigate to="/auth/login" />;
-  if (authorized === false) return (
-    <div className="min-h-screen"><Header />
-      <main className="mx-auto max-w-md px-4 py-20 text-center">
-        <p>Conversa não encontrada.</p>
-        <Button asChild variant="outline" className="mt-4"><Link to="/conversas">Voltar</Link></Button>
-      </main>
-    </div>
-  );
+  if (authorized === false)
+    return (
+      <div className="min-h-screen">
+        <Header />
+        <main className="mx-auto max-w-md px-4 py-20 text-center">
+          <p>Conversa não encontrada.</p>
+          <Button asChild variant="outline" className="mt-4">
+            <Link to="/conversas">Voltar</Link>
+          </Button>
+        </main>
+      </div>
+    );
 
   async function send(e: React.FormEvent) {
     e.preventDefault();
@@ -122,7 +165,10 @@ function Chat() {
       reply_to_id: replyTo?.id ?? null,
     });
     setSending(false);
-    if (error) { toast.error(friendlyError(error)); return; }
+    if (error) {
+      toast.error(friendlyError(error));
+      return;
+    }
     setInput("");
     setReplyTo(null);
   }
@@ -152,9 +198,15 @@ function Chat() {
     const content = editText.trim().slice(0, 2000);
     if (!content) return;
     const original = messages.find((m) => m.id === messageId);
-    if (original && original.content === content) { cancelEdit(); return; }
+    if (original && original.content === content) {
+      cancelEdit();
+      return;
+    }
     const { error } = await supabase.from("messages").update({ content }).eq("id", messageId);
-    if (error) { toast.error("Não foi possível editar."); return; }
+    if (error) {
+      toast.error("Não foi possível editar.");
+      return;
+    }
     cancelEdit();
   }
 
@@ -170,7 +222,9 @@ function Chat() {
     <div className="flex min-h-screen flex-col">
       <Header />
       <div className="glass mx-auto flex w-full max-w-3xl items-center gap-3 px-4 py-3 shadow-soft">
-        <Link to="/conversas" className="text-muted-foreground hover:text-foreground"><ArrowLeft className="h-5 w-5" /></Link>
+        <Link to="/conversas" className="text-muted-foreground hover:text-foreground">
+          <ArrowLeft className="h-5 w-5" />
+        </Link>
         {partner ? (
           <Link
             to="/pretendentes/$id"
@@ -206,11 +260,7 @@ function Chat() {
       </div>
 
       {actionsOpenId && (
-        <div
-          className="fixed inset-0 z-30"
-          onClick={() => setActionsOpenId(null)}
-          aria-hidden="true"
-        />
+        <div className="fixed inset-0 z-30" onClick={() => setActionsOpenId(null)} aria-hidden="true" />
       )}
 
       <main ref={scrollRef} className="mx-auto w-full max-w-3xl flex-1 space-y-5 overflow-y-auto px-4 py-8">
@@ -226,10 +276,14 @@ function Chat() {
           return (
             <div
               key={m.id}
-              ref={(el) => { messageRefs.current[m.id] = el; }}
+              ref={(el) => {
+                messageRefs.current[m.id] = el;
+              }}
               className={`flex scroll-mt-24 transition-colors duration-500 ${mine ? "justify-end" : "justify-start"} ${isFlash ? "rounded-xl bg-primary/10" : ""}`}
             >
-              <div className={`group relative flex max-w-[75%] items-end gap-1 ${showActions ? "z-40" : ""} ${mine ? "flex-row-reverse" : "flex-row"}`}>
+              <div
+                className={`group relative flex max-w-[75%] items-end gap-1 ${showActions ? "z-40" : ""} ${mine ? "flex-row-reverse" : "flex-row"}`}
+              >
                 <BubbleContent
                   mine={mine}
                   isMine={!!mine}
@@ -248,7 +302,7 @@ function Chat() {
                       <span className={`w-0.5 shrink-0 rounded ${mine ? "bg-white/70" : "bg-primary"}`} />
                       <span className="min-w-0 flex-1">
                         <span className={`block font-semibold ${mine ? "text-white/90" : "text-primary"}`}>
-                          {replied.sender_id === user?.id ? "Você" : partner?.full_name?.split(" ")[0] ?? ""}
+                          {replied.sender_id === user?.id ? "Você" : (partner?.full_name?.split(" ")[0] ?? "")}
                         </span>
                         <span className={`line-clamp-2 ${mine ? "text-white/80" : "text-muted-foreground"}`}>
                           {replied.content}
@@ -267,10 +321,20 @@ function Chat() {
                         className={`w-full resize-none rounded-md bg-white/20 p-1.5 text-sm outline-none ring-1 ring-white/40 ${mine ? "text-white placeholder:text-white/60" : "text-foreground bg-background ring-border"}`}
                       />
                       <div className="flex justify-end gap-1">
-                        <button type="button" onClick={cancelEdit} aria-label="Cancelar" className="rounded-full p-1 hover:bg-white/20">
+                        <button
+                          type="button"
+                          onClick={cancelEdit}
+                          aria-label="Cancelar"
+                          className="rounded-full p-1 hover:bg-white/20"
+                        >
                           <X className="h-3.5 w-3.5" />
                         </button>
-                        <button type="button" onClick={() => saveEdit(m.id)} aria-label="Salvar" className="rounded-full p-1 hover:bg-white/20">
+                        <button
+                          type="button"
+                          onClick={() => saveEdit(m.id)}
+                          aria-label="Salvar"
+                          className="rounded-full p-1 hover:bg-white/20"
+                        >
                           <Check className="h-3.5 w-3.5" />
                         </button>
                       </div>
@@ -278,20 +342,24 @@ function Chat() {
                   ) : (
                     <>
                       <p className="whitespace-pre-wrap break-words">{m.content}</p>
-                      <p className={`mt-1 flex items-center gap-1 text-[10px] ${mine ? "text-white/70" : "text-muted-foreground"}`}>
+                      <p
+                        className={`mt-1 flex items-center gap-1 text-[10px] ${mine ? "text-white/70" : "text-muted-foreground"}`}
+                      >
                         <span>
                           {new Date(m.created_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
                           {m.edited_at ? " · editado" : ""}
                         </span>
-                        {mine && (
-                          m.read_at ? (
-                            <span className="ml-0.5 inline-flex items-center gap-0.5" title={`Visto ${new Date(m.read_at).toLocaleString("pt-BR")}`}>
+                        {mine &&
+                          (m.read_at ? (
+                            <span
+                              className="ml-0.5 inline-flex items-center gap-0.5"
+                              title={`Visto ${new Date(m.read_at).toLocaleString("pt-BR")}`}
+                            >
                               <CheckCheck className="h-3 w-3" /> Visto
                             </span>
                           ) : (
                             <Check className="ml-0.5 h-3 w-3" aria-label="Enviada" />
-                          )
-                        )}
+                          ))}
                       </p>
                     </>
                   )}
@@ -299,7 +367,10 @@ function Chat() {
                 {!isEditing && !showActions && (
                   <button
                     type="button"
-                    onClick={(e) => { e.stopPropagation(); setActionsOpenId(m.id); }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setActionsOpenId(m.id);
+                    }}
                     aria-label="Mais opções"
                     className="hidden md:flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-muted-foreground opacity-0 transition-opacity hover:bg-accent hover:text-foreground group-hover:opacity-100 focus:opacity-100"
                   >
@@ -318,7 +389,10 @@ function Chat() {
                   >
                     <button
                       type="button"
-                      onClick={() => { setReplyTo(m); setActionsOpenId(null); }}
+                      onClick={() => {
+                        setReplyTo(m);
+                        setActionsOpenId(null);
+                      }}
                       aria-label="Responder"
                       className="flex items-center gap-1 rounded-full px-2 py-1 text-xs text-foreground hover:bg-accent active:bg-accent/80 [touch-action:manipulation]"
                     >
@@ -328,7 +402,10 @@ function Chat() {
                       <>
                         <button
                           type="button"
-                          onClick={() => { setActionsOpenId(null); startEdit(m); }}
+                          onClick={() => {
+                            setActionsOpenId(null);
+                            startEdit(m);
+                          }}
                           aria-label="Editar mensagem"
                           className="flex items-center gap-1 rounded-full px-2 py-1 text-xs text-foreground hover:bg-accent active:bg-accent/80 [touch-action:manipulation]"
                         >
@@ -336,7 +413,10 @@ function Chat() {
                         </button>
                         <button
                           type="button"
-                          onClick={() => { setActionsOpenId(null); handleDelete(m.id); }}
+                          onClick={() => {
+                            setActionsOpenId(null);
+                            handleDelete(m.id);
+                          }}
                           aria-label="Apagar mensagem"
                           className="flex items-center gap-1 rounded-full px-2 py-1 text-xs text-destructive hover:bg-destructive/10 active:bg-destructive/20 [touch-action:manipulation]"
                         >
@@ -359,7 +439,7 @@ function Chat() {
               <span className="w-1 shrink-0 rounded bg-primary" />
               <div className="min-w-0 flex-1">
                 <p className="text-xs font-semibold text-primary">
-                  Respondendo a {replyTo.sender_id === user?.id ? "você" : partner?.full_name?.split(" ")[0] ?? ""}
+                  Respondendo a {replyTo.sender_id === user?.id ? "você" : (partner?.full_name?.split(" ")[0] ?? "")}
                 </p>
                 <p className="line-clamp-1 text-xs text-muted-foreground">{replyTo.content}</p>
               </div>
@@ -374,7 +454,12 @@ function Chat() {
             </div>
           )}
           <div className="flex gap-2">
-            <Input value={input} onChange={(e) => setInput(e.target.value)} placeholder="Escreva uma mensagem..." maxLength={2000} />
+            <Input
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Escreva uma mensagem..."
+              maxLength={2000}
+            />
             <Button type="submit" disabled={sending || !input.trim()} className="shrink-0">
               <Send className="h-4 w-4" />
             </Button>
@@ -389,7 +474,8 @@ function Chat() {
             </div>
             <DialogTitle className="text-center">Mensagem bloqueada</DialogTitle>
             <DialogDescription className="text-center">
-              A palavra <span className="font-semibold text-foreground">"{warning}"</span> fere as diretrizes da comunidade. Por favor, reescreva sua mensagem com respeito e cuidado.
+              A palavra <span className="font-semibold text-foreground">"{warning}"</span> fere as diretrizes da
+              comunidade. Por favor, reescreva sua mensagem com respeito e cuidado.
             </DialogDescription>
           </DialogHeader>
           <div className="flex justify-center pt-2">
