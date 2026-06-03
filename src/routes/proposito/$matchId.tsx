@@ -254,14 +254,121 @@ function CouplePage() {
           "
         >
           <div className="text-center">
-            <div className="mb-4 text-5xl">💍</div>
+            <div
+              className="
+    mx-auto
+    mb-6
+    flex
+    h-20
+    w-20
+    items-center
+    justify-center
+    rounded-full
+    bg-white/70
+    backdrop-blur
+  "
+            >
+              <Gem
+                className="
+      h-10
+      w-10
+      text-emerald-600
+    "
+              />
+            </div>
 
-            <h1 className="text-3xl font-bold">Propósito Firmado</h1>
+            <h1 className="text-4xl font-bold">
+              {personA?.full_name?.split(" ")[0]}
+              {" • "}
+              {personB?.full_name?.split(" ")[0]}
+            </h1>
+            <div
+              className="
+    mt-4
+    flex
+    flex-wrap
+    items-center
+    justify-center
+    gap-3
+  "
+            >
+              <div
+                className="
+      flex
+      items-center
+      gap-2
+      rounded-full
+      bg-white/70
+      px-3
+      py-2
+      text-sm
+      shadow-sm
+    "
+              >
+                <MessageCircle
+                  className="
+        h-4
+        w-4
+        text-blue-500
+      "
+                />
 
-            <p className="mt-2 text-muted-foreground">Um compromisso público diante da comunidade.</p>
+                <span>{messageCount.toLocaleString("pt-BR")}</span>
+              </div>
+
+              <div
+                className="
+      flex
+      items-center
+      gap-2
+      rounded-full
+      bg-white/70
+      px-3
+      py-2
+      text-sm
+      shadow-sm
+    "
+              >
+                <Gift
+                  className="
+        h-4
+        w-4
+        text-amber-500
+      "
+                />
+
+                <span>{giftCount.toLocaleString("pt-BR")}</span>
+              </div>
+
+              <div
+                className="
+      flex
+      items-center
+      gap-2
+      rounded-full
+      bg-white/70
+      px-3
+      py-2
+      text-sm
+      shadow-sm
+    "
+              >
+                <Gem
+                  className="
+        h-4
+        w-4
+        text-emerald-600
+      "
+                />
+
+                <span>{daysTogether} dias</span>
+              </div>
+            </div>
+
+            <p className="mt-2 text-lg text-muted-foreground">{daysTogether} dias juntos em propósito</p>
           </div>
 
-          <div className="mt-10 flex items-center justify-center gap-6">
+          <div className="mt-10 flex items-center justify-center gap-4">
             <div className="text-center">
               <div className="mx-auto mb-2 flex h-24 w-24 items-center justify-center">
                 <DecoratedAvatar
@@ -276,7 +383,26 @@ function CouplePage() {
               <p className="font-semibold">{personA?.full_name ?? "—"}</p>
             </div>
 
-            <Heart className="h-8 w-8 text-rose-500" />
+            <div
+              className="
+    flex
+    h-14
+    w-14
+    items-center
+    justify-center
+    rounded-full
+    bg-white
+    shadow-md
+  "
+            >
+              <Heart
+                className="
+      h-7
+      w-7
+      text-rose-500
+    "
+              />
+            </div>
 
             <div className="text-center">
               <div className="mx-auto mb-2 flex h-24 w-24 items-center justify-center">
@@ -294,15 +420,80 @@ function CouplePage() {
           </div>
 
           {acceptedAt && (
-            <p className="mt-8 text-center text-sm text-muted-foreground">
-              Desde {new Date(acceptedAt).toLocaleDateString("pt-BR")}
-            </p>
+            <div
+              className="
+      mt-8
+      text-center
+    "
+            >
+              <span
+                className="
+        rounded-full
+        border
+        bg-white/60
+        px-4
+        py-2
+        text-sm
+      "
+              >
+                Desde {new Date(acceptedAt).toLocaleDateString("pt-BR")}
+              </span>
+            </div>
           )}
         </section>
 
         <section className="mt-8 grid gap-4 md:grid-cols-3">
           <div className="glass rounded-3xl p-6 text-center shadow-soft">
-            <Heart className="mx-auto mb-3 h-7 w-7 text-rose-500" />
+            <div className="relative flex items-center">
+              <div
+                className="
+      absolute
+      left-[-60px]
+      h-[2px]
+      w-[60px]
+      bg-gradient-to-r
+      from-transparent
+      via-rose-300
+      to-rose-400
+    "
+              />
+
+              <div
+                className="
+      flex
+      h-14
+      w-14
+      items-center
+      justify-center
+      rounded-full
+      border
+      border-rose-200
+      bg-white
+      shadow-md
+    "
+              >
+                <Heart
+                  className="
+        h-7
+        w-7
+        text-rose-500
+      "
+                />
+              </div>
+
+              <div
+                className="
+      absolute
+      right-[-60px]
+      h-[2px]
+      w-[60px]
+      bg-gradient-to-l
+      from-transparent
+      via-rose-300
+      to-rose-400
+    "
+              />
+            </div>
 
             <div className="text-3xl font-bold">{daysTogether}</div>
 
