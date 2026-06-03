@@ -690,18 +690,6 @@ setAchievements([
 
 </section>
 
-            <ul className="space-y-2 text-sm text-muted-foreground">
-
-              <li>
-                ✅ Página do casal criada
-              </li>
-
-
-            </ul>
-
-          </div>
-
-        </section>
 <section className="mt-8">
 
   <div className="glass rounded-3xl p-6 shadow-soft">
