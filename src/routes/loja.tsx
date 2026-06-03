@@ -182,6 +182,9 @@ function LojaPage() {
       const msg = e instanceof Error ? e.message : "";
       if (msg.includes("insufficient")) toast.error("Moedas insuficientes");
       else if (msg.includes("already_owned")) toast.error("Voce ja possui esse fundo");
+      else if (msg.includes("purchase_profile_background") || msg.includes("schema cache")) {
+        toast.error("Banco sem a função de compra dos fundos. Rode a migration de reparo.");
+      } else if (msg.includes("background_not_found")) toast.error("Fundo indisponivel para compra");
       else toast.error("Nao foi possivel concluir a compra");
     } finally {
       setBusyId(null);
