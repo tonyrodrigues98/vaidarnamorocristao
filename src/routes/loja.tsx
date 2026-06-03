@@ -1,7 +1,7 @@
 import { createFileRoute, Navigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Check, Loader2, Sparkles, X, Lock, Gem } from "lucide-react";
+import { Check, ImageIcon, Loader2, Sparkles, X, Lock, Gem } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
@@ -26,6 +26,15 @@ import {
   type Decoration,
   type DecorationType,
 } from "@/lib/decorations";
+import {
+  BACKGROUND_RARITY_STYLE,
+  equipProfileBackground,
+  fetchMyOwnedBackgroundIds,
+  fetchProfileBackgroundCatalog,
+  purchaseProfileBackground,
+  unequipProfileBackground,
+  type ProfileBackground,
+} from "@/lib/profileBackgrounds";
 
 export const Route = createFileRoute("/loja")({
   component: LojaPage,
@@ -43,54 +52,64 @@ export const Route = createFileRoute("/loja")({
 });
 
 type EquippedMap = { frame: string | null; aura: string | null; sticker: string | null };
-type CategoryKey = "frame" | "aura" | "soon";
+type CategoryKey = "frame" | "aura" | "background" | "soon";
 
-const CATEGORIES: { key: CategoryKey; label: string; type: DecorationType | null }[] = [
+const CATEGORIES: { key: CategoryKey; label: string; type: DecorationType | "background" | null }[] = [
   { key: "frame", label: "Molduras", type: "frame" },
   { key: "aura", label: "Auras", type: "aura" },
+  { key: "background", label: "Fundos de Perfil", type: "background" },
   { key: "soon", label: "Em breve", type: null },
 ];
 
 function LojaPage() {
   const { user, loading: authLoading } = useAuth();
   const [catalog, setCatalog] = useState<Decoration[]>([]);
+  const [backgrounds, setBackgrounds] = useState<ProfileBackground[]>([]);
   const [owned, setOwned] = useState<Set<string>>(new Set());
+  const [ownedBackgrounds, setOwnedBackgrounds] = useState<Set<string>>(new Set());
   const [equipped, setEquipped] = useState<EquippedMap>({
     frame: null,
     aura: null,
     sticker: null,
   });
+  const [equippedBackground, setEquippedBackground] = useState<string | null>(null);
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [balance, setBalance] = useState(0);
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<CategoryKey>("frame");
   const [confirm, setConfirm] = useState<Decoration | null>(null);
+  const [confirmBackground, setConfirmBackground] = useState<ProfileBackground | null>(null);
 
   useEffect(() => {
     if (!user) return;
     let alive = true;
     (async () => {
       try {
-        const [c, o, coins, prof] = await Promise.all([
+        const [c, bg, o, ownedBg, coins, prof] = await Promise.all([
           fetchDecorationCatalog(),
+          fetchProfileBackgroundCatalog(),
           fetchMyOwnedIds(),
+          fetchMyOwnedBackgroundIds(),
           getMyCoins(),
           supabase
             .from("profiles")
-            .select("photo_url, equipped_frame_id, equipped_aura_id, equipped_sticker_id")
+            .select("photo_url, equipped_frame_id, equipped_aura_id, equipped_sticker_id, equipped_background_id")
             .eq("id", user.id)
             .maybeSingle(),
         ]);
         if (!alive) return;
         setCatalog(c);
+        setBackgrounds(bg);
         setOwned(o);
+        setOwnedBackgrounds(ownedBg);
         setBalance(coins.balance);
         const p = (prof.data ?? {}) as {
           photo_url?: string | null;
           equipped_frame_id?: string | null;
           equipped_aura_id?: string | null;
           equipped_sticker_id?: string | null;
+          equipped_background_id?: string | null;
         };
         setPhotoUrl(p.photo_url ?? null);
         setEquipped({
@@ -98,6 +117,7 @@ function LojaPage() {
           aura: p.equipped_aura_id ?? null,
           sticker: p.equipped_sticker_id ?? null,
         });
+        setEquippedBackground(p.equipped_background_id ?? null);
       } catch {
         toast.error("Não foi possível carregar a loja");
       } finally {
@@ -133,6 +153,24 @@ function LojaPage() {
     }
   };
 
+  const handleBuyBackground = async (background: ProfileBackground) => {
+    setBusyId(background.id);
+    try {
+      const r = await purchaseProfileBackground(background.id);
+      setBalance(r.new_balance);
+      setOwnedBackgrounds((s) => new Set([...s, background.id]));
+      toast.success(`${background.name} desbloqueado com sucesso`);
+      setConfirmBackground(null);
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "";
+      if (msg.includes("insufficient")) toast.error("Moedas insuficientes");
+      else if (msg.includes("already_owned")) toast.error("Voce ja possui esse fundo");
+      else toast.error("Nao foi possivel concluir a compra");
+    } finally {
+      setBusyId(null);
+    }
+  };
+
   const handleEquip = async (d: Decoration) => {
     setBusyId(d.id);
     try {
@@ -158,10 +196,38 @@ function LojaPage() {
     }
   };
 
+  const handleEquipBackground = async (background: ProfileBackground) => {
+    setBusyId(background.id);
+    try {
+      await equipProfileBackground(background.id);
+      setEquippedBackground(background.id);
+      toast.success(`${background.name} equipado`);
+    } catch {
+      toast.error("Erro ao equipar fundo");
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const handleUnequipBackground = async () => {
+    setBusyId("unequip-background");
+    try {
+      await unequipProfileBackground();
+      setEquippedBackground(null);
+    } catch {
+      toast.error("Erro ao remover fundo");
+    } finally {
+      setBusyId(null);
+    }
+  };
+
   if (!authLoading && !user) return <Navigate to="/auth/login" />;
 
   const activeCategory = CATEGORIES.find((c) => c.key === activeTab)!;
-  const items = activeCategory.type ? grouped[activeCategory.type] : [];
+  const items =
+    activeCategory.type && activeCategory.type !== "background"
+      ? grouped[activeCategory.type]
+      : [];
 
   return (
     <div className="min-h-screen bg-background">
@@ -264,13 +330,143 @@ function LojaPage() {
           </div>
         ) : activeTab === "soon" ? (
           <ComingSoon />
+        ) : activeTab === "background" ? (
+          backgrounds.length === 0 ? (
+            <p className="py-16 text-center text-sm text-muted-foreground">
+              Em breve novos fundos de perfil.
+            </p>
+          ) : (
+            <>
+              {equippedBackground && (
+                <div className="mb-4 flex justify-end">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-xs text-muted-foreground"
+                    onClick={handleUnequipBackground}
+                    disabled={busyId === "unequip-background"}
+                  >
+                    <X className="mr-1 h-3 w-3" />
+                    Remover fundo atual
+                  </Button>
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {backgrounds.map((background) => {
+                  const isOwned = ownedBackgrounds.has(background.id);
+                  const isEquipped = equippedBackground === background.id;
+                  const busy = busyId === background.id;
+                  const canAfford = balance >= background.price;
+                  const rarity = BACKGROUND_RARITY_STYLE[background.rarity];
+
+                  return (
+                    <article
+                      key={background.id}
+                      className={`group overflow-hidden rounded-2xl border bg-card transition hover:-translate-y-0.5 hover:shadow-soft ${
+                        isEquipped
+                          ? "border-[var(--rose)] ring-1 ring-[var(--rose)]/30"
+                          : rarity.border
+                      }`}
+                    >
+                      <div className="relative aspect-[16/10] overflow-hidden bg-gradient-to-br from-muted to-card">
+                        {background.image_url ? (
+                          <img
+                            src={background.image_url}
+                            alt={background.name}
+                            className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                          />
+                        ) : (
+                          <div className="flex h-full items-center justify-center text-muted-foreground">
+                            <ImageIcon className="h-10 w-10" />
+                          </div>
+                        )}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
+                        <div className="absolute left-3 top-3 flex gap-2">
+                          <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${rarity.chip}`}>
+                            {rarity.label}
+                          </span>
+                          {isEquipped && (
+                            <span className="inline-flex items-center gap-1 rounded-full bg-[var(--rose)] px-2 py-0.5 text-[10px] font-semibold text-white">
+                              <Check className="h-3 w-3" /> Equipado
+                            </span>
+                          )}
+                        </div>
+                        {!isOwned && (
+                          <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-background/85 px-2 py-0.5 text-[10px] font-medium text-foreground backdrop-blur">
+                            <CoinIcon className="h-3 w-3" /> {background.price}
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="p-4">
+                        <h3 className="line-clamp-1 text-sm font-semibold" title={background.name}>
+                          {background.name}
+                        </h3>
+                        <p className="mt-1 line-clamp-2 min-h-[2.5rem] text-xs text-muted-foreground">
+                          {background.description || "Fundo premium para destacar seu perfil."}
+                        </p>
+
+                        <div className="mt-4">
+                          {isEquipped ? (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="w-full text-xs"
+                              disabled={busyId === "unequip-background"}
+                              onClick={handleUnequipBackground}
+                            >
+                              {busyId === "unequip-background" ? (
+                                <Loader2 className="h-3 w-3 animate-spin" />
+                              ) : (
+                                "Equipado"
+                              )}
+                            </Button>
+                          ) : isOwned ? (
+                            <Button
+                              size="sm"
+                              className="w-full text-xs"
+                              disabled={busy}
+                              onClick={() => handleEquipBackground(background)}
+                            >
+                              {busy ? <Loader2 className="h-3 w-3 animate-spin" /> : "Equipar"}
+                            </Button>
+                          ) : (
+                            <Button
+                              size="sm"
+                              className="w-full text-xs"
+                              disabled={busy || !canAfford}
+                              onClick={() => setConfirmBackground(background)}
+                            >
+                              {busy ? (
+                                <Loader2 className="h-3 w-3 animate-spin" />
+                              ) : canAfford ? (
+                                <span className="inline-flex items-center gap-1.5">
+                                  Comprar
+                                  <span className="inline-flex items-center gap-1 opacity-80">
+                                    <CoinIcon className="h-3 w-3" /> {background.price}
+                                  </span>
+                                </span>
+                              ) : (
+                                "Moedas insuficientes"
+                              )}
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            </>
+          )
         ) : items.length === 0 ? (
           <p className="py-16 text-center text-sm text-muted-foreground">
             Em breve novos itens nessa categoria.
           </p>
         ) : (
           <>
-            {activeCategory.type && equipped[activeCategory.type] && (
+            {activeCategory.type && activeCategory.type !== "background" && equipped[activeCategory.type] && (
               <div className="mb-4 flex justify-end">
                 <Button
                   variant="ghost"
@@ -464,6 +660,79 @@ function LojaPage() {
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
                 "Comprar item"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!confirmBackground} onOpenChange={(o) => !o && setConfirmBackground(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <ImageIcon className="h-4 w-4 text-[var(--rose)]" />
+              Confirmar compra?
+            </DialogTitle>
+            <DialogDescription>
+              {confirmBackground && (
+                <>
+                  Deseja utilizar{" "}
+                  <strong className="text-foreground">{confirmBackground.price}</strong>{" "}
+                  moedas para desbloquear este fundo?
+                </>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+
+          {confirmBackground && (
+            <div className="overflow-hidden rounded-xl border bg-muted/30">
+              <div className="relative aspect-[16/9] bg-muted">
+                {confirmBackground.image_url ? (
+                  <img
+                    src={confirmBackground.image_url}
+                    alt={confirmBackground.name}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <div className="flex h-full items-center justify-center text-muted-foreground">
+                    <ImageIcon className="h-8 w-8" />
+                  </div>
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                <div className="absolute bottom-3 left-3 right-3 text-white">
+                  <p className="line-clamp-1 text-sm font-semibold">{confirmBackground.name}</p>
+                  <p className="mt-0.5 line-clamp-1 text-xs text-white/80">
+                    {confirmBackground.description || "Fundo premium para o cabecalho do perfil."}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="text-xs text-muted-foreground">
+            Saldo apos a compra:{" "}
+            <strong className="text-foreground">
+              {confirmBackground ? Math.max(0, balance - confirmBackground.price) : balance}
+            </strong>{" "}
+            moedas
+          </div>
+
+          <DialogFooter className="gap-2 sm:gap-2">
+            <Button
+              variant="ghost"
+              onClick={() => setConfirmBackground(null)}
+              disabled={busyId === confirmBackground?.id}
+            >
+              Cancelar
+            </Button>
+            <Button
+              onClick={() => confirmBackground && handleBuyBackground(confirmBackground)}
+              disabled={busyId === confirmBackground?.id}
+            >
+              {busyId === confirmBackground?.id ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                "Comprar fundo"
               )}
             </Button>
           </DialogFooter>

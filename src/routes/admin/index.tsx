@@ -562,6 +562,9 @@ function Admin() {
               <Button asChild variant="outline" size="sm" className="mr-2">
                 <Link to="/admin/presentes">Catálogo de Presentes</Link>
               </Button>
+              <Button asChild variant="outline" size="sm" className="mr-2">
+                <Link to="/admin/fundos">Fundos de Perfil</Link>
+              </Button>
               {isSuperAdmin && (
                 <Button asChild variant="outline" size="sm">
                   <Link to="/admin/stickers">Stickers</Link>

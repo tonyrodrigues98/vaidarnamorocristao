@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
-import { Check, Loader2, Lock, Sparkles, ShoppingBag, X } from "lucide-react";
+import { Check, ImageIcon, Loader2, Lock, Sparkles, ShoppingBag, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
@@ -16,11 +16,19 @@ import {
   type Decoration,
   type DecorationType,
 } from "@/lib/decorations";
+import {
+  BACKGROUND_RARITY_STYLE,
+  equipProfileBackground,
+  fetchMyOwnedBackgroundIds,
+  fetchProfileBackgroundCatalog,
+  unequipProfileBackground,
+  type ProfileBackground,
+} from "@/lib/profileBackgrounds";
 
 type EquippedMap = { frame: string | null; aura: string | null; sticker: string | null };
 
 type Category = {
-  key: DecorationType | "soon-bg" | "soon-badges" | "soon-effects" | "soon-pets" | "soon-themes";
+  key: DecorationType | "background" | "soon-badges" | "soon-effects" | "soon-pets" | "soon-themes";
   label: string;
   soon?: boolean;
 };
@@ -28,7 +36,7 @@ type Category = {
 const CATEGORIES: Category[] = [
   { key: "frame", label: "Molduras" },
   { key: "aura", label: "Aura" },
-  { key: "soon-bg", label: "Fundos", soon: true },
+  { key: "background", label: "Meus Fundos" },
   { key: "soon-badges", label: "Badges", soon: true },
   { key: "soon-effects", label: "Efeitos", soon: true },
   { key: "soon-themes", label: "Temas", soon: true },
@@ -37,13 +45,17 @@ const CATEGORIES: Category[] = [
 export function CustomizacaoTab({ photoUrl }: { photoUrl: string | null }) {
   const { user } = useAuth();
   const [catalog, setCatalog] = useState<Decoration[]>([]);
+  const [backgrounds, setBackgrounds] = useState<ProfileBackground[]>([]);
   const [owned, setOwned] = useState<Set<string>>(new Set());
+  const [ownedBackgrounds, setOwnedBackgrounds] = useState<Set<string>>(new Set());
   const [equipped, setEquipped] = useState<EquippedMap>({ frame: null, aura: null, sticker: null });
+  const [equippedBackground, setEquippedBackground] = useState<string | null>(null);
   const [preview, setPreview] = useState<EquippedMap>({
     frame: null,
     aura: null,
     sticker: null,
   });
+  const [previewBackground, setPreviewBackground] = useState<string | null>(null);
   const [balance, setBalance] = useState(0);
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -54,30 +66,36 @@ export function CustomizacaoTab({ photoUrl }: { photoUrl: string | null }) {
     let alive = true;
     (async () => {
       try {
-        const [c, o, coins, prof] = await Promise.all([
+        const [c, bg, o, ownedBg, coins, prof] = await Promise.all([
           fetchDecorationCatalog(),
+          fetchProfileBackgroundCatalog(),
           fetchMyOwnedIds(),
+          fetchMyOwnedBackgroundIds(),
           getMyCoins(),
           supabase
             .from("profiles")
-            .select("equipped_frame_id, equipped_aura_id, equipped_sticker_id")
+            .select("equipped_frame_id, equipped_aura_id, equipped_sticker_id, equipped_background_id")
             .eq("id", user.id)
             .maybeSingle(),
         ]);
         if (!alive) return;
         setCatalog(c);
+        setBackgrounds(bg);
         setOwned(o);
+        setOwnedBackgrounds(ownedBg);
         setBalance(coins.balance);
         const p = (prof.data ?? {}) as {
           equipped_frame_id?: string | null;
           equipped_aura_id?: string | null;
           equipped_sticker_id?: string | null;
+          equipped_background_id?: string | null;
         };
         setEquipped({
           frame: p.equipped_frame_id ?? null,
           aura: p.equipped_aura_id ?? null,
           sticker: p.equipped_sticker_id ?? null,
         });
+        setEquippedBackground(p.equipped_background_id ?? null);
       } catch {
         toast.error("Não foi possível carregar a customização");
       } finally {
@@ -94,6 +112,17 @@ export function CustomizacaoTab({ photoUrl }: { photoUrl: string | null }) {
     catalog.forEach((d) => g[d.type]?.push(d));
     return g;
   }, [catalog]);
+
+  const ownedBackgroundItems = useMemo(
+    () => backgrounds.filter((background) => ownedBackgrounds.has(background.id)),
+    [backgrounds, ownedBackgrounds],
+  );
+
+  const activePreviewBackground = useMemo(
+    () =>
+      backgrounds.find((background) => background.id === (previewBackground ?? equippedBackground)) ?? null,
+    [backgrounds, equippedBackground, previewBackground],
+  );
 
   const handleEquip = async (d: Decoration) => {
     setBusyId(d.id);
@@ -116,6 +145,33 @@ export function CustomizacaoTab({ photoUrl }: { photoUrl: string | null }) {
       setEquipped((e) => ({ ...e, [type]: null }));
     } catch {
       toast.error("Erro ao remover");
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const handleEquipBackground = async (background: ProfileBackground) => {
+    setBusyId(background.id);
+    try {
+      await equipProfileBackground(background.id);
+      setEquippedBackground(background.id);
+      setPreviewBackground(null);
+      toast.success(`${background.name} equipado`);
+    } catch {
+      toast.error("Erro ao equipar fundo");
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const handleUnequipBackground = async () => {
+    setBusyId("unequip-background");
+    try {
+      await unequipProfileBackground();
+      setEquippedBackground(null);
+      setPreviewBackground(null);
+    } catch {
+      toast.error("Erro ao remover fundo");
     } finally {
       setBusyId(null);
     }
@@ -232,6 +288,110 @@ export function CustomizacaoTab({ photoUrl }: { photoUrl: string | null }) {
     );
   };
 
+  const renderBackgrounds = () => {
+    if (ownedBackgroundItems.length === 0) {
+      return (
+        <div className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-dashed bg-background/40 py-12 text-center">
+          <ImageIcon className="h-5 w-5 text-[var(--rose)]" />
+          <p className="text-sm font-medium">Voce ainda nao possui fundos</p>
+          <p className="max-w-xs text-xs text-muted-foreground">
+            Desbloqueie fundos premium na loja e volte aqui para equipar.
+          </p>
+          <Button asChild size="sm" variant="outline" className="mt-2">
+            <Link to="/loja">
+              <ShoppingBag className="mr-1.5 h-3.5 w-3.5" /> Ir para loja
+            </Link>
+          </Button>
+        </div>
+      );
+    }
+
+    return (
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        {ownedBackgroundItems.map((background) => {
+          const isEquipped = equippedBackground === background.id;
+          const isPreviewing = previewBackground === background.id;
+          const busy = busyId === background.id;
+          const rarity = BACKGROUND_RARITY_STYLE[background.rarity];
+
+          return (
+            <button
+              type="button"
+              key={background.id}
+              onClick={() => setPreviewBackground((id) => (id === background.id ? null : background.id))}
+              className={`group overflow-hidden rounded-2xl border bg-card/70 text-left transition-all duration-200 active:scale-[0.98] ${
+                isEquipped
+                  ? "border-[var(--rose)]/70 shadow-soft"
+                  : isPreviewing
+                    ? "border-[var(--rose)] ring-2 ring-[var(--rose)]/30"
+                    : "border-border/60 hover:border-[var(--rose-soft)] hover:shadow-soft"
+              }`}
+            >
+              <div className="relative aspect-[16/9] overflow-hidden bg-muted">
+                {background.image_url ? (
+                  <img
+                    src={background.image_url}
+                    alt={background.name}
+                    className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                  />
+                ) : (
+                  <div className="flex h-full items-center justify-center text-muted-foreground">
+                    <ImageIcon className="h-8 w-8" />
+                  </div>
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                <div className="absolute left-3 top-3 flex gap-2">
+                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${rarity.chip}`}>
+                    {rarity.label}
+                  </span>
+                  {isEquipped && (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-[var(--rose)] px-2 py-0.5 text-[10px] font-semibold text-white">
+                      <Check className="h-2.5 w-2.5" /> Equipado
+                    </span>
+                  )}
+                </div>
+              </div>
+              <div className="p-3">
+                <p className="line-clamp-1 text-xs font-semibold" title={background.name}>
+                  {background.name}
+                </p>
+                <p className="mt-1 line-clamp-2 min-h-[2rem] text-[11px] text-muted-foreground">
+                  {background.description || "Fundo premium para destacar seu perfil."}
+                </p>
+                <div className="mt-3" onClick={(e) => e.stopPropagation()}>
+                  {isEquipped ? (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full text-xs"
+                      disabled={busyId === "unequip-background"}
+                      onClick={handleUnequipBackground}
+                    >
+                      {busyId === "unequip-background" ? (
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                      ) : (
+                        "Remover"
+                      )}
+                    </Button>
+                  ) : (
+                    <Button
+                      size="sm"
+                      className="w-full text-xs"
+                      disabled={busy}
+                      onClick={() => handleEquipBackground(background)}
+                    >
+                      {busy ? <Loader2 className="h-3 w-3 animate-spin" /> : "Equipar"}
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    );
+  };
+
   if (loading) {
     return (
       <div className="rounded-3xl border bg-card/50 p-10 text-center text-sm text-muted-foreground">
@@ -278,21 +438,42 @@ export function CustomizacaoTab({ photoUrl }: { photoUrl: string | null }) {
           <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
             Pré-visualização
           </p>
-          <div className="flex h-56 w-56 items-center justify-center transition-all duration-300">
-            <DecoratedAvatar
-              photoUrl={photoUrl}
-              fallback={user?.email?.[0]?.toUpperCase() ?? "?"}
-              size={96}
-              frameId={preview.frame ?? equipped.frame}
-              auraId={preview.aura ?? equipped.aura}
-            />
+          <div className="relative flex h-56 w-full max-w-md items-center justify-center overflow-hidden rounded-3xl border bg-background transition-all duration-300">
+            {activePreviewBackground?.image_url && (
+              <img
+                src={activePreviewBackground.image_url}
+                alt=""
+                className="absolute inset-0 h-full w-full object-cover"
+              />
+            )}
+            <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/35 to-black/55" />
+            <div className="relative flex flex-col items-center gap-3 text-white">
+              <DecoratedAvatar
+                photoUrl={photoUrl}
+                fallback={user?.email?.[0]?.toUpperCase() ?? "?"}
+                size={96}
+                frameId={preview.frame ?? equipped.frame}
+                auraId={preview.aura ?? equipped.aura}
+              />
+              {activePreviewBackground && (
+                <div className="max-w-xs text-center">
+                  <p className="line-clamp-1 text-sm font-semibold">{activePreviewBackground.name}</p>
+                  <p className="line-clamp-1 text-xs text-white/75">
+                    {previewBackground ? "Preview de fundo" : "Fundo equipado"}
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
-          {(preview.frame || preview.aura) && (
+          {(preview.frame || preview.aura || previewBackground) && (
             <Button
               variant="ghost"
               size="sm"
               className="text-xs text-muted-foreground"
-              onClick={() => setPreview({ frame: null, aura: null, sticker: null })}
+              onClick={() => {
+                setPreview({ frame: null, aura: null, sticker: null });
+                setPreviewBackground(null);
+              }}
             >
               <X className="mr-1 h-3 w-3" /> Limpar pré-visualização
             </Button>
@@ -339,6 +520,8 @@ export function CustomizacaoTab({ photoUrl }: { photoUrl: string | null }) {
                 Esta categoria está sendo preparada para uma próxima atualização.
               </p>
             </div>
+          ) : activeCat === "background" ? (
+            renderBackgrounds()
           ) : (
             renderGrid(activeCat as DecorationType)
           )}
@@ -348,7 +531,7 @@ export function CustomizacaoTab({ photoUrl }: { photoUrl: string | null }) {
           <div className="pr-3">
             <p className="text-sm font-medium">Quer mais cosméticos?</p>
             <p className="text-xs text-muted-foreground">
-              Descubra molduras e auras exclusivas na loja.
+              Descubra molduras, auras e fundos exclusivos na loja.
             </p>
           </div>
           <Button asChild size="sm" variant="outline">

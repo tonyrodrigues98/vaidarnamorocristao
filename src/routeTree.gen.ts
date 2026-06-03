@@ -52,6 +52,7 @@ import { Route as ApiVerifyPhotoRouteImport } from './routes/api/verify-photo'
 import { Route as AdminVerificacoesRouteImport } from './routes/admin/verificacoes'
 import { Route as AdminStickersRouteImport } from './routes/admin/stickers'
 import { Route as AdminPresentesRouteImport } from './routes/admin/presentes'
+import { Route as AdminFundosRouteImport } from './routes/admin/fundos'
 import { Route as AdminFotosRouteImport } from './routes/admin/fotos'
 
 const VerificacaoRoute = VerificacaoRouteImport.update({
@@ -269,6 +270,11 @@ const AdminPresentesRoute = AdminPresentesRouteImport.update({
   path: '/admin/presentes',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminFundosRoute = AdminFundosRouteImport.update({
+  id: '/admin/fundos',
+  path: '/admin/fundos',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminFotosRoute = AdminFotosRouteImport.update({
   id: '/admin/fotos',
   path: '/admin/fotos',
@@ -297,6 +303,7 @@ export interface FileRoutesByFullPath {
   '/termos': typeof TermosRoute
   '/verificacao': typeof VerificacaoRoute
   '/admin/fotos': typeof AdminFotosRoute
+  '/admin/fundos': typeof AdminFundosRoute
   '/admin/presentes': typeof AdminPresentesRoute
   '/admin/stickers': typeof AdminStickersRoute
   '/admin/verificacoes': typeof AdminVerificacoesRoute
@@ -343,6 +350,7 @@ export interface FileRoutesByTo {
   '/termos': typeof TermosRoute
   '/verificacao': typeof VerificacaoRoute
   '/admin/fotos': typeof AdminFotosRoute
+  '/admin/fundos': typeof AdminFundosRoute
   '/admin/presentes': typeof AdminPresentesRoute
   '/admin/stickers': typeof AdminStickersRoute
   '/admin/verificacoes': typeof AdminVerificacoesRoute
@@ -390,6 +398,7 @@ export interface FileRoutesById {
   '/termos': typeof TermosRoute
   '/verificacao': typeof VerificacaoRoute
   '/admin/fotos': typeof AdminFotosRoute
+  '/admin/fundos': typeof AdminFundosRoute
   '/admin/presentes': typeof AdminPresentesRoute
   '/admin/stickers': typeof AdminStickersRoute
   '/admin/verificacoes': typeof AdminVerificacoesRoute
@@ -438,6 +447,7 @@ export interface FileRouteTypes {
     | '/termos'
     | '/verificacao'
     | '/admin/fotos'
+    | '/admin/fundos'
     | '/admin/presentes'
     | '/admin/stickers'
     | '/admin/verificacoes'
@@ -484,6 +494,7 @@ export interface FileRouteTypes {
     | '/termos'
     | '/verificacao'
     | '/admin/fotos'
+    | '/admin/fundos'
     | '/admin/presentes'
     | '/admin/stickers'
     | '/admin/verificacoes'
@@ -530,6 +541,7 @@ export interface FileRouteTypes {
     | '/termos'
     | '/verificacao'
     | '/admin/fotos'
+    | '/admin/fundos'
     | '/admin/presentes'
     | '/admin/stickers'
     | '/admin/verificacoes'
@@ -577,6 +589,7 @@ export interface RootRouteChildren {
   TermosRoute: typeof TermosRoute
   VerificacaoRoute: typeof VerificacaoRoute
   AdminFotosRoute: typeof AdminFotosRoute
+  AdminFundosRoute: typeof AdminFundosRoute
   AdminPresentesRoute: typeof AdminPresentesRoute
   AdminStickersRoute: typeof AdminStickersRoute
   AdminVerificacoesRoute: typeof AdminVerificacoesRoute
@@ -905,6 +918,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminPresentesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/fundos': {
+      id: '/admin/fundos'
+      path: '/admin/fundos'
+      fullPath: '/admin/fundos'
+      preLoaderRoute: typeof AdminFundosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/fotos': {
       id: '/admin/fotos'
       path: '/admin/fotos'
@@ -937,6 +957,7 @@ const rootRouteChildren: RootRouteChildren = {
   TermosRoute: TermosRoute,
   VerificacaoRoute: VerificacaoRoute,
   AdminFotosRoute: AdminFotosRoute,
+  AdminFundosRoute: AdminFundosRoute,
   AdminPresentesRoute: AdminPresentesRoute,
   AdminStickersRoute: AdminStickersRoute,
   AdminVerificacoesRoute: AdminVerificacoesRoute,

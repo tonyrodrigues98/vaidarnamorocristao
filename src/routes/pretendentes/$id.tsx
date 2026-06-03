@@ -42,6 +42,7 @@ import { ProfileAdvancedView } from "@/components/ProfileAdvancedView";
 import { ROLE_PRIORITY, type AppRole, type RoleColor } from "@/lib/roles";
 import { SendAnonymousButton } from "@/components/anonymous/SendAnonymousButton";
 import { GiftHighlights } from "@/components/gifts/GiftHighlights";
+import type { ProfileBackground } from "@/lib/profileBackgrounds";
 
 type Full = {
   id: string;
@@ -57,6 +58,7 @@ type Full = {
   years_baptized: number;
   sex: string;
   verified?: boolean;
+  equipped_background_id?: string | null;
 };
 type Prefs = {
   age_min: number;
@@ -93,6 +95,7 @@ function Detail() {
   const [mySex, setMySex] = useState<string | null>(null);
   const [targetRole, setTargetRole] = useState<{ role: AppRole; color: RoleColor | null } | null>(null);
   const [extraPhotos, setExtraPhotos] = useState<string[]>([]);
+  const [equippedBackground, setEquippedBackground] = useState<ProfileBackground | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -134,6 +137,18 @@ function Detail() {
         .eq("status", "approved")
         .maybeSingle();
       setProfile(prof as Full | null);
+      const backgroundId = (prof as Full | null)?.equipped_background_id;
+      if (backgroundId) {
+        const { data: bg } = await supabase
+          .from("profile_backgrounds" as never)
+          .select("*")
+          .eq("id", backgroundId)
+          .eq("is_active", true)
+          .maybeSingle();
+        setEquippedBackground((bg ?? null) as unknown as ProfileBackground | null);
+      } else {
+        setEquippedBackground(null);
+      }
       const { data: pr } = await supabase
         .from("profile_preferences")
         .select("age_min,age_max,accepts_children,desired_quality,looking_for_bio,location_scope,custom_states")
@@ -356,9 +371,30 @@ function Detail() {
         </div>
 
         {/* Identidade */}
-        <div className="mt-6 space-y-4">
+        <div
+          className={`relative mt-6 overflow-hidden rounded-3xl ${
+            equippedBackground?.image_url
+              ? "border border-white/10 bg-zinc-950 p-5 shadow-elegant sm:p-6"
+              : "space-y-4"
+          }`}
+        >
+          {equippedBackground?.image_url && (
+            <>
+              <img
+                src={equippedBackground.image_url}
+                alt=""
+                className="absolute inset-0 h-full w-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/45 to-black/70" />
+            </>
+          )}
+          <div className={equippedBackground?.image_url ? "relative space-y-4 text-white" : "space-y-4"}>
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-            <h1 className="text-3xl font-bold leading-tight text-foreground">
+            <h1
+              className={`text-3xl font-bold leading-tight ${
+                equippedBackground?.image_url ? "text-white drop-shadow" : "text-foreground"
+              }`}
+            >
               {profile.full_name}, {profile.age}
             </h1>
             {profile.verified && <VerifiedBadge size="md" />}
@@ -394,6 +430,7 @@ function Detail() {
                 {profile.years_baptized} anos de batismo
               </Chip>
             ) : null}
+          </div>
           </div>
         </div>
         {profileCommitted && (
