@@ -10,6 +10,7 @@ import { ArrowLeft, Heart, MessageCircle, Gem, Clock3, Gift, Trophy } from "luci
 import { GiftMedia } from "@/components/gifts/GiftMedia";
 import { getCommitmentByMatch } from "@/lib/commitments";
 import { Progress } from "@/components/ui/progress";
+import { TimeCapsuleCard } from "@/components/commitment/TimeCapsuleCard";
 
 type CoupleProfile = {
   id: string;
@@ -572,8 +573,12 @@ setAchievements([
   </div>
 
 </section>
-        
-        <section className="mt-8">
+
+<TimeCapsuleCard
+  matchId={matchId}
+/>
+
+<section className="mt-8">
 
   <div className="glass rounded-3xl p-6 shadow-soft">
 
