@@ -52,6 +52,8 @@ const EMPTY_FORM = {
   sort_order: 0,
 };
 
+const BACKGROUND_IMAGE_BUCKETS = ["profile-backgrounds", "gift-images"] as const;
+
 function AdminFundosPage() {
   const { user, loading: authLoading, isAdmin, role } = useAuth();
   const canAccess = isAdmin || role === "super_admin";
@@ -89,16 +91,33 @@ function AdminFundosPage() {
     setSaving(true);
     try {
       const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "-");
-      const fileName = `${Date.now()}-${safeName}`;
-      const { error } = await supabase.storage.from("profile-backgrounds").upload(fileName, file, {
-        contentType: file.type,
-      });
-      if (error) throw error;
-      const { data } = supabase.storage.from("profile-backgrounds").getPublicUrl(fileName);
-      setForm((current) => ({ ...current, image_url: data.publicUrl }));
+      let uploadedUrl: string | null = null;
+      let lastError: unknown = null;
+
+      for (const bucket of BACKGROUND_IMAGE_BUCKETS) {
+        const fileName = `profile-backgrounds/${Date.now()}-${safeName}`;
+        const { error } = await supabase.storage.from(bucket).upload(fileName, file, {
+          contentType: file.type,
+          upsert: false,
+        });
+
+        if (error) {
+          lastError = error;
+          continue;
+        }
+
+        const { data } = supabase.storage.from(bucket).getPublicUrl(fileName);
+        uploadedUrl = data.publicUrl;
+        break;
+      }
+
+      if (!uploadedUrl) throw lastError;
+
+      setForm((current) => ({ ...current, image_url: uploadedUrl }));
       toast.success("Imagem enviada");
-    } catch {
-      toast.error("Falha ao enviar imagem");
+    } catch (e) {
+      const message = e instanceof Error ? e.message : "Verifique o bucket e as permissoes do Storage";
+      toast.error(`Falha ao enviar imagem: ${message}`);
     } finally {
       setSaving(false);
     }
