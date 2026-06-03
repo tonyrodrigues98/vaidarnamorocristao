@@ -10,7 +10,14 @@ import { getActiveCommitmentByUser } from "@/lib/commitments";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   ArrowLeft,
@@ -93,13 +100,18 @@ function Detail() {
   const [reportReason, setReportReason] = useState("");
   const [reportAlsoBlock, setReportAlsoBlock] = useState(true);
   const [mySex, setMySex] = useState<string | null>(null);
-  const [targetRole, setTargetRole] = useState<{ role: AppRole; color: RoleColor | null } | null>(null);
+  const [targetRole, setTargetRole] = useState<{ role: AppRole; color: RoleColor | null } | null>(
+    null,
+  );
   const [extraPhotos, setExtraPhotos] = useState<string[]>([]);
   const [equippedBackground, setEquippedBackground] = useState<ProfileBackground | null>(null);
 
   useEffect(() => {
     (async () => {
-      const { data } = await supabase.from("user_roles").select("role, badge_color").eq("user_id", id);
+      const { data } = await supabase
+        .from("user_roles")
+        .select("role, badge_color")
+        .eq("user_id", id);
       const rows = (data ?? []) as Array<{ role: AppRole; badge_color: string | null }>;
       let best: { role: AppRole; color: RoleColor | null } | null = null;
       for (const r of rows) {
@@ -123,7 +135,11 @@ function Detail() {
   useEffect(() => {
     if (!user) return;
     (async () => {
-      const { data } = await supabase.from("profiles").select("sex").eq("id", user.id).maybeSingle();
+      const { data } = await supabase
+        .from("profiles")
+        .select("sex")
+        .eq("id", user.id)
+        .maybeSingle();
       setMySex((data?.sex as string | undefined) ?? null);
     })();
   }, [user]);
@@ -151,7 +167,9 @@ function Detail() {
       }
       const { data: pr } = await supabase
         .from("profile_preferences")
-        .select("age_min,age_max,accepts_children,desired_quality,looking_for_bio,location_scope,custom_states")
+        .select(
+          "age_min,age_max,accepts_children,desired_quality,looking_for_bio,location_scope,custom_states",
+        )
         .eq("user_id", id)
         .maybeSingle();
       setPrefs((pr ?? null) as Prefs | null);
@@ -176,13 +194,23 @@ function Detail() {
     if (!user) return;
     (async () => {
       const [intRes, matchRes, blockRes] = await Promise.all([
-        supabase.from("interests").select("id").eq("sender_id", user.id).eq("receiver_id", id).maybeSingle(),
+        supabase
+          .from("interests")
+          .select("id")
+          .eq("sender_id", user.id)
+          .eq("receiver_id", id)
+          .maybeSingle(),
         supabase
           .from("matches")
           .select("id")
           .or(`and(user_a.eq.${user.id},user_b.eq.${id}),and(user_a.eq.${id},user_b.eq.${user.id})`)
           .maybeSingle(),
-        supabase.from("blocks").select("id").eq("blocker_id", user.id).eq("blocked_id", id).maybeSingle(),
+        supabase
+          .from("blocks")
+          .select("id")
+          .eq("blocker_id", user.id)
+          .eq("blocked_id", id)
+          .maybeSingle(),
       ]);
       setInterestSent(!!intRes.data);
       setMatchId(matchRes.data?.id ?? null);
@@ -194,10 +222,15 @@ function Detail() {
   useEffect(() => {
     if (!user || user.id === id) return;
     const key = `pv:${user.id}:${id}`;
-    const last = typeof window !== "undefined" ? Number(window.sessionStorage.getItem(key) ?? 0) : 0;
+    const last =
+      typeof window !== "undefined" ? Number(window.sessionStorage.getItem(key) ?? 0) : 0;
     if (Date.now() - last < 30 * 60 * 1000) return;
     (async () => {
-      const { data: me } = await supabase.from("profiles").select("age, city, state").eq("id", user.id).maybeSingle();
+      const { data: me } = await supabase
+        .from("profiles")
+        .select("age, city, state")
+        .eq("id", user.id)
+        .maybeSingle();
       const { error } = await supabase.from("profile_views").insert({
         viewer_id: user.id,
         viewed_id: id,
@@ -220,7 +253,9 @@ function Detail() {
       return;
     }
     setBusy(true);
-    const { error } = await supabase.from("interests").insert({ sender_id: user.id, receiver_id: id });
+    const { error } = await supabase
+      .from("interests")
+      .insert({ sender_id: user.id, receiver_id: id });
     setBusy(false);
     if (error) {
       toast.error(friendlyError(error));
@@ -250,7 +285,11 @@ function Detail() {
   async function desbloquear() {
     if (!user) return;
     setBusy(true);
-    const { error } = await supabase.from("blocks").delete().eq("blocker_id", user.id).eq("blocked_id", id);
+    const { error } = await supabase
+      .from("blocks")
+      .delete()
+      .eq("blocker_id", user.id)
+      .eq("blocked_id", id);
     setBusy(false);
     if (error) {
       toast.error(friendlyError(error));
@@ -282,7 +321,9 @@ function Detail() {
     }
     setBusy(false);
     toast.success(
-      reportAlsoBlock ? "Denúncia enviada e perfil bloqueado." : "Denúncia enviada. Nossa equipe vai analisar.",
+      reportAlsoBlock
+        ? "Denúncia enviada e perfil bloqueado."
+        : "Denúncia enviada. Nossa equipe vai analisar.",
     );
     setReportReason("");
     setReportOpen(false);
@@ -344,95 +385,188 @@ function Detail() {
       </div>
     );
 
+  const hasPremiumBackground = Boolean(equippedBackground?.image_url);
+  const actionCardClass = hasPremiumBackground
+    ? "rounded-3xl border border-white/15 bg-white/10 p-4 shadow-elegant backdrop-blur-xl"
+    : "rounded-3xl border border-border bg-card p-4 shadow-soft";
+  const surfaceClass = hasPremiumBackground
+    ? "rounded-3xl border border-white/15 bg-background/85 p-5 shadow-elegant backdrop-blur-xl sm:p-6"
+    : "rounded-3xl border border-border bg-card p-5 shadow-soft sm:p-6";
+
   return (
-    <div className="min-h-screen bg-background">
+    <div className="relative min-h-screen overflow-x-hidden bg-background">
       <Header />
-      <main className="mx-auto max-w-2xl px-4 pb-24 pt-4">
+
+      {equippedBackground?.image_url && (
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 top-0 z-0 h-[760px] overflow-hidden"
+        >
+          <img src={equippedBackground.image_url} alt="" className="h-full w-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/45 to-background" />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/45 via-black/20 to-black/45" />
+        </div>
+      )}
+
+      <main className="relative z-10 mx-auto max-w-7xl px-4 pb-24 pt-4 sm:px-6 lg:px-8">
         {/* Voltar */}
         <Link
           to="/pretendentes"
-          className="inline-flex items-center gap-1.5 rounded-full bg-card px-3 py-1.5 text-sm text-muted-foreground shadow-sm transition hover:text-foreground"
+          className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm shadow-sm transition ${
+            hasPremiumBackground
+              ? "border border-white/15 bg-white/10 text-white backdrop-blur-xl hover:bg-white/15"
+              : "bg-card text-muted-foreground hover:text-foreground"
+          }`}
         >
           <ArrowLeft className="h-4 w-4" /> Voltar
         </Link>
 
         {/* Foto + carrossel */}
-        <div className="mt-4 overflow-hidden rounded-3xl shadow-elegant">
-          <PhotoCarousel
-            photos={[...(profile.photo_url ? [profile.photo_url] : []), ...extraPhotos]}
-            alt={profile.full_name}
-            eager
-            fallback={
-              <div className="flex aspect-[4/5] w-full items-center justify-center bg-gradient-love">
-                <span className="text-7xl text-white">{profile.full_name.charAt(0)}</span>
-              </div>
-            }
-          />
-        </div>
-
-        {/* Identidade */}
-        <div
-          className={`relative mt-6 overflow-hidden rounded-3xl ${
-            equippedBackground?.image_url
-              ? "border border-white/10 bg-zinc-950 p-5 shadow-elegant sm:p-6"
-              : "space-y-4"
-          }`}
-        >
-          {equippedBackground?.image_url && (
-            <>
-              <img
-                src={equippedBackground.image_url}
-                alt=""
-                className="absolute inset-0 h-full w-full object-cover"
+        <section className="mt-4 grid gap-5 lg:grid-cols-[minmax(0,1.05fr)_minmax(360px,0.95fr)] lg:items-start">
+          <div
+            className={`overflow-hidden rounded-[2rem] ${
+              hasPremiumBackground
+                ? "border border-white/15 bg-white/10 p-2 shadow-elegant backdrop-blur-xl"
+                : "bg-card p-1 shadow-elegant"
+            }`}
+          >
+            <div className="overflow-hidden rounded-[1.55rem]">
+              <PhotoCarousel
+                photos={[...(profile.photo_url ? [profile.photo_url] : []), ...extraPhotos]}
+                alt={profile.full_name}
+                eager
+                fallback={
+                  <div className="flex aspect-[4/5] w-full items-center justify-center bg-gradient-love">
+                    <span className="text-7xl text-white">{profile.full_name.charAt(0)}</span>
+                  </div>
+                }
               />
-              <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/45 to-black/70" />
-            </>
-          )}
-          <div className={equippedBackground?.image_url ? "relative space-y-4 text-white" : "space-y-4"}>
-          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-            <h1
-              className={`text-3xl font-bold leading-tight ${
-                equippedBackground?.image_url ? "text-white drop-shadow" : "text-foreground"
-              }`}
-            >
-              {profile.full_name}, {profile.age}
-            </h1>
-            {profile.verified && <VerifiedBadge size="md" />}
+            </div>
           </div>
-          <div className="flex flex-wrap items-center gap-2">
-            {targetRole && <RoleBadge role={targetRole.role} color={targetRole.color} size="sm" />}
-            <OnlineDot userId={profile.id} size="sm" showLabel />
-          </div>
-          <UserBadges userId={profile.id} size="sm" max={6} />
 
-          {/* Chips de informações principais */}
-          <div className="flex flex-wrap gap-2 pt-1">
-            {profile.city && (
-              <Chip icon={<MapPin className="h-3.5 w-3.5" />} tone="rose">
-                {profile.city}, {profile.state}
-              </Chip>
+          <div className="space-y-4">
+            {/* Identidade */}
+            <div
+              className={
+                hasPremiumBackground
+                  ? "rounded-[2rem] border border-white/15 bg-white/10 p-5 text-white shadow-elegant backdrop-blur-xl sm:p-7"
+                  : "rounded-[2rem] border border-border bg-card p-5 shadow-soft sm:p-7"
+              }
+            >
+              <div className={hasPremiumBackground ? "space-y-4 text-white" : "space-y-4"}>
+                <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                  <h1
+                    className={`text-3xl font-bold leading-tight ${
+                      hasPremiumBackground ? "text-white drop-shadow" : "text-foreground"
+                    }`}
+                  >
+                    {profile.full_name}, {profile.age}
+                  </h1>
+                  {profile.verified && <VerifiedBadge size="md" />}
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  {targetRole && (
+                    <RoleBadge role={targetRole.role} color={targetRole.color} size="sm" />
+                  )}
+                  <OnlineDot userId={profile.id} size="sm" showLabel />
+                </div>
+                <UserBadges userId={profile.id} size="sm" max={6} />
+
+                {/* Chips de informações principais */}
+                <div className="flex flex-wrap gap-2 pt-1">
+                  {profile.city && (
+                    <Chip icon={<MapPin className="h-3.5 w-3.5" />} tone="rose">
+                      {profile.city}, {profile.state}
+                    </Chip>
+                  )}
+                  {profile.height_cm && (
+                    <Chip icon={<Ruler className="h-3.5 w-3.5" />} tone="sky">
+                      {profile.height_cm} cm
+                    </Chip>
+                  )}
+                  {profile.church && (
+                    <Chip icon={<Church className="h-3.5 w-3.5" />} tone="violet">
+                      {profile.church}
+                    </Chip>
+                  )}
+                  <Chip icon={<Sparkles className="h-3.5 w-3.5" />} tone="amber">
+                    {profile.marital === "solteiro" ? "Solteiro(a)" : "Divorciado(a)"}
+                  </Chip>
+                  {profile.years_baptized ? (
+                    <Chip icon={<CalendarHeart className="h-3.5 w-3.5" />} tone="emerald">
+                      {profile.years_baptized} anos de batismo
+                    </Chip>
+                  ) : null}
+                </div>
+              </div>
+            </div>
+            {!(profile && mySex && profile.sex === mySex) && !(targetRole && !isAdmin) && (
+              <div className={`mt-5 ${actionCardClass}`}>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {profileCommitted ? (
+                    <Button size="lg" className="w-full sm:col-span-2" disabled variant="outline">
+                      <Gem className="mr-2 h-4 w-4" />
+                      Usuario em Proposito
+                    </Button>
+                  ) : matchId ? (
+                    <Button size="lg" className="w-full shadow-glow sm:col-span-2" asChild>
+                      <Link to="/conversas/$matchId" params={{ matchId }}>
+                        <MessageCircle className="mr-2 h-4 w-4" /> Conversar
+                      </Link>
+                    </Button>
+                  ) : interestSent ? (
+                    <Button size="lg" variant="outline" className="w-full sm:col-span-2" disabled>
+                      <Check className="mr-2 h-4 w-4" /> Interesse enviado
+                    </Button>
+                  ) : (
+                    <Button
+                      size="lg"
+                      className="w-full shadow-glow sm:col-span-2"
+                      disabled={busy}
+                      onClick={demonstrarInteresse}
+                    >
+                      <Heart className="mr-2 h-4 w-4" /> Demonstrar interesse
+                    </Button>
+                  )}
+
+                  {user &&
+                    user.id !== profile.id &&
+                    !profileCommitted &&
+                    mySex &&
+                    profile.sex !== mySex && (
+                      <div className="sm:col-span-2">
+                        <SendAnonymousButton receiverId={profile.id} />
+                      </div>
+                    )}
+
+                  {user && user.id !== profile.id && !profileCommitted && (
+                    <Button
+                      variant="outline"
+                      className="w-full border-pink-400/50 bg-gradient-to-r from-pink-500/10 via-fuchsia-500/10 to-purple-500/10 hover:from-pink-500/20 hover:to-purple-500/20"
+                      asChild
+                    >
+                      <Link to="/presentes" search={{ to: profile.id } as never}>
+                        Enviar Presente
+                      </Link>
+                    </Button>
+                  )}
+
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => toast.success("Oracao registrada com carinho")}
+                  >
+                    <HandHeart className="mr-2 h-4 w-4" /> Orar por ele(a)
+                  </Button>
+                </div>
+
+                <div className="mt-4">
+                  <GiftHighlights userId={profile.id} />
+                </div>
+              </div>
             )}
-            {profile.height_cm && (
-              <Chip icon={<Ruler className="h-3.5 w-3.5" />} tone="sky">
-                {profile.height_cm} cm
-              </Chip>
-            )}
-            {profile.church && (
-              <Chip icon={<Church className="h-3.5 w-3.5" />} tone="violet">
-                {profile.church}
-              </Chip>
-            )}
-            <Chip icon={<Sparkles className="h-3.5 w-3.5" />} tone="amber">
-              {profile.marital === "solteiro" ? "Solteiro(a)" : "Divorciado(a)"}
-            </Chip>
-            {profile.years_baptized ? (
-              <Chip icon={<CalendarHeart className="h-3.5 w-3.5" />} tone="emerald">
-                {profile.years_baptized} anos de batismo
-              </Chip>
-            ) : null}
           </div>
-          </div>
-        </div>
+        </section>
         {profileCommitted && (
           <div
             className="
@@ -469,7 +603,8 @@ function Detail() {
                 <h3 className="font-semibold text-emerald-800">Propósito Firmado</h3>
 
                 <p className="mt-1 text-sm text-emerald-700">
-                  Este usuário está em um propósito ativo e não está disponível para novas conexões românticas.
+                  Este usuário está em um propósito ativo e não está disponível para novas conexões
+                  românticas.
                 </p>
               </div>
             </div>
@@ -477,7 +612,7 @@ function Detail() {
         )}
         {/* Bio */}
         {profile.bio && (
-          <section className="mt-6 rounded-2xl border border-border bg-gradient-to-br from-card via-card to-[var(--rose)]/5 p-6 shadow-soft">
+          <section className={`mt-6 ${surfaceClass}`}>
             <h2 className="flex items-center gap-2 text-base font-semibold text-foreground">
               <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[var(--rose)]/10 text-[var(--rose)]">
                 <Quote className="h-4 w-4" />
@@ -495,7 +630,7 @@ function Detail() {
 
         {/* Preferências */}
         {prefs && (
-          <section className="mt-6 rounded-2xl border border-border bg-card p-6 shadow-soft">
+          <section className={`mt-6 ${surfaceClass}`}>
             <h2 className="flex items-center gap-2 text-base font-semibold text-foreground">
               <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-pink-500/10 text-pink-500">
                 <Target className="h-4 w-4" />
@@ -507,7 +642,10 @@ function Detail() {
               <Chip icon={<Cake className="h-3.5 w-3.5" />} tone="rose">
                 {prefs.age_min}–{prefs.age_max} anos
               </Chip>
-              <Chip icon={<Baby className="h-3.5 w-3.5" />} tone={prefs.accepts_children ? "emerald" : "slate"}>
+              <Chip
+                icon={<Baby className="h-3.5 w-3.5" />}
+                tone={prefs.accepts_children ? "emerald" : "slate"}
+              >
                 {prefs.accepts_children ? "Aceita filhos" : "Sem filhos"}
               </Chip>
               <Chip icon={<Globe2 className="h-3.5 w-3.5" />} tone="sky">
@@ -540,60 +678,14 @@ function Detail() {
                     <dt className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-[var(--rose)]">
                       <Users2 className="h-3.5 w-3.5" /> Sobre o que busca
                     </dt>
-                    <dd className="mt-1 leading-relaxed text-foreground/90">{prefs.looking_for_bio}</dd>
+                    <dd className="mt-1 leading-relaxed text-foreground/90">
+                      {prefs.looking_for_bio}
+                    </dd>
                   </div>
                 )}
               </dl>
             )}
           </section>
-        )}
-
-        {/* Ações principais */}
-        {!(profile && mySex && profile.sex === mySex) && !(targetRole && !isAdmin) && (
-          <div className="mt-8 space-y-3">
-            {profileCommitted ? (
-              <Button size="lg" className="w-full" disabled variant="outline">
-                <Gem className="mr-2 h-4 w-4" />
-                Usuário em Propósito
-              </Button>
-            ) : matchId ? (
-              <Button size="lg" className="w-full shadow-glow" asChild>
-                <Link to="/conversas/$matchId" params={{ matchId }}>
-                  <MessageCircle className="mr-2 h-4 w-4" /> Conversar
-                </Link>
-              </Button>
-            ) : interestSent ? (
-              <Button size="lg" variant="outline" className="w-full" disabled>
-                <Check className="mr-2 h-4 w-4" /> Interesse enviado
-              </Button>
-            ) : (
-              <Button size="lg" className="w-full shadow-glow" disabled={busy} onClick={demonstrarInteresse}>
-                <Heart className="mr-2 h-4 w-4" /> Demonstrar interesse
-              </Button>
-            )}
-
-            {user && user.id !== profile.id && !profileCommitted && mySex && profile.sex !== mySex && (
-              <SendAnonymousButton receiverId={profile.id} />
-            )}
-
-            {user && user.id !== profile.id && !profileCommitted && (
-              <Button
-                variant="outline"
-                className="w-full border-pink-400/50 bg-gradient-to-r from-pink-500/10 via-fuchsia-500/10 to-purple-500/10 hover:from-pink-500/20 hover:to-purple-500/20"
-                asChild
-              >
-                <Link to="/presentes" search={{ to: profile.id } as never}>
-                  Enviar Presente
-                </Link>
-              </Button>
-            )}
-
-            <GiftHighlights userId={profile.id} />
-
-            <Button variant="outline" className="w-full" onClick={() => toast.success("Oração registrada com carinho")}>
-              <HandHeart className="mr-2 h-4 w-4" /> Orar por ele(a)
-            </Button>
-          </div>
         )}
 
         {/* Ações secundárias */}
