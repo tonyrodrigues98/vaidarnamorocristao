@@ -358,6 +358,44 @@ export type Database = {
         }
         Relationships: []
       }
+      couple_time_capsules: {
+        Row: {
+          author_id: string
+          created_at: string
+          id: string
+          match_id: string
+          message: string
+          opened_at: string | null
+          unlock_at: string
+        }
+        Insert: {
+          author_id: string
+          created_at?: string
+          id?: string
+          match_id: string
+          message: string
+          opened_at?: string | null
+          unlock_at: string
+        }
+        Update: {
+          author_id?: string
+          created_at?: string
+          id?: string
+          match_id?: string
+          message?: string
+          opened_at?: string | null
+          unlock_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "couple_time_capsules_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "matches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       daily_posts: {
         Row: {
           author_id: string
