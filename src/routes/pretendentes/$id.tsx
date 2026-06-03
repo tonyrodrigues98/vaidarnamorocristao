@@ -47,6 +47,7 @@ import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { OnlineDot } from "@/components/OnlineDot";
 import { UserBadges } from "@/components/UserBadges";
 import { ProfileAdvancedView } from "@/components/ProfileAdvancedView";
+import { DecoratedAvatar } from "@/components/DecoratedAvatar";
 import { ROLE_PRIORITY, type AppRole, type RoleColor } from "@/lib/roles";
 import { SendAnonymousButton } from "@/components/anonymous/SendAnonymousButton";
 import { GiftHighlights } from "@/components/gifts/GiftHighlights";
@@ -67,6 +68,8 @@ type Full = {
   sex: string;
   verified?: boolean;
   equipped_background_id?: string | null;
+  equipped_frame_id?: string | null;
+  equipped_aura_id?: string | null;
 };
 type Prefs = {
   age_min: number;
@@ -429,26 +432,110 @@ function Detail() {
           <ArrowLeft className="h-4 w-4" /> Voltar
         </Link>
 
+        {equippedBackground?.image_url && (
+          <div className="mt-4 overflow-hidden rounded-[2rem] border border-white/60 bg-card/75 shadow-[0_20px_70px_rgba(31,41,55,0.12)] backdrop-blur-xl dark:border-white/10 dark:bg-card/55 md:hidden">
+            <div className="relative h-40">
+              <img
+                src={equippedBackground.image_url}
+                alt=""
+                className="h-full w-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-white/10 dark:from-black/70" />
+              <div className="absolute bottom-3 left-3 right-3">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-white/82 px-3 py-1 text-xs font-semibold text-foreground shadow-soft backdrop-blur dark:bg-black/45 dark:text-white">
+                  <Sparkles className="h-3.5 w-3.5 text-[var(--rose)]" />
+                  Fundo premium equipado
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Foto + carrossel */}
         <section className="mt-4 grid gap-5 xl:grid-cols-[minmax(320px,0.9fr)_minmax(0,1.08fr)_minmax(320px,0.72fr)] xl:items-start">
           <div
-            className={`overflow-hidden rounded-[2rem] ${
+            className={`rounded-[2rem] ${
               hasPremiumBackground
-                ? "border border-white/60 bg-card/75 p-2 shadow-[0_28px_90px_rgba(31,41,55,0.18)] backdrop-blur-xl dark:border-white/10 dark:bg-card/55 dark:shadow-[0_28px_90px_rgba(0,0,0,0.48)]"
-                : "border border-border/70 bg-card/85 p-2 shadow-[0_24px_80px_rgba(31,41,55,0.10)] backdrop-blur dark:bg-card/80"
+                ? "border border-white/60 bg-card/75 p-4 shadow-[0_28px_90px_rgba(31,41,55,0.18)] backdrop-blur-xl dark:border-white/10 dark:bg-card/55 dark:shadow-[0_28px_90px_rgba(0,0,0,0.48)]"
+                : "border border-border/70 bg-card/85 p-4 shadow-[0_24px_80px_rgba(31,41,55,0.10)] backdrop-blur dark:bg-card/80"
             }`}
           >
-            <div className="overflow-hidden rounded-[1.55rem]">
-              <PhotoCarousel
-                photos={[...(profile.photo_url ? [profile.photo_url] : []), ...extraPhotos]}
-                alt={profile.full_name}
-                eager
-                fallback={
-                  <div className="flex aspect-[4/5] w-full items-center justify-center bg-gradient-love">
-                    <span className="text-7xl text-white">{profile.full_name.charAt(0)}</span>
-                  </div>
-                }
-              />
+            <div className="relative overflow-hidden rounded-[1.65rem] border border-border/60 bg-gradient-to-br from-rose-50 via-card to-sky-50 p-5 dark:from-rose-400/10 dark:via-card dark:to-sky-400/10">
+              {equippedBackground?.image_url && (
+                <img
+                  src={equippedBackground.image_url}
+                  alt=""
+                  aria-hidden
+                  className="absolute inset-0 h-full w-full object-cover opacity-[0.18] dark:opacity-[0.22]"
+                />
+              )}
+              <div className="absolute inset-0 bg-gradient-to-b from-card/35 via-card/65 to-card/92" />
+              <div className="relative z-10 flex min-h-[330px] items-center justify-center overflow-visible py-6">
+                <div className="sm:hidden">
+                  <DecoratedAvatar
+                    photoUrl={profile.photo_url}
+                    fallback={profile.full_name.charAt(0)}
+                    alt={profile.full_name}
+                    size={122}
+                    frameId={profile.equipped_frame_id ?? null}
+                    auraId={profile.equipped_aura_id ?? null}
+                    isCommitted={profileCommitted}
+                  />
+                </div>
+                <div className="hidden sm:block lg:hidden">
+                  <DecoratedAvatar
+                    photoUrl={profile.photo_url}
+                    fallback={profile.full_name.charAt(0)}
+                    alt={profile.full_name}
+                    size={154}
+                    frameId={profile.equipped_frame_id ?? null}
+                    auraId={profile.equipped_aura_id ?? null}
+                    isCommitted={profileCommitted}
+                  />
+                </div>
+                <div className="hidden lg:block">
+                  <DecoratedAvatar
+                    photoUrl={profile.photo_url}
+                    fallback={profile.full_name.charAt(0)}
+                    alt={profile.full_name}
+                    size={162}
+                    frameId={profile.equipped_frame_id ?? null}
+                    auraId={profile.equipped_aura_id ?? null}
+                    isCommitted={profileCommitted}
+                  />
+                </div>
+              </div>
+              <div className="relative z-10 mt-2 flex flex-wrap justify-center gap-2">
+                {profile.equipped_frame_id && (
+                  <span className="rounded-full border border-amber-300/40 bg-amber-50/80 px-3 py-1 text-xs font-semibold text-amber-800 backdrop-blur dark:border-amber-400/25 dark:bg-amber-400/10 dark:text-amber-200">
+                    Moldura equipada
+                  </span>
+                )}
+                {profile.equipped_aura_id && (
+                  <span className="rounded-full border border-violet-300/40 bg-violet-50/80 px-3 py-1 text-xs font-semibold text-violet-800 backdrop-blur dark:border-violet-400/25 dark:bg-violet-400/10 dark:text-violet-200">
+                    Aura ativa
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <div className="mt-4 overflow-hidden rounded-[1.35rem] border border-border/60 bg-background/50 p-2 backdrop-blur dark:bg-background/25">
+              <p className="mb-2 px-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                Galeria
+              </p>
+              <div className="overflow-hidden rounded-[1rem]">
+                <PhotoCarousel
+                  photos={[...(profile.photo_url ? [profile.photo_url] : []), ...extraPhotos]}
+                  alt={profile.full_name}
+                  eager
+                  className="aspect-[16/10]"
+                  fallback={
+                    <div className="flex h-full w-full items-center justify-center bg-gradient-love">
+                      <span className="text-4xl text-white">{profile.full_name.charAt(0)}</span>
+                    </div>
+                  }
+                />
+              </div>
             </div>
           </div>
 
