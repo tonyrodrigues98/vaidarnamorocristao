@@ -28,6 +28,7 @@ import {
   Ban,
   MessageCircle,
   Check,
+  Gift,
   Sparkles,
   Baby,
   Globe2,
@@ -332,11 +333,11 @@ function Detail() {
   if (!loading && !user) return <Navigate to="/auth/login" />;
   if (profile === undefined)
     return (
-      <div className="min-h-screen">
+      <div className="min-h-screen bg-background">
         <Header />
-        <main className="mx-auto max-w-4xl px-4 py-10">
+        <main className="mx-auto max-w-[1440px] px-4 py-10 sm:px-6 lg:px-8">
           <div className="mt-6 grid gap-8 md:grid-cols-[2fr_3fr]">
-            <div className="aspect-[4/5] animate-pulse rounded-3xl bg-muted shadow-elegant" />
+            <div className="aspect-[4/5] animate-pulse rounded-[2rem] bg-muted shadow-elegant" />
             <div className="space-y-4">
               <div className="h-9 w-2/3 animate-pulse rounded-lg bg-muted" />
               <div className="h-4 w-1/2 animate-pulse rounded-md bg-muted" />
@@ -350,7 +351,7 @@ function Detail() {
     );
   if (!profile)
     return (
-      <div className="min-h-screen">
+      <div className="min-h-screen bg-background">
         <Header />
         <main className="mx-auto max-w-3xl px-4 py-12 text-center">
           <p>Perfil não encontrado.</p>
@@ -363,10 +364,10 @@ function Detail() {
 
   if (blocked)
     return (
-      <div className="min-h-screen">
+      <div className="min-h-screen bg-background">
         <Header />
         <main className="mx-auto max-w-md px-4 py-20 text-center">
-          <div className="glass rounded-3xl p-8 shadow-soft">
+          <div className="rounded-[2rem] border border-border/70 bg-card/85 p-8 shadow-[0_20px_70px_rgba(31,41,55,0.08)] backdrop-blur dark:bg-card/80 dark:shadow-[0_24px_80px_rgba(0,0,0,0.35)]">
             <Ban className="mx-auto h-10 w-10 text-muted-foreground" />
             <h1 className="mt-4 text-2xl font-semibold">Perfil bloqueado</h1>
             <p className="mt-2 text-sm text-muted-foreground">
@@ -387,15 +388,22 @@ function Detail() {
 
   const hasPremiumBackground = Boolean(equippedBackground?.image_url);
   const actionCardClass = hasPremiumBackground
-    ? "rounded-3xl border border-white/15 bg-black/40 p-4 shadow-elegant backdrop-blur-xl"
-    : "rounded-3xl border border-border bg-card p-4 shadow-soft";
+    ? "rounded-[2rem] border border-white/60 bg-card/82 p-4 text-foreground shadow-[0_20px_70px_rgba(31,41,55,0.14)] backdrop-blur-xl dark:border-white/10 dark:bg-card/72 dark:shadow-[0_24px_80px_rgba(0,0,0,0.42)]"
+    : "rounded-[2rem] border border-border/70 bg-card/85 p-4 shadow-[0_20px_70px_rgba(31,41,55,0.08)] backdrop-blur dark:bg-card/80 dark:shadow-[0_24px_80px_rgba(0,0,0,0.35)]";
   const surfaceClass = hasPremiumBackground
-    ? "rounded-3xl border border-white/15 bg-zinc-950/75 p-5 text-white shadow-elegant backdrop-blur-xl sm:p-6 [&_dd]:text-white/85 [&_dt]:text-white/80 [&_h2]:text-white [&_p]:text-white/85"
-    : "rounded-3xl border border-border bg-card p-5 shadow-soft sm:p-6";
+    ? "rounded-[2rem] border border-white/60 bg-card/86 p-5 text-foreground shadow-[0_20px_70px_rgba(31,41,55,0.12)] backdrop-blur-xl sm:p-6 dark:border-white/10 dark:bg-card/78 dark:shadow-[0_24px_80px_rgba(0,0,0,0.38)]"
+    : "rounded-[2rem] border border-border/70 bg-card/85 p-5 shadow-[0_20px_70px_rgba(31,41,55,0.08)] backdrop-blur sm:p-6 dark:bg-card/80 dark:shadow-[0_24px_80px_rgba(0,0,0,0.35)]";
+  const hasHiddenPrimaryActions =
+    (profile && mySex && profile.sex === mySex) || Boolean(targetRole && !isAdmin);
 
   return (
     <div className="relative min-h-screen overflow-x-hidden bg-background">
       <Header />
+
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 z-0 h-[760px] bg-[linear-gradient(120deg,rgba(255,255,255,0.96),rgba(255,241,242,0.82)_32%,rgba(239,246,255,0.82)_68%,rgba(254,243,199,0.72))] dark:bg-[linear-gradient(120deg,rgba(10,10,18,0.98),rgba(49,22,38,0.72)_34%,rgba(15,35,58,0.76)_70%,rgba(50,36,18,0.48))]"
+      />
 
       {equippedBackground?.image_url && (
         <div
@@ -403,31 +411,31 @@ function Detail() {
           className="pointer-events-none absolute inset-x-0 top-0 z-0 h-[760px] overflow-hidden"
         >
           <img src={equippedBackground.image_url} alt="" className="h-full w-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/55 to-black/85" />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-black/20 to-black/50" />
+          <div className="absolute inset-0 bg-gradient-to-b from-white/78 via-white/56 to-background dark:from-black/82 dark:via-black/58 dark:to-background" />
+          <div className="absolute inset-0 bg-gradient-to-r from-background/82 via-background/34 to-background/84 dark:from-black/62 dark:via-black/24 dark:to-black/68" />
         </div>
       )}
 
-      <main className="relative z-10 mx-auto max-w-7xl px-4 pb-24 pt-4 sm:px-6 lg:px-8">
+      <main className="relative z-10 mx-auto max-w-[1440px] px-4 pb-24 pt-4 sm:px-6 lg:px-8">
         {/* Voltar */}
         <Link
           to="/pretendentes"
           className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm shadow-sm transition ${
             hasPremiumBackground
-              ? "border border-white/15 bg-white/10 text-white backdrop-blur-xl hover:bg-white/15"
-              : "bg-card text-muted-foreground hover:text-foreground"
+              ? "border border-border/60 bg-card/75 text-foreground backdrop-blur-xl hover:bg-card/90 dark:border-white/10 dark:bg-card/60 dark:hover:bg-card/80"
+              : "border border-border/60 bg-card/75 text-muted-foreground backdrop-blur hover:text-foreground"
           }`}
         >
           <ArrowLeft className="h-4 w-4" /> Voltar
         </Link>
 
         {/* Foto + carrossel */}
-        <section className="mt-4 grid gap-5 lg:grid-cols-[minmax(0,1.05fr)_minmax(360px,0.95fr)] lg:items-start">
+        <section className="mt-4 grid gap-5 xl:grid-cols-[minmax(320px,0.9fr)_minmax(0,1.08fr)_minmax(320px,0.72fr)] xl:items-start">
           <div
             className={`overflow-hidden rounded-[2rem] ${
               hasPremiumBackground
-                ? "border border-white/15 bg-white/10 p-2 shadow-elegant backdrop-blur-xl"
-                : "bg-card p-1 shadow-elegant"
+                ? "border border-white/60 bg-card/75 p-2 shadow-[0_28px_90px_rgba(31,41,55,0.18)] backdrop-blur-xl dark:border-white/10 dark:bg-card/55 dark:shadow-[0_28px_90px_rgba(0,0,0,0.48)]"
+                : "border border-border/70 bg-card/85 p-2 shadow-[0_24px_80px_rgba(31,41,55,0.10)] backdrop-blur dark:bg-card/80"
             }`}
           >
             <div className="overflow-hidden rounded-[1.55rem]">
@@ -449,17 +457,13 @@ function Detail() {
             <div
               className={
                 hasPremiumBackground
-                  ? "rounded-[2rem] border border-white/15 bg-white/10 p-5 text-white shadow-elegant backdrop-blur-xl sm:p-7"
-                  : "rounded-[2rem] border border-border bg-card p-5 shadow-soft sm:p-7"
+                  ? "rounded-[2rem] border border-white/60 bg-card/82 p-5 text-foreground shadow-[0_20px_70px_rgba(31,41,55,0.14)] backdrop-blur-xl sm:p-7 dark:border-white/10 dark:bg-card/70 dark:shadow-[0_24px_80px_rgba(0,0,0,0.42)]"
+                  : "rounded-[2rem] border border-border/70 bg-card/85 p-5 shadow-[0_20px_70px_rgba(31,41,55,0.08)] backdrop-blur sm:p-7 dark:bg-card/80"
               }
             >
-              <div className={hasPremiumBackground ? "space-y-4 text-white" : "space-y-4"}>
+              <div className="space-y-4">
                 <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                  <h1
-                    className={`text-3xl font-bold leading-tight ${
-                      hasPremiumBackground ? "text-white drop-shadow" : "text-foreground"
-                    }`}
-                  >
+                  <h1 className="text-3xl font-bold leading-tight text-foreground sm:text-4xl">
                     {profile.full_name}, {profile.age}
                   </h1>
                   {profile.verified && <VerifiedBadge size="md" />}
@@ -471,6 +475,13 @@ function Detail() {
                   <OnlineDot userId={profile.id} size="sm" showLabel />
                 </div>
                 <UserBadges userId={profile.id} size="sm" max={6} />
+
+                {profileCommitted && (
+                  <div className="inline-flex items-center gap-2 rounded-full border border-emerald-300/60 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-800 dark:border-emerald-400/25 dark:bg-emerald-400/10 dark:text-emerald-200">
+                    <Gem className="h-3.5 w-3.5" />
+                    Em Proposito Firmado
+                  </div>
+                )}
 
                 {/* Chips de informações principais */}
                 <div className="flex flex-wrap gap-2 pt-1">
@@ -498,10 +509,27 @@ function Detail() {
                     </Chip>
                   ) : null}
                 </div>
+
+                {profile.bio && (
+                  <p className="line-clamp-4 rounded-2xl border border-border/60 bg-background/55 p-4 text-sm leading-relaxed text-muted-foreground backdrop-blur dark:bg-background/25">
+                    {profile.bio}
+                  </p>
+                )}
               </div>
             </div>
-            {!(profile && mySex && profile.sex === mySex) && !(targetRole && !isAdmin) && (
-              <div className={`mt-5 ${actionCardClass}`}>
+          </div>
+
+          <div className="space-y-4">
+            {!hasHiddenPrimaryActions && (
+              <div className={actionCardClass}>
+                <div className="mb-4">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    Acoes principais
+                  </p>
+                  <h2 className="mt-1 text-xl font-semibold text-foreground">
+                    Conectar com cuidado
+                  </h2>
+                </div>
                 <div className="grid gap-3 sm:grid-cols-2">
                   {profileCommitted ? (
                     <Button size="lg" className="w-full sm:col-span-2" disabled variant="outline">
@@ -546,6 +574,7 @@ function Detail() {
                       asChild
                     >
                       <Link to="/presentes" search={{ to: profile.id } as never}>
+                        <Gift className="mr-2 h-4 w-4" />
                         Enviar Presente
                       </Link>
                     </Button>
@@ -565,6 +594,18 @@ function Detail() {
                 </div>
               </div>
             )}
+
+            {hasHiddenPrimaryActions && (
+              <div className={actionCardClass}>
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  Acoes indisponiveis
+                </p>
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                  Algumas acoes ficam ocultas conforme as regras de seguranca e elegibilidade do
+                  Christian Connect.
+                </p>
+              </div>
+            )}
           </div>
         </section>
         {profileCommitted && (
@@ -572,15 +613,15 @@ function Detail() {
             className="
       mt-6
       overflow-hidden
-      rounded-3xl
+      rounded-[2rem]
       border
-      border-emerald-200/60
+      border-emerald-200/70
       bg-gradient-to-br
       from-emerald-50
-      via-white
+      via-card
       to-emerald-50
       p-6
-      shadow-soft
+      shadow-[0_20px_70px_rgba(31,41,55,0.08)] dark:border-emerald-400/25 dark:from-emerald-500/15 dark:via-card/80 dark:to-teal-500/10 dark:shadow-[0_24px_80px_rgba(0,0,0,0.35)]
     "
           >
             <div className="flex items-start gap-4">
@@ -594,15 +635,20 @@ function Detail() {
           justify-center
           rounded-2xl
           bg-emerald-100
+          text-emerald-700
+          dark:bg-emerald-400/15
+          dark:text-emerald-200
         "
               >
-                <Gem className="h-6 w-6 text-emerald-600" />
+                <Gem className="h-6 w-6" />
               </div>
 
               <div className="flex-1">
-                <h3 className="font-semibold text-emerald-800">Propósito Firmado</h3>
+                <h3 className="font-semibold text-emerald-800 dark:text-emerald-200">
+                  Propósito Firmado
+                </h3>
 
-                <p className="mt-1 text-sm text-emerald-700">
+                <p className="mt-1 text-sm text-emerald-700 dark:text-emerald-100/80">
                   Este usuário está em um propósito ativo e não está disponível para novas conexões
                   românticas.
                 </p>
@@ -624,7 +670,13 @@ function Detail() {
         )}
 
         {/* Avançado (todas as seções visíveis) */}
-        <div className="mt-6">
+        <div className={`mt-6 ${surfaceClass}`}>
+          <div className="mb-4 flex items-center gap-2">
+            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-sky-500/10 text-sky-600 dark:text-sky-300">
+              <Sparkles className="h-4 w-4" />
+            </span>
+            <h2 className="text-base font-semibold text-foreground">Informacoes avancadas</h2>
+          </div>
           <ProfileAdvancedView userId={profile.id} />
         </div>
 
@@ -689,56 +741,69 @@ function Detail() {
         )}
 
         {/* Ações secundárias */}
-        <div className="mt-6 flex gap-2">
-          <Dialog open={reportOpen} onOpenChange={setReportOpen}>
-            <DialogTrigger asChild>
-              <Button variant="ghost" size="sm" className="flex-1 text-muted-foreground">
-                <Flag className="mr-1 h-4 w-4" /> Denunciar
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Denunciar perfil</DialogTitle>
-              </DialogHeader>
-              <Textarea
-                rows={4}
-                maxLength={1000}
-                value={reportReason}
-                onChange={(e) => setReportReason(e.target.value)}
-                placeholder="Conte o que aconteceu..."
-              />
-              <label className="mt-2 flex items-start gap-2 rounded-md border border-border bg-muted/40 p-3 text-sm">
-                <Checkbox
-                  checked={reportAlsoBlock}
-                  onCheckedChange={(c) => setReportAlsoBlock(c === true)}
-                  className="mt-0.5"
+        <div className={`mt-6 ${surfaceClass}`}>
+          <div className="mb-4 flex items-center gap-2">
+            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-red-500/10 text-red-600 dark:text-red-300">
+              <Flag className="h-4 w-4" />
+            </span>
+            <div>
+              <h2 className="text-base font-semibold text-foreground">Seguranca e privacidade</h2>
+              <p className="text-xs text-muted-foreground">
+                Denuncie ou bloqueie este perfil quando necessario.
+              </p>
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <Dialog open={reportOpen} onOpenChange={setReportOpen}>
+              <DialogTrigger asChild>
+                <Button variant="ghost" size="sm" className="flex-1 text-muted-foreground">
+                  <Flag className="mr-1 h-4 w-4" /> Denunciar
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Denunciar perfil</DialogTitle>
+                </DialogHeader>
+                <Textarea
+                  rows={4}
+                  maxLength={1000}
+                  value={reportReason}
+                  onChange={(e) => setReportReason(e.target.value)}
+                  placeholder="Conte o que aconteceu..."
                 />
-                <span>
-                  <span className="font-medium">Também bloquear este perfil</span>
-                  <span className="block text-xs text-muted-foreground">
-                    As mensagens e o perfil ficarão ocultos. Você poderá desbloquear depois.
+                <label className="mt-2 flex items-start gap-2 rounded-md border border-border bg-muted/40 p-3 text-sm">
+                  <Checkbox
+                    checked={reportAlsoBlock}
+                    onCheckedChange={(c) => setReportAlsoBlock(c === true)}
+                    className="mt-0.5"
+                  />
+                  <span>
+                    <span className="font-medium">Também bloquear este perfil</span>
+                    <span className="block text-xs text-muted-foreground">
+                      As mensagens e o perfil ficarão ocultos. Você poderá desbloquear depois.
+                    </span>
                   </span>
-                </span>
-              </label>
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setReportOpen(false)}>
-                  Cancelar
-                </Button>
-                <Button onClick={enviarDenuncia} disabled={busy}>
-                  Enviar denúncia
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="flex-1 text-muted-foreground"
-            disabled={busy || blocked}
-            onClick={bloquear}
-          >
-            <Ban className="mr-1 h-4 w-4" /> {blocked ? "Bloqueado" : "Bloquear"}
-          </Button>
+                </label>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setReportOpen(false)}>
+                    Cancelar
+                  </Button>
+                  <Button onClick={enviarDenuncia} disabled={busy}>
+                    Enviar denúncia
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="flex-1 text-muted-foreground"
+              disabled={busy || blocked}
+              onClick={bloquear}
+            >
+              <Ban className="mr-1 h-4 w-4" /> {blocked ? "Bloqueado" : "Bloquear"}
+            </Button>
+          </div>
         </div>
       </main>
     </div>
