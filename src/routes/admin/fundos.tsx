@@ -54,6 +54,30 @@ const EMPTY_FORM = {
 
 const BACKGROUND_IMAGE_BUCKETS = ["profile-backgrounds", "gift-images"] as const;
 
+function adminErrorMessage(error: unknown, fallback: string) {
+  const message =
+    error instanceof Error
+      ? error.message
+      : typeof error === "object" && error && "message" in error
+        ? String((error as { message?: unknown }).message)
+        : fallback;
+  const code =
+    typeof error === "object" && error && "code" in error
+      ? String((error as { code?: unknown }).code)
+      : "";
+
+  if (
+    code === "42P01" ||
+    code === "42703" ||
+    message.includes("profile_backgrounds") ||
+    message.includes("equipped_background_id")
+  ) {
+    return "Banco ainda sem a migration de Fundos de Perfil. Aplique a migration 20260603120000_profile_backgrounds.sql no Supabase.";
+  }
+
+  return message;
+}
+
 function AdminFundosPage() {
   const { user, loading: authLoading, isAdmin, role } = useAuth();
   const canAccess = isAdmin || role === "super_admin";
@@ -80,8 +104,8 @@ function AdminFundosPage() {
     setLoading(true);
     try {
       setItems(await fetchAllProfileBackgroundsAdmin());
-    } catch {
-      toast.error("Nao foi possivel carregar os fundos");
+    } catch (e) {
+      toast.error(adminErrorMessage(e, "Nao foi possivel carregar os fundos"));
     } finally {
       setLoading(false);
     }
@@ -116,7 +140,7 @@ function AdminFundosPage() {
       setForm((current) => ({ ...current, image_url: uploadedUrl }));
       toast.success("Imagem enviada");
     } catch (e) {
-      const message = e instanceof Error ? e.message : "Verifique o bucket e as permissoes do Storage";
+      const message = adminErrorMessage(e, "Verifique o bucket e as permissoes do Storage");
       toast.error(`Falha ao enviar imagem: ${message}`);
     } finally {
       setSaving(false);
@@ -140,7 +164,7 @@ function AdminFundosPage() {
       setForm(EMPTY_FORM);
       await load();
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Nao foi possivel criar");
+      toast.error(adminErrorMessage(e, "Nao foi possivel criar"));
     } finally {
       setSaving(false);
     }
@@ -164,7 +188,7 @@ function AdminFundosPage() {
       setSelected(null);
       await load();
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Nao foi possivel salvar");
+      toast.error(adminErrorMessage(e, "Nao foi possivel salvar"));
     } finally {
       setSaving(false);
     }

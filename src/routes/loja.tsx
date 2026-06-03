@@ -86,30 +86,25 @@ function LojaPage() {
     let alive = true;
     (async () => {
       try {
-        const [c, bg, o, ownedBg, coins, prof] = await Promise.all([
+        const [c, o, coins, prof] = await Promise.all([
           fetchDecorationCatalog(),
-          fetchProfileBackgroundCatalog(),
           fetchMyOwnedIds(),
-          fetchMyOwnedBackgroundIds(),
           getMyCoins(),
           supabase
             .from("profiles")
-            .select("photo_url, equipped_frame_id, equipped_aura_id, equipped_sticker_id, equipped_background_id")
+            .select("photo_url, equipped_frame_id, equipped_aura_id, equipped_sticker_id")
             .eq("id", user.id)
             .maybeSingle(),
         ]);
         if (!alive) return;
         setCatalog(c);
-        setBackgrounds(bg);
         setOwned(o);
-        setOwnedBackgrounds(ownedBg);
         setBalance(coins.balance);
         const p = (prof.data ?? {}) as {
           photo_url?: string | null;
           equipped_frame_id?: string | null;
           equipped_aura_id?: string | null;
           equipped_sticker_id?: string | null;
-          equipped_background_id?: string | null;
         };
         setPhotoUrl(p.photo_url ?? null);
         setEquipped({
@@ -117,11 +112,33 @@ function LojaPage() {
           aura: p.equipped_aura_id ?? null,
           sticker: p.equipped_sticker_id ?? null,
         });
-        setEquippedBackground(p.equipped_background_id ?? null);
       } catch {
         toast.error("Não foi possível carregar a loja");
       } finally {
         if (alive) setLoading(false);
+      }
+
+      try {
+        const [bg, ownedBg, bgProf] = await Promise.all([
+          fetchProfileBackgroundCatalog(),
+          fetchMyOwnedBackgroundIds(),
+          supabase
+            .from("profiles")
+            .select("equipped_background_id")
+            .eq("id", user.id)
+            .maybeSingle(),
+        ]);
+        if (!alive) return;
+        setBackgrounds(bg);
+        setOwnedBackgrounds(ownedBg);
+        setEquippedBackground(
+          ((bgProf.data ?? {}) as { equipped_background_id?: string | null }).equipped_background_id ?? null,
+        );
+      } catch {
+        if (!alive) return;
+        setBackgrounds([]);
+        setOwnedBackgrounds(new Set());
+        setEquippedBackground(null);
       }
     })();
     return () => {
