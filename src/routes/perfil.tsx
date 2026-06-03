@@ -488,7 +488,7 @@ function PerfilPage() {
     }));
 
   const panelClass =
-    "rounded-[2rem] border border-white/70 bg-white/85 p-5 shadow-[0_20px_70px_rgba(31,41,55,0.08)] backdrop-blur sm:p-6";
+    "rounded-[2rem] border border-border/70 bg-card/85 p-5 shadow-[0_20px_70px_rgba(31,41,55,0.08)] backdrop-blur sm:p-6 dark:bg-card/80 dark:shadow-[0_24px_80px_rgba(0,0,0,0.35)]";
   const tabItems = [
     { value: "profile", label: "Sobre mim", icon: UserIcon, hint: "Dados, fotos e historia" },
     { value: "prefs", label: "Preferencias", icon: Heart, hint: "O que voce busca" },
@@ -507,21 +507,21 @@ function PerfilPage() {
   ];
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-[#fbf8f3]">
+    <div className="min-h-screen overflow-x-hidden bg-background">
       <Header />
       <main className="relative mx-auto max-w-[1440px] px-4 py-6 sm:px-6 lg:px-8 lg:py-10">
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[520px] bg-[linear-gradient(120deg,rgba(255,255,255,0.96),rgba(255,241,242,0.82)_32%,rgba(239,246,255,0.82)_68%,rgba(254,243,199,0.72))]"
+          className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[520px] bg-[linear-gradient(120deg,rgba(255,255,255,0.96),rgba(255,241,242,0.82)_32%,rgba(239,246,255,0.82)_68%,rgba(254,243,199,0.72))] dark:bg-[linear-gradient(120deg,rgba(10,10,18,0.98),rgba(49,22,38,0.72)_34%,rgba(15,35,58,0.76)_70%,rgba(50,36,18,0.48))]"
         />
         <AdminWarningBanner />
-        <section className="animate-fade-up overflow-hidden rounded-[2.25rem] border border-white/70 bg-white/75 shadow-[0_26px_90px_rgba(31,41,55,0.10)] backdrop-blur">
+        <section className="animate-fade-up overflow-hidden rounded-[2.25rem] border border-border/70 bg-card/75 shadow-[0_26px_90px_rgba(31,41,55,0.10)] backdrop-blur dark:bg-card/72 dark:shadow-[0_28px_90px_rgba(0,0,0,0.42)]">
           <div className="grid gap-0 lg:grid-cols-[380px_minmax(0,1fr)]">
-            <div className="relative min-h-[360px] bg-[linear-gradient(145deg,#fff7ed,#fdf2f8_45%,#eff6ff)] p-6 sm:p-8">
-              <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-white/80 to-transparent" />
+            <div className="relative min-h-[360px] bg-[linear-gradient(145deg,#fff7ed,#fdf2f8_45%,#eff6ff)] p-6 dark:bg-[linear-gradient(145deg,rgba(49,22,38,0.88),rgba(20,20,34,0.94)_46%,rgba(15,35,58,0.88))] sm:p-8">
+              <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-card/80 to-transparent" />
               <div className="relative z-10 flex h-full flex-col justify-between gap-8">
                 <div className="flex items-center justify-between gap-3">
-                  <span className="rounded-full border border-white/80 bg-white/70 px-3 py-1 text-xs font-medium text-muted-foreground shadow-soft">
+                  <span className="rounded-full border border-border/70 bg-background/70 px-3 py-1 text-xs font-medium text-muted-foreground shadow-soft backdrop-blur">
                     Meu espaco
                   </span>
                   <StatusPill status={status} />
@@ -532,9 +532,9 @@ function PerfilPage() {
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
                     aria-label="Trocar foto de perfil"
-                    className="group relative h-44 w-44 cursor-pointer overflow-hidden rounded-[2rem] border border-white/80 bg-white/70 p-2 shadow-[0_22px_60px_rgba(15,23,42,0.18)] transition hover:-translate-y-1 hover:shadow-[0_28px_70px_rgba(15,23,42,0.22)]"
+                    className="group relative h-44 w-44 cursor-pointer overflow-hidden rounded-[2rem] border border-border/70 bg-background/70 p-2 shadow-[0_22px_60px_rgba(15,23,42,0.18)] transition hover:-translate-y-1 hover:shadow-[0_28px_70px_rgba(15,23,42,0.22)] dark:shadow-[0_24px_70px_rgba(0,0,0,0.45)]"
                   >
-                    <span className="block h-full w-full overflow-hidden rounded-[1.55rem] bg-white">
+                    <span className="block h-full w-full overflow-hidden rounded-[1.55rem] bg-card">
                       {photoPreview ? (
                         <PhotoImg
                           src={photoPreview}
@@ -567,7 +567,7 @@ function PerfilPage() {
                       <RoleBadge role={role} color={localColor ?? roleCfg.defaultColor} size="sm" />
                     )}
                     {hasContributorBadge && (
-                      <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
+                      <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-200">
                         Contribuidor
                       </span>
                     )}
@@ -575,13 +575,13 @@ function PerfilPage() {
                 </div>
 
                 <div className="grid grid-cols-3 gap-2 text-center">
-                  <div className="rounded-2xl bg-white/70 p-3 shadow-soft">
+                  <div className="rounded-2xl bg-background/70 p-3 shadow-soft backdrop-blur dark:bg-background/35">
                     <p className="text-lg font-semibold text-foreground">{profile.age || "--"}</p>
                     <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
                       anos
                     </p>
                   </div>
-                  <div className="rounded-2xl bg-white/70 p-3 shadow-soft">
+                  <div className="rounded-2xl bg-background/70 p-3 shadow-soft backdrop-blur dark:bg-background/35">
                     <p className="truncate text-lg font-semibold text-foreground">
                       {profile.state || "--"}
                     </p>
@@ -589,7 +589,7 @@ function PerfilPage() {
                       estado
                     </p>
                   </div>
-                  <div className="rounded-2xl bg-white/70 p-3 shadow-soft">
+                  <div className="rounded-2xl bg-background/70 p-3 shadow-soft backdrop-blur dark:bg-background/35">
                     <p className="text-lg font-semibold text-foreground">
                       {prefs.age_min}-{prefs.age_max}
                     </p>
@@ -616,7 +616,11 @@ function PerfilPage() {
 
                 <div className="flex flex-wrap gap-2">
                   {user && (
-                    <Button asChild variant="outline" className="rounded-full bg-white/70">
+                    <Button
+                      asChild
+                      variant="outline"
+                      className="rounded-full bg-background/70 backdrop-blur"
+                    >
                       <Link to="/pretendentes/$id" params={{ id: user.id }}>
                         <Eye className="mr-2 h-4 w-4" />
                         Ver perfil publico
@@ -633,8 +637,8 @@ function PerfilPage() {
               </div>
 
               <div className="mt-8 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                <div className="rounded-2xl border border-rose-100 bg-rose-50/70 p-4">
-                  <div className="flex items-center gap-2 text-sm font-medium text-rose-700">
+                <div className="rounded-2xl border border-rose-100 bg-rose-50/70 p-4 dark:border-rose-400/20 dark:bg-rose-400/10">
+                  <div className="flex items-center gap-2 text-sm font-medium text-rose-700 dark:text-rose-200">
                     <MapPin className="h-4 w-4" />
                     Localizacao
                   </div>
@@ -642,8 +646,8 @@ function PerfilPage() {
                     {[profile.city, profile.state].filter(Boolean).join(", ") || "Nao informada"}
                   </p>
                 </div>
-                <div className="rounded-2xl border border-sky-100 bg-sky-50/70 p-4">
-                  <div className="flex items-center gap-2 text-sm font-medium text-sky-700">
+                <div className="rounded-2xl border border-sky-100 bg-sky-50/70 p-4 dark:border-sky-400/20 dark:bg-sky-400/10">
+                  <div className="flex items-center gap-2 text-sm font-medium text-sky-700 dark:text-sky-200">
                     <Church className="h-4 w-4" />
                     Igreja
                   </div>
@@ -651,8 +655,8 @@ function PerfilPage() {
                     {profile.church || "Nao informada"}
                   </p>
                 </div>
-                <div className="rounded-2xl border border-amber-100 bg-amber-50/80 p-4">
-                  <div className="flex items-center gap-2 text-sm font-medium text-amber-700">
+                <div className="rounded-2xl border border-amber-100 bg-amber-50/80 p-4 dark:border-amber-400/20 dark:bg-amber-400/10">
+                  <div className="flex items-center gap-2 text-sm font-medium text-amber-700 dark:text-amber-200">
                     <CalendarHeart className="h-4 w-4" />
                     Batismo
                   </div>
@@ -660,8 +664,8 @@ function PerfilPage() {
                     {profile.years_baptized ? `${profile.years_baptized} ano(s)` : "Nao informado"}
                   </p>
                 </div>
-                <div className="rounded-2xl border border-violet-100 bg-violet-50/70 p-4">
-                  <div className="flex items-center gap-2 text-sm font-medium text-violet-700">
+                <div className="rounded-2xl border border-violet-100 bg-violet-50/70 p-4 dark:border-violet-400/20 dark:bg-violet-400/10">
+                  <div className="flex items-center gap-2 text-sm font-medium text-violet-700 dark:text-violet-200">
                     <Sparkles className="h-4 w-4" />
                     Personalizacao
                   </div>
@@ -676,7 +680,7 @@ function PerfilPage() {
               </div>
 
               {activeCommitment && (
-                <div className="mt-6 rounded-[1.5rem] border border-emerald-200 bg-gradient-to-r from-emerald-50 via-white to-teal-50 p-4 shadow-soft sm:p-5">
+                <div className="mt-6 rounded-[1.5rem] border border-emerald-200 bg-gradient-to-r from-emerald-50 via-card to-teal-50 p-4 shadow-soft dark:border-emerald-400/25 dark:from-emerald-500/15 dark:via-card/80 dark:to-teal-500/10 sm:p-5">
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
                     <img
                       src={commitmentRing}
@@ -684,8 +688,10 @@ function PerfilPage() {
                       className="h-14 w-14 object-contain drop-shadow-sm"
                     />
                     <div className="flex-1">
-                      <h2 className="font-semibold text-emerald-800">Proposito Firmado</h2>
-                      <p className="text-sm text-emerald-700">
+                      <h2 className="font-semibold text-emerald-800 dark:text-emerald-200">
+                        Proposito Firmado
+                      </h2>
+                      <p className="text-sm text-emerald-700 dark:text-emerald-100/80">
                         {commitmentPartner
                           ? `Voce esta em proposito com ${commitmentPartner}.`
                           : "Voce esta em proposito."}
@@ -710,7 +716,7 @@ function PerfilPage() {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-8">
           <div className="grid gap-6 lg:grid-cols-[292px_minmax(0,1fr)]">
             <aside className="hidden lg:block">
-              <div className="sticky top-24 rounded-[2rem] border border-white/70 bg-white/80 p-3 shadow-[0_18px_60px_rgba(31,41,55,0.08)] backdrop-blur">
+              <div className="sticky top-24 rounded-[2rem] border border-border/70 bg-card/80 p-3 shadow-[0_18px_60px_rgba(31,41,55,0.08)] backdrop-blur dark:shadow-[0_22px_70px_rgba(0,0,0,0.36)]">
                 <div className="px-3 py-3">
                   <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                     Editar perfil
@@ -730,12 +736,12 @@ function PerfilPage() {
                         className={`flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-left transition ${
                           active
                             ? "bg-[var(--rose)] text-white shadow-[0_12px_30px_rgba(190,18,60,0.22)]"
-                            : "text-muted-foreground hover:bg-rose-50 hover:text-foreground"
+                            : "text-muted-foreground hover:bg-rose-50 hover:text-foreground dark:hover:bg-rose-400/10"
                         }`}
                       >
                         <span
                           className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
-                            active ? "bg-white/20" : "bg-white"
+                            active ? "bg-white/20" : "bg-background"
                           }`}
                         >
                           <Icon className="h-5 w-5" />
@@ -1230,10 +1236,26 @@ function PerfilPage() {
 function StatusPill({ status }: { status: "pending" | "approved" | "rejected" | "banned" | null }) {
   if (!status) return null;
   const map = {
-    pending: { Icon: Clock, label: "Em análise", cls: "bg-amber-50 text-amber-700" },
-    approved: { Icon: CheckCircle2, label: "Aprovado", cls: "bg-emerald-50 text-emerald-700" },
-    rejected: { Icon: XCircle, label: "Rejeitado", cls: "bg-red-50 text-red-700" },
-    banned: { Icon: XCircle, label: "Suspenso", cls: "bg-red-50 text-red-700" },
+    pending: {
+      Icon: Clock,
+      label: "Em análise",
+      cls: "bg-amber-50 text-amber-700 dark:bg-amber-400/15 dark:text-amber-200",
+    },
+    approved: {
+      Icon: CheckCircle2,
+      label: "Aprovado",
+      cls: "bg-emerald-50 text-emerald-700 dark:bg-emerald-400/15 dark:text-emerald-200",
+    },
+    rejected: {
+      Icon: XCircle,
+      label: "Rejeitado",
+      cls: "bg-red-50 text-red-700 dark:bg-red-400/15 dark:text-red-200",
+    },
+    banned: {
+      Icon: XCircle,
+      label: "Suspenso",
+      cls: "bg-red-50 text-red-700 dark:bg-red-400/15 dark:text-red-200",
+    },
   }[status];
   const { Icon } = map;
   return (
