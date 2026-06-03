@@ -8,7 +8,23 @@ import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Send, Trash2, Users, Pencil, Check, X, Reply, MoreHorizontal, Pin, PinOff, ShieldCheck, Flag, HandHeart, Plus, Sticker as StickerIcon } from "lucide-react";
+import {
+  Send,
+  Trash2,
+  Users,
+  Pencil,
+  Check,
+  X,
+  Reply,
+  MoreHorizontal,
+  Pin,
+  PinOff,
+  ShieldCheck,
+  Flag,
+  HandHeart,
+  Plus,
+  Sticker as StickerIcon,
+} from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { markSeen } from "@/lib/lastSeen";
 import { RoleBadge } from "@/components/RoleBadge";
@@ -16,7 +32,14 @@ import { type AppRole, type RoleColor, ROLE_PRIORITY } from "@/lib/roles";
 import { useRestrictedWords, findRestrictedWord } from "@/lib/profanity";
 import { ShieldAlert } from "lucide-react";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { OnlineDot } from "@/components/OnlineDot";
 import { UserBadges } from "@/components/UserBadges";
@@ -48,9 +71,16 @@ type Profile = {
   contributor_highlight?: boolean | null;
   equipped_frame_id?: string | null;
   equipped_aura_id?: string | null;
+  committed?: boolean;
 };
 
-export const Route = createFileRoute("/comunidade")({ component: () => (<RequireApproved><Comunidade /></RequireApproved>) });
+export const Route = createFileRoute("/comunidade")({
+  component: () => (
+    <RequireApproved>
+      <Comunidade />
+    </RequireApproved>
+  ),
+});
 
 function Comunidade() {
   const { user, isAdmin, role, loading } = useAuth();
@@ -78,15 +108,14 @@ function Comunidade() {
   const [flagBusy, setFlagBusy] = useState(false);
   const [stickerCache, setStickerCache] = useState<Record<string, Sticker>>({});
   const stickerCacheRef = useRef<Record<string, Sticker>>({});
-  useEffect(() => { stickerCacheRef.current = stickerCache; }, [stickerCache]);
+  useEffect(() => {
+    stickerCacheRef.current = stickerCache;
+  }, [stickerCache]);
 
   useEffect(() => {
     if (!user) return;
     (async () => {
-      const { data } = await supabase
-        .from("user_roles")
-        .select("user_id, role, badge_color")
-        .neq("role", "user");
+      const { data } = await supabase.from("user_roles").select("user_id, role, badge_color").neq("role", "user");
       const map: Record<string, { role: AppRole; color: RoleColor | null }> = {};
       for (const row of (data ?? []) as Array<{ user_id: string; role: AppRole; badge_color: string | null }>) {
         const existing = map[row.user_id];
@@ -118,9 +147,14 @@ function Comunidade() {
     load();
     const ch = supabase
       .channel("message-flags")
-      .on("postgres_changes", { event: "*", schema: "public", table: "message_flags" }, () => { load(); })
+      .on("postgres_changes", { event: "*", schema: "public", table: "message_flags" }, () => {
+        load();
+      })
       .subscribe();
-    return () => { active = false; supabase.removeChannel(ch); };
+    return () => {
+      active = false;
+      supabase.removeChannel(ch);
+    };
   }, [user]);
 
   useEffect(() => {
@@ -140,10 +174,32 @@ function Comunidade() {
       .from("profiles")
       .select("id, full_name, photo_url, verified, contributor_highlight, equipped_frame_id, equipped_aura_id")
       .in("id", missing);
+    const { data: commitments } = await supabase
+      .from("relationship_commitments")
+      .select(
+        `
+      user_a,
+      user_b
+    `,
+      )
+      .eq("status", "active");
+
+    const committedUsers = new Set<string>();
+
+    (commitments ?? []).forEach((c) => {
+      committedUsers.add(c.user_a);
+      committedUsers.add(c.user_b);
+    });
     if (data) {
       setProfiles((p) => {
         const next = { ...p };
-        for (const pr of data) next[pr.id] = pr as Profile;
+        for (const pr of data) {
+          next[pr.id] = {
+            ...(pr as Profile),
+
+            committed: committedUsers.has(pr.id),
+          };
+        }
         return next;
       });
     }
@@ -156,12 +212,22 @@ function Comunidade() {
     if (badgeRows && badgeRows.length) {
       const now = Date.now();
       const newIds = new Set<string>();
-      for (const r of badgeRows as Array<{ user_id: string; active: boolean; expires_at: string | null; badges: { code: string } | null }>) {
+      for (const r of badgeRows as Array<{
+        user_id: string;
+        active: boolean;
+        expires_at: string | null;
+        badges: { code: string } | null;
+      }>) {
         if (r.badges?.code !== "contributor") continue;
         if (r.expires_at && new Date(r.expires_at).getTime() <= now) continue;
         newIds.add(r.user_id);
       }
-      if (newIds.size) setContribIds((prev) => { const n = new Set(prev); newIds.forEach((id) => n.add(id)); return n; });
+      if (newIds.size)
+        setContribIds((prev) => {
+          const n = new Set(prev);
+          newIds.forEach((id) => n.add(id));
+          return n;
+        });
     }
   };
 
@@ -191,7 +257,10 @@ function Comunidade() {
         .select("*")
         .order("created_at", { ascending: false })
         .limit(100);
-      if (error) { toast.error(friendlyError(error)); return; }
+      if (error) {
+        toast.error(friendlyError(error));
+        return;
+      }
       if (ignore) return;
       const list = ((data ?? []) as GMsg[]).slice().reverse();
       setMessages(list);
@@ -206,38 +275,29 @@ function Comunidade() {
 
     const ch = supabase
       .channel("global-chat")
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "global_messages" },
-        async (payload) => {
-          const m = payload.new as GMsg;
-          setMessages((prev) => [...prev, m]);
-          await loadProfiles([m.sender_id]);
-          if (m.sticker_id) loadStickersByIds([m.sticker_id]);
-          if (user) markSeen(user.id, "community");
-          requestAnimationFrame(() => {
-            if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-          });
-        }
-      )
-      .on(
-        "postgres_changes",
-        { event: "DELETE", schema: "public", table: "global_messages" },
-        (payload) => {
-          const old = payload.old as { id: string };
-          setMessages((prev) => prev.filter((m) => m.id !== old.id));
-        }
-      )
-      .on(
-        "postgres_changes",
-        { event: "UPDATE", schema: "public", table: "global_messages" },
-        (payload) => {
-          const updated = payload.new as GMsg;
-          setMessages((prev) => prev.map((m) => (m.id === updated.id ? { ...m, ...updated } : m)));
-        }
-      )
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "global_messages" }, async (payload) => {
+        const m = payload.new as GMsg;
+        setMessages((prev) => [...prev, m]);
+        await loadProfiles([m.sender_id]);
+        if (m.sticker_id) loadStickersByIds([m.sticker_id]);
+        if (user) markSeen(user.id, "community");
+        requestAnimationFrame(() => {
+          if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+        });
+      })
+      .on("postgres_changes", { event: "DELETE", schema: "public", table: "global_messages" }, (payload) => {
+        const old = payload.old as { id: string };
+        setMessages((prev) => prev.filter((m) => m.id !== old.id));
+      })
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "global_messages" }, (payload) => {
+        const updated = payload.new as GMsg;
+        setMessages((prev) => prev.map((m) => (m.id === updated.id ? { ...m, ...updated } : m)));
+      })
       .subscribe();
-    return () => { ignore = true; supabase.removeChannel(ch); };
+    return () => {
+      ignore = true;
+      supabase.removeChannel(ch);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
@@ -250,7 +310,7 @@ function Comunidade() {
 
   const pinnedMessages = useMemo(
     () => messages.filter((m) => m.pinned_at).sort((a, b) => (b.pinned_at ?? "").localeCompare(a.pinned_at ?? "")),
-    [messages]
+    [messages],
   );
 
   const visibleMessages = useMemo(
@@ -261,58 +321,72 @@ function Comunidade() {
         if (user && m.sender_id === user.id) return true;
         return false;
       }),
-    [messages, flaggedIds, isStaffViewer, user]
+    [messages, flaggedIds, isStaffViewer, user],
   );
 
   if (!loading && !user) return <Navigate to="/auth/login" />;
 
-  const sendMessage = useCallback(async (content: string): Promise<boolean> => {
-    if (!content || !user) return false;
-    const hit = findRestrictedWord(content, restrictedWords);
-    if (hit) {
-      setWarning(hit);
-      return false;
-    }
-    const { error } = await supabase.from("global_messages").insert({
-      sender_id: user.id,
-      content,
-      reply_to_id: replyTo?.id ?? null,
-    });
-    if (error) { toast.error(friendlyError(error)); return false; }
-    setReplyTo(null);
-    return true;
-  }, [user, restrictedWords, replyTo]);
-
-  const sendSticker = useCallback(async (s: Sticker): Promise<boolean> => {
-    if (!user) return false;
-    // Cobrar 1 moeda antes do envio
-    try {
-      await spendCoin(1);
-    } catch (e: unknown) {
-      const msg = (e as { message?: string })?.message ?? "";
-      if (msg.includes("insufficient_coins")) {
-        toast.error("Você não possui moedas suficientes.", {
-          action: {
-            label: "Ir para Conquistas",
-            onClick: () => { window.location.href = "/perfil?tab=missions"; },
-          },
-        });
-      } else {
-        toast.error("Não foi possível enviar o sticker.");
+  const sendMessage = useCallback(
+    async (content: string): Promise<boolean> => {
+      if (!content || !user) return false;
+      const hit = findRestrictedWord(content, restrictedWords);
+      if (hit) {
+        setWarning(hit);
+        return false;
       }
-      return false;
-    }
-    const { error } = await supabase.from("global_messages").insert({
-      sender_id: user.id,
-      content: "",
-      sticker_id: s.id,
-      reply_to_id: replyTo?.id ?? null,
-    });
-    if (error) { toast.error(friendlyError(error)); return false; }
-    setStickerCache((prev) => (prev[s.id] ? prev : { ...prev, [s.id]: s }));
-    setReplyTo(null);
-    return true;
-  }, [user, replyTo]);
+      const { error } = await supabase.from("global_messages").insert({
+        sender_id: user.id,
+        content,
+        reply_to_id: replyTo?.id ?? null,
+      });
+      if (error) {
+        toast.error(friendlyError(error));
+        return false;
+      }
+      setReplyTo(null);
+      return true;
+    },
+    [user, restrictedWords, replyTo],
+  );
+
+  const sendSticker = useCallback(
+    async (s: Sticker): Promise<boolean> => {
+      if (!user) return false;
+      // Cobrar 1 moeda antes do envio
+      try {
+        await spendCoin(1);
+      } catch (e: unknown) {
+        const msg = (e as { message?: string })?.message ?? "";
+        if (msg.includes("insufficient_coins")) {
+          toast.error("Você não possui moedas suficientes.", {
+            action: {
+              label: "Ir para Conquistas",
+              onClick: () => {
+                window.location.href = "/perfil?tab=missions";
+              },
+            },
+          });
+        } else {
+          toast.error("Não foi possível enviar o sticker.");
+        }
+        return false;
+      }
+      const { error } = await supabase.from("global_messages").insert({
+        sender_id: user.id,
+        content: "",
+        sticker_id: s.id,
+        reply_to_id: replyTo?.id ?? null,
+      });
+      if (error) {
+        toast.error(friendlyError(error));
+        return false;
+      }
+      setStickerCache((prev) => (prev[s.id] ? prev : { ...prev, [s.id]: s }));
+      setReplyTo(null);
+      return true;
+    },
+    [user, replyTo],
+  );
 
   async function remove(id: string) {
     const { error } = await supabase.from("global_messages").delete().eq("id", id);
@@ -328,22 +402,28 @@ function Comunidade() {
   async function submitFlag() {
     if (!flagDialog || !user) return;
     const reason = flagReason.trim();
-    if (!reason) { toast.error("Descreva o motivo"); return; }
+    if (!reason) {
+      toast.error("Descreva o motivo");
+      return;
+    }
     setFlagBusy(true);
     if (flagDialog.existingId) {
-      const { error } = await supabase
-        .from("message_flags")
-        .update({ reason })
-        .eq("id", flagDialog.existingId);
+      const { error } = await supabase.from("message_flags").update({ reason }).eq("id", flagDialog.existingId);
       setFlagBusy(false);
-      if (error) { toast.error(friendlyError(error)); return; }
+      if (error) {
+        toast.error(friendlyError(error));
+        return;
+      }
       toast.success("Sinalização atualizada");
     } else {
       const { error } = await supabase
         .from("message_flags")
         .insert({ message_id: flagDialog.msg.id, flagged_by: user.id, reason });
       setFlagBusy(false);
-      if (error) { toast.error(friendlyError(error)); return; }
+      if (error) {
+        toast.error(friendlyError(error));
+        return;
+      }
       toast.success("Mensagem sinalizada");
     }
     setFlagDialog(null);
@@ -353,7 +433,10 @@ function Comunidade() {
   async function togglePin(m: GMsg) {
     const pinned_at = m.pinned_at ? null : new Date().toISOString();
     const { error } = await supabase.from("global_messages").update({ pinned_at }).eq("id", m.id);
-    if (error) { toast.error("Não foi possível fixar."); return; }
+    if (error) {
+      toast.error("Não foi possível fixar.");
+      return;
+    }
     toast.success(pinned_at ? "Mensagem fixada" : "Mensagem desafixada");
   }
 
@@ -369,9 +452,15 @@ function Comunidade() {
     const content = editText.trim().slice(0, 2000);
     if (!content) return;
     const original = messages.find((m) => m.id === id);
-    if (original && original.content === content) { cancelEdit(); return; }
+    if (original && original.content === content) {
+      cancelEdit();
+      return;
+    }
     const { error } = await supabase.from("global_messages").update({ content }).eq("id", id);
-    if (error) { toast.error("Não foi possível editar."); return; }
+    if (error) {
+      toast.error("Não foi possível editar.");
+      return;
+    }
     cancelEdit();
   }
 
@@ -412,47 +501,49 @@ function Comunidade() {
                 <Pin className="h-3.5 w-3.5" /> Mensagens fixadas
               </div>
               {pinnedMessages.map((m) => {
-                  const p = profiles[m.sender_id];
-                  const name = p?.full_name?.split(" ")[0] ?? "Alguém";
-                  const senderStaff = staffMap[m.sender_id];
-                  return (
-                    <div
-                      key={`pin-${m.id}`}
-                      className="flex items-stretch gap-2 rounded-lg bg-background/60 px-2 py-1.5 text-xs"
+                const p = profiles[m.sender_id];
+                const name = p?.full_name?.split(" ")[0] ?? "Alguém";
+                const senderStaff = staffMap[m.sender_id];
+                return (
+                  <div
+                    key={`pin-${m.id}`}
+                    className="flex items-stretch gap-2 rounded-lg bg-background/60 px-2 py-1.5 text-xs"
+                  >
+                    <button
+                      type="button"
+                      onClick={() => jumpToMessage(m.id)}
+                      className="flex flex-1 items-stretch gap-2 text-left hover:opacity-80"
                     >
+                      <span className="w-0.5 shrink-0 rounded bg-primary" />
+                      <span className="min-w-0 flex-1">
+                        <span className="flex items-center gap-1 font-semibold text-foreground">
+                          {name}
+                          {p?.verified && <VerifiedBadge size="sm" />}
+                          {senderStaff && <RoleBadge role={senderStaff.role} color={senderStaff.color} />}
+                        </span>
+                        <span className="line-clamp-2 text-muted-foreground">{m.content}</span>
+                      </span>
+                    </button>
+                    {isAdmin && (
                       <button
                         type="button"
-                        onClick={() => jumpToMessage(m.id)}
-                        className="flex flex-1 items-stretch gap-2 text-left hover:opacity-80"
+                        onClick={() => togglePin(m)}
+                        aria-label="Desafixar"
+                        className="shrink-0 self-start rounded-full p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
                       >
-                        <span className="w-0.5 shrink-0 rounded bg-primary" />
-                        <span className="min-w-0 flex-1">
-                          <span className="flex items-center gap-1 font-semibold text-foreground">
-                            {name}
-                            {p?.verified && <VerifiedBadge size="sm" />}
-                            {senderStaff && (
-                              <RoleBadge role={senderStaff.role} color={senderStaff.color} />
-                            )}
-                          </span>
-                          <span className="line-clamp-2 text-muted-foreground">{m.content}</span>
-                        </span>
+                        <PinOff className="h-3.5 w-3.5" />
                       </button>
-                      {isAdmin && (
-                        <button
-                          type="button"
-                          onClick={() => togglePin(m)}
-                          aria-label="Desafixar"
-                          className="shrink-0 self-start rounded-full p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
-                        >
-                          <PinOff className="h-3.5 w-3.5" />
-                        </button>
-                      )}
-                    </div>
-                  );
-                })}
+                    )}
+                  </div>
+                );
+              })}
             </div>
           )}
-          <div ref={scrollRef} className="flex-1 space-y-5 overflow-y-auto p-4 sm:p-6" style={{ maxHeight: "calc(100vh - 280px)" }}>
+          <div
+            ref={scrollRef}
+            className="flex-1 space-y-5 overflow-y-auto p-4 sm:p-6"
+            style={{ maxHeight: "calc(100vh - 280px)" }}
+          >
             {messages.length === 0 ? (
               <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
                 Nenhuma mensagem ainda. Seja o primeiro!
@@ -466,31 +557,38 @@ function Comunidade() {
                 const isEditing = editingId === m.id;
                 const name = p?.full_name?.split(" ")[0] ?? "Alguém";
                 const showActions = actionsOpenId === m.id;
-                const replied = m.reply_to_id ? messagesById.get(m.reply_to_id) ?? null : null;
-                const repliedName = replied
-                  ? (profiles[replied.sender_id]?.full_name?.split(" ")[0] ?? "Alguém")
-                  : "";
+                const replied = m.reply_to_id ? (messagesById.get(m.reply_to_id) ?? null) : null;
+                const repliedName = replied ? (profiles[replied.sender_id]?.full_name?.split(" ")[0] ?? "Alguém") : "";
                 const isFlash = highlightId === m.id;
                 const senderStaff = staffMap[m.sender_id];
-                const senderIsAdmin = !!senderStaff && (senderStaff.role === "admin" || senderStaff.role === "super_admin") && (senderStaff.color ?? "gold") === "gold";
+                const senderIsAdmin =
+                  !!senderStaff &&
+                  (senderStaff.role === "admin" || senderStaff.role === "super_admin") &&
+                  (senderStaff.color ?? "gold") === "gold";
                 const senderIsStaff = !!senderStaff;
-                const senderContribOn = !senderIsAdmin && contribIds.has(m.sender_id) && (p?.contributor_highlight !== false);
+                const senderContribOn =
+                  !senderIsAdmin && contribIds.has(m.sender_id) && p?.contributor_highlight !== false;
                 const isFlagged = flaggedIds.has(m.id);
                 const myFlag = myFlags[m.id];
                 return (
                   <div
                     key={m.id}
-                    ref={(el) => { messageRefs.current[m.id] = el; }}
+                    ref={(el) => {
+                      messageRefs.current[m.id] = el;
+                    }}
                     className={`group relative flex scroll-mt-24 items-start gap-3 rounded-xl transition-colors duration-500 ${isFlash ? "bg-primary/10" : ""} ${isFlagged && isStaffViewer ? "bg-destructive/5 ring-1 ring-destructive/30 px-2 py-1" : ""}`}
                   >
                     {mine ? (
-                      <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${senderIsAdmin ? "ring-2 ring-[var(--gold)] ring-offset-2 ring-offset-background" : senderContribOn ? "ring-2 ring-emerald-500 ring-offset-2 ring-offset-background" : senderIsStaff ? "ring-2 ring-primary/40 ring-offset-2 ring-offset-background" : ""}`}>
+                      <div
+                        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${senderIsAdmin ? "ring-2 ring-[var(--gold)] ring-offset-2 ring-offset-background" : senderContribOn ? "ring-2 ring-emerald-500 ring-offset-2 ring-offset-background" : senderIsStaff ? "ring-2 ring-primary/40 ring-offset-2 ring-offset-background" : ""}`}
+                      >
                         <DecoratedAvatar
                           photoUrl={p?.photo_url ?? null}
                           fallback={name.charAt(0).toUpperCase()}
                           size={36}
                           frameId={p?.equipped_frame_id ?? null}
                           auraId={p?.equipped_aura_id ?? null}
+                          isCommitted={p?.committed}
                         />
                       </div>
                     ) : (
@@ -506,8 +604,11 @@ function Comunidade() {
                           size={36}
                           frameId={p?.equipped_frame_id ?? null}
                           auraId={p?.equipped_aura_id ?? null}
+                          isCommitted={p?.committed}
                         />
-                        <span className="absolute -bottom-0.5 -right-0.5"><OnlineDot userId={m.sender_id} size="xs" /></span>
+                        <span className="absolute -bottom-0.5 -right-0.5">
+                          <OnlineDot userId={m.sender_id} size="xs" />
+                        </span>
                       </Link>
                     )}
                     <BubbleWrap
@@ -520,13 +621,12 @@ function Comunidade() {
                           <span className="flex items-center gap-1 text-sm font-semibold">
                             {name}
                             {p?.verified && <VerifiedBadge size="sm" />}
-                            {senderStaff && (
-                              senderIsAdmin ? (
+                            {senderStaff &&
+                              (senderIsAdmin ? (
                                 <ShieldCheck className="admin-icon-sparkle h-3.5 w-3.5 shrink-0" aria-label="Admin" />
                               ) : (
                                 <RoleBadge role={senderStaff.role} color={senderStaff.color} />
-                              )
-                            )}
+                              ))}
                           </span>
                         ) : (
                           <Link
@@ -536,13 +636,12 @@ function Comunidade() {
                           >
                             {name}
                             {p?.verified && <VerifiedBadge size="sm" />}
-                            {senderStaff && (
-                              senderIsAdmin ? (
+                            {senderStaff &&
+                              (senderIsAdmin ? (
                                 <ShieldCheck className="admin-icon-sparkle h-3.5 w-3.5 shrink-0" aria-label="Admin" />
                               ) : (
                                 <RoleBadge role={senderStaff.role} color={senderStaff.color} />
-                              )
-                            )}
+                              ))}
                           </Link>
                         )}
                         <UserBadges userId={m.sender_id} size="xs" max={2} />
@@ -595,22 +694,26 @@ function Comunidade() {
                             </Button>
                           </div>
                         </div>
-                      ) : (
-                        m.sticker_id ? (
-                          stickerCache[m.sticker_id] ? (
-                            <StickerMessage url={stickerCache[m.sticker_id].public_url} alt={stickerCache[m.sticker_id].name} />
-                          ) : (
-                            <div className="mt-1 h-32 w-32 animate-pulse rounded-xl bg-muted/40" />
-                          )
+                      ) : m.sticker_id ? (
+                        stickerCache[m.sticker_id] ? (
+                          <StickerMessage
+                            url={stickerCache[m.sticker_id].public_url}
+                            alt={stickerCache[m.sticker_id].name}
+                          />
                         ) : (
-                          <p className="mt-0.5 whitespace-pre-wrap break-words text-sm text-foreground/90">{m.content}</p>
+                          <div className="mt-1 h-32 w-32 animate-pulse rounded-xl bg-muted/40" />
                         )
+                      ) : (
+                        <p className="mt-0.5 whitespace-pre-wrap break-words text-sm text-foreground/90">{m.content}</p>
                       )}
                     </BubbleWrap>
                     {!isEditing && (
                       <button
                         type="button"
-                        onClick={(e) => { e.stopPropagation(); setActionsOpenId(m.id); }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setActionsOpenId(m.id);
+                        }}
                         aria-label="Mais opções"
                         className="flex h-8 w-8 shrink-0 items-center justify-center self-start rounded-full text-muted-foreground transition-opacity hover:bg-accent hover:text-foreground md:opacity-0 md:group-hover:opacity-100 md:focus:opacity-100"
                       >
@@ -627,8 +730,8 @@ function Comunidade() {
             approved={!!approved}
             userId={user?.id ?? null}
             replyTo={replyTo}
-            replyToName={replyTo ? profiles[replyTo.sender_id]?.full_name?.split(" ")[0] ?? "Alguém" : ""}
-            replyToStickerUrl={replyTo?.sticker_id ? stickerCache[replyTo.sticker_id]?.public_url ?? null : null}
+            replyToName={replyTo ? (profiles[replyTo.sender_id]?.full_name?.split(" ")[0] ?? "Alguém") : ""}
+            replyToStickerUrl={replyTo?.sticker_id ? (stickerCache[replyTo.sticker_id]?.public_url ?? null) : null}
             onCancelReply={() => setReplyTo(null)}
             onSend={sendMessage}
             onSendSticker={sendSticker}
@@ -637,25 +740,49 @@ function Comunidade() {
       </main>
       <RestrictedWordDialog word={warning} onClose={() => setWarning(null)} />
       <ActionsSheet
-        msg={actionsOpenId ? messagesById.get(actionsOpenId) ?? null : null}
+        msg={actionsOpenId ? (messagesById.get(actionsOpenId) ?? null) : null}
         onClose={() => setActionsOpenId(null)}
         currentUserId={user?.id ?? null}
         canModerateMessages={canModerateMessages}
         canFlagMessages={canFlagMessages}
         isAdmin={isAdmin}
         myFlags={myFlags}
-        onReply={(m) => { setReplyTo(m); setActionsOpenId(null); }}
-        onEdit={(m) => { setActionsOpenId(null); startEdit(m); }}
-        onDelete={(m) => { setActionsOpenId(null); remove(m.id); }}
-        onFlag={(m) => { setActionsOpenId(null); openFlagDialog(m); }}
-        onPin={(m) => { setActionsOpenId(null); togglePin(m); }}
+        onReply={(m) => {
+          setReplyTo(m);
+          setActionsOpenId(null);
+        }}
+        onEdit={(m) => {
+          setActionsOpenId(null);
+          startEdit(m);
+        }}
+        onDelete={(m) => {
+          setActionsOpenId(null);
+          remove(m.id);
+        }}
+        onFlag={(m) => {
+          setActionsOpenId(null);
+          openFlagDialog(m);
+        }}
+        onPin={(m) => {
+          setActionsOpenId(null);
+          togglePin(m);
+        }}
       />
-      <Dialog open={!!flagDialog} onOpenChange={(o) => { if (!o) { setFlagDialog(null); setFlagReason(""); } }}>
+      <Dialog
+        open={!!flagDialog}
+        onOpenChange={(o) => {
+          if (!o) {
+            setFlagDialog(null);
+            setFlagReason("");
+          }
+        }}
+      >
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>{flagDialog?.existingId ? "Editar sinalização" : "Sinalizar mensagem"}</DialogTitle>
             <DialogDescription>
-              Descreva por que você acredita que esta mensagem fere as diretrizes da comunidade. Sua sinalização será revisada pelo Super Admin.
+              Descreva por que você acredita que esta mensagem fere as diretrizes da comunidade. Sua sinalização será
+              revisada pelo Super Admin.
             </DialogDescription>
           </DialogHeader>
           {flagDialog && (
@@ -674,7 +801,15 @@ function Comunidade() {
             </div>
           )}
           <DialogFooter>
-            <Button variant="outline" onClick={() => { setFlagDialog(null); setFlagReason(""); }}>Cancelar</Button>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setFlagDialog(null);
+                setFlagReason("");
+              }}
+            >
+              Cancelar
+            </Button>
             <Button onClick={submitFlag} disabled={flagBusy || !flagReason.trim()}>
               {flagDialog?.existingId ? "Salvar" : "Sinalizar"}
             </Button>
@@ -695,7 +830,8 @@ function RestrictedWordDialog({ word, onClose }: { word: string | null; onClose:
           </div>
           <DialogTitle className="text-center">Mensagem bloqueada</DialogTitle>
           <DialogDescription className="text-center">
-            A palavra <span className="font-semibold text-foreground">"{word}"</span> fere as diretrizes da comunidade. Por favor, reescreva sua mensagem com respeito e cuidado.
+            A palavra <span className="font-semibold text-foreground">"{word}"</span> fere as diretrizes da comunidade.
+            Por favor, reescreva sua mensagem com respeito e cuidado.
           </DialogDescription>
         </DialogHeader>
         <div className="flex justify-center pt-2">
@@ -762,11 +898,13 @@ function ActionsSheet({
   const canShowFlag = canFlagMessages && !!msg && !!currentUserId && msg.sender_id !== currentUserId;
   const myFlag = msg ? myFlags[msg.id] : undefined;
   return (
-    <Sheet open={open} onOpenChange={(o) => { if (!o) onClose(); }}>
-      <SheetContent
-        side="bottom"
-        className="rounded-t-2xl p-0 sm:max-w-md sm:mx-auto"
-      >
+    <Sheet
+      open={open}
+      onOpenChange={(o) => {
+        if (!o) onClose();
+      }}
+    >
+      <SheetContent side="bottom" className="rounded-t-2xl p-0 sm:max-w-md sm:mx-auto">
         <SheetHeader className="px-4 pt-4 pb-2">
           <SheetTitle className="text-base">Ações da mensagem</SheetTitle>
         </SheetHeader>
@@ -826,8 +964,8 @@ function ActionRow({
     tone === "danger"
       ? "text-destructive hover:bg-destructive/10 active:bg-destructive/20"
       : tone === "warn"
-      ? "text-amber-600 hover:bg-amber-500/10 active:bg-amber-500/20"
-      : "text-foreground hover:bg-accent active:bg-accent/80";
+        ? "text-amber-600 hover:bg-amber-500/10 active:bg-amber-500/20"
+        : "text-foreground hover:bg-accent active:bg-accent/80";
   return (
     <button
       type="button"
@@ -919,92 +1057,105 @@ const ChatComposer = memo(function ChatComposer({
     <form onSubmit={handleSubmit} className="flex flex-col gap-0 border-t border-border bg-background/60">
       <TypingIndicator selfId={userId} />
       <div className="flex flex-col gap-2 p-3 pt-2">
-      {replyTo && (
-        <div className="flex items-stretch gap-2 rounded-lg border border-border bg-muted/40 px-3 py-2">
-          <span className="w-1 shrink-0 rounded bg-primary" />
-          <div className="min-w-0 flex-1">
-            <p className="text-xs font-semibold text-primary">Respondendo a {replyToName}</p>
-            {replyToStickerUrl ? (
-              <p className="text-xs text-muted-foreground">Sticker</p>
-            ) : (
-              <p className="line-clamp-1 text-xs text-muted-foreground">{replyTo.content}</p>
+        {replyTo && (
+          <div className="flex items-stretch gap-2 rounded-lg border border-border bg-muted/40 px-3 py-2">
+            <span className="w-1 shrink-0 rounded bg-primary" />
+            <div className="min-w-0 flex-1">
+              <p className="text-xs font-semibold text-primary">Respondendo a {replyToName}</p>
+              {replyToStickerUrl ? (
+                <p className="text-xs text-muted-foreground">Sticker</p>
+              ) : (
+                <p className="line-clamp-1 text-xs text-muted-foreground">{replyTo.content}</p>
+              )}
+            </div>
+            {replyToStickerUrl && (
+              <img
+                src={replyToStickerUrl}
+                alt=""
+                className="h-10 w-10 shrink-0 select-none object-contain"
+                draggable={false}
+              />
             )}
+            <button
+              type="button"
+              onClick={onCancelReply}
+              className="rounded-full p-1 text-muted-foreground hover:text-foreground"
+              aria-label="Cancelar resposta"
+            >
+              <X className="h-4 w-4" />
+            </button>
           </div>
-          {replyToStickerUrl && (
-            <img
-              src={replyToStickerUrl}
-              alt=""
-              className="h-10 w-10 shrink-0 select-none object-contain"
-              draggable={false}
-            />
-          )}
-          <button
-            type="button"
-            onClick={onCancelReply}
-            className="rounded-full p-1 text-muted-foreground hover:text-foreground"
-            aria-label="Cancelar resposta"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        </div>
-      )}
-      <div className="relative flex items-center gap-2">
-        <div className="relative">
-          <button
-            type="button"
-            onClick={() => setPlusOpen((v) => !v)}
-            disabled={!approved}
-            aria-label="Mais opções de envio"
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-muted/40 text-muted-foreground transition hover:bg-accent hover:text-foreground disabled:opacity-50"
-          >
-            <motion.span animate={{ rotate: plusOpen ? 45 : 0 }} transition={{ type: "spring", stiffness: 380, damping: 22 }}>
-              <Plus className="h-4 w-4" />
-            </motion.span>
-          </button>
-          <AnimatePresence>
-            {plusOpen && (
-              <>
-                <div className="fixed inset-0 z-30" onClick={() => setPlusOpen(false)} />
-                <motion.div
-                  initial={{ opacity: 0, y: 6, scale: 0.94 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 6, scale: 0.94 }}
-                  transition={{ type: "spring", stiffness: 380, damping: 28 }}
-                  className="absolute bottom-full left-0 z-40 mb-2 min-w-[160px] overflow-hidden rounded-xl border border-border bg-background/95 p-1 shadow-xl backdrop-blur"
-                >
-                  <button
-                    type="button"
-                    onClick={() => { setPlusOpen(false); setPickerOpen(true); }}
-                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm transition hover:bg-accent"
+        )}
+        <div className="relative flex items-center gap-2">
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setPlusOpen((v) => !v)}
+              disabled={!approved}
+              aria-label="Mais opções de envio"
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-muted/40 text-muted-foreground transition hover:bg-accent hover:text-foreground disabled:opacity-50"
+            >
+              <motion.span
+                animate={{ rotate: plusOpen ? 45 : 0 }}
+                transition={{ type: "spring", stiffness: 380, damping: 22 }}
+              >
+                <Plus className="h-4 w-4" />
+              </motion.span>
+            </button>
+            <AnimatePresence>
+              {plusOpen && (
+                <>
+                  <div className="fixed inset-0 z-30" onClick={() => setPlusOpen(false)} />
+                  <motion.div
+                    initial={{ opacity: 0, y: 6, scale: 0.94 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 6, scale: 0.94 }}
+                    transition={{ type: "spring", stiffness: 380, damping: 28 }}
+                    className="absolute bottom-full left-0 z-40 mb-2 min-w-[160px] overflow-hidden rounded-xl border border-border bg-background/95 p-1 shadow-xl backdrop-blur"
                   >
-                    <StickerIcon className="h-4 w-4 text-primary" />
-                    Sticker
-                  </button>
-                </motion.div>
-              </>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPlusOpen(false);
+                        setPickerOpen(true);
+                      }}
+                      className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm transition hover:bg-accent"
+                    >
+                      <StickerIcon className="h-4 w-4 text-primary" />
+                      Sticker
+                    </button>
+                  </motion.div>
+                </>
+              )}
+            </AnimatePresence>
+            <StickerPicker open={pickerOpen} onClose={() => setPickerOpen(false)} onPick={handleSticker} />
+          </div>
+          <Input
+            value={text}
+            onChange={(e) => {
+              setText(e.target.value);
+              if (e.target.value.trim().length > 0) broadcastTyping();
+            }}
+            placeholder={
+              !approved ? "Aguardando aprovação para enviar mensagens" : "Escreva uma mensagem para a comunidade..."
+            }
+            maxLength={2000}
+            disabled={!approved || sending}
+            className="flex-1"
+          />
+          <Button
+            type="submit"
+            disabled={!approved || sending || !text.trim() || cooldownLeft > 0}
+            size="icon"
+            className="rounded-full"
+          >
+            {cooldownLeft > 0 ? (
+              <span className="text-[10px] font-semibold">{Math.ceil(cooldownLeft / 1000)}s</span>
+            ) : (
+              <Send className="h-4 w-4" />
             )}
-          </AnimatePresence>
-          <StickerPicker open={pickerOpen} onClose={() => setPickerOpen(false)} onPick={handleSticker} />
+          </Button>
         </div>
-        <Input
-          value={text}
-          onChange={(e) => {
-            setText(e.target.value);
-            if (e.target.value.trim().length > 0) broadcastTyping();
-          }}
-          placeholder={!approved ? "Aguardando aprovação para enviar mensagens" : "Escreva uma mensagem para a comunidade..."}
-          maxLength={2000}
-          disabled={!approved || sending}
-          className="flex-1"
-        />
-        <Button type="submit" disabled={!approved || sending || !text.trim() || cooldownLeft > 0} size="icon" className="rounded-full">
-          {cooldownLeft > 0 ? (
-            <span className="text-[10px] font-semibold">{Math.ceil(cooldownLeft / 1000)}s</span>
-          ) : (
-            <Send className="h-4 w-4" />
-          )}
-        </Button>
-      </div>
       </div>
     </form>
   );

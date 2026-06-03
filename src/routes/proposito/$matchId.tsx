@@ -6,9 +6,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/layout/Header";
 import { DecoratedAvatar } from "@/components/DecoratedAvatar";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Heart, MessageCircle, Gem, Clock3, Gift } from "lucide-react";
+import { ArrowLeft, Heart, MessageCircle, Gem, Clock3, Gift, Trophy } from "lucide-react";
 import { GiftMedia } from "@/components/gifts/GiftMedia";
 import { getCommitmentByMatch } from "@/lib/commitments";
+import { Progress } from "@/components/ui/progress";
 
 type CoupleProfile = {
   id: string;
@@ -52,6 +53,9 @@ const [giftCount, setGiftCount] =
   useState(0);
 const [galleryGifts, setGalleryGifts] =
   useState<any[]>([]);
+const [achievements, setAchievements] =
+  useState<any[]>([]);
+  
   
   useEffect(() => {
     if (!user) return;
@@ -181,6 +185,100 @@ setGalleryGifts(
 setFirstGiftAt(
   gifts?.[0]?.created_at ?? null
 );
+
+const totalMessages =
+  count ?? 0;
+
+const totalGifts =
+  gifts?.length ?? 0;
+
+const currentDays =
+  commitment.accepted_at
+    ? Math.max(
+        1,
+        Math.floor(
+          (
+            Date.now() -
+            new Date(
+              commitment.accepted_at
+            ).getTime()
+          ) / 86400000
+        )
+      )
+    : 0;
+
+setAchievements([
+  {
+    title: "Primeira Conversa",
+    progress:
+      totalMessages > 0 ? 100 : 0,
+    unlocked:
+      totalMessages > 0,
+  },
+
+  {
+    title: "Primeiro Presente",
+    progress:
+      totalGifts > 0 ? 100 : 0,
+    unlocked:
+      totalGifts > 0,
+  },
+
+  {
+    title: "100 Mensagens",
+    progress:
+      Math.min(
+        100,
+        (totalMessages / 100) * 100
+      ),
+    unlocked:
+      totalMessages >= 100,
+  },
+
+  {
+    title: "500 Mensagens",
+    progress:
+      Math.min(
+        100,
+        (totalMessages / 500) * 100
+      ),
+    unlocked:
+      totalMessages >= 500,
+  },
+
+  {
+    title: "7 Dias em Propósito",
+    progress:
+      Math.min(
+        100,
+        (currentDays / 7) * 100
+      ),
+    unlocked:
+      currentDays >= 7,
+  },
+
+  {
+    title: "30 Dias em Propósito",
+    progress:
+      Math.min(
+        100,
+        (currentDays / 30) * 100
+      ),
+    unlocked:
+      currentDays >= 30,
+  },
+
+  {
+    title: "50 Presentes",
+    progress:
+      Math.min(
+        100,
+        (totalGifts / 50) * 100
+      ),
+    unlocked:
+      totalGifts >= 50,
+  },
+]);
       
     })();
 
@@ -374,24 +472,107 @@ setFirstGiftAt(
             <p className="text-sm text-muted-foreground">
               Mensagens trocadas
             </p>
-          </div>
+<div className="glass rounded-3xl p-6 text-center shadow-soft">
 
-          <div className="glass rounded-3xl p-6 text-center shadow-soft">
+  <Gift className="mx-auto mb-3 h-7 w-7 text-amber-500" />
 
-            <Gift className="mx-auto mb-3 h-7 w-7 text-amber-500" />
+  <div className="text-3xl font-bold">
+    {giftCount}
+  </div>
 
-            <div className="text-3xl font-bold">
-              {giftCount}
-            </div>
+  <p className="text-sm text-muted-foreground">
+    Presentes trocados
+  </p>
 
-            <p className="text-sm text-muted-foreground">
-              Presentes trocados
-            </p>
-
+</div>
           </div>
 
         </section>
 
+<section className="mt-8">
+
+  <div className="glass rounded-3xl p-6 shadow-soft">
+
+    <div className="mb-6 flex items-center gap-2">
+
+      <Trophy className="h-5 w-5 text-amber-500" />
+
+      <h2 className="font-semibold">
+        Conquistas do Casal
+      </h2>
+
+    </div>
+
+    <div className="space-y-5">
+
+      {achievements.map(
+        (achievement) => (
+
+          <div
+            key={achievement.title}
+            className="
+              rounded-2xl
+              border
+              p-4
+            "
+          >
+
+            <div className="mb-2 flex items-center justify-between">
+
+              <span className="font-medium">
+                {achievement.title}
+              </span>
+
+              {achievement.unlocked ? (
+
+                <span
+                  className="
+                    rounded-full
+                    bg-emerald-100
+                    px-2
+                    py-1
+                    text-xs
+                    font-medium
+                    text-emerald-700
+                  "
+                >
+                  Concluído
+                </span>
+
+              ) : (
+
+                <span
+                  className="
+                    text-xs
+                    text-muted-foreground
+                  "
+                >
+                  {Math.round(
+                    achievement.progress
+                  )}%
+                </span>
+
+              )}
+
+            </div>
+
+            <Progress
+              value={
+                achievement.progress
+              }
+            />
+
+          </div>
+
+        )
+      )}
+
+    </div>
+
+  </div>
+
+</section>
+        
         <section className="mt-8">
 
   <div className="glass rounded-3xl p-6 shadow-soft">
@@ -441,31 +622,34 @@ setFirstGiftAt(
             <h3 className="font-medium">
               Primeira conversa
             </h3>
+{firstGiftAt && (
+  <div className="flex gap-4">
+
+    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-100">
+
+      <Gift className="h-5 w-5 text-amber-600" />
+
+    </div>
+
+    <div>
+
+      <h3 className="font-medium">
+        Primeiro presente enviado
+      </h3>
+
+      <p className="text-sm text-muted-foreground">
+        {new Date(
+          firstGiftAt
+        ).toLocaleDateString("pt-BR")}
+      </p>
+
+    </div>
+
+  </div>
+)}
             <p className="text-sm text-muted-foreground">
               {new Date(
                 firstMessageAt
-              ).toLocaleDateString("pt-BR")}
-            </p>
-          </div>
-
-        </div>
-      )}
-
-      {firstGiftAt && (
-        <div className="flex gap-4">
-
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-100">
-            <Gift className="h-5 w-5 text-amber-600" />
-          </div>
-
-          <div>
-            <h3 className="font-medium">
-              Primeiro presente enviado
-            </h3>
-
-            <p className="text-sm text-muted-foreground">
-              {new Date(
-                firstGiftAt
               ).toLocaleDateString("pt-BR")}
             </p>
           </div>
@@ -500,6 +684,19 @@ setFirstGiftAt(
   </div>
 
 </section>
+
+            <ul className="space-y-2 text-sm text-muted-foreground">
+
+              <li>
+                ✅ Página do casal criada
+              </li>
+
+
+            </ul>
+
+          </div>
+
+        </section>
 <section className="mt-8">
 
   <div className="glass rounded-3xl p-6 shadow-soft">

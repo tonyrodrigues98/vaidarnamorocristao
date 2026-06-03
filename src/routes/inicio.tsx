@@ -33,6 +33,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { Textarea } from "@/components/ui/textarea";
+import { getActiveCommitmentByUser } from "@/lib/commitments";
+import commitmentRing from "@/assets/commitment-ring.png";
 
 export const Route = createFileRoute("/inicio")({
   component: InicioPage,
@@ -182,6 +184,11 @@ function InicioPage() {
   const [banAppeals, setBanAppeals] = useState<BanAppeal[]>([]);
   const [appealText, setAppealText] = useState("");
   const [appealBusy, setAppealBusy] = useState(false);
+  const [activeCommitment, setActiveCommitment] = useState<any>(null);
+
+  const [commitmentPartner, setCommitmentPartner] = useState<string | null>(null);
+
+  const [commitmentDays, setCommitmentDays] = useState(0);
 
   useEffect(() => {
     if (!user) {
@@ -189,6 +196,30 @@ function InicioPage() {
       return;
     }
     setCompletedSteps(getHomeChecklistSteps(user.id));
+  }, [user]);
+
+  useEffect(() => {
+    if (!user) return;
+
+    (async () => {
+      const commitment = await getActiveCommitmentByUser(user.id);
+
+      setActiveCommitment(commitment);
+
+      if (!commitment) return;
+
+      const partnerId = commitment.user_a === user.id ? commitment.user_b : commitment.user_a;
+
+      const { data } = await supabase.from("profiles").select("full_name").eq("id", partnerId).maybeSingle();
+
+      setCommitmentPartner(data?.full_name ?? null);
+
+      if (commitment.accepted_at) {
+        const days = Math.max(1, Math.floor((Date.now() - new Date(commitment.accepted_at).getTime()) / 86400000));
+
+        setCommitmentDays(days);
+      }
+    })();
   }, [user]);
 
   useEffect(() => {
@@ -210,7 +241,9 @@ function InicioPage() {
       ] = await Promise.all([
         supabase
           .from("profiles")
-          .select("id, full_name, photo_url, bio, height_cm, status, city, state, age, sex, banned_reason, banned_at, rejection_reason")
+          .select(
+            "id, full_name, photo_url, bio, height_cm, status, city, state, age, sex, banned_reason, banned_at, rejection_reason",
+          )
           .eq("id", user.id)
           .maybeSingle(),
         supabase
@@ -296,10 +329,7 @@ function InicioPage() {
             .select("id", { count: "exact", head: true })
             .eq("status", "approved")
             .gte("created_at", sinceWeek),
-          supabase
-            .from("messages")
-            .select("id", { count: "exact", head: true })
-            .gte("created_at", since24h),
+          supabase.from("messages").select("id", { count: "exact", head: true }).gte("created_at", since24h),
         ]);
         if (cancel) return;
         setSuggestions((sugg as Suggestion[] | null) ?? []);
@@ -398,37 +428,45 @@ function InicioPage() {
   const latestAppeal = banAppealsList[0] ?? null;
   const latestRejectionAppeal = rejectionAppealsList[0] ?? null;
   const canAppeal = isBanned && (!latestAppeal || latestAppeal.status === "ignored");
-  const canReverify =
-    isRejected && (!latestRejectionAppeal || latestRejectionAppeal.status === "ignored");
+  const canReverify = isRejected && (!latestRejectionAppeal || latestRejectionAppeal.status === "ignored");
 
   async function acknowledgeWarning(id: string) {
     const { error } = await supabase
       .from("user_admin_warnings")
       .update({ acknowledged_at: new Date().toISOString() })
       .eq("id", id);
-    if (error) { toast.error(error.message); return; }
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     setAdminWarnings((prev) =>
       prev.map((w) => (w.id === id ? { ...w, acknowledged_at: new Date().toISOString() } : w)),
     );
   }
   async function resolveRequest(id: string) {
-    const { error } = await supabase
-      .from("user_admin_requests")
-      .update({ status: "resolved" })
-      .eq("id", id);
-    if (error) { toast.error(error.message); return; }
+    const { error } = await supabase.from("user_admin_requests").update({ status: "resolved" }).eq("id", id);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     setAdminRequests((prev) => prev.filter((r) => r.id !== id));
     toast.success("Solicitação marcada como resolvida");
   }
   async function submitAppeal(kind: "ban" | "rejection" = "ban") {
     if (!user) return;
     const txt = appealText.trim();
-    if (txt.length < 10) { toast.error("Escreva sua apelação com mais detalhes."); return; }
+    if (txt.length < 10) {
+      toast.error("Escreva sua apelação com mais detalhes.");
+      return;
+    }
     setAppealBusy(true);
     if (kind === "rejection") {
       const { error: rpcError } = await supabase.rpc("request_reverification", { _message: txt });
       setAppealBusy(false);
-      if (rpcError) { toast.error(rpcError.message); return; }
+      if (rpcError) {
+        toast.error(rpcError.message);
+        return;
+      }
       setAppealText("");
       toast.success("Pedido de reanálise enviado. Seu perfil voltou para análise.");
       // O perfil agora é 'pending' — recarrega para sair do modo rejeitado
@@ -441,7 +479,10 @@ function InicioPage() {
       .select("id, appeal_text, status, response_text, responded_at, created_at, kind")
       .single();
     setAppealBusy(false);
-    if (error) { toast.error(error.message); return; }
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     setBanAppeals((prev) => [data as BanAppeal, ...prev]);
     setAppealText("");
     toast.success("Apelação enviada. A equipe vai analisar.");
@@ -485,145 +526,203 @@ function InicioPage() {
         )}
 
         {/* HERO */}
-        {(() => { const hero = getHeroTheme(); return (
-        <section className={`relative overflow-hidden rounded-[2rem] border border-border/60 ${hero.sectionClass} px-6 py-10 shadow-soft sm:px-10 sm:py-14`}>
-          {!hero.isNight && (
-            <>
-              <div
-                aria-hidden
-                className={`pointer-events-none absolute -top-32 -left-20 h-[420px] w-[420px] rounded-full ${hero.blobA} opacity-70 blur-3xl`}
-              />
-              <div
-                aria-hidden
-                className={`pointer-events-none absolute -bottom-24 -right-16 h-[380px] w-[380px] rounded-full ${hero.blobB} blur-3xl`}
-              />
-            </>
-          )}
-          {hero.isNight && (
-            <>
-              {/* Lua crescente */}
-              <svg
-                aria-hidden
-                viewBox="0 0 64 64"
-                className="pointer-events-none absolute top-6 right-6 h-24 w-24 sm:h-32 sm:w-32"
-                style={{ filter: "drop-shadow(0 4px 18px oklch(0.94 0.08 85 / 0.45))" }}
-              >
-                <defs>
-                  <radialGradient id="moonGlow" cx="50%" cy="50%" r="50%">
-                    <stop offset="0%" stopColor="oklch(0.96 0.09 85)" />
-                    <stop offset="100%" stopColor="oklch(0.88 0.10 75)" />
-                  </radialGradient>
-                </defs>
-                <path
-                  d="M44 8a24 24 0 1 0 12 42A20 20 0 0 1 44 8z"
-                  fill="url(#moonGlow)"
-                />
-              </svg>
-              {/* Estrelinhas cintilantes */}
-              {[
-                { top: "18%", left: "55%", size: 8, delay: "0s" },
-                { top: "8%", left: "42%", size: 6, delay: "0.6s" },
-                { top: "62%", left: "82%", size: 7, delay: "1.2s" },
-                { top: "78%", left: "70%", size: 5, delay: "1.8s" },
-                { top: "48%", left: "92%", size: 6, delay: "2.4s" },
-                { top: "34%", left: "78%", size: 5, delay: "0.3s" },
-                { top: "86%", left: "58%", size: 7, delay: "1.5s" },
-              ].map((s, i) => (
-                <svg
-                  key={i}
-                  aria-hidden
-                  viewBox="0 0 10 10"
-                  className="pointer-events-none absolute animate-pulse"
-                  style={{
-                    top: s.top,
-                    left: s.left,
-                    width: s.size,
-                    height: s.size,
-                    animationDelay: s.delay,
-                    animationDuration: "2.5s",
-                  }}
-                >
-                  <path
-                    d="M5 0 L6 4 L10 5 L6 6 L5 10 L4 6 L0 5 L4 4 Z"
-                    fill="oklch(0.96 0.08 85)"
-                    opacity="0.85"
+        {(() => {
+          const hero = getHeroTheme();
+          return (
+            <section
+              className={`relative overflow-hidden rounded-[2rem] border border-border/60 ${hero.sectionClass} px-6 py-10 shadow-soft sm:px-10 sm:py-14`}
+            >
+              {!hero.isNight && (
+                <>
+                  <div
+                    aria-hidden
+                    className={`pointer-events-none absolute -top-32 -left-20 h-[420px] w-[420px] rounded-full ${hero.blobA} opacity-70 blur-3xl`}
                   />
-                </svg>
-              ))}
-            </>
-          )}
-          <div
-            aria-hidden
-            className="pointer-events-none absolute top-10 right-1/3 h-2 w-2 animate-pulse rounded-full bg-[var(--rose)]/60"
-          />
-          <div
-            aria-hidden
-            className="pointer-events-none absolute bottom-16 left-1/4 h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--coral)]/70"
-            style={{ animationDelay: "1.2s" }}
-          />
+                  <div
+                    aria-hidden
+                    className={`pointer-events-none absolute -bottom-24 -right-16 h-[380px] w-[380px] rounded-full ${hero.blobB} blur-3xl`}
+                  />
+                </>
+              )}
+              {hero.isNight && (
+                <>
+                  {/* Lua crescente */}
+                  <svg
+                    aria-hidden
+                    viewBox="0 0 64 64"
+                    className="pointer-events-none absolute top-6 right-6 h-24 w-24 sm:h-32 sm:w-32"
+                    style={{ filter: "drop-shadow(0 4px 18px oklch(0.94 0.08 85 / 0.45))" }}
+                  >
+                    <defs>
+                      <radialGradient id="moonGlow" cx="50%" cy="50%" r="50%">
+                        <stop offset="0%" stopColor="oklch(0.96 0.09 85)" />
+                        <stop offset="100%" stopColor="oklch(0.88 0.10 75)" />
+                      </radialGradient>
+                    </defs>
+                    <path d="M44 8a24 24 0 1 0 12 42A20 20 0 0 1 44 8z" fill="url(#moonGlow)" />
+                  </svg>
+                  {/* Estrelinhas cintilantes */}
+                  {[
+                    { top: "18%", left: "55%", size: 8, delay: "0s" },
+                    { top: "8%", left: "42%", size: 6, delay: "0.6s" },
+                    { top: "62%", left: "82%", size: 7, delay: "1.2s" },
+                    { top: "78%", left: "70%", size: 5, delay: "1.8s" },
+                    { top: "48%", left: "92%", size: 6, delay: "2.4s" },
+                    { top: "34%", left: "78%", size: 5, delay: "0.3s" },
+                    { top: "86%", left: "58%", size: 7, delay: "1.5s" },
+                  ].map((s, i) => (
+                    <svg
+                      key={i}
+                      aria-hidden
+                      viewBox="0 0 10 10"
+                      className="pointer-events-none absolute animate-pulse"
+                      style={{
+                        top: s.top,
+                        left: s.left,
+                        width: s.size,
+                        height: s.size,
+                        animationDelay: s.delay,
+                        animationDuration: "2.5s",
+                      }}
+                    >
+                      <path d="M5 0 L6 4 L10 5 L6 6 L5 10 L4 6 L0 5 L4 4 Z" fill="oklch(0.96 0.08 85)" opacity="0.85" />
+                    </svg>
+                  ))}
+                </>
+              )}
+              <div
+                aria-hidden
+                className="pointer-events-none absolute top-10 right-1/3 h-2 w-2 animate-pulse rounded-full bg-[var(--rose)]/60"
+              />
+              <div
+                aria-hidden
+                className="pointer-events-none absolute bottom-16 left-1/4 h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--coral)]/70"
+                style={{ animationDelay: "1.2s" }}
+              />
 
-          <div className="relative">
-            <div className="animate-fade-up inline-flex items-center gap-2 rounded-full border border-[var(--rose)]/15 bg-white/60 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--rose)] backdrop-blur dark:bg-white/10">
-              <Sparkles className="h-3 w-3" /> Seu espaço
-            </div>
-            <h1
-              className="animate-fade-up mt-5 text-3xl font-extrabold leading-[1.1] tracking-tight sm:text-5xl"
-              style={{ animationDelay: "60ms", ...hero.titleStyle }}
-            >
-              {greeting(profile.full_name)}{" "}
-              <Hand className="ml-1 inline-block h-7 w-7 -translate-y-0.5 text-[var(--rose)] sm:h-9 sm:w-9" aria-hidden />
-            </h1>
-            <p
-              className="animate-fade-up mt-3 max-w-xl text-base text-muted-foreground sm:text-lg"
-              style={{ animationDelay: "140ms" }}
-            >
-              {subGreeting()}{" "}
-              {isApproved
-                ? "Sua jornada continua — explore, converse e deixe Deus surpreender você."
-                : isBanned
-                  ? "Sua conta está temporariamente suspensa. Você ainda pode falar com a gente e enviar uma apelação abaixo."
-                  : isRejected
-                    ? "Sua conta foi negada. Revise suas informações e clique em Verificar Novamente para uma reanálise."
-                    : "Logo seu perfil será revisado e você poderá começar a explorar."}
-            </p>
+              <div className="relative">
+                <div className="animate-fade-up inline-flex items-center gap-2 rounded-full border border-[var(--rose)]/15 bg-white/60 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--rose)] backdrop-blur dark:bg-white/10">
+                  <Sparkles className="h-3 w-3" /> Seu espaço
+                </div>
+                <h1
+                  className="animate-fade-up mt-5 text-3xl font-extrabold leading-[1.1] tracking-tight sm:text-5xl"
+                  style={{ animationDelay: "60ms", ...hero.titleStyle }}
+                >
+                  {greeting(profile.full_name)}{" "}
+                  <Hand
+                    className="ml-1 inline-block h-7 w-7 -translate-y-0.5 text-[var(--rose)] sm:h-9 sm:w-9"
+                    aria-hidden
+                  />
+                </h1>
+                <p
+                  className="animate-fade-up mt-3 max-w-xl text-base text-muted-foreground sm:text-lg"
+                  style={{ animationDelay: "140ms" }}
+                >
+                  {subGreeting()}{" "}
+                  {isApproved
+                    ? "Sua jornada continua — explore, converse e deixe Deus surpreender você."
+                    : isBanned
+                      ? "Sua conta está temporariamente suspensa. Você ainda pode falar com a gente e enviar uma apelação abaixo."
+                      : isRejected
+                        ? "Sua conta foi negada. Revise suas informações e clique em Verificar Novamente para uma reanálise."
+                        : "Logo seu perfil será revisado e você poderá começar a explorar."}
+                </p>
 
+                <div className="animate-fade-up mt-7 flex flex-wrap gap-3" style={{ animationDelay: "220ms" }}>
+                  {isBanned ? (
+                    <Button
+                      asChild
+                      size="lg"
+                      variant="outline"
+                      className="rounded-full px-6 backdrop-blur bg-white/40 dark:bg-white/5"
+                    >
+                      <Link to="/suporte">
+                        <MessageSquareWarning className="mr-2 h-4 w-4" /> Falar com o suporte
+                      </Link>
+                    </Button>
+                  ) : isApproved ? (
+                    <>
+                      <Button asChild size="lg" className="rounded-full px-6">
+                        <Link to="/pretendentes">
+                          <Compass className="mr-2 h-4 w-4" /> Ver pretendentes
+                        </Link>
+                      </Button>
+                      <Button
+                        asChild
+                        size="lg"
+                        variant="outline"
+                        className="rounded-full px-6 backdrop-blur bg-white/40 dark:bg-white/5"
+                      >
+                        <Link to="/devocional">
+                          <BookHeart className="mr-2 h-4 w-4" /> Devocional do dia
+                        </Link>
+                      </Button>
+                    </>
+                  ) : (
+                    <Button asChild size="lg" className="rounded-full px-6">
+                      <Link to="/perfil">Continuar perfil</Link>
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </section>
+          );
+        })()}
+
+        {activeCommitment && (
+          <section className="mt-8 animate-fade-up">
             <div
-              className="animate-fade-up mt-7 flex flex-wrap gap-3"
-              style={{ animationDelay: "220ms" }}
+              className="
+        overflow-hidden
+        rounded-[2rem]
+        border
+        border-emerald-200/60
+        bg-gradient-to-br
+        from-emerald-50
+        via-white
+        to-emerald-50
+        p-6
+        shadow-soft
+      "
             >
-              {isBanned ? (
-                <Button asChild size="lg" variant="outline" className="rounded-full px-6 backdrop-blur bg-white/40 dark:bg-white/5">
-                  <Link to="/suporte">
-                    <MessageSquareWarning className="mr-2 h-4 w-4" /> Falar com o suporte
+              <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
+                <img
+                  src={commitmentRing}
+                  alt=""
+                  className="
+            h-16
+            w-16
+            object-contain
+            drop-shadow-sm
+          "
+                />
+
+                <div className="flex-1">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-600">
+                    Propósito Firmado
+                  </p>
+
+                  <h2 className="mt-1 text-2xl font-bold">
+                    {commitmentPartner ? `Você está em propósito com ${commitmentPartner}` : "Você está em propósito"}
+                  </h2>
+
+                  <p className="mt-2 text-sm text-muted-foreground">{commitmentDays} dias juntos em propósito.</p>
+                </div>
+
+                <Button asChild>
+                  <Link
+                    to="/proposito/$matchId"
+                    params={{
+                      matchId: activeCommitment.match_id,
+                    }}
+                  >
+                    Ver Página do Casal
                   </Link>
                 </Button>
-              ) : isApproved ? (
-                <>
-                  <Button asChild size="lg" className="rounded-full px-6">
-                    <Link to="/pretendentes">
-                      <Compass className="mr-2 h-4 w-4" /> Ver pretendentes
-                    </Link>
-                  </Button>
-                  <Button
-                    asChild
-                    size="lg"
-                    variant="outline"
-                    className="rounded-full px-6 backdrop-blur bg-white/40 dark:bg-white/5"
-                  >
-                    <Link to="/devocional">
-                      <BookHeart className="mr-2 h-4 w-4" /> Devocional do dia
-                    </Link>
-                  </Button>
-                </>
-              ) : (
-                <Button asChild size="lg" className="rounded-full px-6">
-                  <Link to="/perfil">Continuar perfil</Link>
-                </Button>
-              )}
+              </div>
             </div>
-          </div>
-        </section>
-        ); })()}
+          </section>
+        )}
 
         {/* BANNER STICKERS CHAT GLOBAL */}
         <div className="mt-8 animate-fade-up" style={{ animationDelay: "300ms" }}>
@@ -643,17 +742,15 @@ function InicioPage() {
                 <Ban className="h-5 w-5" />
               </span>
               <div className="flex-1">
-                <h2 className="text-lg font-semibold text-red-700 dark:text-red-300">
-                  Conta suspensa
-                </h2>
+                <h2 className="text-lg font-semibold text-red-700 dark:text-red-300">Conta suspensa</h2>
                 {profile.banned_reason && (
                   <p className="mt-1 whitespace-pre-wrap text-sm text-red-900/80 dark:text-red-200/80">
                     <span className="font-semibold">Motivo:</span> {profile.banned_reason}
                   </p>
                 )}
                 <p className="mt-2 text-sm text-muted-foreground">
-                  Sentimos muito por isso. Se você acredita que houve um engano,
-                  envie uma apelação acolhedora e a equipe vai analisar.
+                  Sentimos muito por isso. Se você acredita que houve um engano, envie uma apelação acolhedora e a
+                  equipe vai analisar.
                 </p>
               </div>
             </div>
@@ -706,9 +803,7 @@ function InicioPage() {
                 <AlertTriangle className="h-5 w-5" />
               </span>
               <div className="flex-1">
-                <h2 className="text-lg font-semibold text-amber-700 dark:text-amber-300">
-                  Conta negada
-                </h2>
+                <h2 className="text-lg font-semibold text-amber-700 dark:text-amber-300">Conta negada</h2>
                 <p className="mt-1 text-sm text-amber-900/80 dark:text-amber-200/80">
                   Revise sua conta e tente novamente.
                 </p>
@@ -778,10 +873,7 @@ function InicioPage() {
             </p>
             <ul className="mt-4 space-y-3">
               {adminRequests.map((r) => (
-                <li
-                  key={r.id}
-                  className="rounded-2xl border border-border/50 bg-background/40 p-4"
-                >
+                <li key={r.id} className="rounded-2xl border border-border/50 bg-background/40 p-4">
                   <p className="text-xs font-semibold uppercase tracking-wide text-[var(--rose)]">
                     {r.kind === "photo" && "Foto"}
                     {r.kind === "bio" && "Biografia"}
@@ -808,308 +900,284 @@ function InicioPage() {
         )}
 
         {/* GRID */}
-        {!isBanned && !isRejected && <>
-        <section className="mt-8 grid gap-6 lg:grid-cols-3">
-          {/* CHECKLIST */}
-          <div className="animate-fade-up rounded-3xl border border-border/60 bg-card/70 p-6 shadow-soft backdrop-blur lg:col-span-2">
-            <div className="flex items-center gap-2">
-              <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-[var(--petal)] text-[var(--rose)]">
-                <Sparkles className="h-4 w-4" />
-              </span>
-              <h2 className="text-lg font-semibold">Como começar</h2>
-            </div>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Pequenos passos que abrem grandes histórias.
-            </p>
-            <ul className="mt-5 space-y-2">
-              {checklist.map((item) => (
-                <li key={item.key}>
-                  <Link
-                    to={item.to}
-                    className="group flex items-center gap-3 rounded-2xl border border-transparent px-3 py-3 transition hover:border-border/60 hover:bg-muted/40"
-                  >
-                    <span
-                      className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition ${
-                        item.done
-                          ? "bg-[var(--rose)]/15 text-[var(--rose)]"
-                          : "bg-muted text-muted-foreground"
-                      }`}
-                    >
-                      {item.done ? (
-                        <CheckCircle2 className="h-4 w-4" />
-                      ) : (
-                        <Circle className="h-4 w-4" />
-                      )}
-                    </span>
-                    <span
-                      className={`flex-1 text-sm ${item.done ? "text-muted-foreground line-through" : "font-medium"}`}
-                    >
-                      {item.label}
-                    </span>
-                    <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 transition group-hover:translate-x-0.5 group-hover:opacity-100" />
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* PERFIL */}
-          <div
-            className="animate-fade-up rounded-3xl border border-border/60 bg-card/70 p-6 shadow-soft backdrop-blur"
-            style={{ animationDelay: "80ms" }}
-          >
-            <div className="flex items-center gap-3">
-              <span className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-gradient-love text-lg font-bold text-white">
-                {profile.photo_url ? (
-                  <PhotoImg src={profile.photo_url} alt="" className="h-full w-full object-cover" />
-                ) : (
-                  firstName.charAt(0).toUpperCase()
-                )}
-              </span>
-              <div className="min-w-0">
-                <p className="truncate text-sm text-muted-foreground">Seu perfil</p>
-                <h3 className="truncate text-base font-semibold">{profile.full_name ?? "Você"}</h3>
-              </div>
-            </div>
-
-            <div className="mt-5">
-              <div className="flex items-baseline justify-between">
-                <span className="text-sm text-muted-foreground">Completude</span>
-                <span className="text-2xl font-extrabold tracking-tight">{completion}%</span>
-              </div>
-              <div className="mt-2 h-2 overflow-hidden rounded-full bg-muted">
-                <div
-                  className="h-full rounded-full bg-gradient-to-r from-[var(--coral)] to-[var(--rose)] transition-all duration-700"
-                  style={{ width: `${completion}%` }}
-                />
-              </div>
-              <p className="mt-3 text-xs text-muted-foreground">
-                {completion >= 90
-                  ? "Seu perfil está brilhando ✨"
-                  : "Perfis completos recebem mais interesses."}
-              </p>
-            </div>
-
-            <Button
-              asChild
-              className="mt-5 w-full rounded-full"
-              variant={completion >= 90 ? "outline" : "default"}
-            >
-              <Link to="/perfil">{completion >= 90 ? "Ver meu perfil" : "Completar perfil"}</Link>
-            </Button>
-          </div>
-        </section>
-
-        {/* DEVOCIONAL + COMUNIDADE */}
-        <section className="mt-6 grid gap-6 lg:grid-cols-3">
-          {/* DEVOCIONAL */}
-          <div className="animate-fade-up relative overflow-hidden rounded-3xl border border-border/60 bg-card/70 p-6 shadow-soft backdrop-blur lg:col-span-2">
-            <div
-              aria-hidden
-              className="pointer-events-none absolute -top-12 -right-12 h-44 w-44 rounded-full bg-[var(--petal)] opacity-60 blur-3xl"
-            />
-            <div className="relative">
-              <div className="flex items-center gap-2">
-                <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-[var(--petal)] text-[var(--rose)]">
-                  <BookHeart className="h-4 w-4" />
-                </span>
-                <h2 className="text-lg font-semibold">Devocional do dia</h2>
-              </div>
-              {devo ? (
-                <>
-                  {devo.bible_reference && (
-                    <p className="mt-5 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--rose)]">
-                      {devo.bible_reference}
-                    </p>
-                  )}
-                  {devo.bible_text && (
-                    <blockquote className="mt-2 border-l-2 border-[var(--rose)]/40 pl-4 text-base italic leading-relaxed text-foreground/90 sm:text-lg">
-                      “{devo.bible_text}”
-                    </blockquote>
-                  )}
-                  <h3 className="mt-5 text-xl font-semibold tracking-tight">{devo.title}</h3>
-                  <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-muted-foreground">
-                    {devo.content}
-                  </p>
-                  <div className="mt-5">
-                    <Button
-                      asChild
-                      variant="outline"
-                      className="rounded-full bg-white/50 backdrop-blur dark:bg-white/5"
-                    >
-                      <Link to="/devocional">
-                        Ler agora <ArrowRight className="ml-1 h-4 w-4" />
+        {!isBanned && !isRejected && (
+          <>
+            <section className="mt-8 grid gap-6 lg:grid-cols-3">
+              {/* CHECKLIST */}
+              <div className="animate-fade-up rounded-3xl border border-border/60 bg-card/70 p-6 shadow-soft backdrop-blur lg:col-span-2">
+                <div className="flex items-center gap-2">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-[var(--petal)] text-[var(--rose)]">
+                    <Sparkles className="h-4 w-4" />
+                  </span>
+                  <h2 className="text-lg font-semibold">Como começar</h2>
+                </div>
+                <p className="mt-1 text-sm text-muted-foreground">Pequenos passos que abrem grandes histórias.</p>
+                <ul className="mt-5 space-y-2">
+                  {checklist.map((item) => (
+                    <li key={item.key}>
+                      <Link
+                        to={item.to}
+                        className="group flex items-center gap-3 rounded-2xl border border-transparent px-3 py-3 transition hover:border-border/60 hover:bg-muted/40"
+                      >
+                        <span
+                          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition ${
+                            item.done ? "bg-[var(--rose)]/15 text-[var(--rose)]" : "bg-muted text-muted-foreground"
+                          }`}
+                        >
+                          {item.done ? <CheckCircle2 className="h-4 w-4" /> : <Circle className="h-4 w-4" />}
+                        </span>
+                        <span
+                          className={`flex-1 text-sm ${item.done ? "text-muted-foreground line-through" : "font-medium"}`}
+                        >
+                          {item.label}
+                        </span>
+                        <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 transition group-hover:translate-x-0.5 group-hover:opacity-100" />
                       </Link>
-                    </Button>
-                  </div>
-                </>
-              ) : (
-                <p className="mt-6 text-sm text-muted-foreground">
-                  Em breve, um novo devocional para o seu dia.
-                </p>
-              )}
-            </div>
-          </div>
-
-          {/* COMUNIDADE VIVA */}
-          <div
-            className="animate-fade-up rounded-3xl border border-border/60 bg-card/70 p-6 shadow-soft backdrop-blur"
-            style={{ animationDelay: "80ms" }}
-          >
-            <div className="flex items-center gap-2">
-              <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-[var(--petal)] text-[var(--rose)]">
-                <Flame className="h-4 w-4" />
-              </span>
-              <h2 className="text-lg font-semibold">Comunidade viva</h2>
-            </div>
-            <p className="mt-1 text-sm text-muted-foreground">O que está acontecendo agora.</p>
-
-            <ul className="mt-5 space-y-3">
-              <PulseRow
-                icon={<Users className="h-4 w-4" />}
-                label="Novos perfis (7d)"
-                value={community.newProfiles}
-              />
-              <PulseRow
-                icon={<MessageCircle className="h-4 w-4" />}
-                label="Mensagens (24h)"
-                value={community.newComments}
-              />
-              <PulseRow
-                icon={<Globe className="h-4 w-4" />}
-                label="Espaço da comunidade"
-                value="ativo"
-                cta={{ to: "/comunidade", label: "Entrar" }}
-              />
-            </ul>
-          </div>
-        </section>
-
-        {/* POSSÍVEIS CONEXÕES */}
-        {isApproved && suggestions.length > 0 && (
-          <section className="mt-8 animate-fade-up">
-            <div className="flex items-end justify-between gap-4">
-              <div>
-                <h2 className="text-xl font-semibold">Possíveis conexões</h2>
-                <p className="text-sm text-muted-foreground">
-                  Pessoas que podem combinar com você.
-                </p>
+                    </li>
+                  ))}
+                </ul>
               </div>
-              <Button asChild variant="ghost" size="sm" className="shrink-0 rounded-full">
-                <Link to="/pretendentes">
-                  Ver todos <ArrowRight className="ml-1 h-4 w-4" />
-                </Link>
-              </Button>
-            </div>
 
-            <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {suggestions.slice(0, 3).map((s) => (
-                <Link
-                  key={s.id}
-                  to="/pretendentes/$id"
-                  params={{ id: s.id }}
-                  className="group relative overflow-hidden rounded-3xl border border-border/60 bg-card shadow-soft transition hover:-translate-y-0.5 hover:shadow-elegant"
-                >
-                  <div className="aspect-[4/5] w-full overflow-hidden bg-muted">
-                    {s.photo_url ? (
-                      <PhotoImg
-                        src={s.photo_url}
-                        alt={s.full_name}
-                        className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.04]"
-                        loading="lazy"
-                      />
+              {/* PERFIL */}
+              <div
+                className="animate-fade-up rounded-3xl border border-border/60 bg-card/70 p-6 shadow-soft backdrop-blur"
+                style={{ animationDelay: "80ms" }}
+              >
+                <div className="flex items-center gap-3">
+                  <span className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-gradient-love text-lg font-bold text-white">
+                    {profile.photo_url ? (
+                      <PhotoImg src={profile.photo_url} alt="" className="h-full w-full object-cover" />
                     ) : (
-                      <div className="flex h-full w-full items-center justify-center bg-gradient-love text-4xl text-white">
-                        {s.full_name.charAt(0)}
-                      </div>
+                      firstName.charAt(0).toUpperCase()
                     )}
-                  </div>
-                  <div className="pointer-events-none absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
-                  <div className="absolute inset-x-0 bottom-0 p-4 text-white">
-                    <p className="truncate text-base font-semibold">
-                      {s.full_name.split(" ")[0]}
-                      {s.age ? `, ${s.age}` : ""}
-                    </p>
-                    {(s.city || s.state) && (
-                      <p className="truncate text-xs opacity-80">
-                        {[s.city, s.state].filter(Boolean).join(" · ")}
-                      </p>
-                    )}
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* DICAS */}
-        <section className="mt-10 animate-fade-up">
-          <div className="flex items-end justify-between gap-4">
-            <div>
-              <h2 className="text-xl font-semibold">Dicas da plataforma</h2>
-              <p className="text-sm text-muted-foreground">
-                Pequenos guias para uma jornada mais leve.
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setTipIndex((i) => (i - 1 + TIPS.length) % TIPS.length)}
-                aria-label="Dica anterior"
-                className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-card/60 backdrop-blur transition hover:bg-muted"
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </button>
-              <button
-                onClick={() => setTipIndex((i) => (i + 1) % TIPS.length)}
-                aria-label="Próxima dica"
-                className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-card/60 backdrop-blur transition hover:bg-muted"
-              >
-                <ChevronRight className="h-4 w-4" />
-              </button>
-            </div>
-          </div>
-
-          <div className="mt-5 overflow-hidden">
-            <div
-              className="flex transition-transform duration-500 ease-out"
-              style={{ transform: `translateX(-${tipIndex * 100}%)` }}
-            >
-              {TIPS.map((t, i) => (
-                <div key={i} className="w-full shrink-0 px-1">
-                  <div className="relative overflow-hidden rounded-3xl border border-border/60 bg-card/70 p-6 shadow-soft backdrop-blur sm:p-8">
-                    <div
-                      aria-hidden
-                      className="pointer-events-none absolute -right-16 -top-16 h-44 w-44 rounded-full bg-[var(--petal)] opacity-60 blur-3xl"
-                    />
-                    <div className="relative flex items-start gap-4">
-                      <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[var(--petal)] text-[var(--rose)]">
-                        <t.icon className="h-5 w-5" />
-                      </span>
-                      <div className="min-w-0">
-                        <h3 className="text-base font-semibold sm:text-lg">{t.title}</h3>
-                        <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-                          {t.text}
-                        </p>
-                      </div>
-                    </div>
+                  </span>
+                  <div className="min-w-0">
+                    <p className="truncate text-sm text-muted-foreground">Seu perfil</p>
+                    <h3 className="truncate text-base font-semibold">{profile.full_name ?? "Você"}</h3>
                   </div>
                 </div>
-              ))}
-            </div>
-          </div>
 
-          <div className="mt-4 flex justify-center gap-1.5">
-            {TIPS.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setTipIndex(i)}
-                aria-label={`Ir para dica ${i + 1}`}
-                className={`h-1.5 rounded-full transition-all ${i === tipIndex ? "w-6 bg-[var(--rose)]" : "w-1.5 bg-muted-foreground/30"}`}
-              />
-            ))}
-          </div>
-        </section>
-        </>}
+                <div className="mt-5">
+                  <div className="flex items-baseline justify-between">
+                    <span className="text-sm text-muted-foreground">Completude</span>
+                    <span className="text-2xl font-extrabold tracking-tight">{completion}%</span>
+                  </div>
+                  <div className="mt-2 h-2 overflow-hidden rounded-full bg-muted">
+                    <div
+                      className="h-full rounded-full bg-gradient-to-r from-[var(--coral)] to-[var(--rose)] transition-all duration-700"
+                      style={{ width: `${completion}%` }}
+                    />
+                  </div>
+                  <p className="mt-3 text-xs text-muted-foreground">
+                    {completion >= 90 ? "Seu perfil está brilhando ✨" : "Perfis completos recebem mais interesses."}
+                  </p>
+                </div>
+
+                <Button asChild className="mt-5 w-full rounded-full" variant={completion >= 90 ? "outline" : "default"}>
+                  <Link to="/perfil">{completion >= 90 ? "Ver meu perfil" : "Completar perfil"}</Link>
+                </Button>
+              </div>
+            </section>
+
+            {/* DEVOCIONAL + COMUNIDADE */}
+            <section className="mt-6 grid gap-6 lg:grid-cols-3">
+              {/* DEVOCIONAL */}
+              <div className="animate-fade-up relative overflow-hidden rounded-3xl border border-border/60 bg-card/70 p-6 shadow-soft backdrop-blur lg:col-span-2">
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute -top-12 -right-12 h-44 w-44 rounded-full bg-[var(--petal)] opacity-60 blur-3xl"
+                />
+                <div className="relative">
+                  <div className="flex items-center gap-2">
+                    <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-[var(--petal)] text-[var(--rose)]">
+                      <BookHeart className="h-4 w-4" />
+                    </span>
+                    <h2 className="text-lg font-semibold">Devocional do dia</h2>
+                  </div>
+                  {devo ? (
+                    <>
+                      {devo.bible_reference && (
+                        <p className="mt-5 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--rose)]">
+                          {devo.bible_reference}
+                        </p>
+                      )}
+                      {devo.bible_text && (
+                        <blockquote className="mt-2 border-l-2 border-[var(--rose)]/40 pl-4 text-base italic leading-relaxed text-foreground/90 sm:text-lg">
+                          “{devo.bible_text}”
+                        </blockquote>
+                      )}
+                      <h3 className="mt-5 text-xl font-semibold tracking-tight">{devo.title}</h3>
+                      <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-muted-foreground">{devo.content}</p>
+                      <div className="mt-5">
+                        <Button
+                          asChild
+                          variant="outline"
+                          className="rounded-full bg-white/50 backdrop-blur dark:bg-white/5"
+                        >
+                          <Link to="/devocional">
+                            Ler agora <ArrowRight className="ml-1 h-4 w-4" />
+                          </Link>
+                        </Button>
+                      </div>
+                    </>
+                  ) : (
+                    <p className="mt-6 text-sm text-muted-foreground">Em breve, um novo devocional para o seu dia.</p>
+                  )}
+                </div>
+              </div>
+
+              {/* COMUNIDADE VIVA */}
+              <div
+                className="animate-fade-up rounded-3xl border border-border/60 bg-card/70 p-6 shadow-soft backdrop-blur"
+                style={{ animationDelay: "80ms" }}
+              >
+                <div className="flex items-center gap-2">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-[var(--petal)] text-[var(--rose)]">
+                    <Flame className="h-4 w-4" />
+                  </span>
+                  <h2 className="text-lg font-semibold">Comunidade viva</h2>
+                </div>
+                <p className="mt-1 text-sm text-muted-foreground">O que está acontecendo agora.</p>
+
+                <ul className="mt-5 space-y-3">
+                  <PulseRow
+                    icon={<Users className="h-4 w-4" />}
+                    label="Novos perfis (7d)"
+                    value={community.newProfiles}
+                  />
+                  <PulseRow
+                    icon={<MessageCircle className="h-4 w-4" />}
+                    label="Mensagens (24h)"
+                    value={community.newComments}
+                  />
+                  <PulseRow
+                    icon={<Globe className="h-4 w-4" />}
+                    label="Espaço da comunidade"
+                    value="ativo"
+                    cta={{ to: "/comunidade", label: "Entrar" }}
+                  />
+                </ul>
+              </div>
+            </section>
+
+            {/* POSSÍVEIS CONEXÕES */}
+            {isApproved && suggestions.length > 0 && (
+              <section className="mt-8 animate-fade-up">
+                <div className="flex items-end justify-between gap-4">
+                  <div>
+                    <h2 className="text-xl font-semibold">Possíveis conexões</h2>
+                    <p className="text-sm text-muted-foreground">Pessoas que podem combinar com você.</p>
+                  </div>
+                  <Button asChild variant="ghost" size="sm" className="shrink-0 rounded-full">
+                    <Link to="/pretendentes">
+                      Ver todos <ArrowRight className="ml-1 h-4 w-4" />
+                    </Link>
+                  </Button>
+                </div>
+
+                <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {suggestions.slice(0, 3).map((s) => (
+                    <Link
+                      key={s.id}
+                      to="/pretendentes/$id"
+                      params={{ id: s.id }}
+                      className="group relative overflow-hidden rounded-3xl border border-border/60 bg-card shadow-soft transition hover:-translate-y-0.5 hover:shadow-elegant"
+                    >
+                      <div className="aspect-[4/5] w-full overflow-hidden bg-muted">
+                        {s.photo_url ? (
+                          <PhotoImg
+                            src={s.photo_url}
+                            alt={s.full_name}
+                            className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.04]"
+                            loading="lazy"
+                          />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center bg-gradient-love text-4xl text-white">
+                            {s.full_name.charAt(0)}
+                          </div>
+                        )}
+                      </div>
+                      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+                      <div className="absolute inset-x-0 bottom-0 p-4 text-white">
+                        <p className="truncate text-base font-semibold">
+                          {s.full_name.split(" ")[0]}
+                          {s.age ? `, ${s.age}` : ""}
+                        </p>
+                        {(s.city || s.state) && (
+                          <p className="truncate text-xs opacity-80">{[s.city, s.state].filter(Boolean).join(" · ")}</p>
+                        )}
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* DICAS */}
+            <section className="mt-10 animate-fade-up">
+              <div className="flex items-end justify-between gap-4">
+                <div>
+                  <h2 className="text-xl font-semibold">Dicas da plataforma</h2>
+                  <p className="text-sm text-muted-foreground">Pequenos guias para uma jornada mais leve.</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setTipIndex((i) => (i - 1 + TIPS.length) % TIPS.length)}
+                    aria-label="Dica anterior"
+                    className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-card/60 backdrop-blur transition hover:bg-muted"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </button>
+                  <button
+                    onClick={() => setTipIndex((i) => (i + 1) % TIPS.length)}
+                    aria-label="Próxima dica"
+                    className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-card/60 backdrop-blur transition hover:bg-muted"
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+
+              <div className="mt-5 overflow-hidden">
+                <div
+                  className="flex transition-transform duration-500 ease-out"
+                  style={{ transform: `translateX(-${tipIndex * 100}%)` }}
+                >
+                  {TIPS.map((t, i) => (
+                    <div key={i} className="w-full shrink-0 px-1">
+                      <div className="relative overflow-hidden rounded-3xl border border-border/60 bg-card/70 p-6 shadow-soft backdrop-blur sm:p-8">
+                        <div
+                          aria-hidden
+                          className="pointer-events-none absolute -right-16 -top-16 h-44 w-44 rounded-full bg-[var(--petal)] opacity-60 blur-3xl"
+                        />
+                        <div className="relative flex items-start gap-4">
+                          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[var(--petal)] text-[var(--rose)]">
+                            <t.icon className="h-5 w-5" />
+                          </span>
+                          <div className="min-w-0">
+                            <h3 className="text-base font-semibold sm:text-lg">{t.title}</h3>
+                            <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{t.text}</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="mt-4 flex justify-center gap-1.5">
+                {TIPS.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setTipIndex(i)}
+                    aria-label={`Ir para dica ${i + 1}`}
+                    className={`h-1.5 rounded-full transition-all ${i === tipIndex ? "w-6 bg-[var(--rose)]" : "w-1.5 bg-muted-foreground/30"}`}
+                  />
+                ))}
+              </div>
+            </section>
+          </>
+        )}
       </main>
     </div>
   );
