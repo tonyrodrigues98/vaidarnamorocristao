@@ -56,7 +56,7 @@ export async function fetchProfileBackgroundCatalog(): Promise<ProfileBackground
       .from("profile_backgrounds" as never)
       .select("*")
       .eq("is_active", true)
-      .order("sort_order", { ascending: true })
+      .order("sort_order", { ascending: true, nullsFirst: false })
       .order("created_at", { ascending: false });
     if (error) throw error;
     backgroundsCache = (data ?? []) as unknown as ProfileBackground[];
@@ -74,7 +74,7 @@ export async function fetchAllProfileBackgroundsAdmin(): Promise<ProfileBackgrou
   const { data, error } = await supabase
     .from("profile_backgrounds" as never)
     .select("*")
-    .order("sort_order", { ascending: true })
+    .order("sort_order", { ascending: true, nullsFirst: false })
     .order("created_at", { ascending: false });
   if (error) throw error;
   return (data ?? []) as unknown as ProfileBackground[];
@@ -89,17 +89,23 @@ export async function fetchMyOwnedBackgroundIds(): Promise<Set<string>> {
 }
 
 export async function purchaseProfileBackground(backgroundId: string) {
-  const { data, error } = await supabase.rpc("purchase_profile_background" as never, {
-    _background_id: backgroundId,
-  } as never);
+  const { data, error } = await supabase.rpc(
+    "purchase_profile_background" as never,
+    {
+      _background_id: backgroundId,
+    } as never,
+  );
   if (error) throw error;
   return data as unknown as { success: boolean; new_balance: number };
 }
 
 export async function equipProfileBackground(backgroundId: string) {
-  const { error } = await supabase.rpc("equip_profile_background" as never, {
-    _background_id: backgroundId,
-  } as never);
+  const { error } = await supabase.rpc(
+    "equip_profile_background" as never,
+    {
+      _background_id: backgroundId,
+    } as never,
+  );
   if (error) throw error;
 }
 
@@ -147,8 +153,27 @@ export async function updateProfileBackground(id: string, payload: Partial<Profi
   return data as unknown as ProfileBackground;
 }
 
+export async function reorderProfileBackgrounds(
+  updates: Array<Pick<ProfileBackground, "id" | "sort_order">>,
+) {
+  const results = await Promise.all(
+    updates.map(({ id, sort_order }) =>
+      supabase
+        .from("profile_backgrounds" as never)
+        .update({ sort_order } as never)
+        .eq("id", id),
+    ),
+  );
+  const failed = results.find((result) => result.error);
+  if (failed?.error) throw failed.error;
+  invalidateProfileBackgroundCatalog();
+}
+
 export async function deleteProfileBackground(id: string) {
-  const { error } = await supabase.from("profile_backgrounds" as never).delete().eq("id", id);
+  const { error } = await supabase
+    .from("profile_backgrounds" as never)
+    .delete()
+    .eq("id", id);
   if (error) throw error;
   invalidateProfileBackgroundCatalog();
 }

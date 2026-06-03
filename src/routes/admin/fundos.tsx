@@ -2,9 +2,12 @@ import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import {
   ArrowLeft,
+  ArrowDown,
+  ArrowUp,
   Coins,
   Eye,
   EyeOff,
+  GripVertical,
   ImageIcon,
   Loader2,
   Pencil,
@@ -23,7 +26,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
@@ -33,6 +42,7 @@ import {
   createProfileBackground,
   deleteProfileBackground,
   fetchAllProfileBackgroundsAdmin,
+  reorderProfileBackgrounds,
   updateProfileBackground,
   type ProfileBackground,
   type ProfileBackgroundRarity,
@@ -53,6 +63,17 @@ const EMPTY_FORM = {
 };
 
 const BACKGROUND_IMAGE_BUCKETS = ["profile-backgrounds", "gift-images"] as const;
+
+function withSequentialSortOrder(items: ProfileBackground[]) {
+  return items.map((item, index) => ({ ...item, sort_order: index + 1 }));
+}
+
+function moveItem(items: ProfileBackground[], fromIndex: number, toIndex: number) {
+  const next = [...items];
+  const [moved] = next.splice(fromIndex, 1);
+  next.splice(toIndex, 0, moved);
+  return next;
+}
 
 function adminErrorMessage(error: unknown, fallback: string) {
   const message =
@@ -84,6 +105,9 @@ function AdminFundosPage() {
   const [items, setItems] = useState<ProfileBackground[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [ordering, setOrdering] = useState(false);
+  const [draggingId, setDraggingId] = useState<string | null>(null);
+  const [dragOverId, setDragOverId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [form, setForm] = useState(EMPTY_FORM);
   const [createOpen, setCreateOpen] = useState(false);
@@ -92,7 +116,9 @@ function AdminFundosPage() {
 
   const filtered = useMemo(() => {
     const term = search.toLowerCase();
-    return items.filter((item) => `${item.name} ${item.description ?? ""}`.toLowerCase().includes(term));
+    return items.filter((item) =>
+      `${item.name} ${item.description ?? ""}`.toLowerCase().includes(term),
+    );
   }, [items, search]);
 
   useEffect(() => {
@@ -109,6 +135,45 @@ function AdminFundosPage() {
     } finally {
       setLoading(false);
     }
+  }
+
+  async function persistOrder(nextItems: ProfileBackground[]) {
+    const previous = items;
+    const ordered = withSequentialSortOrder(nextItems);
+    setItems(ordered);
+    setOrdering(true);
+    try {
+      await reorderProfileBackgrounds(
+        ordered.map((item) => ({
+          id: item.id,
+          sort_order: item.sort_order,
+        })),
+      );
+      toast.success("Ordem dos fundos salva");
+    } catch (e) {
+      setItems(previous);
+      toast.error(adminErrorMessage(e, "Nao foi possivel salvar a ordem"));
+    } finally {
+      setOrdering(false);
+    }
+  }
+
+  function handleDropOn(targetId: string) {
+    if (!draggingId || draggingId === targetId || search.trim()) return;
+    const fromIndex = items.findIndex((item) => item.id === draggingId);
+    const toIndex = items.findIndex((item) => item.id === targetId);
+    setDraggingId(null);
+    setDragOverId(null);
+    if (fromIndex < 0 || toIndex < 0 || fromIndex === toIndex) return;
+    void persistOrder(moveItem(items, fromIndex, toIndex));
+  }
+
+  function moveByButton(itemId: string, direction: -1 | 1) {
+    if (search.trim()) return;
+    const fromIndex = items.findIndex((item) => item.id === itemId);
+    const toIndex = fromIndex + direction;
+    if (fromIndex < 0 || toIndex < 0 || toIndex >= items.length) return;
+    void persistOrder(moveItem(items, fromIndex, toIndex));
   }
 
   async function uploadImage(file: File) {
@@ -236,7 +301,7 @@ function AdminFundosPage() {
               size="lg"
               variant="secondary"
               onClick={() => {
-                setForm(EMPTY_FORM);
+                setForm({ ...EMPTY_FORM, sort_order: items.length + 1 });
                 setCreateOpen(true);
               }}
               className="bg-white text-black hover:bg-white/90"
@@ -262,6 +327,10 @@ function AdminFundosPage() {
               <RefreshCw className="mr-2 h-4 w-4" /> Atualizar
             </Button>
           </div>
+          <p className="mt-3 text-xs text-muted-foreground">
+            Arraste os cards pela alca para reorganizar. A nova ordem e salva automaticamente.
+            {search.trim() ? " Limpe a busca para alterar a ordem." : null}
+          </p>
         </div>
 
         {loading ? (
@@ -272,18 +341,65 @@ function AdminFundosPage() {
           <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
             {filtered.map((item) => {
               const rarity = BACKGROUND_RARITY_STYLE[item.rarity];
+              const orderIndex = items.findIndex((background) => background.id === item.id);
+              const dragDisabled = Boolean(search.trim()) || ordering;
               return (
-                <Card key={item.id} className={`overflow-hidden border bg-card ${rarity.border}`}>
+                <Card
+                  key={item.id}
+                  draggable={!dragDisabled}
+                  onDragStart={(event) => {
+                    if (dragDisabled) return;
+                    event.dataTransfer.effectAllowed = "move";
+                    event.dataTransfer.setData("text/plain", item.id);
+                    setDraggingId(item.id);
+                  }}
+                  onDragOver={(event) => {
+                    if (dragDisabled || !draggingId || draggingId === item.id) return;
+                    event.preventDefault();
+                    event.dataTransfer.dropEffect = "move";
+                    setDragOverId(item.id);
+                  }}
+                  onDrop={(event) => {
+                    event.preventDefault();
+                    handleDropOn(item.id);
+                  }}
+                  onDragEnd={() => {
+                    setDraggingId(null);
+                    setDragOverId(null);
+                  }}
+                  className={`overflow-hidden border bg-card transition ${rarity.border} ${
+                    draggingId === item.id ? "opacity-60" : ""
+                  } ${dragOverId === item.id ? "ring-2 ring-[var(--rose)]" : ""}`}
+                >
                   <div className="relative aspect-[16/9] overflow-hidden bg-muted">
                     {item.image_url ? (
-                      <img src={item.image_url} alt={item.name} className="h-full w-full object-cover" />
+                      <img
+                        src={item.image_url}
+                        alt={item.name}
+                        className="h-full w-full object-cover"
+                      />
                     ) : (
                       <div className="flex h-full items-center justify-center text-muted-foreground">
                         <ImageIcon className="h-12 w-12" />
                       </div>
                     )}
+                    <button
+                      type="button"
+                      className={`absolute right-3 top-3 z-10 inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/25 bg-black/45 text-white shadow-sm backdrop-blur transition ${
+                        dragDisabled
+                          ? "cursor-not-allowed opacity-50"
+                          : "cursor-grab active:cursor-grabbing"
+                      }`}
+                      aria-label="Arrastar fundo para ordenar"
+                      disabled={dragDisabled}
+                    >
+                      <GripVertical className="h-4 w-4" />
+                    </button>
                     <div className="absolute left-3 top-3 flex gap-2">
-                      <Badge className={item.is_active ? "bg-green-600 text-white" : ""} variant={item.is_active ? "default" : "secondary"}>
+                      <Badge
+                        className={item.is_active ? "bg-green-600 text-white" : ""}
+                        variant={item.is_active ? "default" : "secondary"}
+                      >
                         {item.is_active ? "Ativo" : "Oculto"}
                       </Badge>
                       <Badge className={rarity.chip}>{rarity.label}</Badge>
@@ -301,7 +417,23 @@ function AdminFundosPage() {
                       </span>
                       <span className="text-xs text-muted-foreground">Ordem {item.sort_order}</span>
                     </div>
-                    <div className="mt-5 grid grid-cols-4 gap-2">
+                    <div className="mt-5 grid grid-cols-6 gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={dragDisabled || orderIndex <= 0}
+                        onClick={() => moveByButton(item.id, -1)}
+                      >
+                        <ArrowUp className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={dragDisabled || orderIndex < 0 || orderIndex >= items.length - 1}
+                        onClick={() => moveByButton(item.id, 1)}
+                      >
+                        <ArrowDown className="h-4 w-4" />
+                      </Button>
                       <Button size="sm" variant="outline" onClick={() => openEdit(item)}>
                         <Pencil className="h-4 w-4" />
                       </Button>
@@ -313,7 +445,11 @@ function AdminFundosPage() {
                           await load();
                         }}
                       >
-                        {item.is_active ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        {item.is_active ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
                       </Button>
                       <Button
                         size="sm"
@@ -394,7 +530,10 @@ function BackgroundDialog({
         <div className="grid gap-4">
           <div className="space-y-2">
             <Label>Nome</Label>
-            <Input value={form.name} onChange={(e) => onFormChange({ ...form, name: e.target.value })} />
+            <Input
+              value={form.name}
+              onChange={(e) => onFormChange({ ...form, name: e.target.value })}
+            />
           </div>
           <div className="space-y-2">
             <Label>Descricao</Label>
@@ -440,7 +579,9 @@ function BackgroundDialog({
               <Label>Raridade</Label>
               <Select
                 value={form.rarity}
-                onValueChange={(value) => onFormChange({ ...form, rarity: value as ProfileBackgroundRarity })}
+                onValueChange={(value) =>
+                  onFormChange({ ...form, rarity: value as ProfileBackgroundRarity })
+                }
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -466,7 +607,10 @@ function BackgroundDialog({
 
           <label className="flex items-center justify-between rounded-xl border bg-card/50 p-4">
             <span className="text-sm font-medium">Ativo</span>
-            <Switch checked={form.is_active} onCheckedChange={(value) => onFormChange({ ...form, is_active: value })} />
+            <Switch
+              checked={form.is_active}
+              onCheckedChange={(value) => onFormChange({ ...form, is_active: value })}
+            />
           </label>
 
           <Button disabled={saving || !form.name.trim()} onClick={onSave}>

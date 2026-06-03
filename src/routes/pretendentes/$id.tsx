@@ -387,10 +387,10 @@ function Detail() {
 
   const hasPremiumBackground = Boolean(equippedBackground?.image_url);
   const actionCardClass = hasPremiumBackground
-    ? "rounded-3xl border border-white/15 bg-white/10 p-4 shadow-elegant backdrop-blur-xl"
+    ? "rounded-3xl border border-white/15 bg-black/40 p-4 shadow-elegant backdrop-blur-xl"
     : "rounded-3xl border border-border bg-card p-4 shadow-soft";
   const surfaceClass = hasPremiumBackground
-    ? "rounded-3xl border border-white/15 bg-background/85 p-5 shadow-elegant backdrop-blur-xl sm:p-6"
+    ? "rounded-3xl border border-white/15 bg-zinc-950/75 p-5 text-white shadow-elegant backdrop-blur-xl sm:p-6 [&_dd]:text-white/85 [&_dt]:text-white/80 [&_h2]:text-white [&_p]:text-white/85"
     : "rounded-3xl border border-border bg-card p-5 shadow-soft sm:p-6";
 
   return (
@@ -403,8 +403,8 @@ function Detail() {
           className="pointer-events-none absolute inset-x-0 top-0 z-0 h-[760px] overflow-hidden"
         >
           <img src={equippedBackground.image_url} alt="" className="h-full w-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/45 to-background" />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/45 via-black/20 to-black/45" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/55 to-black/85" />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-black/20 to-black/50" />
         </div>
       )}
 
