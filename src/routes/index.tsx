@@ -44,9 +44,16 @@ function Home() {
   return (
     <main className="min-h-dvh overflow-hidden bg-[#0f0f10] font-sans text-white">
       <section className="relative isolate flex min-h-dvh flex-col overflow-hidden px-4 py-4 sm:px-6 lg:px-10">
-        <div className="pointer-events-none absolute inset-0 -z-20 bg-[radial-gradient(circle_at_50%_16%,rgba(255,79,104,0.22),transparent_34%),radial-gradient(circle_at_18%_74%,rgba(255,255,255,0.08),transparent_32%),linear-gradient(145deg,#0f0f10_0%,#151515_48%,#1c1c1f_100%)]" />
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-2/3 bg-gradient-to-t from-black via-black/50 to-transparent" />
-        <div className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[70vh] w-[70vh] -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/10 bg-white/[0.025] shadow-[inset_0_0_90px_rgba(255,255,255,0.05)]" />
+        <img
+          src={carenHeroAsset.url}
+          alt="Caren"
+          className="pointer-events-none absolute inset-0 -z-30 h-full w-full object-cover object-[50%_30%] sm:object-[50%_25%]"
+          loading="eager"
+        />
+        {/* Vinheta escura ao redor, independente do tema */}
+        <div className="pointer-events-none absolute inset-0 -z-20 bg-[radial-gradient(ellipse_at_center,transparent_35%,rgba(0,0,0,0.55)_72%,rgba(0,0,0,0.92)_100%)]" />
+        <div className="pointer-events-none absolute inset-0 -z-20 bg-gradient-to-b from-black/55 via-black/20 to-black/85" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-2/3 bg-gradient-to-t from-black via-black/55 to-transparent" />
 
         <HeroNav />
 
@@ -83,30 +90,18 @@ function Home() {
               <CurvedText
                 id="welcome-curve"
                 text="Seja Bem Vindo"
-                className="relative z-30 -mb-8 h-[118px] w-[min(96vw,980px)] sm:-mb-10 sm:h-[150px] lg:-mb-14 lg:h-[190px]"
+                className="relative z-30 h-[118px] w-[min(96vw,980px)] drop-shadow-[0_6px_20px_rgba(0,0,0,0.75)] sm:h-[150px] lg:h-[190px]"
                 textClassName="fill-white text-[78px] font-black uppercase sm:text-[92px] lg:text-[112px]"
                 path="M 70 178 Q 600 28 1130 178"
                 startOffset="50%"
               />
 
-              <div className="relative z-10 flex h-[46dvh] min-h-[300px] max-h-[420px] w-full max-w-[520px] items-end justify-center sm:h-[58dvh] sm:min-h-[460px] sm:max-h-none lg:h-[66dvh] lg:max-w-[620px]">
-                <div className="absolute bottom-8 h-[80%] w-[68%] rounded-t-full bg-gradient-to-b from-white/15 via-white/10 to-white/0 blur-[2px]" />
-                <div className="absolute bottom-0 h-[86%] w-[74%] overflow-hidden rounded-t-[48%] border border-white/15 shadow-[0_36px_120px_rgba(0,0,0,0.72)]">
-                  <img
-                    src={carenHeroAsset.url}
-                    alt="Caren"
-                    className="absolute inset-0 h-full w-full object-cover object-[50%_30%]"
-                    loading="eager"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#0f0f10]/70" />
-                </div>
-                <div className="absolute bottom-0 h-24 w-[92%] rounded-full bg-[#ff4f68]/18 blur-3xl" />
-              </div>
+              <div className="h-[46dvh] min-h-[300px] sm:h-[58dvh] sm:min-h-[460px] lg:h-[60dvh]" />
 
               <CurvedText
                 id="community-curve"
                 text="à nossa comunidade"
-                className="relative z-30 -mt-32 h-[118px] w-[min(92vw,760px)] sm:-mt-28 sm:h-[142px] lg:-mt-44"
+                className="relative z-30 h-[118px] w-[min(92vw,760px)] drop-shadow-[0_6px_20px_rgba(0,0,0,0.75)] sm:h-[142px]"
                 textClassName="fill-white text-[35px] font-extrabold tracking-[0.08em] sm:text-[48px] lg:text-[56px]"
                 path="M 120 68 Q 600 148 1080 68"
                 startOffset="50%"
