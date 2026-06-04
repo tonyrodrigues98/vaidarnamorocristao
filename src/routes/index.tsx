@@ -324,7 +324,14 @@ function CurvedText({
   startOffset: string;
 }) {
   return (
-    <svg className={className} viewBox="0 0 1200 240" role="img" aria-label={text}>
+    <svg
+      className={className}
+      viewBox="0 0 1200 240"
+      role="img"
+      aria-label={text}
+      preserveAspectRatio="xMidYMid meet"
+      style={{ overflow: "visible" }}
+    >
       <defs>
         <path id={id} d={path} />
       </defs>
