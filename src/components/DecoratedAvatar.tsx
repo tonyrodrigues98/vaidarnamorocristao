@@ -105,10 +105,32 @@ export function DecoratedAvatar({
 
   return (
     <div
-      className={cn("relative inline-block shrink-0", className)}
+      className={cn("relative inline-block shrink-0 overflow-visible", className)}
       style={{ width: canvas, height: canvas }}
     >
-      {aura?.css_value && (
+      {/* Image auras take priority; css_value remains as fallback for older auras. */}
+      {auraAsset ? (
+        <div
+          aria-hidden
+          className="pointer-events-none absolute left-1/2 top-1/2"
+          style={{
+            width: canvas * 1.32,
+            height: canvas * 1.32,
+            transform: "translate(-50%, -50%)",
+            zIndex: 0,
+          }}
+        >
+          <img
+            src={auraAsset}
+            alt=""
+            aria-hidden
+            className="h-full w-full object-contain"
+            style={{
+              filter: "drop-shadow(0 0 18px rgba(255,255,255,.18))",
+            }}
+          />
+        </div>
+      ) : aura?.css_value ? (
         <div
           aria-hidden
           className="pointer-events-none absolute rounded-full"
@@ -119,22 +141,7 @@ export function DecoratedAvatar({
             zIndex: 0,
           }}
         />
-      )}
-      {auraAsset && (
-        <img
-          src={auraAsset}
-          alt=""
-          aria-hidden
-          className="pointer-events-none absolute object-contain"
-          style={{
-            inset: `-${Math.round(canvas * 0.12)}px`,
-            width: canvas * 1.24,
-            height: canvas * 1.24,
-            zIndex: 1,
-            filter: "drop-shadow(0 0 18px rgba(255,255,255,.18))",
-          }}
-        />
-      )}
+      ) : null}
       <div
         className="absolute overflow-hidden rounded-full bg-muted"
         style={{
