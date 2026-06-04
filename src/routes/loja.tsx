@@ -492,7 +492,7 @@ function LojaPage() {
                   variant="ghost"
                   size="sm"
                   className="text-xs text-muted-foreground"
-                  onClick={() => handleUnequip(activeCategory.type!)}
+                  onClick={() => handleUnequip(activeCategory.type as DecorationType)}
                   disabled={busyId === `unequip-${activeCategory.type}`}
                 >
                   <X className="mr-1 h-3 w-3" />

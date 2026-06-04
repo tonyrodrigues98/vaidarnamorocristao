@@ -130,5 +130,5 @@ export async function getActiveCommitmentByUser(userId: string) {
     throw error;
   }
 
-  return data;
+  return data as RelationshipCommitment | null;
 }
