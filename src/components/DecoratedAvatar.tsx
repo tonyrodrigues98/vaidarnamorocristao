@@ -26,6 +26,9 @@ const FRAME_PLACEMENT: Record<string, { photoScale: number; centerX: number; cen
   "frame-folhas-oliveiras.png": { photoScale: 0.62, centerX: 0.5, centerY: 0.5 },
 };
 const DEFAULT_FRAME_PLACEMENT = { photoScale: 0.56, centerX: 0.5, centerY: 0.5 };
+const DEFAULT_DECORATION_CANVAS_SCALE = 1 / DEFAULT_FRAME_PLACEMENT.photoScale;
+const AURA_SCALE = 2.05;
+const COMMITMENT_RING_SCALE = 0.36;
 
 export type DecoratedAvatarProps = {
   photoUrl?: string | null;
@@ -130,9 +133,18 @@ export function DecoratedAvatar({
   // o canvas externo cresce para `size / photoScale` para acomodar a moldura
   // ao redor sem encolher a foto.
   const photoSize = size;
-  const canvas = frameAsset ? size / placement.photoScale : size;
-  const photoCenterX = canvas * placement.centerX;
-  const photoCenterY = canvas * placement.centerY;
+  const frameCanvas = frameAsset ? size / placement.photoScale : 0;
+  const needsDecorationSpace = Boolean(frameId || auraId || frameAsset || auraAsset || aura?.css_value || isCommitted);
+  const canvas = needsDecorationSpace ? Math.max(frameCanvas, size * DEFAULT_DECORATION_CANVAS_SCALE) : size;
+  const frameOffsetX = frameAsset ? (canvas - frameCanvas) / 2 : 0;
+  const frameOffsetY = frameAsset ? (canvas - frameCanvas) / 2 : 0;
+  const photoCenterX = frameAsset ? frameOffsetX + frameCanvas * placement.centerX : canvas / 2;
+  const photoCenterY = frameAsset ? frameOffsetY + frameCanvas * placement.centerY : canvas / 2;
+  const auraSize = photoSize * AURA_SCALE;
+  const cssAuraPadding = Math.round(photoSize * 0.42);
+  const ringSize = Math.max(20, photoSize * COMMITMENT_RING_SCALE);
+  const ringLeft = photoCenterX + photoSize / 2 - ringSize * 0.66;
+  const ringTop = photoCenterY + photoSize / 2 - ringSize * 0.66;
 
   return (
     <div
@@ -143,10 +155,12 @@ export function DecoratedAvatar({
       {auraAsset ? (
         <div
           aria-hidden
-          className="pointer-events-none absolute left-1/2 top-1/2"
+          className="pointer-events-none absolute"
           style={{
-            width: canvas * 1.32,
-            height: canvas * 1.32,
+            left: photoCenterX,
+            top: photoCenterY,
+            width: auraSize,
+            height: auraSize,
             transform: "translate(-50%, -50%)",
             zIndex: 0,
           }}
@@ -166,9 +180,12 @@ export function DecoratedAvatar({
           aria-hidden
           className="pointer-events-none absolute rounded-full"
           style={{
-            inset: `-${Math.round(canvas * 0.1)}px`,
+            left: photoCenterX - photoSize / 2 - cssAuraPadding,
+            top: photoCenterY - photoSize / 2 - cssAuraPadding,
+            width: photoSize + cssAuraPadding * 2,
+            height: photoSize + cssAuraPadding * 2,
             background: `radial-gradient(circle, ${aura.css_value}66 0%, ${aura.css_value}33 45%, transparent 72%)`,
-            filter: `blur(${Math.max(6, canvas * 0.09)}px)`,
+            filter: `blur(${Math.max(8, photoSize * 0.13)}px)`,
             zIndex: 0,
           }}
         />
@@ -204,8 +221,14 @@ export function DecoratedAvatar({
           src={frameAsset}
           alt=""
           aria-hidden
-          className="pointer-events-none absolute inset-0 h-full w-full object-contain"
-          style={{ zIndex: 20 }}
+          className="pointer-events-none absolute object-contain"
+          style={{
+            left: frameOffsetX,
+            top: frameOffsetY,
+            width: frameCanvas,
+            height: frameCanvas,
+            zIndex: 20,
+          }}
         />
       )}
       {isCommitted && (
@@ -214,14 +237,11 @@ export function DecoratedAvatar({
           alt="Propósito Firmado"
           className="pointer-events-none absolute object-contain"
           style={{
-            width: Math.max(24, canvas * 0.24),
-            height: Math.max(24, canvas * 0.24),
-
-            right: -2,
-            bottom: -2,
-
+            width: ringSize,
+            height: ringSize,
+            left: ringLeft,
+            top: ringTop,
             zIndex: 50,
-
             filter: "drop-shadow(0 2px 6px rgba(0,0,0,.25))",
           }}
         />
