@@ -405,13 +405,13 @@ function Detail() {
 
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 z-0 h-[760px] bg-[linear-gradient(120deg,rgba(255,255,255,0.96),rgba(255,241,242,0.82)_32%,rgba(239,246,255,0.82)_68%,rgba(254,243,199,0.72))] dark:bg-[linear-gradient(120deg,rgba(10,10,18,0.98),rgba(49,22,38,0.72)_34%,rgba(15,35,58,0.76)_70%,rgba(50,36,18,0.48))]"
+        className="pointer-events-none absolute inset-x-0 top-0 z-0 h-[380px] bg-[linear-gradient(120deg,rgba(255,255,255,0.96),rgba(255,241,242,0.82)_32%,rgba(239,246,255,0.82)_68%,rgba(254,243,199,0.72))] dark:bg-[linear-gradient(120deg,rgba(10,10,18,0.98),rgba(49,22,38,0.72)_34%,rgba(15,35,58,0.76)_70%,rgba(50,36,18,0.48))]"
       />
 
       {equippedBackground?.image_url && (
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-x-0 top-0 z-0 h-[760px] overflow-hidden"
+          className="pointer-events-none absolute inset-x-0 top-0 z-0 h-[380px] overflow-hidden"
         >
           <img src={equippedBackground.image_url} alt="" className="h-full w-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-b from-white/78 via-white/56 to-background dark:from-black/82 dark:via-black/58 dark:to-background" />
@@ -432,267 +432,252 @@ function Detail() {
           <ArrowLeft className="h-4 w-4" /> Voltar
         </Link>
 
-        {equippedBackground?.image_url && (
-          <div className="mt-4 overflow-hidden rounded-[2rem] border border-white/60 bg-card/75 shadow-[0_20px_70px_rgba(31,41,55,0.12)] backdrop-blur-xl dark:border-white/10 dark:bg-card/55 md:hidden">
-            <div className="relative h-40">
+        {/* Hero premium: fundo como ambientacao, foto/moldura/aura como foco */}
+        <section
+          className={`relative mt-4 overflow-visible rounded-[2.25rem] border pt-36 shadow-[0_24px_90px_rgba(31,41,55,0.10)] backdrop-blur-xl sm:pt-44 lg:pt-52 dark:shadow-[0_28px_90px_rgba(0,0,0,0.42)] ${
+            hasPremiumBackground
+              ? "border-white/60 bg-card/86 dark:border-white/10 dark:bg-card/76"
+              : "border-border/70 bg-card/90 dark:bg-card/82"
+          }`}
+        >
+          <div className="absolute inset-x-0 top-0 h-52 overflow-hidden rounded-t-[2.25rem] sm:h-64 lg:h-72">
+            {equippedBackground?.image_url ? (
               <img
                 src={equippedBackground.image_url}
                 alt=""
+                aria-hidden
                 className="h-full w-full object-cover"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-white/10 dark:from-black/70" />
-              <div className="absolute bottom-3 left-3 right-3">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-white/82 px-3 py-1 text-xs font-semibold text-foreground shadow-soft backdrop-blur dark:bg-black/45 dark:text-white">
-                  <Sparkles className="h-3.5 w-3.5 text-[var(--rose)]" />
-                  Fundo premium equipado
-                </span>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Foto + carrossel */}
-        <section className="mt-4 grid gap-5 xl:grid-cols-[minmax(320px,0.9fr)_minmax(0,1.08fr)_minmax(320px,0.72fr)] xl:items-start">
-          <div
-            className={`rounded-[2rem] ${
-              hasPremiumBackground
-                ? "border border-white/60 bg-card/75 p-4 shadow-[0_28px_90px_rgba(31,41,55,0.18)] backdrop-blur-xl dark:border-white/10 dark:bg-card/55 dark:shadow-[0_28px_90px_rgba(0,0,0,0.48)]"
-                : "border border-border/70 bg-card/85 p-4 shadow-[0_24px_80px_rgba(31,41,55,0.10)] backdrop-blur dark:bg-card/80"
-            }`}
-          >
-            <div className="relative overflow-hidden rounded-[1.65rem] border border-border/60 bg-gradient-to-br from-rose-50 via-card to-sky-50 p-5 dark:from-rose-400/10 dark:via-card dark:to-sky-400/10">
-              {equippedBackground?.image_url && (
-                <img
-                  src={equippedBackground.image_url}
-                  alt=""
-                  aria-hidden
-                  className="absolute inset-0 h-full w-full object-cover opacity-[0.18] dark:opacity-[0.22]"
-                />
-              )}
-              <div className="absolute inset-0 bg-gradient-to-b from-card/35 via-card/65 to-card/92" />
-              <div className="relative z-10 flex min-h-[330px] items-center justify-center overflow-visible py-6">
-                <div className="sm:hidden">
-                  <DecoratedAvatar
-                    photoUrl={profile.photo_url}
-                    fallback={profile.full_name.charAt(0)}
-                    alt={profile.full_name}
-                    size={122}
-                    frameId={profile.equipped_frame_id ?? null}
-                    auraId={profile.equipped_aura_id ?? null}
-                    isCommitted={profileCommitted}
-                  />
-                </div>
-                <div className="hidden sm:block lg:hidden">
-                  <DecoratedAvatar
-                    photoUrl={profile.photo_url}
-                    fallback={profile.full_name.charAt(0)}
-                    alt={profile.full_name}
-                    size={154}
-                    frameId={profile.equipped_frame_id ?? null}
-                    auraId={profile.equipped_aura_id ?? null}
-                    isCommitted={profileCommitted}
-                  />
-                </div>
-                <div className="hidden lg:block">
-                  <DecoratedAvatar
-                    photoUrl={profile.photo_url}
-                    fallback={profile.full_name.charAt(0)}
-                    alt={profile.full_name}
-                    size={162}
-                    frameId={profile.equipped_frame_id ?? null}
-                    auraId={profile.equipped_aura_id ?? null}
-                    isCommitted={profileCommitted}
-                  />
-                </div>
-              </div>
-              <div className="relative z-10 mt-2 flex flex-wrap justify-center gap-2">
-                {profile.equipped_frame_id && (
-                  <span className="rounded-full border border-amber-300/40 bg-amber-50/80 px-3 py-1 text-xs font-semibold text-amber-800 backdrop-blur dark:border-amber-400/25 dark:bg-amber-400/10 dark:text-amber-200">
-                    Moldura equipada
-                  </span>
-                )}
-                {profile.equipped_aura_id && (
-                  <span className="rounded-full border border-violet-300/40 bg-violet-50/80 px-3 py-1 text-xs font-semibold text-violet-800 backdrop-blur dark:border-violet-400/25 dark:bg-violet-400/10 dark:text-violet-200">
-                    Aura ativa
-                  </span>
-                )}
-              </div>
-            </div>
-
-            <div className="mt-4 overflow-hidden rounded-[1.35rem] border border-border/60 bg-background/50 p-2 backdrop-blur dark:bg-background/25">
-              <p className="mb-2 px-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                Galeria
-              </p>
-              <div className="overflow-hidden rounded-[1rem]">
-                <PhotoCarousel
-                  photos={[...(profile.photo_url ? [profile.photo_url] : []), ...extraPhotos]}
-                  alt={profile.full_name}
-                  eager
-                  className="aspect-[16/10]"
-                  fallback={
-                    <div className="flex h-full w-full items-center justify-center bg-gradient-love">
-                      <span className="text-4xl text-white">{profile.full_name.charAt(0)}</span>
-                    </div>
-                  }
-                />
-              </div>
-            </div>
+            ) : (
+              <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,241,242,0.95),rgba(239,246,255,0.88)_48%,rgba(254,243,199,0.78))] dark:bg-[linear-gradient(135deg,rgba(51,25,40,0.86),rgba(15,35,58,0.82)_52%,rgba(64,47,24,0.62))]" />
+            )}
+            <div className="absolute inset-0 bg-gradient-to-b from-white/35 via-white/58 to-card dark:from-black/60 dark:via-black/48 dark:to-card" />
+            <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-card via-card/78 to-transparent" />
+            <div className="absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-card/65 to-transparent dark:from-black/40" />
+            <div className="absolute inset-y-0 right-0 w-1/3 bg-gradient-to-l from-card/65 to-transparent dark:from-black/40" />
           </div>
 
-          <div className="space-y-4">
-            {/* Identidade */}
-            <div
-              className={
-                hasPremiumBackground
-                  ? "rounded-[2rem] border border-white/60 bg-card/82 p-5 text-foreground shadow-[0_20px_70px_rgba(31,41,55,0.14)] backdrop-blur-xl sm:p-7 dark:border-white/10 dark:bg-card/70 dark:shadow-[0_24px_80px_rgba(0,0,0,0.42)]"
-                  : "rounded-[2rem] border border-border/70 bg-card/85 p-5 shadow-[0_20px_70px_rgba(31,41,55,0.08)] backdrop-blur sm:p-7 dark:bg-card/80"
-              }
-            >
-              <div className="space-y-4">
-                <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                  <h1 className="text-3xl font-bold leading-tight text-foreground sm:text-4xl">
-                    {profile.full_name}, {profile.age}
-                  </h1>
-                  {profile.verified && <VerifiedBadge size="md" />}
-                </div>
-                <div className="flex flex-wrap items-center gap-2">
-                  {targetRole && (
-                    <RoleBadge role={targetRole.role} color={targetRole.color} size="sm" />
-                  )}
-                  <OnlineDot userId={profile.id} size="sm" showLabel />
-                </div>
-                <UserBadges userId={profile.id} size="sm" max={6} />
-
-                {profileCommitted && (
-                  <div className="inline-flex items-center gap-2 rounded-full border border-emerald-300/60 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-800 dark:border-emerald-400/25 dark:bg-emerald-400/10 dark:text-emerald-200">
-                    <Gem className="h-3.5 w-3.5" />
-                    Em Proposito Firmado
+          <div className="relative z-10 grid gap-5 p-4 pt-0 sm:p-6 sm:pt-0 xl:grid-cols-[minmax(300px,0.8fr)_minmax(0,1.1fr)_minmax(320px,0.7fr)] xl:items-start">
+            <div className="relative -mt-20 overflow-visible rounded-[2rem] p-0 sm:-mt-24 lg:-mt-28">
+              <div className="relative overflow-visible rounded-[1.65rem] p-0">
+                <div className="relative z-10 flex min-h-[170px] items-center justify-center overflow-visible py-0 sm:min-h-[220px] lg:min-h-[245px]">
+                  <div className="sm:hidden">
+                    <DecoratedAvatar
+                      photoUrl={profile.photo_url}
+                      fallback={profile.full_name.charAt(0)}
+                      alt={profile.full_name}
+                      size={122}
+                      frameId={profile.equipped_frame_id ?? null}
+                      auraId={profile.equipped_aura_id ?? null}
+                      isCommitted={profileCommitted}
+                    />
                   </div>
-                )}
-
-                {/* Chips de informações principais */}
-                <div className="flex flex-wrap gap-2 pt-1">
-                  {profile.city && (
-                    <Chip icon={<MapPin className="h-3.5 w-3.5" />} tone="rose">
-                      {profile.city}, {profile.state}
-                    </Chip>
-                  )}
-                  {profile.height_cm && (
-                    <Chip icon={<Ruler className="h-3.5 w-3.5" />} tone="sky">
-                      {profile.height_cm} cm
-                    </Chip>
-                  )}
-                  {profile.church && (
-                    <Chip icon={<Church className="h-3.5 w-3.5" />} tone="violet">
-                      {profile.church}
-                    </Chip>
-                  )}
-                  <Chip icon={<Sparkles className="h-3.5 w-3.5" />} tone="amber">
-                    {profile.marital === "solteiro" ? "Solteiro(a)" : "Divorciado(a)"}
-                  </Chip>
-                  {profile.years_baptized ? (
-                    <Chip icon={<CalendarHeart className="h-3.5 w-3.5" />} tone="emerald">
-                      {profile.years_baptized} anos de batismo
-                    </Chip>
-                  ) : null}
+                  <div className="hidden sm:block lg:hidden">
+                    <DecoratedAvatar
+                      photoUrl={profile.photo_url}
+                      fallback={profile.full_name.charAt(0)}
+                      alt={profile.full_name}
+                      size={154}
+                      frameId={profile.equipped_frame_id ?? null}
+                      auraId={profile.equipped_aura_id ?? null}
+                      isCommitted={profileCommitted}
+                    />
+                  </div>
+                  <div className="hidden lg:block">
+                    <DecoratedAvatar
+                      photoUrl={profile.photo_url}
+                      fallback={profile.full_name.charAt(0)}
+                      alt={profile.full_name}
+                      size={162}
+                      frameId={profile.equipped_frame_id ?? null}
+                      auraId={profile.equipped_aura_id ?? null}
+                      isCommitted={profileCommitted}
+                    />
+                  </div>
                 </div>
-
-                {profile.bio && (
-                  <p className="line-clamp-4 rounded-2xl border border-border/60 bg-background/55 p-4 text-sm leading-relaxed text-muted-foreground backdrop-blur dark:bg-background/25">
-                    {profile.bio}
-                  </p>
-                )}
               </div>
             </div>
-          </div>
 
-          <div className="space-y-4">
-            {!hasHiddenPrimaryActions && (
-              <div className={actionCardClass}>
-                <div className="mb-4">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                    Acoes principais
-                  </p>
-                  <h2 className="mt-1 text-xl font-semibold text-foreground">
-                    Conectar com cuidado
-                  </h2>
-                </div>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  {profileCommitted ? (
-                    <Button size="lg" className="w-full sm:col-span-2" disabled variant="outline">
-                      <Gem className="mr-2 h-4 w-4" />
-                      Usuario em Proposito
-                    </Button>
-                  ) : matchId ? (
-                    <Button size="lg" className="w-full shadow-glow sm:col-span-2" asChild>
-                      <Link to="/conversas/$matchId" params={{ matchId }}>
-                        <MessageCircle className="mr-2 h-4 w-4" /> Conversar
-                      </Link>
-                    </Button>
-                  ) : interestSent ? (
-                    <Button size="lg" variant="outline" className="w-full sm:col-span-2" disabled>
-                      <Check className="mr-2 h-4 w-4" /> Interesse enviado
-                    </Button>
-                  ) : (
-                    <Button
-                      size="lg"
-                      className="w-full shadow-glow sm:col-span-2"
-                      disabled={busy}
-                      onClick={demonstrarInteresse}
-                    >
-                      <Heart className="mr-2 h-4 w-4" /> Demonstrar interesse
-                    </Button>
+            <div className="space-y-4">
+              {/* Identidade */}
+              <div
+                className={
+                  hasPremiumBackground
+                    ? "rounded-[2rem] border border-white/60 bg-card/82 p-5 text-foreground shadow-[0_20px_70px_rgba(31,41,55,0.14)] backdrop-blur-xl sm:p-7 dark:border-white/10 dark:bg-card/70 dark:shadow-[0_24px_80px_rgba(0,0,0,0.42)]"
+                    : "rounded-[2rem] border border-border/70 bg-card/85 p-5 shadow-[0_20px_70px_rgba(31,41,55,0.08)] backdrop-blur sm:p-7 dark:bg-card/80"
+                }
+              >
+                <div className="space-y-4">
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                    <h1 className="text-3xl font-bold leading-tight text-foreground sm:text-4xl">
+                      {profile.full_name}, {profile.age}
+                    </h1>
+                    {profile.verified && <VerifiedBadge size="md" />}
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    {targetRole && (
+                      <RoleBadge role={targetRole.role} color={targetRole.color} size="sm" />
+                    )}
+                    <OnlineDot userId={profile.id} size="sm" showLabel />
+                  </div>
+                  <UserBadges userId={profile.id} size="sm" max={6} />
+
+                  {profileCommitted && (
+                    <div className="inline-flex items-center gap-2 rounded-full border border-emerald-300/60 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-800 dark:border-emerald-400/25 dark:bg-emerald-400/10 dark:text-emerald-200">
+                      <Gem className="h-3.5 w-3.5" />
+                      Em Proposito Firmado
+                    </div>
                   )}
 
-                  {user &&
-                    user.id !== profile.id &&
-                    !profileCommitted &&
-                    mySex &&
-                    profile.sex !== mySex && (
-                      <div className="sm:col-span-2">
-                        <SendAnonymousButton receiverId={profile.id} />
-                      </div>
+                  {/* Chips de informações principais */}
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    {profile.city && (
+                      <Chip icon={<MapPin className="h-3.5 w-3.5" />} tone="rose">
+                        {profile.city}, {profile.state}
+                      </Chip>
+                    )}
+                    {profile.height_cm && (
+                      <Chip icon={<Ruler className="h-3.5 w-3.5" />} tone="sky">
+                        {profile.height_cm} cm
+                      </Chip>
+                    )}
+                    {profile.church && (
+                      <Chip icon={<Church className="h-3.5 w-3.5" />} tone="violet">
+                        {profile.church}
+                      </Chip>
+                    )}
+                    <Chip icon={<Sparkles className="h-3.5 w-3.5" />} tone="amber">
+                      {profile.marital === "solteiro" ? "Solteiro(a)" : "Divorciado(a)"}
+                    </Chip>
+                    {profile.years_baptized ? (
+                      <Chip icon={<CalendarHeart className="h-3.5 w-3.5" />} tone="emerald">
+                        {profile.years_baptized} anos de batismo
+                      </Chip>
+                    ) : null}
+                  </div>
+
+                  {profile.bio && (
+                    <p className="line-clamp-4 rounded-2xl border border-border/60 bg-background/55 p-4 text-sm leading-relaxed text-muted-foreground backdrop-blur dark:bg-background/25">
+                      {profile.bio}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              {!hasHiddenPrimaryActions && (
+                <div className={actionCardClass}>
+                  <div className="mb-4">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                      Acoes principais
+                    </p>
+                    <h2 className="mt-1 text-xl font-semibold text-foreground">
+                      Conectar com cuidado
+                    </h2>
+                  </div>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {profileCommitted ? (
+                      <Button size="lg" className="w-full sm:col-span-2" disabled variant="outline">
+                        <Gem className="mr-2 h-4 w-4" />
+                        Usuario em Proposito
+                      </Button>
+                    ) : matchId ? (
+                      <Button size="lg" className="w-full shadow-glow sm:col-span-2" asChild>
+                        <Link to="/conversas/$matchId" params={{ matchId }}>
+                          <MessageCircle className="mr-2 h-4 w-4" /> Conversar
+                        </Link>
+                      </Button>
+                    ) : interestSent ? (
+                      <Button size="lg" variant="outline" className="w-full sm:col-span-2" disabled>
+                        <Check className="mr-2 h-4 w-4" /> Interesse enviado
+                      </Button>
+                    ) : (
+                      <Button
+                        size="lg"
+                        className="w-full shadow-glow sm:col-span-2"
+                        disabled={busy}
+                        onClick={demonstrarInteresse}
+                      >
+                        <Heart className="mr-2 h-4 w-4" /> Demonstrar interesse
+                      </Button>
                     )}
 
-                  {user && user.id !== profile.id && !profileCommitted && (
+                    {user &&
+                      user.id !== profile.id &&
+                      !profileCommitted &&
+                      mySex &&
+                      profile.sex !== mySex && (
+                        <div className="sm:col-span-2">
+                          <SendAnonymousButton receiverId={profile.id} />
+                        </div>
+                      )}
+
+                    {user && user.id !== profile.id && !profileCommitted && (
+                      <Button
+                        variant="outline"
+                        className="w-full border-pink-400/50 bg-gradient-to-r from-pink-500/10 via-fuchsia-500/10 to-purple-500/10 hover:from-pink-500/20 hover:to-purple-500/20"
+                        asChild
+                      >
+                        <Link to="/presentes" search={{ to: profile.id } as never}>
+                          <Gift className="mr-2 h-4 w-4" />
+                          Enviar Presente
+                        </Link>
+                      </Button>
+                    )}
+
                     <Button
                       variant="outline"
-                      className="w-full border-pink-400/50 bg-gradient-to-r from-pink-500/10 via-fuchsia-500/10 to-purple-500/10 hover:from-pink-500/20 hover:to-purple-500/20"
-                      asChild
+                      className="w-full"
+                      onClick={() => toast.success("Oracao registrada com carinho")}
                     >
-                      <Link to="/presentes" search={{ to: profile.id } as never}>
-                        <Gift className="mr-2 h-4 w-4" />
-                        Enviar Presente
-                      </Link>
+                      <HandHeart className="mr-2 h-4 w-4" /> Orar por ele(a)
                     </Button>
-                  )}
+                  </div>
 
-                  <Button
-                    variant="outline"
-                    className="w-full"
-                    onClick={() => toast.success("Oracao registrada com carinho")}
-                  >
-                    <HandHeart className="mr-2 h-4 w-4" /> Orar por ele(a)
-                  </Button>
+                  <div className="mt-4">
+                    <GiftHighlights userId={profile.id} />
+                  </div>
                 </div>
+              )}
 
-                <div className="mt-4">
-                  <GiftHighlights userId={profile.id} />
+              {hasHiddenPrimaryActions && (
+                <div className={actionCardClass}>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    Acoes indisponiveis
+                  </p>
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                    Algumas acoes ficam ocultas conforme as regras de seguranca e elegibilidade do
+                    Christian Connect.
+                  </p>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
+          </div>
+        </section>
 
-            {hasHiddenPrimaryActions && (
-              <div className={actionCardClass}>
-                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                  Acoes indisponiveis
-                </p>
-                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                  Algumas acoes ficam ocultas conforme as regras de seguranca e elegibilidade do
-                  Christian Connect.
-                </p>
-              </div>
-            )}
+        <section className={`mt-6 ${surfaceClass}`}>
+          <div className="mb-4">
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              Galeria
+            </p>
+            <h2 className="mt-1 text-2xl font-semibold text-foreground">Fotos do perfil</h2>
+          </div>
+          <div className="overflow-hidden rounded-[1.5rem] border border-border/60 bg-muted/45 p-2 dark:bg-background/25">
+            <div className="overflow-hidden rounded-[1.15rem]">
+              <PhotoCarousel
+                photos={[...(profile.photo_url ? [profile.photo_url] : []), ...extraPhotos]}
+                alt={profile.full_name}
+                eager
+                className="aspect-[4/3] bg-muted sm:aspect-[16/10]"
+                imgClassName="object-contain"
+                fallback={
+                  <div className="flex h-full w-full items-center justify-center bg-gradient-love">
+                    <span className="text-4xl text-white">{profile.full_name.charAt(0)}</span>
+                  </div>
+                }
+              />
+            </div>
           </div>
         </section>
         {profileCommitted && (
