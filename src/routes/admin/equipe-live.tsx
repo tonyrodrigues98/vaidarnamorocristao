@@ -63,6 +63,7 @@ const EMPTY_FORM = {
   tiktok_url: "",
   photo_url: "",
   storage_path: null as string | null,
+  display_url: "",
   sort_order: 0,
   is_active: true,
 };
@@ -200,10 +201,12 @@ function LiveTeamAdminPage() {
 
       if (error) throw error;
 
+      const objectUrl = URL.createObjectURL(normalized);
       setForm((current) => ({
         ...current,
         photo_url: storagePath,
         storage_path: storagePath,
+        display_url: objectUrl,
       }));
       toast.success("Foto enviada");
     } catch (e) {
@@ -267,6 +270,7 @@ function LiveTeamAdminPage() {
       tiktok_url: item.tiktok_url ?? "",
       photo_url: item.photo_url,
       storage_path: item.storage_path,
+      display_url: item.photo_url,
       sort_order: item.sort_order,
       is_active: item.is_active,
     });
@@ -560,7 +564,7 @@ function LiveTeamDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-h-[90dvh] max-w-2xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
@@ -647,10 +651,10 @@ function LiveTeamDialog({
                 }}
               />
             </label>
-            {form.photo_url && (
+            {(form.display_url || form.photo_url) && (
               <div className="relative aspect-[4/3] overflow-hidden rounded-2xl border bg-muted">
                 <img
-                  src={form.photo_url}
+                  src={form.display_url || form.photo_url}
                   alt="Preview do card"
                   className="h-full w-full object-cover"
                 />
