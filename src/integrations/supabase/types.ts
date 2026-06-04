@@ -225,37 +225,46 @@ export type Database = {
           active: boolean
           created_at: string
           css_value: string | null
+          description: string | null
           id: string
           image_url: string | null
           name: string
           price_coins: number
+          rarity: string
           slug: string
           sort_order: number
           type: Database["public"]["Enums"]["decoration_type"]
+          updated_at: string
         }
         Insert: {
           active?: boolean
           created_at?: string
           css_value?: string | null
+          description?: string | null
           id?: string
           image_url?: string | null
           name: string
           price_coins?: number
+          rarity?: string
           slug: string
           sort_order?: number
           type: Database["public"]["Enums"]["decoration_type"]
+          updated_at?: string
         }
         Update: {
           active?: boolean
           created_at?: string
           css_value?: string | null
+          description?: string | null
           id?: string
           image_url?: string | null
           name?: string
           price_coins?: number
+          rarity?: string
           slug?: string
           sort_order?: number
           type?: Database["public"]["Enums"]["decoration_type"]
+          updated_at?: string
         }
         Relationships: []
       }
