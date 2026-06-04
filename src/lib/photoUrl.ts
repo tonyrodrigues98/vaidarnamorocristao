@@ -48,8 +48,12 @@ function looksLikeRawProfilePath(value: string) {
   return value.includes("/");
 }
 
-function isSignedProfileUrl(value: string | null) {
-  return Boolean(value?.includes(`/storage/v1/object/sign/${BUCKET}/`));
+function isProfileStorageUrl(value: string | null) {
+  return Boolean(value && PROFILE_MARKERS.some((marker) => value.includes(marker)));
+}
+
+function isPublicProfileUrl(value: string | null) {
+  return Boolean(value?.includes(`/storage/v1/object/public/${BUCKET}/`));
 }
 
 function publicUrlForPath(path: string) {
@@ -72,6 +76,12 @@ export function extractProfilePhotoPath(url: string | null | undefined): string 
   if (clean.startsWith(`${BUCKET}/`)) {
     return (
       safeDecode(stripQueryAndHash(clean.slice(BUCKET.length + 1))).replace(/^\/+/, "") || null
+    );
+  }
+
+  if (clean.startsWith(`/${BUCKET}/`)) {
+    return (
+      safeDecode(stripQueryAndHash(clean.slice(BUCKET.length + 2))).replace(/^\/+/, "") || null
     );
   }
 
@@ -137,7 +147,9 @@ export function useSignedPhotoUrlResult(input: string | null | undefined): Signe
   const path = useMemo(() => extractProfilePhotoPath(trimmedInput), [trimmedInput]);
   const publicFallback = useMemo(() => {
     if (!path) return null;
-    if (trimmedInput && !isSignedProfileUrl(trimmedInput)) return trimmedInput;
+    if (trimmedInput && isProfileStorageUrl(trimmedInput) && isPublicProfileUrl(trimmedInput)) {
+      return trimmedInput;
+    }
     return publicUrlForPath(path);
   }, [path, trimmedInput]);
   const passthrough = !trimmedInput || path ? null : trimmedInput;

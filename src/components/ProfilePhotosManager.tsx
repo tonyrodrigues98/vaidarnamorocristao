@@ -3,6 +3,8 @@ import { toast } from "sonner";
 import { Plus, Trash2, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { PhotoImg } from "@/components/PhotoImg";
+import { normalizeImageFile } from "@/lib/imageNormalize";
+import { extractProfilePhotoPath } from "@/lib/photoUrl";
 
 interface Photo {
   id: string;
@@ -41,14 +43,26 @@ export function ProfilePhotosManager({ userId }: { userId: string }) {
       toast.error(`Máximo de ${MAX} fotos adicionais`);
       return;
     }
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("Foto até 5MB");
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("Foto muito grande (máx. 10MB).");
       return;
     }
     setUploading(true);
+    const t = toast.loading("Preparando foto...");
+    let normalized = file;
+    try {
+      normalized = await normalizeImageFile(file);
+    } finally {
+      toast.dismiss(t);
+    }
+    if (normalized.size > 8 * 1024 * 1024) {
+      setUploading(false);
+      toast.error("Foto até 8MB após conversão. Tente uma imagem menor.");
+      return;
+    }
     // Verificação por IA antes de subir
     const { verifyProfilePhoto } = await import("@/lib/verifyPhoto");
-    const verdict = await verifyProfilePhoto(file, "extra");
+    const verdict = await verifyProfilePhoto(normalized, "extra");
     if (!verdict.ok) {
       setUploading(false);
       toast.error(verdict.reason);
@@ -68,11 +82,11 @@ export function ProfilePhotosManager({ userId }: { userId: string }) {
       aiConfidence = verdict.confidence;
       aiReason = verdict.reason;
     }
-    const ext = file.name.split(".").pop() ?? "jpg";
+    const ext = normalized.name.split(".").pop() ?? "jpg";
     const path = `${userId}/extra-${Date.now()}.${ext}`;
     const { error: upErr } = await supabase.storage
       .from("profile-photos")
-      .upload(path, file, { upsert: false, contentType: file.type });
+      .upload(path, normalized, { upsert: false, contentType: normalized.type || "image/jpeg" });
     if (upErr) {
       setUploading(false);
       toast.error("Falha ao enviar foto");
@@ -139,10 +153,8 @@ export function ProfilePhotosManager({ userId }: { userId: string }) {
       return;
     }
     // try to remove storage object (best-effort)
-    const marker = "/profile-photos/";
-    const idx = photo.url.indexOf(marker);
-    if (idx > -1) {
-      const path = photo.url.substring(idx + marker.length).split("?")[0];
+    const path = extractProfilePhotoPath(photo.url);
+    if (path) {
       void supabase.storage.from("profile-photos").remove([path]);
     }
     setPhotos((prev) => prev.filter((p) => p.id !== photo.id));
