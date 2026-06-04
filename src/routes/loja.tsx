@@ -20,9 +20,11 @@ import { getMyCoins } from "@/lib/coins";
 import {
   fetchDecorationCatalog,
   fetchMyOwnedIds,
+  fetchMyEquippedDecorations,
   purchaseDecoration,
   equipDecoration,
   unequipDecoration,
+  decorationErrorMessage,
   type Decoration,
   type DecorationType,
 } from "@/lib/decorations";
@@ -43,8 +45,7 @@ export const Route = createFileRoute("/loja")({
       { title: "Loja — VaiDarNamoro" },
       {
         name: "description",
-        content:
-          "Use suas moedas para desbloquear molduras, auras e personalizações exclusivas do seu perfil.",
+        content: "Use suas moedas para desbloquear molduras, auras e personalizações exclusivas do seu perfil.",
       },
       { name: "robots", content: "noindex, nofollow" },
     ],
@@ -122,11 +123,7 @@ function LojaPage() {
         const [bg, ownedBg, bgProf] = await Promise.all([
           fetchProfileBackgroundCatalog(),
           fetchMyOwnedBackgroundIds(),
-          supabase
-            .from("profiles")
-            .select("equipped_background_id")
-            .eq("id", user.id)
-            .maybeSingle(),
+          supabase.from("profiles").select("equipped_background_id").eq("id", user.id).maybeSingle(),
         ]);
         if (!alive) return;
         setBackgrounds(bg);
@@ -192,25 +189,42 @@ function LojaPage() {
   };
 
   const handleEquip = async (d: Decoration) => {
+    if (!user) return;
+
     setBusyId(d.id);
+
     try {
-      await equipDecoration(d.id);
-      setEquipped((e) => ({ ...e, [d.type]: d.id }));
+      const result = await equipDecoration(d.id);
+
+      if (result.type !== d.type) {
+        throw new Error(`invalid_decoration_type:${result.type}`);
+      }
+
+      const nextEquipped = await fetchMyEquippedDecorations(user.id);
+
+      setEquipped(nextEquipped);
+
       toast.success(`${d.name} equipada`);
-    } catch {
-      toast.error("Erro ao equipar");
+    } catch (error) {
+      toast.error(decorationErrorMessage(error, "Erro ao equipar"));
     } finally {
       setBusyId(null);
     }
   };
 
   const handleUnequip = async (type: DecorationType) => {
+    if (!user) return;
+
     setBusyId(`unequip-${type}`);
+
     try {
       await unequipDecoration(type);
-      setEquipped((e) => ({ ...e, [type]: null }));
-    } catch {
-      toast.error("Erro ao remover");
+
+      const nextEquipped = await fetchMyEquippedDecorations(user.id);
+
+      setEquipped(nextEquipped);
+    } catch (error) {
+      toast.error(decorationErrorMessage(error, "Erro ao remover"));
     } finally {
       setBusyId(null);
     }
@@ -244,10 +258,7 @@ function LojaPage() {
   if (!authLoading && !user) return <Navigate to="/auth/login" />;
 
   const activeCategory = CATEGORIES.find((c) => c.key === activeTab)!;
-  const items =
-    activeCategory.type && activeCategory.type !== "background"
-      ? grouped[activeCategory.type]
-      : [];
+  const items = activeCategory.type && activeCategory.type !== "background" ? grouped[activeCategory.type] : [];
 
   return (
     <div className="min-h-screen bg-background">
@@ -280,12 +291,10 @@ function LojaPage() {
               <div className="inline-flex items-center gap-2 rounded-full border border-[var(--rose-soft)]/40 bg-background/70 px-3 py-1 text-xs font-medium text-[var(--rose)] backdrop-blur">
                 <Gem className="h-3.5 w-3.5" /> Loja da Plataforma
               </div>
-              <h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
-                Personalize seu perfil
-              </h1>
+              <h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">Personalize seu perfil</h1>
               <p className="mt-2 text-sm text-muted-foreground sm:text-base">
-                Use suas moedas para desbloquear molduras, auras e itens exclusivos.
-                Toda compra fica salva permanentemente na sua conta.
+                Use suas moedas para desbloquear molduras, auras e itens exclusivos. Toda compra fica salva
+                permanentemente na sua conta.
               </p>
             </div>
 
@@ -295,14 +304,10 @@ function LojaPage() {
                 <CoinIcon className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
-                  Seu saldo
-                </p>
+                <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Seu saldo</p>
                 <p className="text-lg font-semibold leading-none">
                   {balance}
-                  <span className="ml-1 text-xs font-normal text-muted-foreground">
-                    moedas
-                  </span>
+                  <span className="ml-1 text-xs font-normal text-muted-foreground">moedas</span>
                 </p>
               </div>
             </div>
@@ -342,19 +347,14 @@ function LojaPage() {
         {loading ? (
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
             {Array.from({ length: 8 }).map((_, i) => (
-              <div
-                key={i}
-                className="h-64 animate-pulse rounded-2xl border bg-card/50"
-              />
+              <div key={i} className="h-64 animate-pulse rounded-2xl border bg-card/50" />
             ))}
           </div>
         ) : activeTab === "soon" ? (
           <ComingSoon />
         ) : activeTab === "background" ? (
           backgrounds.length === 0 ? (
-            <p className="py-16 text-center text-sm text-muted-foreground">
-              Em breve novos fundos de perfil.
-            </p>
+            <p className="py-16 text-center text-sm text-muted-foreground">Em breve novos fundos de perfil.</p>
           ) : (
             <>
               {equippedBackground && (
@@ -384,9 +384,7 @@ function LojaPage() {
                     <article
                       key={background.id}
                       className={`group overflow-hidden rounded-2xl border bg-card transition hover:-translate-y-0.5 hover:shadow-soft ${
-                        isEquipped
-                          ? "border-[var(--rose)] ring-1 ring-[var(--rose)]/30"
-                          : rarity.border
+                        isEquipped ? "border-[var(--rose)] ring-1 ring-[var(--rose)]/30" : rarity.border
                       }`}
                     >
                       <div className="relative aspect-[16/10] overflow-hidden bg-gradient-to-br from-muted to-card">
@@ -481,9 +479,7 @@ function LojaPage() {
             </>
           )
         ) : items.length === 0 ? (
-          <p className="py-16 text-center text-sm text-muted-foreground">
-            Em breve novos itens nessa categoria.
-          </p>
+          <p className="py-16 text-center text-sm text-muted-foreground">Em breve novos itens nessa categoria.</p>
         ) : (
           <>
             {activeCategory.type && activeCategory.type !== "background" && equipped[activeCategory.type] && (
@@ -546,10 +542,7 @@ function LojaPage() {
                       />
                     </div>
 
-                    <h3
-                      className="mt-3 line-clamp-1 text-center text-sm font-semibold"
-                      title={d.name}
-                    >
+                    <h3 className="mt-3 line-clamp-1 text-center text-sm font-semibold" title={d.name}>
                       {d.name}
                     </h3>
                     <p className="text-center text-[11px] uppercase tracking-wide text-muted-foreground">
@@ -565,24 +558,11 @@ function LojaPage() {
                           disabled={busyId === `unequip-${d.type}`}
                           onClick={() => handleUnequip(d.type)}
                         >
-                          {busyId === `unequip-${d.type}` ? (
-                            <Loader2 className="h-3 w-3 animate-spin" />
-                          ) : (
-                            "Equipado"
-                          )}
+                          {busyId === `unequip-${d.type}` ? <Loader2 className="h-3 w-3 animate-spin" /> : "Equipado"}
                         </Button>
                       ) : isOwned ? (
-                        <Button
-                          size="sm"
-                          className="w-full text-xs"
-                          disabled={busy}
-                          onClick={() => handleEquip(d)}
-                        >
-                          {busy ? (
-                            <Loader2 className="h-3 w-3 animate-spin" />
-                          ) : (
-                            "Equipar"
-                          )}
+                        <Button size="sm" className="w-full text-xs" disabled={busy} onClick={() => handleEquip(d)}>
+                          {busy ? <Loader2 className="h-3 w-3 animate-spin" /> : "Equipar"}
                         </Button>
                       ) : (
                         <Button
@@ -625,9 +605,8 @@ function LojaPage() {
             <DialogDescription>
               {confirm && (
                 <>
-                  Deseja utilizar{" "}
-                  <strong className="text-foreground">{confirm.price_coins}</strong>{" "}
-                  moedas para desbloquear este item?
+                  Deseja utilizar <strong className="text-foreground">{confirm.price_coins}</strong> moedas para
+                  desbloquear este item?
                 </>
               )}
             </DialogDescription>
@@ -665,22 +644,11 @@ function LojaPage() {
           </div>
 
           <DialogFooter className="gap-2 sm:gap-2">
-            <Button
-              variant="ghost"
-              onClick={() => setConfirm(null)}
-              disabled={busyId === confirm?.id}
-            >
+            <Button variant="ghost" onClick={() => setConfirm(null)} disabled={busyId === confirm?.id}>
               Cancelar
             </Button>
-            <Button
-              onClick={() => confirm && handleBuy(confirm)}
-              disabled={busyId === confirm?.id}
-            >
-              {busyId === confirm?.id ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                "Comprar item"
-              )}
+            <Button onClick={() => confirm && handleBuy(confirm)} disabled={busyId === confirm?.id}>
+              {busyId === confirm?.id ? <Loader2 className="h-4 w-4 animate-spin" /> : "Comprar item"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -696,9 +664,8 @@ function LojaPage() {
             <DialogDescription>
               {confirmBackground && (
                 <>
-                  Deseja utilizar{" "}
-                  <strong className="text-foreground">{confirmBackground.price}</strong>{" "}
-                  moedas para desbloquear este fundo?
+                  Deseja utilizar <strong className="text-foreground">{confirmBackground.price}</strong> moedas para
+                  desbloquear este fundo?
                 </>
               )}
             </DialogDescription>
@@ -749,11 +716,7 @@ function LojaPage() {
               onClick={() => confirmBackground && handleBuyBackground(confirmBackground)}
               disabled={busyId === confirmBackground?.id}
             >
-              {busyId === confirmBackground?.id ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                "Comprar fundo"
-              )}
+              {busyId === confirmBackground?.id ? <Loader2 className="h-4 w-4 animate-spin" /> : "Comprar fundo"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -774,10 +737,7 @@ function ComingSoon() {
   return (
     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
       {items.map((i) => (
-        <div
-          key={i.name}
-          className="relative overflow-hidden rounded-2xl border bg-card/50 p-5"
-        >
+        <div key={i.name} className="relative overflow-hidden rounded-2xl border bg-card/50 p-5">
           <div
             aria-hidden
             className="pointer-events-none absolute -right-6 -top-6 h-24 w-24 rounded-full opacity-40 blur-2xl"

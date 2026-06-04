@@ -11,8 +11,10 @@ import { getMyCoins } from "@/lib/coins";
 import {
   fetchDecorationCatalog,
   fetchMyOwnedIds,
+  fetchMyEquippedDecorations,
   equipDecoration,
   unequipDecoration,
+  decorationErrorMessage,
   type Decoration,
   type DecorationType,
 } from "@/lib/decorations";
@@ -100,11 +102,7 @@ export function CustomizacaoTab({ photoUrl }: { photoUrl: string | null }) {
         const [bg, ownedBg, bgProf] = await Promise.all([
           fetchProfileBackgroundCatalog(),
           fetchMyOwnedBackgroundIds(),
-          supabase
-            .from("profiles")
-            .select("equipped_background_id")
-            .eq("id", user.id)
-            .maybeSingle(),
+          supabase.from("profiles").select("equipped_background_id").eq("id", user.id).maybeSingle(),
         ]);
         if (!alive) return;
         setBackgrounds(bg);
@@ -136,32 +134,48 @@ export function CustomizacaoTab({ photoUrl }: { photoUrl: string | null }) {
   );
 
   const activePreviewBackground = useMemo(
-    () =>
-      backgrounds.find((background) => background.id === (previewBackground ?? equippedBackground)) ?? null,
+    () => backgrounds.find((background) => background.id === (previewBackground ?? equippedBackground)) ?? null,
     [backgrounds, equippedBackground, previewBackground],
   );
 
   const handleEquip = async (d: Decoration) => {
+    if (!user) return;
+
     setBusyId(d.id);
+
     try {
-      await equipDecoration(d.id);
-      setEquipped((e) => ({ ...e, [d.type]: d.id }));
+      const result = await equipDecoration(d.id);
+
+      if (result.type !== d.type) {
+        throw new Error(`invalid_decoration_type:${result.type}`);
+      }
+
+      const nextEquipped = await fetchMyEquippedDecorations(user.id);
+
+      setEquipped(nextEquipped);
       setPreview((p) => ({ ...p, [d.type]: null }));
+
       toast.success(`${d.name} equipada`);
-    } catch {
-      toast.error("Erro ao equipar");
+    } catch (error) {
+      toast.error(decorationErrorMessage(error, "Erro ao equipar"));
     } finally {
       setBusyId(null);
     }
   };
 
   const handleUnequip = async (type: DecorationType) => {
+    if (!user) return;
+
     setBusyId(`unequip-${type}`);
+
     try {
       await unequipDecoration(type);
-      setEquipped((e) => ({ ...e, [type]: null }));
-    } catch {
-      toast.error("Erro ao remover");
+
+      const nextEquipped = await fetchMyEquippedDecorations(user.id);
+
+      setEquipped(nextEquipped);
+    } catch (error) {
+      toast.error(decorationErrorMessage(error, "Erro ao remover"));
     } finally {
       setBusyId(null);
     }
@@ -197,11 +211,7 @@ export function CustomizacaoTab({ photoUrl }: { photoUrl: string | null }) {
   const renderGrid = (type: DecorationType) => {
     const items = grouped[type];
     if (!items || items.length === 0) {
-      return (
-        <div className="py-10 text-center text-sm text-muted-foreground">
-          Nenhum item disponível no momento.
-        </div>
-      );
+      return <div className="py-10 text-center text-sm text-muted-foreground">Nenhum item disponível no momento.</div>;
     }
     return (
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
@@ -253,10 +263,7 @@ export function CustomizacaoTab({ photoUrl }: { photoUrl: string | null }) {
                   </div>
                 )}
               </div>
-              <p
-                className="mt-2 line-clamp-2 min-h-[2.25rem] text-xs font-semibold leading-tight"
-                title={d.name}
-              >
+              <p className="mt-2 line-clamp-2 min-h-[2.25rem] text-xs font-semibold leading-tight" title={d.name}>
                 {d.name}
               </p>
               <div className="mt-2 w-full" onClick={(e) => e.stopPropagation()}>
@@ -268,28 +275,14 @@ export function CustomizacaoTab({ photoUrl }: { photoUrl: string | null }) {
                     disabled={busyId === `unequip-${type}`}
                     onClick={() => handleUnequip(type)}
                   >
-                    {busyId === `unequip-${type}` ? (
-                      <Loader2 className="h-3 w-3 animate-spin" />
-                    ) : (
-                      "Remover"
-                    )}
+                    {busyId === `unequip-${type}` ? <Loader2 className="h-3 w-3 animate-spin" /> : "Remover"}
                   </Button>
                 ) : isOwned ? (
-                  <Button
-                    size="sm"
-                    className="w-full text-xs"
-                    disabled={busy}
-                    onClick={() => handleEquip(d)}
-                  >
+                  <Button size="sm" className="w-full text-xs" disabled={busy} onClick={() => handleEquip(d)}>
                     {busy ? <Loader2 className="h-3 w-3 animate-spin" /> : "Equipar"}
                   </Button>
                 ) : (
-                  <Button
-                    asChild
-                    variant="secondary"
-                    size="sm"
-                    className="w-full text-xs"
-                  >
+                  <Button asChild variant="secondary" size="sm" className="w-full text-xs">
                     <Link to="/loja">
                       <span className="inline-flex items-center gap-1">
                         <CoinIcon className="h-3 w-3" /> {d.price_coins}
@@ -384,11 +377,7 @@ export function CustomizacaoTab({ photoUrl }: { photoUrl: string | null }) {
                       disabled={busyId === "unequip-background"}
                       onClick={handleUnequipBackground}
                     >
-                      {busyId === "unequip-background" ? (
-                        <Loader2 className="h-3 w-3 animate-spin" />
-                      ) : (
-                        "Remover"
-                      )}
+                      {busyId === "unequip-background" ? <Loader2 className="h-3 w-3 animate-spin" /> : "Remover"}
                     </Button>
                   ) : (
                     <Button
@@ -436,9 +425,7 @@ export function CustomizacaoTab({ photoUrl }: { photoUrl: string | null }) {
             <div className="inline-flex items-center gap-2 rounded-full bg-[var(--rose-soft)]/40 px-3 py-1 text-[11px] font-medium uppercase tracking-wide text-[var(--rose)]">
               <Sparkles className="h-3 w-3" /> Cosméticos
             </div>
-            <h2 className="mt-3 text-2xl font-semibold tracking-tight sm:text-3xl">
-              Customização
-            </h2>
+            <h2 className="mt-3 text-2xl font-semibold tracking-tight sm:text-3xl">Customização</h2>
             <p className="mt-1 max-w-md text-sm text-muted-foreground">
               Personalize a aparência do seu perfil e destaque sua identidade na plataforma.
             </p>
@@ -452,9 +439,7 @@ export function CustomizacaoTab({ photoUrl }: { photoUrl: string | null }) {
       {/* Preview principal */}
       <div className="glass rounded-3xl p-6 shadow-soft sm:p-8">
         <div className="flex flex-col items-center gap-4">
-          <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-            Pré-visualização
-          </p>
+          <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Pré-visualização</p>
           <div className="relative flex h-56 w-full max-w-md items-center justify-center overflow-hidden rounded-3xl border bg-background transition-all duration-300">
             {activePreviewBackground?.image_url && (
               <img
@@ -547,9 +532,7 @@ export function CustomizacaoTab({ photoUrl }: { photoUrl: string | null }) {
         <div className="mt-5 flex items-center justify-between rounded-2xl border border-dashed bg-background/40 p-4">
           <div className="pr-3">
             <p className="text-sm font-medium">Quer mais cosméticos?</p>
-            <p className="text-xs text-muted-foreground">
-              Descubra molduras, auras e fundos exclusivos na loja.
-            </p>
+            <p className="text-xs text-muted-foreground">Descubra molduras, auras e fundos exclusivos na loja.</p>
           </div>
           <Button asChild size="sm" variant="outline">
             <Link to="/loja">

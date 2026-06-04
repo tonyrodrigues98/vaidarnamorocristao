@@ -40,10 +40,7 @@ export type Decoration = {
   updated_at: string | null;
 };
 
-export const DECORATION_RARITY_STYLE: Record<
-  DecorationRarity,
-  { label: string; chip: string; border: string }
-> = {
+export const DECORATION_RARITY_STYLE: Record<DecorationRarity, { label: string; chip: string; border: string }> = {
   common: {
     label: "Comum",
     chip: "bg-slate-500/10 text-slate-600 dark:text-slate-300",
@@ -237,19 +234,18 @@ export async function reorderDecorations(updates: Array<Pick<Decoration, "id" | 
 }
 
 export async function getDecorationUsage(decorationId: string) {
-  const [{ count: ownedCount, error: ownedError }, { count: equippedCount, error: equippedError }] =
-    await Promise.all([
-      supabase
-        .from("user_decorations" as never)
-        .select("id", { count: "exact", head: true })
-        .eq("decoration_id", decorationId),
-      supabase
-        .from("profiles")
-        .select("id", { count: "exact", head: true })
-        .or(
-          `equipped_frame_id.eq.${decorationId},equipped_aura_id.eq.${decorationId},equipped_sticker_id.eq.${decorationId}`,
-        ),
-    ]);
+  const [{ count: ownedCount, error: ownedError }, { count: equippedCount, error: equippedError }] = await Promise.all([
+    supabase
+      .from("user_decorations" as never)
+      .select("id", { count: "exact", head: true })
+      .eq("decoration_id", decorationId),
+    supabase
+      .from("profiles")
+      .select("id", { count: "exact", head: true })
+      .or(
+        `equipped_frame_id.eq.${decorationId},equipped_aura_id.eq.${decorationId},equipped_sticker_id.eq.${decorationId}`,
+      ),
+  ]);
   if (ownedError) throw ownedError;
   if (equippedError) throw equippedError;
   return {
@@ -284,22 +280,106 @@ export async function purchaseDecoration(decorationId: string) {
   return data as unknown as { success: boolean; new_balance: number };
 }
 
+export function decorationErrorMessage(error: unknown, fallback = "Não foi possível concluir a ação.") {
+  const message =
+    error instanceof Error
+      ? error.message
+      : typeof error === "object" && error && "message" in error
+        ? String((error as { message?: unknown }).message)
+        : "";
+
+  if (message.includes("not_authenticated")) {
+    return "Você precisa estar logado para fazer isso.";
+  }
+
+  if (message.includes("decoration_not_found")) {
+    return "Este item não foi encontrado ou não está mais disponível.";
+  }
+
+  if (message.includes("decoration_inactive")) {
+    return "Este item está inativo no admin e não pode ser equipado.";
+  }
+
+  if (message.includes("not_owned")) {
+    return "Você ainda não possui este item. Compre ou desbloqueie antes de equipar.";
+  }
+
+  if (message.includes("profile_not_found")) {
+    return "Seu perfil não foi encontrado. Complete seu perfil antes de equipar itens.";
+  }
+
+  if (message.includes("invalid_decoration_type")) {
+    return "Tipo de item inválido. Verifique se ele foi criado como moldura ou aura corretamente.";
+  }
+
+  if (message.includes("schema cache") || message.includes("equip_decoration")) {
+    return "A função de equipar no banco está desatualizada. Rode a correção SQL da função equip_decoration.";
+  }
+
+  return message || fallback;
+}
+
+export type EquippedDecorations = {
+  frame: string | null;
+  aura: string | null;
+  sticker: string | null;
+};
+
+export async function fetchMyEquippedDecorations(userId: string): Promise<EquippedDecorations> {
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("equipped_frame_id, equipped_aura_id, equipped_sticker_id")
+    .eq("id", userId)
+    .maybeSingle();
+
+  if (error) throw error;
+
+  const profile = (data ?? {}) as {
+    equipped_frame_id?: string | null;
+    equipped_aura_id?: string | null;
+    equipped_sticker_id?: string | null;
+  };
+
+  return {
+    frame: profile.equipped_frame_id ?? null,
+    aura: profile.equipped_aura_id ?? null,
+    sticker: profile.equipped_sticker_id ?? null,
+  };
+}
+
 export async function equipDecoration(decorationId: string) {
-  const { error } = await supabase.rpc(
+  const { data, error } = await supabase.rpc(
     "equip_decoration" as never,
     {
       _decoration_id: decorationId,
     } as never,
   );
+
   if (error) throw error;
+
+  invalidateDecorationCatalog();
+
+  return data as unknown as {
+    success: boolean;
+    type: DecorationType;
+    decoration_id: string;
+  };
 }
 
 export async function unequipDecoration(type: DecorationType) {
-  const { error } = await supabase.rpc(
+  const { data, error } = await supabase.rpc(
     "unequip_decoration" as never,
     {
       _type: type,
     } as never,
   );
+
   if (error) throw error;
+
+  invalidateDecorationCatalog();
+
+  return data as unknown as {
+    success: boolean;
+    type: DecorationType;
+  };
 }

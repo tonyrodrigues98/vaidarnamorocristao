@@ -11,9 +11,11 @@ import { getMyCoins } from "@/lib/coins";
 import {
   fetchDecorationCatalog,
   fetchMyOwnedIds,
+  fetchMyEquippedDecorations,
   purchaseDecoration,
   equipDecoration,
   unequipDecoration,
+  decorationErrorMessage,
   type Decoration,
   type DecorationType,
 } from "@/lib/decorations";
@@ -124,25 +126,42 @@ export function DecorationsCard({
   };
 
   const handleEquip = async (d: Decoration) => {
+    if (!user) return;
+
     setBusyId(d.id);
+
     try {
-      await equipDecoration(d.id);
-      updateEquipped({ ...equipped, [d.type]: d.id });
+      const result = await equipDecoration(d.id);
+
+      if (result.type !== d.type) {
+        throw new Error(`invalid_decoration_type:${result.type}`);
+      }
+
+      const nextEquipped = await fetchMyEquippedDecorations(user.id);
+
+      updateEquipped(nextEquipped);
+
       toast.success(`${d.name} equipada`);
-    } catch {
-      toast.error("Erro ao equipar");
+    } catch (error) {
+      toast.error(decorationErrorMessage(error, "Erro ao equipar"));
     } finally {
       setBusyId(null);
     }
   };
 
   const handleUnequip = async (type: DecorationType) => {
+    if (!user) return;
+
     setBusyId(`unequip-${type}`);
+
     try {
       await unequipDecoration(type);
-      updateEquipped({ ...equipped, [type]: null });
-    } catch {
-      toast.error("Erro ao remover");
+
+      const nextEquipped = await fetchMyEquippedDecorations(user.id);
+
+      updateEquipped(nextEquipped);
+    } catch (error) {
+      toast.error(decorationErrorMessage(error, "Erro ao remover"));
     } finally {
       setBusyId(null);
     }
@@ -187,9 +206,7 @@ export function DecorationsCard({
           return (
             <div
               key={d.id}
-              onClick={() =>
-                setPreview((p) => ({ ...p, [type]: p[type] === d.id ? null : d.id }))
-              }
+              onClick={() => setPreview((p) => ({ ...p, [type]: p[type] === d.id ? null : d.id }))}
               className={`flex cursor-pointer flex-col items-center rounded-2xl border bg-card p-3 text-center transition ${
                 isPreviewing
                   ? "border-[var(--rose)] ring-2 ring-[var(--rose)]/40 shadow-soft"
@@ -201,10 +218,7 @@ export function DecorationsCard({
               <div className="flex h-28 w-28 items-center justify-center">
                 <DecoratedAvatar {...previewProps} />
               </div>
-              <p
-                className="mt-2 line-clamp-2 min-h-[2.25rem] text-xs font-semibold leading-tight"
-                title={d.name}
-              >
+              <p className="mt-2 line-clamp-2 min-h-[2.25rem] text-xs font-semibold leading-tight" title={d.name}>
                 {d.name}
               </p>
               <div className="mt-2 w-full" onClick={(e) => e.stopPropagation()}>
@@ -225,12 +239,7 @@ export function DecorationsCard({
                     )}
                   </Button>
                 ) : isOwned ? (
-                  <Button
-                    size="sm"
-                    className="w-full text-xs"
-                    disabled={busy}
-                    onClick={() => handleEquip(d)}
-                  >
+                  <Button size="sm" className="w-full text-xs" disabled={busy} onClick={() => handleEquip(d)}>
                     {busy ? <Loader2 className="h-3 w-3 animate-spin" /> : "Usar"}
                   </Button>
                 ) : (
@@ -288,9 +297,7 @@ export function DecorationsCard({
       </div>
 
       <div className="mb-5 flex flex-col items-center gap-2 rounded-xl border border-dashed bg-background/60 p-4">
-        <p className="text-xs uppercase tracking-wide text-muted-foreground">
-          Pré-visualização
-        </p>
+        <p className="text-xs uppercase tracking-wide text-muted-foreground">Pré-visualização</p>
         <div className="flex h-52 w-52 items-center justify-center">
           <DecoratedAvatar
             photoUrl={photoUrl}
@@ -320,11 +327,19 @@ export function DecorationsCard({
         onValueChange={(v) => setActiveTab(v as DecorationType)}
       >
         <TabsList className="w-full">
-          <TabsTrigger value="frame" className="flex-1">Moldura</TabsTrigger>
-          <TabsTrigger value="aura" className="flex-1">Aura</TabsTrigger>
+          <TabsTrigger value="frame" className="flex-1">
+            Moldura
+          </TabsTrigger>
+          <TabsTrigger value="aura" className="flex-1">
+            Aura
+          </TabsTrigger>
         </TabsList>
-        <TabsContent value="frame" className="mt-4">{renderItems("frame")}</TabsContent>
-        <TabsContent value="aura" className="mt-4">{renderItems("aura")}</TabsContent>
+        <TabsContent value="frame" className="mt-4">
+          {renderItems("frame")}
+        </TabsContent>
+        <TabsContent value="aura" className="mt-4">
+          {renderItems("aura")}
+        </TabsContent>
       </Tabs>
     </section>
   );
