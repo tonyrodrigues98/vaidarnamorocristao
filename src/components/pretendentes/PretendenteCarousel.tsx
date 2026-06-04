@@ -49,31 +49,17 @@ export function PretendenteCarousel({
     <section className="mb-10">
       <div className="mb-4 flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">
-            {title}
-          </h2>
+          <h2 className="text-2xl font-bold">{title}</h2>
 
-          {subtitle && (
-            <p className="text-sm text-muted-foreground">
-              {subtitle}
-            </p>
-          )}
+          {subtitle && <p className="text-sm text-muted-foreground">{subtitle}</p>}
         </div>
 
         <div className="hidden gap-2 md:flex">
-          <Button
-            size="icon"
-            variant="outline"
-            onClick={scrollLeft}
-          >
+          <Button size="icon" variant="outline" onClick={scrollLeft}>
             <ChevronLeft className="h-4 w-4" />
           </Button>
 
-          <Button
-            size="icon"
-            variant="outline"
-            onClick={scrollRight}
-          >
+          <Button size="icon" variant="outline" onClick={scrollRight}>
             <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
@@ -95,24 +81,11 @@ export function PretendenteCarousel({
           const chips = affinityByProfile[p.id] ?? [];
 
           const score =
-            maxScore > 0
-              ? Math.min(
-                  99,
-                  Math.round(
-                    (chips.length / maxScore) * 100
-                  )
-                )
-              : 0;
+            maxScore > 0 ? Math.min(99, Math.round((chips.length / maxScore) * 100)) : 0;
 
-          const showScore =
-            chips.length >= 3 &&
-            score >= 50 &&
-            !!myAdvanced;
+          const showScore = chips.length >= 3 && score >= 50 && !!myAdvanced;
 
-          const photos = [
-            ...(p.photo_url ? [p.photo_url] : []),
-            ...(extraPhotos[p.id] ?? []),
-          ];
+          const photos = [...(p.photo_url ? [p.photo_url] : []), ...(extraPhotos[p.id] ?? [])];
 
           return (
             <div

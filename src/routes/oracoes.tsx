@@ -13,24 +13,54 @@ import { friendlyError } from "@/lib/errors";
 import { recomputeMyBadges } from "@/lib/recomputeBadges";
 import { PhotoImg } from "@/components/PhotoImg";
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import {
-  DropdownMenu, DropdownMenuTrigger, DropdownMenuContent,
-  DropdownMenuItem, DropdownMenuSeparator,
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import {
-  Hand, HandHeart, Plus, Check, Trash2, EyeOff, Sparkles, Flag,
-  HeartPulse, Users as UsersIcon, HeartHandshake, Wallet, Flame,
-  ShieldCheck, ShieldAlert, ArchiveRestore, Ban, CheckCircle2,
+  Hand,
+  HandHeart,
+  Plus,
+  Check,
+  Trash2,
+  EyeOff,
+  Sparkles,
+  Flag,
+  HeartPulse,
+  Users as UsersIcon,
+  HeartHandshake,
+  Wallet,
+  Flame,
+  ShieldCheck,
+  ShieldAlert,
+  ArchiveRestore,
+  Ban,
+  CheckCircle2,
 } from "lucide-react";
 
 export const Route = createFileRoute("/oracoes")({
-  component: () => (<RequireApproved><Page /></RequireApproved>),
+  component: () => (
+    <RequireApproved>
+      <Page />
+    </RequireApproved>
+  ),
   head: () => ({
     meta: [
       { title: "Pedidos de oração — VaiDarNamoro" },
-      { name: "description", content: "Compartilhe seus pedidos de oração e ore pelos irmãos da comunidade cristã." },
+      {
+        name: "description",
+        content: "Compartilhe seus pedidos de oração e ore pelos irmãos da comunidade cristã.",
+      },
       { property: "og:title", content: "Pedidos de oração — VaiDarNamoro" },
     ],
   }),
@@ -39,9 +69,15 @@ export const Route = createFileRoute("/oracoes")({
 type Category = "health" | "family" | "relationship" | "financial" | "spiritual" | "other";
 type ModerationStatus = "visible" | "hidden" | "removed";
 type PrayerRequest = {
-  id: string; user_id: string; title: string; content: string;
-  category: Category; is_anonymous: boolean; resolved: boolean;
-  resolved_at: string | null; created_at: string;
+  id: string;
+  user_id: string;
+  title: string;
+  content: string;
+  category: Category;
+  is_anonymous: boolean;
+  resolved: boolean;
+  resolved_at: string | null;
+  created_at: string;
   moderation_status?: ModerationStatus;
 };
 type ProfileLite = { id: string; full_name: string; photo_url: string | null };
@@ -86,14 +122,22 @@ function Page() {
   const [fCategory, setFCategory] = useState<Category>("other");
   const [fAnonymous, setFAnonymous] = useState(false);
 
-  const loadProfiles = useCallback(async (ids: string[]) => {
-    const missing = Array.from(new Set(ids.filter((id) => id && !profiles[id])));
-    if (!missing.length) return;
-    const { data } = await supabase.from("profiles").select("id, full_name, photo_url").in("id", missing);
-    const map: Record<string, ProfileLite> = {};
-    (data ?? []).forEach((p: any) => { map[p.id] = p; });
-    setProfiles((prev) => ({ ...prev, ...map }));
-  }, [profiles]);
+  const loadProfiles = useCallback(
+    async (ids: string[]) => {
+      const missing = Array.from(new Set(ids.filter((id) => id && !profiles[id])));
+      if (!missing.length) return;
+      const { data } = await supabase
+        .from("profiles")
+        .select("id, full_name, photo_url")
+        .in("id", missing);
+      const map: Record<string, ProfileLite> = {};
+      (data ?? []).forEach((p: any) => {
+        map[p.id] = p;
+      });
+      setProfiles((prev) => ({ ...prev, ...map }));
+    },
+    [profiles],
+  );
 
   const loadAll = useCallback(async () => {
     const { data, error } = await supabase
@@ -101,7 +145,10 @@ function Page() {
       .select("*")
       .order("created_at", { ascending: false })
       .limit(200);
-    if (error) { toast.error(friendlyError(error)); return; }
+    if (error) {
+      toast.error(friendlyError(error));
+      return;
+    }
     const list = (data ?? []) as PrayerRequest[];
     setRequests(list);
     const nonAnon = list.filter((r) => !r.is_anonymous).map((r) => r.user_id);
@@ -138,11 +185,23 @@ function Page() {
     void loadAll();
     const ch = supabase
       .channel("prayer-requests-live")
-      .on("postgres_changes", { event: "*", schema: "public", table: "prayer_requests" }, () => loadAll())
-      .on("postgres_changes", { event: "*", schema: "public", table: "prayer_request_prayed" }, () => loadAll())
-      .on("postgres_changes", { event: "*", schema: "public", table: "prayer_request_reports" }, () => loadAll())
+      .on("postgres_changes", { event: "*", schema: "public", table: "prayer_requests" }, () =>
+        loadAll(),
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "prayer_request_prayed" },
+        () => loadAll(),
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "prayer_request_reports" },
+        () => loadAll(),
+      )
       .subscribe();
-    return () => { supabase.removeChannel(ch); };
+    return () => {
+      supabase.removeChannel(ch);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
@@ -159,16 +218,32 @@ function Page() {
     if (!user || busy) return;
     const title = fTitle.trim();
     const content = fContent.trim();
-    if (!title || !content) { toast.error("Preencha título e descrição"); return; }
-    if (title.length > 120) { toast.error("Título muito longo"); return; }
+    if (!title || !content) {
+      toast.error("Preencha título e descrição");
+      return;
+    }
+    if (title.length > 120) {
+      toast.error("Título muito longo");
+      return;
+    }
     setBusy(true);
     const { error } = await supabase.from("prayer_requests").insert({
-      user_id: user.id, title, content, category: fCategory, is_anonymous: fAnonymous,
+      user_id: user.id,
+      title,
+      content,
+      category: fCategory,
+      is_anonymous: fAnonymous,
     });
     setBusy(false);
-    if (error) { toast.error(friendlyError(error)); return; }
+    if (error) {
+      toast.error(friendlyError(error));
+      return;
+    }
     toast.success("Pedido de oração compartilhado");
-    setFTitle(""); setFContent(""); setFCategory("other"); setFAnonymous(false);
+    setFTitle("");
+    setFContent("");
+    setFCategory("other");
+    setFAnonymous(false);
     setOpenCreate(false);
     void recomputeMyBadges(user.id);
   }
@@ -179,27 +254,43 @@ function Page() {
     // optimistic
     setMyPrayed((prev) => {
       const n = new Set(prev);
-      if (has) n.delete(req.id); else n.add(req.id);
+      if (has) n.delete(req.id);
+      else n.add(req.id);
       return n;
     });
     setPrayedCounts((c) => ({ ...c, [req.id]: Math.max(0, (c[req.id] ?? 0) + (has ? -1 : 1)) }));
     if (has) {
-      const { error } = await supabase.from("prayer_request_prayed").delete().eq("request_id", req.id).eq("user_id", user.id);
-      if (error) { toast.error(friendlyError(error)); void loadAll(); }
+      const { error } = await supabase
+        .from("prayer_request_prayed")
+        .delete()
+        .eq("request_id", req.id)
+        .eq("user_id", user.id);
+      if (error) {
+        toast.error(friendlyError(error));
+        void loadAll();
+      }
     } else {
-      const { error } = await supabase.from("prayer_request_prayed").insert({ request_id: req.id, user_id: user.id });
-      if (error) { toast.error(friendlyError(error)); void loadAll(); }
-      else toast.success("Que Deus ouça sua oração");
+      const { error } = await supabase
+        .from("prayer_request_prayed")
+        .insert({ request_id: req.id, user_id: user.id });
+      if (error) {
+        toast.error(friendlyError(error));
+        void loadAll();
+      } else toast.success("Que Deus ouça sua oração");
     }
   }
 
   async function markResolved(req: PrayerRequest) {
     if (!user || req.user_id !== user.id) return;
     const newVal = !req.resolved;
-    const { error } = await supabase.from("prayer_requests")
+    const { error } = await supabase
+      .from("prayer_requests")
       .update({ resolved: newVal, resolved_at: newVal ? new Date().toISOString() : null })
       .eq("id", req.id);
-    if (error) { toast.error(friendlyError(error)); return; }
+    if (error) {
+      toast.error(friendlyError(error));
+      return;
+    }
     toast.success(newVal ? "Marcado como respondido" : "Reaberto");
   }
 
@@ -208,32 +299,49 @@ function Page() {
     if (req.user_id !== user.id && !canModerate) return;
     if (!confirm("Apagar este pedido?")) return;
     const { error } = await supabase.from("prayer_requests").delete().eq("id", req.id);
-    if (error) { toast.error(friendlyError(error)); return; }
+    if (error) {
+      toast.error(friendlyError(error));
+      return;
+    }
   }
 
   async function setModeration(req: PrayerRequest, status: ModerationStatus) {
     if (!canModerate) return;
-    const { error } = await supabase.from("prayer_requests")
+    const { error } = await supabase
+      .from("prayer_requests")
       .update({ moderation_status: status })
       .eq("id", req.id);
-    if (error) { toast.error(friendlyError(error)); return; }
+    if (error) {
+      toast.error(friendlyError(error));
+      return;
+    }
     toast.success(
-      status === "visible" ? "Pedido aprovado e visível"
-      : status === "hidden" ? "Pedido ocultado"
-      : "Pedido marcado como removido"
+      status === "visible"
+        ? "Pedido aprovado e visível"
+        : status === "hidden"
+          ? "Pedido ocultado"
+          : "Pedido marcado como removido",
     );
   }
 
   async function submitReport() {
     if (!user || !reportFor) return;
     const reason = reportReason.trim();
-    if (!reason) { toast.error("Descreva o motivo"); return; }
+    if (!reason) {
+      toast.error("Descreva o motivo");
+      return;
+    }
     setReportBusy(true);
     const { error } = await supabase.from("prayer_request_reports").insert({
-      request_id: reportFor.id, reporter_id: user.id, reason,
+      request_id: reportFor.id,
+      reporter_id: user.id,
+      reason,
     });
     setReportBusy(false);
-    if (error) { toast.error(friendlyError(error)); return; }
+    if (error) {
+      toast.error(friendlyError(error));
+      return;
+    }
     toast.success("Denúncia enviada. Obrigado por cuidar da comunidade.");
     setReportFor(null);
     setReportReason("");
@@ -252,7 +360,11 @@ function Page() {
           <div className="flex-1">
             <h1 className="text-3xl font-semibold tracking-tight">Pedidos de oração</h1>
             <p className="text-sm text-muted-foreground">
-              Compartilhe e ore pelos irmãos. <Link to="/devocional" className="underline">Veja o devocional do dia</Link>.
+              Compartilhe e ore pelos irmãos.{" "}
+              <Link to="/devocional" className="underline">
+                Veja o devocional do dia
+              </Link>
+              .
             </p>
           </div>
           <Button onClick={() => setOpenCreate(true)} className="shrink-0">
@@ -261,13 +373,23 @@ function Page() {
         </header>
 
         <div className="mt-6 flex flex-wrap gap-2">
-          <FilterChip active={filter === "active"} onClick={() => setFilter("active")}>Ativos</FilterChip>
-          <FilterChip active={filter === "all"} onClick={() => setFilter("all")}>Todos</FilterChip>
-          <FilterChip active={filter === "mine"} onClick={() => setFilter("mine")}>Meus</FilterChip>
+          <FilterChip active={filter === "active"} onClick={() => setFilter("active")}>
+            Ativos
+          </FilterChip>
+          <FilterChip active={filter === "all"} onClick={() => setFilter("all")}>
+            Todos
+          </FilterChip>
+          <FilterChip active={filter === "mine"} onClick={() => setFilter("mine")}>
+            Meus
+          </FilterChip>
           {CATEGORIES.map((c) => {
             const Icon = c.Icon;
             return (
-              <FilterChip key={c.value} active={filter === c.value} onClick={() => setFilter(c.value)}>
+              <FilterChip
+                key={c.value}
+                active={filter === c.value}
+                onClick={() => setFilter(c.value)}
+              >
                 <Icon className="h-3.5 w-3.5" /> {c.label}
               </FilterChip>
             );
@@ -309,7 +431,12 @@ function Page() {
                           <EyeOff className="h-4 w-4 text-muted-foreground" />
                         </div>
                       ) : author?.photo_url ? (
-                        <PhotoImg src={author.photo_url} alt={author.full_name} className="h-10 w-10 rounded-full object-cover shrink-0" loading="lazy" />
+                        <PhotoImg
+                          src={author.photo_url}
+                          alt={author.full_name}
+                          className="h-10 w-10 rounded-full object-cover shrink-0"
+                          loading="lazy"
+                        />
                       ) : (
                         <div className="h-10 w-10 rounded-full bg-muted shrink-0" />
                       )}
@@ -330,7 +457,10 @@ function Page() {
                         </Badge>
                       )}
                       {canModerate && reportCount > 0 && (
-                        <Badge variant="outline" className="gap-1 border-amber-500/50 text-amber-600 dark:text-amber-400">
+                        <Badge
+                          variant="outline"
+                          className="gap-1 border-amber-500/50 text-amber-600 dark:text-amber-400"
+                        >
                           <Flag className="h-3 w-3" /> {reportCount}
                         </Badge>
                       )}
@@ -338,7 +468,9 @@ function Page() {
                   </div>
 
                   <h2 className="mt-3 text-lg font-semibold">{req.title}</h2>
-                  <p className="mt-1 whitespace-pre-wrap text-sm text-foreground/90">{req.content}</p>
+                  <p className="mt-1 whitespace-pre-wrap text-sm text-foreground/90">
+                    {req.content}
+                  </p>
 
                   <div className="mt-4 flex items-center justify-between gap-2 flex-wrap">
                     <Button
@@ -362,7 +494,10 @@ function Page() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => { setReportFor(req); setReportReason(""); }}
+                          onClick={() => {
+                            setReportFor(req);
+                            setReportReason("");
+                          }}
                           disabled={iReported}
                           aria-label="Denunciar"
                           title={iReported ? "Você já denunciou este pedido" : "Denunciar"}
@@ -413,7 +548,12 @@ function Page() {
                         </DropdownMenu>
                       )}
                       {isMine && !canModerate && (
-                        <Button variant="ghost" size="sm" onClick={() => deleteRequest(req)} aria-label="Apagar">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => deleteRequest(req)}
+                          aria-label="Apagar"
+                        >
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       )}
@@ -429,7 +569,9 @@ function Page() {
       <Dialog open={openCreate} onOpenChange={setOpenCreate}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2"><Sparkles className="h-4 w-4" /> Novo pedido de oração</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              <Sparkles className="h-4 w-4" /> Novo pedido de oração
+            </DialogTitle>
             <DialogDescription>
               Compartilhe com a comunidade. Seja respeitoso e evite expor terceiros.
             </DialogDescription>
@@ -466,18 +608,34 @@ function Page() {
               })}
             </div>
             <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer">
-              <input type="checkbox" checked={fAnonymous} onChange={(e) => setFAnonymous(e.target.checked)} />
+              <input
+                type="checkbox"
+                checked={fAnonymous}
+                onChange={(e) => setFAnonymous(e.target.checked)}
+              />
               Compartilhar como anônimo
             </label>
             <DialogFooter>
-              <Button type="button" variant="ghost" onClick={() => setOpenCreate(false)}>Cancelar</Button>
-              <Button type="submit" disabled={busy}>{busy ? "Enviando..." : "Compartilhar"}</Button>
+              <Button type="button" variant="ghost" onClick={() => setOpenCreate(false)}>
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={busy}>
+                {busy ? "Enviando..." : "Compartilhar"}
+              </Button>
             </DialogFooter>
           </form>
         </DialogContent>
       </Dialog>
 
-      <Dialog open={!!reportFor} onOpenChange={(o) => { if (!o) { setReportFor(null); setReportReason(""); } }}>
+      <Dialog
+        open={!!reportFor}
+        onOpenChange={(o) => {
+          if (!o) {
+            setReportFor(null);
+            setReportReason("");
+          }
+        }}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
@@ -495,10 +653,21 @@ function Page() {
             maxLength={500}
           />
           <DialogFooter>
-            <Button type="button" variant="ghost" onClick={() => { setReportFor(null); setReportReason(""); }}>
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => {
+                setReportFor(null);
+                setReportReason("");
+              }}
+            >
               Cancelar
             </Button>
-            <Button type="button" onClick={submitReport} disabled={reportBusy || !reportReason.trim()}>
+            <Button
+              type="button"
+              onClick={submitReport}
+              disabled={reportBusy || !reportReason.trim()}
+            >
               {reportBusy ? "Enviando..." : "Enviar denúncia"}
             </Button>
           </DialogFooter>
@@ -508,12 +677,22 @@ function Page() {
   );
 }
 
-function FilterChip({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
+function FilterChip({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
   return (
     <button
       onClick={onClick}
       className={`px-3 py-1.5 rounded-full text-xs font-medium border transition ${
-        active ? "bg-primary text-primary-foreground border-primary" : "bg-background hover:bg-accent border-border"
+        active
+          ? "bg-primary text-primary-foreground border-primary"
+          : "bg-background hover:bg-accent border-border"
       }`}
     >
       {children}

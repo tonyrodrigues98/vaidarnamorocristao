@@ -36,13 +36,15 @@ export function AnonymousExtrasCard() {
   const load = useCallback(async () => {
     const [{ data: q, error: qe }, c] = await Promise.all([
       supabase.rpc("get_anonymous_quota"),
-      getMyCoins().catch(() => ({ balance: 0 } as any)),
+      getMyCoins().catch(() => ({ balance: 0 }) as any),
     ]);
     if (!qe && q && (q as any)[0]) setQuota((q as any)[0] as Quota);
     setCoins(c.balance ?? 0);
   }, []);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    load();
+  }, [load]);
 
   const insufficient = coins < EXTRA_COST;
 
@@ -50,7 +52,10 @@ export function AnonymousExtrasCard() {
     setBusy(true);
     const { error } = await supabase.rpc("buy_anonymous_extra");
     setBusy(false);
-    if (error) { toast.error(friendlyError(error)); return; }
+    if (error) {
+      toast.error(friendlyError(error));
+      return;
+    }
     toast.success("✨ Recado extra adicionado com sucesso");
     setOpen(false);
     await load();
@@ -123,8 +128,13 @@ export function AnonymousExtrasCard() {
         </div>
         {insufficient && (
           <div className="mt-3 flex items-center justify-between rounded-xl border border-dashed border-amber-500/40 bg-amber-500/5 px-3 py-2 text-xs">
-            <span className="text-amber-700 dark:text-amber-300">Você não possui moedas suficientes.</span>
-            <Link to="/perfil" className="inline-flex items-center gap-1 font-medium text-[var(--rose)] hover:underline">
+            <span className="text-amber-700 dark:text-amber-300">
+              Você não possui moedas suficientes.
+            </span>
+            <Link
+              to="/perfil"
+              className="inline-flex items-center gap-1 font-medium text-[var(--rose)] hover:underline"
+            >
               <Trophy className="h-3.5 w-3.5" /> Ir para Conquistas
             </Link>
           </div>
@@ -138,7 +148,8 @@ export function AnonymousExtrasCard() {
               <Sparkles className="h-5 w-5 text-[var(--rose)]" /> Comprar recado extra?
             </DialogTitle>
             <DialogDescription>
-              Deseja utilizar <strong>{EXTRA_COST} moedas</strong> para adicionar +1 recado anônimo extra à sua conta?
+              Deseja utilizar <strong>{EXTRA_COST} moedas</strong> para adicionar +1 recado anônimo
+              extra à sua conta?
             </DialogDescription>
           </DialogHeader>
           <p className="rounded-xl bg-muted/50 px-3 py-2 text-xs text-muted-foreground">

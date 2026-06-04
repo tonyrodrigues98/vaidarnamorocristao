@@ -204,7 +204,12 @@ export function Header() {
       )
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "anonymous_messages", filter: `receiver_id=eq.${user.id}` },
+        {
+          event: "*",
+          schema: "public",
+          table: "anonymous_messages",
+          filter: `receiver_id=eq.${user.id}`,
+        },
         loadAnon,
       )
       .subscribe();
@@ -328,7 +333,7 @@ export function Header() {
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="sm" aria-label="Mais opções">
                     <MoreHorizontal className="h-4 w-4" />
-                    {(newsCount + devotionalCount) > 0 && <Badge n={newsCount + devotionalCount} />}
+                    {newsCount + devotionalCount > 0 && <Badge n={newsCount + devotionalCount} />}
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-52">

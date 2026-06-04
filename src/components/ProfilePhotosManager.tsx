@@ -158,11 +158,16 @@ export function ProfilePhotosManager({ userId }: { userId: string }) {
             Até {MAX} fotos opcionais que aparecerão no carrossel do seu card.
           </p>
         </div>
-        <span className="text-xs text-muted-foreground">{photos.length}/{MAX}</span>
+        <span className="text-xs text-muted-foreground">
+          {photos.length}/{MAX}
+        </span>
       </div>
       <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
         {photos.map((p) => (
-          <div key={p.id} className="group relative aspect-square overflow-hidden rounded-xl border bg-muted">
+          <div
+            key={p.id}
+            className="group relative aspect-square overflow-hidden rounded-xl border bg-muted"
+          >
             <PhotoImg src={p.url} alt="" className="h-full w-full object-cover" loading="lazy" />
             <button
               type="button"

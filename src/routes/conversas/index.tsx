@@ -53,7 +53,10 @@ function List() {
       setLoadingList(false);
       return;
     }
-    const { data: bl } = await supabase.from("blocks").select("blocked_id").eq("blocker_id", user.id);
+    const { data: bl } = await supabase
+      .from("blocks")
+      .select("blocked_id")
+      .eq("blocker_id", user.id);
     const blockedSet = new Set((bl ?? []).map((b) => b.blocked_id as string));
     const { data: matches } = await supabase
       .from("matches")
@@ -137,7 +140,11 @@ function List() {
       .channel("conv-list")
       .on("postgres_changes", { event: "*", schema: "public", table: "messages" }, load)
       .on("postgres_changes", { event: "*", schema: "public", table: "matches" }, load)
-      .on("postgres_changes", { event: "*", schema: "public", table: "relationship_commitments" }, load)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "relationship_commitments" },
+        load,
+      )
       .subscribe();
     return () => {
       supabase.removeChannel(ch);
@@ -207,7 +214,9 @@ function List() {
                     {i.lastMessage ?? "Diga olá"}
                   </p>
                 </div>
-                {i.unread && <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-[var(--rose)]" />}
+                {i.unread && (
+                  <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-[var(--rose)]" />
+                )}
               </Link>
             ))
           )}

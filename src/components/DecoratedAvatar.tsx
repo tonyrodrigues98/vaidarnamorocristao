@@ -138,8 +138,12 @@ export function DecoratedAvatar({
   // ao redor sem encolher a foto.
   const photoSize = size;
   const frameCanvas = frameAsset ? size / placement.photoScale : 0;
-  const needsDecorationSpace = Boolean(frameId || auraId || frameAsset || auraAsset || aura?.css_value || isCommitted);
-  const canvas = needsDecorationSpace ? Math.max(frameCanvas, size * DEFAULT_DECORATION_CANVAS_SCALE) : size;
+  const needsDecorationSpace = Boolean(
+    frameId || auraId || frameAsset || auraAsset || aura?.css_value || isCommitted,
+  );
+  const canvas = needsDecorationSpace
+    ? Math.max(frameCanvas, size * DEFAULT_DECORATION_CANVAS_SCALE)
+    : size;
   const frameOffsetX = frameAsset ? (canvas - frameCanvas) / 2 : 0;
   const frameOffsetY = frameAsset ? (canvas - frameCanvas) / 2 : 0;
   const photoCenterX = frameAsset ? frameOffsetX + frameCanvas * placement.centerX : canvas / 2;

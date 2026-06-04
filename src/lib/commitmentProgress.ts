@@ -10,9 +10,7 @@ export interface CommitmentProgress {
   };
 }
 
-export async function getCommitmentProgress(
-  matchId: string,
-): Promise<CommitmentProgress> {
+export async function getCommitmentProgress(matchId: string): Promise<CommitmentProgress> {
   let percentage = 0;
   const requirements = {
     hasMatch: false,
@@ -42,9 +40,7 @@ export async function getCommitmentProgress(
   }
 
   const days = new Set(
-    messages.map((m: { created_at: string }) =>
-      new Date(m.created_at).toDateString(),
-    ),
+    messages.map((m: { created_at: string }) => new Date(m.created_at).toDateString()),
   );
 
   if (days.size >= 3) {
@@ -52,13 +48,10 @@ export async function getCommitmentProgress(
     percentage += 35;
   }
 
-  const senderCount = messages.reduce<Record<string, number>>(
-    (acc, msg: { sender_id: string }) => {
-      acc[msg.sender_id] = (acc[msg.sender_id] || 0) + 1;
-      return acc;
-    },
-    {},
-  );
+  const senderCount = messages.reduce<Record<string, number>>((acc, msg: { sender_id: string }) => {
+    acc[msg.sender_id] = (acc[msg.sender_id] || 0) + 1;
+    return acc;
+  }, {});
 
   const counts = Object.values(senderCount);
 

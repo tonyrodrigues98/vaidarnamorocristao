@@ -42,13 +42,19 @@ export function RevealCeremony({
       // Conclusão da revelação (sincronizado com blur 2.2s)
       setTimeout(() => !cancelled && setPhase("done"), 2700);
     })();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [target]);
 
   // Vibração leve no mobile ao iniciar
   useEffect(() => {
     if (phase === "revealing" && typeof navigator !== "undefined" && "vibrate" in navigator) {
-      try { (navigator as any).vibrate?.([12, 40, 18]); } catch { /* noop */ }
+      try {
+        (navigator as any).vibrate?.([12, 40, 18]);
+      } catch {
+        /* noop */
+      }
     }
   }, [phase]);
 
@@ -94,8 +100,7 @@ export function RevealCeremony({
             style={{
               background: "linear-gradient(160deg, rgba(255,255,255,0.10), rgba(255,255,255,0.04))",
               border: "1px solid rgba(255,255,255,0.16)",
-              boxShadow:
-                "0 30px 80px -20px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.18)",
+              boxShadow: "0 30px 80px -20px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.18)",
               backdropFilter: "blur(18px)",
               WebkitBackdropFilter: "blur(18px)",
             }}
@@ -113,9 +118,7 @@ export function RevealCeremony({
               <h2 className="mt-2 text-xl font-semibold text-white">
                 Vocês decidiram se conhecer.
               </h2>
-              <p className="mt-1 text-sm text-white/70">
-                Agora vocês podem conversar livremente.
-              </p>
+              <p className="mt-1 text-sm text-white/70">Agora vocês podem conversar livremente.</p>
             </motion.div>
 
             <RevealPhoto photoUrl={profile?.photo_url ?? null} phase={phase} />
@@ -162,10 +165,19 @@ export function RevealCeremony({
   );
 }
 
-function RevealPhoto({ photoUrl, phase }: { photoUrl: string | null; phase: "loading" | "revealing" | "done" }) {
-  const { url: resolvedPhoto, loading: photoLoading, refresh: refreshPhoto } = useSignedPhotoUrlResult(photoUrl);
-  const blur =
-    phase === "loading" ? 38 : phase === "revealing" ? 0 : 0;
+function RevealPhoto({
+  photoUrl,
+  phase,
+}: {
+  photoUrl: string | null;
+  phase: "loading" | "revealing" | "done";
+}) {
+  const {
+    url: resolvedPhoto,
+    loading: photoLoading,
+    refresh: refreshPhoto,
+  } = useSignedPhotoUrlResult(photoUrl);
+  const blur = phase === "loading" ? 38 : phase === "revealing" ? 0 : 0;
   const scale = phase === "loading" ? 1.08 : 1;
 
   return (
@@ -189,16 +201,14 @@ function RevealPhoto({ photoUrl, phase }: { photoUrl: string | null; phase: "loa
       <div
         className="absolute inset-0 rounded-full"
         style={{
-          background:
-            "linear-gradient(140deg, rgba(255,255,255,0.35), rgba(255,255,255,0.05))",
+          background: "linear-gradient(140deg, rgba(255,255,255,0.35), rgba(255,255,255,0.05))",
           padding: 2,
         }}
       >
         <div
           className="relative h-full w-full overflow-hidden rounded-full"
           style={{
-            boxShadow:
-              "inset 0 0 0 1px rgba(255,255,255,0.25), 0 10px 40px rgba(0,0,0,0.4)",
+            boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.25), 0 10px 40px rgba(0,0,0,0.4)",
             background: "rgba(0,0,0,0.4)",
           }}
         >
@@ -228,8 +238,7 @@ function RevealPhoto({ photoUrl, phase }: { photoUrl: string | null; phase: "loa
           <div
             className="pointer-events-none absolute inset-0 rounded-full"
             style={{
-              background:
-                "linear-gradient(160deg, rgba(255,255,255,0.18), transparent 45%)",
+              background: "linear-gradient(160deg, rgba(255,255,255,0.18), transparent 45%)",
             }}
           />
         </div>
@@ -251,7 +260,13 @@ function Particles() {
           <motion.span
             key={i}
             className="absolute rounded-full bg-white/60"
-            style={{ left: `${left}%`, top: "100%", width: size, height: size, filter: "blur(0.4px)" }}
+            style={{
+              left: `${left}%`,
+              top: "100%",
+              width: size,
+              height: size,
+              filter: "blur(0.4px)",
+            }}
             initial={{ y: 0, opacity: 0 }}
             animate={{ y: -window.innerHeight * 0.9, opacity: [0, 0.7, 0] }}
             transition={{ duration: 6 + (i % 4), repeat: Infinity, delay, ease: "easeOut" }}

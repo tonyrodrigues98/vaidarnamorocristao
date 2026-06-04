@@ -32,7 +32,10 @@ function Noticias() {
         .eq("published", true)
         .order("published_at", { ascending: false })
         .limit(50);
-      if (error) { toast.error(error.message); return; }
+      if (error) {
+        toast.error(error.message);
+        return;
+      }
       setPosts((data ?? []) as Post[]);
     };
     load();
@@ -41,7 +44,9 @@ function Noticias() {
       .channel("daily-posts")
       .on("postgres_changes", { event: "*", schema: "public", table: "daily_posts" }, load)
       .subscribe();
-    return () => { supabase.removeChannel(ch); };
+    return () => {
+      supabase.removeChannel(ch);
+    };
   }, [user]);
 
   if (!loading && !user) return <Navigate to="/auth/login" />;
@@ -77,7 +82,11 @@ function Noticias() {
                     Notícia
                   </span>
                   <span className="text-xs uppercase tracking-wide text-muted-foreground">
-                    {new Date(p.published_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" })}
+                    {new Date(p.published_at).toLocaleDateString("pt-BR", {
+                      day: "2-digit",
+                      month: "long",
+                      year: "numeric",
+                    })}
                   </span>
                 </div>
                 <h2 className="mt-3 line-clamp-2 text-xl font-semibold">{p.title}</h2>

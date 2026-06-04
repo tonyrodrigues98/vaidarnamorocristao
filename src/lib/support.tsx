@@ -4,7 +4,15 @@ export type Ticket = {
   id: string;
   user_id: string;
   title: string;
-  category: "account" | "payments" | "profile" | "matches" | "community" | "technical" | "security" | "other";
+  category:
+    | "account"
+    | "payments"
+    | "profile"
+    | "matches"
+    | "community"
+    | "technical"
+    | "security"
+    | "other";
   priority: "low" | "medium" | "high" | "urgent";
   status: "open" | "in_review" | "awaiting_user" | "resolved" | "closed";
   assigned_to: string | null;
@@ -58,7 +66,9 @@ export function statusBadge(s: Ticket["status"]): ReactNode {
     closed: { label: "Fechado", className: "bg-muted text-muted-foreground" },
   };
   const m = map[s];
-  return <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${m.className}`}>{m.label}</span>;
+  return (
+    <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${m.className}`}>{m.label}</span>
+  );
 }
 
 export function priorityBadge(p: Ticket["priority"]): ReactNode {
@@ -66,8 +76,17 @@ export function priorityBadge(p: Ticket["priority"]): ReactNode {
     low: { label: "Baixa", className: "border border-border text-muted-foreground" },
     medium: { label: "Média", className: "border border-sky-500/40 text-sky-500" },
     high: { label: "Alta", className: "border border-amber-500/40 text-amber-500" },
-    urgent: { label: "Urgente", className: "border border-destructive/60 text-destructive animate-pulse" },
+    urgent: {
+      label: "Urgente",
+      className: "border border-destructive/60 text-destructive animate-pulse",
+    },
   };
   const m = map[p];
-  return <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${m.className}`}>{m.label}</span>;
+  return (
+    <span
+      className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${m.className}`}
+    >
+      {m.label}
+    </span>
+  );
 }

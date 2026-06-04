@@ -10,11 +10,27 @@ import { Header } from "@/components/layout/Header";
 import { DecoratedAvatar } from "@/components/DecoratedAvatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, Send, Trash2, Pencil, Check, X, Reply, MoreHorizontal, CheckCheck } from "lucide-react";
+import {
+  ArrowLeft,
+  Send,
+  Trash2,
+  Pencil,
+  Check,
+  X,
+  Reply,
+  MoreHorizontal,
+  CheckCheck,
+} from "lucide-react";
 import { useLongPress } from "@/hooks/use-long-press";
 import { useRestrictedWords, findRestrictedWord } from "@/lib/profanity";
 import { ShieldAlert } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { CommitmentProgressCard } from "@/components/commitment/CommitmentProgressCard";
 import { CommitmentPauseCard } from "@/components/commitment/CommitmentPauseCard";
@@ -70,7 +86,11 @@ function Chat() {
   useEffect(() => {
     if (!user) return;
     (async () => {
-      const { data: m } = await supabase.from("matches").select("user_a, user_b").eq("id", matchId).maybeSingle();
+      const { data: m } = await supabase
+        .from("matches")
+        .select("user_a, user_b")
+        .eq("id", matchId)
+        .maybeSingle();
       if (!m || (m.user_a !== user.id && m.user_b !== user.id)) {
         setAuthorized(false);
         return;
@@ -109,11 +129,17 @@ function Chat() {
 
         setPartnerCommitmentMatchId(active?.match_id ?? null);
       }
-      const { data: msgs } = await supabase.from("messages").select("*").eq("match_id", matchId).order("created_at");
+      const { data: msgs } = await supabase
+        .from("messages")
+        .select("*")
+        .eq("match_id", matchId)
+        .order("created_at");
       setMessages((msgs ?? []) as Msg[]);
       // mark received as read via SECURITY DEFINER RPC (only updates read_at)
       const unread = (msgs ?? []).filter((m: Msg) => m.sender_id !== user.id && !m.read_at);
-      await Promise.all(unread.map((m) => supabase.rpc("mark_message_read", { _message_id: m.id })));
+      await Promise.all(
+        unread.map((m) => supabase.rpc("mark_message_read", { _message_id: m.id })),
+      );
     })();
 
     const ch = supabase
@@ -123,7 +149,9 @@ function Chat() {
         { event: "INSERT", schema: "public", table: "messages", filter: `match_id=eq.${matchId}` },
         (payload) => {
           setMessages((prev) =>
-            prev.some((m) => m.id === (payload.new as Msg).id) ? prev : [...prev, payload.new as Msg],
+            prev.some((m) => m.id === (payload.new as Msg).id)
+              ? prev
+              : [...prev, payload.new as Msg],
           );
           if ((payload.new as Msg).sender_id !== user.id) {
             supabase.rpc("mark_message_read", { _message_id: (payload.new as Msg).id });
@@ -325,13 +353,22 @@ function Chat() {
       </div>
 
       {actionsOpenId && (
-        <div className="fixed inset-0 z-30" onClick={() => setActionsOpenId(null)} aria-hidden="true" />
+        <div
+          className="fixed inset-0 z-30"
+          onClick={() => setActionsOpenId(null)}
+          aria-hidden="true"
+        />
       )}
 
-      <main ref={scrollRef} className="mx-auto w-full max-w-3xl flex-1 space-y-5 overflow-y-auto px-4 py-8">
+      <main
+        ref={scrollRef}
+        className="mx-auto w-full max-w-3xl flex-1 space-y-5 overflow-y-auto px-4 py-8"
+      >
         <CommitmentProgressCard matchId={matchId} />
         {messages.length === 0 && (
-          <p className="mt-12 text-center text-sm text-muted-foreground">Comece a conversa com graça e respeito 💗</p>
+          <p className="mt-12 text-center text-sm text-muted-foreground">
+            Comece a conversa com graça e respeito 💗
+          </p>
         )}
         {messages.map((m) => {
           const mine = m.sender_id === user?.id;
@@ -362,15 +399,25 @@ function Chat() {
                       type="button"
                       onClick={() => jumpToMessage(replied.id)}
                       className={`mb-1 flex w-full items-stretch gap-2 rounded-md px-2 py-1 text-left text-xs transition ${
-                        mine ? "bg-white/15 hover:bg-white/25" : "bg-foreground/5 hover:bg-foreground/10"
+                        mine
+                          ? "bg-white/15 hover:bg-white/25"
+                          : "bg-foreground/5 hover:bg-foreground/10"
                       }`}
                     >
-                      <span className={`w-0.5 shrink-0 rounded ${mine ? "bg-white/70" : "bg-primary"}`} />
+                      <span
+                        className={`w-0.5 shrink-0 rounded ${mine ? "bg-white/70" : "bg-primary"}`}
+                      />
                       <span className="min-w-0 flex-1">
-                        <span className={`block font-semibold ${mine ? "text-white/90" : "text-primary"}`}>
-                          {replied.sender_id === user?.id ? "Você" : (partner?.full_name?.split(" ")[0] ?? "")}
+                        <span
+                          className={`block font-semibold ${mine ? "text-white/90" : "text-primary"}`}
+                        >
+                          {replied.sender_id === user?.id
+                            ? "Você"
+                            : (partner?.full_name?.split(" ")[0] ?? "")}
                         </span>
-                        <span className={`line-clamp-2 ${mine ? "text-white/80" : "text-muted-foreground"}`}>
+                        <span
+                          className={`line-clamp-2 ${mine ? "text-white/80" : "text-muted-foreground"}`}
+                        >
                           {replied.content}
                         </span>
                       </span>
@@ -412,7 +459,10 @@ function Chat() {
                         className={`mt-1 flex items-center gap-1 text-[10px] ${mine ? "text-white/70" : "text-muted-foreground"}`}
                       >
                         <span>
-                          {new Date(m.created_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+                          {new Date(m.created_at).toLocaleTimeString("pt-BR", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
                           {m.edited_at ? " · editado" : ""}
                         </span>
                         {mine &&
@@ -498,14 +548,20 @@ function Chat() {
         })}
       </main>
 
-      <form onSubmit={send} className="sticky bottom-0 border-t border-border bg-background/80 px-4 py-3 backdrop-blur">
+      <form
+        onSubmit={send}
+        className="sticky bottom-0 border-t border-border bg-background/80 px-4 py-3 backdrop-blur"
+      >
         <div className="mx-auto flex max-w-3xl flex-col gap-2">
           {replyTo && (
             <div className="flex items-stretch gap-2 rounded-lg border border-border bg-muted/40 px-3 py-2">
               <span className="w-1 shrink-0 rounded bg-primary" />
               <div className="min-w-0 flex-1">
                 <p className="text-xs font-semibold text-primary">
-                  Respondendo a {replyTo.sender_id === user?.id ? "você" : (partner?.full_name?.split(" ")[0] ?? "")}
+                  Respondendo a{" "}
+                  {replyTo.sender_id === user?.id
+                    ? "você"
+                    : (partner?.full_name?.split(" ")[0] ?? "")}
                 </p>
                 <p className="line-clamp-1 text-xs text-muted-foreground">{replyTo.content}</p>
               </div>
@@ -540,8 +596,8 @@ function Chat() {
             </div>
             <DialogTitle className="text-center">Mensagem bloqueada</DialogTitle>
             <DialogDescription className="text-center">
-              A palavra <span className="font-semibold text-foreground">"{warning}"</span> fere as diretrizes da
-              comunidade. Por favor, reescreva sua mensagem com respeito e cuidado.
+              A palavra <span className="font-semibold text-foreground">"{warning}"</span> fere as
+              diretrizes da comunidade. Por favor, reescreva sua mensagem com respeito e cuidado.
             </DialogDescription>
           </DialogHeader>
           <div className="flex justify-center pt-2">

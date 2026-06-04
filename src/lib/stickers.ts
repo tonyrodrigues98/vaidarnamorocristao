@@ -29,20 +29,30 @@ export async function fetchCategories(): Promise<StickerCategory[]> {
   return (data ?? []) as StickerCategory[];
 }
 
-export async function fetchStickers(opts?: { activeOnly?: boolean; categoryId?: string | null }): Promise<Sticker[]> {
+export async function fetchStickers(opts?: {
+  activeOnly?: boolean;
+  categoryId?: string | null;
+}): Promise<Sticker[]> {
   let q = supabase
     .from("stickers")
-    .select("id, category_id, name, storage_path, public_url, mime_type, is_animated, active, sort_order")
+    .select(
+      "id, category_id, name, storage_path, public_url, mime_type, is_animated, active, sort_order",
+    )
     .order("sort_order", { ascending: true })
     .order("created_at", { ascending: false });
   if (opts?.activeOnly) q = q.eq("active", true);
-  if (opts?.categoryId !== undefined && opts?.categoryId !== null) q = q.eq("category_id", opts.categoryId);
+  if (opts?.categoryId !== undefined && opts?.categoryId !== null)
+    q = q.eq("category_id", opts.categoryId);
   const { data, error } = await q;
   if (error) throw error;
   return (data ?? []) as Sticker[];
 }
 
-export async function uploadStickerFile(file: File, categoryId: string | null, name: string): Promise<Sticker> {
+export async function uploadStickerFile(
+  file: File,
+  categoryId: string | null,
+  name: string,
+): Promise<Sticker> {
   const ext = (file.name.split(".").pop() || "webp").toLowerCase();
   const path = `${crypto.randomUUID()}.${ext}`;
   const { error: upErr } = await supabase.storage.from("stickers").upload(path, file, {
@@ -73,7 +83,10 @@ export async function uploadStickerFile(file: File, categoryId: string | null, n
 }
 
 export async function deleteSticker(s: Sticker): Promise<void> {
-  await supabase.storage.from("stickers").remove([s.storage_path]).catch(() => {});
+  await supabase.storage
+    .from("stickers")
+    .remove([s.storage_path])
+    .catch(() => {});
   const { error } = await supabase.from("stickers").delete().eq("id", s.id);
   if (error) throw error;
 }

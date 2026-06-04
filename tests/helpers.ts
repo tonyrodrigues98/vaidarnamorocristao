@@ -30,7 +30,11 @@ export type Ctx = {
 export async function createUser(label: string, opts?: { status?: string }): Promise<Ctx> {
   const email = `t-${label}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}@test.local`;
   const password = "Test12345!";
-  const { data, error } = await admin.auth.admin.createUser({ email, password, email_confirm: true });
+  const { data, error } = await admin.auth.admin.createUser({
+    email,
+    password,
+    email_confirm: true,
+  });
   if (error || !data.user) throw error ?? new Error("no user");
   const userId = data.user.id;
 
@@ -57,7 +61,11 @@ export async function createUser(label: string, opts?: { status?: string }): Pro
 export async function deleteUsers(...ctxs: (Ctx | undefined)[]) {
   for (const u of ctxs) {
     if (u?.userId) {
-      try { await admin.auth.admin.deleteUser(u.userId); } catch { /* ignore */ }
+      try {
+        await admin.auth.admin.deleteUser(u.userId);
+      } catch {
+        /* ignore */
+      }
     }
   }
 }

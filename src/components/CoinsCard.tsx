@@ -25,7 +25,9 @@ export function CoinsCard() {
       .then((s) => !cancel && setStatus(s))
       .catch(() => {})
       .finally(() => !cancel && setLoading(false));
-    return () => { cancel = true; };
+    return () => {
+      cancel = true;
+    };
   }, []);
 
   useEffect(() => {
@@ -47,7 +49,9 @@ export function CoinsCard() {
         const audio = new Audio(coinSound);
         audio.volume = 0.6;
         void audio.play().catch(() => {});
-      } catch {}
+      } catch {
+        // Audio playback is optional and can be blocked by the browser.
+      }
       setStatus({
         balance: r.balance,
         last_claim_date: new Date().toISOString().slice(0, 10),
@@ -102,7 +106,11 @@ export function CoinsCard() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <img src={coinIcon} alt="moeda" className={`h-9 w-9 drop-shadow ${pulse ? "animate-bounce" : ""}`} />
+          <img
+            src={coinIcon}
+            alt="moeda"
+            className={`h-9 w-9 drop-shadow ${pulse ? "animate-bounce" : ""}`}
+          />
           <span
             className={`text-4xl font-bold tabular-nums tracking-tight ${pulse ? "animate-scale-in text-amber-500" : ""}`}
           >
@@ -119,7 +127,9 @@ export function CoinsCard() {
           ) : atMax ? (
             <>Limite máximo atingido</>
           ) : (
-            <>Próximo resgate em <span className="font-medium text-foreground">{countdown}</span></>
+            <>
+              Próximo resgate em <span className="font-medium text-foreground">{countdown}</span>
+            </>
           )}
         </div>
         <button

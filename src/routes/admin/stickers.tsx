@@ -55,8 +55,9 @@ function StickersAdmin() {
   }, [isSuperAdmin]);
 
   const filtered = useMemo(
-    () => stickers.filter((s) => (activeCat ? s.category_id === activeCat : s.category_id === null)),
-    [stickers, activeCat]
+    () =>
+      stickers.filter((s) => (activeCat ? s.category_id === activeCat : s.category_id === null)),
+    [stickers, activeCat],
   );
 
   if (loading || (user && !rolesLoaded)) return null;
@@ -66,11 +67,19 @@ function StickersAdmin() {
   async function createCategory() {
     const name = newCatName.trim();
     if (!name) return;
-    const slug = name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+    const slug = name
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "");
     setBusy(true);
     const { error } = await supabase.from("sticker_categories").insert({ name, slug });
     setBusy(false);
-    if (error) { toast.error(error.message); return; }
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     setNewCatName("");
     toast.success("Categoria criada");
     await reload();
@@ -80,7 +89,10 @@ function StickersAdmin() {
     const name = editingCatName.trim();
     if (!name) return;
     const { error } = await supabase.from("sticker_categories").update({ name }).eq("id", id);
-    if (error) { toast.error(error.message); return; }
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     setEditingCatId(null);
     setEditingCatName("");
     await reload();
@@ -89,7 +101,10 @@ function StickersAdmin() {
   async function removeCategory(id: string) {
     if (!confirm("Excluir esta categoria? Os stickers ficarão sem categoria.")) return;
     const { error } = await supabase.from("sticker_categories").delete().eq("id", id);
-    if (error) { toast.error(error.message); return; }
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     if (activeCat === id) setActiveCat(null);
     await reload();
   }
@@ -122,7 +137,10 @@ function StickersAdmin() {
 
   async function toggleActive(s: Sticker) {
     const { error } = await supabase.from("stickers").update({ active: !s.active }).eq("id", s.id);
-    if (error) { toast.error(error.message); return; }
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     setStickers((prev) => prev.map((x) => (x.id === s.id ? { ...x, active: !s.active } : x)));
   }
 
@@ -130,7 +148,10 @@ function StickersAdmin() {
     const name = editingStickerName.trim();
     if (!name) return;
     const { error } = await supabase.from("stickers").update({ name }).eq("id", id);
-    if (error) { toast.error(error.message); return; }
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     setEditingStickerId(null);
     setEditingStickerName("");
     await reload();
@@ -152,15 +173,24 @@ function StickersAdmin() {
     if (!sticker) return;
     if (sticker.category_id === categoryId) return;
     // optimistic update
-    setStickers((prev) => prev.map((x) => (x.id === stickerId ? { ...x, category_id: categoryId } : x)));
-    const { error } = await supabase.from("stickers").update({ category_id: categoryId }).eq("id", stickerId);
+    setStickers((prev) =>
+      prev.map((x) => (x.id === stickerId ? { ...x, category_id: categoryId } : x)),
+    );
+    const { error } = await supabase
+      .from("stickers")
+      .update({ category_id: categoryId })
+      .eq("id", stickerId);
     if (error) {
       toast.error(error.message);
       // revert
-      setStickers((prev) => prev.map((x) => (x.id === stickerId ? { ...x, category_id: sticker.category_id } : x)));
+      setStickers((prev) =>
+        prev.map((x) => (x.id === stickerId ? { ...x, category_id: sticker.category_id } : x)),
+      );
       return;
     }
-    const target = categoryId ? cats.find((c) => c.id === categoryId)?.name ?? "categoria" : "Sem categoria";
+    const target = categoryId
+      ? (cats.find((c) => c.id === categoryId)?.name ?? "categoria")
+      : "Sem categoria";
     toast.success(`Movido para ${target}`);
   }
 
@@ -170,11 +200,15 @@ function StickersAdmin() {
       <main className="mx-auto w-full max-w-6xl px-4 py-6">
         <div className="mb-6 flex items-center gap-3">
           <Button asChild variant="ghost" size="sm">
-            <Link to="/admin"><ArrowLeft className="mr-1 h-4 w-4" /> Voltar</Link>
+            <Link to="/admin">
+              <ArrowLeft className="mr-1 h-4 w-4" /> Voltar
+            </Link>
           </Button>
           <div>
             <h1 className="text-3xl font-semibold">Stickers</h1>
-            <p className="text-sm text-muted-foreground">Gerencie a biblioteca usada no chat global</p>
+            <p className="text-sm text-muted-foreground">
+              Gerencie a biblioteca usada no chat global
+            </p>
           </div>
         </div>
 
@@ -182,94 +216,122 @@ function StickersAdmin() {
           {/* Categories */}
           <aside className="rounded-2xl border border-border bg-card/40 p-3 md:sticky md:top-4 md:h-[calc(100vh-2rem)] md:overflow-y-auto">
             <div className="space-y-3">
-            <div className="flex gap-2">
-              <Input
-                placeholder="Nova categoria"
-                value={newCatName}
-                onChange={(e) => setNewCatName(e.target.value)}
-                onKeyDown={(e) => { if (e.key === "Enter") void createCategory(); }}
-              />
-              <Button onClick={createCategory} disabled={busy || !newCatName.trim()} size="icon">
-                <Plus className="h-4 w-4" />
-              </Button>
-            </div>
-            <ul className="space-y-1">
-              <li>
-                <button
-                  type="button"
-                  onClick={() => setActiveCat(null)}
-                  onDragOver={(e) => { if (draggingId) { e.preventDefault(); setDragOverCat("none"); } }}
-                  onDragLeave={() => setDragOverCat((v) => (v === "none" ? null : v))}
-                  onDrop={(e) => {
-                    e.preventDefault();
-                    const id = e.dataTransfer.getData("text/sticker-id") || draggingId;
-                    setDragOverCat(null);
-                    if (id) void moveStickerToCategory(id, null);
+              <div className="flex gap-2">
+                <Input
+                  placeholder="Nova categoria"
+                  value={newCatName}
+                  onChange={(e) => setNewCatName(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") void createCategory();
                   }}
-                  className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm transition ${activeCat === null ? "bg-primary/10 font-semibold text-primary" : "hover:bg-accent"} ${dragOverCat === "none" ? "ring-2 ring-primary/60 bg-primary/5" : ""}`}
-                >
-                  Sem categoria
-                  <span className="text-xs text-muted-foreground">{stickers.filter((s) => !s.category_id).length}</span>
-                </button>
-              </li>
-              {cats.map((c) => {
-                const count = stickers.filter((s) => s.category_id === c.id).length;
-                const editing = editingCatId === c.id;
-                return (
-                  <li key={c.id} className="group">
-                    {editing ? (
-                      <div className="flex items-center gap-1 rounded-lg bg-muted/40 p-1">
-                        <Input
-                          value={editingCatName}
-                          onChange={(e) => setEditingCatName(e.target.value)}
-                          autoFocus
-                          className="h-8"
-                        />
-                        <Button size="icon" variant="ghost" onClick={() => renameCategory(c.id)}><Check className="h-4 w-4" /></Button>
-                        <Button size="icon" variant="ghost" onClick={() => { setEditingCatId(null); setEditingCatName(""); }}><X className="h-4 w-4" /></Button>
-                      </div>
-                    ) : (
-                      <div
-                        onDragOver={(e) => { if (draggingId) { e.preventDefault(); setDragOverCat(c.id); } }}
-                        onDragLeave={() => setDragOverCat((v) => (v === c.id ? null : v))}
-                        onDrop={(e) => {
-                          e.preventDefault();
-                          const id = e.dataTransfer.getData("text/sticker-id") || draggingId;
-                          setDragOverCat(null);
-                          if (id) void moveStickerToCategory(id, c.id);
-                        }}
-                        className={`flex items-center rounded-lg transition ${activeCat === c.id ? "bg-primary/10" : "hover:bg-accent"} ${dragOverCat === c.id ? "ring-2 ring-primary/60 bg-primary/5" : ""}`}
-                      >
-                        <button
-                          type="button"
-                          onClick={() => setActiveCat(c.id)}
-                          className={`flex flex-1 items-center justify-between px-3 py-2 text-sm ${activeCat === c.id ? "font-semibold text-primary" : ""}`}
+                />
+                <Button onClick={createCategory} disabled={busy || !newCatName.trim()} size="icon">
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
+              <ul className="space-y-1">
+                <li>
+                  <button
+                    type="button"
+                    onClick={() => setActiveCat(null)}
+                    onDragOver={(e) => {
+                      if (draggingId) {
+                        e.preventDefault();
+                        setDragOverCat("none");
+                      }
+                    }}
+                    onDragLeave={() => setDragOverCat((v) => (v === "none" ? null : v))}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      const id = e.dataTransfer.getData("text/sticker-id") || draggingId;
+                      setDragOverCat(null);
+                      if (id) void moveStickerToCategory(id, null);
+                    }}
+                    className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm transition ${activeCat === null ? "bg-primary/10 font-semibold text-primary" : "hover:bg-accent"} ${dragOverCat === "none" ? "ring-2 ring-primary/60 bg-primary/5" : ""}`}
+                  >
+                    Sem categoria
+                    <span className="text-xs text-muted-foreground">
+                      {stickers.filter((s) => !s.category_id).length}
+                    </span>
+                  </button>
+                </li>
+                {cats.map((c) => {
+                  const count = stickers.filter((s) => s.category_id === c.id).length;
+                  const editing = editingCatId === c.id;
+                  return (
+                    <li key={c.id} className="group">
+                      {editing ? (
+                        <div className="flex items-center gap-1 rounded-lg bg-muted/40 p-1">
+                          <Input
+                            value={editingCatName}
+                            onChange={(e) => setEditingCatName(e.target.value)}
+                            autoFocus
+                            className="h-8"
+                          />
+                          <Button size="icon" variant="ghost" onClick={() => renameCategory(c.id)}>
+                            <Check className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            onClick={() => {
+                              setEditingCatId(null);
+                              setEditingCatName("");
+                            }}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <div
+                          onDragOver={(e) => {
+                            if (draggingId) {
+                              e.preventDefault();
+                              setDragOverCat(c.id);
+                            }
+                          }}
+                          onDragLeave={() => setDragOverCat((v) => (v === c.id ? null : v))}
+                          onDrop={(e) => {
+                            e.preventDefault();
+                            const id = e.dataTransfer.getData("text/sticker-id") || draggingId;
+                            setDragOverCat(null);
+                            if (id) void moveStickerToCategory(id, c.id);
+                          }}
+                          className={`flex items-center rounded-lg transition ${activeCat === c.id ? "bg-primary/10" : "hover:bg-accent"} ${dragOverCat === c.id ? "ring-2 ring-primary/60 bg-primary/5" : ""}`}
                         >
-                          {c.name}
-                          <span className="text-xs text-muted-foreground">{count}</span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => { setEditingCatId(c.id); setEditingCatName(c.name); }}
-                          className="px-2 opacity-0 transition group-hover:opacity-100"
-                          aria-label="Renomear"
-                        >
-                          <Pencil className="h-3.5 w-3.5" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => removeCategory(c.id)}
-                          className="px-2 opacity-0 transition group-hover:opacity-100 hover:text-destructive"
-                          aria-label="Excluir"
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </button>
-                      </div>
-                    )}
-                  </li>
-                );
-              })}
-            </ul>
+                          <button
+                            type="button"
+                            onClick={() => setActiveCat(c.id)}
+                            className={`flex flex-1 items-center justify-between px-3 py-2 text-sm ${activeCat === c.id ? "font-semibold text-primary" : ""}`}
+                          >
+                            {c.name}
+                            <span className="text-xs text-muted-foreground">{count}</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditingCatId(c.id);
+                              setEditingCatName(c.name);
+                            }}
+                            className="px-2 opacity-0 transition group-hover:opacity-100"
+                            aria-label="Renomear"
+                          >
+                            <Pencil className="h-3.5 w-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => removeCategory(c.id)}
+                            className="px-2 opacity-0 transition group-hover:opacity-100 hover:text-destructive"
+                            aria-label="Excluir"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
             </div>
           </aside>
 
@@ -277,8 +339,14 @@ function StickersAdmin() {
           <section className="space-y-4 rounded-2xl border border-border bg-card/40 p-4">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
-                <h2 className="text-lg font-semibold">{activeCat ? cats.find((c) => c.id === activeCat)?.name ?? "Categoria" : "Sem categoria"}</h2>
-                <p className="text-xs text-muted-foreground">{filtered.length} sticker(s) · WEBP, PNG (até 1MB)</p>
+                <h2 className="text-lg font-semibold">
+                  {activeCat
+                    ? (cats.find((c) => c.id === activeCat)?.name ?? "Categoria")
+                    : "Sem categoria"}
+                </h2>
+                <p className="text-xs text-muted-foreground">
+                  {filtered.length} sticker(s) · WEBP, PNG (até 1MB)
+                </p>
               </div>
               <div>
                 <input
@@ -290,7 +358,12 @@ function StickersAdmin() {
                   className="hidden"
                 />
                 <Button onClick={() => fileRef.current?.click()} disabled={busy}>
-                  {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />} Enviar stickers
+                  {busy ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Upload className="mr-2 h-4 w-4" />
+                  )}{" "}
+                  Enviar stickers
                 </Button>
               </div>
             </div>
@@ -310,11 +383,19 @@ function StickersAdmin() {
                       e.dataTransfer.effectAllowed = "move";
                       e.dataTransfer.setData("text/sticker-id", s.id);
                     }}
-                    onDragEnd={() => { setDraggingId(null); setDragOverCat(null); }}
+                    onDragEnd={() => {
+                      setDraggingId(null);
+                      setDragOverCat(null);
+                    }}
                     className={`group relative flex cursor-grab flex-col items-center gap-1 rounded-xl border border-border bg-background/60 p-2 active:cursor-grabbing ${!s.active ? "opacity-50" : ""} ${draggingId === s.id ? "opacity-40" : ""}`}
                   >
                     <div className="aspect-square w-full overflow-hidden rounded-lg bg-muted/30 p-2">
-                      <img src={s.public_url} alt={s.name} loading="lazy" className="h-full w-full object-contain" />
+                      <img
+                        src={s.public_url}
+                        alt={s.name}
+                        loading="lazy"
+                        className="h-full w-full object-contain"
+                      />
                     </div>
                     {editingStickerId === s.id ? (
                       <div className="flex w-full items-center gap-1">
@@ -324,12 +405,17 @@ function StickersAdmin() {
                           autoFocus
                           className="h-7 text-xs"
                         />
-                        <Button size="icon" variant="ghost" onClick={() => renameSticker(s.id)}><Check className="h-3.5 w-3.5" /></Button>
+                        <Button size="icon" variant="ghost" onClick={() => renameSticker(s.id)}>
+                          <Check className="h-3.5 w-3.5" />
+                        </Button>
                       </div>
                     ) : (
                       <button
                         type="button"
-                        onClick={() => { setEditingStickerId(s.id); setEditingStickerName(s.name); }}
+                        onClick={() => {
+                          setEditingStickerId(s.id);
+                          setEditingStickerName(s.name);
+                        }}
                         className="line-clamp-1 w-full text-center text-xs text-muted-foreground hover:text-foreground"
                         title={s.name}
                       >
@@ -337,7 +423,11 @@ function StickersAdmin() {
                       </button>
                     )}
                     <div className="flex w-full items-center justify-between pt-1">
-                      <Switch checked={s.active} onCheckedChange={() => toggleActive(s)} aria-label="Ativo" />
+                      <Switch
+                        checked={s.active}
+                        onCheckedChange={() => toggleActive(s)}
+                        aria-label="Ativo"
+                      />
                       <button
                         type="button"
                         onClick={() => removeSticker(s)}

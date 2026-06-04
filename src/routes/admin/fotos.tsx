@@ -8,8 +8,26 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { ArrowLeft, Check, X, RefreshCw, Settings, History, Image as ImageIcon, Eye, Trash2, ExternalLink } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import {
+  ArrowLeft,
+  Check,
+  X,
+  RefreshCw,
+  Settings,
+  History,
+  Image as ImageIcon,
+  Eye,
+  Trash2,
+  ExternalLink,
+} from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { PhotoImg } from "@/components/PhotoImg";
 
@@ -138,7 +156,7 @@ function AdminFotos() {
             console.warn("signed url failed", e);
           }
         }
-      })
+      }),
     );
     setLogs([...items]);
     void loadProfilesFor(Array.from(new Set(items.map((i) => i.user_id))));
@@ -394,15 +412,23 @@ function AdminFotos() {
                             {prof?.full_name ?? "Perfil sem nome"}
                           </div>
                           <div className="text-xs text-muted-foreground">
-                            {items.length} foto(s) • {items.filter((i) => i.scope === "avatar").length} avatar •{" "}
+                            {items.length} foto(s) •{" "}
+                            {items.filter((i) => i.scope === "avatar").length} avatar •{" "}
                             {items.filter((i) => i.scope === "extra").length} adicional
                           </div>
                         </div>
                       </header>
                       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                         {items.map((it) => (
-                          <div key={it.id} className="overflow-hidden rounded-xl border bg-background">
-                            <PhotoImg src={it.photo_url} alt="" className="aspect-square w-full object-cover" />
+                          <div
+                            key={it.id}
+                            className="overflow-hidden rounded-xl border bg-background"
+                          >
+                            <PhotoImg
+                              src={it.photo_url}
+                              alt=""
+                              className="aspect-square w-full object-cover"
+                            />
                             <div className="space-y-2 p-3">
                               <div className="flex items-center justify-between text-xs">
                                 <span
@@ -419,7 +445,9 @@ function AdminFotos() {
                                 </span>
                               </div>
                               {it.ai_result?.reason && (
-                                <p className="text-xs text-muted-foreground">{it.ai_result.reason}</p>
+                                <p className="text-xs text-muted-foreground">
+                                  {it.ai_result.reason}
+                                </p>
                               )}
                               {queueStatus === "pending" && (
                                 <div className="flex gap-2 pt-1">
@@ -498,18 +526,18 @@ function AdminFotos() {
                             >
                               {it.photo_url ? (
                                 <PhotoImg
-                                src={it.signed_url ?? it.photo_url}
+                                  src={it.signed_url ?? it.photo_url}
                                   alt=""
                                   className="h-12 w-12 rounded-md object-cover"
                                   loading="lazy"
                                 />
-                            ) : it.signed_url ? (
-                              <PhotoImg
-                                src={it.signed_url}
-                                alt=""
-                                className="h-12 w-12 rounded-md object-cover"
-                                loading="lazy"
-                              />
+                              ) : it.signed_url ? (
+                                <PhotoImg
+                                  src={it.signed_url}
+                                  alt=""
+                                  className="h-12 w-12 rounded-md object-cover"
+                                  loading="lazy"
+                                />
                               ) : (
                                 <div className="flex h-12 w-12 items-center justify-center rounded-md bg-muted text-muted-foreground">
                                   <ImageIcon className="h-4 w-4" />
@@ -533,7 +561,7 @@ function AdminFotos() {
                                 </span>
                                 <span
                                   className={`rounded-full px-2 py-0.5 text-xs ${decisionClass(
-                                    it.decision
+                                    it.decision,
                                   )}`}
                                 >
                                   {decisionLabel(it.decision)}
@@ -615,13 +643,15 @@ function AdminFotos() {
                 </div>
               )}
               <div className="mt-6 flex items-center gap-3">
-                <Button onClick={() => void saveSettings()} disabled={savingSettings || !draftSettings}>
+                <Button
+                  onClick={() => void saveSettings()}
+                  disabled={savingSettings || !draftSettings}
+                >
                   Salvar limiares
                 </Button>
                 {settings && (
                   <span className="text-xs text-muted-foreground">
-                    Última atualização:{" "}
-                    {new Date(settings.updated_at).toLocaleString("pt-BR")}
+                    Última atualização: {new Date(settings.updated_at).toLocaleString("pt-BR")}
                   </span>
                 )}
               </div>
@@ -634,85 +664,101 @@ function AdminFotos() {
           <DialogHeader>
             <DialogTitle>Análise da foto</DialogTitle>
             <DialogDescription>
-              Visualização completa para auditoria. Você pode abrir o perfil ou apagar a foto definitivamente.
+              Visualização completa para auditoria. Você pode abrir o perfil ou apagar a foto
+              definitivamente.
             </DialogDescription>
           </DialogHeader>
-          {openLog && (() => {
-            const prof = profiles.get(openLog.user_id);
-            return (
-              <div className="grid gap-4 sm:grid-cols-[1fr_1fr]">
-                <div className="overflow-hidden rounded-xl border bg-muted">
-                  {openLog.photo_url || openLog.signed_url ? (
-                    <PhotoImg
-                      src={openLog.signed_url ?? openLog.photo_url ?? ""}
-                      alt=""
-                      className="h-full max-h-[60vh] w-full object-contain"
-                    />
-                  ) : (
-                    <div className="flex aspect-square w-full items-center justify-center text-sm text-muted-foreground">
-                      Foto não disponível
-                    </div>
-                  )}
-                </div>
-                <div className="space-y-3 text-sm">
-                  <div className="flex items-center gap-3">
-                    {prof?.photo_url ? (
-                      <PhotoImg src={prof.photo_url} alt="" className="h-12 w-12 rounded-full object-cover" />
+          {openLog &&
+            (() => {
+              const prof = profiles.get(openLog.user_id);
+              return (
+                <div className="grid gap-4 sm:grid-cols-[1fr_1fr]">
+                  <div className="overflow-hidden rounded-xl border bg-muted">
+                    {openLog.photo_url || openLog.signed_url ? (
+                      <PhotoImg
+                        src={openLog.signed_url ?? openLog.photo_url ?? ""}
+                        alt=""
+                        className="h-full max-h-[60vh] w-full object-contain"
+                      />
                     ) : (
-                      <div className="h-12 w-12 rounded-full bg-muted" />
-                    )}
-                    <div>
-                      <div className="font-medium">{prof?.full_name ?? "Sem nome"}</div>
-                      <div className="text-xs text-muted-foreground">
-                        {prof?.age ? `${prof.age} anos` : ""}
-                        {prof?.city ? ` • ${prof.city}${prof?.state ? "/" + prof.state : ""}` : ""}
+                      <div className="flex aspect-square w-full items-center justify-center text-sm text-muted-foreground">
+                        Foto não disponível
                       </div>
-                      {prof?.church && (
-                        <div className="text-xs text-muted-foreground">{prof.church}</div>
+                    )}
+                  </div>
+                  <div className="space-y-3 text-sm">
+                    <div className="flex items-center gap-3">
+                      {prof?.photo_url ? (
+                        <PhotoImg
+                          src={prof.photo_url}
+                          alt=""
+                          className="h-12 w-12 rounded-full object-cover"
+                        />
+                      ) : (
+                        <div className="h-12 w-12 rounded-full bg-muted" />
                       )}
-                      {prof?.status && (
-                        <div className="mt-1 text-xs">
-                          <span className="rounded-full bg-muted px-2 py-0.5">Status: {prof.status}</span>
+                      <div>
+                        <div className="font-medium">{prof?.full_name ?? "Sem nome"}</div>
+                        <div className="text-xs text-muted-foreground">
+                          {prof?.age ? `${prof.age} anos` : ""}
+                          {prof?.city
+                            ? ` • ${prof.city}${prof?.state ? "/" + prof.state : ""}`
+                            : ""}
                         </div>
+                        {prof?.church && (
+                          <div className="text-xs text-muted-foreground">{prof.church}</div>
+                        )}
+                        {prof?.status && (
+                          <div className="mt-1 text-xs">
+                            <span className="rounded-full bg-muted px-2 py-0.5">
+                              Status: {prof.status}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2 text-xs">
+                      <span
+                        className={`rounded-full px-2 py-0.5 ${openLog.scope === "avatar" ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}
+                      >
+                        {openLog.scope === "avatar" ? "Foto principal" : "Foto adicional"}
+                      </span>
+                      <span
+                        className={`rounded-full px-2 py-0.5 ${decisionClass(openLog.decision)}`}
+                      >
+                        {decisionLabel(openLog.decision)}
+                      </span>
+                      {openLog.confidence !== null && (
+                        <span className="text-muted-foreground">
+                          Confiança: {Math.round(openLog.confidence * 100)}%
+                        </span>
                       )}
                     </div>
-                  </div>
-                  <div className="flex flex-wrap items-center gap-2 text-xs">
-                    <span className={`rounded-full px-2 py-0.5 ${openLog.scope === "avatar" ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
-                      {openLog.scope === "avatar" ? "Foto principal" : "Foto adicional"}
-                    </span>
-                    <span className={`rounded-full px-2 py-0.5 ${decisionClass(openLog.decision)}`}>
-                      {decisionLabel(openLog.decision)}
-                    </span>
-                    {openLog.confidence !== null && (
-                      <span className="text-muted-foreground">
-                        Confiança: {Math.round(openLog.confidence * 100)}%
-                      </span>
+                    {openLog.reason && (
+                      <p className="text-xs text-muted-foreground">{openLog.reason}</p>
                     )}
-                  </div>
-                  {openLog.reason && (
-                    <p className="text-xs text-muted-foreground">{openLog.reason}</p>
-                  )}
-                  <p className="text-xs text-muted-foreground">
-                    {new Date(openLog.created_at).toLocaleString("pt-BR")}
-                  </p>
-                  <div className="pt-2">
-                    <Label htmlFor="delete-reason" className="text-xs">
-                      Motivo da remoção (enviado ao usuário)
-                    </Label>
-                    <Textarea
-                      id="delete-reason"
-                      value={deleteReason}
-                      onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setDeleteReason(e.target.value)}
-                      placeholder="Ex.: Foto contém conteúdo inadequado, viola as diretrizes…"
-                      rows={3}
-                      className="mt-1"
-                    />
+                    <p className="text-xs text-muted-foreground">
+                      {new Date(openLog.created_at).toLocaleString("pt-BR")}
+                    </p>
+                    <div className="pt-2">
+                      <Label htmlFor="delete-reason" className="text-xs">
+                        Motivo da remoção (enviado ao usuário)
+                      </Label>
+                      <Textarea
+                        id="delete-reason"
+                        value={deleteReason}
+                        onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
+                          setDeleteReason(e.target.value)
+                        }
+                        placeholder="Ex.: Foto contém conteúdo inadequado, viola as diretrizes…"
+                        rows={3}
+                        className="mt-1"
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
-            );
-          })()}
+              );
+            })()}
           <DialogFooter className="flex flex-col gap-2 sm:flex-row">
             {openLog && (
               <Button asChild variant="outline" className="sm:mr-auto">
@@ -721,7 +767,15 @@ function AdminFotos() {
                 </Link>
               </Button>
             )}
-            <Button variant="ghost" onClick={() => { setDeleteReason(""); setOpenLog(null); }}>Fechar</Button>
+            <Button
+              variant="ghost"
+              onClick={() => {
+                setDeleteReason("");
+                setOpenLog(null);
+              }}
+            >
+              Fechar
+            </Button>
             <Button
               variant="destructive"
               onClick={() => openLog && deleteLogPhoto(openLog)}
@@ -770,18 +824,18 @@ function decisionLabel(d: LogItem["decision"]) {
   return d === "approved"
     ? "Aprovada"
     : d === "needs_review"
-    ? "Revisão"
-    : d === "rejected"
-    ? "Rejeitada"
-    : "IA indisponível";
+      ? "Revisão"
+      : d === "rejected"
+        ? "Rejeitada"
+        : "IA indisponível";
 }
 
 function decisionClass(d: LogItem["decision"]) {
   return d === "approved"
     ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
     : d === "needs_review"
-    ? "bg-amber-500/10 text-amber-700 dark:text-amber-400"
-    : d === "rejected"
-    ? "bg-red-500/10 text-red-700 dark:text-red-400"
-    : "bg-muted text-muted-foreground";
+      ? "bg-amber-500/10 text-amber-700 dark:text-amber-400"
+      : d === "rejected"
+        ? "bg-red-500/10 text-red-700 dark:text-red-400"
+        : "bg-muted text-muted-foreground";
 }

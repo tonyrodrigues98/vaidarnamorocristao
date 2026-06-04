@@ -2,19 +2,26 @@ import { useEffect, useMemo, useState } from "react";
 import { Book, BookOpen, Hash, Loader2, X } from "lucide-react";
 import bibleData from "@/data/bible-pt.json";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 import { Button } from "@/components/ui/button";
 
 type BibleBook = { a: string; n: string; v: number[] };
 const BOOKS = bibleData as BibleBook[];
 
 export type BibleSelection = {
-  book: string;        // PT name
-  abbrev: string;      // 'gn'
+  book: string; // PT name
+  abbrev: string; // 'gn'
   chapter: number;
   verse: number;
-  reference: string;   // "João 3:16"
-  text: string;        // verse content
+  reference: string; // "João 3:16"
+  text: string; // verse content
 };
 
 export interface BibleVerseSelectorProps {
@@ -43,7 +50,7 @@ export function BibleVerseSelector({ value, onChange }: BibleVerseSelectorProps)
   const [chapterOpen, setChapterOpen] = useState(false);
   const [verseOpen, setVerseOpen] = useState(false);
   const [selBook, setSelBook] = useState<BibleBook | null>(
-    value ? BOOKS.find((b) => b.a === value.abbrev) ?? null : null,
+    value ? (BOOKS.find((b) => b.a === value.abbrev) ?? null) : null,
   );
   const [selChapter, setSelChapter] = useState<number | null>(value?.chapter ?? null);
   const [selVerse, setSelVerse] = useState<number | null>(value?.verse ?? null);
@@ -142,7 +149,12 @@ export function BibleVerseSelector({ value, onChange }: BibleVerseSelectorProps)
         {/* Chapter */}
         <Popover open={chapterOpen} onOpenChange={setChapterOpen}>
           <PopoverTrigger asChild>
-            <Button variant="outline" type="button" disabled={!selBook} className="justify-between font-normal">
+            <Button
+              variant="outline"
+              type="button"
+              disabled={!selBook}
+              className="justify-between font-normal"
+            >
               <span className="flex items-center gap-2">
                 <BookOpen className="h-4 w-4 text-[var(--rose)]" />
                 {selChapter ? `Cap. ${selChapter}` : "Capítulo"}
@@ -175,7 +187,12 @@ export function BibleVerseSelector({ value, onChange }: BibleVerseSelectorProps)
         {/* Verse */}
         <Popover open={verseOpen} onOpenChange={setVerseOpen}>
           <PopoverTrigger asChild>
-            <Button variant="outline" type="button" disabled={!selChapter} className="justify-between font-normal">
+            <Button
+              variant="outline"
+              type="button"
+              disabled={!selChapter}
+              className="justify-between font-normal"
+            >
               <span className="flex items-center gap-2">
                 <Hash className="h-4 w-4 text-[var(--rose)]" />
                 {selVerse ? `v. ${selVerse}` : "Versículo"}
@@ -233,7 +250,9 @@ export function BibleVerseSelector({ value, onChange }: BibleVerseSelectorProps)
             ) : verseText ? (
               `"${verseText}"`
             ) : (
-              <span className="text-muted-foreground">Texto não disponível — apenas a referência será salva.</span>
+              <span className="text-muted-foreground">
+                Texto não disponível — apenas a referência será salva.
+              </span>
             )}
           </p>
         </div>

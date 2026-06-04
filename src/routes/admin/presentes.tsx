@@ -28,7 +28,13 @@ import { Textarea } from "@/components/ui/textarea";
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 import { Switch } from "@/components/ui/switch";
 
@@ -155,50 +161,41 @@ function AdminPresentesPage() {
 
     items.splice(targetIndex, 0, moved);
 
-const optimisticItems = items.map(
-  (gift, index) => ({
-    ...gift,
-    sort_order: index,
-  })
-);
+    const optimisticItems = items.map((gift, index) => ({
+      ...gift,
+      sort_order: index,
+    }));
 
-setGifts(optimisticItems);
+    setGifts(optimisticItems);
 
-try {
+    try {
       const rarityBase = {
-  common: 0,
-  rare: 1000,
-  epic: 2000,
-  legendary: 3000,
-  exclusive: 4000,
-};
+        common: 0,
+        rare: 1000,
+        epic: 2000,
+        legendary: 3000,
+        exclusive: 4000,
+      };
 
-const rarityCounters = {
-  common: 0,
-  rare: 0,
-  epic: 0,
-  legendary: 0,
-  exclusive: 0,
-};
+      const rarityCounters = {
+        common: 0,
+        rare: 0,
+        epic: 0,
+        legendary: 0,
+        exclusive: 0,
+      };
 
-for (const gift of items) {
+      for (const gift of items) {
+        const base = rarityBase[gift.rarity];
 
-  const base =
-    rarityBase[gift.rarity];
+        const nextOrder = base + rarityCounters[gift.rarity];
 
-  const nextOrder =
-    base +
-    rarityCounters[gift.rarity];
+        rarityCounters[gift.rarity]++;
 
-  rarityCounters[gift.rarity]++;
-
-  await updateGift(
-    gift.id,
-    {
-      sort_order: nextOrder,
-    }
-  );
-}
+        await updateGift(gift.id, {
+          sort_order: nextOrder,
+        });
+      }
     } catch (err) {
       console.error(err);
     }
@@ -372,11 +369,15 @@ for (const gift of items) {
 
                         const fileName = `${Date.now()}-${file.name}`;
 
-                        const { error } = await supabase.storage.from("gift-images").upload(fileName, file);
+                        const { error } = await supabase.storage
+                          .from("gift-images")
+                          .upload(fileName, file);
 
                         if (error) throw error;
 
-                        const { data: publicUrlData } = supabase.storage.from("gift-images").getPublicUrl(fileName);
+                        const { data: publicUrlData } = supabase.storage
+                          .from("gift-images")
+                          .getPublicUrl(fileName);
 
                         setForm({
                           ...form,
@@ -492,7 +493,9 @@ for (const gift of items) {
                     setCreateOpen(false);
                     toast.success("Presente criado com sucesso.");
                   } catch (err) {
-                    toast.error(err instanceof Error ? err.message : "Não foi possível criar o presente.");
+                    toast.error(
+                      err instanceof Error ? err.message : "Não foi possível criar o presente.",
+                    );
                   } finally {
                     setSaving(false);
                   }
@@ -566,11 +569,15 @@ for (const gift of items) {
 
                         const fileName = `${Date.now()}-${file.name}`;
 
-                        const { error } = await supabase.storage.from("gift-images").upload(fileName, file);
+                        const { error } = await supabase.storage
+                          .from("gift-images")
+                          .upload(fileName, file);
 
                         if (error) throw error;
 
-                        const { data } = supabase.storage.from("gift-images").getPublicUrl(fileName);
+                        const { data } = supabase.storage
+                          .from("gift-images")
+                          .getPublicUrl(fileName);
 
                         setForm({
                           ...form,
@@ -584,7 +591,11 @@ for (const gift of items) {
                 </label>
 
                 {form.image_url && (
-                  <img src={form.image_url} alt="preview" className="h-56 w-full rounded-xl object-cover" />
+                  <img
+                    src={form.image_url}
+                    alt="preview"
+                    className="h-56 w-full rounded-xl object-cover"
+                  />
                 )}
               </div>
 
@@ -791,7 +802,9 @@ ${draggingId === gift.id ? "opacity-40" : ""}
                   </div>
 
                   <div className="absolute right-3 top-3">
-                    <Badge className={RARITY_STYLE[gift.rarity].chip}>{RARITY_STYLE[gift.rarity].label}</Badge>
+                    <Badge className={RARITY_STYLE[gift.rarity].chip}>
+                      {RARITY_STYLE[gift.rarity].label}
+                    </Badge>
                   </div>
                 </div>
 

@@ -44,7 +44,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import {
   Dialog,
@@ -159,7 +165,18 @@ function Admin() {
         "flags",
         "interests",
       ];
-    if (isAdmin) return ["pending", "approved", "rejected", "banned", "deactivated", "reports", "posts", "restricted_words", "flags"];
+    if (isAdmin)
+      return [
+        "pending",
+        "approved",
+        "rejected",
+        "banned",
+        "deactivated",
+        "reports",
+        "posts",
+        "restricted_words",
+        "flags",
+      ];
     if (isApresentador) return ["pre_cadastros", "reports", "posts", "restricted_words", "flags"];
     if (isModerador) return ["reports", "posts", "restricted_words", "flags"];
     return [];
@@ -197,7 +214,12 @@ function Admin() {
 
   const [busy, setBusy] = useState<string | null>(null);
   const [reports, setReports] = useState<
-    Array<Report & { reporter?: { full_name: string | null }; reported?: { full_name: string | null; id: string } }>
+    Array<
+      Report & {
+        reporter?: { full_name: string | null };
+        reported?: { full_name: string | null; id: string };
+      }
+    >
   >([]);
   const [posts, setPosts] = useState<DailyPost[]>([]);
   const [users, setUsers] = useState<AdminUserRowWithSupport[]>([]);
@@ -218,7 +240,10 @@ function Admin() {
 
   async function load(status: TabKey) {
     if (status === "reports") {
-      const { data: rs, error } = await supabase.from("reports").select("*").order("created_at", { ascending: false });
+      const { data: rs, error } = await supabase
+        .from("reports")
+        .select("*")
+        .order("created_at", { ascending: false });
       if (error) {
         toast.error(error.message);
         return;
@@ -264,7 +289,11 @@ function Admin() {
       }
       const roleMap = new Map<string, AppRole>();
       const supportMap = new Map<string, boolean>();
-      for (const r of (roles ?? []) as Array<{ user_id: string; role: AppRole; is_support_agent: boolean | null }>) {
+      for (const r of (roles ?? []) as Array<{
+        user_id: string;
+        role: AppRole;
+        is_support_agent: boolean | null;
+      }>) {
         const cur = roleMap.get(r.user_id);
         if (!cur || ROLE_PRIORITY.indexOf(r.role) < ROLE_PRIORITY.indexOf(cur)) {
           roleMap.set(r.user_id, r.role);
@@ -331,7 +360,9 @@ function Admin() {
         <main className="mx-auto max-w-md px-4 py-20 text-center">
           <ShieldAlert className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
           <h1 className="text-2xl">Acesso restrito</h1>
-          <p className="mt-2 text-sm text-muted-foreground">Esta página é apenas para administradores.</p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Esta página é apenas para administradores.
+          </p>
         </main>
       </div>
     );
@@ -359,7 +390,9 @@ function Admin() {
       toast.error(delErr.message);
       return;
     }
-    const { error: insErr } = await supabase.from("user_roles").insert({ user_id: userId, role: newRole });
+    const { error: insErr } = await supabase
+      .from("user_roles")
+      .insert({ user_id: userId, role: newRole });
     setBusy(null);
     if (insErr) {
       toast.error(insErr.message);
@@ -421,7 +454,9 @@ function Admin() {
       }
       toast.success("Pré-cadastro atualizado");
     } else {
-      const { error } = await supabase.from("pre_cadastros").insert({ ...pcDraft, created_by: user.id });
+      const { error } = await supabase
+        .from("pre_cadastros")
+        .insert({ ...pcDraft, created_by: user.id });
       setPcBusy(false);
       if (error) {
         toast.error(error.message);
@@ -475,7 +510,10 @@ function Admin() {
   }
 
   async function togglePublish(p: DailyPost) {
-    const { error } = await supabase.from("daily_posts").update({ published: !p.published }).eq("id", p.id);
+    const { error } = await supabase
+      .from("daily_posts")
+      .update({ published: !p.published })
+      .eq("id", p.id);
     if (error) toast.error(error.message);
     else load("posts");
   }
@@ -521,7 +559,12 @@ function Admin() {
       return;
     }
     setEditBusy(true);
-    const patch: { title: string; content: string; bible_reference: string | null; bible_text: string | null } = {
+    const patch: {
+      title: string;
+      content: string;
+      bible_reference: string | null;
+      bible_text: string | null;
+    } = {
       title: t,
       content: c,
       bible_reference: editingPost.kind === "devotional" ? (editBibleSel?.reference ?? null) : null,
@@ -761,16 +804,23 @@ function Admin() {
                 >
                   <DialogContent className="max-w-2xl">
                     <DialogHeader>
-                      <DialogTitle>Editar {editingPost?.kind === "devotional" ? "devocional" : "notícia"}</DialogTitle>
+                      <DialogTitle>
+                        Editar {editingPost?.kind === "devotional" ? "devocional" : "notícia"}
+                      </DialogTitle>
                       <DialogDescription>
-                        Atualize o conteúdo {editingPost?.kind === "devotional" ? "e a referência bíblica" : ""}. As
+                        Atualize o conteúdo{" "}
+                        {editingPost?.kind === "devotional" ? "e a referência bíblica" : ""}. As
                         alterações ficam visíveis imediatamente.
                       </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-3">
                       <div>
                         <Label className="text-xs">Título</Label>
-                        <Input value={editTitle} onChange={(e) => setEditTitle(e.target.value)} maxLength={200} />
+                        <Input
+                          value={editTitle}
+                          onChange={(e) => setEditTitle(e.target.value)}
+                          maxLength={200}
+                        />
                       </div>
                       {editingPost?.kind === "devotional" && (
                         <div className="rounded-xl border border-dashed border-[var(--rose)]/30 bg-[var(--petal)]/20 p-3">
@@ -793,7 +843,11 @@ function Admin() {
                       </div>
                     </div>
                     <DialogFooter>
-                      <Button variant="ghost" onClick={() => setEditingPost(null)} disabled={editBusy}>
+                      <Button
+                        variant="ghost"
+                        onClick={() => setEditingPost(null)}
+                        disabled={editBusy}
+                      >
                         Cancelar
                       </Button>
                       <Button onClick={saveEditPost} disabled={editBusy}>
@@ -837,7 +891,10 @@ function Admin() {
                               <Button
                                 size="sm"
                                 onClick={async () => {
-                                  await supabase.from("reports").update({ status: "reviewed" }).eq("id", r.id);
+                                  await supabase
+                                    .from("reports")
+                                    .update({ status: "reviewed" })
+                                    .eq("id", r.id);
                                   toast.success("Marcada como revisada");
                                   load("reports");
                                 }}
@@ -848,7 +905,10 @@ function Admin() {
                                 size="sm"
                                 variant="ghost"
                                 onClick={async () => {
-                                  await supabase.from("reports").update({ status: "dismissed" }).eq("id", r.id);
+                                  await supabase
+                                    .from("reports")
+                                    .update({ status: "dismissed" })
+                                    .eq("id", r.id);
                                   load("reports");
                                 }}
                               >
@@ -886,7 +946,11 @@ function Admin() {
                         >
                           <div className="h-24 w-24 shrink-0 overflow-hidden rounded-2xl bg-muted">
                             {r.photo_url ? (
-                              <PhotoImg src={r.photo_url} alt="" className="h-full w-full object-cover" />
+                              <PhotoImg
+                                src={r.photo_url}
+                                alt=""
+                                className="h-full w-full object-cover"
+                              />
                             ) : (
                               <div className="flex h-full w-full items-center justify-center bg-gradient-love text-2xl text-white">
                                 {r.full_name.charAt(0)}
@@ -937,10 +1001,17 @@ function Admin() {
                 ) : (
                   <div className="grid gap-4">
                     {rows.map((r) => (
-                      <div key={r.id} className="glass flex flex-col gap-4 rounded-2xl p-5 shadow-soft sm:flex-row">
+                      <div
+                        key={r.id}
+                        className="glass flex flex-col gap-4 rounded-2xl p-5 shadow-soft sm:flex-row"
+                      >
                         <div className="h-24 w-24 shrink-0 overflow-hidden rounded-2xl bg-muted">
                           {r.photo_url ? (
-                            <PhotoImg src={r.photo_url} alt="" className="h-full w-full object-cover" />
+                            <PhotoImg
+                              src={r.photo_url}
+                              alt=""
+                              className="h-full w-full object-cover"
+                            />
                           ) : (
                             <div className="flex h-full w-full items-center justify-center bg-gradient-love text-2xl text-white">
                               {r.full_name.charAt(0)}
@@ -967,7 +1038,9 @@ function Admin() {
                             disabled={busy === r.id}
                             onClick={async () => {
                               if (!confirm("Remover banimento e reaprovar este usuário?")) return;
-                              const { error } = await supabase.rpc("admin_unban_user", { _user_id: r.id });
+                              const { error } = await supabase.rpc("admin_unban_user", {
+                                _user_id: r.id,
+                              });
                               if (error) toast.error(error.message);
                               else {
                                 toast.success("Usuário desbanido");
@@ -993,10 +1066,17 @@ function Admin() {
                 ) : (
                   <div className="grid gap-4">
                     {rows.map((r) => (
-                      <div key={r.id} className="glass flex flex-col gap-4 rounded-2xl p-5 shadow-soft sm:flex-row">
+                      <div
+                        key={r.id}
+                        className="glass flex flex-col gap-4 rounded-2xl p-5 shadow-soft sm:flex-row"
+                      >
                         <div className="h-24 w-24 shrink-0 overflow-hidden rounded-2xl bg-muted">
                           {r.photo_url ? (
-                            <PhotoImg src={r.photo_url} alt="" className="h-full w-full object-cover" />
+                            <PhotoImg
+                              src={r.photo_url}
+                              alt=""
+                              className="h-full w-full object-cover"
+                            />
                           ) : (
                             <div className="flex h-full w-full items-center justify-center bg-gradient-love text-2xl text-white">
                               {r.full_name.charAt(0)}
@@ -1017,7 +1097,9 @@ function Admin() {
                             <Button
                               size="sm"
                               disabled={busy === r.id}
-                              onClick={() => update(r.id, { status: "approved", rejection_reason: null })}
+                              onClick={() =>
+                                update(r.id, { status: "approved", rejection_reason: null })
+                              }
                             >
                               <Check className="mr-1 h-4 w-4" /> Aprovar
                             </Button>
@@ -1029,7 +1111,10 @@ function Admin() {
                               disabled={busy === r.id}
                               onClick={() => {
                                 const reason = window.prompt("Motivo (opcional):") ?? "";
-                                update(r.id, { status: "rejected", rejection_reason: reason || null });
+                                update(r.id, {
+                                  status: "rejected",
+                                  rejection_reason: reason || null,
+                                });
                               }}
                             >
                               <X className="mr-1 h-4 w-4" /> Rejeitar
@@ -1041,7 +1126,8 @@ function Admin() {
                               variant="destructive"
                               disabled={busy === r.id}
                               onClick={() => {
-                                if (confirm("Banir esta conta?")) update(r.id, { status: "banned" });
+                                if (confirm("Banir esta conta?"))
+                                  update(r.id, { status: "banned" });
                               }}
                             >
                               <Ban className="mr-1 h-4 w-4" /> Banir
@@ -1081,12 +1167,19 @@ function UsersPanel({
   canGrantCoins: boolean;
 }) {
   if (users.length === 0) {
-    return <div className="glass rounded-2xl p-10 text-center text-muted-foreground shadow-soft">Nenhum usuário.</div>;
+    return (
+      <div className="glass rounded-2xl p-10 text-center text-muted-foreground shadow-soft">
+        Nenhum usuário.
+      </div>
+    );
   }
   return (
     <div className="grid gap-3">
       {users.map((u) => (
-        <div key={u.id} className="glass flex flex-col gap-3 rounded-2xl p-4 shadow-soft sm:flex-row sm:items-center">
+        <div
+          key={u.id}
+          className="glass flex flex-col gap-3 rounded-2xl p-4 shadow-soft sm:flex-row sm:items-center"
+        >
           <div className="h-14 w-14 shrink-0 overflow-hidden rounded-full bg-muted">
             {u.photo_url ? (
               <PhotoImg src={u.photo_url} alt="" className="h-full w-full object-cover" />
@@ -1103,11 +1196,12 @@ function UsersPanel({
               </h3>
               <RoleBadge role={u.primaryRole} />
               {u.verified && <VerifiedBadge size="sm" />}
-              {u.isSupportAgent && (u.primaryRole === "moderador" || u.primaryRole === "apresentador") && (
-                <span className="inline-flex items-center gap-1 rounded-full border border-sky-500/40 bg-sky-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-sky-500">
-                  <LifeBuoy className="h-3 w-3" /> Suporte
-                </span>
-              )}
+              {u.isSupportAgent &&
+                (u.primaryRole === "moderador" || u.primaryRole === "apresentador") && (
+                  <span className="inline-flex items-center gap-1 rounded-full border border-sky-500/40 bg-sky-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-sky-500">
+                    <LifeBuoy className="h-3 w-3" /> Suporte
+                  </span>
+                )}
               <UserBadges userId={u.id} size="xs" max={5} />
             </div>
             <p className="truncate text-xs text-muted-foreground">
@@ -1128,17 +1222,20 @@ function UsersPanel({
                 <BadgeCheck className="h-4 w-4" />
               </Button>
             )}
-            {canManageSupportAgents && (u.primaryRole === "moderador" || u.primaryRole === "apresentador") && (
-              <Button
-                size="sm"
-                variant={u.isSupportAgent ? "default" : "outline"}
-                disabled={busy === u.id}
-                onClick={() => onToggleSupportAgent(u.id, u.primaryRole, u.isSupportAgent)}
-                title={u.isSupportAgent ? "Revogar acesso ao suporte" : "Conceder acesso ao suporte"}
-              >
-                <LifeBuoy className="h-4 w-4" />
-              </Button>
-            )}
+            {canManageSupportAgents &&
+              (u.primaryRole === "moderador" || u.primaryRole === "apresentador") && (
+                <Button
+                  size="sm"
+                  variant={u.isSupportAgent ? "default" : "outline"}
+                  disabled={busy === u.id}
+                  onClick={() => onToggleSupportAgent(u.id, u.primaryRole, u.isSupportAgent)}
+                  title={
+                    u.isSupportAgent ? "Revogar acesso ao suporte" : "Conceder acesso ao suporte"
+                  }
+                >
+                  <LifeBuoy className="h-4 w-4" />
+                </Button>
+              )}
             {canGrantCoins && <GrantCoinsButton userId={u.id} userName={u.full_name} />}
             <div className="flex-1 sm:w-52">
               <Select
@@ -1202,7 +1299,8 @@ function GrantCoinsButton({ userId, userName }: { userId: string; userName: stri
         <DialogHeader>
           <DialogTitle>Adicionar moedas</DialogTitle>
           <DialogDescription>
-            Adicione moedas ao saldo de <strong>{userName}</strong>. O saldo máximo por conta é 500 moedas.
+            Adicione moedas ao saldo de <strong>{userName}</strong>. O saldo máximo por conta é 500
+            moedas.
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-2">
@@ -1270,7 +1368,8 @@ function PreCadastrosPanel({
   currentUserId: string | null;
   isSuperAdmin: boolean;
 }) {
-  const set = <K extends keyof PreCadastro>(k: K, v: PreCadastro[K] | null) => setDraft({ ...draft, [k]: v });
+  const set = <K extends keyof PreCadastro>(k: K, v: PreCadastro[K] | null) =>
+    setDraft({ ...draft, [k]: v });
   const numOrNull = (s: string) => (s.trim() === "" ? null : Number(s));
   const [uploading, setUploading] = useState(false);
   const [viewing, setViewing] = useState<PreCadastro | null>(null);
@@ -1288,7 +1387,8 @@ function PreCadastrosPanel({
   const [duplicateMatch, setDuplicateMatch] = useState<PreCadastro | null>(null);
   const [duplicateDismissed, setDuplicateDismissed] = useState<string | null>(null);
 
-  const normalizeTiktok = (v: string) => v.trim().toLowerCase().replace(/^@+/, "").replace(/\s+/g, "");
+  const normalizeTiktok = (v: string) =>
+    v.trim().toLowerCase().replace(/^@+/, "").replace(/\s+/g, "");
 
   const currentTiktok = (draft as { tiktok_user?: string | null }).tiktok_user ?? "";
 
@@ -1305,7 +1405,11 @@ function PreCadastrosPanel({
     let cancelled = false;
     setTiktokCheckBusy(true);
     const t = setTimeout(async () => {
-      const { data, error } = await supabase.from("pre_cadastros").select("*").ilike("tiktok_user", norm).limit(5);
+      const { data, error } = await supabase
+        .from("pre_cadastros")
+        .select("*")
+        .ilike("tiktok_user", norm)
+        .limit(5);
       if (cancelled) return;
       setTiktokCheckBusy(false);
       if (error) return;
@@ -1332,7 +1436,9 @@ function PreCadastrosPanel({
   };
   const handleDismissDuplicate = () => {
     if (duplicateMatch) {
-      const t = normalizeTiktok((duplicateMatch as { tiktok_user?: string | null }).tiktok_user ?? "");
+      const t = normalizeTiktok(
+        (duplicateMatch as { tiktok_user?: string | null }).tiktok_user ?? "",
+      );
       setDuplicateDismissed(t);
     }
     setDuplicateMatch(null);
@@ -1416,7 +1522,9 @@ function PreCadastrosPanel({
       <div className="glass flex flex-wrap items-center justify-between gap-3 rounded-2xl p-5 shadow-soft">
         <div>
           <h3 className="text-lg font-semibold">Pré-cadastros</h3>
-          <p className="text-xs text-muted-foreground">Cadastre fichas, registre matches e acompanhe o casal.</p>
+          <p className="text-xs text-muted-foreground">
+            Cadastre fichas, registre matches e acompanhe o casal.
+          </p>
         </div>
         <Button onClick={startCreate}>
           <Plus className="mr-1 h-4 w-4" /> Cadastrar Ficha
@@ -1472,7 +1580,10 @@ function PreCadastrosPanel({
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             <div className="space-y-1 sm:col-span-2">
               <Label>Nome completo</Label>
-              <Input value={draft.full_name ?? ""} onChange={(e) => set("full_name", e.target.value || null)} />
+              <Input
+                value={draft.full_name ?? ""}
+                onChange={(e) => set("full_name", e.target.value || null)}
+              />
             </div>
             <div className="space-y-1 sm:col-span-2">
               <Label>Usuário do TikTok</Label>
@@ -1480,18 +1591,31 @@ function PreCadastrosPanel({
                 value={(draft as { tiktok_user?: string | null }).tiktok_user ?? ""}
                 onChange={(e) => {
                   setDuplicateDismissed(null);
-                  setDraft({ ...draft, tiktok_user: e.target.value || null } as Partial<PreCadastro>);
+                  setDraft({
+                    ...draft,
+                    tiktok_user: e.target.value || null,
+                  } as Partial<PreCadastro>);
                 }}
                 placeholder="@usuario"
               />
-              {tiktokCheckBusy && <p className="text-xs text-muted-foreground">Verificando se já existe…</p>}
-              {!tiktokCheckBusy && duplicateDismissed && normalizeTiktok(currentTiktok) === duplicateDismissed && (
-                <p className="text-xs text-amber-600">Você optou por criar uma nova ficha com este usuário.</p>
+              {tiktokCheckBusy && (
+                <p className="text-xs text-muted-foreground">Verificando se já existe…</p>
               )}
+              {!tiktokCheckBusy &&
+                duplicateDismissed &&
+                normalizeTiktok(currentTiktok) === duplicateDismissed && (
+                  <p className="text-xs text-amber-600">
+                    Você optou por criar uma nova ficha com este usuário.
+                  </p>
+                )}
             </div>
             <div className="space-y-1">
               <Label>Idade</Label>
-              <Input type="number" value={draft.age ?? ""} onChange={(e) => set("age", numOrNull(e.target.value))} />
+              <Input
+                type="number"
+                value={draft.age ?? ""}
+                onChange={(e) => set("age", numOrNull(e.target.value))}
+              />
             </div>
             <div className="space-y-1">
               <Label>Altura (cm)</Label>
@@ -1527,19 +1651,32 @@ function PreCadastrosPanel({
             </div>
             <div className="space-y-1">
               <Label>Cidade</Label>
-              <Input value={draft.city ?? ""} onChange={(e) => set("city", e.target.value || null)} />
+              <Input
+                value={draft.city ?? ""}
+                onChange={(e) => set("city", e.target.value || null)}
+              />
             </div>
             <div className="space-y-1">
               <Label>Estado (UF)</Label>
-              <Input value={draft.state ?? ""} onChange={(e) => set("state", e.target.value || null)} maxLength={2} />
+              <Input
+                value={draft.state ?? ""}
+                onChange={(e) => set("state", e.target.value || null)}
+                maxLength={2}
+              />
             </div>
             <div className="space-y-1 sm:col-span-2">
               <Label>Igreja</Label>
-              <Input value={draft.church ?? ""} onChange={(e) => set("church", e.target.value || null)} />
+              <Input
+                value={draft.church ?? ""}
+                onChange={(e) => set("church", e.target.value || null)}
+              />
             </div>
             <div className="space-y-1 sm:col-span-2">
               <Label>Sobre</Label>
-              <Textarea value={draft.bio ?? ""} onChange={(e) => set("bio", e.target.value || null)} />
+              <Textarea
+                value={draft.bio ?? ""}
+                onChange={(e) => set("bio", e.target.value || null)}
+              />
             </div>
             <div className="space-y-1">
               <Label>Idade desejada (mín)</Label>
@@ -1564,7 +1701,10 @@ function PreCadastrosPanel({
                   Ative se a distância <strong>não</strong> é problema
                 </p>
               </div>
-              <Switch checked={draft.pref_distance_ok ?? false} onCheckedChange={(v) => set("pref_distance_ok", v)} />
+              <Switch
+                checked={draft.pref_distance_ok ?? false}
+                onCheckedChange={(v) => set("pref_distance_ok", v)}
+              />
             </div>
             <div className="rounded-xl border border-border/50 bg-muted/30 p-3 sm:col-span-2 space-y-3">
               <div className="flex items-center justify-between">
@@ -1575,7 +1715,11 @@ function PreCadastrosPanel({
                 <Switch
                   checked={draft.has_children ?? false}
                   onCheckedChange={(v) =>
-                    setDraft({ ...draft, has_children: v, children_count: v ? (draft.children_count ?? null) : null })
+                    setDraft({
+                      ...draft,
+                      has_children: v,
+                      children_count: v ? (draft.children_count ?? null) : null,
+                    })
                   }
                 />
               </div>
@@ -1593,7 +1737,9 @@ function PreCadastrosPanel({
               <div className="flex items-center justify-between border-t border-border/40 pt-3">
                 <div>
                   <Label className="text-sm">Aceita pessoa com filhos?</Label>
-                  <p className="text-xs text-muted-foreground">Aceitaria um(a) parceiro(a) que já tem filhos</p>
+                  <p className="text-xs text-muted-foreground">
+                    Aceitaria um(a) parceiro(a) que já tem filhos
+                  </p>
                 </div>
                 <Switch
                   checked={draft.accepts_partner_with_children ?? false}
@@ -1617,7 +1763,10 @@ function PreCadastrosPanel({
             </div>
             <div className="space-y-1 sm:col-span-2">
               <Label>Notas internas</Label>
-              <Textarea value={draft.notes ?? ""} onChange={(e) => set("notes", e.target.value || null)} />
+              <Textarea
+                value={draft.notes ?? ""}
+                onChange={(e) => set("notes", e.target.value || null)}
+              />
             </div>
           </div>
           <DialogFooter className="mt-4">
@@ -1643,7 +1792,10 @@ function PreCadastrosPanel({
             <AlertDialogDescription>
               Encontramos uma ficha com o usuário do TikTok{" "}
               <strong>
-                @{normalizeTiktok((duplicateMatch as { tiktok_user?: string | null } | null)?.tiktok_user ?? "")}
+                @
+                {normalizeTiktok(
+                  (duplicateMatch as { tiktok_user?: string | null } | null)?.tiktok_user ?? "",
+                )}
               </strong>
               {duplicateMatch?.full_name ? (
                 <>
@@ -1682,7 +1834,9 @@ function PreCadastrosPanel({
             type="button"
             onClick={() => setFilterMatches((v) => !v)}
             className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold transition ${
-              filterMatches ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/70"
+              filterMatches
+                ? "bg-primary text-primary-foreground"
+                : "bg-muted text-muted-foreground hover:bg-muted/70"
             }`}
           >
             <Heart className="h-3 w-3" /> Matches
@@ -1715,7 +1869,10 @@ function PreCadastrosPanel({
               onEditMatch={(m) => setEditingMatch(m)}
               onDeleteMatch={async (m) => {
                 if (!confirm("Remover este match?")) return;
-                const { error } = await supabase.from("pre_cadastro_matches").delete().eq("id", m.id);
+                const { error } = await supabase
+                  .from("pre_cadastro_matches")
+                  .delete()
+                  .eq("id", m.id);
                 if (error) {
                   toast.error(error.message);
                   return;
@@ -1736,32 +1893,52 @@ function PreCadastrosPanel({
           {viewing && (
             <div className="space-y-4">
               {viewing.photo_url && (
-                <PhotoImg src={viewing.photo_url} alt="" className="w-full rounded-xl object-cover" />
+                <PhotoImg
+                  src={viewing.photo_url}
+                  alt=""
+                  className="w-full rounded-xl object-cover"
+                />
               )}
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <Field label="Idade" value={viewing.age?.toString()} />
-                <Field label="Altura" value={viewing.height_cm ? `${viewing.height_cm} cm` : null} />
+                <Field
+                  label="Altura"
+                  value={viewing.height_cm ? `${viewing.height_cm} cm` : null}
+                />
                 <Field label="Sexo" value={viewing.sex} />
                 <Field label="Estado civil" value={viewing.marital} />
                 <Field label="Cidade" value={viewing.city} />
                 <Field label="Estado" value={viewing.state} />
                 <Field label="Igreja" value={viewing.church} />
-                <Field label="TikTok" value={(viewing as { tiktok_user?: string | null }).tiktok_user} />
+                <Field
+                  label="TikTok"
+                  value={(viewing as { tiktok_user?: string | null }).tiktok_user}
+                />
               </div>
               {viewing.bio && (
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Sobre</p>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    Sobre
+                  </p>
                   <p className="mt-1 whitespace-pre-wrap text-sm">{viewing.bio}</p>
                 </div>
               )}
               <div className="rounded-xl bg-muted/50 p-3">
-                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Preferências</p>
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  Preferências
+                </p>
                 <div className="mt-2 grid grid-cols-2 gap-2 text-sm">
                   <Field label="Idade mín" value={viewing.pref_age_min?.toString()} />
                   <Field label="Idade máx" value={viewing.pref_age_max?.toString()} />
                   <Field
                     label="Distância OK"
-                    value={viewing.pref_distance_ok == null ? null : viewing.pref_distance_ok ? "Sim" : "Não"}
+                    value={
+                      viewing.pref_distance_ok == null
+                        ? null
+                        : viewing.pref_distance_ok
+                          ? "Sim"
+                          : "Não"
+                    }
                   />
                   <Field
                     label="Tem filhos"
@@ -1844,7 +2021,10 @@ function RestrictedWordsPanel() {
   const [busy, setBusy] = useState(false);
 
   async function load() {
-    const { data, error } = await supabase.from("restricted_words").select("*").order("word", { ascending: true });
+    const { data, error } = await supabase
+      .from("restricted_words")
+      .select("*")
+      .order("word", { ascending: true });
     if (error) {
       toast.error(error.message);
       return;
@@ -1887,8 +2067,8 @@ function RestrictedWordsPanel() {
       <div className="glass rounded-2xl p-5 shadow-soft">
         <h3 className="text-lg font-semibold">Palavras restritas</h3>
         <p className="mt-1 text-xs text-muted-foreground">
-          Mensagens contendo essas palavras serão bloqueadas no chat da comunidade e nas conversas privadas, com aviso
-          ao remetente.
+          Mensagens contendo essas palavras serão bloqueadas no chat da comunidade e nas conversas
+          privadas, com aviso ao remetente.
         </p>
         <div className="mt-4 flex gap-2">
           <Input
@@ -1959,7 +2139,9 @@ function PreCadastroCard({
 }) {
   const hasMatch = matches.length > 0;
   return (
-    <div className={`glass rounded-2xl p-4 shadow-soft ${hasMatch ? "ring-1 ring-pink-400/40" : ""}`}>
+    <div
+      className={`glass rounded-2xl p-4 shadow-soft ${hasMatch ? "ring-1 ring-pink-400/40" : ""}`}
+    >
       <div className="flex items-start gap-3">
         <button
           type="button"
@@ -1988,7 +2170,12 @@ function PreCadastroCard({
             )}
           </div>
           <p className="text-xs text-muted-foreground">
-            {[p.sex, p.marital, p.city && p.state ? `${p.city}/${p.state}` : p.city || p.state, p.church]
+            {[
+              p.sex,
+              p.marital,
+              p.city && p.state ? `${p.city}/${p.state}` : p.city || p.state,
+              p.church,
+            ]
               .filter(Boolean)
               .join(" · ")}
           </p>
@@ -2041,7 +2228,9 @@ function PreCadastroCard({
                     {COUPLE_STATUS_LABEL[m.status]}
                   </span>
                 )}
-                {m.internal_notes && <p className="mt-1 text-xs italic text-muted-foreground">📝 {m.internal_notes}</p>}
+                {m.internal_notes && (
+                  <p className="mt-1 text-xs italic text-muted-foreground">📝 {m.internal_notes}</p>
+                )}
               </div>
               <div className="flex gap-1">
                 <Button size="sm" variant="ghost" onClick={() => onEditMatch(m)}>
@@ -2112,7 +2301,8 @@ function MatchDialog({
 
   // Determinar sexo oposto baseado no target
   const targetSex = target?.sex ?? null;
-  const oppositeSex = targetSex === "masculino" ? "feminino" : targetSex === "feminino" ? "masculino" : null;
+  const oppositeSex =
+    targetSex === "masculino" ? "feminino" : targetSex === "feminino" ? "masculino" : null;
 
   useEffect(() => {
     if (!open) return;
@@ -2127,7 +2317,8 @@ function MatchDialog({
     }
   }, [open, editing, oppositeSex]);
 
-  const set = <K extends keyof PreMatchRow>(k: K, v: PreMatchRow[K] | null) => setDraft((d) => ({ ...d, [k]: v }));
+  const set = <K extends keyof PreMatchRow>(k: K, v: PreMatchRow[K] | null) =>
+    setDraft((d) => ({ ...d, [k]: v }));
   const numOrNull = (s: string) => (s.trim() === "" ? null : Number(s));
 
   async function runSearch(q: string) {
@@ -2279,17 +2470,29 @@ function MatchDialog({
         <DialogHeader>
           <DialogTitle>{editing ? "Editar Match" : "Novo Match"}</DialogTitle>
           <DialogDescription>
-            {target ? `Para ${target.full_name ?? "(sem nome)"}` : editing ? "Edição do match existente" : ""}
+            {target
+              ? `Para ${target.full_name ?? "(sem nome)"}`
+              : editing
+                ? "Edição do match existente"
+                : ""}
             {oppositeSex && !editing ? ` · sexo do par será ${oppositeSex}` : ""}
           </DialogDescription>
         </DialogHeader>
 
         {!editing && (
           <div className="flex gap-2">
-            <Button size="sm" variant={mode === "new" ? "default" : "outline"} onClick={() => setMode("new")}>
+            <Button
+              size="sm"
+              variant={mode === "new" ? "default" : "outline"}
+              onClick={() => setMode("new")}
+            >
               <UserPlus className="mr-1 h-4 w-4" /> Novo Match (ficha)
             </Button>
-            <Button size="sm" variant={mode === "existing" ? "default" : "outline"} onClick={() => setMode("existing")}>
+            <Button
+              size="sm"
+              variant={mode === "existing" ? "default" : "outline"}
+              onClick={() => setMode("existing")}
+            >
               <Search className="mr-1 h-4 w-4" /> Usuário Existente
             </Button>
           </div>
@@ -2297,7 +2500,11 @@ function MatchDialog({
 
         {mode === "existing" && !editing && (
           <div className="space-y-2">
-            <Input placeholder="Buscar pelo nome..." value={search} onChange={(e) => runSearch(e.target.value)} />
+            <Input
+              placeholder="Buscar pelo nome..."
+              value={search}
+              onChange={(e) => runSearch(e.target.value)}
+            />
             {results.length > 0 && (
               <div className="max-h-48 overflow-y-auto rounded-xl border border-border">
                 {results.map((r) => (
@@ -2363,7 +2570,10 @@ function MatchDialog({
           </div>
           <div className="space-y-1">
             <Label>Sexo</Label>
-            <Select value={draft.partner_sex ?? ""} onValueChange={(v) => set("partner_sex", v || null)}>
+            <Select
+              value={draft.partner_sex ?? ""}
+              onValueChange={(v) => set("partner_sex", v || null)}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Selecione" />
               </SelectTrigger>
@@ -2373,12 +2583,17 @@ function MatchDialog({
               </SelectContent>
             </Select>
             {!editing && oppositeSex && draft.partner_sex && draft.partner_sex !== oppositeSex && (
-              <p className="text-[11px] text-amber-600">Atenção: sexo cadastrado não é o oposto do principal.</p>
+              <p className="text-[11px] text-amber-600">
+                Atenção: sexo cadastrado não é o oposto do principal.
+              </p>
             )}
           </div>
           <div className="space-y-1">
             <Label>Estado civil</Label>
-            <Select value={draft.partner_marital ?? ""} onValueChange={(v) => set("partner_marital", v || null)}>
+            <Select
+              value={draft.partner_marital ?? ""}
+              onValueChange={(v) => set("partner_marital", v || null)}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Selecione" />
               </SelectTrigger>
@@ -2390,7 +2605,10 @@ function MatchDialog({
           </div>
           <div className="space-y-1">
             <Label>Cidade</Label>
-            <Input value={draft.partner_city ?? ""} onChange={(e) => set("partner_city", e.target.value || null)} />
+            <Input
+              value={draft.partner_city ?? ""}
+              onChange={(e) => set("partner_city", e.target.value || null)}
+            />
           </div>
           <div className="space-y-1">
             <Label>Estado (UF)</Label>
@@ -2402,7 +2620,10 @@ function MatchDialog({
           </div>
           <div className="space-y-1 sm:col-span-2">
             <Label>Igreja</Label>
-            <Input value={draft.partner_church ?? ""} onChange={(e) => set("partner_church", e.target.value || null)} />
+            <Input
+              value={draft.partner_church ?? ""}
+              onChange={(e) => set("partner_church", e.target.value || null)}
+            />
           </div>
           <div className="rounded-xl border border-border/50 bg-muted/30 p-3 sm:col-span-2 space-y-3">
             <div className="flex items-center justify-between">
@@ -2432,7 +2653,10 @@ function MatchDialog({
           </div>
           <div className="space-y-1 sm:col-span-2">
             <Label>Status do casal</Label>
-            <Select value={draft.status ?? ""} onValueChange={(v) => set("status", (v || null) as CoupleStatus | null)}>
+            <Select
+              value={draft.status ?? ""}
+              onValueChange={(v) => set("status", (v || null) as CoupleStatus | null)}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="(sem status)" />
               </SelectTrigger>
@@ -2465,7 +2689,13 @@ function MatchDialog({
   );
 }
 
-function FlagsPanel({ isSuperAdmin, currentUserId }: { isSuperAdmin: boolean; currentUserId: string | null }) {
+function FlagsPanel({
+  isSuperAdmin,
+  currentUserId,
+}: {
+  isSuperAdmin: boolean;
+  currentUserId: string | null;
+}) {
   type FlagRow = {
     id: string;
     message_id: string;
@@ -2474,9 +2704,9 @@ function FlagsPanel({ isSuperAdmin, currentUserId }: { isSuperAdmin: boolean; cu
     created_at: string;
   };
   const [flags, setFlags] = useState<FlagRow[]>([]);
-  const [messages, setMessages] = useState<Record<string, { content: string; sender_id: string; created_at: string }>>(
-    {},
-  );
+  const [messages, setMessages] = useState<
+    Record<string, { content: string; sender_id: string; created_at: string }>
+  >({});
   const [profs, setProfs] = useState<Record<string, { full_name: string | null }>>({});
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editText, setEditText] = useState("");
@@ -2494,10 +2724,16 @@ function FlagsPanel({ isSuperAdmin, currentUserId }: { isSuperAdmin: boolean; cu
     setFlags(list);
     const msgIds = Array.from(new Set(list.map((f) => f.message_id)));
     const { data: msgs } = msgIds.length
-      ? await supabase.from("global_messages").select("id, content, sender_id, created_at").in("id", msgIds)
-      : { data: [] as Array<{ id: string; content: string; sender_id: string; created_at: string }> };
+      ? await supabase
+          .from("global_messages")
+          .select("id, content, sender_id, created_at")
+          .in("id", msgIds)
+      : {
+          data: [] as Array<{ id: string; content: string; sender_id: string; created_at: string }>,
+        };
     const mMap: Record<string, { content: string; sender_id: string; created_at: string }> = {};
-    for (const m of msgs ?? []) mMap[m.id] = { content: m.content, sender_id: m.sender_id, created_at: m.created_at };
+    for (const m of msgs ?? [])
+      mMap[m.id] = { content: m.content, sender_id: m.sender_id, created_at: m.created_at };
     setMessages(mMap);
     const userIds = Array.from(
       new Set([...list.map((f) => f.flagged_by), ...Object.values(mMap).map((m) => m.sender_id)]),
@@ -2541,7 +2777,9 @@ function FlagsPanel({ isSuperAdmin, currentUserId }: { isSuperAdmin: boolean; cu
 
   if (flags.length === 0) {
     return (
-      <div className="glass rounded-2xl p-10 text-center text-muted-foreground shadow-soft">Nenhuma sinalização.</div>
+      <div className="glass rounded-2xl p-10 text-center text-muted-foreground shadow-soft">
+        Nenhuma sinalização.
+      </div>
     );
   }
 
@@ -2549,7 +2787,9 @@ function FlagsPanel({ isSuperAdmin, currentUserId }: { isSuperAdmin: boolean; cu
     <div className="grid gap-3">
       {flags.map((f) => {
         const msg = messages[f.message_id];
-        const senderName = msg ? (profs[msg.sender_id]?.full_name ?? "Alguém") : "(mensagem removida)";
+        const senderName = msg
+          ? (profs[msg.sender_id]?.full_name ?? "Alguém")
+          : "(mensagem removida)";
         const flagger = profs[f.flagged_by]?.full_name ?? "Alguém";
         const isMine = f.flagged_by === currentUserId;
         const canDelete = isSuperAdmin || isMine;
@@ -2562,7 +2802,9 @@ function FlagsPanel({ isSuperAdmin, currentUserId }: { isSuperAdmin: boolean; cu
                   {new Date(f.created_at).toLocaleString("pt-BR")}
                 </p>
                 <div className="mt-2 rounded-lg border border-border bg-muted/40 p-3">
-                  <p className="text-xs font-semibold text-muted-foreground">Mensagem de {senderName}</p>
+                  <p className="text-xs font-semibold text-muted-foreground">
+                    Mensagem de {senderName}
+                  </p>
                   <p className="mt-1 whitespace-pre-wrap break-words text-sm">
                     {msg?.content ?? "(mensagem indisponível)"}
                   </p>
@@ -2664,7 +2906,13 @@ function BadgeAdminControls({ userId, userName }: { userId: string; userName: st
 
   return (
     <div className="flex items-center gap-1">
-      <Button size="sm" variant="outline" disabled={busy} onClick={award} title="Atribuir Contribuidor (30 dias)">
+      <Button
+        size="sm"
+        variant="outline"
+        disabled={busy}
+        onClick={award}
+        title="Atribuir Contribuidor (30 dias)"
+      >
         <AwardIcon className="h-4 w-4" />
       </Button>
       <Select onValueChange={(v) => removeBadge(v as BadgeCode)} disabled={busy}>
@@ -2741,7 +2989,10 @@ function PrayerReportsPanel({ isSuperAdmin }: { isSuperAdmin: boolean }) {
   }, []);
 
   async function setModeration(requestId: string, status: "visible" | "hidden" | "removed") {
-    const { error } = await supabase.from("prayer_requests").update({ moderation_status: status }).eq("id", requestId);
+    const { error } = await supabase
+      .from("prayer_requests")
+      .update({ moderation_status: status })
+      .eq("id", requestId);
     if (error) {
       toast.error(error.message);
       return;
@@ -2757,7 +3008,10 @@ function PrayerReportsPanel({ isSuperAdmin }: { isSuperAdmin: boolean }) {
   }
 
   async function resolveReport(id: string) {
-    const { error } = await supabase.from("prayer_request_reports").update({ status: "resolved" }).eq("id", id);
+    const { error } = await supabase
+      .from("prayer_request_reports")
+      .update({ status: "resolved" })
+      .eq("id", id);
     if (error) {
       toast.error(error.message);
       return;
@@ -2813,19 +3067,29 @@ function PrayerReportsPanel({ isSuperAdmin }: { isSuperAdmin: boolean }) {
                 <div className="mt-2 rounded-lg border border-border bg-muted/40 p-3">
                   <p className="text-xs font-semibold text-muted-foreground">
                     Pedido de {authorName}
-                    {req && <span className="ml-2 text-[10px] uppercase tracking-wide">[{req.moderation_status}]</span>}
+                    {req && (
+                      <span className="ml-2 text-[10px] uppercase tracking-wide">
+                        [{req.moderation_status}]
+                      </span>
+                    )}
                   </p>
                   {req ? (
                     <>
                       <p className="mt-1 break-words text-sm font-medium">{req.title}</p>
-                      <p className="mt-1 whitespace-pre-wrap break-words text-sm text-foreground/90">{req.content}</p>
+                      <p className="mt-1 whitespace-pre-wrap break-words text-sm text-foreground/90">
+                        {req.content}
+                      </p>
                     </>
                   ) : (
-                    <p className="mt-1 text-sm italic text-muted-foreground">(pedido indisponível)</p>
+                    <p className="mt-1 text-sm italic text-muted-foreground">
+                      (pedido indisponível)
+                    </p>
                   )}
                 </div>
                 <div className="mt-2 rounded-lg border border-amber-400/40 bg-amber-500/5 p-3">
-                  <p className="text-xs font-semibold text-amber-700 dark:text-amber-300">Motivo da denúncia</p>
+                  <p className="text-xs font-semibold text-amber-700 dark:text-amber-300">
+                    Motivo da denúncia
+                  </p>
                   <p className="mt-1 whitespace-pre-wrap break-words text-sm">{r.reason}</p>
                 </div>
               </div>
@@ -2833,17 +3097,29 @@ function PrayerReportsPanel({ isSuperAdmin }: { isSuperAdmin: boolean }) {
                 {req && (
                   <>
                     {req.moderation_status !== "hidden" && (
-                      <Button size="sm" variant="outline" onClick={() => setModeration(req.id, "hidden")}>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setModeration(req.id, "hidden")}
+                      >
                         Ocultar
                       </Button>
                     )}
                     {req.moderation_status !== "removed" && (
-                      <Button size="sm" variant="outline" onClick={() => setModeration(req.id, "removed")}>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setModeration(req.id, "removed")}
+                      >
                         Remover
                       </Button>
                     )}
                     {req.moderation_status !== "visible" && (
-                      <Button size="sm" variant="outline" onClick={() => setModeration(req.id, "visible")}>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setModeration(req.id, "visible")}
+                      >
                         Restaurar
                       </Button>
                     )}
@@ -2960,7 +3236,10 @@ function UserGearMenu({ user }: { user: AdminUserRowWithSupport }) {
       return;
     }
     setBusy(true);
-    const { error } = await supabase.rpc("admin_ban_user", { _user_id: user.id, _reason: banReason.trim() });
+    const { error } = await supabase.rpc("admin_ban_user", {
+      _user_id: user.id,
+      _reason: banReason.trim(),
+    });
     if (!error) {
       await supabase.from("notifications").insert({
         user_id: user.id,
@@ -2991,7 +3270,10 @@ function UserGearMenu({ user }: { user: AdminUserRowWithSupport }) {
       return;
     }
     setBusy(true);
-    const { error } = await supabase.rpc("admin_hard_delete_user", { _user_id: user.id, _reason: delReason.trim() });
+    const { error } = await supabase.rpc("admin_hard_delete_user", {
+      _user_id: user.id,
+      _reason: delReason.trim(),
+    });
     setBusy(false);
     if (error) {
       toast.error(error.message);
@@ -3040,7 +3322,9 @@ function UserGearMenu({ user }: { user: AdminUserRowWithSupport }) {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Requisitar alteração — {user.full_name}</DialogTitle>
-            <DialogDescription>O usuário verá esta solicitação em /inicio e nas notificações.</DialogDescription>
+            <DialogDescription>
+              O usuário verá esta solicitação em /inicio e nas notificações.
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-3">
             <div>
@@ -3084,12 +3368,17 @@ function UserGearMenu({ user }: { user: AdminUserRowWithSupport }) {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Enviar aviso — {user.full_name}</DialogTitle>
-            <DialogDescription>O aviso aparece em destaque no perfil do usuário até ser reconhecido.</DialogDescription>
+            <DialogDescription>
+              O aviso aparece em destaque no perfil do usuário até ser reconhecido.
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-3">
             <div>
               <Label className="text-xs">Severidade</Label>
-              <Select value={warnSeverity} onValueChange={(v) => setWarnSeverity(v as typeof warnSeverity)}>
+              <Select
+                value={warnSeverity}
+                onValueChange={(v) => setWarnSeverity(v as typeof warnSeverity)}
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -3126,7 +3415,9 @@ function UserGearMenu({ user }: { user: AdminUserRowWithSupport }) {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Banir {user.full_name}</DialogTitle>
-            <DialogDescription>O usuário será restrito a /inicio, /notificacoes, /conta e /suporte.</DialogDescription>
+            <DialogDescription>
+              O usuário será restrito a /inicio, /notificacoes, /conta e /suporte.
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-3">
             <Label className="text-xs">Motivo do banimento</Label>
@@ -3155,8 +3446,8 @@ function UserGearMenu({ user }: { user: AdminUserRowWithSupport }) {
           <DialogHeader>
             <DialogTitle className="text-destructive">Excluir permanentemente</DialogTitle>
             <DialogDescription>
-              Esta ação <strong>não pode ser desfeita</strong>. Todos os dados públicos do usuário serão apagados. O
-              email permanece liberado para recadastro.
+              Esta ação <strong>não pode ser desfeita</strong>. Todos os dados públicos do usuário
+              serão apagados. O email permanece liberado para recadastro.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-3">
@@ -3173,14 +3464,22 @@ function UserGearMenu({ user }: { user: AdminUserRowWithSupport }) {
               <Label className="text-xs">
                 Para confirmar, digite o nome exato: <strong>{user.full_name}</strong>
               </Label>
-              <Input value={delConfirm} onChange={(e) => setDelConfirm(e.target.value)} placeholder={user.full_name} />
+              <Input
+                value={delConfirm}
+                onChange={(e) => setDelConfirm(e.target.value)}
+                placeholder={user.full_name}
+              />
             </div>
           </div>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setOpenDelete(false)} disabled={busy}>
               Cancelar
             </Button>
-            <Button variant="destructive" onClick={submitDelete} disabled={busy || delConfirm !== user.full_name}>
+            <Button
+              variant="destructive"
+              onClick={submitDelete}
+              disabled={busy || delConfirm !== user.full_name}
+            >
               <Trash2 className="mr-1 h-4 w-4" /> Excluir definitivamente
             </Button>
           </DialogFooter>
@@ -3206,7 +3505,9 @@ type AppealRow = {
 function BannedAppealsPanel({ kind = "ban" }: { kind?: "ban" | "rejection" } = {}) {
   const { user: me } = useAuth();
   const [appeals, setAppeals] = useState<AppealRow[]>([]);
-  const [profMap, setProfMap] = useState<Map<string, { full_name: string; photo_url: string | null }>>(new Map());
+  const [profMap, setProfMap] = useState<
+    Map<string, { full_name: string; photo_url: string | null }>
+  >(new Map());
   const [open, setOpen] = useState<AppealRow | null>(null);
   const [response, setResponse] = useState("");
   const [busy, setBusy] = useState(false);
@@ -3222,7 +3523,10 @@ function BannedAppealsPanel({ kind = "ban" }: { kind?: "ban" | "rejection" } = {
     setAppeals(items);
     const ids = Array.from(new Set(items.map((a) => a.user_id)));
     if (ids.length) {
-      const { data: profs } = await supabase.from("profiles").select("id, full_name, photo_url").in("id", ids);
+      const { data: profs } = await supabase
+        .from("profiles")
+        .select("id, full_name, photo_url")
+        .in("id", ids);
       const m = new Map<string, { full_name: string; photo_url: string | null }>();
       for (const p of profs ?? []) m.set(p.id, { full_name: p.full_name, photo_url: p.photo_url });
       setProfMap(m);
@@ -3274,7 +3578,11 @@ function BannedAppealsPanel({ kind = "ban" }: { kind?: "ban" | "rejection" } = {
     if (!confirm("Marcar esta apelação como ignorada?")) return;
     const { error } = await supabase
       .from("user_ban_appeals")
-      .update({ status: "ignored", responded_by: me?.id ?? null, responded_at: new Date().toISOString() })
+      .update({
+        status: "ignored",
+        responded_by: me?.id ?? null,
+        responded_at: new Date().toISOString(),
+      })
       .eq("id", a.id);
     if (error) {
       toast.error(error.message);
@@ -3287,7 +3595,9 @@ function BannedAppealsPanel({ kind = "ban" }: { kind?: "ban" | "rejection" } = {
   if (appeals.length === 0) {
     return (
       <div className="glass rounded-2xl p-6 text-center text-sm text-muted-foreground shadow-soft">
-        {kind === "rejection" ? "Nenhum pedido de reanálise recebido." : "Nenhuma apelação recebida."}
+        {kind === "rejection"
+          ? "Nenhum pedido de reanálise recebido."
+          : "Nenhuma apelação recebida."}
       </div>
     );
   }
@@ -3303,7 +3613,10 @@ function BannedAppealsPanel({ kind = "ban" }: { kind?: "ban" | "rejection" } = {
         const isPending = a.status === "pending";
         const isIgnored = a.status === "ignored";
         return (
-          <div key={a.id} className={`glass rounded-2xl p-4 shadow-soft ${isIgnored ? "opacity-60" : ""}`}>
+          <div
+            key={a.id}
+            className={`glass rounded-2xl p-4 shadow-soft ${isIgnored ? "opacity-60" : ""}`}
+          >
             <div className="flex items-start gap-3">
               <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full bg-muted">
                 {prof?.photo_url ? (
@@ -3374,14 +3687,19 @@ function BannedAppealsPanel({ kind = "ban" }: { kind?: "ban" | "rejection" } = {
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Apelação de {open ? (profMap.get(open.user_id)?.full_name ?? open.user_id) : ""}</DialogTitle>
+            <DialogTitle>
+              Apelação de {open ? (profMap.get(open.user_id)?.full_name ?? open.user_id) : ""}
+            </DialogTitle>
             <DialogDescription>
-              {open && new Date(open.created_at).toLocaleString("pt-BR")} · status: <strong>{open?.status}</strong>
+              {open && new Date(open.created_at).toLocaleString("pt-BR")} · status:{" "}
+              <strong>{open?.status}</strong>
             </DialogDescription>
           </DialogHeader>
           {open && (
             <div className="space-y-3">
-              <div className="rounded-lg bg-muted/40 p-3 text-sm whitespace-pre-wrap">{open.appeal_text}</div>
+              <div className="rounded-lg bg-muted/40 p-3 text-sm whitespace-pre-wrap">
+                {open.appeal_text}
+              </div>
               <div>
                 <Label className="text-xs">Sua resposta</Label>
                 <Textarea

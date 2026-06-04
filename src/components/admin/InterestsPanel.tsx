@@ -1,7 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "@tanstack/react-router";
-import { Loader2, Heart, Sparkles, ArrowRight, Users as UsersIcon, TrendingUp, Calendar } from "lucide-react";
+import {
+  Loader2,
+  Heart,
+  Sparkles,
+  ArrowRight,
+  Users as UsersIcon,
+  TrendingUp,
+  Calendar,
+} from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { PhotoImg } from "@/components/PhotoImg";
@@ -13,7 +21,12 @@ type InterestRow = {
   created_at: string;
 };
 
-type ProfileLite = { id: string; full_name: string | null; photo_url: string | null; sex: string | null };
+type ProfileLite = {
+  id: string;
+  full_name: string | null;
+  photo_url: string | null;
+  sex: string | null;
+};
 
 type MatchPair = { user_a: string; user_b: string; id: string; created_at: string };
 
@@ -23,7 +36,13 @@ function pairKey(a: string, b: string) {
 
 function formatDate(iso: string) {
   const d = new Date(iso);
-  return d.toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
+  return d.toLocaleString("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
 export function InterestsPanel() {
@@ -37,7 +56,10 @@ export function InterestsPanel() {
     (async () => {
       setLoading(true);
       const [intRes, matchRes] = await Promise.all([
-        supabase.from("interests").select("id, sender_id, receiver_id, created_at").order("created_at", { ascending: false }),
+        supabase
+          .from("interests")
+          .select("id, sender_id, receiver_id, created_at")
+          .order("created_at", { ascending: false }),
         supabase.from("matches").select("id, user_a, user_b, created_at"),
       ]);
       if (intRes.error) {
@@ -60,7 +82,10 @@ export function InterestsPanel() {
     })();
   }, []);
 
-  const matchPairs = useMemo(() => new Set(matches.map((m) => pairKey(m.user_a, m.user_b))), [matches]);
+  const matchPairs = useMemo(
+    () => new Set(matches.map((m) => pairKey(m.user_a, m.user_b))),
+    [matches],
+  );
 
   const stats = useMemo(() => {
     const totalInterests = interests.length;
@@ -88,11 +113,22 @@ export function InterestsPanel() {
     // Last 7 days
     const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
     const last7d = interests.filter((i) => new Date(i.created_at).getTime() >= weekAgo).length;
-    const last24h = interests.filter((i) => new Date(i.created_at).getTime() >= Date.now() - 24 * 60 * 60 * 1000).length;
+    const last24h = interests.filter(
+      (i) => new Date(i.created_at).getTime() >= Date.now() - 24 * 60 * 60 * 1000,
+    ).length;
 
     const conversionRate = totalInterests > 0 ? ((totalMatches * 2) / totalInterests) * 100 : 0;
 
-    return { totalInterests, totalMatches, reciprocal, topSenders, topReceivers, last7d, last24h, conversionRate };
+    return {
+      totalInterests,
+      totalMatches,
+      reciprocal,
+      topSenders,
+      topReceivers,
+      last7d,
+      last24h,
+      conversionRate,
+    };
   }, [interests, matches]);
 
   const filtered = useMemo(() => {
@@ -117,10 +153,31 @@ export function InterestsPanel() {
     <div className="space-y-6">
       {/* Stats cards */}
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        <StatCard icon={<Heart className="h-4 w-4" />} label="Total de interesses" value={stats.totalInterests} tone="rose" />
-        <StatCard icon={<Sparkles className="h-4 w-4" />} label="Matches (recíprocos)" value={stats.totalMatches} tone="emerald" />
-        <StatCard icon={<TrendingUp className="h-4 w-4" />} label="Taxa de match" value={`${stats.conversionRate.toFixed(1)}%`} tone="violet" hint="Interesses que viraram match" />
-        <StatCard icon={<Calendar className="h-4 w-4" />} label="Últimas 24h / 7 dias" value={`${stats.last24h} / ${stats.last7d}`} tone="sky" />
+        <StatCard
+          icon={<Heart className="h-4 w-4" />}
+          label="Total de interesses"
+          value={stats.totalInterests}
+          tone="rose"
+        />
+        <StatCard
+          icon={<Sparkles className="h-4 w-4" />}
+          label="Matches (recíprocos)"
+          value={stats.totalMatches}
+          tone="emerald"
+        />
+        <StatCard
+          icon={<TrendingUp className="h-4 w-4" />}
+          label="Taxa de match"
+          value={`${stats.conversionRate.toFixed(1)}%`}
+          tone="violet"
+          hint="Interesses que viraram match"
+        />
+        <StatCard
+          icon={<Calendar className="h-4 w-4" />}
+          label="Últimas 24h / 7 dias"
+          value={`${stats.last24h} / ${stats.last7d}`}
+          tone="sky"
+        />
       </div>
 
       {/* Top users */}
@@ -155,7 +212,9 @@ export function InterestsPanel() {
 
         <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-soft">
           {filtered.length === 0 ? (
-            <div className="p-8 text-center text-sm text-muted-foreground">Nenhum interesse encontrado.</div>
+            <div className="p-8 text-center text-sm text-muted-foreground">
+              Nenhum interesse encontrado.
+            </div>
           ) : (
             <ul className="divide-y divide-border">
               {filtered.map((i) => {
@@ -163,7 +222,10 @@ export function InterestsPanel() {
                 const receiver = profiles.get(i.receiver_id);
                 const isMatch = matchPairs.has(pairKey(i.sender_id, i.receiver_id));
                 return (
-                  <li key={i.id} className="flex flex-col gap-2 p-4 sm:flex-row sm:items-center sm:justify-between">
+                  <li
+                    key={i.id}
+                    className="flex flex-col gap-2 p-4 sm:flex-row sm:items-center sm:justify-between"
+                  >
                     <div className="flex items-center gap-3">
                       <Avatar name={sender?.full_name} url={sender?.photo_url} />
                       <div className="min-w-0">
@@ -174,7 +236,9 @@ export function InterestsPanel() {
                         >
                           {sender?.full_name ?? "—"}
                         </Link>
-                        <span className="text-[11px] text-muted-foreground">{sender?.sex ?? ""}</span>
+                        <span className="text-[11px] text-muted-foreground">
+                          {sender?.sex ?? ""}
+                        </span>
                       </div>
                       <ArrowRight className="mx-2 h-4 w-4 shrink-0 text-rose-500" />
                       <Avatar name={receiver?.full_name} url={receiver?.photo_url} />
@@ -186,7 +250,9 @@ export function InterestsPanel() {
                         >
                           {receiver?.full_name ?? "—"}
                         </Link>
-                        <span className="text-[11px] text-muted-foreground">{receiver?.sex ?? ""}</span>
+                        <span className="text-[11px] text-muted-foreground">
+                          {receiver?.sex ?? ""}
+                        </span>
                       </div>
                     </div>
                     <div className="flex items-center gap-3 text-xs text-muted-foreground sm:flex-col sm:items-end sm:gap-1">
@@ -235,7 +301,11 @@ function StatCard({
     <div className="rounded-2xl border border-border bg-card p-4 shadow-soft">
       <div className="flex items-center justify-between">
         <span className="text-xs font-medium text-muted-foreground">{label}</span>
-        <span className={`flex h-7 w-7 items-center justify-center rounded-lg ring-1 ${tones[tone]}`}>{icon}</span>
+        <span
+          className={`flex h-7 w-7 items-center justify-center rounded-lg ring-1 ${tones[tone]}`}
+        >
+          {icon}
+        </span>
       </div>
       <div className="mt-2 text-2xl font-bold text-foreground">{value}</div>
       {hint && <p className="mt-1 text-[11px] text-muted-foreground">{hint}</p>}
@@ -268,7 +338,9 @@ function TopList({
             const p = profiles.get(uid);
             return (
               <li key={uid} className="flex items-center gap-3">
-                <span className="w-5 text-center text-xs font-bold text-muted-foreground">{idx + 1}</span>
+                <span className="w-5 text-center text-xs font-bold text-muted-foreground">
+                  {idx + 1}
+                </span>
                 <Avatar name={p?.full_name} url={p?.photo_url} />
                 <Link
                   to="/pretendentes/$id"
@@ -277,7 +349,9 @@ function TopList({
                 >
                   {p?.full_name ?? "—"}
                 </Link>
-                <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium">{count}</span>
+                <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium">
+                  {count}
+                </span>
               </li>
             );
           })}

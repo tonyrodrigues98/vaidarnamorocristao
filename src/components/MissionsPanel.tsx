@@ -1,7 +1,16 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { BADGE_META, type BadgeCode } from "@/lib/badges";
-import { Award, Flame, Heart as HeartIcon, BookOpen, UserCheck, Sparkles, Gem, Users } from "lucide-react";
+import {
+  Award,
+  Flame,
+  Heart as HeartIcon,
+  BookOpen,
+  UserCheck,
+  Sparkles,
+  Gem,
+  Users,
+} from "lucide-react";
 
 type Missions = {
   profile_complete: boolean;
@@ -29,17 +38,18 @@ type ExtraProgress = {
   community_veteran: number;
 };
 
-const SELECTED_REWARDS: Array<{ code: BadgeCode; target: number; progress: keyof ExtraProgress }> = [
-  { code: "faithful_heart", target: 30, progress: "faithful_heart" },
-  { code: "intercessor", target: 50, progress: "intercessor" },
-  { code: "spiritual_mentor", target: 25, progress: "spiritual_mentor" },
-  { code: "bridge_builder", target: 5, progress: "bridge_builder" },
-  { code: "open_heart", target: 10, progress: "open_heart" },
-  { code: "attentive_chatter", target: 14, progress: "attentive_chatter" },
-  { code: "magnetic_profile", target: 50, progress: "magnetic_profile" },
-  { code: "faith_ambassador", target: 1, progress: "faith_ambassador" },
-  { code: "community_veteran", target: 180, progress: "community_veteran" },
-];
+const SELECTED_REWARDS: Array<{ code: BadgeCode; target: number; progress: keyof ExtraProgress }> =
+  [
+    { code: "faithful_heart", target: 30, progress: "faithful_heart" },
+    { code: "intercessor", target: 50, progress: "intercessor" },
+    { code: "spiritual_mentor", target: 25, progress: "spiritual_mentor" },
+    { code: "bridge_builder", target: 5, progress: "bridge_builder" },
+    { code: "open_heart", target: 10, progress: "open_heart" },
+    { code: "attentive_chatter", target: 14, progress: "attentive_chatter" },
+    { code: "magnetic_profile", target: 50, progress: "magnetic_profile" },
+    { code: "faith_ambassador", target: 1, progress: "faith_ambassador" },
+    { code: "community_veteran", target: 180, progress: "community_veteran" },
+  ];
 
 const STREAK_TIERS = [7, 15, 30, 60, 90, 365];
 
@@ -49,7 +59,7 @@ function toDayKey(date: Date) {
 
 function currentDailyStreak(days: string[]) {
   const set = new Set(days);
-  let cursor = new Date();
+  const cursor = new Date();
   let count = 0;
   while (set.has(toDayKey(cursor))) {
     count += 1;
@@ -69,22 +79,61 @@ export function MissionsPanel({ userId }: { userId: string }) {
   const [loading, setLoading] = useState(true);
 
   async function load() {
-    const [missions, ub, prayers, comments, matchesA, matchesB, interests, messages, views, advanced, activity, profile] = await Promise.all([
+    const [
+      missions,
+      ub,
+      prayers,
+      comments,
+      matchesA,
+      matchesB,
+      interests,
+      messages,
+      views,
+      advanced,
+      activity,
+      profile,
+    ] = await Promise.all([
       supabase.rpc("get_my_missions"),
       supabase
         .from("user_badges")
         .select("active, expires_at, badges(code)")
         .eq("user_id", userId)
         .eq("active", true),
-      supabase.from("prayer_request_prayed").select("id", { count: "exact", head: true }).eq("user_id", userId),
-      supabase.from("devotional_comments").select("id", { count: "exact", head: true }).eq("user_id", userId).is("deleted_at", null),
+      supabase
+        .from("prayer_request_prayed")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", userId),
+      supabase
+        .from("devotional_comments")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", userId)
+        .is("deleted_at", null),
       supabase.from("matches").select("id", { count: "exact", head: true }).eq("user_a", userId),
       supabase.from("matches").select("id", { count: "exact", head: true }).eq("user_b", userId),
-      supabase.from("interests").select("id", { count: "exact", head: true }).eq("sender_id", userId),
-      supabase.from("messages").select("created_at").eq("sender_id", userId).order("created_at", { ascending: false }).limit(120),
-      supabase.from("profile_views").select("id", { count: "exact", head: true }).eq("viewed_id", userId),
-      supabase.from("profile_advanced").select("testimony, life_verse, faith_moment").eq("user_id", userId).maybeSingle(),
-      supabase.from("user_activity").select("day").eq("user_id", userId).order("day", { ascending: true }),
+      supabase
+        .from("interests")
+        .select("id", { count: "exact", head: true })
+        .eq("sender_id", userId),
+      supabase
+        .from("messages")
+        .select("created_at")
+        .eq("sender_id", userId)
+        .order("created_at", { ascending: false })
+        .limit(120),
+      supabase
+        .from("profile_views")
+        .select("id", { count: "exact", head: true })
+        .eq("viewed_id", userId),
+      supabase
+        .from("profile_advanced")
+        .select("testimony, life_verse, faith_moment")
+        .eq("user_id", userId)
+        .maybeSingle(),
+      supabase
+        .from("user_activity")
+        .select("day")
+        .eq("user_id", userId)
+        .order("day", { ascending: true }),
       supabase.from("profiles").select("created_at").eq("id", userId).maybeSingle(),
     ]);
     if (missions.data?.[0]) setM(missions.data[0] as Missions);
@@ -95,8 +144,14 @@ export function MissionsPanel({ userId }: { userId: string }) {
         .filter(Boolean),
     );
     const activeStreak = currentDailyStreak((activity.data ?? []).map((r) => r.day));
-    const messageStreak = currentMessageStreak(((messages.data ?? []) as Array<{ created_at: string }>).map((r) => r.created_at));
-    const adv = advanced.data as { testimony: string | null; life_verse: string | null; faith_moment: string | null } | null;
+    const messageStreak = currentMessageStreak(
+      ((messages.data ?? []) as Array<{ created_at: string }>).map((r) => r.created_at),
+    );
+    const adv = advanced.data as {
+      testimony: string | null;
+      life_verse: string | null;
+      faith_moment: string | null;
+    } | null;
     setExtraProgress({
       faithful_heart: activeStreak,
       intercessor: prayers.count ?? 0,
@@ -105,8 +160,14 @@ export function MissionsPanel({ userId }: { userId: string }) {
       open_heart: interests.count ?? 0,
       attentive_chatter: messageStreak,
       magnetic_profile: views.count ?? 0,
-      faith_ambassador: adv?.testimony?.trim() && adv.life_verse?.trim() && adv.faith_moment ? 1 : 0,
-      community_veteran: Math.max(0, Math.floor((Date.now() - new Date(profile.data?.created_at ?? new Date()).getTime()) / 86_400_000)),
+      faith_ambassador:
+        adv?.testimony?.trim() && adv.life_verse?.trim() && adv.faith_moment ? 1 : 0,
+      community_veteran: Math.max(
+        0,
+        Math.floor(
+          (Date.now() - new Date(profile.data?.created_at ?? new Date()).getTime()) / 86_400_000,
+        ),
+      ),
     });
     setLoading(false);
   }
@@ -115,7 +176,11 @@ export function MissionsPanel({ userId }: { userId: string }) {
     load();
     const ch = supabase
       .channel(`badges-${userId}`)
-      .on("postgres_changes", { event: "*", schema: "public", table: "user_badges", filter: `user_id=eq.${userId}` }, load)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "user_badges", filter: `user_id=eq.${userId}` },
+        load,
+      )
       .subscribe();
     return () => {
       ch.unsubscribe();
@@ -128,7 +193,8 @@ export function MissionsPanel({ userId }: { userId: string }) {
     return <div className="glass animate-pulse rounded-2xl p-6 shadow-soft h-48" />;
   }
 
-  const nextTier = STREAK_TIERS.find((t) => t > m.active_streak) ?? STREAK_TIERS[STREAK_TIERS.length - 1];
+  const nextTier =
+    STREAK_TIERS.find((t) => t > m.active_streak) ?? STREAK_TIERS[STREAK_TIERS.length - 1];
   const has = (c: BadgeCode) => badges.includes(c);
 
   return (
@@ -140,7 +206,8 @@ export function MissionsPanel({ userId }: { userId: string }) {
         </h3>
         {badges.length === 0 ? (
           <p className="mt-2 text-sm text-muted-foreground">
-            Você ainda não tem badges. Complete missões abaixo para ganhar suas primeiras conquistas.
+            Você ainda não tem badges. Complete missões abaixo para ganhar suas primeiras
+            conquistas.
           </p>
         ) : (
           <div className="mt-3 flex flex-wrap gap-2">
@@ -254,19 +321,28 @@ export function MissionsPanel({ userId }: { userId: string }) {
             achieved={m.has_first_devotional}
           />
         </div>
-        <p className="mt-3 text-xs text-muted-foreground">
-          Visível apenas para você.
-        </p>
+        <p className="mt-3 text-xs text-muted-foreground">Visível apenas para você.</p>
       </div>
     </div>
   );
 }
 
 function Mission({
-  icon, title, done, value, target, doneLabel, todoLabel,
+  icon,
+  title,
+  done,
+  value,
+  target,
+  doneLabel,
+  todoLabel,
 }: {
-  icon: React.ReactNode; title: string; done: boolean; value: number; target: number;
-  doneLabel: string; todoLabel: string;
+  icon: React.ReactNode;
+  title: string;
+  done: boolean;
+  value: number;
+  target: number;
+  doneLabel: string;
+  todoLabel: string;
 }) {
   const pct = Math.min(100, Math.round((value / target) * 100));
   return (
@@ -275,7 +351,9 @@ function Mission({
         <div className="flex items-center gap-2 text-sm font-medium">
           {icon} {title}
         </div>
-        <span className="text-xs tabular-nums text-muted-foreground">{value}/{target}</span>
+        <span className="text-xs tabular-nums text-muted-foreground">
+          {value}/{target}
+        </span>
       </div>
       <div className="mt-2 h-2 overflow-hidden rounded-full bg-muted">
         <div
@@ -288,7 +366,17 @@ function Mission({
   );
 }
 
-function RewardBadge({ code, value, target, achieved }: { code: BadgeCode; value: number; target: number; achieved: boolean }) {
+function RewardBadge({
+  code,
+  value,
+  target,
+  achieved,
+}: {
+  code: BadgeCode;
+  value: number;
+  target: number;
+  achieved: boolean;
+}) {
   const meta = BADGE_META[code];
   const Icon = meta.icon;
   const pct = Math.min(100, Math.round((value / target) * 100));
@@ -314,8 +402,16 @@ function RewardBadge({ code, value, target, achieved }: { code: BadgeCode; value
 }
 
 function SimpleReward({
-  icon, name, description, achieved,
-}: { icon: React.ReactNode; name: string; description: string; achieved: boolean }) {
+  icon,
+  name,
+  description,
+  achieved,
+}: {
+  icon: React.ReactNode;
+  name: string;
+  description: string;
+  achieved: boolean;
+}) {
   return (
     <div
       className={`flex items-center gap-2 rounded-xl border p-3 ${achieved ? "border-emerald-400/40 bg-emerald-500/5" : "border-border bg-muted/30 opacity-60"}`}
@@ -325,7 +421,10 @@ function SimpleReward({
         <div className="text-sm font-medium">{name}</div>
         <div className="text-[11px] text-muted-foreground">{description}</div>
         <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-muted">
-          <div className="h-full bg-emerald-500 transition-all" style={{ width: achieved ? "100%" : "0%" }} />
+          <div
+            className="h-full bg-emerald-500 transition-all"
+            style={{ width: achieved ? "100%" : "0%" }}
+          />
         </div>
         <div className="mt-1 text-[11px] text-muted-foreground">
           {achieved ? "Conquistado" : "Pendente"}

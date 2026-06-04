@@ -27,8 +27,12 @@ export function CommitmentPauseCard({
           <Lock className="h-3.5 w-3.5" />
           Área pausada com cuidado
         </div>
-        <h1 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">Propósito Firmado</h1>
-        <p className="mx-auto max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">{description}</p>
+        <h1 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+          Propósito Firmado
+        </h1>
+        <p className="mx-auto max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">
+          {description}
+        </p>
       </div>
       <div className="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row">
         <Button asChild size="lg" className="rounded-2xl shadow-glow">

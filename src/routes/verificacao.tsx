@@ -9,13 +9,30 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
-import { BadgeCheck, Camera, FileText, Loader2, ShieldCheck, Clock, XCircle, RefreshCw } from "lucide-react";
+import {
+  BadgeCheck,
+  Camera,
+  FileText,
+  Loader2,
+  ShieldCheck,
+  Clock,
+  XCircle,
+  RefreshCw,
+} from "lucide-react";
 
 export const Route = createFileRoute("/verificacao")({
-  component: () => (<RequireApproved><VerificacaoPage /></RequireApproved>),
+  component: () => (
+    <RequireApproved>
+      <VerificacaoPage />
+    </RequireApproved>
+  ),
 });
 
 type Status = "pending" | "approved" | "rejected" | "more_info";
@@ -91,7 +108,8 @@ function VerificacaoPage() {
       });
       if (error) throw error;
       toast.success("Solicitação enviada! Vamos analisar em breve.");
-      setSelfie(null); setDoc(null);
+      setSelfie(null);
+      setDoc(null);
       if (selfieRef.current) selfieRef.current.value = "";
       if (docRef.current) docRef.current.value = "";
       setReload((n) => n + 1);
@@ -104,7 +122,8 @@ function VerificacaoPage() {
 
   if (!loading && !user) return <Navigate to="/auth/login" />;
 
-  const canSubmit = !verified && (!request || request.status === "rejected" || request.status === "more_info");
+  const canSubmit =
+    !verified && (!request || request.status === "rejected" || request.status === "more_info");
 
   return (
     <div className="min-h-screen">
@@ -173,7 +192,9 @@ function VerificacaoPage() {
             <div>
               <Label>Tipo de documento</Label>
               <Select value={docType} onValueChange={(v) => setDocType(v as typeof docType)}>
-                <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="rg">RG</SelectItem>
                   <SelectItem value="cnh">CNH</SelectItem>
@@ -184,7 +205,9 @@ function VerificacaoPage() {
             </div>
 
             <div>
-              <Label className="flex items-center gap-2"><Camera className="h-4 w-4" /> Selfie</Label>
+              <Label className="flex items-center gap-2">
+                <Camera className="h-4 w-4" /> Selfie
+              </Label>
               <p className="mt-1 text-xs text-muted-foreground">
                 Tire uma selfie clara, em boa iluminação, sem óculos escuros ou boné.
               </p>
@@ -199,7 +222,9 @@ function VerificacaoPage() {
             </div>
 
             <div>
-              <Label className="flex items-center gap-2"><FileText className="h-4 w-4" /> Foto do documento</Label>
+              <Label className="flex items-center gap-2">
+                <FileText className="h-4 w-4" /> Foto do documento
+              </Label>
               <p className="mt-1 text-xs text-muted-foreground">
                 Documento oficial com foto. Mantemos com acesso restrito apenas à equipe.
               </p>
@@ -213,18 +238,29 @@ function VerificacaoPage() {
             </div>
 
             <div className="rounded-xl border border-border bg-muted/40 p-3 text-xs text-muted-foreground">
-              🔒 Seus arquivos ficam em armazenamento privado. Apenas administradores autorizados podem visualizá-los.
+              🔒 Seus arquivos ficam em armazenamento privado. Apenas administradores autorizados
+              podem visualizá-los.
             </div>
 
-            <Button onClick={submit} disabled={busy || !selfie || !doc} className="w-full shadow-glow">
-              {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ShieldCheck className="mr-2 h-4 w-4" />}
+            <Button
+              onClick={submit}
+              disabled={busy || !selfie || !doc}
+              className="w-full shadow-glow"
+            >
+              {busy ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <ShieldCheck className="mr-2 h-4 w-4" />
+              )}
               Enviar para análise
             </Button>
           </div>
         )}
 
         <div className="mt-8 text-sm text-muted-foreground">
-          <Link to="/perfil" className="hover:underline">← Voltar para o perfil</Link>
+          <Link to="/perfil" className="hover:underline">
+            ← Voltar para o perfil
+          </Link>
         </div>
       </main>
     </div>

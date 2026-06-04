@@ -61,7 +61,11 @@ describe("message_flags — somente staff cria/lê sinalizações", () => {
   });
 
   it("usuário comum NÃO consegue deletar flag de outros", async () => {
-    const { data } = await user.client.from("message_flags").delete().eq("id", flagId!).select("id");
+    const { data } = await user.client
+      .from("message_flags")
+      .delete()
+      .eq("id", flagId!)
+      .select("id");
     expect((data ?? []).length).toBe(0);
   });
 });
@@ -94,10 +98,7 @@ describe("user_roles — escalação de privilégios bloqueada", () => {
     if (!existing) {
       await admin.from("user_roles").insert({ user_id: user.userId, role: "user" });
     }
-    await user.client
-      .from("user_roles")
-      .update({ role: "admin" })
-      .eq("user_id", user.userId);
+    await user.client.from("user_roles").update({ role: "admin" }).eq("user_id", user.userId);
     const { data: roles } = await admin
       .from("user_roles")
       .select("role")
@@ -109,21 +110,13 @@ describe("user_roles — escalação de privilégios bloqueada", () => {
 describe("profiles — usuário comum não pode banir/aprovar a si mesmo", () => {
   it("alteração de status é ignorada para não-admin", async () => {
     await user.client.from("profiles").update({ status: "banned" }).eq("id", user.userId);
-    const { data } = await admin
-      .from("profiles")
-      .select("status")
-      .eq("id", user.userId)
-      .single();
+    const { data } = await admin.from("profiles").select("status").eq("id", user.userId).single();
     expect(data?.status).toBe("approved");
   });
 
   it("admin consegue mudar status de outro perfil", async () => {
     await adminUser.client.from("profiles").update({ status: "banned" }).eq("id", user.userId);
-    const { data } = await admin
-      .from("profiles")
-      .select("status")
-      .eq("id", user.userId)
-      .single();
+    const { data } = await admin.from("profiles").select("status").eq("id", user.userId).single();
     expect(data?.status).toBe("banned");
     // restore
     await admin.from("profiles").update({ status: "approved" }).eq("id", user.userId);

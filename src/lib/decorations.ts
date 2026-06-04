@@ -40,7 +40,10 @@ export type Decoration = {
   updated_at: string | null;
 };
 
-export const DECORATION_RARITY_STYLE: Record<DecorationRarity, { label: string; chip: string; border: string }> = {
+export const DECORATION_RARITY_STYLE: Record<
+  DecorationRarity,
+  { label: string; chip: string; border: string }
+> = {
   common: {
     label: "Comum",
     chip: "bg-slate-500/10 text-slate-600 dark:text-slate-300",
@@ -234,18 +237,19 @@ export async function reorderDecorations(updates: Array<Pick<Decoration, "id" | 
 }
 
 export async function getDecorationUsage(decorationId: string) {
-  const [{ count: ownedCount, error: ownedError }, { count: equippedCount, error: equippedError }] = await Promise.all([
-    supabase
-      .from("user_decorations" as never)
-      .select("id", { count: "exact", head: true })
-      .eq("decoration_id", decorationId),
-    supabase
-      .from("profiles")
-      .select("id", { count: "exact", head: true })
-      .or(
-        `equipped_frame_id.eq.${decorationId},equipped_aura_id.eq.${decorationId},equipped_sticker_id.eq.${decorationId}`,
-      ),
-  ]);
+  const [{ count: ownedCount, error: ownedError }, { count: equippedCount, error: equippedError }] =
+    await Promise.all([
+      supabase
+        .from("user_decorations" as never)
+        .select("id", { count: "exact", head: true })
+        .eq("decoration_id", decorationId),
+      supabase
+        .from("profiles")
+        .select("id", { count: "exact", head: true })
+        .or(
+          `equipped_frame_id.eq.${decorationId},equipped_aura_id.eq.${decorationId},equipped_sticker_id.eq.${decorationId}`,
+        ),
+    ]);
   if (ownedError) throw ownedError;
   if (equippedError) throw equippedError;
   return {
@@ -285,7 +289,10 @@ export async function purchaseDecoration(decorationId: string) {
   return data as unknown as { success: boolean; new_balance: number };
 }
 
-export function decorationErrorMessage(error: unknown, fallback = "Não foi possível concluir a ação.") {
+export function decorationErrorMessage(
+  error: unknown,
+  fallback = "Não foi possível concluir a ação.",
+) {
   const message =
     error instanceof Error
       ? error.message

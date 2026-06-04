@@ -17,7 +17,14 @@ const SIZES = {
   xl: { box: "h-40 w-40 text-7xl", img: "h-28 w-28" },
 };
 
-export function GiftMedia({ emoji, imageUrl, rarity, size = "md", className, floating = false }: Props) {
+export function GiftMedia({
+  emoji,
+  imageUrl,
+  rarity,
+  size = "md",
+  className,
+  floating = false,
+}: Props) {
   const s = SIZES[size];
   const r = RARITY_STYLE[rarity];
   return (
@@ -35,7 +42,10 @@ export function GiftMedia({ emoji, imageUrl, rarity, size = "md", className, flo
         <img src={imageUrl} alt="" className={cn("object-contain", s.img)} />
       ) : (
         <span
-          className={cn("leading-none select-none", floating && "animate-[gift-float_3.2s_ease-in-out_infinite]")}
+          className={cn(
+            "leading-none select-none",
+            floating && "animate-[gift-float_3.2s_ease-in-out_infinite]",
+          )}
           style={{ filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.2))" }}
         >
           {emoji ?? "🎁"}

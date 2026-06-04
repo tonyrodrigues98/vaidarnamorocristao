@@ -59,16 +59,17 @@ export const ROLE_CONFIG: Record<AppRole, RoleConfig> = {
   },
 };
 
-export const COLOR_HEX: Record<RoleColor, { fg: string; bg: string; ring: string; name: string }> = {
-  coral: { fg: "#7a1f17", bg: "#ff6f61", ring: "#ff6f61", name: "Coral" },
-  gold: { fg: "#5b3a00", bg: "#e9b949", ring: "#e9b949", name: "Dourado" },
-  silver: { fg: "#3d4452", bg: "#c8cdd4", ring: "#c8cdd4", name: "Prata" },
-  purple: { fg: "#3a1758", bg: "#a47bd6", ring: "#a47bd6", name: "Roxo" },
-  red: { fg: "#5c0f12", bg: "#e15155", ring: "#e15155", name: "Vermelho" },
-  blue: { fg: "#0e2f55", bg: "#5aa3e6", ring: "#5aa3e6", name: "Azul" },
-  green: { fg: "#0d3b22", bg: "#5db98a", ring: "#5db98a", name: "Verde" },
-  orange: { fg: "#5c2a00", bg: "#ff9b3d", ring: "#ff9b3d", name: "Laranja" },
-};
+export const COLOR_HEX: Record<RoleColor, { fg: string; bg: string; ring: string; name: string }> =
+  {
+    coral: { fg: "#7a1f17", bg: "#ff6f61", ring: "#ff6f61", name: "Coral" },
+    gold: { fg: "#5b3a00", bg: "#e9b949", ring: "#e9b949", name: "Dourado" },
+    silver: { fg: "#3d4452", bg: "#c8cdd4", ring: "#c8cdd4", name: "Prata" },
+    purple: { fg: "#3a1758", bg: "#a47bd6", ring: "#a47bd6", name: "Roxo" },
+    red: { fg: "#5c0f12", bg: "#e15155", ring: "#e15155", name: "Vermelho" },
+    blue: { fg: "#0e2f55", bg: "#5aa3e6", ring: "#5aa3e6", name: "Azul" },
+    green: { fg: "#0d3b22", bg: "#5db98a", ring: "#5db98a", name: "Verde" },
+    orange: { fg: "#5c2a00", bg: "#ff9b3d", ring: "#ff9b3d", name: "Laranja" },
+  };
 
 export const ROLE_PRIORITY: AppRole[] = [
   "super_admin",

@@ -137,14 +137,22 @@ describe("messages RLS — escrita restrita ao remetente participante", () => {
     // either explicit error or zero rows touched
     expect(error !== null || (data ?? []).length === 0).toBe(true);
 
-    const { data: row } = await admin.from("messages").select("content").eq("id", msgFromA).single();
+    const { data: row } = await admin
+      .from("messages")
+      .select("content")
+      .eq("id", msgFromA)
+      .single();
     expect(row?.content).toBe("olá B");
   });
 
   it("B não pode deletar mensagem de A", async () => {
     const { data } = await B.client.from("messages").delete().eq("id", msgFromA).select("id");
     expect((data ?? []).length).toBe(0);
-    const { data: row } = await admin.from("messages").select("id").eq("id", msgFromA).maybeSingle();
+    const { data: row } = await admin
+      .from("messages")
+      .select("id")
+      .eq("id", msgFromA)
+      .maybeSingle();
     expect(row?.id).toBe(msgFromA);
   });
 });

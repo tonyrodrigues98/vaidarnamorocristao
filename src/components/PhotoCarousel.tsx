@@ -18,9 +18,11 @@ export function PhotoCarousel({ photos, alt, fallback, className, imgClassName, 
   const deltaX = useRef(0);
   const total = photos.length;
   const has = total > 0;
-  const { url: currentSrc, loading: photoLoading, refresh: refreshPhoto } = useSignedPhotoUrlResult(
-    has ? photos[index] : null
-  );
+  const {
+    url: currentSrc,
+    loading: photoLoading,
+    refresh: refreshPhoto,
+  } = useSignedPhotoUrlResult(has ? photos[index] : null);
 
   const stop = (e: MouseEvent) => {
     e.preventDefault();
@@ -66,16 +68,16 @@ export function PhotoCarousel({ photos, alt, fallback, className, imgClassName, 
           className={cn("h-full w-full object-cover", imgClassName)}
         />
       ) : has ? (
-        fallback ?? (
+        (fallback ?? (
           <div
             aria-hidden
             className={cn(
               "h-full w-full bg-muted",
               photoLoading ? "animate-pulse" : "",
-              imgClassName
+              imgClassName,
             )}
           />
-        )
+        ))
       ) : (
         fallback
       )}
@@ -89,7 +91,7 @@ export function PhotoCarousel({ photos, alt, fallback, className, imgClassName, 
                 key={i}
                 className={cn(
                   "h-1 flex-1 rounded-full transition-opacity",
-                  i === index ? "bg-white/95" : "bg-white/40"
+                  i === index ? "bg-white/95" : "bg-white/40",
                 )}
               />
             ))}
@@ -99,7 +101,10 @@ export function PhotoCarousel({ photos, alt, fallback, className, imgClassName, 
           <button
             type="button"
             aria-label="Foto anterior"
-            onClick={(e) => { stop(e); go(index - 1); }}
+            onClick={(e) => {
+              stop(e);
+              go(index - 1);
+            }}
             className="absolute left-2 top-1/2 z-20 hidden h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-black/35 text-white backdrop-blur-sm transition hover:bg-black/55 active:scale-95 sm:flex"
           >
             <ChevronLeft className="h-5 w-5" />
@@ -107,7 +112,10 @@ export function PhotoCarousel({ photos, alt, fallback, className, imgClassName, 
           <button
             type="button"
             aria-label="Próxima foto"
-            onClick={(e) => { stop(e); go(index + 1); }}
+            onClick={(e) => {
+              stop(e);
+              go(index + 1);
+            }}
             className="absolute right-2 top-1/2 z-20 hidden h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-black/35 text-white backdrop-blur-sm transition hover:bg-black/55 active:scale-95 sm:flex"
           >
             <ChevronRight className="h-5 w-5" />
@@ -117,13 +125,19 @@ export function PhotoCarousel({ photos, alt, fallback, className, imgClassName, 
           <button
             type="button"
             aria-label="Foto anterior"
-            onClick={(e) => { stop(e); go(index - 1); }}
+            onClick={(e) => {
+              stop(e);
+              go(index - 1);
+            }}
             className="absolute left-0 top-0 z-10 h-full w-1/3 sm:hidden"
           />
           <button
             type="button"
             aria-label="Próxima foto"
-            onClick={(e) => { stop(e); go(index + 1); }}
+            onClick={(e) => {
+              stop(e);
+              go(index + 1);
+            }}
             className="absolute right-0 top-0 z-10 h-full w-1/3 sm:hidden"
           />
         </>

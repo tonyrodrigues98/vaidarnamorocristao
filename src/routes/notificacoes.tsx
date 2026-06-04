@@ -42,7 +42,8 @@ export const Route = createFileRoute("/notificacoes")({
   component: NotificacoesPage,
 });
 
-const EMOJI_RE = /[\p{Extended_Pictographic}\u{1F3FB}-\u{1F3FF}\u{FE0F}\u200D]/gu;
+const EMOJI_RE =
+  /\p{Extended_Pictographic}|\u{1F3FB}|\u{1F3FC}|\u{1F3FD}|\u{1F3FE}|\u{1F3FF}|\u{FE0F}|\u200D/gu;
 const stripEmoji = (s: string) => s.replace(EMOJI_RE, "").replace(/\s+/g, " ").trim();
 
 function iconMeta(type: string): { icon: React.ReactNode; bg: string; fg: string } {
@@ -56,22 +57,38 @@ function iconMeta(type: string): { icon: React.ReactNode; bg: string; fg: string
     case "profile_approved":
       return { icon: <Shield className="h-4 w-4" />, bg: "bg-emerald-100", fg: "text-emerald-600" };
     case "profile_verified":
-      return { icon: <BadgeCheck className="h-4 w-4" />, bg: "bg-indigo-100", fg: "text-indigo-600" };
+      return {
+        icon: <BadgeCheck className="h-4 w-4" />,
+        bg: "bg-indigo-100",
+        fg: "text-indigo-600",
+      };
     case "anonymous_message":
       return { icon: <Mail className="h-4 w-4" />, bg: "bg-violet-100", fg: "text-violet-600" };
     case "anonymous_hint_requested":
     case "anonymous_hint_sent":
-      return { icon: <Lightbulb className="h-4 w-4" />, bg: "bg-yellow-100", fg: "text-yellow-700" };
+      return {
+        icon: <Lightbulb className="h-4 w-4" />,
+        bg: "bg-yellow-100",
+        fg: "text-yellow-700",
+      };
     case "anonymous_reply":
       return { icon: <Reply className="h-4 w-4" />, bg: "bg-rose-100", fg: "text-rose-600" };
     case "anonymous_reveal_requested":
       return { icon: <Unlock className="h-4 w-4" />, bg: "bg-amber-100", fg: "text-amber-700" };
     case "anonymous_revealed":
-      return { icon: <HeartHandshake className="h-4 w-4" />, bg: "bg-fuchsia-100", fg: "text-fuchsia-600" };
+      return {
+        icon: <HeartHandshake className="h-4 w-4" />,
+        bg: "bg-fuchsia-100",
+        fg: "text-fuchsia-600",
+      };
     case "anonymous_report":
       return { icon: <Flag className="h-4 w-4" />, bg: "bg-red-100", fg: "text-red-600" };
     default:
-      return { icon: <Bell className="h-4 w-4" />, bg: "bg-[var(--petal)]", fg: "text-[var(--rose)]" };
+      return {
+        icon: <Bell className="h-4 w-4" />,
+        bg: "bg-[var(--petal)]",
+        fg: "text-[var(--rose)]",
+      };
   }
 }
 
@@ -141,7 +158,9 @@ function NotificacoesPage() {
           <div>
             <h1 className="text-2xl font-semibold sm:text-3xl">Notificações</h1>
             <p className="text-sm text-muted-foreground">
-              {visibleUnread > 0 ? `${visibleUnread} não lida${visibleUnread > 1 ? "s" : ""}` : "Tudo em dia"}
+              {visibleUnread > 0
+                ? `${visibleUnread} não lida${visibleUnread > 1 ? "s" : ""}`
+                : "Tudo em dia"}
             </p>
           </div>
           {visibleUnread > 0 && (
@@ -162,12 +181,7 @@ function NotificacoesPage() {
           <ul className="space-y-2">
             <AnimatePresence initial={false}>
               {visible.map((n) => (
-                <NotificationRow
-                  key={n.id}
-                  n={n}
-                  onOpen={onClick}
-                  onDelete={handleDelete}
-                />
+                <NotificationRow key={n.id} n={n} onOpen={onClick} onDelete={handleDelete} />
               ))}
             </AnimatePresence>
           </ul>
@@ -275,15 +289,10 @@ function NotificationRow({
         animate={controls}
         style={{ x }}
         className={`group relative flex items-start gap-3 rounded-2xl border p-4 backdrop-blur-sm transition-colors ${
-          n.read_at
-            ? "border-border bg-card/80"
-            : "border-[var(--rose)]/30 bg-[var(--petal)]/40"
+          n.read_at ? "border-border bg-card/80" : "border-[var(--rose)]/30 bg-[var(--petal)]/40"
         }`}
       >
-        <button
-          onClick={handleOpenItem}
-          className="flex flex-1 items-start gap-3 text-left"
-        >
+        <button onClick={handleOpenItem} className="flex flex-1 items-start gap-3 text-left">
           <span
             className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${meta.bg} ${meta.fg}`}
           >

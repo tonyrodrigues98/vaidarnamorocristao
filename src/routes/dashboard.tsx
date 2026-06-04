@@ -7,12 +7,34 @@ import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { ProfileCompletenessAlert } from "@/components/ProfileCompletenessAlert";
 import {
-  Clock, CheckCircle2, XCircle, Users, Heart, MessageCircle, Sparkles,
-  Globe, Newspaper, Eye, TrendingUp, User as UserIcon, Gem,
+  Clock,
+  CheckCircle2,
+  XCircle,
+  Users,
+  Heart,
+  MessageCircle,
+  Sparkles,
+  Globe,
+  Newspaper,
+  Eye,
+  TrendingUp,
+  User as UserIcon,
+  Gem,
 } from "lucide-react";
 import {
-  ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid,
-  BarChart, Bar, PieChart, Pie, Cell, Legend,
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  Legend,
 } from "recharts";
 
 type Profile = {
@@ -28,7 +50,14 @@ type ViewRow = {
   viewer_state: string | null;
   created_at: string;
 };
-type Visitor = { id: string; full_name: string; photo_url: string | null; city: string; state: string; age: number };
+type Visitor = {
+  id: string;
+  full_name: string;
+  photo_url: string | null;
+  city: string;
+  state: string;
+  age: number;
+};
 type LatestNews = { id: string; title: string; content: string; published_at: string };
 
 export const Route = createFileRoute("/dashboard")({ component: Dashboard });
@@ -70,7 +99,11 @@ function Dashboard() {
 
   useEffect(() => {
     if (!user) return;
-    supabase.from("profiles").select("status, full_name, rejection_reason").eq("id", user.id).maybeSingle()
+    supabase
+      .from("profiles")
+      .select("status, full_name, rejection_reason")
+      .eq("id", user.id)
+      .maybeSingle()
       .then(({ data }) => setProfile(data as Profile | null));
   }, [user]);
 
@@ -80,17 +113,17 @@ function Dashboard() {
 
     (async () => {
       const [{ data: vw }, intRes, mtsRes] = await Promise.all([
-        supabase.from("profile_views")
+        supabase
+          .from("profile_views")
           .select("id, viewer_id, viewer_age, viewer_city, viewer_state, created_at")
           .eq("viewed_id", user.id)
           .gte("created_at", sinceIso)
           .order("created_at", { ascending: false }),
-        supabase.from("interests")
+        supabase
+          .from("interests")
           .select("id", { count: "exact", head: true })
           .eq("receiver_id", user.id),
-        supabase.from("matches")
-          .select("id")
-          .or(`user_a.eq.${user.id},user_b.eq.${user.id}`),
+        supabase.from("matches").select("id").or(`user_a.eq.${user.id},user_b.eq.${user.id}`),
       ]);
       const list = (vw ?? []) as ViewRow[];
       setViews(list);
@@ -99,7 +132,8 @@ function Dashboard() {
       const matchIds = (mtsRes.data ?? []).map((m) => m.id);
       let unread = 0;
       if (matchIds.length) {
-        const { count } = await supabase.from("messages")
+        const { count } = await supabase
+          .from("messages")
           .select("id", { count: "exact", head: true })
           .in("match_id", matchIds)
           .neq("sender_id", user.id)
@@ -164,7 +198,10 @@ function Dashboard() {
   const topCities = useMemo(() => {
     const m = new Map<string, number>();
     for (const v of views) {
-      const key = v.viewer_city && v.viewer_state ? `${v.viewer_city} · ${v.viewer_state}` : v.viewer_state ?? "—";
+      const key =
+        v.viewer_city && v.viewer_state
+          ? `${v.viewer_city} · ${v.viewer_state}`
+          : (v.viewer_state ?? "—");
       m.set(key, (m.get(key) ?? 0) + 1);
     }
     return Array.from(m.entries())
@@ -175,8 +212,14 @@ function Dashboard() {
 
   const totalViews = views.length;
   const uniqueViewers = useMemo(() => new Set(views.map((v) => v.viewer_id)).size, [views]);
-  const last7 = useMemo(() => dailySeries.slice(-7).reduce((a, d) => a + d.views, 0), [dailySeries]);
-  const prev7 = useMemo(() => dailySeries.slice(-14, -7).reduce((a, d) => a + d.views, 0), [dailySeries]);
+  const last7 = useMemo(
+    () => dailySeries.slice(-7).reduce((a, d) => a + d.views, 0),
+    [dailySeries],
+  );
+  const prev7 = useMemo(
+    () => dailySeries.slice(-14, -7).reduce((a, d) => a + d.views, 0),
+    [dailySeries],
+  );
   const trend = prev7 === 0 ? (last7 > 0 ? 100 : 0) : Math.round(((last7 - prev7) / prev7) * 100);
 
   const recentVisitors = useMemo(() => {
@@ -194,14 +237,43 @@ function Dashboard() {
   }, [views, visitorsMap]);
 
   if (!loading && !user) return <Navigate to="/auth/login" />;
-  if (profile === undefined) return <div className="min-h-screen"><Header /></div>;
+  if (profile === undefined)
+    return (
+      <div className="min-h-screen">
+        <Header />
+      </div>
+    );
   if (!profile) return <Navigate to="/onboarding/etapa-1" />;
 
   const statusInfo = {
-    pending: { icon: Clock, color: "text-amber-600", bg: "bg-amber-50", title: "Perfil em análise", text: "Sua inscrição está sendo revisada por nossa equipe. Você será avisado(a) assim que for aprovada." },
-    approved: { icon: CheckCircle2, color: "text-emerald-600", bg: "bg-emerald-50", title: "Perfil aprovado!", text: "Bem-vindo(a) à comunidade. Conheça os pretendentes." },
-    rejected: { icon: XCircle, color: "text-red-600", bg: "bg-red-50", title: "Perfil rejeitado", text: profile.rejection_reason ?? "Entre em contato com a equipe." },
-    banned: { icon: XCircle, color: "text-red-700", bg: "bg-red-50", title: "Conta suspensa", text: "Sua conta foi suspensa." },
+    pending: {
+      icon: Clock,
+      color: "text-amber-600",
+      bg: "bg-amber-50",
+      title: "Perfil em análise",
+      text: "Sua inscrição está sendo revisada por nossa equipe. Você será avisado(a) assim que for aprovada.",
+    },
+    approved: {
+      icon: CheckCircle2,
+      color: "text-emerald-600",
+      bg: "bg-emerald-50",
+      title: "Perfil aprovado!",
+      text: "Bem-vindo(a) à comunidade. Conheça os pretendentes.",
+    },
+    rejected: {
+      icon: XCircle,
+      color: "text-red-600",
+      bg: "bg-red-50",
+      title: "Perfil rejeitado",
+      text: profile.rejection_reason ?? "Entre em contato com a equipe.",
+    },
+    banned: {
+      icon: XCircle,
+      color: "text-red-700",
+      bg: "bg-red-50",
+      title: "Conta suspensa",
+      text: "Sua conta foi suspensa.",
+    },
   }[profile.status];
 
   const Icon = statusInfo.icon;
@@ -212,33 +284,61 @@ function Dashboard() {
       <main className="mx-auto max-w-6xl px-4 py-10">
         <div className="animate-fade-up">
           <p className="text-sm text-muted-foreground">Olá,</p>
-          <h1 className="text-4xl font-semibold">{profile.full_name?.split(" ")[0] ?? "Bem-vindo(a)"}</h1>
+          <h1 className="text-4xl font-semibold">
+            {profile.full_name?.split(" ")[0] ?? "Bem-vindo(a)"}
+          </h1>
         </div>
 
         <div className="glass animate-fade-up mt-6 flex items-start gap-4 rounded-3xl p-6 shadow-soft">
-          <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ${statusInfo.bg}`}>
+          <div
+            className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ${statusInfo.bg}`}
+          >
             <Icon className={`h-6 w-6 ${statusInfo.color}`} />
           </div>
           <div className="flex-1">
             <h2 className="text-xl font-semibold">{statusInfo.title}</h2>
             <p className="mt-1 text-sm text-muted-foreground">{statusInfo.text}</p>
             {profile.status === "rejected" && (
-              <Button asChild variant="outline" className="mt-4"><Link to="/onboarding/etapa-1">Editar perfil</Link></Button>
+              <Button asChild variant="outline" className="mt-4">
+                <Link to="/onboarding/etapa-1">Editar perfil</Link>
+              </Button>
             )}
           </div>
         </div>
 
         {profile.status === "approved" && (
           <>
-            <div className="mt-6"><ProfileCompletenessAlert /></div>
+            <div className="mt-6">
+              <ProfileCompletenessAlert />
+            </div>
             {/* Resumo */}
             <section className="mt-8">
               <h2 className="text-xl font-semibold">Resumo dos últimos {PERIOD_DAYS} dias</h2>
               <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                <StatCard Icon={Eye} label="Visitas ao perfil" value={totalViews} hint={`${uniqueViewers} pessoas únicas`} />
-                <StatCard Icon={TrendingUp} label="Tendência (7d)" value={`${trend > 0 ? "+" : ""}${trend}%`} hint={`${last7} vs ${prev7} visitas`} />
-                <StatCard Icon={Sparkles} label="Interesses recebidos" value={stats.interests} hint="Total acumulado" />
-                <StatCard Icon={Heart} label="Matches" value={stats.matches} hint={`${stats.unread} mensagens não lidas`} />
+                <StatCard
+                  Icon={Eye}
+                  label="Visitas ao perfil"
+                  value={totalViews}
+                  hint={`${uniqueViewers} pessoas únicas`}
+                />
+                <StatCard
+                  Icon={TrendingUp}
+                  label="Tendência (7d)"
+                  value={`${trend > 0 ? "+" : ""}${trend}%`}
+                  hint={`${last7} vs ${prev7} visitas`}
+                />
+                <StatCard
+                  Icon={Sparkles}
+                  label="Interesses recebidos"
+                  value={stats.interests}
+                  hint="Total acumulado"
+                />
+                <StatCard
+                  Icon={Heart}
+                  label="Matches"
+                  value={stats.matches}
+                  hint={`${stats.unread} mensagens não lidas`}
+                />
               </div>
             </section>
 
@@ -255,7 +355,10 @@ function Dashboard() {
               </div>
               <div className="mt-4 h-64">
                 <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={dailySeries} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
+                  <AreaChart
+                    data={dailySeries}
+                    margin={{ top: 5, right: 10, left: -20, bottom: 0 }}
+                  >
                     <defs>
                       <linearGradient id="g-views" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="0%" stopColor={ROSE} stopOpacity={0.6} />
@@ -263,13 +366,31 @@ function Dashboard() {
                       </linearGradient>
                     </defs>
                     <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
-                    <XAxis dataKey="label" tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} interval="preserveStartEnd" />
-                    <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} />
+                    <XAxis
+                      dataKey="label"
+                      tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
+                      interval="preserveStartEnd"
+                    />
+                    <YAxis
+                      allowDecimals={false}
+                      tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
+                    />
                     <Tooltip
-                      contentStyle={{ background: "var(--popover)", border: "1px solid var(--border)", borderRadius: 12, color: "var(--popover-foreground)" }}
+                      contentStyle={{
+                        background: "var(--popover)",
+                        border: "1px solid var(--border)",
+                        borderRadius: 12,
+                        color: "var(--popover-foreground)",
+                      }}
                       labelStyle={{ color: "var(--foreground)" }}
                     />
-                    <Area type="monotone" dataKey="views" stroke={ROSE} strokeWidth={2} fill="url(#g-views)" />
+                    <Area
+                      type="monotone"
+                      dataKey="views"
+                      stroke={ROSE}
+                      strokeWidth={2}
+                      fill="url(#g-views)"
+                    />
                   </AreaChart>
                 </ResponsiveContainer>
               </div>
@@ -282,11 +403,31 @@ function Dashboard() {
                 <p className="text-sm text-muted-foreground">Idade declarada de quem visitou</p>
                 <div className="mt-4 h-64">
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={ageBucketSeries} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
-                      <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
-                      <XAxis dataKey="label" tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} />
-                      <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} />
-                      <Tooltip contentStyle={{ background: "var(--popover)", border: "1px solid var(--border)", borderRadius: 12, color: "var(--popover-foreground)" }} />
+                    <BarChart
+                      data={ageBucketSeries}
+                      margin={{ top: 5, right: 10, left: -20, bottom: 0 }}
+                    >
+                      <CartesianGrid
+                        stroke="var(--border)"
+                        strokeDasharray="3 3"
+                        vertical={false}
+                      />
+                      <XAxis
+                        dataKey="label"
+                        tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
+                      />
+                      <YAxis
+                        allowDecimals={false}
+                        tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
+                      />
+                      <Tooltip
+                        contentStyle={{
+                          background: "var(--popover)",
+                          border: "1px solid var(--border)",
+                          borderRadius: 12,
+                          color: "var(--popover-foreground)",
+                        }}
+                      />
                       <Bar dataKey="count" fill={CORAL} radius={[6, 6, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
@@ -303,13 +444,31 @@ function Dashboard() {
                   <div className="mt-4 h-64">
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
-                        <Pie data={topCities} dataKey="value" nameKey="name" innerRadius={45} outerRadius={85} paddingAngle={2}>
+                        <Pie
+                          data={topCities}
+                          dataKey="value"
+                          nameKey="name"
+                          innerRadius={45}
+                          outerRadius={85}
+                          paddingAngle={2}
+                        >
                           {topCities.map((_, i) => (
-                            <Cell key={i} fill={i % 2 === 0 ? ROSE : CORAL} fillOpacity={1 - i * 0.15} />
+                            <Cell
+                              key={i}
+                              fill={i % 2 === 0 ? ROSE : CORAL}
+                              fillOpacity={1 - i * 0.15}
+                            />
                           ))}
                         </Pie>
                         <Legend wrapperStyle={{ fontSize: 12 }} />
-                        <Tooltip contentStyle={{ background: "var(--popover)", border: "1px solid var(--border)", borderRadius: 12, color: "var(--popover-foreground)" }} />
+                        <Tooltip
+                          contentStyle={{
+                            background: "var(--popover)",
+                            border: "1px solid var(--border)",
+                            borderRadius: 12,
+                            color: "var(--popover-foreground)",
+                          }}
+                        />
                       </PieChart>
                     </ResponsiveContainer>
                   </div>
@@ -322,7 +481,9 @@ function Dashboard() {
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-lg font-semibold">Visitantes recentes</h3>
-                  <p className="text-sm text-muted-foreground">Últimas pessoas únicas que viram seu perfil</p>
+                  <p className="text-sm text-muted-foreground">
+                    Últimas pessoas únicas que viram seu perfil
+                  </p>
                 </div>
               </div>
               {recentVisitors.length === 0 ? (
@@ -340,7 +501,11 @@ function Dashboard() {
                     >
                       <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full bg-muted">
                         {p.photo_url ? (
-                          <PhotoImg src={p.photo_url} alt={p.full_name} className="h-full w-full object-cover" />
+                          <PhotoImg
+                            src={p.photo_url}
+                            alt={p.full_name}
+                            className="h-full w-full object-cover"
+                          />
                         ) : (
                           <div className="flex h-full w-full items-center justify-center bg-gradient-love text-lg text-white">
                             {p.full_name.charAt(0)}
@@ -348,10 +513,17 @@ function Dashboard() {
                         )}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-semibold">{p.full_name.split(" ")[0]}, {p.age}</p>
-                        <p className="truncate text-xs text-muted-foreground">{p.city} · {p.state}</p>
+                        <p className="truncate text-sm font-semibold">
+                          {p.full_name.split(" ")[0]}, {p.age}
+                        </p>
+                        <p className="truncate text-xs text-muted-foreground">
+                          {p.city} · {p.state}
+                        </p>
                         <p className="text-[10px] text-muted-foreground">
-                          {new Date(v.created_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "short" })}
+                          {new Date(v.created_at).toLocaleDateString("pt-BR", {
+                            day: "2-digit",
+                            month: "short",
+                          })}
                         </p>
                       </div>
                     </Link>
@@ -376,25 +548,65 @@ function Dashboard() {
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--rose)]">
-                    {new Date(latestNews.published_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "long" })}
+                    {new Date(latestNews.published_at).toLocaleDateString("pt-BR", {
+                      day: "2-digit",
+                      month: "long",
+                    })}
                   </p>
                   <h3 className="mt-1 truncate text-lg font-semibold">{latestNews.title}</h3>
-                  <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{latestNews.content}</p>
+                  <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
+                    {latestNews.content}
+                  </p>
                 </div>
               </Link>
             </div>
           )}
           <h2 className="text-xl font-semibold">Atalhos</h2>
           <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <DashCard to="/perfil" Icon={UserIcon} title="Meu perfil" desc="Edite seus dados e preferências" />
-            <DashCard to="/conversas" Icon={MessageCircle} title="Conversas" desc="Suas mensagens privadas" />
-            <DashCard to="/comunidade" Icon={Globe} title="Comunidade" desc="Chat global em tempo real" />
-            <DashCard to="/pretendentes" Icon={Gem} title="Pretendentes" desc="Conheça pessoas com a mesma fé" />
+            <DashCard
+              to="/perfil"
+              Icon={UserIcon}
+              title="Meu perfil"
+              desc="Edite seus dados e preferências"
+            />
+            <DashCard
+              to="/conversas"
+              Icon={MessageCircle}
+              title="Conversas"
+              desc="Suas mensagens privadas"
+            />
+            <DashCard
+              to="/comunidade"
+              Icon={Globe}
+              title="Comunidade"
+              desc="Chat global em tempo real"
+            />
+            <DashCard
+              to="/pretendentes"
+              Icon={Gem}
+              title="Pretendentes"
+              desc="Conheça pessoas com a mesma fé"
+            />
           </div>
           <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <DashCard to="/interesses" Icon={Sparkles} title="Interesses" desc="Quem demonstrou interesse" />
-            <DashCard to="/matches" Icon={Users} title="Matches" desc="Conexões com reciprocidade" />
-            <DashCard to="/noticias" Icon={Newspaper} title="Notícias & Devocional" desc="Reflexões e avisos" />
+            <DashCard
+              to="/interesses"
+              Icon={Sparkles}
+              title="Interesses"
+              desc="Quem demonstrou interesse"
+            />
+            <DashCard
+              to="/matches"
+              Icon={Users}
+              title="Matches"
+              desc="Conexões com reciprocidade"
+            />
+            <DashCard
+              to="/noticias"
+              Icon={Newspaper}
+              title="Notícias & Devocional"
+              desc="Reflexões e avisos"
+            />
           </div>
         </section>
       </main>
@@ -403,8 +615,16 @@ function Dashboard() {
 }
 
 function StatCard({
-  Icon, label, value, hint,
-}: { Icon: typeof Users; label: string; value: number | string; hint?: string }) {
+  Icon,
+  label,
+  value,
+  hint,
+}: {
+  Icon: typeof Users;
+  label: string;
+  value: number | string;
+  hint?: string;
+}) {
   return (
     <div className="glass animate-fade-up rounded-2xl p-5 shadow-soft">
       <div className="flex items-center justify-between">
@@ -418,10 +638,21 @@ function StatCard({
 }
 
 function DashCard({
-  to, Icon, title, desc,
-}: { to: string; Icon: typeof Users; title: string; desc: string }) {
+  to,
+  Icon,
+  title,
+  desc,
+}: {
+  to: string;
+  Icon: typeof Users;
+  title: string;
+  desc: string;
+}) {
   return (
-    <Link to={to} className="glass group animate-fade-up rounded-2xl p-6 shadow-soft transition hover:shadow-elegant">
+    <Link
+      to={to}
+      className="glass group animate-fade-up rounded-2xl p-6 shadow-soft transition hover:shadow-elegant"
+    >
       <Icon className="mb-3 h-6 w-6 text-[var(--rose)]" />
       <h3 className="text-lg font-semibold">{title}</h3>
       <p className="text-sm text-muted-foreground">{desc}</p>

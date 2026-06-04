@@ -34,7 +34,12 @@ export function useRealtimeNotifications() {
       .channel(`notif-${user.id}`)
       .on(
         "postgres_changes",
-        { event: "INSERT", schema: "public", table: "interests", filter: `receiver_id=eq.${user.id}` },
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "interests",
+          filter: `receiver_id=eq.${user.id}`,
+        },
         async (payload) => {
           const senderId = (payload.new as { sender_id: string }).sender_id;
           const { data: prof } = await supabase
@@ -49,11 +54,16 @@ export function useRealtimeNotifications() {
               onClick: () => router.navigate({ to: "/interesses" }),
             },
           });
-        }
+        },
       )
       .on(
         "postgres_changes",
-        { event: "INSERT", schema: "public", table: "profile_views", filter: `viewed_id=eq.${user.id}` },
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "profile_views",
+          filter: `viewed_id=eq.${user.id}`,
+        },
         async (payload) => {
           const v = payload.new as { viewer_id: string };
           // Notify only the first time this viewer appears in the current session
@@ -74,7 +84,7 @@ export function useRealtimeNotifications() {
               onClick: () => router.navigate({ to: "/dashboard" }),
             },
           });
-        }
+        },
       )
       .on(
         "postgres_changes",
@@ -92,11 +102,12 @@ export function useRealtimeNotifications() {
             description: `Você e ${prof?.full_name?.split(" ")[0] ?? "alguém"} podem conversar agora.`,
             action: {
               label: "Conversar",
-              onClick: () => router.navigate({ to: "/conversas/$matchId", params: { matchId: m.id } }),
+              onClick: () =>
+                router.navigate({ to: "/conversas/$matchId", params: { matchId: m.id } }),
             },
           });
           refreshMatches();
-        }
+        },
       )
       .on(
         "postgres_changes",
@@ -122,7 +133,7 @@ export function useRealtimeNotifications() {
                 router.navigate({ to: "/conversas/$matchId", params: { matchId: m.match_id } }),
             },
           });
-        }
+        },
       )
       .on(
         "postgres_changes",
@@ -135,7 +146,7 @@ export function useRealtimeNotifications() {
             description: p.title,
             action: { label: "Ler", onClick: () => router.navigate({ to: "/noticias" }) },
           });
-        }
+        },
       )
       .on(
         "postgres_changes",
@@ -144,7 +155,8 @@ export function useRealtimeNotifications() {
           const m = payload.new as { sender_id: string; content: string };
           if (m.sender_id === user.id) return;
           // Suppress when the user is already on the community page.
-          if (typeof window !== "undefined" && window.location.pathname.startsWith("/comunidade")) return;
+          if (typeof window !== "undefined" && window.location.pathname.startsWith("/comunidade"))
+            return;
           const { data: prof } = await supabase
             .from("profiles")
             .select("full_name")
@@ -154,11 +166,16 @@ export function useRealtimeNotifications() {
             description: `${prof?.full_name?.split(" ")[0] ?? "Alguém"}: ${m.content.slice(0, 60)}`,
             action: { label: "Abrir", onClick: () => router.navigate({ to: "/comunidade" }) },
           });
-        }
+        },
       )
       .on(
         "postgres_changes",
-        { event: "UPDATE", schema: "public", table: "verification_requests", filter: `user_id=eq.${user.id}` },
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "verification_requests",
+          filter: `user_id=eq.${user.id}`,
+        },
         (payload) => {
           const n = payload.new as { status: string; admin_notes: string | null };
           const o = payload.old as { status: string };
@@ -179,7 +196,7 @@ export function useRealtimeNotifications() {
               action: { label: "Abrir", onClick: () => router.navigate({ to: "/verificacao" }) },
             });
           }
-        }
+        },
       )
       .on(
         "postgres_changes",
@@ -193,13 +210,18 @@ export function useRealtimeNotifications() {
               action: { label: "Ver perfil", onClick: () => router.navigate({ to: "/perfil" }) },
             });
           }
-        }
+        },
       )
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "support_messages" },
         async (payload) => {
-          const m = payload.new as { ticket_id: string; sender_id: string; is_staff: boolean; content: string };
+          const m = payload.new as {
+            ticket_id: string;
+            sender_id: string;
+            is_staff: boolean;
+            content: string;
+          };
           if (m.sender_id === user.id) return;
           // Only notify if user is participant in the ticket
           const { data: t } = await supabase
@@ -215,16 +237,28 @@ export function useRealtimeNotifications() {
             .eq("user_id", user.id);
           const staff = (roles ?? []).some((r) => r.role === "admin" || r.role === "super_admin");
           if (!isOwner && !staff) return;
-          if (typeof window !== "undefined" && window.location.pathname.startsWith(`/suporte/${m.ticket_id}`)) return;
+          if (
+            typeof window !== "undefined" &&
+            window.location.pathname.startsWith(`/suporte/${m.ticket_id}`)
+          )
+            return;
           toast(m.is_staff ? "🛟 Resposta do suporte" : "🛟 Nova mensagem no chamado", {
             description: `${t.title}: ${m.content.slice(0, 60)}`,
-            action: { label: "Abrir", onClick: () => router.navigate({ to: "/suporte/$id", params: { id: m.ticket_id } }) },
+            action: {
+              label: "Abrir",
+              onClick: () => router.navigate({ to: "/suporte/$id", params: { id: m.ticket_id } }),
+            },
           });
-        }
+        },
       )
       .on(
         "postgres_changes",
-        { event: "UPDATE", schema: "public", table: "support_tickets", filter: `user_id=eq.${user.id}` },
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "support_tickets",
+          filter: `user_id=eq.${user.id}`,
+        },
         (payload) => {
           const n = payload.new as { id: string; status: string; title: string };
           const o = payload.old as { status: string };
@@ -238,9 +272,12 @@ export function useRealtimeNotifications() {
           };
           toast(labels[n.status] ?? "Status atualizado", {
             description: n.title,
-            action: { label: "Abrir", onClick: () => router.navigate({ to: "/suporte/$id", params: { id: n.id } }) },
+            action: {
+              label: "Abrir",
+              onClick: () => router.navigate({ to: "/suporte/$id", params: { id: n.id } }),
+            },
           });
-        }
+        },
       )
       .subscribe();
 

@@ -42,11 +42,7 @@ interface AdminSidebarProps {
   onTabChange: (tab: AdminTab) => void;
 }
 
-export function AdminSidebar({
-  currentTab,
-  availableTabs,
-  onTabChange,
-}: AdminSidebarProps) {
+export function AdminSidebar({ currentTab, availableTabs, onTabChange }: AdminSidebarProps) {
   const items = [
     {
       key: "pending",
@@ -111,54 +107,31 @@ export function AdminSidebar({
   ] as const;
 
   return (
-    <Sidebar
-      variant="floating"
-      collapsible="offcanvas"
-      className="border-r"
-    >
+    <Sidebar variant="floating" collapsible="offcanvas" className="border-r">
       <SidebarContent>
-
         <SidebarGroup>
-
-          <SidebarGroupLabel>
-            Administração
-          </SidebarGroupLabel>
+          <SidebarGroupLabel>Administração</SidebarGroupLabel>
 
           <SidebarMenu>
-
             {items
-              .filter((item) =>
-                availableTabs.includes(
-                  item.key as AdminTab
-                )
-              )
+              .filter((item) => availableTabs.includes(item.key as AdminTab))
               .map((item) => {
                 const Icon = item.icon;
 
                 return (
                   <SidebarMenuItem key={item.key}>
                     <SidebarMenuButton
-                      isActive={
-                        currentTab === item.key
-                      }
-                      onClick={() =>
-                        onTabChange(
-                          item.key as AdminTab
-                        )
-                      }
+                      isActive={currentTab === item.key}
+                      onClick={() => onTabChange(item.key as AdminTab)}
                     >
                       <Icon />
-                      <span>
-                        {item.label}
-                      </span>
+                      <span>{item.label}</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 );
               })}
           </SidebarMenu>
-
         </SidebarGroup>
-
       </SidebarContent>
     </Sidebar>
   );

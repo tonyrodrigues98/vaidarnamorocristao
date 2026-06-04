@@ -11,7 +11,14 @@ type Props = {
   onDone: () => void;
 };
 
-export function GiftSendAnimation({ show, giftName, emoji, imageUrl, rarity = "rare", onDone }: Props) {
+export function GiftSendAnimation({
+  show,
+  giftName,
+  emoji,
+  imageUrl,
+  rarity = "rare",
+  onDone,
+}: Props) {
   useEffect(() => {
     if (!show) return;
     const t = setTimeout(onDone, 1900);
@@ -29,13 +36,15 @@ export function GiftSendAnimation({ show, giftName, emoji, imageUrl, rarity = "r
             <span
               key={i}
               className="absolute left-1/2 top-1/2 h-2 w-2 rounded-full"
-              style={{
-                background: i % 2 ? "#FF7BC3" : "#A855F7",
-                animation: `gift-particle 1.6s ease-out forwards`,
-                animationDelay: `${i * 0.04}s`,
-                ["--tx" as string]: `${Math.cos((i / 14) * Math.PI * 2) * 160}px`,
-                ["--ty" as string]: `${Math.sin((i / 14) * Math.PI * 2) * 160}px`,
-              } as React.CSSProperties}
+              style={
+                {
+                  background: i % 2 ? "#FF7BC3" : "#A855F7",
+                  animation: `gift-particle 1.6s ease-out forwards`,
+                  animationDelay: `${i * 0.04}s`,
+                  ["--tx" as string]: `${Math.cos((i / 14) * Math.PI * 2) * 160}px`,
+                  ["--ty" as string]: `${Math.sin((i / 14) * Math.PI * 2) * 160}px`,
+                } as React.CSSProperties
+              }
             />
           ))}
         </div>

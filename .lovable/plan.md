@@ -5,17 +5,20 @@ Feature grande. Vou implementar em camadas: backend → admin → loja `/present
 ### 1. Backend (migration única)
 
 **Tabelas novas:**
+
 - `virtual_gifts` — catálogo (id, name, slug, image_url, price_coins, category, rarity, active, sort_order)
 - `gift_transactions` — envios (id, sender_id, receiver_id, gift_id, price_paid, message, status: held|redeemed, created_at, redeemed_at, redeemed_coins)
 
 **Enums:** `gift_category` (romantic, spiritual, caring, friendship, fun, legendary), `gift_rarity` (common, rare, epic, legendary, exclusive)
 
 **Funções RPC (SECURITY DEFINER):**
+
 - `send_virtual_gift(_receiver_id, _gift_id, _message)` — debita moedas, cria transação, envia notificação, loga `coin_transactions`
 - `redeem_virtual_gift(_tx_id)` — devolve 30% das moedas (arredondado, mínimo 1), marca `redeemed`
 - `get_received_gifts(_user_id)` — lista para perfil próprio/público (limita públicos a held)
 
 **RLS:**
+
 - `virtual_gifts`: SELECT público para `active=true`; ALL para admins
 - `gift_transactions`: SELECT para sender/receiver; INSERT/UPDATE só via RPC
 
@@ -28,6 +31,7 @@ Seed ~18 presentes cobrindo as 6 categorias com emojis/placeholders (Rosa Encant
 ### 3. Rota `/presentes`
 
 `src/routes/presentes/index.tsx` — fora da loja, identidade própria:
+
 - Header 220px gradiente `#FF5FA2 → #FF7BC3 → #A855F7 → #6D5BFF`, blur orbs flutuantes, partículas CSS
 - Card saldo glassmorphism + botão "Ver Extrato" → `/loja?tab=saldo`
 - Filtros por categoria (chips com ícones lucide)
@@ -53,6 +57,7 @@ Notification type `gift_received` já cabe no schema existente (`create_notifica
 ### 7. Tokens visuais
 
 Adicionar em `src/styles.css`:
+
 - `--gift-gradient`, `--rarity-common/rare/epic/legendary/exclusive` (cores + glow shadows)
 - Keyframes `gift-float`, `gift-sparkle`, `gift-rise`
 
@@ -61,10 +66,12 @@ Adicionar em `src/styles.css`:
 ### Arquivos a criar/editar
 
 **Backend (migration):**
+
 - `supabase/migrations/<ts>_virtual_gifts.sql`
 - `supabase/migrations/<ts>_seed_gifts.sql` (ou via insert tool após primeira migration)
 
 **Frontend novo:**
+
 - `src/routes/presentes/index.tsx`
 - `src/routes/admin/presentes.tsx`
 - `src/components/gifts/GiftCard.tsx`
@@ -76,6 +83,7 @@ Adicionar em `src/styles.css`:
 - `src/lib/gifts.ts` (RPC wrappers)
 
 **Frontend editado:**
+
 - `src/routes/perfil.tsx` (adicionar aba)
 - `src/routes/pretendentes/$id.tsx` (seção destaques + botão enviar)
 - `src/routes/admin/index.tsx` (link menu)

@@ -38,9 +38,16 @@ export const Route = createFileRoute("/depoimentos")({
   head: () => ({
     meta: [
       { title: "Depoimentos — Casais que se conheceram no VaiDarNamoro" },
-      { name: "description", content: "Histórias reais de casais cristãos que se conheceram no VaiDarNamoro. Inspire-se com testemunhos de namoro, noivado e casamento com propósito." },
+      {
+        name: "description",
+        content:
+          "Histórias reais de casais cristãos que se conheceram no VaiDarNamoro. Inspire-se com testemunhos de namoro, noivado e casamento com propósito.",
+      },
       { property: "og:title", content: "Casais que se conheceram no VaiDarNamoro" },
-      { property: "og:description", content: "Histórias reais de relacionamentos cristãos sérios construídos na plataforma." },
+      {
+        property: "og:description",
+        content: "Histórias reais de relacionamentos cristãos sérios construídos na plataforma.",
+      },
       { property: "og:url", content: "https://vaidarnamoro.com/depoimentos" },
     ],
     links: [{ rel: "canonical", href: "https://vaidarnamoro.com/depoimentos" }],
@@ -92,7 +99,9 @@ function DepoimentosPage() {
         </section>
 
         <section className="mt-20 text-center">
-          <h2 className="text-3xl font-extrabold tracking-tight">Sua história pode ser a próxima</h2>
+          <h2 className="text-3xl font-extrabold tracking-tight">
+            Sua história pode ser a próxima
+          </h2>
           <Link
             to="/auth/signup"
             className="mt-8 inline-flex h-12 items-center justify-center rounded-full bg-[var(--rose)] px-8 font-semibold text-white shadow-glow hover:opacity-90"

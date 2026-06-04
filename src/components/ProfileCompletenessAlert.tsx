@@ -26,7 +26,9 @@ export function ProfileCompletenessAlert() {
           .maybeSingle(),
         supabase
           .from("profile_advanced")
-          .select("life_verse, testimony, seeking, essential_quality, hobbies, love_language, wants_marriage, wants_children")
+          .select(
+            "life_verse, testimony, seeking, essential_quality, hobbies, love_language, wants_marriage, wants_children",
+          )
           .eq("user_id", user.id)
           .maybeSingle(),
       ]);
@@ -73,7 +75,9 @@ export function ProfileCompletenessAlert() {
       <div className="flex items-start gap-3">
         <div
           className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${
-            isLow ? "bg-[color:var(--coral)]/15 text-[color:var(--coral)]" : "bg-[color:var(--rose)]/15 text-[color:var(--rose)]"
+            isLow
+              ? "bg-[color:var(--coral)]/15 text-[color:var(--coral)]"
+              : "bg-[color:var(--rose)]/15 text-[color:var(--rose)]"
           }`}
         >
           {isLow ? <AlertTriangle className="h-5 w-5" /> : <Sparkles className="h-5 w-5" />}
@@ -81,14 +85,17 @@ export function ProfileCompletenessAlert() {
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <h3 className="text-sm font-semibold sm:text-base">
-              {isLow ? "Seu perfil está sendo pouco exibido" : "Complete seu perfil para aumentar suas chances"}
+              {isLow
+                ? "Seu perfil está sendo pouco exibido"
+                : "Complete seu perfil para aumentar suas chances"}
             </h3>
             <span className="rounded-full bg-background/70 px-2 py-0.5 text-xs font-medium text-muted-foreground">
               {score}% completo
             </span>
           </div>
           <p className="mt-1 text-sm text-muted-foreground">
-            Perfis completos recebem até 5x mais interesses. Faltam: {missing.slice(0, 3).join(", ")}
+            Perfis completos recebem até 5x mais interesses. Faltam:{" "}
+            {missing.slice(0, 3).join(", ")}
             {missing.length > 3 ? ` e mais ${missing.length - 3}…` : "."}
           </p>
           <div className="mt-2 h-2 overflow-hidden rounded-full bg-background/70">

@@ -49,7 +49,12 @@ export function UserBadges({ userId, size = "sm", max = 3, className = "" }: Pro
 
   if (!codes.length) return null;
   const shown = codes.slice(0, max);
-  const padding = size === "xs" ? "px-1 py-0.5 text-[9px]" : size === "md" ? "px-2 py-1 text-[11px]" : "px-1.5 py-0.5 text-[10px]";
+  const padding =
+    size === "xs"
+      ? "px-1 py-0.5 text-[9px]"
+      : size === "md"
+        ? "px-2 py-1 text-[11px]"
+        : "px-1.5 py-0.5 text-[10px]";
   const icon = size === "xs" ? "h-2.5 w-2.5" : size === "md" ? "h-3.5 w-3.5" : "h-3 w-3";
 
   return (

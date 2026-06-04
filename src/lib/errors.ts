@@ -4,17 +4,16 @@
  *  - terms version updated (user must re-accept)
  *  - profile not yet approved (still pending review)
  */
-export function friendlyError(error: unknown, fallback = "Não foi possível concluir a ação."): string {
+export function friendlyError(
+  error: unknown,
+  fallback = "Não foi possível concluir a ação.",
+): string {
   if (!error) return fallback;
   const msg = (error as { message?: string })?.message || String(error);
   const code = (error as { code?: string })?.code || "";
 
   // RLS violation
-  if (
-    code === "42501" ||
-    /row-level security/i.test(msg) ||
-    /violates row-level/i.test(msg)
-  ) {
+  if (code === "42501" || /row-level security/i.test(msg) || /violates row-level/i.test(msg)) {
     return "Para continuar, aceite os Termos atualizados e confirme que seu perfil foi aprovado.";
   }
 

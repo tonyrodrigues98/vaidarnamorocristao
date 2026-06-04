@@ -7,7 +7,9 @@ export function SupportFooterButton() {
   if (!user) return null;
   return (
     <>
-      <span aria-hidden className="opacity-40">•</span>
+      <span aria-hidden className="opacity-40">
+        •
+      </span>
       <Link
         to="/suporte"
         aria-label="Suporte"

@@ -7,7 +7,15 @@ type Props = {
   onChange: (v: GiftCategory | "all") => void;
 };
 
-const ORDER: (GiftCategory | "all")[] = ["all", "romantic", "spiritual", "caring", "friendship", "fun", "legendary"];
+const ORDER: (GiftCategory | "all")[] = [
+  "all",
+  "romantic",
+  "spiritual",
+  "caring",
+  "friendship",
+  "fun",
+  "legendary",
+];
 const ICONS = {
   all: Gift,
   romantic: Heart,

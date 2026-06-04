@@ -107,7 +107,11 @@ export async function listAllGiftsAdmin(): Promise<VirtualGift[]> {
   return (data ?? []) as unknown as VirtualGift[];
 }
 
-export async function sendGift(receiverId: string, giftId: string, message?: string): Promise<string> {
+export async function sendGift(
+  receiverId: string,
+  giftId: string,
+  message?: string,
+): Promise<string> {
   const { data, error } = await supabase.rpc(
     "send_virtual_gift" as never,
     {
@@ -121,7 +125,10 @@ export async function sendGift(receiverId: string, giftId: string, message?: str
 }
 
 export async function redeemGift(txId: string): Promise<number> {
-  const { data, error } = await supabase.rpc("redeem_virtual_gift" as never, { _tx_id: txId } as never);
+  const { data, error } = await supabase.rpc(
+    "redeem_virtual_gift" as never,
+    { _tx_id: txId } as never,
+  );
   if (error) throw error;
   return Number(data ?? 0);
 }
@@ -136,9 +143,15 @@ export async function listMyReceivedGifts(userId: string): Promise<GiftTransacti
   const rows = (data ?? []) as unknown as GiftTransaction[];
   const senderIds = Array.from(new Set(rows.map((r) => r.sender_id)));
   if (senderIds.length > 0) {
-    const { data: profs } = await supabase.from("profiles").select("id, full_name, photo_url").in("id", senderIds);
+    const { data: profs } = await supabase
+      .from("profiles")
+      .select("id, full_name, photo_url")
+      .in("id", senderIds);
     const map = new Map(
-      (profs ?? []).map((p: { id: string; full_name: string; photo_url: string | null }) => [p.id, p]),
+      (profs ?? []).map((p: { id: string; full_name: string; photo_url: string | null }) => [
+        p.id,
+        p,
+      ]),
     );
     rows.forEach((r) => {
       const p = map.get(r.sender_id);
@@ -162,7 +175,10 @@ export type PublicGiftHighlight = {
   gift_category: GiftCategory;
 };
 
-export async function listPublicGiftHighlights(userId: string, limit = 6): Promise<PublicGiftHighlight[]> {
+export async function listPublicGiftHighlights(
+  userId: string,
+  limit = 6,
+): Promise<PublicGiftHighlight[]> {
   const { data, error } = await supabase.rpc(
     "get_received_gifts_public" as never,
     {

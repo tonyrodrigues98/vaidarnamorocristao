@@ -10,13 +10,42 @@ export function PublicNav() {
           <span>VaiDarNamoro</span>
         </Link>
         <div className="hidden items-center gap-6 text-sm font-medium text-muted-foreground md:flex">
-          <Link to="/sobre" className="hover:text-[var(--rose)]" activeProps={{ className: "text-[var(--rose)]" }}>Sobre</Link>
-          <Link to="/como-funciona" className="hover:text-[var(--rose)]" activeProps={{ className: "text-[var(--rose)]" }}>Como funciona</Link>
-          <Link to="/depoimentos" className="hover:text-[var(--rose)]" activeProps={{ className: "text-[var(--rose)]" }}>Depoimentos</Link>
-          <Link to="/blog" className="hover:text-[var(--rose)]" activeProps={{ className: "text-[var(--rose)]" }}>Blog</Link>
+          <Link
+            to="/sobre"
+            className="hover:text-[var(--rose)]"
+            activeProps={{ className: "text-[var(--rose)]" }}
+          >
+            Sobre
+          </Link>
+          <Link
+            to="/como-funciona"
+            className="hover:text-[var(--rose)]"
+            activeProps={{ className: "text-[var(--rose)]" }}
+          >
+            Como funciona
+          </Link>
+          <Link
+            to="/depoimentos"
+            className="hover:text-[var(--rose)]"
+            activeProps={{ className: "text-[var(--rose)]" }}
+          >
+            Depoimentos
+          </Link>
+          <Link
+            to="/blog"
+            className="hover:text-[var(--rose)]"
+            activeProps={{ className: "text-[var(--rose)]" }}
+          >
+            Blog
+          </Link>
         </div>
         <div className="flex items-center gap-2">
-          <Link to="/auth/login" className="hidden text-sm font-medium text-muted-foreground hover:text-[var(--rose)] md:inline">Entrar</Link>
+          <Link
+            to="/auth/login"
+            className="hidden text-sm font-medium text-muted-foreground hover:text-[var(--rose)] md:inline"
+          >
+            Entrar
+          </Link>
           <Link
             to="/auth/signup"
             className="rounded-full bg-[var(--rose)] px-4 py-2 text-sm font-semibold text-white shadow-glow hover:opacity-90"

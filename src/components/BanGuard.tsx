@@ -28,12 +28,8 @@ export function BanGuard() {
     if (profileStatus !== "banned" && profileStatus !== "rejected") return;
     const path = location.pathname;
     const prefixes =
-      profileStatus === "rejected"
-        ? [...ALLOWED_PREFIXES, "/perfil"]
-        : ALLOWED_PREFIXES;
-    const allowed = prefixes.some(
-      (p) => path === p || path.startsWith(p + "/"),
-    );
+      profileStatus === "rejected" ? [...ALLOWED_PREFIXES, "/perfil"] : ALLOWED_PREFIXES;
+    const allowed = prefixes.some((p) => path === p || path.startsWith(p + "/"));
     if (!allowed) {
       navigate({ to: "/inicio", replace: true });
     }

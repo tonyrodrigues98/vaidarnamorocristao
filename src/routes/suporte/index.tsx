@@ -8,15 +8,29 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { LifeBuoy, Plus, Loader2, Search, BookOpen } from "lucide-react";
 import { toast } from "sonner";
 import {
-  CATEGORIES, PRIORITIES, STATUSES, statusBadge, priorityBadge, type Ticket,
+  CATEGORIES,
+  PRIORITIES,
+  STATUSES,
+  statusBadge,
+  priorityBadge,
+  type Ticket,
 } from "@/lib/support";
 
 export const Route = createFileRoute("/suporte/")({
@@ -25,7 +39,10 @@ export const Route = createFileRoute("/suporte/")({
 
 function SuportePage() {
   const { user, isAdmin, role, isSupportAgent, loading } = useAuth();
-  const isStaff = isAdmin || role === "super_admin" || ((role === "moderador" || role === "apresentador") && isSupportAgent);
+  const isStaff =
+    isAdmin ||
+    role === "super_admin" ||
+    ((role === "moderador" || role === "apresentador") && isSupportAgent);
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [busy, setBusy] = useState(true);
   const [open, setOpen] = useState(false);
@@ -55,9 +72,14 @@ function SuportePage() {
     load();
     const ch = supabase
       .channel("support_tickets_list")
-      .on("postgres_changes", { event: "*", schema: "public", table: "support_tickets" }, () => load())
+      .on("postgres_changes", { event: "*", schema: "public", table: "support_tickets" }, () =>
+        load(),
+      )
       .subscribe();
-    return () => { ignore = true; supabase.removeChannel(ch); };
+    return () => {
+      ignore = true;
+      supabase.removeChannel(ch);
+    };
   }, [user, isStaff]);
 
   const filtered = useMemo(() => {
@@ -88,17 +110,26 @@ function SuportePage() {
             </p>
           </div>
           {!isStaff && (
-            <NewTicketDialog open={open} setOpen={setOpen} onCreated={(id) => {
-              window.location.href = `/suporte/${id}`;
-            }} />
+            <NewTicketDialog
+              open={open}
+              setOpen={setOpen}
+              onCreated={(id) => {
+                window.location.href = `/suporte/${id}`;
+              }}
+            />
           )}
         </div>
 
-        <Link to="/suporte/ajuda" className="glass mt-4 flex items-center gap-3 rounded-2xl p-4 shadow-soft transition-all hover:shadow-glow">
+        <Link
+          to="/suporte/ajuda"
+          className="glass mt-4 flex items-center gap-3 rounded-2xl p-4 shadow-soft transition-all hover:shadow-glow"
+        >
           <BookOpen className="h-6 w-6 text-[var(--rose)]" />
           <div className="flex-1">
             <p className="font-semibold">Central de Ajuda e FAQ</p>
-            <p className="text-xs text-muted-foreground">Veja respostas para dúvidas comuns antes de abrir um chamado.</p>
+            <p className="text-xs text-muted-foreground">
+              Veja respostas para dúvidas comuns antes de abrir um chamado.
+            </p>
           </div>
           <span className="text-sm text-[var(--rose)]">Abrir →</span>
         </Link>
@@ -106,33 +137,60 @@ function SuportePage() {
         <div className="glass mt-6 flex flex-wrap items-center gap-3 rounded-2xl p-3 shadow-soft">
           <div className="relative flex-1 min-w-[200px]">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar por título" className="pl-9" />
+            <Input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Buscar por título"
+              className="pl-9"
+            />
           </div>
           <Select value={filterStatus} onValueChange={setFilterStatus}>
-            <SelectTrigger className="w-[170px]"><SelectValue placeholder="Status" /></SelectTrigger>
+            <SelectTrigger className="w-[170px]">
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todos os status</SelectItem>
-              {STATUSES.map((s) => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}
+              {STATUSES.map((s) => (
+                <SelectItem key={s.value} value={s.value}>
+                  {s.label}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
           <Select value={filterPriority} onValueChange={setFilterPriority}>
-            <SelectTrigger className="w-[160px]"><SelectValue placeholder="Prioridade" /></SelectTrigger>
+            <SelectTrigger className="w-[160px]">
+              <SelectValue placeholder="Prioridade" />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todas prioridades</SelectItem>
-              {PRIORITIES.map((p) => <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>)}
+              {PRIORITIES.map((p) => (
+                <SelectItem key={p.value} value={p.value}>
+                  {p.label}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
           <Select value={filterCategory} onValueChange={setFilterCategory}>
-            <SelectTrigger className="w-[180px]"><SelectValue placeholder="Categoria" /></SelectTrigger>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Categoria" />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todas categorias</SelectItem>
-              {CATEGORIES.map((c) => <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>)}
+              {CATEGORIES.map((c) => (
+                <SelectItem key={c.value} value={c.value}>
+                  {c.label}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
 
         <div className="mt-4 space-y-2">
-          {busy && <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin" /></div>}
+          {busy && (
+            <div className="flex justify-center py-12">
+              <Loader2 className="h-6 w-6 animate-spin" />
+            </div>
+          )}
           {!busy && filtered.length === 0 && (
             <div className="glass rounded-2xl p-10 text-center text-sm text-muted-foreground">
               {tickets.length === 0
@@ -153,7 +211,8 @@ function SuportePage() {
                   {priorityBadge(t.priority)}
                 </div>
                 <p className="mt-0.5 truncate text-xs text-muted-foreground">
-                  {CATEGORIES.find((c) => c.value === t.category)?.label} • atualizado {new Date(t.last_message_at).toLocaleString("pt-BR")}
+                  {CATEGORIES.find((c) => c.value === t.category)?.label} • atualizado{" "}
+                  {new Date(t.last_message_at).toLocaleString("pt-BR")}
                 </p>
               </div>
               {statusBadge(t.status)}
@@ -165,8 +224,14 @@ function SuportePage() {
   );
 }
 
-function NewTicketDialog({ open, setOpen, onCreated }: {
-  open: boolean; setOpen: (v: boolean) => void; onCreated: (id: string) => void;
+function NewTicketDialog({
+  open,
+  setOpen,
+  onCreated,
+}: {
+  open: boolean;
+  setOpen: (v: boolean) => void;
+  onCreated: (id: string) => void;
 }) {
   const { user } = useAuth();
   const [title, setTitle] = useState("");
@@ -202,7 +267,9 @@ function NewTicketDialog({ open, setOpen, onCreated }: {
       const attachments: { path: string; name: string; type: string; size: number }[] = [];
       for (const f of files) {
         const path = `${user.id}/${ticketId}/${Date.now()}-${f.name.replace(/[^a-zA-Z0-9._-]/g, "_").slice(-60)}`;
-        const up = await supabase.storage.from("support-attachments").upload(path, f, { contentType: f.type });
+        const up = await supabase.storage
+          .from("support-attachments")
+          .upload(path, f, { contentType: f.type });
         if (up.error) throw up.error;
         attachments.push({ path, name: f.name, type: f.type, size: f.size });
       }
@@ -215,7 +282,11 @@ function NewTicketDialog({ open, setOpen, onCreated }: {
       if (mErr) throw mErr;
       toast.success("Chamado criado!");
       setOpen(false);
-      setTitle(""); setDescription(""); setFiles([]); setCategory("other"); setPriority("medium");
+      setTitle("");
+      setDescription("");
+      setFiles([]);
+      setCategory("other");
+      setPriority("medium");
       onCreated(ticketId);
     } catch (e: any) {
       toast.error(e?.message ?? "Erro ao criar chamado");
@@ -227,49 +298,85 @@ function NewTicketDialog({ open, setOpen, onCreated }: {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="rounded-full shadow-glow"><Plus className="mr-1 h-4 w-4" /> Novo chamado</Button>
+        <Button className="rounded-full shadow-glow">
+          <Plus className="mr-1 h-4 w-4" /> Novo chamado
+        </Button>
       </DialogTrigger>
       <DialogContent className="max-w-lg">
-        <DialogHeader><DialogTitle>Abrir novo chamado</DialogTitle></DialogHeader>
+        <DialogHeader>
+          <DialogTitle>Abrir novo chamado</DialogTitle>
+        </DialogHeader>
         <div className="space-y-3">
           <div>
             <Label>Título</Label>
-            <Input value={title} onChange={(e) => setTitle(e.target.value)} maxLength={120} placeholder="Resumo do problema" />
+            <Input
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              maxLength={120}
+              placeholder="Resumo do problema"
+            />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <Label>Categoria</Label>
               <Select value={category} onValueChange={setCategory}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
-                  {CATEGORIES.map((c) => <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>)}
+                  {CATEGORIES.map((c) => (
+                    <SelectItem key={c.value} value={c.value}>
+                      {c.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
             <div>
               <Label>Prioridade</Label>
               <Select value={priority} onValueChange={setPriority}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
-                  {PRIORITIES.map((p) => <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>)}
+                  {PRIORITIES.map((p) => (
+                    <SelectItem key={p.value} value={p.value}>
+                      {p.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
           </div>
           <div>
             <Label>Descrição</Label>
-            <Textarea rows={5} value={description} onChange={(e) => setDescription(e.target.value)} maxLength={4000} placeholder="Descreva o problema com o máximo de detalhes possível." />
+            <Textarea
+              rows={5}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              maxLength={4000}
+              placeholder="Descreva o problema com o máximo de detalhes possível."
+            />
           </div>
           <div>
             <Label>Anexos (imagens, até 5MB cada, máx 5)</Label>
-            <Input type="file" accept="image/*" multiple onChange={(e) => setFiles(Array.from(e.target.files ?? []).slice(0, 5))} />
+            <Input
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={(e) => setFiles(Array.from(e.target.files ?? []).slice(0, 5))}
+            />
             {files.length > 0 && (
-              <p className="mt-1 text-xs text-muted-foreground">{files.length} arquivo(s) selecionado(s)</p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {files.length} arquivo(s) selecionado(s)
+              </p>
             )}
           </div>
         </div>
         <DialogFooter>
-          <Button variant="ghost" onClick={() => setOpen(false)}>Cancelar</Button>
+          <Button variant="ghost" onClick={() => setOpen(false)}>
+            Cancelar
+          </Button>
           <Button onClick={submit} disabled={busy}>
             {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Criar chamado
           </Button>

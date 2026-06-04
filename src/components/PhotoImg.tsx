@@ -15,14 +15,10 @@ export function PhotoImg({ src, fallback, className, onError, ...rest }: ImgProp
   if (!url) {
     if (fallback) return <>{fallback}</>;
     return (
-      <div
-        aria-hidden
-        className={cn("bg-muted", loading ? "animate-pulse" : "", className)}
-      />
+      <div aria-hidden className={cn("bg-muted", loading ? "animate-pulse" : "", className)} />
     );
   }
 
-  // eslint-disable-next-line jsx-a11y/alt-text
   return (
     <img
       src={url}

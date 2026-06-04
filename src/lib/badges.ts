@@ -1,5 +1,20 @@
 import type { LucideIcon } from "lucide-react";
-import { Sparkles, HandHeart, UserCheck, BookOpen, Heart, Gem, Flame, ShieldCheck, MessagesSquare, Handshake, MessageCircleHeart, Eye, Cross, CalendarDays } from "lucide-react";
+import {
+  Sparkles,
+  HandHeart,
+  UserCheck,
+  BookOpen,
+  Heart,
+  Gem,
+  Flame,
+  ShieldCheck,
+  MessagesSquare,
+  Handshake,
+  MessageCircleHeart,
+  Eye,
+  Cross,
+  CalendarDays,
+} from "lucide-react";
 
 export type BadgeCode =
   | "new_member"

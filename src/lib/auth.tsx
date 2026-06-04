@@ -56,7 +56,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setRole(primary);
     setBadgeColor((primaryRow?.badge_color as RoleColor | null) ?? null);
     setPublicListing(!!primaryRow?.public_listing);
-    setIsSupportAgent(rows.some((r) => (r as { is_support_agent?: boolean }).is_support_agent === true));
+    setIsSupportAgent(
+      rows.some((r) => (r as { is_support_agent?: boolean }).is_support_agent === true),
+    );
     const { data: prof } = await supabase
       .from("profiles")
       .select("status")
@@ -71,7 +73,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(s);
       setLoading(false);
       if (s?.user) {
-        setTimeout(() => { loadRoles(s.user.id); }, 0);
+        setTimeout(() => {
+          loadRoles(s.user.id);
+        }, 0);
       } else {
         setRole("user");
         setBadgeColor(null);
@@ -101,10 +105,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .on(
         "postgres_changes" as never,
         { event: "DELETE", schema: "public", table: "profiles", filter: `id=eq.${uid}` },
-        () => { supabase.auth.signOut(); },
+        () => {
+          supabase.auth.signOut();
+        },
       )
       .subscribe();
-    return () => { supabase.removeChannel(ch); };
+    return () => {
+      supabase.removeChannel(ch);
+    };
   }, [session?.user?.id]);
 
   const isAdmin = role === "admin" || role === "super_admin";

@@ -114,8 +114,12 @@ function CouplePage() {
         .select("id, full_name, photo_url, equipped_frame_id, equipped_aura_id")
         .in("id", [commitment.user_a, commitment.user_b]);
 
-      setPersonA((profiles?.find((p) => p.id === commitment.user_a) ?? null) as CoupleProfile | null);
-      setPersonB((profiles?.find((p) => p.id === commitment.user_b) ?? null) as CoupleProfile | null);
+      setPersonA(
+        (profiles?.find((p) => p.id === commitment.user_a) ?? null) as CoupleProfile | null,
+      );
+      setPersonB(
+        (profiles?.find((p) => p.id === commitment.user_b) ?? null) as CoupleProfile | null,
+      );
 
       const { count } = await supabase
         .from("messages")
@@ -127,7 +131,11 @@ function CouplePage() {
 
       setMessageCount(count ?? 0);
 
-      const { data: matchData } = await supabase.from("matches").select("created_at").eq("id", matchId).maybeSingle();
+      const { data: matchData } = await supabase
+        .from("matches")
+        .select("created_at")
+        .eq("id", matchId)
+        .maybeSingle();
       setMatchCreatedAt(matchData?.created_at ?? null);
 
       const { data: firstMessage } = await supabase
@@ -167,29 +175,68 @@ function CouplePage() {
       const totalMessages = count ?? 0;
       const totalGifts = gifts?.length ?? 0;
       const currentDays = commitment.accepted_at
-        ? Math.max(1, Math.floor((Date.now() - new Date(commitment.accepted_at).getTime()) / 86400000))
+        ? Math.max(
+            1,
+            Math.floor((Date.now() - new Date(commitment.accepted_at).getTime()) / 86400000),
+          )
         : 0;
 
       setGiftCount(totalGifts);
       setGalleryGifts((gifts ?? []).slice(0, 8));
       setFirstGiftAt(gifts?.[0]?.created_at ?? null);
       setAchievements([
-        { title: "Primeira conversa", progress: totalMessages > 0 ? 100 : 0, unlocked: totalMessages > 0 },
-        { title: "Primeiro presente", progress: totalGifts > 0 ? 100 : 0, unlocked: totalGifts > 0 },
-        { title: "100 mensagens", progress: Math.min(100, (totalMessages / 100) * 100), unlocked: totalMessages >= 100 },
-        { title: "500 mensagens", progress: Math.min(100, (totalMessages / 500) * 100), unlocked: totalMessages >= 500 },
-        { title: "7 dias em Propósito", progress: Math.min(100, (currentDays / 7) * 100), unlocked: currentDays >= 7 },
-        { title: "30 dias em Propósito", progress: Math.min(100, (currentDays / 30) * 100), unlocked: currentDays >= 30 },
-        { title: "50 presentes", progress: Math.min(100, (totalGifts / 50) * 100), unlocked: totalGifts >= 50 },
+        {
+          title: "Primeira conversa",
+          progress: totalMessages > 0 ? 100 : 0,
+          unlocked: totalMessages > 0,
+        },
+        {
+          title: "Primeiro presente",
+          progress: totalGifts > 0 ? 100 : 0,
+          unlocked: totalGifts > 0,
+        },
+        {
+          title: "100 mensagens",
+          progress: Math.min(100, (totalMessages / 100) * 100),
+          unlocked: totalMessages >= 100,
+        },
+        {
+          title: "500 mensagens",
+          progress: Math.min(100, (totalMessages / 500) * 100),
+          unlocked: totalMessages >= 500,
+        },
+        {
+          title: "7 dias em Propósito",
+          progress: Math.min(100, (currentDays / 7) * 100),
+          unlocked: currentDays >= 7,
+        },
+        {
+          title: "30 dias em Propósito",
+          progress: Math.min(100, (currentDays / 30) * 100),
+          unlocked: currentDays >= 30,
+        },
+        {
+          title: "50 presentes",
+          progress: Math.min(100, (totalGifts / 50) * 100),
+          unlocked: totalGifts >= 50,
+        },
       ]);
 
-      const { data: msgs } = await supabase.from("messages").select("*").eq("match_id", matchId).order("created_at");
+      const { data: msgs } = await supabase
+        .from("messages")
+        .select("*")
+        .eq("match_id", matchId)
+        .order("created_at");
       const typedMessages = (msgs ?? []) as Msg[];
 
       setMessages(typedMessages);
 
-      const unread = typedMessages.filter((message) => message.sender_id !== user.id && !message.read_at);
-      await Promise.all(unread.map((message) => supabase.rpc("mark_message_read", { _message_id: message.id })));
+      const unread = typedMessages.filter(
+        (message) => message.sender_id !== user.id && !message.read_at,
+      );
+      await Promise.all(
+        unread.map((message) => supabase.rpc("mark_message_read", { _message_id: message.id })),
+      );
     })();
   }, [matchId, user]);
 
@@ -204,7 +251,9 @@ function CouplePage() {
         (payload) => {
           const message = payload.new as Msg;
 
-          setMessages((prev) => (prev.some((item) => item.id === message.id) ? prev : [...prev, message]));
+          setMessages((prev) =>
+            prev.some((item) => item.id === message.id) ? prev : [...prev, message],
+          );
           setMessageCount((prev) => prev + 1);
 
           if (message.sender_id !== user.id) {
@@ -217,7 +266,11 @@ function CouplePage() {
         { event: "UPDATE", schema: "public", table: "messages", filter: `match_id=eq.${matchId}` },
         (payload) => {
           const updated = payload.new as Msg;
-          setMessages((prev) => prev.map((message) => (message.id === updated.id ? { ...message, ...updated } : message)));
+          setMessages((prev) =>
+            prev.map((message) =>
+              message.id === updated.id ? { ...message, ...updated } : message,
+            ),
+          );
         },
       )
       .on(
@@ -250,7 +303,9 @@ function CouplePage() {
         <Header />
         <main className="mx-auto max-w-xl px-4 py-20 text-center">
           <h1 className="text-2xl font-semibold">Página não disponível</h1>
-          <p className="mt-3 text-muted-foreground">Este propósito não existe ou não pertence a você.</p>
+          <p className="mt-3 text-muted-foreground">
+            Este propósito não existe ou não pertence a você.
+          </p>
           <Button asChild className="mt-6">
             <Link to="/conversas">Voltar</Link>
           </Button>
@@ -355,18 +410,28 @@ function CouplePage() {
               </div>
 
               <h1 className="mt-5 text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
-                {personA?.full_name?.split(" ")[0] ?? "Casal"} e {personB?.full_name?.split(" ")[0] ?? "Propósito"}
+                {personA?.full_name?.split(" ")[0] ?? "Casal"} e{" "}
+                {personB?.full_name?.split(" ")[0] ?? "Propósito"}
               </h1>
 
               <p className="mt-4 max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">
-                Um espaço reservado para acompanhar a caminhada, conversar com intenção e guardar os marcos desse
-                compromisso.
+                Um espaço reservado para acompanhar a caminhada, conversar com intenção e guardar os
+                marcos desse compromisso.
               </p>
 
               <div className="mt-6 flex flex-wrap gap-3">
-                <HeroPill icon={<CalendarDays className="h-4 w-4" />} label={`${daysTogether} dias em propósito`} />
-                <HeroPill icon={<MessageCircle className="h-4 w-4" />} label={`${messageCount.toLocaleString("pt-BR")} mensagens`} />
-                <HeroPill icon={<Gift className="h-4 w-4" />} label={`${giftCount.toLocaleString("pt-BR")} presentes`} />
+                <HeroPill
+                  icon={<CalendarDays className="h-4 w-4" />}
+                  label={`${daysTogether} dias em propósito`}
+                />
+                <HeroPill
+                  icon={<MessageCircle className="h-4 w-4" />}
+                  label={`${messageCount.toLocaleString("pt-BR")} mensagens`}
+                />
+                <HeroPill
+                  icon={<Gift className="h-4 w-4" />}
+                  label={`${giftCount.toLocaleString("pt-BR")} presentes`}
+                />
               </div>
 
               {acceptedAt && (
@@ -389,14 +454,32 @@ function CouplePage() {
         </section>
 
         <section className="mt-6 grid gap-4 md:grid-cols-3">
-          <StatCard icon={<Heart className="h-6 w-6" />} value={daysTogether} label="Dias juntos" tone="rose" />
-          <StatCard icon={<MessageCircle className="h-6 w-6" />} value={messageCount} label="Mensagens trocadas" tone="primary" />
-          <StatCard icon={<Gift className="h-6 w-6" />} value={giftCount} label="Presentes trocados" tone="amber" />
+          <StatCard
+            icon={<Heart className="h-6 w-6" />}
+            value={daysTogether}
+            label="Dias juntos"
+            tone="rose"
+          />
+          <StatCard
+            icon={<MessageCircle className="h-6 w-6" />}
+            value={messageCount}
+            label="Mensagens trocadas"
+            tone="primary"
+          />
+          <StatCard
+            icon={<Gift className="h-6 w-6" />}
+            value={giftCount}
+            label="Presentes trocados"
+            tone="amber"
+          />
         </section>
 
         <section className="mt-6 grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
           <div className="rounded-[2rem] border bg-card/80 p-5 shadow-soft backdrop-blur sm:p-6">
-            <SectionHeader icon={<Trophy className="h-5 w-5 text-amber-500" />} title="Conquistas do Casal" />
+            <SectionHeader
+              icon={<Trophy className="h-5 w-5 text-amber-500" />}
+              title="Conquistas do Casal"
+            />
             <div className="mt-5 space-y-4">
               {achievements.map((achievement) => (
                 <AchievementCard key={achievement.title} achievement={achievement} />
@@ -405,7 +488,10 @@ function CouplePage() {
           </div>
 
           <div className="rounded-[2rem] border bg-card/80 p-5 shadow-soft backdrop-blur sm:p-6">
-            <SectionHeader icon={<Sparkles className="h-5 w-5 text-primary" />} title="Linha do Tempo" />
+            <SectionHeader
+              icon={<Sparkles className="h-5 w-5 text-primary" />}
+              title="Linha do Tempo"
+            />
             <div className="mt-5 space-y-5">
               {matchCreatedAt && (
                 <TimelineItem
@@ -448,7 +534,10 @@ function CouplePage() {
         </div>
 
         <section className="mt-6 rounded-[2rem] border bg-card/80 p-5 shadow-soft backdrop-blur sm:p-6">
-          <SectionHeader icon={<Gift className="h-5 w-5 text-amber-500" />} title="Galeria do Relacionamento" />
+          <SectionHeader
+            icon={<Gift className="h-5 w-5 text-amber-500" />}
+            title="Galeria do Relacionamento"
+          />
 
           {galleryGifts.length > 0 ? (
             <>
@@ -459,15 +548,25 @@ function CouplePage() {
                   if (!gift) return null;
 
                   return (
-                    <div key={index} className="rounded-2xl border bg-background/70 p-4 text-center shadow-sm">
-                      <GiftMedia imageUrl={gift.image_url} emoji={gift.emoji} rarity={gift.rarity} size="md" />
+                    <div
+                      key={index}
+                      className="rounded-2xl border bg-background/70 p-4 text-center shadow-sm"
+                    >
+                      <GiftMedia
+                        imageUrl={gift.image_url}
+                        emoji={gift.emoji}
+                        rarity={gift.rarity}
+                        size="md"
+                      />
                       <p className="mt-3 text-xs font-medium">{gift.name}</p>
                     </div>
                   );
                 })}
               </div>
 
-              <p className="mt-5 text-center text-sm text-muted-foreground">{giftCount} presentes trocados</p>
+              <p className="mt-5 text-center text-sm text-muted-foreground">
+                {giftCount} presentes trocados
+              </p>
             </>
           ) : (
             <div className="mt-5 rounded-2xl border border-dashed bg-muted/20 p-8 text-center text-sm text-muted-foreground">
@@ -478,7 +577,10 @@ function CouplePage() {
 
         <section className="mt-6 rounded-[2rem] border bg-card/85 shadow-soft backdrop-blur">
           <div className="border-b p-5 sm:p-6">
-            <SectionHeader icon={<MessageCircle className="h-5 w-5 text-primary" />} title="Conversa do Casal" />
+            <SectionHeader
+              icon={<MessageCircle className="h-5 w-5 text-primary" />}
+              title="Conversa do Casal"
+            />
             <p className="mt-2 text-sm text-muted-foreground">
               Esse chat fica aqui para manter a conversa ativa durante o Propósito Firmado.
             </p>
@@ -494,10 +596,15 @@ function CouplePage() {
                 const mine = message.sender_id === user?.id;
 
                 return (
-                  <div key={message.id} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
+                  <div
+                    key={message.id}
+                    className={`flex ${mine ? "justify-end" : "justify-start"}`}
+                  >
                     <div
                       className={`max-w-[82%] rounded-2xl px-4 py-2 text-sm shadow-sm ${
-                        mine ? "bg-gradient-love text-white" : "border bg-background/80 text-foreground backdrop-blur"
+                        mine
+                          ? "bg-gradient-love text-white"
+                          : "border bg-background/80 text-foreground backdrop-blur"
                       }`}
                     >
                       <p className="whitespace-pre-wrap break-words">{message.content}</p>
@@ -524,7 +631,10 @@ function CouplePage() {
             )}
           </div>
 
-          <form onSubmit={sendMessage} className="border-t bg-background/70 p-4 backdrop-blur sm:p-5">
+          <form
+            onSubmit={sendMessage}
+            className="border-t bg-background/70 p-4 backdrop-blur sm:p-5"
+          >
             <div className="flex gap-2">
               <Input
                 value={input}
@@ -533,14 +643,19 @@ function CouplePage() {
                 maxLength={2000}
                 className="rounded-2xl"
               />
-              <Button type="submit" disabled={sending || !input.trim()} className="shrink-0 rounded-2xl">
+              <Button
+                type="submit"
+                disabled={sending || !input.trim()}
+                className="shrink-0 rounded-2xl"
+              >
                 <Send className="h-4 w-4" />
               </Button>
             </div>
           </form>
         </section>
 
-        {(role === "super_admin" || (user && (user.id === personA?.id || user.id === personB?.id))) && (
+        {(role === "super_admin" ||
+          (user && (user.id === personA?.id || user.id === personB?.id))) && (
           <section className="mt-6 rounded-[2rem] border border-border bg-card/85 p-5 shadow-soft backdrop-blur sm:p-6">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
@@ -567,15 +682,19 @@ function CouplePage() {
           <DialogHeader>
             <DialogTitle>Encerrar propósito</DialogTitle>
             <DialogDescription>
-              Encerrar este propósito vai liberar a área de pretendentes, matches e conversas novamente para os
-              participantes.
+              Encerrar este propósito vai liberar a área de pretendentes, matches e conversas
+              novamente para os participantes.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2 sm:gap-0">
             <Button variant="outline" onClick={() => setEndDialogOpen(false)} disabled={ending}>
               Cancelar
             </Button>
-            <Button variant="destructive" onClick={() => void handleEndCommitment()} disabled={ending}>
+            <Button
+              variant="destructive"
+              onClick={() => void handleEndCommitment()}
+              disabled={ending}
+            >
               {ending ? "Encerrando..." : "Encerrar propósito"}
             </Button>
           </DialogFooter>
@@ -590,8 +709,8 @@ function CouplePage() {
             </div>
             <DialogTitle className="text-center">Mensagem bloqueada</DialogTitle>
             <DialogDescription className="text-center">
-              A palavra <span className="font-semibold text-foreground">"{warning}"</span> fere as diretrizes da
-              comunidade. Por favor, reescreva sua mensagem com respeito e cuidado.
+              A palavra <span className="font-semibold text-foreground">"{warning}"</span> fere as
+              diretrizes da comunidade. Por favor, reescreva sua mensagem com respeito e cuidado.
             </DialogDescription>
           </DialogHeader>
           <div className="flex justify-center pt-2">
@@ -650,7 +769,9 @@ function StatCard({
 
   return (
     <div className="rounded-[2rem] border bg-card/80 p-6 shadow-soft backdrop-blur">
-      <div className={`mb-4 flex h-12 w-12 items-center justify-center rounded-2xl ${toneClass}`}>{icon}</div>
+      <div className={`mb-4 flex h-12 w-12 items-center justify-center rounded-2xl ${toneClass}`}>
+        {icon}
+      </div>
       <div className="text-3xl font-bold tracking-tight">{value.toLocaleString("pt-BR")}</div>
       <p className="mt-1 text-sm text-muted-foreground">{label}</p>
     </div>
@@ -660,7 +781,9 @@ function StatCard({
 function SectionHeader({ icon, title }: { icon: React.ReactNode; title: string }) {
   return (
     <div className="flex items-center gap-2">
-      <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-muted/60">{icon}</div>
+      <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-muted/60">
+        {icon}
+      </div>
       <h2 className="text-lg font-semibold">{title}</h2>
     </div>
   );
@@ -706,7 +829,11 @@ function TimelineItem({
 
   return (
     <div className="flex gap-4">
-      <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ${toneClass}`}>{icon}</div>
+      <div
+        className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ${toneClass}`}
+      >
+        {icon}
+      </div>
       <div>
         <h3 className="font-medium">{title}</h3>
         <p className="text-sm text-muted-foreground">{date}</p>

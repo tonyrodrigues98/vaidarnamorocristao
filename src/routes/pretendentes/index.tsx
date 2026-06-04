@@ -2,8 +2,8 @@ import { createFileRoute, Link, Navigate, useNavigate } from "@tanstack/react-ro
 import { RequireApproved } from "@/components/RequireApproved";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { PretendenteCarousel } from "./PretendenteCarousel";
-import { PretendenteFeaturedCard } from "./PretendenteFeaturedCard";
+import { PretendenteCarousel } from "@/components/pretendentes/PretendenteCarousel";
+import { PretendenteFeaturedCard } from "@/components/pretendentes/PretendenteFeaturedCard";
 import { useAuth } from "@/lib/auth";
 import { getActiveCommitmentByUser } from "@/lib/commitments";
 import { Header } from "@/components/layout/Header";

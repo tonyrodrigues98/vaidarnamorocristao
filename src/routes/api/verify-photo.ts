@@ -77,7 +77,9 @@ export const Route = createFileRoute("/api/verify-photo")({
           // Load admin-configured thresholds (singleton row).
           const { data: settings } = await sb
             .from("photo_moderation_settings")
-            .select("extra_reject_threshold, extra_review_threshold, main_approve_threshold, main_review_threshold")
+            .select(
+              "extra_reject_threshold, extra_review_threshold, main_approve_threshold, main_review_threshold",
+            )
             .eq("id", true)
             .maybeSingle();
           const extraReject = Number(settings?.extra_reject_threshold ?? 0.6);
@@ -90,7 +92,7 @@ export const Route = createFileRoute("/api/verify-photo")({
             confidence: number | null,
             reason: string,
             aiResult: unknown,
-            extra?: { storage_bucket?: string; storage_path?: string; photo_url?: string }
+            extra?: { storage_bucket?: string; storage_path?: string; photo_url?: string },
           ) => {
             try {
               await sb.from("photo_moderation_log").insert({
@@ -110,7 +112,10 @@ export const Route = createFileRoute("/api/verify-photo")({
           };
 
           // Upload de evidência para fotos rejeitadas/em revisão (mantém 7 dias para auditoria do admin)
-          const uploadRejectEvidence = async (): Promise<{ bucket: string; path: string } | null> => {
+          const uploadRejectEvidence = async (): Promise<{
+            bucket: string;
+            path: string;
+          } | null> => {
             try {
               const ext = (mimeType.split("/")[1] || "jpg").replace("jpeg", "jpg");
               const path = `${userRes.user!.id}/${crypto.randomUUID()}.${ext}`;
@@ -138,10 +143,10 @@ export const Route = createFileRoute("/api/verify-photo")({
 
           const apiKey = process.env.LOVABLE_API_KEY;
           if (!apiKey) {
-            return new Response(
-              JSON.stringify({ soft: true, error: "ai_unavailable" }),
-              { status: 200, headers: { "Content-Type": "application/json" } }
-            );
+            return new Response(JSON.stringify({ soft: true, error: "ai_unavailable" }), {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            });
           }
 
           const dataUrl = `data:${mimeType};base64,${imageBase64}`;
@@ -155,11 +160,20 @@ export const Route = createFileRoute("/api/verify-photo")({
             body: JSON.stringify({
               model: "google/gemini-2.5-flash",
               messages: [
-                { role: "system", content: scope === "extra" ? SYSTEM_PROMPT_EXTRA : SYSTEM_PROMPT_MAIN },
+                {
+                  role: "system",
+                  content: scope === "extra" ? SYSTEM_PROMPT_EXTRA : SYSTEM_PROMPT_MAIN,
+                },
                 {
                   role: "user",
                   content: [
-                    { type: "text", text: scope === "extra" ? "Analise esta foto adicional." : "Analise esta foto de perfil." },
+                    {
+                      type: "text",
+                      text:
+                        scope === "extra"
+                          ? "Analise esta foto adicional."
+                          : "Analise esta foto de perfil.",
+                    },
                     { type: "image_url", image_url: { url: dataUrl } },
                   ],
                 },
@@ -170,19 +184,19 @@ export const Route = createFileRoute("/api/verify-photo")({
 
           if (aiResp.status === 429 || aiResp.status === 402) {
             await logDecision("soft_fail", null, "ai_rate_limited", { status: aiResp.status });
-            return new Response(
-              JSON.stringify({ soft: true, error: "ai_rate_limited" }),
-              { status: 200, headers: { "Content-Type": "application/json" } }
-            );
+            return new Response(JSON.stringify({ soft: true, error: "ai_rate_limited" }), {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            });
           }
           if (!aiResp.ok) {
             const txt = await aiResp.text();
             console.error("AI gateway error", aiResp.status, txt);
             await logDecision("soft_fail", null, "ai_error", { status: aiResp.status });
-            return new Response(
-              JSON.stringify({ soft: true, error: "ai_error" }),
-              { status: 200, headers: { "Content-Type": "application/json" } }
-            );
+            return new Response(JSON.stringify({ soft: true, error: "ai_error" }), {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            });
           }
 
           const aiJson = await aiResp.json();
@@ -195,20 +209,28 @@ export const Route = createFileRoute("/api/verify-photo")({
           }
           if (!parsed || typeof parsed !== "object") {
             await logDecision("soft_fail", null, "ai_parse_error", { raw });
-            return new Response(
-              JSON.stringify({ soft: true, error: "ai_parse_error" }),
-              { status: 200, headers: { "Content-Type": "application/json" } }
-            );
+            return new Response(JSON.stringify({ soft: true, error: "ai_parse_error" }), {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            });
           }
 
           if (scope === "extra") {
             const isExplicit = !!parsed.is_explicit;
             const isDocument = !!parsed.is_document;
             const isSafe =
-              parsed.is_safe === undefined ? !isExplicit && !isDocument : !!parsed.is_safe && !isDocument;
+              parsed.is_safe === undefined
+                ? !isExplicit && !isDocument
+                : !!parsed.is_safe && !isDocument;
             const confidence = typeof parsed.confidence === "number" ? parsed.confidence : 0;
             const reason = typeof parsed.reason === "string" ? parsed.reason : "";
-            const result = { is_safe: isSafe, is_explicit: isExplicit, is_document: isDocument, confidence, reason };
+            const result = {
+              is_safe: isSafe,
+              is_explicit: isExplicit,
+              is_document: isDocument,
+              confidence,
+              reason,
+            };
             // Documentos: reprovar imediatamente, independente do limiar configurado
             if (isDocument && confidence >= extraReview) {
               const ev = await uploadRejectEvidence();
@@ -217,7 +239,7 @@ export const Route = createFileRoute("/api/verify-photo")({
                 confidence,
                 reason || "Documento de identidade ou dados pessoais detectados.",
                 result,
-                ev ? { storage_bucket: ev.bucket, storage_path: ev.path } : undefined
+                ev ? { storage_bucket: ev.bucket, storage_path: ev.path } : undefined,
               );
               return new Response(
                 JSON.stringify({
@@ -226,28 +248,33 @@ export const Route = createFileRoute("/api/verify-photo")({
                   result: {
                     ...result,
                     reason:
-                      reason ||
-                      "Não envie documentos de identidade ou imagens com dados pessoais.",
+                      reason || "Não envie documentos de identidade ou imagens com dados pessoais.",
                   },
                 }),
-                { status: 200, headers: { "Content-Type": "application/json" } }
+                { status: 200, headers: { "Content-Type": "application/json" } },
               );
             }
             // Conteúdo explícito ou qualquer outra reprovação por IA segue para revisão manual,
             // não bloqueia automaticamente. Apenas documentos (acima) são bloqueados de imediato.
             if (isExplicit && confidence >= extraReview) {
               const ev = await uploadRejectEvidence();
-              await logDecision("needs_review", confidence, reason, result, ev ? { storage_bucket: ev.bucket, storage_path: ev.path } : undefined);
-              return new Response(
-                JSON.stringify({ approved: false, needsReview: true, result }),
-                { status: 200, headers: { "Content-Type": "application/json" } }
+              await logDecision(
+                "needs_review",
+                confidence,
+                reason,
+                result,
+                ev ? { storage_bucket: ev.bucket, storage_path: ev.path } : undefined,
               );
+              return new Response(JSON.stringify({ approved: false, needsReview: true, result }), {
+                status: 200,
+                headers: { "Content-Type": "application/json" },
+              });
             }
             await logDecision("approved", confidence, reason, result);
-            return new Response(
-              JSON.stringify({ approved: true, needsReview: false, result }),
-              { status: 200, headers: { "Content-Type": "application/json" } }
-            );
+            return new Response(JSON.stringify({ approved: true, needsReview: false, result }), {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            });
           }
 
           const result: VerifyResult = {
@@ -273,18 +300,18 @@ export const Route = createFileRoute("/api/verify-photo")({
             result.confidence,
             result.reason,
             result,
-            evMain ? { storage_bucket: evMain.bucket, storage_path: evMain.path } : undefined
+            evMain ? { storage_bucket: evMain.bucket, storage_path: evMain.path } : undefined,
           );
-          return new Response(
-            JSON.stringify({ approved, needsReview, result }),
-            { status: 200, headers: { "Content-Type": "application/json" } }
-          );
+          return new Response(JSON.stringify({ approved, needsReview, result }), {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+          });
         } catch (e) {
           console.error("verify-photo error", e);
-          return new Response(
-            JSON.stringify({ soft: true, error: "exception" }),
-            { status: 200, headers: { "Content-Type": "application/json" } }
-          );
+          return new Response(JSON.stringify({ soft: true, error: "exception" }), {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+          });
         }
       },
     },

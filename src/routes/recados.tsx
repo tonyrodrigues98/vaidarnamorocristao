@@ -7,36 +7,87 @@ import { RequireApproved } from "@/components/RequireApproved";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { Mail, Sparkles, Heart, Eye, Flag, EyeOff, Unlock, MessageCircle, Send, Lightbulb, Reply, HeartHandshake, Clock, Wand2, RefreshCw } from "lucide-react";
+import {
+  Mail,
+  Sparkles,
+  Heart,
+  Eye,
+  Flag,
+  EyeOff,
+  Unlock,
+  MessageCircle,
+  Send,
+  Lightbulb,
+  Reply,
+  HeartHandshake,
+  Clock,
+  Wand2,
+  RefreshCw,
+} from "lucide-react";
 import { toast } from "sonner";
 import { friendlyError } from "@/lib/errors";
 import { RevealCeremony, type RevealTarget } from "@/components/anonymous/RevealCeremony";
 import { AnimatePresence, motion } from "framer-motion";
-import { fetchSenderProfile, buildHintPool, pickThree, type GeneratedHint } from "@/lib/anonymousHints";
+import {
+  fetchSenderProfile,
+  buildHintPool,
+  pickThree,
+  type GeneratedHint,
+} from "@/lib/anonymousHints";
 import { AnonymousExtrasCard } from "@/components/anonymous/AnonymousExtrasCard";
 import { CommitmentPauseCard } from "@/components/commitment/CommitmentPauseCard";
 import { getActiveCommitmentByUser, type RelationshipCommitment } from "@/lib/commitments";
 
 export const Route = createFileRoute("/recados")({
-  component: () => (<RequireApproved><RecadosPage /></RequireApproved>),
+  component: () => (
+    <RequireApproved>
+      <RecadosPage />
+    </RequireApproved>
+  ),
   head: () => ({ meta: [{ title: "Recados Anônimos · VaiDarNamoro" }] }),
 });
 
 type InboxRow = {
-  id: string; sender_id: string | null; content: string; status: string;
-  reply_text: string | null; sender_reveal_requested_at: string | null;
-  receiver_reveal_requested_at: string | null; revealed_at: string | null;
-  match_id: string | null; created_at: string; expires_at: string;
+  id: string;
+  sender_id: string | null;
+  content: string;
+  status: string;
+  reply_text: string | null;
+  sender_reveal_requested_at: string | null;
+  receiver_reveal_requested_at: string | null;
+  revealed_at: string | null;
+  match_id: string | null;
+  created_at: string;
+  expires_at: string;
 };
 type OutboxRow = {
-  id: string; receiver_id_revealed: string | null; content: string; status: string;
-  reply_text: string | null; sender_reveal_requested_at: string | null;
-  receiver_reveal_requested_at: string | null; revealed_at: string | null;
-  match_id: string | null; created_at: string;
+  id: string;
+  receiver_id_revealed: string | null;
+  content: string;
+  status: string;
+  reply_text: string | null;
+  sender_reveal_requested_at: string | null;
+  receiver_reveal_requested_at: string | null;
+  revealed_at: string | null;
+  match_id: string | null;
+  created_at: string;
 };
-type Hint = { id: string; message_id: string; category: string | null; hint_text: string | null; sent_at: string | null; requested_at: string };
+type Hint = {
+  id: string;
+  message_id: string;
+  category: string | null;
+  hint_text: string | null;
+  sent_at: string | null;
+  requested_at: string;
+};
 
 function StatusBadge({ status }: { status: string }) {
   const map: Record<string, { icon: React.ReactNode; label: string }> = {
@@ -83,9 +134,19 @@ function RecadosPage() {
     }
     await supabase.rpc("expire_anonymous_messages");
     const [{ data: inb }, { data: out }, { data: settings }] = await Promise.all([
-      supabase.from("anonymous_messages_inbox").select("*").order("created_at", { ascending: false }),
-      supabase.from("anonymous_messages_outbox").select("*").order("created_at", { ascending: false }),
-      supabase.from("anonymous_message_settings").select("accept_anonymous").eq("user_id", user.id).maybeSingle(),
+      supabase
+        .from("anonymous_messages_inbox")
+        .select("*")
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("anonymous_messages_outbox")
+        .select("*")
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("anonymous_message_settings")
+        .select("accept_anonymous")
+        .eq("user_id", user.id)
+        .maybeSingle(),
     ]);
     setInbox((inb ?? []) as InboxRow[]);
     setOutbox((out ?? []) as OutboxRow[]);
@@ -119,9 +180,14 @@ function RecadosPage() {
 
     const allIds = [...(inb ?? []), ...(out ?? [])].map((r: any) => r.id);
     if (allIds.length) {
-      const { data: h } = await supabase.from("anonymous_message_hints").select("*").in("message_id", allIds);
+      const { data: h } = await supabase
+        .from("anonymous_message_hints")
+        .select("*")
+        .in("message_id", allIds);
       const grouped: Record<string, Hint[]> = {};
-      (h ?? []).forEach((row: any) => { (grouped[row.message_id] ||= []).push(row); });
+      (h ?? []).forEach((row: any) => {
+        (grouped[row.message_id] ||= []).push(row);
+      });
       setHints(grouped);
     } else setHints({});
     setLoadingList(false);
@@ -133,10 +199,20 @@ function RecadosPage() {
     const ch = supabase
       .channel(`recados-${user.id}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "anonymous_messages" }, load)
-      .on("postgres_changes", { event: "*", schema: "public", table: "anonymous_message_hints" }, load)
-      .on("postgres_changes", { event: "*", schema: "public", table: "relationship_commitments" }, load)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "anonymous_message_hints" },
+        load,
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "relationship_commitments" },
+        load,
+      )
       .subscribe();
-    return () => { supabase.removeChannel(ch); };
+    return () => {
+      supabase.removeChannel(ch);
+    };
   }, [user, load]);
 
   const toggleOptout = async (checked: boolean) => {
@@ -171,59 +247,65 @@ function RecadosPage() {
             <div className="glass h-24 animate-pulse rounded-2xl" />
           </div>
         ) : (
-        <Tabs value={tab} onValueChange={setTab}>
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="inbox"><Mail className="mr-1 h-4 w-4" /> Recebidos</TabsTrigger>
-            <TabsTrigger value="outbox"><Eye className="mr-1 h-4 w-4" /> Enviados</TabsTrigger>
-            <TabsTrigger value="config">Configurações</TabsTrigger>
-          </TabsList>
+          <Tabs value={tab} onValueChange={setTab}>
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="inbox">
+                <Mail className="mr-1 h-4 w-4" /> Recebidos
+              </TabsTrigger>
+              <TabsTrigger value="outbox">
+                <Eye className="mr-1 h-4 w-4" /> Enviados
+              </TabsTrigger>
+              <TabsTrigger value="config">Configurações</TabsTrigger>
+            </TabsList>
 
-          <TabsContent value="inbox" className="space-y-3">
-            {inbox.length === 0 && (
-              <p className="rounded-2xl border border-dashed p-8 text-center text-sm text-muted-foreground">
-                <span className="inline-flex items-center gap-2">
-                  <Mail className="h-4 w-4" /> Nenhum recado por enquanto.
-                </span>
-              </p>
-            )}
-            {inbox.map((m) => (
-              <InboxCard key={m.id} m={m} hints={hints[m.id] ?? []} onChange={load} />
-            ))}
-          </TabsContent>
+            <TabsContent value="inbox" className="space-y-3">
+              {inbox.length === 0 && (
+                <p className="rounded-2xl border border-dashed p-8 text-center text-sm text-muted-foreground">
+                  <span className="inline-flex items-center gap-2">
+                    <Mail className="h-4 w-4" /> Nenhum recado por enquanto.
+                  </span>
+                </p>
+              )}
+              {inbox.map((m) => (
+                <InboxCard key={m.id} m={m} hints={hints[m.id] ?? []} onChange={load} />
+              ))}
+            </TabsContent>
 
-          <TabsContent value="outbox" className="space-y-3">
-            {outbox.length === 0 && (
-              <p className="rounded-2xl border border-dashed p-8 text-center text-sm text-muted-foreground">
-                Você ainda não enviou recados.
-              </p>
-            )}
-            {outbox.map((m) => (
-              <OutboxCard key={m.id} m={m} hints={hints[m.id] ?? []} onChange={load} />
-            ))}
-          </TabsContent>
+            <TabsContent value="outbox" className="space-y-3">
+              {outbox.length === 0 && (
+                <p className="rounded-2xl border border-dashed p-8 text-center text-sm text-muted-foreground">
+                  Você ainda não enviou recados.
+                </p>
+              )}
+              {outbox.map((m) => (
+                <OutboxCard key={m.id} m={m} hints={hints[m.id] ?? []} onChange={load} />
+              ))}
+            </TabsContent>
 
-          <TabsContent value="config">
-            <div className="space-y-4">
-              <AnonymousExtrasCard />
-              <div className="rounded-2xl border p-5">
-              <label className="flex items-center justify-between">
-                <div>
-                  <div className="font-medium">Aceitar recados anônimos</div>
-                  <div className="text-xs text-muted-foreground">Quando desativado, ninguém poderá enviar recados anônimos para você.</div>
+            <TabsContent value="config">
+              <div className="space-y-4">
+                <AnonymousExtrasCard />
+                <div className="rounded-2xl border p-5">
+                  <label className="flex items-center justify-between">
+                    <div>
+                      <div className="font-medium">Aceitar recados anônimos</div>
+                      <div className="text-xs text-muted-foreground">
+                        Quando desativado, ninguém poderá enviar recados anônimos para você.
+                      </div>
+                    </div>
+                    <Switch checked={accept} onCheckedChange={toggleOptout} />
+                  </label>
                 </div>
-                <Switch checked={accept} onCheckedChange={toggleOptout} />
-              </label>
               </div>
-            </div>
-          </TabsContent>
-        </Tabs>
+            </TabsContent>
+          </Tabs>
         )}
       </main>
     </div>
   );
 }
 
-function InboxCard({ m, hints, onChange }: { m: InboxRow; hints: Hint[]; onChange: () => void; }) {
+function InboxCard({ m, hints, onChange }: { m: InboxRow; hints: Hint[]; onChange: () => void }) {
   const [replyOpen, setReplyOpen] = useState(false);
   const [reply, setReply] = useState("");
   const [reportOpen, setReportOpen] = useState(false);
@@ -232,13 +314,17 @@ function InboxCard({ m, hints, onChange }: { m: InboxRow; hints: Hint[]; onChang
 
   const hasPending = hints.some((h) => !h.sent_at);
   const canReply = (m.status === "pending" || m.status === "hint_sent") && !hasPending;
-  const canHint = (m.status === "pending" || m.status === "hint_sent") && hints.length < 2 && !hasPending;
+  const canHint =
+    (m.status === "pending" || m.status === "hint_sent") && hints.length < 2 && !hasPending;
   const canReveal = ["replied", "reveal_requested", "hint_sent"].includes(m.status);
   const myRevealed = !!m.receiver_reveal_requested_at;
 
   const action = async (fn: () => PromiseLike<any>) => {
-    setBusy(true); const { error } = await fn(); setBusy(false);
-    if (error) toast.error(friendlyError(error)); else onChange();
+    setBusy(true);
+    const { error } = await fn();
+    setBusy(false);
+    if (error) toast.error(friendlyError(error));
+    else onChange();
   };
 
   return (
@@ -249,11 +335,13 @@ function InboxCard({ m, hints, onChange }: { m: InboxRow; hints: Hint[]; onChang
       </div>
       <p className="whitespace-pre-wrap text-foreground/90">{m.content}</p>
 
-      {hints.filter((h) => h.sent_at).map((h) => (
-        <div key={h.id} className="mt-3 rounded-xl bg-[var(--rose)]/10 px-3 py-2 text-sm">
-          <Sparkles className="mr-1 inline h-3 w-3 text-[var(--rose)]" /> {h.hint_text}
-        </div>
-      ))}
+      {hints
+        .filter((h) => h.sent_at)
+        .map((h) => (
+          <div key={h.id} className="mt-3 rounded-xl bg-[var(--rose)]/10 px-3 py-2 text-sm">
+            <Sparkles className="mr-1 inline h-3 w-3 text-[var(--rose)]" /> {h.hint_text}
+          </div>
+        ))}
       {hasPending && (
         <div className="mt-3 rounded-xl bg-muted px-3 py-2 text-xs text-muted-foreground">
           Aguardando o remetente escolher uma dica…
@@ -280,22 +368,42 @@ function InboxCard({ m, hints, onChange }: { m: InboxRow; hints: Hint[]; onChang
             </Button>
           )}
           {canHint && (
-            <Button size="sm" variant="outline" disabled={busy}
-              onClick={() => action(() => supabase.rpc("request_anonymous_hint", { _message_id: m.id }))}>
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={busy}
+              onClick={() =>
+                action(() => supabase.rpc("request_anonymous_hint", { _message_id: m.id }))
+              }
+            >
               <Eye className="mr-1 h-3 w-3" /> Pedir dica ({hints.length}/2)
             </Button>
           )}
           {canReveal && !myRevealed && (
-            <Button size="sm" variant="outline" disabled={busy}
-              onClick={() => action(() => supabase.rpc("request_anonymous_reveal", { _message_id: m.id }))}>
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={busy}
+              onClick={() =>
+                action(() => supabase.rpc("request_anonymous_reveal", { _message_id: m.id }))
+              }
+            >
               <Unlock className="mr-1 h-3 w-3" /> Revelar quem eu sou
             </Button>
           )}
           {myRevealed && m.status !== "revealed" && (
-            <span className="text-xs text-muted-foreground">Aguardando o outro lado aceitar revelar…</span>
+            <span className="text-xs text-muted-foreground">
+              Aguardando o outro lado aceitar revelar…
+            </span>
           )}
-          <Button size="sm" variant="outline" disabled={busy}
-            onClick={() => action(() => supabase.rpc("ignore_anonymous_message", { _message_id: m.id }))}>
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={busy}
+            onClick={() =>
+              action(() => supabase.rpc("ignore_anonymous_message", { _message_id: m.id }))
+            }
+          >
             <EyeOff className="mr-1 h-3 w-3" /> Ignorar
           </Button>
           <Button size="sm" variant="outline" onClick={() => setReportOpen(true)}>
@@ -306,35 +414,81 @@ function InboxCard({ m, hints, onChange }: { m: InboxRow; hints: Hint[]; onChang
 
       <Dialog open={replyOpen} onOpenChange={setReplyOpen}>
         <DialogContent>
-          <DialogHeader><DialogTitle>Responder anonimamente</DialogTitle></DialogHeader>
-          <Textarea rows={4} maxLength={280} value={reply} onChange={(e) => setReply(e.target.value)} placeholder="Sua resposta..." />
+          <DialogHeader>
+            <DialogTitle>Responder anonimamente</DialogTitle>
+          </DialogHeader>
+          <Textarea
+            rows={4}
+            maxLength={280}
+            value={reply}
+            onChange={(e) => setReply(e.target.value)}
+            placeholder="Sua resposta..."
+          />
           <div className="text-right text-xs text-muted-foreground">{reply.length}/280</div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setReplyOpen(false)}>Cancelar</Button>
-            <Button disabled={busy || !reply.trim()} onClick={async () => {
-              setBusy(true);
-              const { error } = await supabase.rpc("reply_anonymous_message", { _message_id: m.id, _reply: reply.trim() });
-              setBusy(false);
-              if (error) toast.error(friendlyError(error));
-              else { toast.success("Resposta enviada"); setReplyOpen(false); setReply(""); onChange(); }
-            }}>Enviar</Button>
+            <Button variant="outline" onClick={() => setReplyOpen(false)}>
+              Cancelar
+            </Button>
+            <Button
+              disabled={busy || !reply.trim()}
+              onClick={async () => {
+                setBusy(true);
+                const { error } = await supabase.rpc("reply_anonymous_message", {
+                  _message_id: m.id,
+                  _reply: reply.trim(),
+                });
+                setBusy(false);
+                if (error) toast.error(friendlyError(error));
+                else {
+                  toast.success("Resposta enviada");
+                  setReplyOpen(false);
+                  setReply("");
+                  onChange();
+                }
+              }}
+            >
+              Enviar
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       <Dialog open={reportOpen} onOpenChange={setReportOpen}>
         <DialogContent>
-          <DialogHeader><DialogTitle>Denunciar recado</DialogTitle></DialogHeader>
-          <Textarea rows={4} maxLength={500} value={reportReason} onChange={(e) => setReportReason(e.target.value)} placeholder="Descreva o motivo..." />
+          <DialogHeader>
+            <DialogTitle>Denunciar recado</DialogTitle>
+          </DialogHeader>
+          <Textarea
+            rows={4}
+            maxLength={500}
+            value={reportReason}
+            onChange={(e) => setReportReason(e.target.value)}
+            placeholder="Descreva o motivo..."
+          />
           <DialogFooter>
-            <Button variant="outline" onClick={() => setReportOpen(false)}>Cancelar</Button>
-            <Button disabled={busy || !reportReason.trim()} onClick={async () => {
-              setBusy(true);
-              const { error } = await supabase.rpc("report_anonymous_message", { _message_id: m.id, _reason: reportReason.trim() });
-              setBusy(false);
-              if (error) toast.error(friendlyError(error));
-              else { toast.success("Denúncia enviada"); setReportOpen(false); setReportReason(""); onChange(); }
-            }}>Enviar denúncia</Button>
+            <Button variant="outline" onClick={() => setReportOpen(false)}>
+              Cancelar
+            </Button>
+            <Button
+              disabled={busy || !reportReason.trim()}
+              onClick={async () => {
+                setBusy(true);
+                const { error } = await supabase.rpc("report_anonymous_message", {
+                  _message_id: m.id,
+                  _reason: reportReason.trim(),
+                });
+                setBusy(false);
+                if (error) toast.error(friendlyError(error));
+                else {
+                  toast.success("Denúncia enviada");
+                  setReportOpen(false);
+                  setReportReason("");
+                  onChange();
+                }
+              }}
+            >
+              Enviar denúncia
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -342,7 +496,7 @@ function InboxCard({ m, hints, onChange }: { m: InboxRow; hints: Hint[]; onChang
   );
 }
 
-function OutboxCard({ m, hints, onChange }: { m: OutboxRow; hints: Hint[]; onChange: () => void; }) {
+function OutboxCard({ m, hints, onChange }: { m: OutboxRow; hints: Hint[]; onChange: () => void }) {
   const { user } = useAuth();
   const [hintOpen, setHintOpen] = useState(false);
   const [selected, setSelected] = useState<GeneratedHint | null>(null);
@@ -394,11 +548,13 @@ function OutboxCard({ m, hints, onChange }: { m: OutboxRow; hints: Hint[]; onCha
       </div>
       <p className="whitespace-pre-wrap text-foreground/90">{m.content}</p>
 
-      {hints.filter((h) => h.sent_at).map((h) => (
-        <div key={h.id} className="mt-3 rounded-xl bg-muted px-3 py-2 text-xs">
-          Dica enviada: <span className="font-medium">{h.hint_text}</span>
-        </div>
-      ))}
+      {hints
+        .filter((h) => h.sent_at)
+        .map((h) => (
+          <div key={h.id} className="mt-3 rounded-xl bg-muted px-3 py-2 text-xs">
+            Dica enviada: <span className="font-medium">{h.hint_text}</span>
+          </div>
+        ))}
 
       {m.reply_text && (
         <div className="mt-3 rounded-xl border bg-[var(--rose)]/5 px-3 py-2 text-sm">
@@ -421,18 +577,27 @@ function OutboxCard({ m, hints, onChange }: { m: OutboxRow; hints: Hint[]; onCha
             </Button>
           )}
           {canReveal && !myRevealed && (
-            <Button size="sm" variant="outline" disabled={busy}
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={busy}
               onClick={async () => {
                 setBusy(true);
-                const { error } = await supabase.rpc("request_anonymous_reveal", { _message_id: m.id });
+                const { error } = await supabase.rpc("request_anonymous_reveal", {
+                  _message_id: m.id,
+                });
                 setBusy(false);
-                if (error) toast.error(friendlyError(error)); else onChange();
-              }}>
+                if (error) toast.error(friendlyError(error));
+                else onChange();
+              }}
+            >
               <Unlock className="mr-1 h-3 w-3" /> Revelar quem eu sou
             </Button>
           )}
           {myRevealed && m.status !== "revealed" && (
-            <span className="text-xs text-muted-foreground">Aguardando o outro lado aceitar revelar…</span>
+            <span className="text-xs text-muted-foreground">
+              Aguardando o outro lado aceitar revelar…
+            </span>
           )}
         </div>
       )}
@@ -510,7 +675,9 @@ function OutboxCard({ m, hints, onChange }: { m: OutboxRow; hints: Hint[]; onCha
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setHintOpen(false)}>Cancelar</Button>
+            <Button variant="outline" onClick={() => setHintOpen(false)}>
+              Cancelar
+            </Button>
             <Button
               disabled={busy || !selected}
               onClick={async () => {

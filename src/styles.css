@@ -46,15 +46,15 @@
   --radius: 1rem;
 
   /* iOS-like motion tokens */
-  --ease-ios: cubic-bezier(.32, .72, 0, 1);
-  --ease-ios-out: cubic-bezier(.16, 1, .3, 1);
+  --ease-ios: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-ios-out: cubic-bezier(0.16, 1, 0.3, 1);
   --dur-fast: 120ms;
   --dur-base: 200ms;
   --dur-slow: 320ms;
 
   /* Off-white cream base, warm love palette */
-  --background: oklch(0.985 0.006 60);    /* off-white #FDFCF8 */
-  --foreground: oklch(0.18 0.01 30);      /* near-black ink */
+  --background: oklch(0.985 0.006 60); /* off-white #FDFCF8 */
+  --foreground: oklch(0.18 0.01 30); /* near-black ink */
 
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.18 0.01 30);
@@ -63,7 +63,7 @@
   --popover-foreground: oklch(0.18 0.01 30);
 
   /* Coral-rose primary — vibrant love */
-  --primary: oklch(0.63 0.21 18);          /* coral red ~#E63956 */
+  --primary: oklch(0.63 0.21 18); /* coral red ~#E63956 */
   --primary-foreground: oklch(1 0 0);
 
   --secondary: oklch(0.96 0.012 25);
@@ -83,24 +83,29 @@
   --ring: oklch(0.63 0.21 18);
 
   /* Brand tokens */
-  --rose: oklch(0.6 0.2 14);               /* deep rose-red */
-  --rose-soft: oklch(0.78 0.15 18);        /* soft rose */
-  --coral: oklch(0.72 0.18 30);            /* warm coral */
-  --petal: oklch(0.95 0.04 18);            /* blush */
+  --rose: oklch(0.6 0.2 14); /* deep rose-red */
+  --rose-soft: oklch(0.78 0.15 18); /* soft rose */
+  --coral: oklch(0.72 0.18 30); /* warm coral */
+  --petal: oklch(0.95 0.04 18); /* blush */
   --cream: oklch(0.985 0.006 60);
   --ink: oklch(0.16 0.01 30);
 
   /* Sparky gold — admin highlight */
-  --gold: oklch(0.82 0.16 90);            /* warm sparkly gold */
-  --gold-soft: oklch(0.93 0.09 92);       /* soft champagne */
+  --gold: oklch(0.82 0.16 90); /* warm sparkly gold */
+  --gold-soft: oklch(0.93 0.09 92); /* soft champagne */
 
   --gradient-love: linear-gradient(135deg, var(--coral) 0%, var(--rose) 60%, var(--ink) 130%);
   --gradient-warm: linear-gradient(180deg, oklch(0.985 0.006 60) 0%, oklch(0.97 0.022 18) 100%);
   --gradient-text: linear-gradient(120deg, var(--rose) 0%, var(--coral) 100%);
-  --gradient-night: linear-gradient(135deg, oklch(0.86 0.05 280) 0%, oklch(0.90 0.04 310) 45%, oklch(0.93 0.05 30) 100%);
+  --gradient-night: linear-gradient(
+    135deg,
+    oklch(0.86 0.05 280) 0%,
+    oklch(0.9 0.04 310) 45%,
+    oklch(0.93 0.05 30) 100%
+  );
 
   --shadow-soft: 0 1px 2px oklch(0.3 0.06 18 / 0.04), 0 8px 24px oklch(0.3 0.06 18 / 0.06);
-  --shadow-elegant: 0 2px 4px oklch(0.3 0.06 18 / 0.05), 0 18px 48px oklch(0.3 0.06 18 / 0.10);
+  --shadow-elegant: 0 2px 4px oklch(0.3 0.06 18 / 0.05), 0 18px 48px oklch(0.3 0.06 18 / 0.1);
   --shadow-glow: 0 10px 40px oklch(0.6 0.2 14 / 0.18);
 }
 
@@ -138,7 +143,12 @@
   --gold-soft: oklch(0.42 0.1 90);
 
   --gradient-warm: linear-gradient(180deg, oklch(0.18 0.012 25) 0%, oklch(0.22 0.04 18) 100%);
-  --gradient-night: linear-gradient(135deg, oklch(0.26 0.06 270) 0%, oklch(0.30 0.05 300) 50%, oklch(0.34 0.05 30) 100%);
+  --gradient-night: linear-gradient(
+    135deg,
+    oklch(0.26 0.06 270) 0%,
+    oklch(0.3 0.05 300) 50%,
+    oklch(0.34 0.05 30) 100%
+  );
 
   --shadow-soft: 0 1px 2px oklch(0 0 0 / 0.4), 0 8px 24px oklch(0 0 0 / 0.45);
   --shadow-elegant: 0 2px 4px oklch(0 0 0 / 0.4), 0 18px 48px oklch(0 0 0 / 0.5);
@@ -146,7 +156,9 @@
 }
 
 @layer base {
-  * { border-color: var(--color-border); }
+  * {
+    border-color: var(--color-border);
+  }
   html {
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
@@ -164,7 +176,8 @@
     /* Permite scroll natural do mouse e trackpad; só contém o "bounce" ao chegar nas bordas */
     overscroll-behavior-y: auto;
   }
-  html, body {
+  html,
+  body {
     overflow-x: hidden;
     max-width: 100vw;
     /* Garante que a roda do mouse role a página verticalmente */
@@ -172,34 +185,52 @@
   }
   /* Avoid iOS auto-zoom on input focus (which feels laggy) */
   @media (max-width: 767px) {
-    input, select, textarea {
+    input,
+    select,
+    textarea {
       font-size: 16px;
     }
   }
   /* Interactive elements get instant tactile feedback */
-  button, a, [role="button"], summary, label[for] {
+  button,
+  a,
+  [role="button"],
+  summary,
+  label[for] {
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
   }
-  h1, h2, h3, h4 {
+  h1,
+  h2,
+  h3,
+  h4 {
     font-family: var(--font-display);
     letter-spacing: -0.025em;
     font-weight: 700;
   }
-  ::selection { background: var(--petal); color: var(--rose); }
+  ::selection {
+    background: var(--petal);
+    color: var(--rose);
+  }
 }
 
 @layer utilities {
   /* App-like tap feedback — apply to clickable cards, list rows, icon buttons */
   .tap {
-    transition: transform var(--dur-fast) var(--ease-ios),
-                opacity   var(--dur-fast) var(--ease-ios),
-                background-color var(--dur-fast) var(--ease-ios);
+    transition:
+      transform var(--dur-fast) var(--ease-ios),
+      opacity var(--dur-fast) var(--ease-ios),
+      background-color var(--dur-fast) var(--ease-ios);
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
   }
-  .tap:active { transform: scale(0.97); opacity: 0.85; }
-  .tap-sm:active { transform: scale(0.96); }
+  .tap:active {
+    transform: scale(0.97);
+    opacity: 0.85;
+  }
+  .tap-sm:active {
+    transform: scale(0.96);
+  }
 
   .glass {
     background: oklch(1 0 0 / 0.7);
@@ -219,21 +250,53 @@
     background-clip: text;
     color: transparent;
   }
-  .bg-gradient-warm { background: var(--gradient-warm); }
-  .bg-gradient-love { background: var(--gradient-love); }
-  .bg-gradient-night { background: var(--gradient-night); }
-  .shadow-soft { box-shadow: var(--shadow-soft); }
-  .shadow-elegant { box-shadow: var(--shadow-elegant); }
-  .shadow-glow { box-shadow: var(--shadow-glow); }
-  .hover-lift { transition: transform .3s ease, box-shadow .3s ease; }
-  .hover-lift:hover { transform: translateY(-2px); box-shadow: var(--shadow-elegant); }
-  .animate-fade-up { animation: fade-up 0.6s ease-out both; }
-  .animate-fade-in { animation: fade-in 0.5s ease-out both; }
-  .animate-reveal { animation: reveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) both; opacity: 0; }
-  .animate-letter { display: inline-block; animation: letter-fade .8s cubic-bezier(.2,0,.2,1) both; opacity: 0; }
+  .bg-gradient-warm {
+    background: var(--gradient-warm);
+  }
+  .bg-gradient-love {
+    background: var(--gradient-love);
+  }
+  .bg-gradient-night {
+    background: var(--gradient-night);
+  }
+  .shadow-soft {
+    box-shadow: var(--shadow-soft);
+  }
+  .shadow-elegant {
+    box-shadow: var(--shadow-elegant);
+  }
+  .shadow-glow {
+    box-shadow: var(--shadow-glow);
+  }
+  .hover-lift {
+    transition:
+      transform 0.3s ease,
+      box-shadow 0.3s ease;
+  }
+  .hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-elegant);
+  }
+  .animate-fade-up {
+    animation: fade-up 0.6s ease-out both;
+  }
+  .animate-fade-in {
+    animation: fade-in 0.5s ease-out both;
+  }
+  .animate-reveal {
+    animation: reveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+    opacity: 0;
+  }
+  .animate-letter {
+    display: inline-block;
+    animation: letter-fade 0.8s cubic-bezier(0.2, 0, 0.2, 1) both;
+    opacity: 0;
+  }
   .admin-sparkle {
     position: relative;
-    box-shadow: 0 0 0 1px var(--gold-soft) inset, 0 6px 22px oklch(0.82 0.16 90 / 0.18);
+    box-shadow:
+      0 0 0 1px var(--gold-soft) inset,
+      0 6px 22px oklch(0.82 0.16 90 / 0.18);
   }
   .admin-sparkle::before {
     content: "";
@@ -255,7 +318,9 @@
   /* Contributor — emerald highlight (paralelo ao gold do admin) */
   .contributor-sparkle {
     position: relative;
-    box-shadow: 0 0 0 1px oklch(0.82 0.17 155 / 0.45) inset, 0 6px 22px oklch(0.7 0.2 155 / 0.22);
+    box-shadow:
+      0 0 0 1px oklch(0.82 0.17 155 / 0.45) inset,
+      0 6px 22px oklch(0.7 0.2 155 / 0.22);
   }
   .contributor-sparkle::before {
     content: "";
@@ -263,7 +328,12 @@
     inset: 0;
     border-radius: inherit;
     pointer-events: none;
-    background: linear-gradient(120deg, transparent 30%, oklch(0.95 0.18 155 / 0.55) 50%, transparent 70%);
+    background: linear-gradient(
+      120deg,
+      transparent 30%,
+      oklch(0.95 0.18 155 / 0.55) 50%,
+      transparent 70%
+    );
     background-size: 220% 100%;
     animation: sparkle-sweep 3.4s ease-in-out infinite;
     mix-blend-mode: overlay;
@@ -277,28 +347,63 @@
 }
 
 @keyframes fade-up {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 @keyframes fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 @keyframes reveal {
-  from { opacity: 0; transform: translateY(14px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 @keyframes letter-fade {
-  from { opacity: 0; transform: translateY(14px); filter: blur(6px); }
-  to { opacity: 1; transform: translateY(0); filter: blur(0); }
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
 }
 @keyframes sparkle-sweep {
-  0% { background-position: 200% 0; }
-  100% { background-position: -120% 0; }
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -120% 0;
+  }
 }
 @keyframes sparkle-pulse {
-  0%, 100% { transform: scale(1); filter: drop-shadow(0 0 3px oklch(0.82 0.16 90 / 0.5)); }
-  50% { transform: scale(1.1); filter: drop-shadow(0 0 7px oklch(0.82 0.16 90 / 0.85)); }
+  0%,
+  100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 3px oklch(0.82 0.16 90 / 0.5));
+  }
+  50% {
+    transform: scale(1.1);
+    filter: drop-shadow(0 0 7px oklch(0.82 0.16 90 / 0.85));
+  }
 }
 
 /* App-like behavior on touch devices.
@@ -354,61 +459,122 @@
 }
 
 @keyframes vt-fade-out {
-  to { opacity: 0; transform: translateY(-4px); }
+  to {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
 }
 @keyframes vt-fade-in {
-  from { opacity: 0; transform: translateY(6px); }
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
 }
 
 /* Floating animation for sticker composition banners */
 @keyframes sticker-float {
-  0%, 100% { transform: translate(-50%, -50%) rotate(var(--r, 0deg)); }
-  50%      { transform: translate(-50%, calc(-50% - 8px)) rotate(var(--r, 0deg)); }
+  0%,
+  100% {
+    transform: translate(-50%, -50%) rotate(var(--r, 0deg));
+  }
+  50% {
+    transform: translate(-50%, calc(-50% - 8px)) rotate(var(--r, 0deg));
+  }
 }
 
 @keyframes sticker-float-m {
-  0%, 100% { transform: translateY(0) rotate(var(--r, 0deg)); }
-  50%      { transform: translateY(-6px) rotate(var(--r, 0deg)); }
+  0%,
+  100% {
+    transform: translateY(0) rotate(var(--r, 0deg));
+  }
+  50% {
+    transform: translateY(-6px) rotate(var(--r, 0deg));
+  }
 }
 
 @keyframes anon-float {
-  0%, 100% { transform: translateY(0); }
-  50%      { transform: translateY(-8px); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
 }
 
 @keyframes anon-twinkle {
-  0%, 100% { opacity: 0.3; transform: scale(0.9); }
-  50%      { opacity: 1;   transform: scale(1.1); }
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: scale(0.9);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
 }
 
 /* Gifts system animations */
 @keyframes gift-float {
-  0%, 100% { transform: translateY(0); }
-  50%      { transform: translateY(-6px); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
 }
 @keyframes gift-sparkle {
-  0%, 100% { opacity: 0.2; transform: scale(0.6); }
-  50%      { opacity: 1;   transform: scale(1.2); }
+  0%,
+  100% {
+    opacity: 0.2;
+    transform: scale(0.6);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
 }
 @keyframes gift-rise {
-  0%   { opacity: 0; transform: translateY(40px) scale(0.6); }
-  40%  { opacity: 1; transform: translateY(-20px) scale(1.1); }
-  100% { opacity: 0; transform: translateY(-220px) scale(0.9); }
+  0% {
+    opacity: 0;
+    transform: translateY(40px) scale(0.6);
+  }
+  40% {
+    opacity: 1;
+    transform: translateY(-20px) scale(1.1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-220px) scale(0.9);
+  }
 }
 @keyframes gift-particle {
-  0%   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-  100% { opacity: 0; transform: translate(calc(-50% + var(--tx, 0px)), calc(-50% + var(--ty, 0px))) scale(0.3); }
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(-50% + var(--tx, 0px)), calc(-50% + var(--ty, 0px))) scale(0.3);
+  }
 }
 @keyframes gift-header-orb {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  50%      { transform: translate(20px, -10px) scale(1.1); }
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(20px, -10px) scale(1.1);
+  }
 }
 
 /* Fallback para navegadores sem View Transitions API (Firefox, Safari < 18).
    Aplica fade-in suave no <main>/Outlet ao trocar de rota. */
 @supports not (view-transition-name: none) {
   @media (prefers-reduced-motion: no-preference) {
-    main, [data-route-outlet] {
+    main,
+    [data-route-outlet] {
       animation: vt-fade-in 220ms var(--ease-ios) both;
     }
   }
@@ -416,7 +582,9 @@
 
 /* Honor user motion preferences */
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;

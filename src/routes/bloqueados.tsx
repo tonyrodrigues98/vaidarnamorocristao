@@ -9,12 +9,24 @@ import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { Ban, ShieldOff, ArrowLeft } from "lucide-react";
 
-export const Route = createFileRoute("/bloqueados")({ component: () => (<RequireApproved><BlockedPage /></RequireApproved>) });
+export const Route = createFileRoute("/bloqueados")({
+  component: () => (
+    <RequireApproved>
+      <BlockedPage />
+    </RequireApproved>
+  ),
+});
 
 type Row = {
   blocked_id: string;
   created_at: string;
-  profile: { id: string; full_name: string; photo_url: string | null; city: string; state: string } | null;
+  profile: {
+    id: string;
+    full_name: string;
+    photo_url: string | null;
+    city: string;
+    state: string;
+  } | null;
 };
 
 function BlockedPage() {
@@ -30,7 +42,10 @@ function BlockedPage() {
       .eq("blocker_id", user.id)
       .order("created_at", { ascending: false });
     const ids = (blocks ?? []).map((b) => b.blocked_id as string);
-    if (ids.length === 0) { setRows([]); return; }
+    if (ids.length === 0) {
+      setRows([]);
+      return;
+    }
     const { data: profs } = await supabase
       .from("profiles")
       .select("id, full_name, photo_url, city, state")
@@ -41,19 +56,27 @@ function BlockedPage() {
         blocked_id: b.blocked_id,
         created_at: b.created_at,
         profile: map.get(b.blocked_id) ?? null,
-      }))
+      })),
     );
   };
 
-  useEffect(() => { load(); }, [user]);
+  useEffect(() => {
+    load();
+  }, [user]);
 
   async function unblock(id: string) {
     if (!user) return;
     setBusyId(id);
-    const { error } = await supabase.from("blocks").delete()
-      .eq("blocker_id", user.id).eq("blocked_id", id);
+    const { error } = await supabase
+      .from("blocks")
+      .delete()
+      .eq("blocker_id", user.id)
+      .eq("blocked_id", id);
     setBusyId(null);
-    if (error) { toast.error(error.message); return; }
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     toast.success("Perfil desbloqueado");
     setRows((prev) => (prev ?? []).filter((r) => r.blocked_id !== id));
   }
@@ -66,7 +89,9 @@ function BlockedPage() {
       <Header />
       <main className="mx-auto max-w-3xl px-4 py-8 sm:py-10">
         <Button variant="ghost" size="sm" asChild className="mb-4">
-          <Link to="/perfil"><ArrowLeft className="mr-1 h-4 w-4" /> Voltar</Link>
+          <Link to="/perfil">
+            <ArrowLeft className="mr-1 h-4 w-4" /> Voltar
+          </Link>
         </Button>
         <div className="mb-6 flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-muted">
@@ -81,7 +106,9 @@ function BlockedPage() {
         </div>
 
         {rows === null ? (
-          <div className="rounded-2xl border border-border bg-card p-6 text-sm text-muted-foreground">Carregando…</div>
+          <div className="rounded-2xl border border-border bg-card p-6 text-sm text-muted-foreground">
+            Carregando…
+          </div>
         ) : rows.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-border bg-card/50 p-10 text-center">
             <Ban className="mx-auto mb-3 h-8 w-8 text-muted-foreground" />
@@ -90,16 +117,27 @@ function BlockedPage() {
         ) : (
           <ul className="space-y-3">
             {rows.map((r) => (
-              <li key={r.blocked_id} className="flex items-center gap-3 rounded-2xl border border-border bg-card p-3">
+              <li
+                key={r.blocked_id}
+                className="flex items-center gap-3 rounded-2xl border border-border bg-card p-3"
+              >
                 <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full bg-muted">
                   {r.profile?.photo_url ? (
-                    <PhotoImg src={r.profile.photo_url} alt="" className="h-full w-full object-cover grayscale" />
+                    <PhotoImg
+                      src={r.profile.photo_url}
+                      alt=""
+                      className="h-full w-full object-cover grayscale"
+                    />
                   ) : null}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate font-medium">{r.profile?.full_name ?? "Perfil indisponível"}</p>
+                  <p className="truncate font-medium">
+                    {r.profile?.full_name ?? "Perfil indisponível"}
+                  </p>
                   {r.profile && (
-                    <p className="truncate text-xs text-muted-foreground">{r.profile.city} – {r.profile.state}</p>
+                    <p className="truncate text-xs text-muted-foreground">
+                      {r.profile.city} – {r.profile.state}
+                    </p>
                   )}
                 </div>
                 <Button

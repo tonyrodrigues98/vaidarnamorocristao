@@ -68,7 +68,7 @@ export async function fetchSenderProfile(userId: string): Promise<ProfileBundle 
     supabase
       .from("profile_advanced")
       .select(
-        "ministry, participates, spiritual_routine, introversion, energy, pace, love_language, hobbies, worship_style, life_goals, wants_marriage, wants_children, faith_moment, seeking"
+        "ministry, participates, spiritual_routine, introversion, energy, pace, love_language, hobbies, worship_style, life_goals, wants_marriage, wants_children, faith_moment, seeking",
       )
       .eq("user_id", userId)
       .maybeSingle(),
@@ -198,9 +198,11 @@ export function buildHintPool(p: ProfileBundle): GeneratedHint[] {
   if (p.wants_children === "nao") {
     add(out, "compatibilidade", "Tenho uma visão bem definida sobre filhos");
   }
-  if (p.seeking === "casamento") add(out, "compatibilidade", "Estou buscando algo que leve a algo eterno");
+  if (p.seeking === "casamento")
+    add(out, "compatibilidade", "Estou buscando algo que leve a algo eterno");
   if (p.seeking === "namoro") add(out, "compatibilidade", "Quero viver um namoro com propósito");
-  if (p.seeking === "amizade") add(out, "compatibilidade", "Antes de tudo, quero construir uma amizade verdadeira");
+  if (p.seeking === "amizade")
+    add(out, "compatibilidade", "Antes de tudo, quero construir uma amizade verdadeira");
   if ((p.life_goals ?? []).length > 0) {
     add(out, "compatibilidade", "Tenho sonhos e metas bem claras para o futuro");
   }

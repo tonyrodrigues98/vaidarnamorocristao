@@ -1,4 +1,12 @@
-import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 
@@ -48,10 +56,13 @@ export function PresenceProvider({ children }: { children: ReactNode }) {
     };
   }, [user]);
 
-  const value = useMemo<Ctx>(() => ({
-    online,
-    isOnline: (id: string) => online.has(id),
-  }), [online]);
+  const value = useMemo<Ctx>(
+    () => ({
+      online,
+      isOnline: (id: string) => online.has(id),
+    }),
+    [online],
+  );
 
   return <PresenceCtx.Provider value={value}>{children}</PresenceCtx.Provider>;
 }

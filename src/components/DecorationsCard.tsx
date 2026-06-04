@@ -45,7 +45,11 @@ export function DecorationsCard({
   const [balance, setBalance] = useState(0);
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState<string | null>(null);
-  const [preview, setPreview] = useState<{ frame: string | null; aura: string | null; sticker: string | null }>({
+  const [preview, setPreview] = useState<{
+    frame: string | null;
+    aura: string | null;
+    sticker: string | null;
+  }>({
     frame: null,
     aura: null,
     sticker: null,
@@ -219,7 +223,10 @@ export function DecorationsCard({
               <div className="flex h-28 w-28 items-center justify-center">
                 <DecoratedAvatar {...previewProps} />
               </div>
-              <p className="mt-2 line-clamp-2 min-h-[2.25rem] text-xs font-semibold leading-tight" title={d.name}>
+              <p
+                className="mt-2 line-clamp-2 min-h-[2.25rem] text-xs font-semibold leading-tight"
+                title={d.name}
+              >
                 {d.name}
               </p>
               <div className="mt-2 w-full" onClick={(e) => e.stopPropagation()}>
@@ -240,7 +247,12 @@ export function DecorationsCard({
                     )}
                   </Button>
                 ) : isOwned ? (
-                  <Button size="sm" className="w-full text-xs" disabled={busy} onClick={() => handleEquip(d)}>
+                  <Button
+                    size="sm"
+                    className="w-full text-xs"
+                    disabled={busy}
+                    onClick={() => handleEquip(d)}
+                  >
                     {busy ? <Loader2 className="h-3 w-3 animate-spin" /> : "Usar"}
                   </Button>
                 ) : (

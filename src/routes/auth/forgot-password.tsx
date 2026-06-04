@@ -21,7 +21,10 @@ function Forgot() {
       redirectTo: `${window.location.origin}/auth/reset-password`,
     });
     setLoading(false);
-    if (error) { toast.error(error.message); return; }
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     setSent(true);
     toast.success("Email enviado, verifique sua caixa.");
   }
@@ -32,14 +35,24 @@ function Forgot() {
       <main className="mx-auto flex max-w-md flex-col px-4 py-12">
         <div className="glass animate-fade-up rounded-3xl p-8 shadow-elegant">
           <h1 className="text-3xl font-semibold">Recuperar senha</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Enviaremos um link de redefinição para seu email.</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Enviaremos um link de redefinição para seu email.
+          </p>
           {sent ? (
-            <p className="mt-6 rounded-xl bg-accent/50 p-4 text-sm">Verifique sua caixa de entrada e siga o link recebido.</p>
+            <p className="mt-6 rounded-xl bg-accent/50 p-4 text-sm">
+              Verifique sua caixa de entrada e siga o link recebido.
+            </p>
           ) : (
             <form onSubmit={handleSubmit} className="mt-6 space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
               </div>
               <Button type="submit" className="w-full" size="lg" disabled={loading}>
                 {loading ? "Enviando..." : "Enviar link"}
@@ -47,7 +60,9 @@ function Forgot() {
             </form>
           )}
           <p className="mt-6 text-center text-sm text-muted-foreground">
-            <Link to="/auth/login" className="font-medium text-[var(--rose)] hover:underline">Voltar para login</Link>
+            <Link to="/auth/login" className="font-medium text-[var(--rose)] hover:underline">
+              Voltar para login
+            </Link>
           </p>
         </div>
       </main>

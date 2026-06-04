@@ -42,7 +42,8 @@ function safeDecode(value: string) {
 }
 
 function looksLikeRawProfilePath(value: string) {
-  if (!value || value.startsWith("/") || value.startsWith("data:") || value.startsWith("blob:")) return false;
+  if (!value || value.startsWith("/") || value.startsWith("data:") || value.startsWith("blob:"))
+    return false;
   if (/^[a-z][a-z0-9+.-]*:/i.test(value)) return false;
   return value.includes("/");
 }
@@ -69,7 +70,9 @@ export function extractProfilePhotoPath(url: string | null | undefined): string 
   }
 
   if (clean.startsWith(`${BUCKET}/`)) {
-    return safeDecode(stripQueryAndHash(clean.slice(BUCKET.length + 1))).replace(/^\/+/, "") || null;
+    return (
+      safeDecode(stripQueryAndHash(clean.slice(BUCKET.length + 1))).replace(/^\/+/, "") || null
+    );
   }
 
   if (looksLikeRawProfilePath(clean)) {
@@ -80,12 +83,17 @@ export function extractProfilePhotoPath(url: string | null | undefined): string 
 }
 
 async function signPath(path: string): Promise<string | null> {
-  const { data, error } = await supabase.storage.from(BUCKET).createSignedUrl(path, SIGN_TTL_SECONDS);
+  const { data, error } = await supabase.storage
+    .from(BUCKET)
+    .createSignedUrl(path, SIGN_TTL_SECONDS);
   if (error || !data?.signedUrl) return null;
   return data.signedUrl;
 }
 
-function getSigned(path: string, force = false): { url: string | null; pending: Promise<string | null> | null } {
+function getSigned(
+  path: string,
+  force = false,
+): { url: string | null; pending: Promise<string | null> | null } {
   const now = Date.now();
   const cached = cache.get(path);
 

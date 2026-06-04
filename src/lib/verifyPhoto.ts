@@ -5,7 +5,14 @@ export type PhotoScope = "main" | "extra";
 
 export type VerifyOutcome =
   | { ok: true; approved: true; needsReview: false; confidence: number }
-  | { ok: true; approved: false; needsReview: true; confidence: number; reason: string; aiResult: unknown }
+  | {
+      ok: true;
+      approved: false;
+      needsReview: true;
+      confidence: number;
+      reason: string;
+      aiResult: unknown;
+    }
   | { ok: false; reason: string }
   | { ok: true; soft: true; approved: false; needsReview: false; confidence: 0 };
 
@@ -29,7 +36,7 @@ function fileToBase64(file: File): Promise<string> {
 export async function verifyProfilePhoto(
   file: File,
   scope: PhotoScope = "main",
-  photoUrl?: string | null
+  photoUrl?: string | null,
 ): Promise<VerifyOutcome> {
   // Stage 1 — face count (only for main avatar).
   // We HARD-block only the unambiguous case of "more than one face".
@@ -40,7 +47,10 @@ export async function verifyProfilePhoto(
     try {
       const faceCount = await detectFaceCount(file);
       if (faceCount > 1) {
-        return { ok: false, reason: "Envie uma foto somente com você (mais de um rosto detectado)." };
+        return {
+          ok: false,
+          reason: "Envie uma foto somente com você (mais de um rosto detectado).",
+        };
       }
     } catch (e) {
       console.warn("face-api failed, deferring to server AI", e);
@@ -61,7 +71,12 @@ export async function verifyProfilePhoto(
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ imageBase64, mimeType: file.type || "image/jpeg", scope, photoUrl: photoUrl ?? null }),
+      body: JSON.stringify({
+        imageBase64,
+        mimeType: file.type || "image/jpeg",
+        scope,
+        photoUrl: photoUrl ?? null,
+      }),
     });
   } catch {
     return { ok: true, soft: true, approved: false, needsReview: false, confidence: 0 };

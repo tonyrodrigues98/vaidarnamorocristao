@@ -22,7 +22,9 @@ function subscribe(ctx: Ctx, received: any[]): Promise<() => Promise<void>> {
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "messages" },
-        (payload) => { received.push(payload.new); },
+        (payload) => {
+          received.push(payload.new);
+        },
       )
       .subscribe((status, err) => {
         if (status === "SUBSCRIBED") {

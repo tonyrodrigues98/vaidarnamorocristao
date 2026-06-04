@@ -7,9 +7,17 @@ export const Route = createFileRoute("/sobre")({
   head: () => ({
     meta: [
       { title: "Sobre o VaiDarNamoro — Nossa missão no namoro cristão" },
-      { name: "description", content: "Conheça a história, missão e valores do VaiDarNamoro: a plataforma cristã de relacionamentos sérios com aprovação manual de perfis e propósito eterno." },
+      {
+        name: "description",
+        content:
+          "Conheça a história, missão e valores do VaiDarNamoro: a plataforma cristã de relacionamentos sérios com aprovação manual de perfis e propósito eterno.",
+      },
       { property: "og:title", content: "Sobre o VaiDarNamoro" },
-      { property: "og:description", content: "Nossa missão é ajudar cristãos solteiros e divorciados a encontrar relacionamentos sérios, com fé e propósito." },
+      {
+        property: "og:description",
+        content:
+          "Nossa missão é ajudar cristãos solteiros e divorciados a encontrar relacionamentos sérios, com fé e propósito.",
+      },
       { property: "og:url", content: "https://vaidarnamoro.com/sobre" },
       { property: "og:type", content: "website" },
     ],
@@ -30,7 +38,8 @@ function SobrePage() {
             Onde a fé encontra <span className="text-gradient">o amor</span>
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">
-            O VaiDarNamoro nasceu de uma convicção simples: cristãos sérios merecem um espaço sério para encontrar a pessoa certa, sem o ruído dos apps tradicionais.
+            O VaiDarNamoro nasceu de uma convicção simples: cristãos sérios merecem um espaço sério
+            para encontrar a pessoa certa, sem o ruído dos apps tradicionais.
           </p>
         </header>
 
@@ -39,28 +48,33 @@ function SobrePage() {
             <BookOpen className="h-6 w-6 text-[var(--rose)]" />
             <h2 className="mt-4 text-xl font-bold tracking-tight">Nossa missão</h2>
             <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-              Conectar cristãos solteiros e divorciados que buscam relacionamento com propósito eterno. Não promovemos relacionamento descartável — caminhamos com você na construção de algo duradouro.
+              Conectar cristãos solteiros e divorciados que buscam relacionamento com propósito
+              eterno. Não promovemos relacionamento descartável — caminhamos com você na construção
+              de algo duradouro.
             </p>
           </div>
           <div className="rounded-3xl border border-border bg-card p-7 shadow-soft">
             <Shield className="h-6 w-6 text-[var(--rose)]" />
             <h2 className="mt-4 text-xl font-bold tracking-tight">Aprovação manual</h2>
             <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-              Cada perfil passa por revisão humana antes de aparecer publicamente. Reduz fakes, aumenta confiança e garante que quem está aqui está aqui com seriedade.
+              Cada perfil passa por revisão humana antes de aparecer publicamente. Reduz fakes,
+              aumenta confiança e garante que quem está aqui está aqui com seriedade.
             </p>
           </div>
           <div className="rounded-3xl border border-border bg-card p-7 shadow-soft">
             <Heart className="h-6 w-6 text-[var(--rose)]" />
             <h2 className="mt-4 text-xl font-bold tracking-tight">Sem swipe, com propósito</h2>
             <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-              Não tratamos pessoas como cards descartáveis. Aqui você demonstra interesse e conversa apenas quando o sentimento é recíproco.
+              Não tratamos pessoas como cards descartáveis. Aqui você demonstra interesse e conversa
+              apenas quando o sentimento é recíproco.
             </p>
           </div>
           <div className="rounded-3xl border border-border bg-card p-7 shadow-soft">
             <Users className="h-6 w-6 text-[var(--rose)]" />
             <h2 className="mt-4 text-xl font-bold tracking-tight">Comunidade na fé</h2>
             <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-              Devocional diário, comunidade e espaço de oração. Mais que um app de relacionamento — um lugar para crescer espiritualmente.
+              Devocional diário, comunidade e espaço de oração. Mais que um app de relacionamento —
+              um lugar para crescer espiritualmente.
             </p>
           </div>
         </section>

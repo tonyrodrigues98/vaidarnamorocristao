@@ -23,7 +23,11 @@ export function useNotifications(limit = 50) {
   const instanceIdRef = useRef<string>(Math.random().toString(36).slice(2));
 
   const load = useCallback(async () => {
-    if (!user) { setItems([]); setLoading(false); return; }
+    if (!user) {
+      setItems([]);
+      setLoading(false);
+      return;
+    }
     const { data } = await supabase
       .from("notifications")
       .select("*")
@@ -41,10 +45,12 @@ export function useNotifications(limit = 50) {
     ch.on(
       "postgres_changes" as any,
       { event: "*", schema: "public", table: "notifications", filter: `user_id=eq.${user.id}` },
-      () => load()
+      () => load(),
     );
     ch.subscribe();
-    return () => { supabase.removeChannel(ch); };
+    return () => {
+      supabase.removeChannel(ch);
+    };
   }, [user, load]);
 
   const unread = items.filter((n) => !n.read_at).length;

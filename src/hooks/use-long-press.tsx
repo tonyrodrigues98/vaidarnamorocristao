@@ -14,7 +14,11 @@ export function useLongPress(onLongPress: () => void, delay = 450) {
     triggered.current = true;
     setPressing(false);
     if (typeof navigator !== "undefined" && "vibrate" in navigator) {
-      try { (navigator as Navigator).vibrate?.(30); } catch { /* noop */ }
+      try {
+        (navigator as Navigator).vibrate?.(30);
+      } catch {
+        /* noop */
+      }
     }
     onLongPress();
   }, [onLongPress]);
@@ -35,7 +39,7 @@ export function useLongPress(onLongPress: () => void, delay = 450) {
       setPressing(true);
       timer.current = setTimeout(fire, delay);
     },
-    [delay, clear, fire]
+    [delay, clear, fire],
   );
 
   const moveTouch = useCallback(
@@ -45,7 +49,7 @@ export function useLongPress(onLongPress: () => void, delay = 450) {
       const dy = e.touches[0].clientY - startPos.current.y;
       if (Math.abs(dx) > 10 || Math.abs(dy) > 10) clear();
     },
-    [clear]
+    [clear],
   );
 
   const endTouch = useCallback(() => {
@@ -74,7 +78,7 @@ export function useLongPress(onLongPress: () => void, delay = 450) {
       setPressing(true);
       timer.current = setTimeout(fire, delay);
     },
-    [delay, clear, fire]
+    [delay, clear, fire],
   );
 
   const moveMouse = useCallback(
@@ -84,7 +88,7 @@ export function useLongPress(onLongPress: () => void, delay = 450) {
       const dy = e.clientY - startPos.current.y;
       if (Math.abs(dx) > 10 || Math.abs(dy) > 10) clear();
     },
-    [clear]
+    [clear],
   );
 
   const endMouse = useCallback(() => {

@@ -97,7 +97,9 @@ function Comunidade() {
   const [replyTo, setReplyTo] = useState<GMsg | null>(null);
   const [highlightId, setHighlightId] = useState<string | null>(null);
   const messageRefs = useRef<Record<string, HTMLDivElement | null>>({});
-  const [staffMap, setStaffMap] = useState<Record<string, { role: AppRole; color: RoleColor | null }>>({});
+  const [staffMap, setStaffMap] = useState<
+    Record<string, { role: AppRole; color: RoleColor | null }>
+  >({});
   const [contribIds, setContribIds] = useState<Set<string>>(new Set());
   const restrictedWords = useRestrictedWords();
   const [warning, setWarning] = useState<string | null>(null);
@@ -115,13 +117,23 @@ function Comunidade() {
   useEffect(() => {
     if (!user) return;
     (async () => {
-      const { data } = await supabase.from("user_roles").select("user_id, role, badge_color").neq("role", "user");
+      const { data } = await supabase
+        .from("user_roles")
+        .select("user_id, role, badge_color")
+        .neq("role", "user");
       const map: Record<string, { role: AppRole; color: RoleColor | null }> = {};
-      for (const row of (data ?? []) as Array<{ user_id: string; role: AppRole; badge_color: string | null }>) {
+      for (const row of (data ?? []) as Array<{
+        user_id: string;
+        role: AppRole;
+        badge_color: string | null;
+      }>) {
         const existing = map[row.user_id];
         // pick highest priority role per user
         if (!existing || ROLE_PRIORITY.indexOf(row.role) < ROLE_PRIORITY.indexOf(existing.role)) {
-          map[row.user_id] = { role: row.role, color: (row.badge_color as RoleColor | null) ?? null };
+          map[row.user_id] = {
+            role: row.role,
+            color: (row.badge_color as RoleColor | null) ?? null,
+          };
         }
       }
       setStaffMap(map);
@@ -133,11 +145,18 @@ function Comunidade() {
     if (!user) return;
     let active = true;
     const load = async () => {
-      const { data } = await supabase.from("message_flags").select("id, message_id, flagged_by, reason");
+      const { data } = await supabase
+        .from("message_flags")
+        .select("id, message_id, flagged_by, reason");
       if (!active) return;
       const ids = new Set<string>();
       const mine: Record<string, { id: string; reason: string }> = {};
-      for (const r of (data ?? []) as Array<{ id: string; message_id: string; flagged_by: string; reason: string }>) {
+      for (const r of (data ?? []) as Array<{
+        id: string;
+        message_id: string;
+        flagged_by: string;
+        reason: string;
+      }>) {
         ids.add(r.message_id);
         if (r.flagged_by === user.id) mine[r.message_id] = { id: r.id, reason: r.reason };
       }
@@ -172,7 +191,9 @@ function Comunidade() {
     if (missing.length === 0) return;
     const { data } = await supabase
       .from("profiles")
-      .select("id, full_name, photo_url, verified, contributor_highlight, equipped_frame_id, equipped_aura_id")
+      .select(
+        "id, full_name, photo_url, verified, contributor_highlight, equipped_frame_id, equipped_aura_id",
+      )
       .in("id", missing);
     const { data: commitments } = await supabase
       .from("relationship_commitments")
@@ -237,7 +258,9 @@ function Comunidade() {
     if (missing.length === 0) return;
     const { data } = await supabase
       .from("stickers")
-      .select("id, category_id, name, storage_path, public_url, mime_type, is_animated, active, sort_order")
+      .select(
+        "id, category_id, name, storage_path, public_url, mime_type, is_animated, active, sort_order",
+      )
       .in("id", missing);
     if (data && data.length) {
       setStickerCache((prev) => {
@@ -265,7 +288,9 @@ function Comunidade() {
       const list = ((data ?? []) as GMsg[]).slice().reverse();
       setMessages(list);
       await loadProfiles(Array.from(new Set(list.map((m) => m.sender_id))));
-      const stickerIds = Array.from(new Set(list.map((m) => m.sticker_id).filter(Boolean) as string[]));
+      const stickerIds = Array.from(
+        new Set(list.map((m) => m.sticker_id).filter(Boolean) as string[]),
+      );
       if (stickerIds.length) loadStickersByIds(stickerIds);
       markSeen(user.id, "community");
       requestAnimationFrame(() => {
@@ -275,24 +300,36 @@ function Comunidade() {
 
     const ch = supabase
       .channel("global-chat")
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "global_messages" }, async (payload) => {
-        const m = payload.new as GMsg;
-        setMessages((prev) => [...prev, m]);
-        await loadProfiles([m.sender_id]);
-        if (m.sticker_id) loadStickersByIds([m.sticker_id]);
-        if (user) markSeen(user.id, "community");
-        requestAnimationFrame(() => {
-          if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-        });
-      })
-      .on("postgres_changes", { event: "DELETE", schema: "public", table: "global_messages" }, (payload) => {
-        const old = payload.old as { id: string };
-        setMessages((prev) => prev.filter((m) => m.id !== old.id));
-      })
-      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "global_messages" }, (payload) => {
-        const updated = payload.new as GMsg;
-        setMessages((prev) => prev.map((m) => (m.id === updated.id ? { ...m, ...updated } : m)));
-      })
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "global_messages" },
+        async (payload) => {
+          const m = payload.new as GMsg;
+          setMessages((prev) => [...prev, m]);
+          await loadProfiles([m.sender_id]);
+          if (m.sticker_id) loadStickersByIds([m.sticker_id]);
+          if (user) markSeen(user.id, "community");
+          requestAnimationFrame(() => {
+            if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+          });
+        },
+      )
+      .on(
+        "postgres_changes",
+        { event: "DELETE", schema: "public", table: "global_messages" },
+        (payload) => {
+          const old = payload.old as { id: string };
+          setMessages((prev) => prev.filter((m) => m.id !== old.id));
+        },
+      )
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "global_messages" },
+        (payload) => {
+          const updated = payload.new as GMsg;
+          setMessages((prev) => prev.map((m) => (m.id === updated.id ? { ...m, ...updated } : m)));
+        },
+      )
       .subscribe();
     return () => {
       ignore = true;
@@ -309,7 +346,10 @@ function Comunidade() {
   }, [messages]);
 
   const pinnedMessages = useMemo(
-    () => messages.filter((m) => m.pinned_at).sort((a, b) => (b.pinned_at ?? "").localeCompare(a.pinned_at ?? "")),
+    () =>
+      messages
+        .filter((m) => m.pinned_at)
+        .sort((a, b) => (b.pinned_at ?? "").localeCompare(a.pinned_at ?? "")),
     [messages],
   );
 
@@ -323,8 +363,6 @@ function Comunidade() {
       }),
     [messages, flaggedIds, isStaffViewer, user],
   );
-
-  if (!loading && !user) return <Navigate to="/auth/login" />;
 
   const sendMessage = useCallback(
     async (content: string): Promise<boolean> => {
@@ -388,6 +426,8 @@ function Comunidade() {
     [user, replyTo],
   );
 
+  if (!loading && !user) return <Navigate to="/auth/login" />;
+
   async function remove(id: string) {
     const { error } = await supabase.from("global_messages").delete().eq("id", id);
     if (error) toast.error(friendlyError(error));
@@ -408,7 +448,10 @@ function Comunidade() {
     }
     setFlagBusy(true);
     if (flagDialog.existingId) {
-      const { error } = await supabase.from("message_flags").update({ reason }).eq("id", flagDialog.existingId);
+      const { error } = await supabase
+        .from("message_flags")
+        .update({ reason })
+        .eq("id", flagDialog.existingId);
       setFlagBusy(false);
       if (error) {
         toast.error(friendlyError(error));
@@ -482,7 +525,9 @@ function Comunidade() {
           </div>
           <div className="flex-1 min-w-0">
             <h1 className="text-3xl font-semibold">Comunidade</h1>
-            <p className="text-sm text-muted-foreground">Chat global em tempo real — converse com todos</p>
+            <p className="text-sm text-muted-foreground">
+              Chat global em tempo real — converse com todos
+            </p>
           </div>
           <Link
             to="/oracoes"
@@ -519,7 +564,9 @@ function Comunidade() {
                         <span className="flex items-center gap-1 font-semibold text-foreground">
                           {name}
                           {p?.verified && <VerifiedBadge size="sm" />}
-                          {senderStaff && <RoleBadge role={senderStaff.role} color={senderStaff.color} />}
+                          {senderStaff && (
+                            <RoleBadge role={senderStaff.role} color={senderStaff.color} />
+                          )}
                         </span>
                         <span className="line-clamp-2 text-muted-foreground">{m.content}</span>
                       </span>
@@ -558,7 +605,9 @@ function Comunidade() {
                 const name = p?.full_name?.split(" ")[0] ?? "Alguém";
                 const showActions = actionsOpenId === m.id;
                 const replied = m.reply_to_id ? (messagesById.get(m.reply_to_id) ?? null) : null;
-                const repliedName = replied ? (profiles[replied.sender_id]?.full_name?.split(" ")[0] ?? "Alguém") : "";
+                const repliedName = replied
+                  ? (profiles[replied.sender_id]?.full_name?.split(" ")[0] ?? "Alguém")
+                  : "";
                 const isFlash = highlightId === m.id;
                 const senderStaff = staffMap[m.sender_id];
                 const senderIsAdmin =
@@ -567,7 +616,9 @@ function Comunidade() {
                   (senderStaff.color ?? "gold") === "gold";
                 const senderIsStaff = !!senderStaff;
                 const senderContribOn =
-                  !senderIsAdmin && contribIds.has(m.sender_id) && p?.contributor_highlight !== false;
+                  !senderIsAdmin &&
+                  contribIds.has(m.sender_id) &&
+                  p?.contributor_highlight !== false;
                 const isFlagged = flaggedIds.has(m.id);
                 const myFlag = myFlags[m.id];
                 return (
@@ -623,7 +674,10 @@ function Comunidade() {
                             {p?.verified && <VerifiedBadge size="sm" />}
                             {senderStaff &&
                               (senderIsAdmin ? (
-                                <ShieldCheck className="admin-icon-sparkle h-3.5 w-3.5 shrink-0" aria-label="Admin" />
+                                <ShieldCheck
+                                  className="admin-icon-sparkle h-3.5 w-3.5 shrink-0"
+                                  aria-label="Admin"
+                                />
                               ) : (
                                 <RoleBadge role={senderStaff.role} color={senderStaff.color} />
                               ))}
@@ -638,7 +692,10 @@ function Comunidade() {
                             {p?.verified && <VerifiedBadge size="sm" />}
                             {senderStaff &&
                               (senderIsAdmin ? (
-                                <ShieldCheck className="admin-icon-sparkle h-3.5 w-3.5 shrink-0" aria-label="Admin" />
+                                <ShieldCheck
+                                  className="admin-icon-sparkle h-3.5 w-3.5 shrink-0"
+                                  aria-label="Admin"
+                                />
                               ) : (
                                 <RoleBadge role={senderStaff.role} color={senderStaff.color} />
                               ))}
@@ -646,7 +703,10 @@ function Comunidade() {
                         )}
                         <UserBadges userId={m.sender_id} size="xs" max={2} />
                         <span className="text-[11px] text-muted-foreground">
-                          {new Date(m.created_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+                          {new Date(m.created_at).toLocaleTimeString("pt-BR", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
                           {m.edited_at ? " · editado" : ""}
                         </span>
                       </div>
@@ -662,7 +722,9 @@ function Comunidade() {
                             {replied.sticker_id && stickerCache[replied.sticker_id] ? (
                               <span className="text-muted-foreground">Sticker</span>
                             ) : (
-                              <span className="line-clamp-2 text-muted-foreground">{replied.content}</span>
+                              <span className="line-clamp-2 text-muted-foreground">
+                                {replied.content}
+                              </span>
                             )}
                           </span>
                           {replied.sticker_id && stickerCache[replied.sticker_id] && (
@@ -704,7 +766,9 @@ function Comunidade() {
                           <div className="mt-1 h-32 w-32 animate-pulse rounded-xl bg-muted/40" />
                         )
                       ) : (
-                        <p className="mt-0.5 whitespace-pre-wrap break-words text-sm text-foreground/90">{m.content}</p>
+                        <p className="mt-0.5 whitespace-pre-wrap break-words text-sm text-foreground/90">
+                          {m.content}
+                        </p>
                       )}
                     </BubbleWrap>
                     {!isEditing && (
@@ -730,8 +794,12 @@ function Comunidade() {
             approved={!!approved}
             userId={user?.id ?? null}
             replyTo={replyTo}
-            replyToName={replyTo ? (profiles[replyTo.sender_id]?.full_name?.split(" ")[0] ?? "Alguém") : ""}
-            replyToStickerUrl={replyTo?.sticker_id ? (stickerCache[replyTo.sticker_id]?.public_url ?? null) : null}
+            replyToName={
+              replyTo ? (profiles[replyTo.sender_id]?.full_name?.split(" ")[0] ?? "Alguém") : ""
+            }
+            replyToStickerUrl={
+              replyTo?.sticker_id ? (stickerCache[replyTo.sticker_id]?.public_url ?? null) : null
+            }
             onCancelReply={() => setReplyTo(null)}
             onSend={sendMessage}
             onSendSticker={sendSticker}
@@ -779,10 +847,12 @@ function Comunidade() {
       >
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>{flagDialog?.existingId ? "Editar sinalização" : "Sinalizar mensagem"}</DialogTitle>
+            <DialogTitle>
+              {flagDialog?.existingId ? "Editar sinalização" : "Sinalizar mensagem"}
+            </DialogTitle>
             <DialogDescription>
-              Descreva por que você acredita que esta mensagem fere as diretrizes da comunidade. Sua sinalização será
-              revisada pelo Super Admin.
+              Descreva por que você acredita que esta mensagem fere as diretrizes da comunidade. Sua
+              sinalização será revisada pelo Super Admin.
             </DialogDescription>
           </DialogHeader>
           {flagDialog && (
@@ -830,8 +900,8 @@ function RestrictedWordDialog({ word, onClose }: { word: string | null; onClose:
           </div>
           <DialogTitle className="text-center">Mensagem bloqueada</DialogTitle>
           <DialogDescription className="text-center">
-            A palavra <span className="font-semibold text-foreground">"{word}"</span> fere as diretrizes da comunidade.
-            Por favor, reescreva sua mensagem com respeito e cuidado.
+            A palavra <span className="font-semibold text-foreground">"{word}"</span> fere as
+            diretrizes da comunidade. Por favor, reescreva sua mensagem com respeito e cuidado.
           </DialogDescription>
         </DialogHeader>
         <div className="flex justify-center pt-2">
@@ -895,7 +965,8 @@ function ActionsSheet({
   const mine = !!msg && !!currentUserId && msg.sender_id === currentUserId;
   const canDelete = mine || canModerateMessages;
   const canEdit = mine;
-  const canShowFlag = canFlagMessages && !!msg && !!currentUserId && msg.sender_id !== currentUserId;
+  const canShowFlag =
+    canFlagMessages && !!msg && !!currentUserId && msg.sender_id !== currentUserId;
   const myFlag = msg ? myFlags[msg.id] : undefined;
   return (
     <Sheet
@@ -914,9 +985,17 @@ function ActionsSheet({
               {msg.content}
             </p>
             <div className="flex flex-col">
-              <ActionRow icon={<Reply className="h-5 w-5" />} label="Responder" onClick={() => onReply(msg)} />
+              <ActionRow
+                icon={<Reply className="h-5 w-5" />}
+                label="Responder"
+                onClick={() => onReply(msg)}
+              />
               {canEdit && (
-                <ActionRow icon={<Pencil className="h-5 w-5" />} label="Editar" onClick={() => onEdit(msg)} />
+                <ActionRow
+                  icon={<Pencil className="h-5 w-5" />}
+                  label="Editar"
+                  onClick={() => onEdit(msg)}
+                />
               )}
               {canShowFlag && (
                 <ActionRow
@@ -928,7 +1007,9 @@ function ActionsSheet({
               )}
               {isAdmin && (
                 <ActionRow
-                  icon={msg.pinned_at ? <PinOff className="h-5 w-5" /> : <Pin className="h-5 w-5" />}
+                  icon={
+                    msg.pinned_at ? <PinOff className="h-5 w-5" /> : <Pin className="h-5 w-5" />
+                  }
                   label={msg.pinned_at ? "Desafixar" : "Fixar"}
                   onClick={() => onPin(msg)}
                 />
@@ -972,7 +1053,9 @@ function ActionRow({
       onClick={onClick}
       className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium transition-colors ${toneClass}`}
     >
-      <span className="flex h-9 w-9 items-center justify-center rounded-full bg-muted/60">{icon}</span>
+      <span className="flex h-9 w-9 items-center justify-center rounded-full bg-muted/60">
+        {icon}
+      </span>
       <span>{label}</span>
     </button>
   );
@@ -1054,7 +1137,10 @@ const ChatComposer = memo(function ChatComposer({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-0 border-t border-border bg-background/60">
+    <form
+      onSubmit={handleSubmit}
+      className="flex flex-col gap-0 border-t border-border bg-background/60"
+    >
       <TypingIndicator selfId={userId} />
       <div className="flex flex-col gap-2 p-3 pt-2">
         {replyTo && (
@@ -1128,7 +1214,11 @@ const ChatComposer = memo(function ChatComposer({
                 </>
               )}
             </AnimatePresence>
-            <StickerPicker open={pickerOpen} onClose={() => setPickerOpen(false)} onPick={handleSticker} />
+            <StickerPicker
+              open={pickerOpen}
+              onClose={() => setPickerOpen(false)}
+              onPick={handleSticker}
+            />
           </div>
           <Input
             value={text}
@@ -1137,7 +1227,9 @@ const ChatComposer = memo(function ChatComposer({
               if (e.target.value.trim().length > 0) broadcastTyping();
             }}
             placeholder={
-              !approved ? "Aguardando aprovação para enviar mensagens" : "Escreva uma mensagem para a comunidade..."
+              !approved
+                ? "Aguardando aprovação para enviar mensagens"
+                : "Escreva uma mensagem para a comunidade..."
             }
             maxLength={2000}
             disabled={!approved || sending}

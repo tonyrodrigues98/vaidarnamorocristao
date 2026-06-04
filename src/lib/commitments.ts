@@ -34,7 +34,12 @@ export async function getCommitmentByMatch(matchId: string) {
   return data as RelationshipCommitment | null;
 }
 
-export async function createCommitmentRequest(matchId: string, userA: string, userB: string, requestedBy: string) {
+export async function createCommitmentRequest(
+  matchId: string,
+  userA: string,
+  userB: string,
+  requestedBy: string,
+) {
   const existing = await getCommitmentByMatch(matchId);
 
   if (existing) {

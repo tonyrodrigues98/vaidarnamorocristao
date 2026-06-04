@@ -1,10 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 
-export async function createTimeCapsule(
-  matchId: string,
-  message: string,
-  unlockAt: string
-) {
+export async function createTimeCapsule(matchId: string, message: string, unlockAt: string) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -29,9 +25,7 @@ export async function createTimeCapsule(
   return data;
 }
 
-export async function listTimeCapsules(
-  matchId: string
-) {
+export async function listTimeCapsules(matchId: string) {
   const { data, error } = await supabase
     .from("couple_time_capsules")
     .select("*")
@@ -45,9 +39,7 @@ export async function listTimeCapsules(
   return data ?? [];
 }
 
-export async function openTimeCapsule(
-  capsuleId: string
-) {
+export async function openTimeCapsule(capsuleId: string) {
   const now = new Date().toISOString();
 
   const { data, error } = await supabase

@@ -76,10 +76,7 @@ describe("E2E chat flow — match → mensagem → conversas → ler → marcar 
   });
 
   it("C não consegue abrir a conversa", async () => {
-    const { data } = await C.client
-      .from("messages")
-      .select("id")
-      .eq("match_id", matchId!);
+    const { data } = await C.client.from("messages").select("id").eq("match_id", matchId!);
     expect((data ?? []).length).toBe(0);
   });
 

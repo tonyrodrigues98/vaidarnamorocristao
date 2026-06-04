@@ -210,12 +210,19 @@ function InicioPage() {
 
       const partnerId = commitment.user_a === user.id ? commitment.user_b : commitment.user_a;
 
-      const { data } = await supabase.from("profiles").select("full_name").eq("id", partnerId).maybeSingle();
+      const { data } = await supabase
+        .from("profiles")
+        .select("full_name")
+        .eq("id", partnerId)
+        .maybeSingle();
 
       setCommitmentPartner(data?.full_name ?? null);
 
       if (commitment.accepted_at) {
-        const days = Math.max(1, Math.floor((Date.now() - new Date(commitment.accepted_at).getTime()) / 86400000));
+        const days = Math.max(
+          1,
+          Math.floor((Date.now() - new Date(commitment.accepted_at).getTime()) / 86400000),
+        );
 
         setCommitmentDays(days);
       }
@@ -329,7 +336,10 @@ function InicioPage() {
             .select("id", { count: "exact", head: true })
             .eq("status", "approved")
             .gte("created_at", sinceWeek),
-          supabase.from("messages").select("id", { count: "exact", head: true }).gte("created_at", since24h),
+          supabase
+            .from("messages")
+            .select("id", { count: "exact", head: true })
+            .gte("created_at", since24h),
         ]);
         if (cancel) return;
         setSuggestions((sugg as Suggestion[] | null) ?? []);
@@ -428,7 +438,8 @@ function InicioPage() {
   const latestAppeal = banAppealsList[0] ?? null;
   const latestRejectionAppeal = rejectionAppealsList[0] ?? null;
   const canAppeal = isBanned && (!latestAppeal || latestAppeal.status === "ignored");
-  const canReverify = isRejected && (!latestRejectionAppeal || latestRejectionAppeal.status === "ignored");
+  const canReverify =
+    isRejected && (!latestRejectionAppeal || latestRejectionAppeal.status === "ignored");
 
   async function acknowledgeWarning(id: string) {
     const { error } = await supabase
@@ -444,7 +455,10 @@ function InicioPage() {
     );
   }
   async function resolveRequest(id: string) {
-    const { error } = await supabase.from("user_admin_requests").update({ status: "resolved" }).eq("id", id);
+    const { error } = await supabase
+      .from("user_admin_requests")
+      .update({ status: "resolved" })
+      .eq("id", id);
     if (error) {
       toast.error(error.message);
       return;
@@ -585,7 +599,11 @@ function InicioPage() {
                         animationDuration: "2.5s",
                       }}
                     >
-                      <path d="M5 0 L6 4 L10 5 L6 6 L5 10 L4 6 L0 5 L4 4 Z" fill="oklch(0.96 0.08 85)" opacity="0.85" />
+                      <path
+                        d="M5 0 L6 4 L10 5 L6 6 L5 10 L4 6 L0 5 L4 4 Z"
+                        fill="oklch(0.96 0.08 85)"
+                        opacity="0.85"
+                      />
                     </svg>
                   ))}
                 </>
@@ -628,7 +646,10 @@ function InicioPage() {
                         : "Logo seu perfil será revisado e você poderá começar a explorar."}
                 </p>
 
-                <div className="animate-fade-up mt-7 flex flex-wrap gap-3" style={{ animationDelay: "220ms" }}>
+                <div
+                  className="animate-fade-up mt-7 flex flex-wrap gap-3"
+                  style={{ animationDelay: "220ms" }}
+                >
                   {isBanned ? (
                     <Button
                       asChild
@@ -703,10 +724,14 @@ function InicioPage() {
                   </p>
 
                   <h2 className="mt-1 text-2xl font-bold">
-                    {commitmentPartner ? `Você está em propósito com ${commitmentPartner}` : "Você está em propósito"}
+                    {commitmentPartner
+                      ? `Você está em propósito com ${commitmentPartner}`
+                      : "Você está em propósito"}
                   </h2>
 
-                  <p className="mt-2 text-sm text-muted-foreground">{commitmentDays} dias juntos em propósito.</p>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    {commitmentDays} dias juntos em propósito.
+                  </p>
                 </div>
 
                 <Button asChild>
@@ -742,15 +767,17 @@ function InicioPage() {
                 <Ban className="h-5 w-5" />
               </span>
               <div className="flex-1">
-                <h2 className="text-lg font-semibold text-red-700 dark:text-red-300">Conta suspensa</h2>
+                <h2 className="text-lg font-semibold text-red-700 dark:text-red-300">
+                  Conta suspensa
+                </h2>
                 {profile.banned_reason && (
                   <p className="mt-1 whitespace-pre-wrap text-sm text-red-900/80 dark:text-red-200/80">
                     <span className="font-semibold">Motivo:</span> {profile.banned_reason}
                   </p>
                 )}
                 <p className="mt-2 text-sm text-muted-foreground">
-                  Sentimos muito por isso. Se você acredita que houve um engano, envie uma apelação acolhedora e a
-                  equipe vai analisar.
+                  Sentimos muito por isso. Se você acredita que houve um engano, envie uma apelação
+                  acolhedora e a equipe vai analisar.
                 </p>
               </div>
             </div>
@@ -803,7 +830,9 @@ function InicioPage() {
                 <AlertTriangle className="h-5 w-5" />
               </span>
               <div className="flex-1">
-                <h2 className="text-lg font-semibold text-amber-700 dark:text-amber-300">Conta negada</h2>
+                <h2 className="text-lg font-semibold text-amber-700 dark:text-amber-300">
+                  Conta negada
+                </h2>
                 <p className="mt-1 text-sm text-amber-900/80 dark:text-amber-200/80">
                   Revise sua conta e tente novamente.
                 </p>
@@ -823,20 +852,26 @@ function InicioPage() {
             {latestRejectionAppeal && (
               <div className="mt-5 rounded-2xl border border-border/60 bg-background/60 p-4">
                 <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                  Sua solicitação · {new Date(latestRejectionAppeal.created_at).toLocaleString("pt-BR")} ·{" "}
+                  Sua solicitação ·{" "}
+                  {new Date(latestRejectionAppeal.created_at).toLocaleString("pt-BR")} ·{" "}
                   {latestRejectionAppeal.status === "pending" && "aguardando resposta"}
                   {latestRejectionAppeal.status === "answered" && "respondida"}
                   {latestRejectionAppeal.status === "ignored" && "encerrada"}
                 </p>
-                <p className="mt-2 whitespace-pre-wrap text-sm">{latestRejectionAppeal.appeal_text}</p>
-                {latestRejectionAppeal.status === "answered" && latestRejectionAppeal.response_text && (
-                  <div className="mt-3 rounded-xl bg-[var(--petal)]/40 p-3 text-sm">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-[var(--rose)]">
-                      Resposta da equipe
-                    </p>
-                    <p className="mt-1 whitespace-pre-wrap">{latestRejectionAppeal.response_text}</p>
-                  </div>
-                )}
+                <p className="mt-2 whitespace-pre-wrap text-sm">
+                  {latestRejectionAppeal.appeal_text}
+                </p>
+                {latestRejectionAppeal.status === "answered" &&
+                  latestRejectionAppeal.response_text && (
+                    <div className="mt-3 rounded-xl bg-[var(--petal)]/40 p-3 text-sm">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-[var(--rose)]">
+                        Resposta da equipe
+                      </p>
+                      <p className="mt-1 whitespace-pre-wrap">
+                        {latestRejectionAppeal.response_text}
+                      </p>
+                    </div>
+                  )}
               </div>
             )}
 
@@ -911,7 +946,9 @@ function InicioPage() {
                   </span>
                   <h2 className="text-lg font-semibold">Como começar</h2>
                 </div>
-                <p className="mt-1 text-sm text-muted-foreground">Pequenos passos que abrem grandes histórias.</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Pequenos passos que abrem grandes histórias.
+                </p>
                 <ul className="mt-5 space-y-2">
                   {checklist.map((item) => (
                     <li key={item.key}>
@@ -921,10 +958,16 @@ function InicioPage() {
                       >
                         <span
                           className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition ${
-                            item.done ? "bg-[var(--rose)]/15 text-[var(--rose)]" : "bg-muted text-muted-foreground"
+                            item.done
+                              ? "bg-[var(--rose)]/15 text-[var(--rose)]"
+                              : "bg-muted text-muted-foreground"
                           }`}
                         >
-                          {item.done ? <CheckCircle2 className="h-4 w-4" /> : <Circle className="h-4 w-4" />}
+                          {item.done ? (
+                            <CheckCircle2 className="h-4 w-4" />
+                          ) : (
+                            <Circle className="h-4 w-4" />
+                          )}
                         </span>
                         <span
                           className={`flex-1 text-sm ${item.done ? "text-muted-foreground line-through" : "font-medium"}`}
@@ -946,14 +989,20 @@ function InicioPage() {
                 <div className="flex items-center gap-3">
                   <span className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-gradient-love text-lg font-bold text-white">
                     {profile.photo_url ? (
-                      <PhotoImg src={profile.photo_url} alt="" className="h-full w-full object-cover" />
+                      <PhotoImg
+                        src={profile.photo_url}
+                        alt=""
+                        className="h-full w-full object-cover"
+                      />
                     ) : (
                       firstName.charAt(0).toUpperCase()
                     )}
                   </span>
                   <div className="min-w-0">
                     <p className="truncate text-sm text-muted-foreground">Seu perfil</p>
-                    <h3 className="truncate text-base font-semibold">{profile.full_name ?? "Você"}</h3>
+                    <h3 className="truncate text-base font-semibold">
+                      {profile.full_name ?? "Você"}
+                    </h3>
                   </div>
                 </div>
 
@@ -969,12 +1018,20 @@ function InicioPage() {
                     />
                   </div>
                   <p className="mt-3 text-xs text-muted-foreground">
-                    {completion >= 90 ? "Seu perfil está brilhando ✨" : "Perfis completos recebem mais interesses."}
+                    {completion >= 90
+                      ? "Seu perfil está brilhando ✨"
+                      : "Perfis completos recebem mais interesses."}
                   </p>
                 </div>
 
-                <Button asChild className="mt-5 w-full rounded-full" variant={completion >= 90 ? "outline" : "default"}>
-                  <Link to="/perfil">{completion >= 90 ? "Ver meu perfil" : "Completar perfil"}</Link>
+                <Button
+                  asChild
+                  className="mt-5 w-full rounded-full"
+                  variant={completion >= 90 ? "outline" : "default"}
+                >
+                  <Link to="/perfil">
+                    {completion >= 90 ? "Ver meu perfil" : "Completar perfil"}
+                  </Link>
                 </Button>
               </div>
             </section>
@@ -1007,7 +1064,9 @@ function InicioPage() {
                         </blockquote>
                       )}
                       <h3 className="mt-5 text-xl font-semibold tracking-tight">{devo.title}</h3>
-                      <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-muted-foreground">{devo.content}</p>
+                      <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-muted-foreground">
+                        {devo.content}
+                      </p>
                       <div className="mt-5">
                         <Button
                           asChild
@@ -1021,7 +1080,9 @@ function InicioPage() {
                       </div>
                     </>
                   ) : (
-                    <p className="mt-6 text-sm text-muted-foreground">Em breve, um novo devocional para o seu dia.</p>
+                    <p className="mt-6 text-sm text-muted-foreground">
+                      Em breve, um novo devocional para o seu dia.
+                    </p>
                   )}
                 </div>
               </div>
@@ -1066,7 +1127,9 @@ function InicioPage() {
                 <div className="flex items-end justify-between gap-4">
                   <div>
                     <h2 className="text-xl font-semibold">Possíveis conexões</h2>
-                    <p className="text-sm text-muted-foreground">Pessoas que podem combinar com você.</p>
+                    <p className="text-sm text-muted-foreground">
+                      Pessoas que podem combinar com você.
+                    </p>
                   </div>
                   <Button asChild variant="ghost" size="sm" className="shrink-0 rounded-full">
                     <Link to="/pretendentes">
@@ -1104,7 +1167,9 @@ function InicioPage() {
                           {s.age ? `, ${s.age}` : ""}
                         </p>
                         {(s.city || s.state) && (
-                          <p className="truncate text-xs opacity-80">{[s.city, s.state].filter(Boolean).join(" · ")}</p>
+                          <p className="truncate text-xs opacity-80">
+                            {[s.city, s.state].filter(Boolean).join(" · ")}
+                          </p>
                         )}
                       </div>
                     </Link>
@@ -1118,7 +1183,9 @@ function InicioPage() {
               <div className="flex items-end justify-between gap-4">
                 <div>
                   <h2 className="text-xl font-semibold">Dicas da plataforma</h2>
-                  <p className="text-sm text-muted-foreground">Pequenos guias para uma jornada mais leve.</p>
+                  <p className="text-sm text-muted-foreground">
+                    Pequenos guias para uma jornada mais leve.
+                  </p>
                 </div>
                 <div className="flex items-center gap-2">
                   <button
@@ -1156,7 +1223,9 @@ function InicioPage() {
                           </span>
                           <div className="min-w-0">
                             <h3 className="text-base font-semibold sm:text-lg">{t.title}</h3>
-                            <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{t.text}</p>
+                            <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+                              {t.text}
+                            </p>
                           </div>
                         </div>
                       </div>

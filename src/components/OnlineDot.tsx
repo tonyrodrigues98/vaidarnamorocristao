@@ -16,7 +16,9 @@ export function OnlineDot({ userId, className = "", size = "sm", showLabel = fal
     <span className={`inline-flex items-center gap-1 ${className}`} title="Online agora">
       <span className={`relative inline-flex ${dim}`}>
         <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
-        <span className={`relative inline-flex rounded-full bg-emerald-500 ring-2 ring-background ${dim}`} />
+        <span
+          className={`relative inline-flex rounded-full bg-emerald-500 ring-2 ring-background ${dim}`}
+        />
       </span>
       {showLabel && <span className="text-xs font-medium text-emerald-600">Online</span>}
     </span>

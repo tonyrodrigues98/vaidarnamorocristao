@@ -45,8 +45,7 @@ export function ReceivedGiftsTab({ userId }: { userId: string }) {
       <div
         className="relative overflow-hidden rounded-3xl p-5 text-white shadow-xl"
         style={{
-          background:
-            "linear-gradient(135deg, #FF5FA2 0%, #A855F7 60%, #6D5BFF 100%)",
+          background: "linear-gradient(135deg, #FF5FA2 0%, #A855F7 60%, #6D5BFF 100%)",
         }}
       >
         <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white/20 blur-3xl" />
@@ -63,7 +62,10 @@ export function ReceivedGiftsTab({ userId }: { userId: string }) {
               {totalReceived} no total · {heldCount} aguardando resgate
             </p>
           </div>
-          <div className="hidden text-5xl drop-shadow-2xl sm:block" style={{ animation: "gift-float 3s ease-in-out infinite" }}>
+          <div
+            className="hidden text-5xl drop-shadow-2xl sm:block"
+            style={{ animation: "gift-float 3s ease-in-out infinite" }}
+          >
             🎁
           </div>
         </div>
@@ -104,7 +106,12 @@ export function ReceivedGiftsTab({ userId }: { userId: string }) {
                   <div className="min-w-0 flex-1">
                     <div className="flex items-start justify-between gap-2">
                       <h4 className="truncate text-sm font-bold">{g.name}</h4>
-                      <span className={cn("shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold", r.chip)}>
+                      <span
+                        className={cn(
+                          "shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold",
+                          r.chip,
+                        )}
+                      >
                         {r.label}
                       </span>
                     </div>
@@ -119,7 +126,10 @@ export function ReceivedGiftsTab({ userId }: { userId: string }) {
                         <div className="h-5 w-5 rounded-full bg-muted" />
                       )}
                       <p className="truncate text-xs text-muted-foreground">
-                        de <span className="font-medium text-foreground">{tx.sender_name ?? "Alguém"}</span>
+                        de{" "}
+                        <span className="font-medium text-foreground">
+                          {tx.sender_name ?? "Alguém"}
+                        </span>
                       </p>
                     </div>
                     {tx.message && (
@@ -157,7 +167,8 @@ export function ReceivedGiftsTab({ userId }: { userId: string }) {
       )}
 
       <p className="text-center text-[11px] text-muted-foreground">
-        Ao resgatar, você recebe 30% do valor em moedas. Presentes não resgatados ficam como decoração na sua coleção.
+        Ao resgatar, você recebe 30% do valor em moedas. Presentes não resgatados ficam como
+        decoração na sua coleção.
       </p>
     </div>
   );

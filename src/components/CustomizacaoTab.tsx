@@ -103,13 +103,18 @@ export function CustomizacaoTab({ photoUrl }: { photoUrl: string | null }) {
         const [bg, ownedBg, bgProf] = await Promise.all([
           fetchProfileBackgroundCatalog(),
           fetchMyOwnedBackgroundIds(),
-          supabase.from("profiles").select("equipped_background_id").eq("id", user.id).maybeSingle(),
+          supabase
+            .from("profiles")
+            .select("equipped_background_id")
+            .eq("id", user.id)
+            .maybeSingle(),
         ]);
         if (!alive) return;
         setBackgrounds(bg);
         setOwnedBackgrounds(ownedBg);
         setEquippedBackground(
-          ((bgProf.data ?? {}) as { equipped_background_id?: string | null }).equipped_background_id ?? null,
+          ((bgProf.data ?? {}) as { equipped_background_id?: string | null })
+            .equipped_background_id ?? null,
         );
       } catch {
         if (!alive) return;
@@ -135,7 +140,10 @@ export function CustomizacaoTab({ photoUrl }: { photoUrl: string | null }) {
   );
 
   const activePreviewBackground = useMemo(
-    () => backgrounds.find((background) => background.id === (previewBackground ?? equippedBackground)) ?? null,
+    () =>
+      backgrounds.find(
+        (background) => background.id === (previewBackground ?? equippedBackground),
+      ) ?? null,
     [backgrounds, equippedBackground, previewBackground],
   );
 
@@ -212,7 +220,11 @@ export function CustomizacaoTab({ photoUrl }: { photoUrl: string | null }) {
   const renderGrid = (type: DecorationType) => {
     const items = grouped[type];
     if (!items || items.length === 0) {
-      return <div className="py-10 text-center text-sm text-muted-foreground">Nenhum item disponível no momento.</div>;
+      return (
+        <div className="py-10 text-center text-sm text-muted-foreground">
+          Nenhum item disponível no momento.
+        </div>
+      );
     }
     return (
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
@@ -264,7 +276,10 @@ export function CustomizacaoTab({ photoUrl }: { photoUrl: string | null }) {
                   </div>
                 )}
               </div>
-              <p className="mt-2 line-clamp-2 min-h-[2.25rem] text-xs font-semibold leading-tight" title={d.name}>
+              <p
+                className="mt-2 line-clamp-2 min-h-[2.25rem] text-xs font-semibold leading-tight"
+                title={d.name}
+              >
                 {d.name}
               </p>
               <div className="mt-2 w-full" onClick={(e) => e.stopPropagation()}>
@@ -276,10 +291,19 @@ export function CustomizacaoTab({ photoUrl }: { photoUrl: string | null }) {
                     disabled={busyId === `unequip-${type}`}
                     onClick={() => handleUnequip(type)}
                   >
-                    {busyId === `unequip-${type}` ? <Loader2 className="h-3 w-3 animate-spin" /> : "Remover"}
+                    {busyId === `unequip-${type}` ? (
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                    ) : (
+                      "Remover"
+                    )}
                   </Button>
                 ) : isOwned ? (
-                  <Button size="sm" className="w-full text-xs" disabled={busy} onClick={() => handleEquip(d)}>
+                  <Button
+                    size="sm"
+                    className="w-full text-xs"
+                    disabled={busy}
+                    onClick={() => handleEquip(d)}
+                  >
                     {busy ? <Loader2 className="h-3 w-3 animate-spin" /> : "Equipar"}
                   </Button>
                 ) : (
@@ -329,7 +353,9 @@ export function CustomizacaoTab({ photoUrl }: { photoUrl: string | null }) {
             <button
               type="button"
               key={background.id}
-              onClick={() => setPreviewBackground((id) => (id === background.id ? null : background.id))}
+              onClick={() =>
+                setPreviewBackground((id) => (id === background.id ? null : background.id))
+              }
               className={`group overflow-hidden rounded-2xl border bg-card/70 text-left transition-all duration-200 active:scale-[0.98] ${
                 isEquipped
                   ? "border-[var(--rose)]/70 shadow-soft"
@@ -352,7 +378,9 @@ export function CustomizacaoTab({ photoUrl }: { photoUrl: string | null }) {
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                 <div className="absolute left-3 top-3 flex gap-2">
-                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${rarity.chip}`}>
+                  <span
+                    className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${rarity.chip}`}
+                  >
                     {rarity.label}
                   </span>
                   {isEquipped && (
@@ -378,7 +406,11 @@ export function CustomizacaoTab({ photoUrl }: { photoUrl: string | null }) {
                       disabled={busyId === "unequip-background"}
                       onClick={handleUnequipBackground}
                     >
-                      {busyId === "unequip-background" ? <Loader2 className="h-3 w-3 animate-spin" /> : "Remover"}
+                      {busyId === "unequip-background" ? (
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                      ) : (
+                        "Remover"
+                      )}
                     </Button>
                   ) : (
                     <Button
@@ -440,7 +472,9 @@ export function CustomizacaoTab({ photoUrl }: { photoUrl: string | null }) {
       {/* Preview principal */}
       <div className="glass rounded-3xl p-6 shadow-soft sm:p-8">
         <div className="flex flex-col items-center gap-4">
-          <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Pré-visualização</p>
+          <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+            Pré-visualização
+          </p>
           <div className="relative flex h-56 w-full max-w-md items-center justify-center overflow-hidden rounded-3xl border bg-background transition-all duration-300">
             {activePreviewBackground?.image_url && (
               <img
@@ -460,7 +494,9 @@ export function CustomizacaoTab({ photoUrl }: { photoUrl: string | null }) {
               />
               {activePreviewBackground && (
                 <div className="max-w-xs text-center">
-                  <p className="line-clamp-1 text-sm font-semibold">{activePreviewBackground.name}</p>
+                  <p className="line-clamp-1 text-sm font-semibold">
+                    {activePreviewBackground.name}
+                  </p>
                   <p className="line-clamp-1 text-xs text-white/75">
                     {previewBackground ? "Preview de fundo" : "Fundo equipado"}
                   </p>
@@ -533,7 +569,9 @@ export function CustomizacaoTab({ photoUrl }: { photoUrl: string | null }) {
         <div className="mt-5 flex items-center justify-between rounded-2xl border border-dashed bg-background/40 p-4">
           <div className="pr-3">
             <p className="text-sm font-medium">Quer mais cosméticos?</p>
-            <p className="text-xs text-muted-foreground">Descubra molduras, auras e fundos exclusivos na loja.</p>
+            <p className="text-xs text-muted-foreground">
+              Descubra molduras, auras e fundos exclusivos na loja.
+            </p>
           </div>
           <Button asChild size="sm" variant="outline">
             <Link to="/loja">

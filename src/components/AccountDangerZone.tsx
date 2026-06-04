@@ -42,7 +42,9 @@ export function AccountDangerZone() {
         .maybeSingle();
       if (alive) setState((data as AccountState) ?? null);
     })();
-    return () => { alive = false; };
+    return () => {
+      alive = false;
+    };
   }, [user]);
 
   const isDeactivated = !!state?.deactivated_at && !state?.deletion_requested_at;
@@ -62,7 +64,10 @@ export function AccountDangerZone() {
     setLoading(true);
     const { error } = await supabase.rpc("request_account_deactivation");
     setLoading(false);
-    if (error) { toast.error("Não foi possível desativar."); return; }
+    if (error) {
+      toast.error("Não foi possível desativar.");
+      return;
+    }
     setOpenDeactivate(false);
     toast.success("Conta desativada. Você pode reativar quando quiser.");
     await refresh();
@@ -72,7 +77,10 @@ export function AccountDangerZone() {
     setLoading(true);
     const { error } = await supabase.rpc("request_account_reactivation");
     setLoading(false);
-    if (error) { toast.error("Não foi possível reativar."); return; }
+    if (error) {
+      toast.error("Não foi possível reativar.");
+      return;
+    }
     toast.success("Conta reativada.");
     await refresh();
   }
@@ -85,7 +93,10 @@ export function AccountDangerZone() {
     setLoading(true);
     const { error } = await supabase.rpc("request_account_deletion", { _confirm: confirmText });
     setLoading(false);
-    if (error) { toast.error("Não foi possível agendar a exclusão."); return; }
+    if (error) {
+      toast.error("Não foi possível agendar a exclusão.");
+      return;
+    }
     toast.success("Sua conta será excluída em 30 dias. Você ainda pode cancelar.");
     setOpenDelete(false);
     setDeleteStep(1);
@@ -98,7 +109,10 @@ export function AccountDangerZone() {
     setLoading(true);
     const { error } = await supabase.rpc("cancel_account_deletion");
     setLoading(false);
-    if (error) { toast.error("Não foi possível cancelar."); return; }
+    if (error) {
+      toast.error("Não foi possível cancelar.");
+      return;
+    }
     toast.success("Exclusão cancelada. Bem-vindo(a) de volta!");
     await refresh();
   }
@@ -113,8 +127,10 @@ export function AccountDangerZone() {
               <p className="font-semibold">Exclusão agendada</p>
               <p className="mt-1">
                 Sua conta será permanentemente excluída em{" "}
-                <strong>{new Date(state.deletion_scheduled_for).toLocaleDateString("pt-BR")}</strong>.
-                Você ainda pode cancelar agora.
+                <strong>
+                  {new Date(state.deletion_scheduled_for).toLocaleDateString("pt-BR")}
+                </strong>
+                . Você ainda pode cancelar agora.
               </p>
               <Button
                 size="sm"
@@ -143,8 +159,8 @@ export function AccountDangerZone() {
       <div className="rounded-2xl border border-border bg-card/40 p-5">
         <h3 className="text-base font-semibold">Desativar conta</h3>
         <p className="mt-1 text-sm text-muted-foreground">
-          Seu perfil ficará invisível e você não receberá novos interesses. Suas conversas ficam salvas e
-          você pode reativar a qualquer momento.
+          Seu perfil ficará invisível e você não receberá novos interesses. Suas conversas ficam
+          salvas e você pode reativar a qualquer momento.
         </p>
         <Button
           variant="outline"
@@ -159,13 +175,17 @@ export function AccountDangerZone() {
       <div className="rounded-2xl border border-red-200 bg-red-50/40 p-5">
         <h3 className="text-base font-semibold text-red-700">Excluir conta</h3>
         <p className="mt-1 text-sm text-red-700/80">
-          Ação permanente. Após 30 dias seus dados serão removidos definitivamente. Você pode cancelar
-          dentro desse prazo.
+          Ação permanente. Após 30 dias seus dados serão removidos definitivamente. Você pode
+          cancelar dentro desse prazo.
         </p>
         <Button
           variant="destructive"
           className="mt-4"
-          onClick={() => { setDeleteStep(1); setConfirmText(""); setOpenDelete(true); }}
+          onClick={() => {
+            setDeleteStep(1);
+            setConfirmText("");
+            setOpenDelete(true);
+          }}
           disabled={loading || isPendingDeletion}
         >
           <Trash2 className="mr-2 h-4 w-4" /> Excluir conta
@@ -200,7 +220,16 @@ export function AccountDangerZone() {
       </AlertDialog>
 
       {/* Delete dialog (3 steps) */}
-      <AlertDialog open={openDelete} onOpenChange={(o) => { setOpenDelete(o); if (!o) { setDeleteStep(1); setConfirmText(""); } }}>
+      <AlertDialog
+        open={openDelete}
+        onOpenChange={(o) => {
+          setOpenDelete(o);
+          if (!o) {
+            setDeleteStep(1);
+            setConfirmText("");
+          }
+        }}
+      >
         <AlertDialogContent className="max-w-md">
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2 text-red-700">
@@ -213,7 +242,9 @@ export function AccountDangerZone() {
               <div className="space-y-3 text-sm text-foreground/90">
                 {deleteStep === 1 && (
                   <>
-                    <p>Esta ação é <strong>permanente</strong>. Você perderá:</p>
+                    <p>
+                      Esta ação é <strong>permanente</strong>. Você perderá:
+                    </p>
                     <ul className="list-disc space-y-1 pl-5">
                       <li>Todos os seus matches</li>
                       <li>Todas as suas conversas</li>
@@ -238,14 +269,17 @@ export function AccountDangerZone() {
                       aria-label="Texto de confirmação"
                     />
                     {confirmText.length > 0 && confirmText !== "CONFIRMO" && (
-                      <p className="text-xs text-red-600">Texto incorreto. Digite CONFIRMO em maiúsculas.</p>
+                      <p className="text-xs text-red-600">
+                        Texto incorreto. Digite CONFIRMO em maiúsculas.
+                      </p>
                     )}
                   </>
                 )}
                 {deleteStep === 3 && (
                   <>
                     <p>
-                      Tem certeza absoluta? Esta é sua última chance antes de iniciar o processo de exclusão.
+                      Tem certeza absoluta? Esta é sua última chance antes de iniciar o processo de
+                      exclusão.
                     </p>
                     <p className="text-muted-foreground">
                       Sua conta será desativada agora e excluída permanentemente em 30 dias.

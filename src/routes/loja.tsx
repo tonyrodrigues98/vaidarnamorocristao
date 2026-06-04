@@ -45,7 +45,8 @@ export const Route = createFileRoute("/loja")({
       { title: "Loja — VaiDarNamoro" },
       {
         name: "description",
-        content: "Use suas moedas para desbloquear molduras, auras e personalizações exclusivas do seu perfil.",
+        content:
+          "Use suas moedas para desbloquear molduras, auras e personalizações exclusivas do seu perfil.",
       },
       { name: "robots", content: "noindex, nofollow" },
     ],
@@ -55,7 +56,11 @@ export const Route = createFileRoute("/loja")({
 type EquippedMap = { frame: string | null; aura: string | null; sticker: string | null };
 type CategoryKey = "frame" | "aura" | "background" | "soon";
 
-const CATEGORIES: { key: CategoryKey; label: string; type: DecorationType | "background" | null }[] = [
+const CATEGORIES: {
+  key: CategoryKey;
+  label: string;
+  type: DecorationType | "background" | null;
+}[] = [
   { key: "frame", label: "Molduras", type: "frame" },
   { key: "aura", label: "Auras", type: "aura" },
   { key: "background", label: "Fundos de Perfil", type: "background" },
@@ -124,13 +129,18 @@ function LojaPage() {
         const [bg, ownedBg, bgProf] = await Promise.all([
           fetchProfileBackgroundCatalog(),
           fetchMyOwnedBackgroundIds(),
-          supabase.from("profiles").select("equipped_background_id").eq("id", user.id).maybeSingle(),
+          supabase
+            .from("profiles")
+            .select("equipped_background_id")
+            .eq("id", user.id)
+            .maybeSingle(),
         ]);
         if (!alive) return;
         setBackgrounds(bg);
         setOwnedBackgrounds(ownedBg);
         setEquippedBackground(
-          ((bgProf.data ?? {}) as { equipped_background_id?: string | null }).equipped_background_id ?? null,
+          ((bgProf.data ?? {}) as { equipped_background_id?: string | null })
+            .equipped_background_id ?? null,
         );
       } catch {
         if (!alive) return;
@@ -182,7 +192,8 @@ function LojaPage() {
       else if (msg.includes("already_owned")) toast.error("Voce ja possui esse fundo");
       else if (msg.includes("purchase_profile_background") || msg.includes("schema cache")) {
         toast.error("Banco sem a função de compra dos fundos. Rode a migration de reparo.");
-      } else if (msg.includes("background_not_found")) toast.error("Fundo indisponivel para compra");
+      } else if (msg.includes("background_not_found"))
+        toast.error("Fundo indisponivel para compra");
       else toast.error("Nao foi possivel concluir a compra");
     } finally {
       setBusyId(null);
@@ -259,7 +270,8 @@ function LojaPage() {
   if (!authLoading && !user) return <Navigate to="/auth/login" />;
 
   const activeCategory = CATEGORIES.find((c) => c.key === activeTab)!;
-  const items = activeCategory.type && activeCategory.type !== "background" ? grouped[activeCategory.type] : [];
+  const items =
+    activeCategory.type && activeCategory.type !== "background" ? grouped[activeCategory.type] : [];
 
   return (
     <div className="min-h-screen bg-background">
@@ -292,10 +304,12 @@ function LojaPage() {
               <div className="inline-flex items-center gap-2 rounded-full border border-[var(--rose-soft)]/40 bg-background/70 px-3 py-1 text-xs font-medium text-[var(--rose)] backdrop-blur">
                 <Gem className="h-3.5 w-3.5" /> Loja da Plataforma
               </div>
-              <h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">Personalize seu perfil</h1>
+              <h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
+                Personalize seu perfil
+              </h1>
               <p className="mt-2 text-sm text-muted-foreground sm:text-base">
-                Use suas moedas para desbloquear molduras, auras e itens exclusivos. Toda compra fica salva
-                permanentemente na sua conta.
+                Use suas moedas para desbloquear molduras, auras e itens exclusivos. Toda compra
+                fica salva permanentemente na sua conta.
               </p>
             </div>
 
@@ -305,7 +319,9 @@ function LojaPage() {
                 <CoinIcon className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Seu saldo</p>
+                <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
+                  Seu saldo
+                </p>
                 <p className="text-lg font-semibold leading-none">
                   {balance}
                   <span className="ml-1 text-xs font-normal text-muted-foreground">moedas</span>
@@ -355,7 +371,9 @@ function LojaPage() {
           <ComingSoon />
         ) : activeTab === "background" ? (
           backgrounds.length === 0 ? (
-            <p className="py-16 text-center text-sm text-muted-foreground">Em breve novos fundos de perfil.</p>
+            <p className="py-16 text-center text-sm text-muted-foreground">
+              Em breve novos fundos de perfil.
+            </p>
           ) : (
             <>
               {equippedBackground && (
@@ -385,7 +403,9 @@ function LojaPage() {
                     <article
                       key={background.id}
                       className={`group overflow-hidden rounded-2xl border bg-card transition hover:-translate-y-0.5 hover:shadow-soft ${
-                        isEquipped ? "border-[var(--rose)] ring-1 ring-[var(--rose)]/30" : rarity.border
+                        isEquipped
+                          ? "border-[var(--rose)] ring-1 ring-[var(--rose)]/30"
+                          : rarity.border
                       }`}
                     >
                       <div className="relative aspect-[16/10] overflow-hidden bg-gradient-to-br from-muted to-card">
@@ -402,7 +422,9 @@ function LojaPage() {
                         )}
                         <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
                         <div className="absolute left-3 top-3 flex gap-2">
-                          <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${rarity.chip}`}>
+                          <span
+                            className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${rarity.chip}`}
+                          >
                             {rarity.label}
                           </span>
                           {isEquipped && (
@@ -480,23 +502,27 @@ function LojaPage() {
             </>
           )
         ) : items.length === 0 ? (
-          <p className="py-16 text-center text-sm text-muted-foreground">Em breve novos itens nessa categoria.</p>
+          <p className="py-16 text-center text-sm text-muted-foreground">
+            Em breve novos itens nessa categoria.
+          </p>
         ) : (
           <>
-            {activeCategory.type && activeCategory.type !== "background" && equipped[activeCategory.type] && (
-              <div className="mb-4 flex justify-end">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-xs text-muted-foreground"
-                  onClick={() => handleUnequip(activeCategory.type as DecorationType)}
-                  disabled={busyId === `unequip-${activeCategory.type}`}
-                >
-                  <X className="mr-1 h-3 w-3" />
-                  Remover {activeCategory.label.toLowerCase().slice(0, -1)} atual
-                </Button>
-              </div>
-            )}
+            {activeCategory.type &&
+              activeCategory.type !== "background" &&
+              equipped[activeCategory.type] && (
+                <div className="mb-4 flex justify-end">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-xs text-muted-foreground"
+                    onClick={() => handleUnequip(activeCategory.type as DecorationType)}
+                    disabled={busyId === `unequip-${activeCategory.type}`}
+                  >
+                    <X className="mr-1 h-3 w-3" />
+                    Remover {activeCategory.label.toLowerCase().slice(0, -1)} atual
+                  </Button>
+                </div>
+              )}
 
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
               {items.map((d) => {
@@ -543,7 +569,10 @@ function LojaPage() {
                       />
                     </div>
 
-                    <h3 className="mt-3 line-clamp-1 text-center text-sm font-semibold" title={d.name}>
+                    <h3
+                      className="mt-3 line-clamp-1 text-center text-sm font-semibold"
+                      title={d.name}
+                    >
                       {d.name}
                     </h3>
                     <p className="text-center text-[11px] uppercase tracking-wide text-muted-foreground">
@@ -559,10 +588,19 @@ function LojaPage() {
                           disabled={busyId === `unequip-${d.type}`}
                           onClick={() => handleUnequip(d.type)}
                         >
-                          {busyId === `unequip-${d.type}` ? <Loader2 className="h-3 w-3 animate-spin" /> : "Equipado"}
+                          {busyId === `unequip-${d.type}` ? (
+                            <Loader2 className="h-3 w-3 animate-spin" />
+                          ) : (
+                            "Equipado"
+                          )}
                         </Button>
                       ) : isOwned ? (
-                        <Button size="sm" className="w-full text-xs" disabled={busy} onClick={() => handleEquip(d)}>
+                        <Button
+                          size="sm"
+                          className="w-full text-xs"
+                          disabled={busy}
+                          onClick={() => handleEquip(d)}
+                        >
                           {busy ? <Loader2 className="h-3 w-3 animate-spin" /> : "Equipar"}
                         </Button>
                       ) : (
@@ -606,8 +644,8 @@ function LojaPage() {
             <DialogDescription>
               {confirm && (
                 <>
-                  Deseja utilizar <strong className="text-foreground">{confirm.price_coins}</strong> moedas para
-                  desbloquear este item?
+                  Deseja utilizar <strong className="text-foreground">{confirm.price_coins}</strong>{" "}
+                  moedas para desbloquear este item?
                 </>
               )}
             </DialogDescription>
@@ -645,11 +683,19 @@ function LojaPage() {
           </div>
 
           <DialogFooter className="gap-2 sm:gap-2">
-            <Button variant="ghost" onClick={() => setConfirm(null)} disabled={busyId === confirm?.id}>
+            <Button
+              variant="ghost"
+              onClick={() => setConfirm(null)}
+              disabled={busyId === confirm?.id}
+            >
               Cancelar
             </Button>
             <Button onClick={() => confirm && handleBuy(confirm)} disabled={busyId === confirm?.id}>
-              {busyId === confirm?.id ? <Loader2 className="h-4 w-4 animate-spin" /> : "Comprar item"}
+              {busyId === confirm?.id ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                "Comprar item"
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -665,7 +711,8 @@ function LojaPage() {
             <DialogDescription>
               {confirmBackground && (
                 <>
-                  Deseja utilizar <strong className="text-foreground">{confirmBackground.price}</strong> moedas para
+                  Deseja utilizar{" "}
+                  <strong className="text-foreground">{confirmBackground.price}</strong> moedas para
                   desbloquear este fundo?
                 </>
               )}
@@ -717,7 +764,11 @@ function LojaPage() {
               onClick={() => confirmBackground && handleBuyBackground(confirmBackground)}
               disabled={busyId === confirmBackground?.id}
             >
-              {busyId === confirmBackground?.id ? <Loader2 className="h-4 w-4 animate-spin" /> : "Comprar fundo"}
+              {busyId === confirmBackground?.id ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                "Comprar fundo"
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>

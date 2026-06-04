@@ -32,18 +32,22 @@ export function StickerPicker({ open, onClose, onPick }: Props) {
       })
       .catch(() => {})
       .finally(() => !cancel && setLoading(false));
-    return () => { cancel = true; };
+    return () => {
+      cancel = true;
+    };
   }, [open]);
 
   const filtered = useMemo(
     () => (activeCat === "all" ? stickers : stickers.filter((s) => s.category_id === activeCat)),
-    [activeCat, stickers]
+    [activeCat, stickers],
   );
 
   const content = (
     <div className="flex h-full flex-col">
       <div className="flex shrink-0 gap-2 overflow-x-auto border-b border-border/60 px-3 py-2">
-        <CatChip active={activeCat === "all"} onClick={() => setActiveCat("all")}>Todos</CatChip>
+        <CatChip active={activeCat === "all"} onClick={() => setActiveCat("all")}>
+          Todos
+        </CatChip>
         {cats.map((c) => (
           <CatChip key={c.id} active={activeCat === c.id} onClick={() => setActiveCat(c.id)}>
             {c.name}
@@ -66,7 +70,10 @@ export function StickerPicker({ open, onClose, onPick }: Props) {
               <button
                 key={s.id}
                 type="button"
-                onClick={() => { onPick(s); onClose(); }}
+                onClick={() => {
+                  onPick(s);
+                  onClose();
+                }}
                 className="group relative aspect-square rounded-xl bg-muted/30 p-3 transition-transform duration-150 hover:scale-105 hover:bg-accent/40 active:scale-95"
                 aria-label={s.name}
               >
@@ -156,7 +163,15 @@ export function StickerPicker({ open, onClose, onPick }: Props) {
   );
 }
 
-function CatChip({ active, children, onClick }: { active: boolean; children: React.ReactNode; onClick: () => void }) {
+function CatChip({
+  active,
+  children,
+  onClick,
+}: {
+  active: boolean;
+  children: React.ReactNode;
+  onClick: () => void;
+}) {
   return (
     <button
       type="button"

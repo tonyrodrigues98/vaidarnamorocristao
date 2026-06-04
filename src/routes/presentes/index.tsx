@@ -44,7 +44,10 @@ function PresentesPage() {
       .catch(() => {});
   }, [user]);
 
-  const filtered = useMemo(() => (cat === "all" ? gifts : gifts.filter((g) => g.category === cat)), [gifts, cat]);
+  const filtered = useMemo(
+    () => (cat === "all" ? gifts : gifts.filter((g) => g.category === cat)),
+    [gifts, cat],
+  );
 
   if (!loading && !user) return <Navigate to="/auth/login" />;
 
@@ -57,8 +60,7 @@ function PresentesPage() {
         <div
           className="absolute inset-0"
           style={{
-            background:
-              "linear-gradient(135deg, #FF5FA2, #FF7BC3, #A855F7, #6D5BFF)",
+            background: "linear-gradient(135deg, #FF5FA2, #FF7BC3, #A855F7, #6D5BFF)",
           }}
         />
         {/* blur orbs */}
@@ -68,7 +70,10 @@ function PresentesPage() {
         />
         <div
           className="pointer-events-none absolute right-0 top-20 h-52 w-52 rounded-full opacity-50 blur-3xl"
-          style={{ background: "#C4B5FD", animation: "gift-header-orb 7s ease-in-out infinite reverse" }}
+          style={{
+            background: "#C4B5FD",
+            animation: "gift-header-orb 7s ease-in-out infinite reverse",
+          }}
         />
         {/* sparkle dots */}
         <div className="pointer-events-none absolute inset-0">
@@ -125,14 +130,17 @@ function PresentesPage() {
         <div className="-mt-8 mb-6 rounded-3xl border border-white/30 bg-white/70 p-4 shadow-xl backdrop-blur-2xl dark:bg-slate-900/60">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br bg-bg-white
-border shadow-lg shadow-amber-400/30">
+              <div
+                className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br bg-bg-white
+border shadow-lg shadow-amber-400/30"
+              >
                 <CoinIcon className="h-7 w-7" />
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">Saldo atual</p>
                 <p className="text-2xl font-bold leading-tight">
-                  {balance} <span className="text-sm font-medium text-muted-foreground">moedas</span>
+                  {balance}{" "}
+                  <span className="text-sm font-medium text-muted-foreground">moedas</span>
                 </p>
               </div>
             </div>
@@ -155,12 +163,15 @@ border shadow-lg shadow-amber-400/30">
         </div>
 
         {filtered.length === 0 && (
-          <p className="mt-12 text-center text-sm text-muted-foreground">Nenhum presente nesta categoria ainda.</p>
+          <p className="mt-12 text-center text-sm text-muted-foreground">
+            Nenhum presente nesta categoria ainda.
+          </p>
         )}
 
         {!search.to && (
           <div className="mt-8 rounded-2xl border border-dashed border-purple-400/40 bg-purple-500/5 p-4 text-center text-sm text-muted-foreground">
-            💡 Para enviar um presente, abra o perfil de um pretendente e clique em <strong>Enviar Presente</strong>.
+            💡 Para enviar um presente, abra o perfil de um pretendente e clique em{" "}
+            <strong>Enviar Presente</strong>.
           </div>
         )}
       </main>

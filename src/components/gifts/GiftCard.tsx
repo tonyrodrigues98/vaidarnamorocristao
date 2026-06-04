@@ -27,7 +27,12 @@ export function GiftCard({ gift, onSelect, disabled }: Props) {
       )}
     >
       {/* decorative gradient bg */}
-      <div className={cn("pointer-events-none absolute inset-0 -z-10 bg-gradient-to-br opacity-60", r.gradient)} />
+      <div
+        className={cn(
+          "pointer-events-none absolute inset-0 -z-10 bg-gradient-to-br opacity-60",
+          r.gradient,
+        )}
+      />
 
       {/* rarity chip */}
       <span
@@ -36,7 +41,9 @@ export function GiftCard({ gift, onSelect, disabled }: Props) {
           r.chip,
         )}
       >
-        {(gift.rarity === "legendary" || gift.rarity === "exclusive") && <Sparkles className="h-3 w-3" />}
+        {(gift.rarity === "legendary" || gift.rarity === "exclusive") && (
+          <Sparkles className="h-3 w-3" />
+        )}
         {r.label}
       </span>
 

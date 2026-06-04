@@ -26,9 +26,15 @@ function Signup() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!acceptedTerms) { toast.error("Você precisa aceitar os Termos e Condições."); return; }
+    if (!acceptedTerms) {
+      toast.error("Você precisa aceitar os Termos e Condições.");
+      return;
+    }
     const parsed = schema.safeParse({ email, password });
-    if (!parsed.success) { toast.error(parsed.error.issues[0].message); return; }
+    if (!parsed.success) {
+      toast.error(parsed.error.issues[0].message);
+      return;
+    }
     setLoading(true);
     const { data: signUpData, error } = await supabase.auth.signUp({
       email: parsed.data.email,
@@ -36,10 +42,15 @@ function Signup() {
       options: { emailRedirectTo: window.location.origin },
     });
     setLoading(false);
-    if (error) { toast.error(error.message); return; }
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     const uid = signUpData.user?.id;
     if (uid) {
-      await supabase.from("terms_acceptances").insert({ user_id: uid, version: CURRENT_TERMS_VERSION });
+      await supabase
+        .from("terms_acceptances")
+        .insert({ user_id: uid, version: CURRENT_TERMS_VERSION });
     }
     toast.success("Conta criada! Vamos montar seu perfil.");
     navigate({ to: "/onboarding/etapa-1" });
@@ -55,11 +66,25 @@ function Signup() {
           <form onSubmit={handleSubmit} className="mt-6 space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+              <Input
+                id="email"
+                type="email"
+                autoComplete="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Senha</Label>
-              <Input id="password" type="password" autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+              <Input
+                id="password"
+                type="password"
+                autoComplete="new-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
               <p className="text-xs text-muted-foreground">Mínimo 8 caracteres.</p>
             </div>
             <label className="flex items-start gap-2 rounded-xl border border-border bg-card/40 p-3 text-sm">
@@ -89,7 +114,10 @@ function Signup() {
             </p>
           )}
           <p className="mt-6 text-center text-sm text-muted-foreground">
-            Já tem conta? <Link to="/auth/login" className="font-medium text-[var(--rose)] hover:underline">Entrar</Link>
+            Já tem conta?{" "}
+            <Link to="/auth/login" className="font-medium text-[var(--rose)] hover:underline">
+              Entrar
+            </Link>
           </p>
         </div>
       </main>

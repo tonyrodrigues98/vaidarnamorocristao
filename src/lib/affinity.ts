@@ -1,16 +1,34 @@
 import {
   type AdvancedProfile,
-  LOVE_LANGUAGE, SEEKING, PACE, MINISTRY, WORSHIP_STYLE, LIVING_PLACE,
-  CHURCH_FREQUENCY, FAITH_MOMENT, HAS_CALLING, SIM_NAO_TALVEZ,
-  PARTICIPATES, SPIRITUAL_ROUTINE, LIFE_GOALS,
-  INTROVERSION, ENERGY, COMMUNICATION, STYLE,
-  ROUTINE, AVAILABLE_TIME,
+  LOVE_LANGUAGE,
+  SEEKING,
+  PACE,
+  MINISTRY,
+  WORSHIP_STYLE,
+  LIVING_PLACE,
+  CHURCH_FREQUENCY,
+  FAITH_MOMENT,
+  HAS_CALLING,
+  SIM_NAO_TALVEZ,
+  PARTICIPATES,
+  SPIRITUAL_ROUTINE,
+  LIFE_GOALS,
+  INTROVERSION,
+  ENERGY,
+  COMMUNICATION,
+  STYLE,
+  ROUTINE,
+  AVAILABLE_TIME,
   labelOf,
 } from "@/lib/profileAdvanced";
 
 export type AffinityChip = { key: string; label: string };
 
-const SCALAR_FIELDS: Array<{ field: keyof AdvancedProfile; opts: { v: string; l: string }[]; prefix?: string }> = [
+const SCALAR_FIELDS: Array<{
+  field: keyof AdvancedProfile;
+  opts: { v: string; l: string }[];
+  prefix?: string;
+}> = [
   { field: "love_language", opts: LOVE_LANGUAGE },
   { field: "seeking", opts: SEEKING },
   { field: "pace", opts: PACE },

@@ -20,19 +20,29 @@ export function TermsGate() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    if (loading || !user) { setNeedsAccept(false); setChecked(true); return; }
+    if (loading || !user) {
+      setNeedsAccept(false);
+      setChecked(true);
+      return;
+    }
     setChecked(false);
     let ignore = false;
     (async () => {
       // Server-side check: returns current_version + accepted flag + accepted_at
       const { data, error } = await supabase.rpc("get_my_terms_status");
       if (ignore) return;
-      if (error) { setNeedsAccept(true); setChecked(true); return; }
+      if (error) {
+        setNeedsAccept(true);
+        setChecked(true);
+        return;
+      }
       const row = Array.isArray(data) ? data[0] : data;
       setNeedsAccept(!row?.accepted);
       setChecked(true);
     })();
-    return () => { ignore = true; };
+    return () => {
+      ignore = true;
+    };
   }, [user, loading]);
 
   if (!user || !needsAccept) return null;
@@ -69,8 +79,8 @@ export function TermsGate() {
           <Link to="/termos" className="font-medium text-[var(--rose)] hover:underline">
             Termos e Condições
           </Link>{" "}
-          atualizados. Eles definem regras de conduta, requisitos para uso e
-          diretrizes da comunidade cristã.
+          atualizados. Eles definem regras de conduta, requisitos para uso e diretrizes da
+          comunidade cristã.
         </p>
         <p className="mt-3 text-sm text-muted-foreground">
           Versão atual: <span className="font-mono">{CURRENT_TERMS_VERSION}</span>

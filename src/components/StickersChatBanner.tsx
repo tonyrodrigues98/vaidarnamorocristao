@@ -118,8 +118,7 @@ export function StickersChatBanner() {
             className="animate-fade-up mt-3 max-w-md text-sm text-muted-foreground sm:text-base"
             style={{ animationDelay: "140ms" }}
           >
-            Expresse suas emoções, espalhe alegria e torne as conversas ainda
-            mais divertidas.
+            Expresse suas emoções, espalhe alegria e torne as conversas ainda mais divertidas.
           </p>
 
           {/* mini features */}
@@ -146,10 +145,7 @@ export function StickersChatBanner() {
           </ul>
 
           {/* CTA */}
-          <div
-            className="animate-fade-up mt-6"
-            style={{ animationDelay: "300ms" }}
-          >
+          <div className="animate-fade-up mt-6" style={{ animationDelay: "300ms" }}>
             <Link
               to="/comunidade"
               className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full bg-gradient-to-r from-[oklch(0.65_0.22_340)] to-[oklch(0.62_0.20_20)] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_8px_30px_-8px_oklch(0.65_0.22_340/0.6)] transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98] sm:px-6 sm:py-3 sm:text-base"
@@ -174,13 +170,13 @@ export function StickersChatBanner() {
           <div className="relative mx-auto grid max-w-[320px] grid-cols-4 place-items-center gap-x-3 gap-y-4 px-2 py-4">
             {(stickers.length > 0
               ? stickers.slice(0, 8)
-              : ["😊", "🌹", "⭐", "💖", "🍦", "😎", "🦋", "🎈"].map((e, i) => ({
+              : (["😊", "🌹", "⭐", "💖", "🍦", "😎", "🦋", "🎈"].map((e, i) => ({
                   url: "",
                   emoji: e,
                   rotate: SLOTS[i].rotate,
                   delay: SLOTS[i].delay,
                   duration: SLOTS[i].duration,
-                })) as any
+                })) as any)
             ).map((s: any, i: number) => (
               <div
                 key={i}

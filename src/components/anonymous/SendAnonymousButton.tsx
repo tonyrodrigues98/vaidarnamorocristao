@@ -1,7 +1,14 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Sparkles, Lock } from "lucide-react";
 import { toast } from "sonner";
@@ -20,16 +27,23 @@ export function SendAnonymousButton({ receiverId }: Props) {
   useEffect(() => {
     let active = true;
     const load = async () => {
-      const { data, error } = await supabase.rpc("get_anonymous_cooldown", { _receiver_id: receiverId });
+      const { data, error } = await supabase.rpc("get_anonymous_cooldown", {
+        _receiver_id: receiverId,
+      });
       if (!active) return;
-      if (error || !data || !data[0]) { setCanSend(false); return; }
+      if (error || !data || !data[0]) {
+        setCanSend(false);
+        return;
+      }
       const row = data[0];
       setCanSend(row.can_send);
       setReason(row.reason ?? "");
       setSecondsLeft(row.seconds_remaining ?? 0);
     };
     load();
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
   }, [receiverId]);
 
   useEffect(() => {
@@ -42,7 +56,8 @@ export function SendAnonymousButton({ receiverId }: Props) {
     if (r === "incompatible") return "Disponível apenas para o sexo oposto.";
     if (r === "opted_out") return "Esta pessoa não aceita recados anônimos.";
     if (r === "active_exists") return "Você já tem um recado ativo com esta pessoa.";
-    if (r === "daily_limit") return "Limite diário atingido. Compre recados extras em Recados › Configurações.";
+    if (r === "daily_limit")
+      return "Limite diário atingido. Compre recados extras em Recados › Configurações.";
     if (r === "cooldown") {
       const d = Math.ceil(secondsLeft / 86400);
       return `Aguarde ${d} dia${d > 1 ? "s" : ""} para enviar outro recado.`;
@@ -54,12 +69,19 @@ export function SendAnonymousButton({ receiverId }: Props) {
     if (content.trim().length === 0) return;
     setBusy(true);
     const { error } = await supabase.rpc("send_anonymous_message", {
-      _receiver_id: receiverId, _content: content.trim(),
+      _receiver_id: receiverId,
+      _content: content.trim(),
     });
     setBusy(false);
-    if (error) { toast.error(friendlyError(error)); return; }
+    if (error) {
+      toast.error(friendlyError(error));
+      return;
+    }
     toast.success("Recado anônimo enviado");
-    setOpen(false); setContent(""); setCanSend(false); setReason("active_exists");
+    setOpen(false);
+    setContent("");
+    setCanSend(false);
+    setReason("active_exists");
   };
 
   if (canSend === null) return null;
@@ -89,14 +111,20 @@ export function SendAnonymousButton({ receiverId }: Props) {
           Sua identidade ficará oculta. Ela só será revelada se ambos aceitarem.
         </p>
         <Textarea
-          rows={4} maxLength={280} value={content}
+          rows={4}
+          maxLength={280}
+          value={content}
           onChange={(e) => setContent(e.target.value)}
           placeholder="Escreva algo leve e respeitoso..."
         />
         <div className="text-right text-xs text-muted-foreground">{content.length}/280</div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
-          <Button onClick={send} disabled={busy || content.trim().length === 0}>Enviar</Button>
+          <Button variant="outline" onClick={() => setOpen(false)}>
+            Cancelar
+          </Button>
+          <Button onClick={send} disabled={busy || content.trim().length === 0}>
+            Enviar
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

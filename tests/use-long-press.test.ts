@@ -76,8 +76,8 @@ describe("useLongPress (chat action menu)", () => {
     h.onTouchEnd(end);
     // Regressão: chamadas anteriores chamavam preventDefault aqui e isso
     // matava o primeiro tap no botão do menu.
-    expect((end.preventDefault as ReturnType<typeof vi.fn>)).not.toHaveBeenCalled();
-    expect((end.stopPropagation as ReturnType<typeof vi.fn>)).not.toHaveBeenCalled();
+    expect(end.preventDefault as ReturnType<typeof vi.fn>).not.toHaveBeenCalled();
+    expect(end.stopPropagation as ReturnType<typeof vi.fn>).not.toHaveBeenCalled();
   });
 
   it("right-click abre o menu (desktop)", () => {
@@ -87,6 +87,6 @@ describe("useLongPress (chat action menu)", () => {
     const ev = { preventDefault: vi.fn() } as unknown as React.MouseEvent;
     h.onContextMenu(ev);
     expect(onLong).toHaveBeenCalledTimes(1);
-    expect((ev.preventDefault as ReturnType<typeof vi.fn>)).toHaveBeenCalled();
+    expect(ev.preventDefault as ReturnType<typeof vi.fn>).toHaveBeenCalled();
   });
 });

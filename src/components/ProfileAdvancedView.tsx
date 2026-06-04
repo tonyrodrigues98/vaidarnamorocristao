@@ -1,17 +1,55 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Sparkles, HeartHandshake, Users, Compass, Smile, Music, Clock, MessageCircleHeart, Search, BookHeart, Quote } from "lucide-react";
+import {
+  Sparkles,
+  HeartHandshake,
+  Users,
+  Compass,
+  Smile,
+  Music,
+  Clock,
+  MessageCircleHeart,
+  Search,
+  BookHeart,
+  Quote,
+} from "lucide-react";
 import {
   type AdvancedProfile,
-  FAITH_MOMENT, PARTICIPATES, SPIRITUAL_ROUTINE, CHURCH_FREQUENCY,
-  MINISTRY, HAS_CALLING, SEEKING, PACE, LOVE_LANGUAGE,
-  SIM_NAO_TALVEZ, LIVING_PLACE, LIFE_GOALS,
-  INTROVERSION, ENERGY, COMMUNICATION, STYLE,
-  WORSHIP_STYLE, ROUTINE, AVAILABLE_TIME,
-  labelOf, labelsOf, hasAny,
+  FAITH_MOMENT,
+  PARTICIPATES,
+  SPIRITUAL_ROUTINE,
+  CHURCH_FREQUENCY,
+  MINISTRY,
+  HAS_CALLING,
+  SEEKING,
+  PACE,
+  LOVE_LANGUAGE,
+  SIM_NAO_TALVEZ,
+  LIVING_PLACE,
+  LIFE_GOALS,
+  INTROVERSION,
+  ENERGY,
+  COMMUNICATION,
+  STYLE,
+  WORSHIP_STYLE,
+  ROUTINE,
+  AVAILABLE_TIME,
+  labelOf,
+  labelsOf,
+  hasAny,
 } from "@/lib/profileAdvanced";
 
-type Tone = "rose" | "sky" | "violet" | "amber" | "emerald" | "indigo" | "pink" | "teal" | "fuchsia" | "orange";
+type Tone =
+  | "rose"
+  | "sky"
+  | "violet"
+  | "amber"
+  | "emerald"
+  | "indigo"
+  | "pink"
+  | "teal"
+  | "fuchsia"
+  | "orange";
 
 const TONE_BG: Record<Tone, string> = {
   rose: "bg-[var(--rose)]/10 text-[var(--rose)]",
@@ -53,7 +91,9 @@ function Card({
   children: React.ReactNode;
 }) {
   return (
-    <section className={`glass animate-fade-up rounded-2xl p-6 shadow-soft ring-1 ${TONE_RING[tone]}`}>
+    <section
+      className={`glass animate-fade-up rounded-2xl p-6 shadow-soft ring-1 ${TONE_RING[tone]}`}
+    >
       <header className="mb-5 flex items-center gap-3">
         <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${TONE_BG[tone]}`}>
           {icon}
@@ -72,7 +112,9 @@ function Row({ label, value }: { label: string; value: React.ReactNode }) {
   if (value == null || value === "" || (Array.isArray(value) && value.length === 0)) return null;
   return (
     <div>
-      <dt className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{label}</dt>
+      <dt className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+        {label}
+      </dt>
       <dd className="mt-1 leading-relaxed text-foreground/90">{value}</dd>
     </div>
   );
@@ -100,11 +142,17 @@ export function ProfileAdvancedView({ userId }: { userId: string }) {
   useEffect(() => {
     let alive = true;
     (async () => {
-      const { data } = await supabase.from("profile_advanced").select("*").eq("user_id", userId).maybeSingle();
+      const { data } = await supabase
+        .from("profile_advanced")
+        .select("*")
+        .eq("user_id", userId)
+        .maybeSingle();
       if (!alive) return;
       setD((data ?? null) as AdvancedProfile | null);
     })();
-    return () => { alive = false; };
+    return () => {
+      alive = false;
+    };
   }, [userId]);
 
   if (d === undefined) return null;
@@ -121,13 +169,28 @@ export function ProfileAdvancedView({ userId }: { userId: string }) {
   const showEmotional = hasAny(d.in_relationship_iam);
   const showSeeking = hasAny(d.essential_quality, d.non_negotiable, d.willing_to_build);
 
-  const anything = showSpiritual || showLifestyle || showMinistry || showRel || showFuture || showPersonality || showLikes || showRoutine || showEmotional || showSeeking;
+  const anything =
+    showSpiritual ||
+    showLifestyle ||
+    showMinistry ||
+    showRel ||
+    showFuture ||
+    showPersonality ||
+    showLikes ||
+    showRoutine ||
+    showEmotional ||
+    showSeeking;
   if (!anything) return null;
 
   return (
     <div className="space-y-5">
       {showSpiritual && (
-        <Card icon={<BookHeart className="h-5 w-5" />} title="Identidade Espiritual" subtitle="Fé e caminhada" tone="violet">
+        <Card
+          icon={<BookHeart className="h-5 w-5" />}
+          title="Identidade Espiritual"
+          subtitle="Fé e caminhada"
+          tone="violet"
+        >
           {d.life_verse && (
             <div className="rounded-xl bg-violet-500/5 p-4 ring-1 ring-violet-500/15 text-foreground/90">
               <Quote className="mb-1.5 h-4 w-4 text-violet-500" />
@@ -142,19 +205,47 @@ export function ProfileAdvancedView({ userId }: { userId: string }) {
       )}
 
       {showLifestyle && (
-        <Card icon={<HeartHandshake className="h-5 w-5" />} title="Estilo de Vida Cristão" subtitle="Rotina e prática" tone="emerald">
+        <Card
+          icon={<HeartHandshake className="h-5 w-5" />}
+          title="Estilo de Vida Cristão"
+          subtitle="Rotina e prática"
+          tone="emerald"
+        >
           <dl className="space-y-3">
-            <Row label="Participa de" value={<Tags items={labelsOf(PARTICIPATES, d.participates)} tone="emerald" />} />
-            <Row label="Rotina espiritual" value={<Tags items={labelsOf(SPIRITUAL_ROUTINE, d.spiritual_routine)} tone="emerald" />} />
-            <Row label="Frequência na igreja" value={labelOf(CHURCH_FREQUENCY, d.church_frequency)} />
+            <Row
+              label="Participa de"
+              value={<Tags items={labelsOf(PARTICIPATES, d.participates)} tone="emerald" />}
+            />
+            <Row
+              label="Rotina espiritual"
+              value={
+                <Tags items={labelsOf(SPIRITUAL_ROUTINE, d.spiritual_routine)} tone="emerald" />
+              }
+            />
+            <Row
+              label="Frequência na igreja"
+              value={labelOf(CHURCH_FREQUENCY, d.church_frequency)}
+            />
           </dl>
         </Card>
       )}
 
       {showMinistry && (
-        <Card icon={<Users className="h-5 w-5" />} title="Ministério e Chamado" subtitle="Serviço e propósito" tone="indigo">
+        <Card
+          icon={<Users className="h-5 w-5" />}
+          title="Ministério e Chamado"
+          subtitle="Serviço e propósito"
+          tone="indigo"
+        >
           <dl className="space-y-2">
-            <Row label="Ministério" value={d.ministry === "outro" ? d.ministry_other ?? labelOf(MINISTRY, d.ministry) : labelOf(MINISTRY, d.ministry)} />
+            <Row
+              label="Ministério"
+              value={
+                d.ministry === "outro"
+                  ? (d.ministry_other ?? labelOf(MINISTRY, d.ministry))
+                  : labelOf(MINISTRY, d.ministry)
+              }
+            />
             <Row label="Sente um chamado?" value={labelOf(HAS_CALLING, d.has_calling)} />
             <Row label="Sobre o chamado" value={d.calling_description} />
           </dl>
@@ -162,7 +253,12 @@ export function ProfileAdvancedView({ userId }: { userId: string }) {
       )}
 
       {showRel && (
-        <Card icon={<MessageCircleHeart className="h-5 w-5" />} title="Relacionamento e Intenção" subtitle="Como se relaciona" tone="pink">
+        <Card
+          icon={<MessageCircleHeart className="h-5 w-5" />}
+          title="Relacionamento e Intenção"
+          subtitle="Como se relaciona"
+          tone="pink"
+        >
           <dl className="space-y-2">
             <Row label="O que busca" value={labelOf(SEEKING, d.seeking)} />
             <Row label="Tempo / objetivo" value={labelOf(PACE, d.pace)} />
@@ -172,33 +268,61 @@ export function ProfileAdvancedView({ userId }: { userId: string }) {
       )}
 
       {showFuture && (
-        <Card icon={<Compass className="h-5 w-5" />} title="Visão de Futuro" subtitle="Sonhos e planos" tone="sky">
+        <Card
+          icon={<Compass className="h-5 w-5" />}
+          title="Visão de Futuro"
+          subtitle="Sonhos e planos"
+          tone="sky"
+        >
           <dl className="space-y-3">
             <Row label="Quer casar?" value={labelOf(SIM_NAO_TALVEZ, d.wants_marriage)} />
-            <Row label="Quer filhos?" value={
-              d.wants_children
-                ? `${labelOf(SIM_NAO_TALVEZ, d.wants_children)}${d.children_count ? ` · ${d.children_count}` : ""}`
-                : null
-            } />
+            <Row
+              label="Quer filhos?"
+              value={
+                d.wants_children
+                  ? `${labelOf(SIM_NAO_TALVEZ, d.wants_children)}${d.children_count ? ` · ${d.children_count}` : ""}`
+                  : null
+              }
+            />
             <Row label="Onde deseja viver" value={labelOf(LIVING_PLACE, d.living_place)} />
-            <Row label="Objetivos de vida" value={<Tags items={labelsOf(LIFE_GOALS, d.life_goals)} tone="sky" />} />
+            <Row
+              label="Objetivos de vida"
+              value={<Tags items={labelsOf(LIFE_GOALS, d.life_goals)} tone="sky" />}
+            />
           </dl>
         </Card>
       )}
 
       {showPersonality && (
-        <Card icon={<Smile className="h-5 w-5" />} title="Personalidade" subtitle="Jeito de ser" tone="amber">
+        <Card
+          icon={<Smile className="h-5 w-5" />}
+          title="Personalidade"
+          subtitle="Jeito de ser"
+          tone="amber"
+        >
           <div className="grid grid-cols-2 gap-3">
-            {d.introversion && <PersonalityChip label="Social" value={labelOf(INTROVERSION, d.introversion)!} />}
+            {d.introversion && (
+              <PersonalityChip label="Social" value={labelOf(INTROVERSION, d.introversion)!} />
+            )}
             {d.energy && <PersonalityChip label="Energia" value={labelOf(ENERGY, d.energy)!} />}
-            {d.communication && <PersonalityChip label="Comunicação" value={labelOf(COMMUNICATION, d.communication)!} />}
+            {d.communication && (
+              <PersonalityChip
+                label="Comunicação"
+                value={labelOf(COMMUNICATION, d.communication)!}
+              />
+            )}
             {d.style && <PersonalityChip label="Estilo" value={labelOf(STYLE, d.style)!} />}
           </div>
         </Card>
       )}
 
       {showLikes && (
-        <Card icon={<Music className="h-5 w-5" />} title="Gostos e Interesses" subtitle="Vida pessoal" tone="fuchsia">
+        <Card
+          icon={<Music className="h-5 w-5" />}
+          title="Gostos e Interesses"
+          subtitle="Vida pessoal"
+          tone="fuchsia"
+        >
           <dl className="space-y-2">
             <Row label="Hobbies" value={d.hobbies} />
             <Row label="Louvores favoritos" value={d.favorite_worships} />
@@ -212,19 +336,32 @@ export function ProfileAdvancedView({ userId }: { userId: string }) {
         <Card icon={<Clock className="h-5 w-5" />} title="Rotina" subtitle="Dia a dia" tone="teal">
           <dl className="space-y-2">
             <Row label="Rotina" value={labelOf(ROUTINE, d.routine)} />
-            <Row label="Tempo para relacionamento" value={labelOf(AVAILABLE_TIME, d.available_time)} />
+            <Row
+              label="Tempo para relacionamento"
+              value={labelOf(AVAILABLE_TIME, d.available_time)}
+            />
           </dl>
         </Card>
       )}
 
       {showEmotional && (
-        <Card icon={<Sparkles className="h-5 w-5" />} title="Em um relacionamento" subtitle="Como ama" tone="rose">
+        <Card
+          icon={<Sparkles className="h-5 w-5" />}
+          title="Em um relacionamento"
+          subtitle="Como ama"
+          tone="rose"
+        >
           <p className="leading-relaxed text-foreground/90">{d.in_relationship_iam}</p>
         </Card>
       )}
 
       {showSeeking && (
-        <Card icon={<Search className="h-5 w-5" />} title="O que busco" subtitle="Valores no outro" tone="orange">
+        <Card
+          icon={<Search className="h-5 w-5" />}
+          title="O que busco"
+          subtitle="Valores no outro"
+          tone="orange"
+        >
           <dl className="space-y-2">
             <Row label="Qualidade essencial" value={d.essential_quality} />
             <Row label="Não abre mão" value={d.non_negotiable} />
@@ -239,7 +376,9 @@ export function ProfileAdvancedView({ userId }: { userId: string }) {
 function PersonalityChip({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-xl border border-amber-500/20 bg-gradient-to-br from-amber-500/5 to-orange-500/5 p-3.5">
-      <div className="text-[10px] font-semibold uppercase tracking-wide text-amber-700 dark:text-amber-400">{label}</div>
+      <div className="text-[10px] font-semibold uppercase tracking-wide text-amber-700 dark:text-amber-400">
+        {label}
+      </div>
       <div className="mt-1 text-sm font-medium text-foreground">{value}</div>
     </div>
   );

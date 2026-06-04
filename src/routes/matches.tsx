@@ -13,8 +13,15 @@ import { PhotoImg } from "@/components/PhotoImg";
 import { CommitmentPauseCard } from "@/components/commitment/CommitmentPauseCard";
 import { getActiveCommitmentByUser, type RelationshipCommitment } from "@/lib/commitments";
 import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
-  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
 type MatchItem = {
@@ -34,7 +41,13 @@ type MatchItem = {
   };
 };
 
-export const Route = createFileRoute("/matches")({ component: () => (<RequireApproved><MatchesPage /></RequireApproved>) });
+export const Route = createFileRoute("/matches")({
+  component: () => (
+    <RequireApproved>
+      <MatchesPage />
+    </RequireApproved>
+  ),
+});
 
 function MatchesPage() {
   const { user, loading } = useAuth();
@@ -53,14 +66,21 @@ function MatchesPage() {
       return;
     }
     const { data: matches } = await supabase
-      .from("matches").select("id, user_a, user_b, created_at")
+      .from("matches")
+      .select("id, user_a, user_b, created_at")
       .or(`user_a.eq.${user.id},user_b.eq.${user.id}`)
       .order("created_at", { ascending: false });
-    if (!matches?.length) { setItems([]); setLoadingList(false); return; }
+    if (!matches?.length) {
+      setItems([]);
+      setLoadingList(false);
+      return;
+    }
     const partnerIds = matches.map((m) => (m.user_a === user.id ? m.user_b : m.user_a));
     const { data: profs } = await supabase
       .from("profiles")
-      .select("id, full_name, age, city, state, photo_url, verified, equipped_frame_id, equipped_aura_id, equipped_sticker_id")
+      .select(
+        "id, full_name, age, city, state, photo_url, verified, equipped_frame_id, equipped_aura_id, equipped_sticker_id",
+      )
       .in("id", partnerIds);
     const map = new Map((profs ?? []).map((p) => [p.id, p]));
     const list: MatchItem[] = matches
@@ -82,11 +102,18 @@ function MatchesPage() {
   useEffect(() => {
     if (!user) return;
     load();
-    const ch = supabase.channel("matches-list")
+    const ch = supabase
+      .channel("matches-list")
       .on("postgres_changes", { event: "*", schema: "public", table: "matches" }, load)
-      .on("postgres_changes", { event: "*", schema: "public", table: "relationship_commitments" }, load)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "relationship_commitments" },
+        load,
+      )
       .subscribe();
-    return () => { supabase.removeChannel(ch); };
+    return () => {
+      supabase.removeChannel(ch);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
@@ -96,7 +123,10 @@ function MatchesPage() {
     setBusy(matchId);
     const { error } = await supabase.rpc("unmatch", { _match_id: matchId });
     setBusy(null);
-    if (error) { toast.error(error.message); return; }
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     toast.success("Match desfeito.");
     setItems((prev) => prev.filter((i) => i.matchId !== matchId));
   }
@@ -108,7 +138,9 @@ function MatchesPage() {
         <div className="animate-fade-up flex flex-wrap items-end justify-between gap-3">
           <div>
             <h1 className="text-3xl font-semibold sm:text-4xl">Seus matches</h1>
-            <p className="mt-1 text-sm text-muted-foreground">Conexões com interesse mútuo. Cuide bem delas.</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Conexões com interesse mútuo. Cuide bem delas.
+            </p>
           </div>
           <span className="rounded-full bg-[var(--petal)] px-3 py-1 text-xs font-medium text-[var(--rose)]">
             {items.length} {items.length === 1 ? "match" : "matches"}
@@ -130,17 +162,29 @@ function MatchesPage() {
         ) : items.length === 0 ? (
           <div className="glass animate-fade-up mt-10 rounded-3xl p-12 text-center shadow-soft">
             <Heart className="mx-auto mb-3 h-8 w-8 text-[var(--rose)]" />
-            <p className="text-muted-foreground">Você ainda não tem matches. Demonstre interesse em alguém — quando for recíproco, aparece aqui.</p>
-            <Button asChild className="mt-5"><Link to="/pretendentes">Ver pretendentes</Link></Button>
+            <p className="text-muted-foreground">
+              Você ainda não tem matches. Demonstre interesse em alguém — quando for recíproco,
+              aparece aqui.
+            </p>
+            <Button asChild className="mt-5">
+              <Link to="/pretendentes">Ver pretendentes</Link>
+            </Button>
           </div>
         ) : (
           <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {items.map((it) => (
-              <article key={it.matchId} className="glass animate-fade-up overflow-hidden rounded-2xl shadow-soft hover-lift">
+              <article
+                key={it.matchId}
+                className="glass animate-fade-up overflow-hidden rounded-2xl shadow-soft hover-lift"
+              >
                 <Link to="/pretendentes/$id" params={{ id: it.partner.id }} className="block">
                   <div className="relative aspect-[4/5] overflow-hidden bg-muted">
                     {it.partner.photo_url ? (
-                      <PhotoImg src={it.partner.photo_url} alt={it.partner.full_name} className="h-full w-full object-cover" />
+                      <PhotoImg
+                        src={it.partner.photo_url}
+                        alt={it.partner.full_name}
+                        className="h-full w-full object-cover"
+                      />
                     ) : (
                       <div className="flex h-full w-full items-center justify-center bg-gradient-love text-5xl text-white">
                         {it.partner.full_name.charAt(0)}
@@ -149,7 +193,9 @@ function MatchesPage() {
                     <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-[var(--rose)] shadow-soft backdrop-blur">
                       <Heart className="h-3 w-3" fill="currentColor" /> Match
                     </span>
-                    {(it.partner.equipped_frame_id || it.partner.equipped_aura_id || it.partner.equipped_sticker_id) && (
+                    {(it.partner.equipped_frame_id ||
+                      it.partner.equipped_aura_id ||
+                      it.partner.equipped_sticker_id) && (
                       <div className="absolute bottom-3 left-3">
                         <DecoratedAvatar
                           photoUrl={it.partner.photo_url}
@@ -169,7 +215,9 @@ function MatchesPage() {
                       {it.partner.full_name.split(" ")[0]}, {it.partner.age}
                       {it.partner.verified && <VerifiedBadge size="sm" />}
                     </h3>
-                    <p className="text-xs text-muted-foreground">{it.partner.city} · {it.partner.state}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {it.partner.city} · {it.partner.state}
+                    </p>
                   </div>
                   <div className="flex gap-2">
                     <Button asChild size="sm" className="flex-1">
@@ -184,20 +232,30 @@ function MatchesPage() {
                     </Button>
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
-                        <Button size="sm" variant="outline" disabled={busy === it.matchId} title="Desfazer match">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          disabled={busy === it.matchId}
+                          title="Desfazer match"
+                        >
                           <HeartCrack className="h-4 w-4" />
                         </Button>
                       </AlertDialogTrigger>
                       <AlertDialogContent>
                         <AlertDialogHeader>
-                          <AlertDialogTitle>Desfazer match com {it.partner.full_name.split(" ")[0]}?</AlertDialogTitle>
+                          <AlertDialogTitle>
+                            Desfazer match com {it.partner.full_name.split(" ")[0]}?
+                          </AlertDialogTitle>
                           <AlertDialogDescription>
-                            Esta ação remove o match, apaga as mensagens trocadas e os interesses entre vocês. Não é possível desfazer.
+                            Esta ação remove o match, apaga as mensagens trocadas e os interesses
+                            entre vocês. Não é possível desfazer.
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
                           <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                          <AlertDialogAction onClick={() => unmatch(it.matchId)}>Desfazer match</AlertDialogAction>
+                          <AlertDialogAction onClick={() => unmatch(it.matchId)}>
+                            Desfazer match
+                          </AlertDialogAction>
                         </AlertDialogFooter>
                       </AlertDialogContent>
                     </AlertDialog>

@@ -43,10 +43,13 @@ export function useRestrictedWords() {
           const { data } = await supabase.from("restricted_words").select("word");
           if (!active) return;
           setWords((data ?? []).map((r) => r.word));
-        }
+        },
       )
       .subscribe();
-    return () => { active = false; supabase.removeChannel(ch); };
+    return () => {
+      active = false;
+      supabase.removeChannel(ch);
+    };
   }, []);
   return words;
 }

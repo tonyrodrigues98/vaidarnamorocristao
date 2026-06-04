@@ -45,7 +45,11 @@ export const Route = createRootRoute({
       { name: "apple-mobile-web-app-status-bar-style", content: "default" },
       { name: "apple-mobile-web-app-title", content: "VaiDarNamoro" },
       { title: "VaiDarNamoro — Namoro cristão sério com propósito" },
-      { name: "description", content: "VaiDarNamoro é a plataforma cristã de relacionamentos sérios. Conheça pretendentes aprovados manualmente que vivem e compartilham a sua fé." },
+      {
+        name: "description",
+        content:
+          "VaiDarNamoro é a plataforma cristã de relacionamentos sérios. Conheça pretendentes aprovados manualmente que vivem e compartilham a sua fé.",
+      },
       { name: "author", content: "VaiDarNamoro" },
       { name: "robots", content: "index, follow, max-image-preview:large, max-snippet:-1" },
       { property: "og:site_name", content: "VaiDarNamoro" },
@@ -96,21 +100,23 @@ function RootComponent() {
           <NotificationsBridge />
           <BanGuard />
           <div className="flex min-h-screen flex-col">
-          <div className="flex-1">
-            <Outlet />
-          </div>
-          <footer className="border-t border-border/50 bg-background/60 py-4 mt-8">
-            <div className="mx-auto flex max-w-7xl items-center justify-end gap-4 px-4 text-xs text-muted-foreground">
-              <Link to="/termos" className="hover:text-[var(--rose)] hover:underline">
-                Termos e Condições
-              </Link>
-              <span aria-hidden className="opacity-40">•</span>
-              <Link to="/manual" className="hover:text-[var(--rose)] hover:underline">
-                Manual do Usuário
-              </Link>
-              <SupportFooterButton />
+            <div className="flex-1">
+              <Outlet />
             </div>
-          </footer>
+            <footer className="border-t border-border/50 bg-background/60 py-4 mt-8">
+              <div className="mx-auto flex max-w-7xl items-center justify-end gap-4 px-4 text-xs text-muted-foreground">
+                <Link to="/termos" className="hover:text-[var(--rose)] hover:underline">
+                  Termos e Condições
+                </Link>
+                <span aria-hidden className="opacity-40">
+                  •
+                </span>
+                <Link to="/manual" className="hover:text-[var(--rose)] hover:underline">
+                  Manual do Usuário
+                </Link>
+                <SupportFooterButton />
+              </div>
+            </footer>
           </div>
           <TermsGate />
         </PresenceProvider>

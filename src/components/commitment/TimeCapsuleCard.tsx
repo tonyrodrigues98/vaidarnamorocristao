@@ -116,7 +116,9 @@ export function TimeCapsuleCard({ matchId }: Props) {
               >
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-semibold text-lg">{unlocked ? "Cápsula Disponível" : "Cápsula Lacrada"}</p>
+                    <p className="font-semibold text-lg">
+                      {unlocked ? "Cápsula Disponível" : "Cápsula Lacrada"}
+                    </p>
 
                     <div className="mt-2 space-y-1">
                       <p className="text-sm text-muted-foreground">

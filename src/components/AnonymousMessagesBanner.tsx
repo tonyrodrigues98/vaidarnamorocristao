@@ -13,8 +13,7 @@ export function AnonymousMessagesBanner() {
     <div
       className="relative overflow-hidden rounded-[2rem] border border-white/60"
       style={{
-        background:
-          "linear-gradient(90deg, #FFF0F5 0%, #F8EDFF 50%, #FDEEFF 100%)",
+        background: "linear-gradient(90deg, #FFF0F5 0%, #F8EDFF 50%, #FDEEFF 100%)",
         boxShadow: "0 10px 40px rgba(0,0,0,0.04)",
       }}
     >
@@ -75,8 +74,8 @@ export function AnonymousMessagesBanner() {
             className="text-[#6B7280]"
             style={{ fontSize: "clamp(15px, 1.6vw, 18px)", lineHeight: 1.7, maxWidth: 520 }}
           >
-            Receba mensagens especiais de forma anônima. Surpresas, elogios e
-            declarações no seu cantinho.
+            Receba mensagens especiais de forma anônima. Surpresas, elogios e declarações no seu
+            cantinho.
           </p>
 
           {/* chips */}

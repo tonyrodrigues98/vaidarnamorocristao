@@ -170,7 +170,9 @@ export function PretendenteFeaturedCard({
           </div>
         )}
 
-        {profile.bio && <p className="mt-3 line-clamp-2 text-sm text-muted-foreground">{profile.bio}</p>}
+        {profile.bio && (
+          <p className="mt-3 line-clamp-2 text-sm text-muted-foreground">{profile.bio}</p>
+        )}
       </div>
     </Link>
   );
