@@ -9,7 +9,7 @@ import { PresenceProvider } from "@/lib/presence";
 import { BanGuard } from "@/components/BanGuard";
 
 import appCss from "../styles.css?url";
-import coinPng from "@/assets/coin.png";
+import coinPng from "@/assets/coin.webp";
 
 function NotFoundComponent() {
   return (

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { fetchDecorationRenderCatalog, assetFor, type Decoration } from "@/lib/decorations";
 import { useSignedPhotoUrlResult } from "@/lib/photoUrl";
-import commitmentRing from "@/assets/commitment-ring.png";
+import commitmentRing from "@/assets/commitment-ring.webp";
 // `size` é o canvas total do componente. A moldura SEMPRE preenche esse
 // canvas (assim os cards ficam com altura/largura estáveis e idênticas em
 // todas as molduras). A foto é posicionada dentro do vão da moldura usando

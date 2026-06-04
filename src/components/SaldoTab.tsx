@@ -10,7 +10,7 @@ import {
   DollarSign,
   VenetianMask,
 } from "lucide-react";
-import coinIcon from "@/assets/coin.png";
+import coinIcon from "@/assets/coin.webp";
 import coinSound from "@/assets/coin-reward.mp3";
 import { DECORATION_ASSETS } from "@/lib/decorations";
 import {

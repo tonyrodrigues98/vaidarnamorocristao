@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { VenetianMask, Heart, Lock, ArrowRight } from "lucide-react";
-import letterImage from "@/assets/anonymous-letter.png";
+import letterImage from "@/assets/anonymous-letter.webp";
 
 /**
  * Premium banner announcing the "Recados Anônimos" feature.

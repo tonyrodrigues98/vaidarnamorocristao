@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import coinImg from "@/assets/coin.png";
+import coinImg from "@/assets/coin.webp";
 
 export function CoinIcon({ className = "h-5 w-5" }: { className?: string }) {
   return (

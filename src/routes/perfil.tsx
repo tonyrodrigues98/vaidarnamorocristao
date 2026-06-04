@@ -55,7 +55,7 @@ import { RoleBadge } from "@/components/RoleBadge";
 import { MissionsPanel } from "@/components/MissionsPanel";
 import { SaldoTab } from "@/components/SaldoTab";
 import { recomputeMyBadges } from "@/lib/recomputeBadges";
-import commitmentRing from "@/assets/commitment-ring.png";
+import commitmentRing from "@/assets/commitment-ring.webp";
 import { getActiveCommitmentByUser, type RelationshipCommitment } from "@/lib/commitments";
 import { ProfileAdvancedForm } from "@/components/ProfileAdvancedForm";
 import { ProfilePhotosManager } from "@/components/ProfilePhotosManager";

@@ -34,7 +34,7 @@ import {
 import { toast } from "sonner";
 import { Textarea } from "@/components/ui/textarea";
 import { getActiveCommitmentByUser } from "@/lib/commitments";
-import commitmentRing from "@/assets/commitment-ring.png";
+import commitmentRing from "@/assets/commitment-ring.webp";
 
 export const Route = createFileRoute("/inicio")({
   component: InicioPage,

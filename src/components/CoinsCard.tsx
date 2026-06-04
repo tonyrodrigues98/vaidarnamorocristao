@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Loader2, Sparkles } from "lucide-react";
-import coinIcon from "@/assets/coin.png";
+import coinIcon from "@/assets/coin.webp";
 import coinSound from "@/assets/coin-reward.mp3";
 import {
   claimDailyCoins,
