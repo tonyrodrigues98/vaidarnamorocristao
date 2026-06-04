@@ -116,7 +116,7 @@ async function existingPaths(paths: string[]) {
   for (let i = 0; i < unique.length; i += 100) {
     const batch = unique.slice(i, i + 100);
     const { data, error } = await supabaseAdmin
-      .schema("storage")
+      .schema("storage" as never)
       .from("objects" as never)
       .select("name")
       .eq("bucket_id", BUCKET)
