@@ -19,6 +19,8 @@ import {
   Eye,
   Trash2,
   ExternalLink,
+  Wrench,
+  AlertTriangle,
 } from "lucide-react";
 import {
   Dialog,
@@ -30,6 +32,8 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { PhotoImg } from "@/components/PhotoImg";
+import { normalizeImageFile } from "@/lib/imageNormalize";
+import { refreshSignedProfilePhoto } from "@/lib/photoUrl";
 
 export const Route = createFileRoute("/admin/fotos")({ component: AdminFotos });
 
@@ -82,12 +86,22 @@ type Settings = {
   updated_at: string;
 };
 
+type RepairIssue = {
+  source: "profiles.photo_url" | "profile_photos.url";
+  user_id: string;
+  photo_id: string | null;
+  url: string;
+  storage_path: string | null;
+  issue: "heic_heif_salvo" | "arquivo_nao_existe_no_storage";
+  valid_extra_url?: string | null;
+};
+
 function AdminFotos() {
   const { user, isAdmin, role, loading } = useAuth();
   const isSuper = role === "super_admin";
   const canAccess = isAdmin || isSuper;
 
-  type TabKey = "queue" | "history" | "settings";
+  type TabKey = "queue" | "history" | "settings" | "repairs";
   const [tab, setTab] = useState<TabKey>("queue");
   const [queueStatus, setQueueStatus] = useState<Status>("pending");
   const [queue, setQueue] = useState<QueueItem[]>([]);
@@ -100,6 +114,9 @@ function AdminFotos() {
   const [openLog, setOpenLog] = useState<LogItem | null>(null);
   const [deletingPhoto, setDeletingPhoto] = useState(false);
   const [deleteReason, setDeleteReason] = useState("");
+  const [repairs, setRepairs] = useState<RepairIssue[]>([]);
+  const [loadingRepairs, setLoadingRepairs] = useState(false);
+  const [repairBusy, setRepairBusy] = useState<string | null>(null);
 
   async function loadProfilesFor(ids: string[]) {
     const fresh = ids.filter((id) => !profiles.has(id));
@@ -190,8 +207,110 @@ function AdminFotos() {
     if (tab === "queue") void loadQueue();
     else if (tab === "history") void loadLogs();
     else if (tab === "settings") void loadSettings();
+    else if (tab === "repairs") void loadRepairs();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [canAccess, tab, queueStatus]);
+
+  async function authHeaders() {
+    const { data } = await supabase.auth.getSession();
+    const token = data.session?.access_token;
+    if (!token) throw new Error("Sessão expirada. Faça login novamente.");
+    return { Authorization: `Bearer ${token}` };
+  }
+
+  const repairKey = (item: RepairIssue) => `${item.source}:${item.user_id}:${item.photo_id ?? ""}`;
+
+  async function loadRepairs() {
+    setLoadingRepairs(true);
+    try {
+      const headers = await authHeaders();
+      const resp = await fetch("/api/photo-repair", { headers });
+      const json = await resp.json().catch(() => ({}));
+      if (!resp.ok) throw new Error(json?.error || "Não foi possível carregar reparos.");
+      const rows = (json.rows ?? []) as RepairIssue[];
+      setRepairs(rows);
+      void loadProfilesFor(Array.from(new Set(rows.map((row) => row.user_id))));
+    } catch (e: any) {
+      toast.error(e?.message || "Não foi possível carregar reparos.");
+    } finally {
+      setLoadingRepairs(false);
+    }
+  }
+
+  async function repairHeic(item: RepairIssue) {
+    const key = repairKey(item);
+    setRepairBusy(key);
+    try {
+      const signedUrl = await refreshSignedProfilePhoto(item.url);
+      if (!signedUrl) throw new Error("Não foi possível abrir a foto original.");
+      const imageResp = await fetch(signedUrl);
+      if (!imageResp.ok) throw new Error("A foto original não está acessível no Storage.");
+      const blob = await imageResp.blob();
+      const sourceFile = new File([blob], "repair.heic", {
+        type: blob.type || "image/heic",
+      });
+      const jpeg = await normalizeImageFile(sourceFile);
+      if (jpeg.type !== "image/jpeg") {
+        throw new Error("Não foi possível converter esta imagem para JPEG.");
+      }
+      const headers = await authHeaders();
+      const form = new FormData();
+      form.set("scope", item.source === "profiles.photo_url" ? "avatar" : "extra");
+      form.set("userId", item.user_id);
+      if (item.photo_id) form.set("photoId", item.photo_id);
+      form.set("oldUrl", item.url);
+      form.set("file", jpeg);
+      const resp = await fetch("/api/photo-repair", {
+        method: "POST",
+        headers,
+        body: form,
+      });
+      const json = await resp.json().catch(() => ({}));
+      if (!resp.ok) throw new Error(json?.error || "Não foi possível reparar a foto.");
+      toast.success("Foto convertida para JPEG.");
+      void loadRepairs();
+    } catch (e: any) {
+      toast.error(e?.message || "Não foi possível reparar a foto.");
+    } finally {
+      setRepairBusy(null);
+    }
+  }
+
+  async function clearBrokenReference(item: RepairIssue) {
+    const label =
+      item.source === "profiles.photo_url" && item.valid_extra_url
+        ? "promover uma foto adicional válida para principal"
+        : item.source === "profiles.photo_url"
+          ? "limpar a foto principal quebrada"
+          : "remover esta foto adicional quebrada";
+    if (!confirm(`Confirmar: ${label}?`)) return;
+    const key = repairKey(item);
+    setRepairBusy(key);
+    try {
+      const headers = {
+        ...(await authHeaders()),
+        "Content-Type": "application/json",
+      };
+      const resp = await fetch("/api/photo-repair", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          action: "clear",
+          scope: item.source === "profiles.photo_url" ? "avatar" : "extra",
+          userId: item.user_id,
+          photoId: item.photo_id,
+        }),
+      });
+      const json = await resp.json().catch(() => ({}));
+      if (!resp.ok) throw new Error(json?.error || "Não foi possível limpar a referência.");
+      toast.success(json?.promotedUrl ? "Foto adicional promovida." : "Referência quebrada limpa.");
+      void loadRepairs();
+    } catch (e: any) {
+      toast.error(e?.message || "Não foi possível limpar a referência.");
+    } finally {
+      setRepairBusy(null);
+    }
+  }
 
   async function approve(item: QueueItem) {
     setBusy(item.id);
@@ -368,6 +487,9 @@ function AdminFotos() {
             </TabsTrigger>
             <TabsTrigger value="settings">
               <Settings className="mr-1 h-4 w-4" /> Limiares
+            </TabsTrigger>
+            <TabsTrigger value="repairs">
+              <Wrench className="mr-1 h-4 w-4" /> Reparos
             </TabsTrigger>
           </TabsList>
 
@@ -656,6 +778,118 @@ function AdminFotos() {
                 )}
               </div>
             </div>
+          </TabsContent>
+
+          <TabsContent value="repairs" className="mt-4">
+            <div className="mb-4 rounded-2xl border border-amber-200/70 bg-amber-50/80 p-4 text-sm text-amber-950 dark:border-amber-800/50 dark:bg-amber-950/20 dark:text-amber-100">
+              <div className="flex gap-3">
+                <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0" />
+                <div>
+                  <p className="font-semibold">Reparo real de fotos antigas</p>
+                  <p className="mt-1">
+                    HEIC/HEIF será convertido para JPEG e salvo novamente no Storage. Arquivos que
+                    não existem no Storage terão a referência limpa ou uma foto adicional válida
+                    promovida para principal.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="mb-4 flex items-center justify-between gap-3">
+              <p className="text-sm text-muted-foreground">
+                {loadingRepairs
+                  ? "Procurando fotos problemáticas..."
+                  : `${repairs.length} registro(s) precisam de reparo.`}
+              </p>
+              <Button variant="ghost" size="sm" onClick={() => void loadRepairs()}>
+                <RefreshCw className="mr-1 h-4 w-4" /> Atualizar
+              </Button>
+            </div>
+
+            {repairs.length === 0 && !loadingRepairs ? (
+              <div className="rounded-2xl border bg-card p-6 text-sm text-muted-foreground">
+                Nenhuma foto antiga problemática encontrada.
+              </div>
+            ) : (
+              <div className="grid gap-4 lg:grid-cols-2">
+                {repairs.map((item) => {
+                  const prof = profiles.get(item.user_id);
+                  const key = repairKey(item);
+                  const busy = repairBusy === key;
+                  const isAvatar = item.source === "profiles.photo_url";
+                  return (
+                    <section key={key} className="rounded-2xl border bg-card p-4 shadow-sm">
+                      <div className="flex gap-4">
+                        <div className="h-24 w-24 shrink-0 overflow-hidden rounded-xl border bg-muted">
+                          <PhotoImg
+                            src={item.url}
+                            alt=""
+                            className="h-full w-full object-cover"
+                            loading="lazy"
+                          />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
+                              {isAvatar ? "Foto principal" : "Foto adicional"}
+                            </span>
+                            <span
+                              className={`rounded-full px-2 py-0.5 text-xs ${
+                                item.issue === "heic_heif_salvo"
+                                  ? "bg-sky-500/10 text-sky-700 dark:text-sky-300"
+                                  : "bg-destructive/10 text-destructive"
+                              }`}
+                            >
+                              {item.issue === "heic_heif_salvo"
+                                ? "HEIC/HEIF salvo"
+                                : "Arquivo ausente"}
+                            </span>
+                          </div>
+                          <h3 className="mt-2 truncate text-sm font-semibold">
+                            {prof?.full_name ?? "Perfil sem nome"}
+                          </h3>
+                          <p className="mt-1 break-all text-xs text-muted-foreground">
+                            {item.storage_path ?? item.url}
+                          </p>
+                          {isAvatar && item.issue === "arquivo_nao_existe_no_storage" && (
+                            <p className="mt-2 text-xs text-muted-foreground">
+                              {item.valid_extra_url
+                                ? "Existe foto adicional válida para promover."
+                                : "Sem foto adicional válida; o usuário precisará reenviar a foto principal."}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        {item.issue === "heic_heif_salvo" && (
+                          <Button size="sm" onClick={() => repairHeic(item)} disabled={busy}>
+                            <Wrench className="mr-1 h-4 w-4" /> Converter para JPEG
+                          </Button>
+                        )}
+                        <Button
+                          size="sm"
+                          variant={item.issue === "heic_heif_salvo" ? "outline" : "default"}
+                          onClick={() => clearBrokenReference(item)}
+                          disabled={busy}
+                        >
+                          {isAvatar && item.valid_extra_url
+                            ? "Promover foto válida"
+                            : isAvatar
+                              ? "Limpar foto principal"
+                              : "Remover foto quebrada"}
+                        </Button>
+                        <Button asChild size="sm" variant="ghost">
+                          <Link to="/pretendentes/$id" params={{ id: item.user_id }}>
+                            <Eye className="mr-1 h-4 w-4" /> Ver perfil
+                          </Link>
+                        </Button>
+                      </div>
+                    </section>
+                  );
+                })}
+              </div>
+            )}
           </TabsContent>
         </Tabs>
       </main>

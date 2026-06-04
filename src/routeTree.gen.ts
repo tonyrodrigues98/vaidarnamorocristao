@@ -49,6 +49,7 @@ import { Route as AuthResetPasswordRouteImport } from './routes/auth/reset-passw
 import { Route as AuthLoginRouteImport } from './routes/auth/login'
 import { Route as AuthForgotPasswordRouteImport } from './routes/auth/forgot-password'
 import { Route as ApiVerifyPhotoRouteImport } from './routes/api/verify-photo'
+import { Route as ApiPhotoRepairRouteImport } from './routes/api/photo-repair'
 import { Route as AdminVerificacoesRouteImport } from './routes/admin/verificacoes'
 import { Route as AdminStickersRouteImport } from './routes/admin/stickers'
 import { Route as AdminPresentesRouteImport } from './routes/admin/presentes'
@@ -257,6 +258,11 @@ const ApiVerifyPhotoRoute = ApiVerifyPhotoRouteImport.update({
   path: '/api/verify-photo',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPhotoRepairRoute = ApiPhotoRepairRouteImport.update({
+  id: '/api/photo-repair',
+  path: '/api/photo-repair',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminVerificacoesRoute = AdminVerificacoesRouteImport.update({
   id: '/admin/verificacoes',
   path: '/admin/verificacoes',
@@ -321,6 +327,7 @@ export interface FileRoutesByFullPath {
   '/admin/presentes': typeof AdminPresentesRoute
   '/admin/stickers': typeof AdminStickersRoute
   '/admin/verificacoes': typeof AdminVerificacoesRoute
+  '/api/photo-repair': typeof ApiPhotoRepairRoute
   '/api/verify-photo': typeof ApiVerifyPhotoRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
@@ -370,6 +377,7 @@ export interface FileRoutesByTo {
   '/admin/presentes': typeof AdminPresentesRoute
   '/admin/stickers': typeof AdminStickersRoute
   '/admin/verificacoes': typeof AdminVerificacoesRoute
+  '/api/photo-repair': typeof ApiPhotoRepairRoute
   '/api/verify-photo': typeof ApiVerifyPhotoRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
@@ -420,6 +428,7 @@ export interface FileRoutesById {
   '/admin/presentes': typeof AdminPresentesRoute
   '/admin/stickers': typeof AdminStickersRoute
   '/admin/verificacoes': typeof AdminVerificacoesRoute
+  '/api/photo-repair': typeof ApiPhotoRepairRoute
   '/api/verify-photo': typeof ApiVerifyPhotoRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
@@ -471,6 +480,7 @@ export interface FileRouteTypes {
     | '/admin/presentes'
     | '/admin/stickers'
     | '/admin/verificacoes'
+    | '/api/photo-repair'
     | '/api/verify-photo'
     | '/auth/forgot-password'
     | '/auth/login'
@@ -520,6 +530,7 @@ export interface FileRouteTypes {
     | '/admin/presentes'
     | '/admin/stickers'
     | '/admin/verificacoes'
+    | '/api/photo-repair'
     | '/api/verify-photo'
     | '/auth/forgot-password'
     | '/auth/login'
@@ -569,6 +580,7 @@ export interface FileRouteTypes {
     | '/admin/presentes'
     | '/admin/stickers'
     | '/admin/verificacoes'
+    | '/api/photo-repair'
     | '/api/verify-photo'
     | '/auth/forgot-password'
     | '/auth/login'
@@ -619,6 +631,7 @@ export interface RootRouteChildren {
   AdminPresentesRoute: typeof AdminPresentesRoute
   AdminStickersRoute: typeof AdminStickersRoute
   AdminVerificacoesRoute: typeof AdminVerificacoesRoute
+  ApiPhotoRepairRoute: typeof ApiPhotoRepairRoute
   ApiVerifyPhotoRoute: typeof ApiVerifyPhotoRoute
   AuthForgotPasswordRoute: typeof AuthForgotPasswordRoute
   AuthLoginRoute: typeof AuthLoginRoute
@@ -923,6 +936,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiVerifyPhotoRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/photo-repair': {
+      id: '/api/photo-repair'
+      path: '/api/photo-repair'
+      fullPath: '/api/photo-repair'
+      preLoaderRoute: typeof ApiPhotoRepairRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/verificacoes': {
       id: '/admin/verificacoes'
       path: '/admin/verificacoes'
@@ -1003,6 +1023,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminPresentesRoute: AdminPresentesRoute,
   AdminStickersRoute: AdminStickersRoute,
   AdminVerificacoesRoute: AdminVerificacoesRoute,
+  ApiPhotoRepairRoute: ApiPhotoRepairRoute,
   ApiVerifyPhotoRoute: ApiVerifyPhotoRoute,
   AuthForgotPasswordRoute: AuthForgotPasswordRoute,
   AuthLoginRoute: AuthLoginRoute,
@@ -1027,3 +1048,12 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
