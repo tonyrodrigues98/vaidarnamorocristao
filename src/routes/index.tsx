@@ -91,8 +91,8 @@ function Home() {
                 id="welcome-curve"
                 text="Seja Bem Vindo"
                 className="relative z-30 h-[16vw] min-h-[110px] w-[80vw] max-w-[1400px] drop-shadow-[0_6px_20px_rgba(0,0,0,0.75)] sm:h-[14vw] lg:h-[12vw]"
-                textClassName="fill-white text-[150px] font-black uppercase tracking-tight"
-                path="M 70 178 Q 600 28 1130 178"
+                textClassName="fill-white text-[128px] font-black uppercase tracking-tight"
+                path="M 20 200 Q 600 40 1180 200"
                 startOffset="50%"
               />
 
@@ -102,8 +102,8 @@ function Home() {
                 id="community-curve"
                 text="à nossa comunidade"
                 className="relative z-30 h-[10vw] min-h-[70px] w-[60vw] max-w-[1050px] drop-shadow-[0_6px_20px_rgba(0,0,0,0.75)] sm:h-[9vw] lg:h-[8vw]"
-                textClassName="fill-white text-[78px] font-semibold tracking-[0.04em]"
-                path="M 120 68 Q 600 148 1080 68"
+                textClassName="fill-white text-[72px] font-semibold tracking-[0.02em]"
+                path="M 20 80 Q 600 180 1180 80"
                 startOffset="50%"
               />
             </div>
