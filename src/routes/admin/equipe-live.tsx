@@ -200,10 +200,9 @@ function LiveTeamAdminPage() {
 
       if (error) throw error;
 
-      const { data } = supabase.storage.from(LIVE_TEAM_BUCKET).getPublicUrl(storagePath);
       setForm((current) => ({
         ...current,
-        photo_url: data.publicUrl,
+        photo_url: storagePath,
         storage_path: storagePath,
       }));
       toast.success("Foto enviada");
