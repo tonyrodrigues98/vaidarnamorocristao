@@ -1,26 +1,57 @@
-import { useSignedPhotoUrl } from "@/lib/photoUrl";
 import { AvatarImage } from "@/components/ui/avatar";
-import type { ComponentPropsWithoutRef } from "react";
+import { useSignedPhotoUrlResult } from "@/lib/photoUrl";
+import { cn } from "@/lib/utils";
+import type { ComponentPropsWithoutRef, ReactNode } from "react";
 
 type ImgProps = Omit<ComponentPropsWithoutRef<"img">, "src"> & {
   src: string | null | undefined;
+  fallback?: ReactNode;
 };
 
-/** <img> wrapper that resolves stored profile-photos URLs to signed URLs. */
-export function PhotoImg({ src, ...rest }: ImgProps) {
-  const resolved = useSignedPhotoUrl(src ?? null);
-  if (!resolved) return null;
+/** <img> wrapper that resolves stored profile-photos URLs to signed URLs and retries expired links. */
+export function PhotoImg({ src, fallback, className, onError, ...rest }: ImgProps) {
+  const { url, loading, refresh } = useSignedPhotoUrlResult(src ?? null);
+
+  if (!url) {
+    if (fallback) return <>{fallback}</>;
+    return (
+      <div
+        aria-hidden
+        className={cn("bg-muted", loading ? "animate-pulse" : "", className)}
+      />
+    );
+  }
+
   // eslint-disable-next-line jsx-a11y/alt-text
-  return <img src={resolved} {...rest} />;
+  return (
+    <img
+      src={url}
+      className={className}
+      onError={(event) => {
+        refresh();
+        onError?.(event);
+      }}
+      {...rest}
+    />
+  );
 }
 
 type AvatarImageProps = Omit<ComponentPropsWithoutRef<typeof AvatarImage>, "src"> & {
   src: string | null | undefined;
 };
 
-/** AvatarImage wrapper that resolves stored profile-photos URLs to signed URLs. */
-export function PhotoAvatarImage({ src, ...rest }: AvatarImageProps) {
-  const resolved = useSignedPhotoUrl(src ?? null);
-  if (!resolved) return null;
-  return <AvatarImage src={resolved} {...rest} />;
+/** AvatarImage wrapper that resolves stored profile-photos URLs to signed URLs and retries expired links. */
+export function PhotoAvatarImage({ src, onError, ...rest }: AvatarImageProps) {
+  const { url, refresh } = useSignedPhotoUrlResult(src ?? null);
+  if (!url) return null;
+  return (
+    <AvatarImage
+      src={url}
+      onError={(event) => {
+        refresh();
+        onError?.(event);
+      }}
+      {...rest}
+    />
+  );
 }

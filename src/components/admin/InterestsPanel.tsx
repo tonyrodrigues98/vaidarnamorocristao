@@ -4,6 +4,7 @@ import { Link } from "@tanstack/react-router";
 import { Loader2, Heart, Sparkles, ArrowRight, Users as UsersIcon, TrendingUp, Calendar } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import { PhotoImg } from "@/components/PhotoImg";
 
 type InterestRow = {
   id: string;
@@ -287,12 +288,21 @@ function TopList({
 }
 
 function Avatar({ name, url }: { name?: string | null; url?: string | null }) {
-  if (url) {
-    return <img src={url} alt={name ?? ""} className="h-8 w-8 shrink-0 rounded-full object-cover" />;
-  }
-  return (
+  const fallback = (
     <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-love text-xs font-medium text-white">
       {name?.charAt(0) ?? "?"}
     </div>
   );
+
+  if (url) {
+    return (
+      <PhotoImg
+        src={url}
+        alt={name ?? ""}
+        className="h-8 w-8 shrink-0 rounded-full object-cover"
+        fallback={fallback}
+      />
+    );
+  }
+  return fallback;
 }

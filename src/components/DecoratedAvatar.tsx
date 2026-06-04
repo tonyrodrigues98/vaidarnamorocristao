@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { fetchDecorationRenderCatalog, assetFor, type Decoration } from "@/lib/decorations";
-import { useSignedPhotoUrl } from "@/lib/photoUrl";
+import { useSignedPhotoUrlResult } from "@/lib/photoUrl";
 import commitmentRing from "@/assets/commitment-ring.png";
 // `size` é o canvas total do componente. A moldura SEMPRE preenche esse
 // canvas (assim os cards ficam com altura/largura estáveis e idênticas em
@@ -84,7 +84,11 @@ export function DecoratedAvatar({
   const hasAny = !!(frameId || auraId);
   const [catalog, setCatalog] = useState<Decoration[] | null>(cachedCatalog);
   const refreshedMissingKey = useRef<string | null>(null);
-  const resolvedPhoto = useSignedPhotoUrl(photoUrl ?? null);
+  const {
+    url: resolvedPhoto,
+    loading: photoLoading,
+    refresh: refreshPhoto,
+  } = useSignedPhotoUrlResult(photoUrl ?? null);
 
   useEffect(() => {
     if (!hasAny || catalog) return;
@@ -206,7 +210,11 @@ export function DecoratedAvatar({
             alt={alt}
             className="h-full w-full object-cover"
             loading="lazy"
+            decoding="async"
+            onError={refreshPhoto}
           />
+        ) : photoUrl && photoLoading ? (
+          <div className="h-full w-full animate-pulse bg-muted" />
         ) : (
           <div
             className="flex h-full w-full items-center justify-center bg-gradient-love font-semibold text-white"

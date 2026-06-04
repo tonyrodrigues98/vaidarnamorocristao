@@ -4,6 +4,7 @@ import { Link } from "@tanstack/react-router";
 import { Sparkles, MessageCircle, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { useSignedPhotoUrlResult } from "@/lib/photoUrl";
 
 export type RevealTarget = {
   messageId: string;
@@ -162,6 +163,7 @@ export function RevealCeremony({
 }
 
 function RevealPhoto({ photoUrl, phase }: { photoUrl: string | null; phase: "loading" | "revealing" | "done" }) {
+  const { url: resolvedPhoto, loading: photoLoading, refresh: refreshPhoto } = useSignedPhotoUrlResult(photoUrl);
   const blur =
     phase === "loading" ? 38 : phase === "revealing" ? 0 : 0;
   const scale = phase === "loading" ? 1.08 : 1;
@@ -200,9 +202,9 @@ function RevealPhoto({ photoUrl, phase }: { photoUrl: string | null; phase: "loa
             background: "rgba(0,0,0,0.4)",
           }}
         >
-          {photoUrl ? (
+          {resolvedPhoto ? (
             <motion.img
-              src={photoUrl}
+              src={resolvedPhoto}
               alt=""
               className="h-full w-full object-cover"
               initial={{ filter: "blur(38px)", scale: 1.08, opacity: 0.6 }}
@@ -213,7 +215,10 @@ function RevealPhoto({ photoUrl, phase }: { photoUrl: string | null; phase: "loa
               }}
               transition={{ duration: 2.2, ease: [0.22, 1, 0.36, 1] }}
               draggable={false}
+              onError={refreshPhoto}
             />
+          ) : photoUrl && photoLoading ? (
+            <div className="h-full w-full animate-pulse bg-white/10" />
           ) : (
             <div className="flex h-full w-full items-center justify-center text-white/40">
               <Sparkles className="h-10 w-10" />
