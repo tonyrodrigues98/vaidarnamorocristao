@@ -21,6 +21,8 @@ export type LiveTeamMember = {
   updated_at: string;
 };
 
+const SIGNED_IMAGE_TTL_SECONDS = 60 * 60;
+
 export type LiveTeamPayload = {
   name: string;
   role_title: string;
@@ -48,6 +50,18 @@ function normalizeTikTokUrl(value?: string | null) {
   return `https://www.tiktok.com/@${trimmed.replace(/^@/, "")}`;
 }
 
+async function withDisplayUrls(members: LiveTeamMember[]) {
+  return Promise.all(
+    members.map(async (member) => {
+      if (!member.storage_path) return member;
+      const { data } = await supabase.storage
+        .from(LIVE_TEAM_BUCKET)
+        .createSignedUrl(member.storage_path, SIGNED_IMAGE_TTL_SECONDS);
+      return data?.signedUrl ? { ...member, photo_url: data.signedUrl } : member;
+    }),
+  );
+}
+
 export function prepareLiveTeamPayload(payload: LiveTeamPayload) {
   return {
     name: payload.name.trim(),
@@ -72,7 +86,7 @@ export async function fetchActiveLiveTeamMembers(): Promise<LiveTeamMember[]> {
     .order("created_at", { ascending: true });
 
   if (error) throw error;
-  return (data ?? []) as unknown as LiveTeamMember[];
+  return withDisplayUrls((data ?? []) as unknown as LiveTeamMember[]);
 }
 
 export async function fetchAllLiveTeamMembersAdmin(): Promise<LiveTeamMember[]> {
@@ -84,7 +98,7 @@ export async function fetchAllLiveTeamMembersAdmin(): Promise<LiveTeamMember[]> 
     .order("created_at", { ascending: true });
 
   if (error) throw error;
-  return (data ?? []) as unknown as LiveTeamMember[];
+  return withDisplayUrls((data ?? []) as unknown as LiveTeamMember[]);
 }
 
 export async function createLiveTeamMember(payload: LiveTeamPayload): Promise<LiveTeamMember> {
