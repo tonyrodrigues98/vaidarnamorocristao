@@ -12,6 +12,8 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Heart, MessageCircle, Sparkles } from "lucide-react";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { markSeen } from "@/lib/lastSeen";
+import { CommitmentPauseCard } from "@/components/commitment/CommitmentPauseCard";
+import { getActiveCommitmentByUser, type RelationshipCommitment } from "@/lib/commitments";
 
 type ProfileLite = {
   id: string; full_name: string; age: number; city: string; state: string;
@@ -28,9 +30,21 @@ function Page() {
   const [sent, setSent] = useState<SentRow[]>([]);
   const [matchedIds, setMatchedIds] = useState<Set<string>>(new Set());
   const [busy, setBusy] = useState<string | null>(null);
+  const [loadingList, setLoadingList] = useState(true);
+  const [activeCommitment, setActiveCommitment] = useState<RelationshipCommitment | null>(null);
 
   async function load() {
     if (!user) return;
+    setLoadingList(true);
+    const commitment = await getActiveCommitmentByUser(user.id);
+    setActiveCommitment(commitment);
+    if (commitment) {
+      setReceived([]);
+      setSent([]);
+      setMatchedIds(new Set());
+      setLoadingList(false);
+      return;
+    }
     const [r, s, mts] = await Promise.all([
       supabase.from("interests").select("id, created_at, sender_id").eq("receiver_id", user.id).order("created_at", { ascending: false }),
       supabase.from("interests").select("id, created_at, receiver_id").eq("sender_id", user.id).order("created_at", { ascending: false }),
@@ -49,6 +63,7 @@ function Page() {
     const matched = new Set<string>();
     (mts.data ?? []).forEach((m) => matched.add(m.user_a === user.id ? m.user_b : m.user_a));
     setMatchedIds(matched);
+    setLoadingList(false);
   }
 
   useEffect(() => {
@@ -58,6 +73,7 @@ function Page() {
     const ch = supabase.channel("interests-page")
       .on("postgres_changes", { event: "*", schema: "public", table: "interests" }, load)
       .on("postgres_changes", { event: "*", schema: "public", table: "matches" }, load)
+      .on("postgres_changes", { event: "*", schema: "public", table: "relationship_commitments" }, load)
       .subscribe();
     return () => { supabase.removeChannel(ch); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -71,7 +87,7 @@ function Page() {
     const { error } = await supabase.from("interests").insert({ sender_id: user.id, receiver_id: senderId });
     setBusy(null);
     if (error && !error.message.includes("duplicate")) { toast.error(friendlyError(error)); return; }
-    toast.success("Match! 💗 Vocês já podem conversar.");
+    toast.success("Match! Vocês já podem conversar.");
     load();
   }
 
@@ -91,6 +107,19 @@ function Page() {
           <p className="mt-1 text-muted-foreground">Pessoas que demonstraram interesse e pessoas que você curtiu.</p>
         </div>
 
+        {activeCommitment ? (
+          <CommitmentPauseCard
+            matchId={activeCommitment.match_id}
+            className="mt-8 animate-fade-up"
+            description="Você está em um propósito ativo. Por isso, interesses recebidos e enviados ficam arquivados até esse compromisso ser interrompido."
+          />
+        ) : loadingList ? (
+          <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="glass h-80 animate-pulse rounded-2xl" />
+            ))}
+          </div>
+        ) : (
         <Tabs defaultValue="received" className="mt-8">
           <TabsList>
             <TabsTrigger value="received"><Sparkles className="mr-1 h-4 w-4" /> Recebidos ({received.length})</TabsTrigger>
@@ -141,6 +170,7 @@ function Page() {
             )}
           </TabsContent>
         </Tabs>
+        )}
       </main>
     </div>
   );

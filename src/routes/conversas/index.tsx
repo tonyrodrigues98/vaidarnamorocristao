@@ -9,6 +9,8 @@ import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { OnlineDot } from "@/components/OnlineDot";
 import { UserBadges } from "@/components/UserBadges";
 import { DecoratedAvatar } from "@/components/DecoratedAvatar";
+import { CommitmentPauseCard } from "@/components/commitment/CommitmentPauseCard";
+import { getActiveCommitmentByUser, type RelationshipCommitment } from "@/lib/commitments";
 
 type Item = {
   matchId: string;
@@ -40,9 +42,17 @@ function List() {
   const { user, loading } = useAuth();
   const [items, setItems] = useState<Item[]>([]);
   const [loadingList, setLoadingList] = useState(true);
+  const [activeCommitment, setActiveCommitment] = useState<RelationshipCommitment | null>(null);
 
   async function load() {
     if (!user) return;
+    const commitment = await getActiveCommitmentByUser(user.id);
+    setActiveCommitment(commitment);
+    if (commitment) {
+      setItems([]);
+      setLoadingList(false);
+      return;
+    }
     const { data: bl } = await supabase.from("blocks").select("blocked_id").eq("blocker_id", user.id);
     const blockedSet = new Set((bl ?? []).map((b) => b.blocked_id as string));
     const { data: matches } = await supabase
@@ -127,6 +137,7 @@ function List() {
       .channel("conv-list")
       .on("postgres_changes", { event: "*", schema: "public", table: "messages" }, load)
       .on("postgres_changes", { event: "*", schema: "public", table: "matches" }, load)
+      .on("postgres_changes", { event: "*", schema: "public", table: "relationship_commitments" }, load)
       .subscribe();
     return () => {
       supabase.removeChannel(ch);
@@ -146,7 +157,12 @@ function List() {
         </div>
 
         <div className="mt-8 space-y-3">
-          {loadingList ? (
+          {activeCommitment ? (
+            <CommitmentPauseCard
+              matchId={activeCommitment.match_id}
+              description="Você está em um propósito ativo. Por isso, suas outras conversas ficam arquivadas e fora de vista enquanto esse compromisso estiver firmado."
+            />
+          ) : loadingList ? (
             <div className="glass h-24 animate-pulse rounded-2xl" />
           ) : items.length === 0 ? (
             <div className="glass rounded-2xl p-12 text-center text-muted-foreground shadow-soft">
@@ -188,7 +204,7 @@ function List() {
                   <p
                     className={`truncate text-sm ${i.unread ? "font-semibold text-foreground" : "text-muted-foreground"}`}
                   >
-                    {i.lastMessage ?? "Diga olá 👋"}
+                    {i.lastMessage ?? "Diga olá"}
                   </p>
                 </div>
                 {i.unread && <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-[var(--rose)]" />}

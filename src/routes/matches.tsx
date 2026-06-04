@@ -10,6 +10,8 @@ import { Heart, MessageCircle, User as UserIcon, HeartCrack } from "lucide-react
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { DecoratedAvatar } from "@/components/DecoratedAvatar";
 import { PhotoImg } from "@/components/PhotoImg";
+import { CommitmentPauseCard } from "@/components/commitment/CommitmentPauseCard";
+import { getActiveCommitmentByUser, type RelationshipCommitment } from "@/lib/commitments";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
@@ -39,9 +41,17 @@ function MatchesPage() {
   const [items, setItems] = useState<MatchItem[]>([]);
   const [loadingList, setLoadingList] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
+  const [activeCommitment, setActiveCommitment] = useState<RelationshipCommitment | null>(null);
 
   async function load() {
     if (!user) return;
+    const commitment = await getActiveCommitmentByUser(user.id);
+    setActiveCommitment(commitment);
+    if (commitment) {
+      setItems([]);
+      setLoadingList(false);
+      return;
+    }
     const { data: matches } = await supabase
       .from("matches").select("id, user_a, user_b, created_at")
       .or(`user_a.eq.${user.id},user_b.eq.${user.id}`)
@@ -74,6 +84,7 @@ function MatchesPage() {
     load();
     const ch = supabase.channel("matches-list")
       .on("postgres_changes", { event: "*", schema: "public", table: "matches" }, load)
+      .on("postgres_changes", { event: "*", schema: "public", table: "relationship_commitments" }, load)
       .subscribe();
     return () => { supabase.removeChannel(ch); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -97,14 +108,20 @@ function MatchesPage() {
         <div className="animate-fade-up flex flex-wrap items-end justify-between gap-3">
           <div>
             <h1 className="text-3xl font-semibold sm:text-4xl">Seus matches</h1>
-            <p className="mt-1 text-sm text-muted-foreground">Conexões com interesse mútuo. Cuide bem delas. 💗</p>
+            <p className="mt-1 text-sm text-muted-foreground">Conexões com interesse mútuo. Cuide bem delas.</p>
           </div>
           <span className="rounded-full bg-[var(--petal)] px-3 py-1 text-xs font-medium text-[var(--rose)]">
             {items.length} {items.length === 1 ? "match" : "matches"}
           </span>
         </div>
 
-        {loadingList ? (
+        {activeCommitment ? (
+          <CommitmentPauseCard
+            matchId={activeCommitment.match_id}
+            className="mt-10 animate-fade-up"
+            description="Você está em um propósito ativo. Por isso, seus matches ficam arquivados e fora de vista enquanto esse compromisso estiver firmado."
+          />
+        ) : loadingList ? (
           <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 3 }).map((_, i) => (
               <div key={i} className="glass h-80 animate-pulse rounded-2xl" />

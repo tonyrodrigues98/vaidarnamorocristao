@@ -16,6 +16,8 @@ import { RevealCeremony, type RevealTarget } from "@/components/anonymous/Reveal
 import { AnimatePresence, motion } from "framer-motion";
 import { fetchSenderProfile, buildHintPool, pickThree, type GeneratedHint } from "@/lib/anonymousHints";
 import { AnonymousExtrasCard } from "@/components/anonymous/AnonymousExtrasCard";
+import { CommitmentPauseCard } from "@/components/commitment/CommitmentPauseCard";
+import { getActiveCommitmentByUser, type RelationshipCommitment } from "@/lib/commitments";
 
 export const Route = createFileRoute("/recados")({
   component: () => (<RequireApproved><RecadosPage /></RequireApproved>),
@@ -62,11 +64,23 @@ function RecadosPage() {
   const [hints, setHints] = useState<Record<string, Hint[]>>({});
   const [accept, setAccept] = useState(true);
   const [reveal, setReveal] = useState<RevealTarget | null>(null);
+  const [loadingList, setLoadingList] = useState(true);
+  const [activeCommitment, setActiveCommitment] = useState<RelationshipCommitment | null>(null);
   const seenRevealed = useRef<Set<string>>(new Set());
   const initializedRef = useRef(false);
 
   const load = useCallback(async () => {
     if (!user) return;
+    setLoadingList(true);
+    const commitment = await getActiveCommitmentByUser(user.id);
+    setActiveCommitment(commitment);
+    if (commitment) {
+      setInbox([]);
+      setOutbox([]);
+      setHints({});
+      setLoadingList(false);
+      return;
+    }
     await supabase.rpc("expire_anonymous_messages");
     const [{ data: inb }, { data: out }, { data: settings }] = await Promise.all([
       supabase.from("anonymous_messages_inbox").select("*").order("created_at", { ascending: false }),
@@ -110,6 +124,7 @@ function RecadosPage() {
       (h ?? []).forEach((row: any) => { (grouped[row.message_id] ||= []).push(row); });
       setHints(grouped);
     } else setHints({});
+    setLoadingList(false);
   }, [user]);
 
   useEffect(() => {
@@ -119,6 +134,7 @@ function RecadosPage() {
       .channel(`recados-${user.id}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "anonymous_messages" }, load)
       .on("postgres_changes", { event: "*", schema: "public", table: "anonymous_message_hints" }, load)
+      .on("postgres_changes", { event: "*", schema: "public", table: "relationship_commitments" }, load)
       .subscribe();
     return () => { supabase.removeChannel(ch); };
   }, [user, load]);
@@ -143,6 +159,18 @@ function RecadosPage() {
           </p>
         </div>
 
+        {activeCommitment ? (
+          <CommitmentPauseCard
+            matchId={activeCommitment.match_id}
+            className="mt-8 animate-fade-up"
+            description="Você está em um propósito ativo. Por isso, recados anônimos recebidos e enviados ficam arquivados até esse compromisso ser interrompido."
+          />
+        ) : loadingList ? (
+          <div className="mt-8 space-y-3">
+            <div className="glass h-24 animate-pulse rounded-2xl" />
+            <div className="glass h-24 animate-pulse rounded-2xl" />
+          </div>
+        ) : (
         <Tabs value={tab} onValueChange={setTab}>
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="inbox"><Mail className="mr-1 h-4 w-4" /> Recebidos</TabsTrigger>
@@ -189,6 +217,7 @@ function RecadosPage() {
             </div>
           </TabsContent>
         </Tabs>
+        )}
       </main>
     </div>
   );

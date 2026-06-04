@@ -2,7 +2,7 @@ import { friendlyError } from "@/lib/errors";
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { RequireApproved } from "@/components/RequireApproved";
 import { useEffect, useRef, useState } from "react";
-import { getActiveCommitmentByUser } from "@/lib/commitments";
+import { getActiveCommitmentByUser, type RelationshipCommitment } from "@/lib/commitments";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
@@ -17,6 +17,7 @@ import { ShieldAlert } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { CommitmentProgressCard } from "@/components/commitment/CommitmentProgressCard";
+import { CommitmentPauseCard } from "@/components/commitment/CommitmentPauseCard";
 
 type Msg = {
   id: string;
@@ -50,6 +51,8 @@ function Chat() {
   const [partner, setPartner] = useState<Partner | null>(null);
   const [partnerCommitted, setPartnerCommitted] = useState(false);
   const [partnerCommitmentMatchId, setPartnerCommitmentMatchId] = useState<string | null>(null);
+  const [currentCommitment, setCurrentCommitment] = useState<RelationshipCommitment | null>(null);
+  const [pausedByCommitment, setPausedByCommitment] = useState(false);
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
@@ -83,6 +86,15 @@ function Chat() {
         setAuthorized(false);
         return;
       }
+      const myActiveCommitment = await getActiveCommitmentByUser(user.id);
+      setCurrentCommitment(myActiveCommitment);
+      if (myActiveCommitment && myActiveCommitment.match_id !== matchId) {
+        setPausedByCommitment(true);
+        setMessages([]);
+        setAuthorized(true);
+        return;
+      }
+      setPausedByCommitment(false);
       setAuthorized(true);
       const { data: p } = await supabase
         .from("profiles")
@@ -154,6 +166,24 @@ function Chat() {
           <Button asChild variant="outline" className="mt-4">
             <Link to="/conversas">Voltar</Link>
           </Button>
+        </main>
+      </div>
+    );
+  if (pausedByCommitment && currentCommitment)
+    return (
+      <div className="min-h-screen">
+        <Header />
+        <main className="mx-auto max-w-3xl px-4 py-10">
+          <Button asChild variant="ghost" className="mb-6">
+            <Link to="/conversas">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Voltar
+            </Link>
+          </Button>
+          <CommitmentPauseCard
+            matchId={currentCommitment.match_id}
+            description="Você está em um propósito ativo. Por isso, conversas fora desse compromisso ficam arquivadas até o propósito ser interrompido."
+          />
         </main>
       </div>
     );
