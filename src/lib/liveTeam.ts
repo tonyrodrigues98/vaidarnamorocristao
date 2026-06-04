@@ -103,6 +103,18 @@ async function withDisplayUrls(members: LiveTeamMember[]) {
   );
 }
 
+async function withHighlightDisplayUrls(items: LiveMonthlyHighlight[]) {
+  return Promise.all(
+    items.map(async (item) => {
+      if (!item.storage_path) return item;
+      const { data } = await supabase.storage
+        .from(LIVE_TEAM_BUCKET)
+        .createSignedUrl(item.storage_path, SIGNED_IMAGE_TTL_SECONDS);
+      return data?.signedUrl ? { ...item, photo_url: data.signedUrl } : item;
+    }),
+  );
+}
+
 export function prepareLiveTeamPayload(payload: LiveTeamPayload) {
   return {
     name: payload.name.trim(),
@@ -158,7 +170,7 @@ export async function fetchActiveMonthlyHighlights(): Promise<LiveMonthlyHighlig
     .order("position", { ascending: true });
 
   if (error) throw error;
-  return (data ?? []) as unknown as LiveMonthlyHighlight[];
+  return withHighlightDisplayUrls((data ?? []) as unknown as LiveMonthlyHighlight[]);
 }
 
 export async function fetchAllLiveTeamMembersAdmin(): Promise<LiveTeamMember[]> {
@@ -183,7 +195,7 @@ export async function fetchAllMonthlyHighlightsAdmin(): Promise<LiveMonthlyHighl
     .order("position", { ascending: true });
 
   if (error) throw error;
-  return (data ?? []) as unknown as LiveMonthlyHighlight[];
+  return withHighlightDisplayUrls((data ?? []) as unknown as LiveMonthlyHighlight[]);
 }
 
 export async function createLiveTeamMember(payload: LiveTeamPayload): Promise<LiveTeamMember> {

@@ -88,6 +88,7 @@ const EMPTY_HIGHLIGHT_FORM = {
   tiktok_url: "",
   photo_url: "",
   storage_path: null as string | null,
+  display_url: "",
   month: CURRENT_PERIOD.month,
   year: CURRENT_PERIOD.year,
   is_active: true,
@@ -274,11 +275,12 @@ function LiveTeamAdminPage() {
 
       if (error) throw error;
 
-      const { data } = supabase.storage.from(LIVE_TEAM_BUCKET).getPublicUrl(storagePath);
+      const objectUrl = URL.createObjectURL(normalized);
       setHighlightForm((current) => ({
         ...current,
-        photo_url: data.publicUrl,
+        photo_url: storagePath,
         storage_path: storagePath,
+        display_url: objectUrl,
       }));
       toast.success("Foto enviada");
     } catch (e) {
@@ -419,6 +421,7 @@ function LiveTeamAdminPage() {
       tiktok_url: item.tiktok_url ?? "",
       photo_url: item.photo_url ?? "",
       storage_path: item.storage_path,
+      display_url: item.photo_url ?? "",
       month: item.month,
       year: item.year,
       is_active: item.is_active,
@@ -998,7 +1001,7 @@ function MonthlyHighlightDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-h-[90dvh] max-w-2xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
@@ -1111,11 +1114,11 @@ function MonthlyHighlightDialog({
                 }}
               />
             </label>
-            {form.photo_url && (
+            {(form.display_url || form.photo_url) && (
               <div className="relative overflow-hidden rounded-2xl border bg-muted p-4">
                 <div className="flex items-center gap-4">
                   <img
-                    src={form.photo_url}
+                    src={form.display_url || form.photo_url}
                     alt="Preview do destaque"
                     className="h-20 w-20 rounded-full object-cover"
                   />
