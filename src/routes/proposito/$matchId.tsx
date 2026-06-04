@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
-import { getCommitmentByMatch } from "@/lib/commitments";
+import { endCommitment, getCommitmentByMatch } from "@/lib/commitments";
 import { friendlyError } from "@/lib/errors";
 import { findRestrictedWord, useRestrictedWords } from "@/lib/profanity";
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
@@ -61,7 +61,7 @@ export const Route = createFileRoute("/proposito/$matchId")({
 
 function CouplePage() {
   const { matchId } = Route.useParams();
-  const { user, loading } = useAuth();
+  const { user, loading, role } = useAuth();
 
   const [authorized, setAuthorized] = useState<boolean | null>(null);
   const [personA, setPersonA] = useState<CoupleProfile | null>(null);
@@ -78,6 +78,7 @@ function CouplePage() {
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const [warning, setWarning] = useState<string | null>(null);
+  const [ending, setEnding] = useState(false);
   const chatRef = useRef<HTMLDivElement>(null);
   const restrictedWords = useRestrictedWords();
 
@@ -300,6 +301,33 @@ function CouplePage() {
     setInput("");
   }
 
+  async function handleEndCommitment() {
+    if (!user || !acceptedAt || ending) return;
+    const confirmed = window.confirm(
+      "Encerrar este propósito vai liberar a área de pretendentes, matches e conversas novamente. Deseja continuar?",
+    );
+    if (!confirmed) return;
+
+    setEnding(true);
+    const commitment = await getCommitmentByMatch(matchId);
+    if (!commitment) {
+      toast.error("Não foi possível encontrar o propósito ativo.");
+      setEnding(false);
+      return;
+    }
+
+    try {
+      await endCommitment(commitment.id);
+    } catch (error) {
+      toast.error(friendlyError(error));
+      setEnding(false);
+      return;
+    }
+
+    toast.success("Propósito encerrado. A área voltou ao estado normal.");
+    window.location.assign("/pretendentes");
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted/30">
       <Header />
@@ -507,6 +535,27 @@ function CouplePage() {
             </div>
           </form>
         </section>
+
+        {(role === "super_admin" || (user && (user.id === personA?.id || user.id === personB?.id))) && (
+          <section className="mt-6 rounded-[2rem] border border-border bg-card/85 p-5 shadow-soft backdrop-blur sm:p-6">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h2 className="text-lg font-semibold">Encerrar propósito</h2>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Use este controle quando o compromisso precisar voltar ao estado normal.
+                </p>
+              </div>
+              <Button
+                variant="destructive"
+                className="rounded-full"
+                onClick={() => void handleEndCommitment()}
+                disabled={ending}
+              >
+                {ending ? "Encerrando..." : "Encerrar propósito"}
+              </Button>
+            </div>
+          </section>
+        )}
       </main>
 
       <Dialog open={!!warning} onOpenChange={(open) => !open && setWarning(null)}>

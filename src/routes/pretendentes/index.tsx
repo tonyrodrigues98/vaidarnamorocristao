@@ -74,7 +74,7 @@ export const Route = createFileRoute("/pretendentes/")({
 });
 
 function List() {
-  const { user, loading } = useAuth();
+  const { user, loading, role } = useAuth();
   const search = Route.useSearch();
   const navigate = useNavigate({ from: "/pretendentes/" });
 
@@ -127,7 +127,8 @@ function List() {
     (async () => {
       const commitment = await getActiveCommitmentByUser(user.id);
       setActiveCommitment(commitment);
-      if (commitment) {
+      const isSuperAdmin = role === "super_admin";
+      if (commitment && !isSuperAdmin) {
         setProfiles([]);
         setLoadingList(false);
         return;
@@ -204,9 +205,11 @@ function List() {
           committedUsers.add(row.user_b);
         }
 
-        const visible = ((profsRes.data ?? []) as Profile[]).filter(
-          (p) => !hidden.has(p.id) && !committedUsers.has(p.id),
-        );
+        const visible = ((profsRes.data ?? []) as Profile[]).filter((p) => {
+          if (hidden.has(p.id)) return false;
+          if (!isSuperAdmin && committedUsers.has(p.id)) return false;
+          return true;
+        });
         setProfiles(visible);
         setMyAdvanced(((myAdvRes as any)?.data ?? null) as AdvancedProfile | null);
         const ids = visible.map((p) => p.id);
@@ -232,7 +235,7 @@ function List() {
       }
       setLoadingList(false);
     })();
-  }, [user]);
+  }, [user, role]);
 
   // Compute affinity per profile (memoized)
   const affinityByProfile = useMemo(() => {
@@ -337,7 +340,8 @@ function List() {
     search.loveLang !== "all" ||
     search.verified;
 
-  const canBrowsePretendentes = !activeCommitment && myStatus === "approved";
+  const isSuperAdmin = role === "super_admin";
+  const canBrowsePretendentes = (!activeCommitment || isSuperAdmin) && myStatus === "approved";
   const audienceLabel =
     mySex === "masculino" ? "Mulheres" : mySex === "feminino" ? "Homens" : "Pessoas";
 
