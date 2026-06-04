@@ -1409,6 +1409,45 @@ export type Database = {
         }
         Relationships: []
       }
+      profile_backgrounds: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string
+          is_active: boolean
+          name: string
+          price: number
+          rarity: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url: string
+          is_active?: boolean
+          name: string
+          price?: number
+          rarity?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string
+          is_active?: boolean
+          name?: string
+          price?: number
+          rarity?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profile_photos: {
         Row: {
           ai_checked_at: string | null
@@ -1529,6 +1568,7 @@ export type Database = {
           deletion_requested_at: string | null
           deletion_scheduled_for: string | null
           equipped_aura_id: string | null
+          equipped_background_id: string | null
           equipped_frame_id: string | null
           equipped_sticker_id: string | null
           full_name: string
@@ -1564,6 +1604,7 @@ export type Database = {
           deletion_requested_at?: string | null
           deletion_scheduled_for?: string | null
           equipped_aura_id?: string | null
+          equipped_background_id?: string | null
           equipped_frame_id?: string | null
           equipped_sticker_id?: string | null
           full_name: string
@@ -1599,6 +1640,7 @@ export type Database = {
           deletion_requested_at?: string | null
           deletion_scheduled_for?: string | null
           equipped_aura_id?: string | null
+          equipped_background_id?: string | null
           equipped_frame_id?: string | null
           equipped_sticker_id?: string | null
           full_name?: string
@@ -1623,6 +1665,13 @@ export type Database = {
             columns: ["equipped_aura_id"]
             isOneToOne: false
             referencedRelation: "avatar_decorations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_equipped_background_id_fkey"
+            columns: ["equipped_background_id"]
+            isOneToOne: false
+            referencedRelation: "profile_backgrounds"
             referencedColumns: ["id"]
           },
           {
@@ -2210,6 +2259,35 @@ export type Database = {
         }
         Relationships: []
       }
+      user_profile_backgrounds: {
+        Row: {
+          background_id: string
+          id: string
+          purchased_at: string
+          user_id: string
+        }
+        Insert: {
+          background_id: string
+          id?: string
+          purchased_at?: string
+          user_id: string
+        }
+        Update: {
+          background_id?: string
+          id?: string
+          purchased_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_profile_backgrounds_background_id_fkey"
+            columns: ["background_id"]
+            isOneToOne: false
+            referencedRelation: "profile_backgrounds"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           badge_color: string | null
@@ -2505,6 +2583,10 @@ export type Database = {
       }
       current_terms_version: { Args: never; Returns: string }
       equip_decoration: { Args: { _decoration_id: string }; Returns: Json }
+      equip_profile_background: {
+        Args: { _background_id: string }
+        Returns: undefined
+      }
       expire_anonymous_messages: { Args: never; Returns: number }
       get_active_streak: {
         Args: { _user_id: string }
@@ -2632,6 +2714,10 @@ export type Database = {
       mark_all_notifications_read: { Args: never; Returns: number }
       mark_message_read: { Args: { _message_id: string }; Returns: undefined }
       purchase_decoration: { Args: { _decoration_id: string }; Returns: Json }
+      purchase_profile_background: {
+        Args: { _background_id: string }
+        Returns: Json
+      }
       recompute_all_badges: { Args: never; Returns: undefined }
       recompute_user_badges: { Args: { _user_id: string }; Returns: undefined }
       redeem_virtual_gift: { Args: { _tx_id: string }; Returns: number }
@@ -2684,6 +2770,7 @@ export type Database = {
         Args: { _type: Database["public"]["Enums"]["decoration_type"] }
         Returns: Json
       }
+      unequip_profile_background: { Args: never; Returns: undefined }
       unmatch: { Args: { _match_id: string }; Returns: undefined }
     }
     Enums: {
