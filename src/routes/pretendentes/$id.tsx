@@ -414,8 +414,9 @@ function Detail() {
           className="pointer-events-none absolute inset-x-0 top-0 z-0 h-[380px] overflow-hidden"
         >
           <img src={equippedBackground.image_url} alt="" className="h-full w-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-b from-white/78 via-white/56 to-background dark:from-black/82 dark:via-black/58 dark:to-background" />
-          <div className="absolute inset-0 bg-gradient-to-r from-background/82 via-background/34 to-background/84 dark:from-black/62 dark:via-black/24 dark:to-black/68" />
+          <div className="absolute inset-0 bg-gradient-to-b from-white/28 via-white/14 to-background/82 dark:from-black/52 dark:via-black/26 dark:to-background/86" />
+
+          <div className="absolute inset-0 bg-gradient-to-r from-background/38 via-transparent to-background/42 dark:from-black/34 dark:via-transparent dark:to-black/38" />
         </div>
       )}
 
@@ -451,11 +452,10 @@ function Detail() {
             ) : (
               <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,241,242,0.95),rgba(239,246,255,0.88)_48%,rgba(254,243,199,0.78))] dark:bg-[linear-gradient(135deg,rgba(51,25,40,0.86),rgba(15,35,58,0.82)_52%,rgba(64,47,24,0.62))]" />
             )}
-            <div className="absolute inset-0 bg-gradient-to-b from-white/35 via-white/58 to-card dark:from-black/60 dark:via-black/48 dark:to-card" />
-            <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-card via-card/78 to-transparent" />
-            <div className="absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-card/65 to-transparent dark:from-black/40" />
-            <div className="absolute inset-y-0 right-0 w-1/3 bg-gradient-to-l from-card/65 to-transparent dark:from-black/40" />
-          </div>
+            <div className="absolute inset-0 bg-gradient-to-b from-white/18 via-white/10 to-card/72 dark:from-black/42 dark:via-black/22 dark:to-card/78" />
+<div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-card/86 via-card/36 to-transparent" />
+<div className="absolute inset-y-0 left-0 w-1/4 bg-gradient-to-r from-card/28 to-transparent dark:from-black/24" />
+<div className="absolute inset-y-0 right-0 w-1/4 bg-gradient-to-l from-card/28 to-transparent dark:from-black/24" />
 
           <div className="relative z-10 grid gap-5 p-4 pt-0 sm:p-6 sm:pt-0 xl:grid-cols-[minmax(300px,0.8fr)_minmax(0,1.1fr)_minmax(320px,0.7fr)] xl:items-start">
             <div className="relative -mt-20 overflow-visible rounded-[2rem] p-0 sm:-mt-24 lg:-mt-28">
