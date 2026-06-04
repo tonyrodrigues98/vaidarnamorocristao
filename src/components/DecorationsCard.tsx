@@ -59,7 +59,7 @@ export function DecorationsCard({
       try {
         const [c, o, coins, prof] = await Promise.all([
           fetchDecorationCatalog(),
-          fetchMyOwnedIds(),
+          fetchMyOwnedIds(user.id),
           getMyCoins(),
           supabase
             .from("profiles")
@@ -67,6 +67,7 @@ export function DecorationsCard({
             .eq("id", user.id)
             .maybeSingle(),
         ]);
+
         if (!alive) return;
         setCatalog(c);
         setOwned(o);

@@ -70,7 +70,7 @@ export function CustomizacaoTab({ photoUrl }: { photoUrl: string | null }) {
       try {
         const [c, o, coins, prof] = await Promise.all([
           fetchDecorationCatalog(),
-          fetchMyOwnedIds(),
+          fetchMyOwnedIds(user.id),
           getMyCoins(),
           supabase
             .from("profiles")
@@ -78,6 +78,7 @@ export function CustomizacaoTab({ photoUrl }: { photoUrl: string | null }) {
             .eq("id", user.id)
             .maybeSingle(),
         ]);
+
         if (!alive) return;
         setCatalog(c);
         setOwned(o);

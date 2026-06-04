@@ -263,9 +263,14 @@ export async function deleteDecoration(id: string) {
   invalidateDecorationCatalog();
 }
 
-export async function fetchMyOwnedIds(): Promise<Set<string>> {
-  const { data, error } = await supabase.from("user_decorations" as never).select("decoration_id");
+export async function fetchMyOwnedIds(userId: string): Promise<Set<string>> {
+  const { data, error } = await supabase
+    .from("user_decorations" as never)
+    .select("decoration_id")
+    .eq("user_id", userId);
+
   if (error) throw error;
+
   return new Set(((data ?? []) as Array<{ decoration_id: string }>).map((r) => r.decoration_id));
 }
 
