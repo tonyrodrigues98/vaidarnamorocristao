@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 
 import {
   Gift,
@@ -474,7 +475,7 @@ for (const gift of items) {
                   try {
                     setSaving(true);
 
-                    const result = await createGift({
+                    await createGift({
                       slug: form.slug,
                       name: form.name,
                       description: form.description,
@@ -486,15 +487,12 @@ for (const gift of items) {
                       active: form.active,
                     });
 
-                    console.log(result);
-
                     await load();
 
                     setCreateOpen(false);
+                    toast.success("Presente criado com sucesso.");
                   } catch (err) {
-                    console.error(err);
-
-                    alert(JSON.stringify(err, null, 2));
+                    toast.error(err instanceof Error ? err.message : "Não foi possível criar o presente.");
                   } finally {
                     setSaving(false);
                   }

@@ -74,7 +74,7 @@ export const Route = createFileRoute("/pretendentes/")({
 });
 
 function List() {
-  const { user, loading, role } = useAuth();
+  const { user, loading, role, rolesLoaded } = useAuth();
   const search = Route.useSearch();
   const navigate = useNavigate({ from: "/pretendentes/" });
 
@@ -123,6 +123,7 @@ function List() {
 
   useEffect(() => {
     if (!user) return;
+    if (!rolesLoaded) return;
     markHomeChecklistStep(user.id, "explore");
     (async () => {
       const commitment = await getActiveCommitmentByUser(user.id);
@@ -235,7 +236,7 @@ function List() {
       }
       setLoadingList(false);
     })();
-  }, [user, role]);
+  }, [user, role, rolesLoaded]);
 
   // Compute affinity per profile (memoized)
   const affinityByProfile = useMemo(() => {
@@ -347,6 +348,25 @@ function List() {
 
   if (!loading && !user) return <Navigate to="/auth/login" />;
 
+  if (user && !rolesLoaded) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-rose-50/70 via-background to-background dark:from-rose-950/10 dark:via-background dark:to-background">
+        <Header />
+        <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+          <div className="h-56 animate-pulse rounded-3xl border border-border/70 bg-card/70 shadow-soft" />
+          <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {[1, 2, 3].map((item) => (
+              <div
+                key={item}
+                className="h-80 animate-pulse rounded-3xl border border-border/70 bg-card/70 shadow-soft"
+              />
+            ))}
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-rose-50/70 via-background to-background dark:from-rose-950/10 dark:via-background dark:to-background">
       <Header />
@@ -384,7 +404,7 @@ function List() {
           </div>
         </section>
 
-        {activeCommitment ? (
+        {activeCommitment && !isSuperAdmin ? (
           <section className="mx-auto mt-8 max-w-3xl overflow-hidden rounded-3xl border border-emerald-200/60 bg-gradient-to-br from-emerald-50 via-white to-rose-50 p-8 text-center shadow-soft backdrop-blur dark:border-emerald-800/40 dark:from-emerald-950/30 dark:via-background dark:to-rose-950/20 sm:p-12">
             <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br from-emerald-400/20 via-white to-rose-400/20 shadow-inner dark:via-white/10">
               <Gem className="h-10 w-10 text-emerald-600 dark:text-emerald-300" />

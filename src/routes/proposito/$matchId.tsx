@@ -4,7 +4,14 @@ import { DecoratedAvatar } from "@/components/DecoratedAvatar";
 import { GiftMedia } from "@/components/gifts/GiftMedia";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
@@ -79,6 +86,7 @@ function CouplePage() {
   const [sending, setSending] = useState(false);
   const [warning, setWarning] = useState<string | null>(null);
   const [ending, setEnding] = useState(false);
+  const [endDialogOpen, setEndDialogOpen] = useState(false);
   const chatRef = useRef<HTMLDivElement>(null);
   const restrictedWords = useRestrictedWords();
 
@@ -302,21 +310,16 @@ function CouplePage() {
   }
 
   async function handleEndCommitment() {
-    if (!user || !acceptedAt || ending) return;
-    const confirmed = window.confirm(
-      "Encerrar este propósito vai liberar a área de pretendentes, matches e conversas novamente. Deseja continuar?",
-    );
-    if (!confirmed) return;
-
+    if (!user || ending) return;
     setEnding(true);
-    const commitment = await getCommitmentByMatch(matchId);
-    if (!commitment) {
-      toast.error("Não foi possível encontrar o propósito ativo.");
-      setEnding(false);
-      return;
-    }
 
     try {
+      const commitment = await getCommitmentByMatch(matchId);
+
+      if (!commitment || commitment.status !== "active") {
+        throw new Error("Não foi possível encontrar o propósito ativo.");
+      }
+
       await endCommitment(commitment.id);
     } catch (error) {
       toast.error(friendlyError(error));
@@ -325,6 +328,7 @@ function CouplePage() {
     }
 
     toast.success("Propósito encerrado. A área voltou ao estado normal.");
+    setEndDialogOpen(false);
     window.location.assign("/pretendentes");
   }
 
@@ -548,7 +552,7 @@ function CouplePage() {
               <Button
                 variant="destructive"
                 className="rounded-full"
-                onClick={() => void handleEndCommitment()}
+                onClick={() => setEndDialogOpen(true)}
                 disabled={ending}
               >
                 {ending ? "Encerrando..." : "Encerrar propósito"}
@@ -557,6 +561,26 @@ function CouplePage() {
           </section>
         )}
       </main>
+
+      <Dialog open={endDialogOpen} onOpenChange={(open) => !ending && setEndDialogOpen(open)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Encerrar propósito</DialogTitle>
+            <DialogDescription>
+              Encerrar este propósito vai liberar a área de pretendentes, matches e conversas novamente para os
+              participantes.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="outline" onClick={() => setEndDialogOpen(false)} disabled={ending}>
+              Cancelar
+            </Button>
+            <Button variant="destructive" onClick={() => void handleEndCommitment()} disabled={ending}>
+              {ending ? "Encerrando..." : "Encerrar propósito"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={!!warning} onOpenChange={(open) => !open && setWarning(null)}>
         <DialogContent className="sm:max-w-md">
