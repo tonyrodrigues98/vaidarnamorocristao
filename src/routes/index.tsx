@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, Heart, Instagram, Music2, Radio, Users, Youtube } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import carenHeroAsset from "@/assets/caren-hero.jpeg.asset.json";
 
 const TIKTOK_LIVE_URL = "https://www.tiktok.com/@carenlayane6?_r=1&_t=ZS-96w3ETPtTl3";
 
@@ -90,12 +91,14 @@ function Home() {
 
               <div className="relative z-10 flex h-[46dvh] min-h-[300px] max-h-[420px] w-full max-w-[520px] items-end justify-center sm:h-[58dvh] sm:min-h-[460px] sm:max-h-none lg:h-[66dvh] lg:max-w-[620px]">
                 <div className="absolute bottom-8 h-[80%] w-[68%] rounded-t-full bg-gradient-to-b from-white/15 via-white/10 to-white/0 blur-[2px]" />
-                <div className="absolute bottom-0 h-[86%] w-[74%] rounded-t-[48%] border border-white/15 bg-[linear-gradient(180deg,rgba(255,255,255,0.14),rgba(255,255,255,0.05)_38%,rgba(255,79,104,0.12)_100%)] shadow-[0_36px_120px_rgba(0,0,0,0.72)] backdrop-blur-sm">
-                  {/* Troque este bloco pelo asset real da Caren futuramente.
-                      Exemplo: importar src/assets/caren-hero.webp e renderizar uma img absolute inset-0 object-cover. */}
-                  <div className="absolute inset-x-[20%] top-[12%] mx-auto h-[21%] rounded-full bg-gradient-to-br from-white/30 via-white/15 to-[#ff5c70]/20 shadow-[0_0_70px_rgba(255,92,112,0.22)]" />
-                  <div className="absolute inset-x-[12%] bottom-0 h-[67%] rounded-t-[46%] bg-gradient-to-b from-white/20 via-white/10 to-[#151515]/70" />
-                  <div className="absolute inset-0 rounded-t-[48%] bg-[radial-gradient(circle_at_50%_22%,rgba(255,255,255,0.18),transparent_18%),linear-gradient(90deg,transparent,rgba(255,255,255,0.07),transparent)]" />
+                <div className="absolute bottom-0 h-[86%] w-[74%] overflow-hidden rounded-t-[48%] border border-white/15 shadow-[0_36px_120px_rgba(0,0,0,0.72)]">
+                  <img
+                    src={carenHeroAsset.url}
+                    alt="Caren"
+                    className="absolute inset-0 h-full w-full object-cover object-[50%_30%]"
+                    loading="eager"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#0f0f10]/70" />
                 </div>
                 <div className="absolute bottom-0 h-24 w-[92%] rounded-full bg-[#ff4f68]/18 blur-3xl" />
               </div>
