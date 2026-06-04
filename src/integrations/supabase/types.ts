@@ -739,6 +739,51 @@ export type Database = {
         }
         Relationships: []
       }
+      live_team_members: {
+        Row: {
+          category: string
+          chip_text: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          photo_url: string
+          role_title: string
+          sort_order: number
+          storage_path: string | null
+          tiktok_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          chip_text?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          photo_url: string
+          role_title: string
+          sort_order?: number
+          storage_path?: string | null
+          tiktok_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          chip_text?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          photo_url?: string
+          role_title?: string
+          sort_order?: number
+          storage_path?: string | null
+          tiktok_url?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       matches: {
         Row: {
           created_at: string
