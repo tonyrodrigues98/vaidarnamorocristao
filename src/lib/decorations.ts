@@ -98,6 +98,13 @@ export function assetFor(d: Pick<Decoration, "image_url"> | null | undefined): s
   if (!d?.image_url) return null;
   if (DECORATION_ASSETS[d.image_url]) return DECORATION_ASSETS[d.image_url];
   if (/^(https?:|data:|blob:|\/)/.test(d.image_url)) return d.image_url;
+  if (d.image_url.startsWith("avatar-decorations/")) {
+    return supabase.storage.from("gift-images").getPublicUrl(d.image_url).data.publicUrl;
+  }
+  if (d.image_url.startsWith("gift-images/")) {
+    const path = d.image_url.replace(/^gift-images\//, "");
+    return supabase.storage.from("gift-images").getPublicUrl(path).data.publicUrl;
+  }
   return d.image_url;
 }
 
@@ -130,7 +137,11 @@ export function invalidateDecorationCatalog() {
   renderCatalogPromise = null;
 }
 
-export async function fetchDecorationRenderCatalog(): Promise<Decoration[]> {
+export async function fetchDecorationRenderCatalog(force = false): Promise<Decoration[]> {
+  if (force) {
+    renderCatalogCache = null;
+    renderCatalogPromise = null;
+  }
   if (renderCatalogCache) return renderCatalogCache;
   if (renderCatalogPromise) return renderCatalogPromise;
   renderCatalogPromise = (async () => {

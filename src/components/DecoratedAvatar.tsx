@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { fetchDecorationRenderCatalog, assetFor, type Decoration } from "@/lib/decorations";
 import { useSignedPhotoUrl } from "@/lib/photoUrl";
@@ -53,6 +53,18 @@ function ensureCatalog(): Decoration[] | null {
   return null;
 }
 
+function publishCatalog(catalog: Decoration[]) {
+  cachedCatalog = catalog;
+  listeners.forEach((fn) => fn(catalog));
+}
+
+function hasDecorationIds(catalog: Decoration[] | null, ids: Array<string | null | undefined>) {
+  const wanted = ids.filter(Boolean);
+  if (!wanted.length) return true;
+  if (!catalog) return false;
+  return wanted.every((id) => catalog.some((decoration) => decoration.id === id));
+}
+
 export function DecoratedAvatar({
   photoUrl,
   fallback,
@@ -68,6 +80,7 @@ export function DecoratedAvatar({
   void _stickerId;
   const hasAny = !!(frameId || auraId);
   const [catalog, setCatalog] = useState<Decoration[] | null>(cachedCatalog);
+  const refreshedMissingKey = useRef<string | null>(null);
   const resolvedPhoto = useSignedPhotoUrl(photoUrl ?? null);
 
   useEffect(() => {
@@ -83,6 +96,24 @@ export function DecoratedAvatar({
       listeners.delete(handler);
     };
   }, [hasAny, catalog]);
+
+  useEffect(() => {
+    if (!hasAny || !catalog || hasDecorationIds(catalog, [frameId, auraId])) return;
+    const missingKey = `${frameId ?? ""}:${auraId ?? ""}`;
+    if (refreshedMissingKey.current === missingKey) return;
+    refreshedMissingKey.current = missingKey;
+    let cancelled = false;
+    fetchDecorationRenderCatalog(true)
+      .then((nextCatalog) => {
+        if (cancelled) return;
+        publishCatalog(nextCatalog);
+        setCatalog(nextCatalog);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [hasAny, catalog, frameId, auraId]);
 
   const find = (id: string | null | undefined) =>
     id && catalog ? (catalog.find((d) => d.id === id) ?? null) : null;
