@@ -73,15 +73,6 @@ import { UserBadges, invalidateUserBadges } from "@/components/UserBadges";
 import { BADGE_META, type BadgeCode } from "@/lib/badges";
 import { Award as AwardIcon } from "lucide-react";
 import { BibleVerseSelector, type BibleSelection } from "@/components/BibleVerseSelector";
-import {
-  SidebarProvider,
-  SidebarInset,
-  SidebarTrigger,
-} from "@/components/ui/sidebar";
-
-import {
-  AdminSidebar,
-} from "@/components/admin/AdminSidebar";
 import { InterestsPanel } from "@/components/admin/InterestsPanel";
 
 type Row = Database["public"]["Tables"]["profiles"]["Row"];
@@ -173,6 +164,27 @@ function Admin() {
     if (isModerador) return ["reports", "posts", "restricted_words", "flags"];
     return [];
   }, [isAdmin, isSuperAdmin, isApresentador]);
+
+  const tabNavItems = useMemo(
+    () =>
+      [
+        { value: "pending", label: "Pendentes", icon: ClipboardList },
+        { value: "approved", label: "Aprovados", icon: BadgeCheck },
+        { value: "rejected", label: "Rejeitados", icon: X },
+        { value: "banned", label: "Banidos", icon: Ban },
+        { value: "deactivated", label: "Desativados", icon: ShieldX },
+        { value: "reports", label: "Denúncias", icon: Flag },
+        { value: "posts", label: "Texto diário", icon: Newspaper },
+        { value: "users", label: "Usuários", icon: UsersIcon },
+        { value: "pre_cadastros", label: "Pré-cadastros", icon: UserPlus },
+        { value: "restricted_words", label: "Palavras restritas", icon: ShieldAlert },
+        { value: "flags", label: "Sinalizações", icon: MessageSquareWarning },
+        { value: "interests", label: "Interesses & Matches", icon: Heart },
+      ].filter((item): item is { value: TabKey; label: string; icon: typeof ClipboardList } =>
+        availableTabs.includes(item.value as TabKey),
+      ),
+    [availableTabs],
+  );
 
   const [rows, setRows] = useState<Row[]>([]);
   const [tab, setTab] = useState<TabKey>("pending");
@@ -527,21 +539,9 @@ function Admin() {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-muted/20">
       <Header />
-      <SidebarProvider>
-
-  <AdminSidebar
-    currentTab={tab}
-    availableTabs={availableTabs}
-    onTabChange={(value) =>
-      setTab(value)
-    }
-  />
-
-  <SidebarInset>
-
-    <main className="px-4 py-10">
+      <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
         <div className="animate-fade-up">
           <h1 className="text-4xl font-semibold">Painel administrativo</h1>
           <p className="mt-1 text-muted-foreground">
@@ -581,19 +581,23 @@ function Admin() {
         </div>
 
         <Tabs value={tab} onValueChange={(v) => setTab(v as TabKey)} className="mt-8">
-          <TabsList className="flex h-auto flex-wrap justify-start gap-1">
-            {availableTabs.includes("pending") && <TabsTrigger value="pending">Pendentes</TabsTrigger>}
-            {availableTabs.includes("approved") && <TabsTrigger value="approved">Aprovados</TabsTrigger>}
-            {availableTabs.includes("rejected") && <TabsTrigger value="rejected">Rejeitados</TabsTrigger>}
-            {availableTabs.includes("banned") && <TabsTrigger value="banned">Banidos</TabsTrigger>}
-            {availableTabs.includes("deactivated") && <TabsTrigger value="deactivated">Desativados</TabsTrigger>}
-            {availableTabs.includes("reports") && <TabsTrigger value="reports">Denúncias</TabsTrigger>}
-            {availableTabs.includes("posts") && <TabsTrigger value="posts">Texto diário</TabsTrigger>}
-            {availableTabs.includes("users") && <TabsTrigger value="users">Usuários</TabsTrigger>}
-            {availableTabs.includes("pre_cadastros") && <TabsTrigger value="pre_cadastros">Pré-cadastros</TabsTrigger>}
-            {availableTabs.includes("restricted_words") && <TabsTrigger value="restricted_words">Palavras restritas</TabsTrigger>}
-            {availableTabs.includes("flags") && <TabsTrigger value="flags">Sinalizações</TabsTrigger>}
-            {availableTabs.includes("interests") && <TabsTrigger value="interests">Interesses & Matches</TabsTrigger>}
+          <TabsList className="grid h-auto w-full grid-cols-1 gap-3 rounded-3xl border bg-background/70 p-3 shadow-soft backdrop-blur sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {tabNavItems.map((item) => {
+              const Icon = item.icon;
+
+              return (
+                <TabsTrigger
+                  key={item.value}
+                  value={item.value}
+                  className="min-h-14 justify-start gap-3 rounded-2xl border border-border/70 bg-white px-5 py-3 text-left text-sm font-semibold text-black shadow-sm transition-all hover:-translate-y-0.5 hover:border-[var(--rose)]/40 hover:shadow-md data-[state=active]:border-[var(--rose)] data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-glow"
+                >
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[var(--petal)] text-[var(--rose)]">
+                    <Icon className="h-4 w-4" />
+                  </span>
+                  <span className="truncate">{item.label}</span>
+                </TabsTrigger>
+              );
+            })}
           </TabsList>
 
           <TabsContent value={tab} className="mt-6">
@@ -1053,10 +1057,6 @@ function Admin() {
           </TabsContent>
         </Tabs>
       </main>
-
-  </SidebarInset>
-
-</SidebarProvider>
     </div>
   );
 }
