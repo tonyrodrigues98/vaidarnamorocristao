@@ -90,8 +90,8 @@ function Home() {
               <CurvedText
                 id="welcome-curve"
                 text="Seja Bem Vindo"
-                className="relative z-30 h-[118px] w-[min(96vw,980px)] drop-shadow-[0_6px_20px_rgba(0,0,0,0.75)] sm:h-[150px] lg:h-[190px]"
-                textClassName="fill-white text-[78px] font-black uppercase sm:text-[92px] lg:text-[112px]"
+                className="relative z-30 h-[16vw] min-h-[110px] w-[80vw] max-w-[1400px] drop-shadow-[0_6px_20px_rgba(0,0,0,0.75)] sm:h-[14vw] lg:h-[12vw]"
+                textClassName="fill-white text-[150px] font-black uppercase tracking-tight"
                 path="M 70 178 Q 600 28 1130 178"
                 startOffset="50%"
               />
@@ -101,8 +101,8 @@ function Home() {
               <CurvedText
                 id="community-curve"
                 text="à nossa comunidade"
-                className="relative z-30 h-[118px] w-[min(92vw,760px)] drop-shadow-[0_6px_20px_rgba(0,0,0,0.75)] sm:h-[142px]"
-                textClassName="fill-white text-[35px] font-extrabold tracking-[0.08em] sm:text-[48px] lg:text-[56px]"
+                className="relative z-30 h-[10vw] min-h-[70px] w-[60vw] max-w-[1050px] drop-shadow-[0_6px_20px_rgba(0,0,0,0.75)] sm:h-[9vw] lg:h-[8vw]"
+                textClassName="fill-white text-[78px] font-semibold tracking-[0.04em]"
                 path="M 120 68 Q 600 148 1080 68"
                 startOffset="50%"
               />
