@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import carenHeroAsset from "@/assets/caren-hero.jpeg.asset.json";
 
 export const TIKTOK_LIVE_URL = "https://www.tiktok.com/@carenlayane6?_r=1&_t=ZS-96w3ETPtTl3";
-export const COMMUNITY_AUTH_ROUTE = "/auth/login";
+export const COMMUNITY_AUTH_ROUTE = "/inicio";
 
 export function CarenLiveHero() {
   return (

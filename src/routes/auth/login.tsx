@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, Navigate, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { z } from "zod";
 import { toast } from "sonner";
@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Header } from "@/components/layout/Header";
 import { SocialAuthButtons } from "@/components/SocialAuthButtons";
+import { useAuth } from "@/lib/auth";
 
 const schema = z.object({
   email: z.string().trim().email("Email inválido").max(255),
@@ -18,6 +19,7 @@ export const Route = createFileRoute("/auth/login")({ component: Login });
 
 function Login() {
   const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -39,6 +41,8 @@ function Login() {
     toast.success("Bem-vindo(a) de volta!");
     navigate({ to: "/inicio" });
   }
+
+  if (!authLoading && user) return <Navigate to="/inicio" replace />;
 
   return (
     <div className="min-h-screen">
