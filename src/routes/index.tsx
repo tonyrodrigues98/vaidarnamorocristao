@@ -1,10 +1,9 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, Heart, Instagram, Music2, Radio, Users, Youtube } from "lucide-react";
+import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 
-import { Button } from "@/components/ui/button";
-import carenHeroAsset from "@/assets/caren-hero.jpeg.asset.json";
-
-const TIKTOK_LIVE_URL = "https://www.tiktok.com/@carenlayane6?_r=1&_t=ZS-96w3ETPtTl3";
+import { CarenLiveHero, TIKTOK_LIVE_URL } from "@/components/home/CarenLiveHero";
+import { LiveTeamSection } from "@/components/home/LiveTeamSection";
+import { fetchActiveLiveTeamMembers, type LiveTeamMember } from "@/lib/liveTeam";
 
 export const Route = createFileRoute("/")({
   component: Home,
@@ -36,310 +35,36 @@ export const Route = createFileRoute("/")({
       },
       { name: "twitter:image", content: "https://vaidarnamoro.com/og-image.jpg" },
     ],
-    links: [{ rel: "canonical", href: "https://vaidarnamoro.com/" }],
+    links: [
+      { rel: "canonical", href: "https://vaidarnamoro.com/" },
+      { rel: "me", href: TIKTOK_LIVE_URL },
+    ],
   }),
 });
 
 function Home() {
+  const [members, setMembers] = useState<LiveTeamMember[]>([]);
+
+  useEffect(() => {
+    let mounted = true;
+
+    fetchActiveLiveTeamMembers()
+      .then((items) => {
+        if (mounted) setMembers(items);
+      })
+      .catch(() => {
+        if (mounted) setMembers([]);
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
   return (
     <main className="min-h-dvh overflow-hidden bg-[#0f0f10] font-sans text-white">
-      <section className="relative isolate flex min-h-dvh flex-col overflow-hidden px-4 py-4 sm:px-6 lg:px-10">
-        <img
-          src={carenHeroAsset.url}
-          alt="Caren"
-          className="pointer-events-none absolute inset-0 -z-30 h-full w-full object-cover object-[50%_30%] sm:object-[50%_25%]"
-          loading="eager"
-        />
-        {/* Vinheta escura ao redor, independente do tema */}
-        <div className="pointer-events-none absolute inset-0 -z-20 bg-[radial-gradient(ellipse_at_center,transparent_35%,rgba(0,0,0,0.55)_72%,rgba(0,0,0,0.92)_100%)]" />
-        <div className="pointer-events-none absolute inset-0 -z-20 bg-gradient-to-b from-black/55 via-black/20 to-black/85" />
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-2/3 bg-gradient-to-t from-black via-black/55 to-transparent" />
-
-        <HeroNav />
-
-        <div className="relative mx-auto flex w-full max-w-[1440px] flex-1 items-center justify-center pt-6 lg:pt-0">
-          <SocialRail />
-
-          <div className="relative grid min-h-[540px] w-full place-items-center sm:min-h-[calc(100dvh-112px)]">
-            <div className="pointer-events-none absolute left-0 top-[16%] hidden w-72 rounded-3xl border border-white/10 bg-white/[0.06] p-5 text-white/85 shadow-2xl shadow-black/30 backdrop-blur-xl lg:block">
-              <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-[#ff5c70]">
-                Comunidade ativa
-              </p>
-              <p className="mt-3 text-lg font-black leading-tight">
-                Uma comunidade real, feita de pessoas reais.
-              </p>
-              <div className="mt-5 flex items-center gap-3 text-xs text-white/60">
-                <Users className="h-4 w-4 text-[#ff5c70]" />
-                Respeito, fé e diversão
-              </div>
-            </div>
-
-            <div className="pointer-events-none absolute right-0 top-[20%] hidden w-64 rounded-3xl border border-white/10 bg-black/25 p-5 text-white shadow-2xl shadow-black/30 backdrop-blur-xl xl:block">
-              <div className="flex items-center gap-3">
-                <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#ff4f68]">
-                  <Radio className="h-5 w-5" />
-                </span>
-                <div>
-                  <p className="text-sm font-black">Todos os dias</p>
-                  <p className="text-xs text-white/60">A partir das 23h</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="relative flex w-full max-w-5xl flex-col items-center">
-              <CurvedText
-                id="welcome-curve"
-                text="Seja Bem Vindo"
-                className="relative z-30 h-[16vw] min-h-[110px] w-[80vw] max-w-[1400px] drop-shadow-[0_6px_20px_rgba(0,0,0,0.75)] sm:h-[14vw] lg:h-[12vw]"
-                textClassName="fill-white text-[128px] font-black uppercase tracking-tight"
-                path="M 20 200 Q 600 40 1180 200"
-                startOffset="50%"
-              />
-
-              <div className="h-[46dvh] min-h-[300px] sm:h-[58dvh] sm:min-h-[460px] lg:h-[60dvh]" />
-
-              <CurvedText
-                id="community-curve"
-                text="à nossa comunidade"
-                className="relative z-30 h-[10vw] min-h-[70px] w-[60vw] max-w-[1050px] drop-shadow-[0_6px_20px_rgba(0,0,0,0.75)] sm:h-[9vw] lg:h-[8vw]"
-                textClassName="fill-white text-[72px] font-semibold tracking-[0.02em]"
-                path="M 20 80 Q 600 180 1180 80"
-                startOffset="50%"
-              />
-            </div>
-          </div>
-        </div>
-
-        <HeroActions />
-      </section>
+      <CarenLiveHero />
+      <LiveTeamSection members={members} />
     </main>
-  );
-}
-
-function HeroNav() {
-  return (
-    <header className="relative z-40 mx-auto flex w-full max-w-[1440px] items-start justify-between gap-3">
-      <Link to="/" className="group flex min-w-0 items-center gap-3" aria-label="Caren">
-        <div>
-          <div className="font-[cursive] text-3xl italic leading-none text-[#ff5c70] drop-shadow-sm sm:text-4xl">
-            Caren
-          </div>
-          <p className="mt-1 text-[9px] font-bold uppercase leading-[1.1] tracking-[0.2em] text-white/70 sm:text-[10px]">
-            Vai Dar
-            <br />
-            Namoro Cristão
-          </p>
-        </div>
-      </Link>
-
-      <div className="flex flex-col items-end gap-2 sm:flex-row sm:items-center">
-        <a
-          href={TIKTOK_LIVE_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 rounded-full border border-[#ff5c70]/40 bg-[#ff5c70]/12 px-3 py-2 text-[10px] font-black uppercase tracking-[0.18em] text-white shadow-lg shadow-[#ff4f68]/10 backdrop-blur-xl transition hover:bg-[#ff5c70]/20 sm:text-xs"
-        >
-          <span className="relative flex h-2.5 w-2.5">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#ff5c70] opacity-60" />
-            <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-[#ff5c70]" />
-          </span>
-          AO VIVO no TikTok
-        </a>
-        <span className="hidden rounded-full border border-white/10 bg-white/[0.06] px-3 py-2 text-xs font-semibold text-white/70 backdrop-blur-xl sm:inline-flex">
-          Todos os dias a partir das 23h
-        </span>
-      </div>
-    </header>
-  );
-}
-
-function HeroActions() {
-  return (
-    <div className="relative z-40 mx-auto -mt-10 flex w-full max-w-[1440px] flex-col gap-4 pb-4 sm:-mt-20 lg:-mt-28 lg:flex-row lg:items-end lg:justify-between">
-      <div className="order-3 rounded-3xl border border-white/10 bg-white/[0.06] p-4 shadow-2xl shadow-black/30 backdrop-blur-xl lg:order-none lg:hidden">
-        <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#ff5c70]">
-          Comunidade ativa
-        </p>
-        <p className="mt-2 text-base font-black leading-tight">
-          Uma comunidade real, feita de pessoas reais.
-        </p>
-      </div>
-
-      <div className="order-2 flex justify-center gap-2 md:hidden">
-        <SocialIcon href={TIKTOK_LIVE_URL} label="TikTok da Caren" icon={Music2} />
-        <SocialIcon label="Instagram em breve" icon={Instagram} />
-        <SocialIcon label="YouTube em breve" icon={Youtube} />
-        <SocialIcon to="/auth/signup" label="Comunidade" icon={Heart} />
-      </div>
-
-      <div className="order-1 grid grid-cols-2 gap-3 sm:flex sm:flex-row lg:order-none lg:ml-auto">
-        <Button
-          asChild
-          className="col-span-2 h-[52px] rounded-full bg-[#ff4f68] px-6 text-sm font-black text-white shadow-[0_18px_42px_rgba(255,79,104,0.26)] transition hover:bg-[#ff5c70] sm:h-14 sm:px-8"
-        >
-          <a href={TIKTOK_LIVE_URL} target="_blank" rel="noopener noreferrer">
-            Participar da live <ArrowRight className="ml-2 h-4 w-4" />
-          </a>
-        </Button>
-        <Button
-          asChild
-          variant="outline"
-          className="h-[52px] rounded-full border-white/15 bg-white/[0.07] px-6 text-sm font-bold text-white backdrop-blur-xl transition hover:bg-white/10 hover:text-white sm:h-14 sm:px-8"
-        >
-          <Link to="/auth/login">Entrar</Link>
-        </Button>
-        <Button
-          asChild
-          variant="outline"
-          className="h-[52px] rounded-full border-white/15 bg-white text-sm font-black text-[#111113] transition hover:bg-white/90 sm:h-14 sm:px-8"
-        >
-          <Link to="/auth/signup">Criar conta</Link>
-        </Button>
-      </div>
-    </div>
-  );
-}
-
-function SocialRail() {
-  const links = [
-    {
-      label: "TikTok da Caren",
-      href: TIKTOK_LIVE_URL,
-      icon: Music2,
-    },
-    {
-      label: "Instagram",
-      icon: Instagram,
-    },
-    {
-      label: "YouTube",
-      icon: Youtube,
-    },
-    {
-      label: "Comunidade",
-      href: "/auth/signup",
-      icon: Heart,
-      internal: true,
-    },
-  ];
-
-  return (
-    <nav
-      aria-label="Redes sociais"
-      className="absolute right-0 top-1/2 z-40 hidden -translate-y-1/2 flex-col gap-3 md:flex"
-    >
-      {links.map((item) => {
-        const Icon = item.icon;
-        const className =
-          "flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/[0.07] text-white/80 backdrop-blur-xl transition hover:-translate-y-0.5 hover:border-[#ff5c70]/60 hover:text-white";
-        if (item.internal) {
-          return (
-            <Link key={item.label} to="/auth/signup" className={className} aria-label={item.label}>
-              <Icon className="h-4 w-4" />
-            </Link>
-          );
-        }
-        if (!item.href) {
-          return (
-            <span
-              key={item.label}
-              className={`${className} opacity-70`}
-              aria-label={`${item.label} em breve`}
-              title={`${item.label} em breve`}
-            >
-              <Icon className="h-4 w-4" />
-            </span>
-          );
-        }
-        return (
-          <a
-            key={item.label}
-            href={item.href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={className}
-            aria-label={item.label}
-          >
-            <Icon className="h-4 w-4" />
-          </a>
-        );
-      })}
-    </nav>
-  );
-}
-
-function SocialIcon({
-  href,
-  to,
-  label,
-  icon: Icon,
-}: {
-  href?: string;
-  to?: "/auth/signup";
-  label: string;
-  icon: typeof Music2;
-}) {
-  const className =
-    "flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/[0.08] text-white/80 backdrop-blur-xl transition hover:border-[#ff5c70]/60 hover:text-white";
-  if (to) {
-    return (
-      <Link to={to} className={className} aria-label={label}>
-        <Icon className="h-4 w-4" />
-      </Link>
-    );
-  }
-  if (href) {
-    return (
-      <a
-        href={href}
-        target="_blank"
-        rel="noopener noreferrer"
-        className={className}
-        aria-label={label}
-      >
-        <Icon className="h-4 w-4" />
-      </a>
-    );
-  }
-  return (
-    <span className={`${className} opacity-70`} aria-label={label} title={label}>
-      <Icon className="h-4 w-4" />
-    </span>
-  );
-}
-
-function CurvedText({
-  id,
-  text,
-  className,
-  textClassName,
-  path,
-  startOffset,
-}: {
-  id: string;
-  text: string;
-  className: string;
-  textClassName: string;
-  path: string;
-  startOffset: string;
-}) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 1200 240"
-      role="img"
-      aria-label={text}
-      preserveAspectRatio="xMidYMid meet"
-      style={{ overflow: "visible" }}
-    >
-      <defs>
-        <path id={id} d={path} />
-      </defs>
-      <text className={textClassName} dominantBaseline="middle" textAnchor="middle">
-        <textPath href={`#${id}`} startOffset={startOffset}>
-          {text}
-        </textPath>
-      </text>
-    </svg>
   );
 }
