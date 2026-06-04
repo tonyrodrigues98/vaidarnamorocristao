@@ -5,15 +5,29 @@ import { supabase } from "@/integrations/supabase/client";
 import { PretendenteCarousel } from "./PretendenteCarousel";
 import { PretendenteFeaturedCard } from "./PretendenteFeaturedCard";
 import { useAuth } from "@/lib/auth";
-import { getActiveCommitmentByUser,} from "@/lib/commitments";
+import { getActiveCommitmentByUser } from "@/lib/commitments";
 import { Header } from "@/components/layout/Header";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { BR_STATES } from "@/lib/constants";
-import { SlidersHorizontal, X, Sparkles, Flame } from "lucide-react";
+import {
+  ArrowRight,
+  Gem,
+  Heart,
+  Lock,
+  ShieldCheck,
+  SlidersHorizontal,
+  Sparkles,
+  X,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ROLE_PRIORITY, type AppRole, type RoleColor } from "@/lib/roles";
-import { UserBadges } from "@/components/UserBadges";
 import { computeAffinity, type AffinityChip } from "@/lib/affinity";
 import { LOVE_LANGUAGE, MINISTRY, type AdvancedProfile } from "@/lib/profileAdvanced";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
@@ -86,8 +100,12 @@ function List() {
   const [advancedMap, setAdvancedMap] = useState<Record<string, AdvancedProfile>>({});
   const [extraPhotos, setExtraPhotos] = useState<Record<string, string[]>>({});
 
-  const [ageMinInput, setAgeMinInput] = useState<string>(search.ageMin != null ? String(search.ageMin) : "");
-  const [ageMaxInput, setAgeMaxInput] = useState<string>(search.ageMax != null ? String(search.ageMax) : "");
+  const [ageMinInput, setAgeMinInput] = useState<string>(
+    search.ageMin != null ? String(search.ageMin) : "",
+  );
+  const [ageMaxInput, setAgeMaxInput] = useState<string>(
+    search.ageMax != null ? String(search.ageMax) : "",
+  );
 
   function commitAge(field: "ageMin" | "ageMax", raw: string) {
     const digits = raw.replace(/\D/g, "");
@@ -109,7 +127,16 @@ function List() {
     (async () => {
       const commitment = await getActiveCommitmentByUser(user.id);
       setActiveCommitment(commitment);
-      const { data: me } = await supabase.from("profiles").select("status, sex, state").eq("id", user.id).maybeSingle();
+      if (commitment) {
+        setProfiles([]);
+        setLoadingList(false);
+        return;
+      }
+      const { data: me } = await supabase
+        .from("profiles")
+        .select("status, sex, state")
+        .eq("id", user.id)
+        .maybeSingle();
       setMyStatus(me?.status ?? null);
       setMySex(me?.sex ?? null);
       const { data: prefs } = await supabase
@@ -124,30 +151,34 @@ function List() {
       });
       if (me?.status === "approved") {
         const targetSex = me.sex === "masculino" ? "feminino" : "masculino";
-        const [profsRes, blocksRes, blockedByRes, hiddenRes, rolesRes, myAdvRes, commitmentsRes,
-] = await Promise.all([
-          supabase
-            .from("profiles")
-            .select("id, full_name, age, city, state, church, bio, photo_url, sex, marital, verified, created_at")
-            .eq("status", "approved")
-            .eq("sex", targetSex)
-            .neq("id", user.id)
-            .order("created_at", { ascending: false }),
-          supabase.from("blocks").select("blocked_id").eq("blocker_id", user.id),
-          supabase.from("blocks").select("blocker_id").eq("blocked_id", user.id),
-          supabase.rpc("get_hidden_staff_ids"),
-          supabase.from("user_roles").select("user_id, role, badge_color").neq("role", "user"),
-          supabase.from("profile_advanced").select("*").eq("user_id", user.id).maybeSingle(),
-          supabase
-            .from("relationship_commitments")
-            .select("user_a,user_b")
-            .eq("status", "active"),
-        ]);
+        const [profsRes, blocksRes, blockedByRes, hiddenRes, rolesRes, myAdvRes, commitmentsRes] =
+          await Promise.all([
+            supabase
+              .from("profiles")
+              .select(
+                "id, full_name, age, city, state, church, bio, photo_url, sex, marital, verified, created_at",
+              )
+              .eq("status", "approved")
+              .eq("sex", targetSex)
+              .neq("id", user.id)
+              .order("created_at", { ascending: false }),
+            supabase.from("blocks").select("blocked_id").eq("blocker_id", user.id),
+            supabase.from("blocks").select("blocker_id").eq("blocked_id", user.id),
+            supabase.rpc("get_hidden_staff_ids"),
+            supabase.from("user_roles").select("user_id, role, badge_color").neq("role", "user"),
+            supabase.from("profile_advanced").select("*").eq("user_id", user.id).maybeSingle(),
+            supabase
+              .from("relationship_commitments")
+              .select("user_a,user_b")
+              .eq("status", "active"),
+          ]);
         const hidden = new Set<string>([
           ...(blocksRes.data ?? []).map((b: any) => b.blocked_id),
           ...(blockedByRes.data ?? []).map((b: any) => b.blocker_id),
           ...(((hiddenRes as any).data ?? []) as any[])
-            .map((x: any) => (typeof x === "string" ? x : (x.get_hidden_staff_ids ?? x.user_id ?? "")))
+            .map((x: any) =>
+              typeof x === "string" ? x : (x.get_hidden_staff_ids ?? x.user_id ?? ""),
+            )
             .filter(Boolean),
         ]);
         const map: Record<string, StaffInfo> = {};
@@ -165,31 +196,17 @@ function List() {
           }
         }
         setStaffMap(map);
-        const committedUsers =
-  new Set<string>();
+        const committedUsers = new Set<string>();
 
-for (
-  const row of
-  (commitmentsRes.data ?? [])
-) {
+        for (const row of commitmentsRes.data ?? []) {
+          committedUsers.add(row.user_a);
 
-  committedUsers.add(
-    row.user_a
-  );
+          committedUsers.add(row.user_b);
+        }
 
-  committedUsers.add(
-    row.user_b
-  );
-
-}
-
-const visible =
-  ((profsRes.data ?? []) as Profile[])
-    .filter(
-      (p) =>
-        !hidden.has(p.id) &&
-        !committedUsers.has(p.id)
-    );
+        const visible = ((profsRes.data ?? []) as Profile[]).filter(
+          (p) => !hidden.has(p.id) && !committedUsers.has(p.id),
+        );
         setProfiles(visible);
         setMyAdvanced(((myAdvRes as any)?.data ?? null) as AdvancedProfile | null);
         const ids = visible.map((p) => p.id);
@@ -237,13 +254,15 @@ const visible =
     const list = profiles.filter((p) => {
       if (search.q) {
         const qq = search.q.toLowerCase();
-        if (!p.full_name.toLowerCase().includes(qq) && !p.city.toLowerCase().includes(qq)) return false;
+        if (!p.full_name.toLowerCase().includes(qq) && !p.city.toLowerCase().includes(qq))
+          return false;
       }
       if (search.state !== "all" && p.state !== search.state) return false;
       if (search.marital !== "all" && p.marital !== search.marital) return false;
       if (search.ageMin != null && p.age < search.ageMin) return false;
       if (search.ageMax != null && p.age > search.ageMax) return false;
-      if (search.church && !p.church.toLowerCase().includes(search.church.toLowerCase())) return false;
+      if (search.church && !p.church.toLowerCase().includes(search.church.toLowerCase()))
+        return false;
       if (search.verified && !p.verified) return false;
       if (search.ministry !== "all") {
         const adv = advancedMap[p.id];
@@ -283,7 +302,9 @@ const visible =
 
   const topMatches = useMemo(() => {
     return [...filtered]
-      .sort((a, b) => (affinityByProfile[b.id]?.length ?? 0) - (affinityByProfile[a.id]?.length ?? 0))
+      .sort(
+        (a, b) => (affinityByProfile[b.id]?.length ?? 0) - (affinityByProfile[a.id]?.length ?? 0),
+      )
       .slice(0, 10);
   }, [filtered, affinityByProfile]);
 
@@ -292,7 +313,9 @@ const visible =
   }, [filtered, myPrefs.state]);
 
   const newestProfiles = useMemo(() => {
-    return [...filtered].sort((a, b) => (b.created_at ?? "").localeCompare(a.created_at ?? "")).slice(0, 10);
+    return [...filtered]
+      .sort((a, b) => (b.created_at ?? "").localeCompare(a.created_at ?? ""))
+      .slice(0, 10);
   }, [filtered]);
 
   function isSuggestion(p: Profile): boolean {
@@ -314,102 +337,143 @@ const visible =
     search.loveLang !== "all" ||
     search.verified;
 
+  const canBrowsePretendentes = !activeCommitment && myStatus === "approved";
+  const audienceLabel =
+    mySex === "masculino" ? "Mulheres" : mySex === "feminino" ? "Homens" : "Pessoas";
+
   if (!loading && !user) return <Navigate to="/auth/login" />;
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-gradient-to-b from-rose-50/70 via-background to-background dark:from-rose-950/10 dark:via-background dark:to-background">
       <Header />
-      <main className="mx-auto max-w-6xl px-4 py-10">
-        <div className="animate-fade-up">
-          <h1 className="text-4xl font-semibold">Pretendentes</h1>
-          <p className="mt-1 text-muted-foreground">
-            {mySex === "masculino" ? "Mulheres" : mySex === "feminino" ? "Homens" : "Pessoas"} cristãs aprovados na
-            plataforma.
-          </p>
-        </div>
+      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <section className="relative overflow-hidden rounded-3xl border border-white/70 bg-white/75 p-6 shadow-soft backdrop-blur-xl dark:border-white/10 dark:bg-card/70 sm:p-8 lg:p-10">
+          <div className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full bg-rose-300/25 blur-3xl dark:bg-rose-700/20" />
+          <div className="pointer-events-none absolute -bottom-28 left-10 h-72 w-72 rounded-full bg-emerald-200/25 blur-3xl dark:bg-emerald-800/20" />
+          <div className="relative grid gap-8 lg:grid-cols-[1fr_auto] lg:items-end">
+            <div className="max-w-3xl animate-fade-up">
+              <div className="inline-flex items-center gap-2 rounded-full border border-rose-200/70 bg-rose-50/80 px-3 py-1 text-xs font-semibold text-rose-700 dark:border-rose-800/50 dark:bg-rose-950/30 dark:text-rose-200">
+                <Heart className="h-3.5 w-3.5" />
+                Encontros com propósito
+              </div>
+              <h1 className="mt-4 text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
+                Pretendentes
+              </h1>
+              <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">
+                {audienceLabel} com perfis cristãos aprovados na plataforma, organizados por
+                afinidade, região e detalhes do perfil para ajudar você a conhecer alguém com calma
+                e segurança.
+              </p>
+            </div>
+            {canBrowsePretendentes && (
+              <div className="grid grid-cols-2 gap-3 rounded-3xl border border-border/60 bg-background/70 p-4 text-center shadow-sm backdrop-blur md:min-w-[280px]">
+                <div>
+                  <p className="text-2xl font-semibold">{filtered.length}</p>
+                  <p className="text-xs text-muted-foreground">perfis visíveis</p>
+                </div>
+                <div>
+                  <p className="text-2xl font-semibold">{topMatches.length}</p>
+                  <p className="text-xs text-muted-foreground">destaques</p>
+                </div>
+              </div>
+            )}
+          </div>
+        </section>
 
         {activeCommitment ? (
-  <div className="glass mt-8 rounded-2xl p-12 text-center shadow-soft">
+          <section className="mx-auto mt-8 max-w-3xl overflow-hidden rounded-3xl border border-emerald-200/60 bg-gradient-to-br from-emerald-50 via-white to-rose-50 p-8 text-center shadow-soft backdrop-blur dark:border-emerald-800/40 dark:from-emerald-950/30 dark:via-background dark:to-rose-950/20 sm:p-12">
+            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br from-emerald-400/20 via-white to-rose-400/20 shadow-inner dark:via-white/10">
+              <Gem className="h-10 w-10 text-emerald-600 dark:text-emerald-300" />
+            </div>
 
-    <h2 className="text-3xl font-semibold">
-      💍 Propósito Firmado
-    </h2>
+            <h2 className="mt-6 text-3xl font-semibold tracking-tight">Propósito Firmado</h2>
 
-    <p className="mt-3 text-muted-foreground">
-      Você firmou propósito com outra pessoa.
-    </p>
+            <p className="mx-auto mt-3 max-w-xl text-muted-foreground">
+              Você está em um propósito ativo. Por isso, a área de pretendentes fica pausada
+              enquanto esse compromisso estiver firmado.
+            </p>
 
-    <p className="mt-2 text-sm text-muted-foreground">
-      Enquanto o propósito estiver ativo,
-      novos pretendentes não são exibidos.
-    </p>
+            <Button asChild size="lg" className="mt-7 rounded-full px-6">
+              <Link
+                to="/proposito/$matchId"
+                params={{
+                  matchId: activeCommitment.match_id,
+                }}
+              >
+                Ver Página do Casal
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
 
-    <Button
-      asChild
-      className="mt-6"
-    >
-      <Link
-        to="/proposito/$matchId"
-        params={{
-          matchId:
-            activeCommitment.match_id,
-        }}
-      >
-        Ver Página do Casal
-      </Link>
-    </Button>
-
-  </div>
-) : (
-        myStatus !== "approved" ? (
-          <div className="glass mt-8 rounded-2xl p-8 text-center shadow-soft">
-            <p className="text-muted-foreground">Você precisa ter o perfil aprovado para ver os pretendentes.</p>
-          </div>
+            <div className="mt-6 inline-flex items-center gap-2 rounded-full border border-emerald-200/70 bg-white/60 px-4 py-2 text-xs font-medium text-emerald-700 dark:border-emerald-800/50 dark:bg-white/5 dark:text-emerald-200">
+              <Lock className="h-3.5 w-3.5" />
+              Pretendentes pausados durante o compromisso
+            </div>
+          </section>
+        ) : myStatus !== "approved" ? (
+          <section className="mt-8 rounded-3xl border border-border/70 bg-card/80 p-8 text-center shadow-soft backdrop-blur">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-muted">
+              <ShieldCheck className="h-7 w-7 text-muted-foreground" />
+            </div>
+            <p className="mt-4 text-muted-foreground">
+              Você precisa ter o perfil aprovado para ver os pretendentes.
+            </p>
+          </section>
         ) : (
           <>
-            <div className="mt-6 flex flex-wrap items-center gap-2">
-              <Input
-                placeholder="Buscar por nome ou cidade..."
-                value={search.q}
-                onChange={(e) => update("q", e.target.value)}
-                className="max-w-sm"
-              />
-              <Button variant="outline" size="sm" onClick={() => setFiltersOpen((o) => !o)}>
-                <SlidersHorizontal className="mr-1 h-4 w-4" /> Filtros
-              </Button>
-              {hasFilters && (
-                <Button variant="ghost" size="sm" onClick={clearAll}>
-                  <X className="mr-1 h-4 w-4" /> Limpar
+            <div className="mt-6 rounded-3xl border border-border/70 bg-card/80 p-4 shadow-soft backdrop-blur">
+              <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
+                <Input
+                  placeholder="Buscar por nome ou cidade..."
+                  value={search.q}
+                  onChange={(e) => update("q", e.target.value)}
+                  className="h-11 rounded-2xl bg-background/80 lg:max-w-sm"
+                />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="rounded-full"
+                  onClick={() => setFiltersOpen((o) => !o)}
+                >
+                  <SlidersHorizontal className="mr-1 h-4 w-4" /> Filtros
                 </Button>
-              )}
-              <Button
-                variant={search.verified ? "default" : "outline"}
-                size="sm"
-                onClick={() => update("verified", !search.verified)}
-              >
-                ✔ Verificados
-              </Button>
-              <div className="ml-auto flex items-center gap-2">
-                <Select value={search.sort} onValueChange={(v) => update("sort", v as any)}>
-                  <SelectTrigger className="h-9 w-[180px]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="affinity">🔥 Afinidade</SelectItem>
-                    <SelectItem value="recent">Mais recentes</SelectItem>
-                    <SelectItem value="geographic">Mais próximos</SelectItem>
-                  </SelectContent>
-                </Select>
-                <span className="text-sm text-muted-foreground">{filtered.length}</span>
+                {hasFilters && (
+                  <Button variant="ghost" size="sm" className="rounded-full" onClick={clearAll}>
+                    <X className="mr-1 h-4 w-4" /> Limpar
+                  </Button>
+                )}
+                <Button
+                  variant={search.verified ? "default" : "outline"}
+                  size="sm"
+                  className="rounded-full"
+                  onClick={() => update("verified", !search.verified)}
+                >
+                  <ShieldCheck className="mr-1 h-4 w-4" /> Verificados
+                </Button>
+                <div className="flex flex-1 items-center gap-2 lg:justify-end">
+                  <Select value={search.sort} onValueChange={(v) => update("sort", v as any)}>
+                    <SelectTrigger className="h-11 rounded-2xl bg-background/80 sm:w-[190px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="affinity">Afinidade</SelectItem>
+                      <SelectItem value="recent">Mais recentes</SelectItem>
+                      <SelectItem value="geographic">Mais próximos</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <span className="rounded-full bg-muted px-3 py-2 text-sm text-muted-foreground">
+                    {filtered.length}
+                  </span>
+                </div>
               </div>
             </div>
 
             {filtersOpen && (
-              <div className="glass mt-3 grid gap-3 rounded-2xl p-4 shadow-soft sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+              <div className="mt-4 grid gap-3 rounded-3xl border border-border/60 bg-background/65 p-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                 <div>
                   <label className="text-xs text-muted-foreground">Estado</label>
                   <Select value={search.state} onValueChange={(v) => update("state", v)}>
-                    <SelectTrigger>
+                    <SelectTrigger className="mt-1 rounded-2xl">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -425,7 +489,7 @@ const visible =
                 <div>
                   <label className="text-xs text-muted-foreground">Estado civil</label>
                   <Select value={search.marital} onValueChange={(v) => update("marital", v as any)}>
-                    <SelectTrigger>
+                    <SelectTrigger className="mt-1 rounded-2xl">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -444,6 +508,7 @@ const visible =
                     maxLength={3}
                     placeholder="18"
                     value={ageMinInput}
+                    className="mt-1 rounded-2xl"
                     onChange={(e) => commitAge("ageMin", e.target.value)}
                     onBlur={() => {
                       if (ageMinInput === "") return;
@@ -464,6 +529,7 @@ const visible =
                     maxLength={3}
                     placeholder="110"
                     value={ageMaxInput}
+                    className="mt-1 rounded-2xl"
                     onChange={(e) => commitAge("ageMax", e.target.value)}
                     onBlur={() => {
                       if (ageMaxInput === "") return;
@@ -481,12 +547,13 @@ const visible =
                     value={search.church}
                     onChange={(e) => update("church", e.target.value)}
                     placeholder="Ex: Batista"
+                    className="mt-1 rounded-2xl"
                   />
                 </div>
                 <div>
                   <label className="text-xs text-muted-foreground">Ministério</label>
                   <Select value={search.ministry} onValueChange={(v) => update("ministry", v)}>
-                    <SelectTrigger>
+                    <SelectTrigger className="mt-1 rounded-2xl">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -502,7 +569,7 @@ const visible =
                 <div>
                   <label className="text-xs text-muted-foreground">Linguagem do amor</label>
                   <Select value={search.loveLang} onValueChange={(v) => update("loveLang", v)}>
-                    <SelectTrigger>
+                    <SelectTrigger className="mt-1 rounded-2xl">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -518,36 +585,53 @@ const visible =
               </div>
             )}
           </>
-        ))}
+        )}
 
-        {myStatus === "approved" &&
+        {canBrowsePretendentes &&
           (loadingList ? (
             <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="glass h-80 animate-pulse rounded-2xl" />
+                <div
+                  key={i}
+                  className="h-80 animate-pulse rounded-3xl border border-border/70 bg-card/70 shadow-soft"
+                />
               ))}
             </div>
           ) : filtered.length === 0 ? (
-            <div className="glass mt-8 rounded-2xl p-12 text-center shadow-soft">
-              <p className="text-xl">
-                {hasFilters ? "Nenhum perfil corresponde aos filtros." : "Ainda não há pretendentes para mostrar."}
+            <div className="mt-8 rounded-3xl border border-border/70 bg-card/80 p-10 text-center shadow-soft backdrop-blur sm:p-12">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-rose-100 text-rose-600 dark:bg-rose-950/40 dark:text-rose-300">
+                <Sparkles className="h-7 w-7" />
+              </div>
+              <p className="mt-4 text-xl font-semibold">
+                {hasFilters
+                  ? "Nenhum perfil corresponde aos filtros."
+                  : "Ainda não há pretendentes para mostrar."}
+              </p>
+              <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
+                Ajuste a busca ou volte mais tarde para encontrar novos perfis aprovados.
               </p>
               {hasFilters && (
-                <Button variant="outline" className="mt-4" onClick={clearAll}>
+                <Button variant="outline" className="mt-5 rounded-full" onClick={clearAll}>
                   Limpar filtros
                 </Button>
               )}
             </div>
           ) : (
             <>
-              <br></br>
-              <div className="mb-10 overflow-hidden rounded-3xl bg-gradient-to-r from-pink-500 via-rose-500 to-purple-500 p-8 text-white">
+              <div className="mt-8 overflow-hidden rounded-3xl border border-rose-200/60 bg-gradient-to-r from-rose-500 via-pink-500 to-purple-500 p-8 text-white shadow-elegant dark:border-rose-900/40">
                 <div className="max-w-2xl">
-                  <p className="text-sm font-semibold uppercase tracking-wider opacity-90">Descobertas</p>
+                  <p className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-white/90">
+                    <Sparkles className="h-3.5 w-3.5" />
+                    Descobertas
+                  </p>
 
-                  <h2 className="mt-2 text-4xl font-bold">Pessoas compatíveis com você</h2>
+                  <h2 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">
+                    Pessoas compatíveis com você
+                  </h2>
 
-                  <p className="mt-3 text-white/90">Baseado na sua fé, afinidade, localização e interesses.</p>
+                  <p className="mt-3 text-white/90">
+                    Baseado na sua fé, afinidade, localização e interesses.
+                  </p>
                 </div>
               </div>
               <PretendenteCarousel
@@ -588,7 +672,8 @@ const visible =
               <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                 {filtered.map((p, i) => {
                   const chips = affinityByProfile[p.id] ?? [];
-                  const score = maxScore > 0 ? Math.min(99, Math.round((chips.length / maxScore) * 100)) : 0;
+                  const score =
+                    maxScore > 0 ? Math.min(99, Math.round((chips.length / maxScore) * 100)) : 0;
                   const showScore = chips.length >= 3 && score >= 50 && !!myAdvanced;
                   return (
                     <PretendenteFeaturedCard
