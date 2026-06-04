@@ -456,6 +456,7 @@ function Detail() {
 <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-card/86 via-card/36 to-transparent" />
 <div className="absolute inset-y-0 left-0 w-1/4 bg-gradient-to-r from-card/28 to-transparent dark:from-black/24" />
 <div className="absolute inset-y-0 right-0 w-1/4 bg-gradient-to-l from-card/28 to-transparent dark:from-black/24" />
+          </div>
 
           <div className="relative z-10 grid gap-5 p-4 pt-0 sm:p-6 sm:pt-0 xl:grid-cols-[minmax(300px,0.8fr)_minmax(0,1.1fr)_minmax(320px,0.7fr)] xl:items-start">
             <div className="relative -mt-20 overflow-visible rounded-[2rem] p-0 sm:-mt-24 lg:-mt-28">
