@@ -22,16 +22,53 @@ import coracao from "@/assets/decorations/sticker-coracao-sagrado.png";
 import estrela from "@/assets/decorations/sticker-estrela-belem.png";
 
 export type DecorationType = "frame" | "aura" | "sticker";
+export type DecorationRarity = "common" | "rare" | "epic" | "legendary" | "exclusive";
 
 export type Decoration = {
   id: string;
   type: DecorationType;
   slug: string;
   name: string;
+  description: string | null;
   image_url: string | null;
   css_value: string | null;
   price_coins: number;
+  rarity: DecorationRarity;
   sort_order: number;
+  active: boolean;
+  created_at: string;
+  updated_at: string | null;
+};
+
+export const DECORATION_RARITY_STYLE: Record<
+  DecorationRarity,
+  { label: string; chip: string; border: string }
+> = {
+  common: {
+    label: "Comum",
+    chip: "bg-slate-500/10 text-slate-600 dark:text-slate-300",
+    border: "border-slate-300/40",
+  },
+  rare: {
+    label: "Raro",
+    chip: "bg-sky-500/15 text-sky-600 dark:text-sky-300",
+    border: "border-sky-400/50",
+  },
+  epic: {
+    label: "Epico",
+    chip: "bg-purple-500/15 text-purple-600 dark:text-purple-300",
+    border: "border-purple-400/60",
+  },
+  legendary: {
+    label: "Lendario",
+    chip: "bg-gradient-to-r from-amber-400 to-yellow-300 text-amber-950",
+    border: "border-amber-400/70",
+  },
+  exclusive: {
+    label: "Exclusivo",
+    chip: "bg-gradient-to-r from-pink-500 via-fuchsia-500 to-purple-500 text-white",
+    border: "border-pink-400/70",
+  },
 };
 
 export const DECORATION_ASSETS: Record<string, string> = {
@@ -59,11 +96,15 @@ export const DECORATION_ASSETS: Record<string, string> = {
 
 export function assetFor(d: Pick<Decoration, "image_url"> | null | undefined): string | null {
   if (!d?.image_url) return null;
-  return DECORATION_ASSETS[d.image_url] ?? null;
+  if (DECORATION_ASSETS[d.image_url]) return DECORATION_ASSETS[d.image_url];
+  if (/^(https?:|data:|blob:|\/)/.test(d.image_url)) return d.image_url;
+  return d.image_url;
 }
 
 let catalogCache: Decoration[] | null = null;
 let catalogPromise: Promise<Decoration[]> | null = null;
+let renderCatalogCache: Decoration[] | null = null;
+let renderCatalogPromise: Promise<Decoration[]> | null = null;
 
 export async function fetchDecorationCatalog(): Promise<Decoration[]> {
   if (catalogCache) return catalogCache;
@@ -85,34 +126,169 @@ export async function fetchDecorationCatalog(): Promise<Decoration[]> {
 export function invalidateDecorationCatalog() {
   catalogCache = null;
   catalogPromise = null;
+  renderCatalogCache = null;
+  renderCatalogPromise = null;
+}
+
+export async function fetchDecorationRenderCatalog(): Promise<Decoration[]> {
+  if (renderCatalogCache) return renderCatalogCache;
+  if (renderCatalogPromise) return renderCatalogPromise;
+  renderCatalogPromise = (async () => {
+    const { data, error } = await supabase
+      .from("avatar_decorations" as never)
+      .select("*")
+      .order("type")
+      .order("sort_order", { ascending: true, nullsFirst: false })
+      .order("created_at", { ascending: false });
+    if (error) throw error;
+    renderCatalogCache = (data ?? []) as unknown as Decoration[];
+    return renderCatalogCache;
+  })();
+  return renderCatalogPromise;
+}
+
+export async function fetchAdminDecorations(type: DecorationType): Promise<Decoration[]> {
+  const { data, error } = await supabase
+    .from("avatar_decorations" as never)
+    .select("*")
+    .eq("type", type)
+    .order("sort_order", { ascending: true, nullsFirst: false })
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return (data ?? []) as unknown as Decoration[];
+}
+
+export type DecorationPayload = {
+  type: DecorationType;
+  slug: string;
+  name: string;
+  description?: string | null;
+  image_url?: string | null;
+  css_value?: string | null;
+  price_coins: number;
+  rarity?: DecorationRarity;
+  sort_order?: number;
+  active?: boolean;
+};
+
+export async function createDecoration(payload: DecorationPayload) {
+  const { data, error } = await supabase
+    .from("avatar_decorations" as never)
+    .insert({
+      type: payload.type,
+      slug: payload.slug,
+      name: payload.name,
+      description: payload.description ?? null,
+      image_url: payload.image_url ?? null,
+      css_value: payload.css_value ?? null,
+      price_coins: payload.price_coins,
+      rarity: payload.rarity ?? "common",
+      sort_order: payload.sort_order ?? 0,
+      active: payload.active ?? true,
+    } as never)
+    .select()
+    .single();
+  if (error) throw error;
+  invalidateDecorationCatalog();
+  return data as unknown as Decoration;
+}
+
+export async function updateDecoration(id: string, payload: Partial<DecorationPayload>) {
+  const { data, error } = await supabase
+    .from("avatar_decorations" as never)
+    .update({
+      ...payload,
+      updated_at: new Date().toISOString(),
+    } as never)
+    .eq("id", id)
+    .select()
+    .single();
+  if (error) throw error;
+  invalidateDecorationCatalog();
+  return data as unknown as Decoration;
+}
+
+export async function reorderDecorations(updates: Array<Pick<Decoration, "id" | "sort_order">>) {
+  const results = await Promise.all(
+    updates.map(({ id, sort_order }) =>
+      supabase
+        .from("avatar_decorations" as never)
+        .update({
+          sort_order,
+          updated_at: new Date().toISOString(),
+        } as never)
+        .eq("id", id),
+    ),
+  );
+  const failed = results.find((result) => result.error);
+  if (failed?.error) throw failed.error;
+  invalidateDecorationCatalog();
+}
+
+export async function getDecorationUsage(decorationId: string) {
+  const [{ count: ownedCount, error: ownedError }, { count: equippedCount, error: equippedError }] =
+    await Promise.all([
+      supabase
+        .from("user_decorations" as never)
+        .select("id", { count: "exact", head: true })
+        .eq("decoration_id", decorationId),
+      supabase
+        .from("profiles")
+        .select("id", { count: "exact", head: true })
+        .or(
+          `equipped_frame_id.eq.${decorationId},equipped_aura_id.eq.${decorationId},equipped_sticker_id.eq.${decorationId}`,
+        ),
+    ]);
+  if (ownedError) throw ownedError;
+  if (equippedError) throw equippedError;
+  return {
+    ownedCount: ownedCount ?? 0,
+    equippedCount: equippedCount ?? 0,
+  };
+}
+
+export async function deleteDecoration(id: string) {
+  const { error } = await supabase
+    .from("avatar_decorations" as never)
+    .delete()
+    .eq("id", id);
+  if (error) throw error;
+  invalidateDecorationCatalog();
 }
 
 export async function fetchMyOwnedIds(): Promise<Set<string>> {
-  const { data, error } = await supabase
-    .from("user_decorations" as never)
-    .select("decoration_id");
+  const { data, error } = await supabase.from("user_decorations" as never).select("decoration_id");
   if (error) throw error;
   return new Set(((data ?? []) as Array<{ decoration_id: string }>).map((r) => r.decoration_id));
 }
 
 export async function purchaseDecoration(decorationId: string) {
-  const { data, error } = await supabase.rpc("purchase_decoration" as never, {
-    _decoration_id: decorationId,
-  } as never);
+  const { data, error } = await supabase.rpc(
+    "purchase_decoration" as never,
+    {
+      _decoration_id: decorationId,
+    } as never,
+  );
   if (error) throw error;
   return data as unknown as { success: boolean; new_balance: number };
 }
 
 export async function equipDecoration(decorationId: string) {
-  const { error } = await supabase.rpc("equip_decoration" as never, {
-    _decoration_id: decorationId,
-  } as never);
+  const { error } = await supabase.rpc(
+    "equip_decoration" as never,
+    {
+      _decoration_id: decorationId,
+    } as never,
+  );
   if (error) throw error;
 }
 
 export async function unequipDecoration(type: DecorationType) {
-  const { error } = await supabase.rpc("unequip_decoration" as never, {
-    _type: type,
-  } as never);
+  const { error } = await supabase.rpc(
+    "unequip_decoration" as never,
+    {
+      _type: type,
+    } as never,
+  );
   if (error) throw error;
 }

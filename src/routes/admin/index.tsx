@@ -563,6 +563,12 @@ function Admin() {
                 <Link to="/admin/presentes">Catálogo de Presentes</Link>
               </Button>
               <Button asChild variant="outline" size="sm" className="mr-2">
+                <Link to="/admin/molduras">Molduras</Link>
+              </Button>
+              <Button asChild variant="outline" size="sm" className="mr-2">
+                <Link to="/admin/auras">Auras</Link>
+              </Button>
+              <Button asChild variant="outline" size="sm" className="mr-2">
                 <Link to="/admin/fundos">Fundos de Perfil</Link>
               </Button>
               {isSuperAdmin && (

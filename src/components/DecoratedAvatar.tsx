@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
-import { fetchDecorationCatalog, assetFor, type Decoration } from "@/lib/decorations";
+import { fetchDecorationRenderCatalog, assetFor, type Decoration } from "@/lib/decorations";
 import { useSignedPhotoUrl } from "@/lib/photoUrl";
 import commitmentRing from "@/assets/commitment-ring.png";
 // `size` é o canvas total do componente. A moldura SEMPRE preenche esse
@@ -44,7 +44,7 @@ const listeners = new Set<(c: Decoration[]) => void>();
 
 function ensureCatalog(): Decoration[] | null {
   if (cachedCatalog) return cachedCatalog;
-  fetchDecorationCatalog()
+  fetchDecorationRenderCatalog()
     .then((c) => {
       cachedCatalog = c;
       listeners.forEach((fn) => fn(c));
@@ -84,12 +84,14 @@ export function DecoratedAvatar({
     };
   }, [hasAny, catalog]);
 
-  const find = (id: string | null | undefined) => (id && catalog ? (catalog.find((d) => d.id === id) ?? null) : null);
+  const find = (id: string | null | undefined) =>
+    id && catalog ? (catalog.find((d) => d.id === id) ?? null) : null;
   const frame = find(frameId);
   const aura = find(auraId);
 
   const initial = fallback ?? "?";
   const frameAsset = frame ? assetFor(frame) : null;
+  const auraAsset = aura ? assetFor(aura) : null;
   const placement = frame?.image_url
     ? (FRAME_PLACEMENT[frame.image_url] ?? DEFAULT_FRAME_PLACEMENT)
     : DEFAULT_FRAME_PLACEMENT;
@@ -102,7 +104,10 @@ export function DecoratedAvatar({
   const photoCenterY = canvas * placement.centerY;
 
   return (
-    <div className={cn("relative inline-block shrink-0", className)} style={{ width: canvas, height: canvas }}>
+    <div
+      className={cn("relative inline-block shrink-0", className)}
+      style={{ width: canvas, height: canvas }}
+    >
       {aura?.css_value && (
         <div
           aria-hidden
@@ -112,6 +117,21 @@ export function DecoratedAvatar({
             background: `radial-gradient(circle, ${aura.css_value}66 0%, ${aura.css_value}33 45%, transparent 72%)`,
             filter: `blur(${Math.max(6, canvas * 0.09)}px)`,
             zIndex: 0,
+          }}
+        />
+      )}
+      {auraAsset && (
+        <img
+          src={auraAsset}
+          alt=""
+          aria-hidden
+          className="pointer-events-none absolute object-contain"
+          style={{
+            inset: `-${Math.round(canvas * 0.12)}px`,
+            width: canvas * 1.24,
+            height: canvas * 1.24,
+            zIndex: 1,
+            filter: "drop-shadow(0 0 18px rgba(255,255,255,.18))",
           }}
         />
       )}
@@ -126,7 +146,12 @@ export function DecoratedAvatar({
         }}
       >
         {resolvedPhoto ? (
-          <img src={resolvedPhoto} alt={alt} className="h-full w-full object-cover" loading="lazy" />
+          <img
+            src={resolvedPhoto}
+            alt={alt}
+            className="h-full w-full object-cover"
+            loading="lazy"
+          />
         ) : (
           <div
             className="flex h-full w-full items-center justify-center bg-gradient-love font-semibold text-white"

@@ -52,8 +52,10 @@ import { Route as ApiVerifyPhotoRouteImport } from './routes/api/verify-photo'
 import { Route as AdminVerificacoesRouteImport } from './routes/admin/verificacoes'
 import { Route as AdminStickersRouteImport } from './routes/admin/stickers'
 import { Route as AdminPresentesRouteImport } from './routes/admin/presentes'
+import { Route as AdminMoldurasRouteImport } from './routes/admin/molduras'
 import { Route as AdminFundosRouteImport } from './routes/admin/fundos'
 import { Route as AdminFotosRouteImport } from './routes/admin/fotos'
+import { Route as AdminAurasRouteImport } from './routes/admin/auras'
 
 const VerificacaoRoute = VerificacaoRouteImport.update({
   id: '/verificacao',
@@ -270,6 +272,11 @@ const AdminPresentesRoute = AdminPresentesRouteImport.update({
   path: '/admin/presentes',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminMoldurasRoute = AdminMoldurasRouteImport.update({
+  id: '/admin/molduras',
+  path: '/admin/molduras',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminFundosRoute = AdminFundosRouteImport.update({
   id: '/admin/fundos',
   path: '/admin/fundos',
@@ -278,6 +285,11 @@ const AdminFundosRoute = AdminFundosRouteImport.update({
 const AdminFotosRoute = AdminFotosRouteImport.update({
   id: '/admin/fotos',
   path: '/admin/fotos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminAurasRoute = AdminAurasRouteImport.update({
+  id: '/admin/auras',
+  path: '/admin/auras',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -302,8 +314,10 @@ export interface FileRoutesByFullPath {
   '/sobre': typeof SobreRoute
   '/termos': typeof TermosRoute
   '/verificacao': typeof VerificacaoRoute
+  '/admin/auras': typeof AdminAurasRoute
   '/admin/fotos': typeof AdminFotosRoute
   '/admin/fundos': typeof AdminFundosRoute
+  '/admin/molduras': typeof AdminMoldurasRoute
   '/admin/presentes': typeof AdminPresentesRoute
   '/admin/stickers': typeof AdminStickersRoute
   '/admin/verificacoes': typeof AdminVerificacoesRoute
@@ -349,8 +363,10 @@ export interface FileRoutesByTo {
   '/sobre': typeof SobreRoute
   '/termos': typeof TermosRoute
   '/verificacao': typeof VerificacaoRoute
+  '/admin/auras': typeof AdminAurasRoute
   '/admin/fotos': typeof AdminFotosRoute
   '/admin/fundos': typeof AdminFundosRoute
+  '/admin/molduras': typeof AdminMoldurasRoute
   '/admin/presentes': typeof AdminPresentesRoute
   '/admin/stickers': typeof AdminStickersRoute
   '/admin/verificacoes': typeof AdminVerificacoesRoute
@@ -397,8 +413,10 @@ export interface FileRoutesById {
   '/sobre': typeof SobreRoute
   '/termos': typeof TermosRoute
   '/verificacao': typeof VerificacaoRoute
+  '/admin/auras': typeof AdminAurasRoute
   '/admin/fotos': typeof AdminFotosRoute
   '/admin/fundos': typeof AdminFundosRoute
+  '/admin/molduras': typeof AdminMoldurasRoute
   '/admin/presentes': typeof AdminPresentesRoute
   '/admin/stickers': typeof AdminStickersRoute
   '/admin/verificacoes': typeof AdminVerificacoesRoute
@@ -446,8 +464,10 @@ export interface FileRouteTypes {
     | '/sobre'
     | '/termos'
     | '/verificacao'
+    | '/admin/auras'
     | '/admin/fotos'
     | '/admin/fundos'
+    | '/admin/molduras'
     | '/admin/presentes'
     | '/admin/stickers'
     | '/admin/verificacoes'
@@ -493,8 +513,10 @@ export interface FileRouteTypes {
     | '/sobre'
     | '/termos'
     | '/verificacao'
+    | '/admin/auras'
     | '/admin/fotos'
     | '/admin/fundos'
+    | '/admin/molduras'
     | '/admin/presentes'
     | '/admin/stickers'
     | '/admin/verificacoes'
@@ -540,8 +562,10 @@ export interface FileRouteTypes {
     | '/sobre'
     | '/termos'
     | '/verificacao'
+    | '/admin/auras'
     | '/admin/fotos'
     | '/admin/fundos'
+    | '/admin/molduras'
     | '/admin/presentes'
     | '/admin/stickers'
     | '/admin/verificacoes'
@@ -588,8 +612,10 @@ export interface RootRouteChildren {
   SobreRoute: typeof SobreRoute
   TermosRoute: typeof TermosRoute
   VerificacaoRoute: typeof VerificacaoRoute
+  AdminAurasRoute: typeof AdminAurasRoute
   AdminFotosRoute: typeof AdminFotosRoute
   AdminFundosRoute: typeof AdminFundosRoute
+  AdminMoldurasRoute: typeof AdminMoldurasRoute
   AdminPresentesRoute: typeof AdminPresentesRoute
   AdminStickersRoute: typeof AdminStickersRoute
   AdminVerificacoesRoute: typeof AdminVerificacoesRoute
@@ -918,6 +944,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminPresentesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/molduras': {
+      id: '/admin/molduras'
+      path: '/admin/molduras'
+      fullPath: '/admin/molduras'
+      preLoaderRoute: typeof AdminMoldurasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/fundos': {
       id: '/admin/fundos'
       path: '/admin/fundos'
@@ -930,6 +963,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/fotos'
       fullPath: '/admin/fotos'
       preLoaderRoute: typeof AdminFotosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/auras': {
+      id: '/admin/auras'
+      path: '/admin/auras'
+      fullPath: '/admin/auras'
+      preLoaderRoute: typeof AdminAurasRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -956,8 +996,10 @@ const rootRouteChildren: RootRouteChildren = {
   SobreRoute: SobreRoute,
   TermosRoute: TermosRoute,
   VerificacaoRoute: VerificacaoRoute,
+  AdminAurasRoute: AdminAurasRoute,
   AdminFotosRoute: AdminFotosRoute,
   AdminFundosRoute: AdminFundosRoute,
+  AdminMoldurasRoute: AdminMoldurasRoute,
   AdminPresentesRoute: AdminPresentesRoute,
   AdminStickersRoute: AdminStickersRoute,
   AdminVerificacoesRoute: AdminVerificacoesRoute,
@@ -985,3 +1027,12 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
