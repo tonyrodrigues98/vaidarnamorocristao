@@ -11,6 +11,7 @@ const PROFILE_MARKERS = [
 const SIGN_TTL_SECONDS = 60 * 60;
 const REFRESH_BEFORE_MS = 5 * 60 * 1000;
 const RETRY_DELAY_MS = 1200;
+const EMPTY_SIGNED_EXPIRES_AT = 0;
 
 type CachedSigned = {
   url: string;
@@ -20,6 +21,7 @@ type CachedSigned = {
 
 type SignedResult = {
   url: string | null;
+  fallbackUrl: string | null;
   loading: boolean;
   error: boolean;
   refresh: () => void;
@@ -43,6 +45,14 @@ function looksLikeRawProfilePath(value: string) {
   if (!value || value.startsWith("/") || value.startsWith("data:") || value.startsWith("blob:")) return false;
   if (/^[a-z][a-z0-9+.-]*:/i.test(value)) return false;
   return value.includes("/");
+}
+
+function isSignedProfileUrl(value: string | null) {
+  return Boolean(value?.includes(`/storage/v1/object/sign/${BUCKET}/`));
+}
+
+function publicUrlForPath(path: string) {
+  return supabase.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
 }
 
 export function extractProfilePhotoPath(url: string | null | undefined): string | null {
@@ -91,7 +101,7 @@ function getSigned(path: string, force = false): { url: string | null; pending: 
     if (url) {
       cache.set(path, { url, expiresAt: Date.now() + SIGN_TTL_SECONDS * 1000 });
     } else if (!cached?.url) {
-      cache.delete(path);
+      cache.set(path, { url: publicUrlForPath(path), expiresAt: EMPTY_SIGNED_EXPIRES_AT });
     } else {
       cache.set(path, { url: cached.url, expiresAt: cached.expiresAt });
     }
@@ -117,6 +127,11 @@ export function refreshSignedProfilePhoto(input: string | null | undefined) {
 export function useSignedPhotoUrlResult(input: string | null | undefined): SignedResult {
   const trimmedInput = input?.trim() || null;
   const path = useMemo(() => extractProfilePhotoPath(trimmedInput), [trimmedInput]);
+  const publicFallback = useMemo(() => {
+    if (!path) return null;
+    if (trimmedInput && !isSignedProfileUrl(trimmedInput)) return trimmedInput;
+    return publicUrlForPath(path);
+  }, [path, trimmedInput]);
   const passthrough = !trimmedInput || path ? null : trimmedInput;
   const [refreshToken, setRefreshToken] = useState(0);
 
@@ -124,8 +139,8 @@ export function useSignedPhotoUrlResult(input: string | null | undefined): Signe
     if (!path) return passthrough;
     const cached = cache.get(path);
     if (cached?.url && cached.expiresAt - REFRESH_BEFORE_MS > Date.now()) return cached.url;
-    return null;
-  }, [path, passthrough]);
+    return publicFallback;
+  }, [path, passthrough, publicFallback]);
 
   const [url, setUrl] = useState<string | null>(initial);
   const [loading, setLoading] = useState(Boolean(path && !initial));
@@ -148,7 +163,7 @@ export function useSignedPhotoUrlResult(input: string | null | undefined): Signe
     const force = refreshToken > 0;
     const { url: cachedUrl, pending } = getSigned(path, force);
 
-    if (cachedUrl) setUrl(cachedUrl);
+    setUrl(cachedUrl || publicFallback);
     setLoading(Boolean(pending && !cachedUrl));
     setError(false);
 
@@ -159,6 +174,7 @@ export function useSignedPhotoUrlResult(input: string | null | undefined): Signe
           setUrl(nextUrl);
           setError(false);
         } else {
+          setUrl(publicFallback);
           setError(true);
           setTimeout(() => {
             if (!cancelled) setRefreshToken((value) => value + 1);
@@ -182,9 +198,9 @@ export function useSignedPhotoUrlResult(input: string | null | undefined): Signe
       cancelled = true;
       if (timer) window.clearTimeout(timer);
     };
-  }, [path, passthrough, refreshToken]);
+  }, [path, passthrough, publicFallback, refreshToken]);
 
-  return { url, loading, error, refresh };
+  return { url, fallbackUrl: publicFallback, loading, error, refresh };
 }
 
 export function useSignedPhotoUrl(input: string | null | undefined): string | null {
