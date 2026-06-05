@@ -268,7 +268,7 @@ function Dashboard() {
   if (!loading && !user) return <Navigate to="/auth/login" />;
   if (profile === undefined)
     return (
-      <div className="min-h-screen">
+      <div className="min-h-screen bg-gradient-to-b from-[var(--petal)]/20 via-background to-background">
         <Header />
       </div>
     );
@@ -308,9 +308,9 @@ function Dashboard() {
   const Icon = statusInfo.icon;
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-gradient-to-b from-[var(--petal)]/20 via-background to-background">
       <Header />
-      <main className="mx-auto max-w-6xl px-4 py-10">
+      <main className="mx-auto max-w-6xl px-4 pb-20 pt-5 sm:py-10">
         <div className="animate-fade-up">
           <p className="text-sm text-muted-foreground">Olá,</p>
           <h1 className="text-4xl font-black tracking-tight">
@@ -322,7 +322,7 @@ function Dashboard() {
           </h1>
         </div>
 
-        <div className="glass animate-fade-up mt-6 flex items-start gap-4 rounded-3xl p-6 shadow-soft">
+        <div className="glass animate-fade-up mt-6 flex items-start gap-4 rounded-[1.75rem] p-5 shadow-soft sm:rounded-3xl sm:p-6">
           <div
             className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ${statusInfo.bg}`}
           >

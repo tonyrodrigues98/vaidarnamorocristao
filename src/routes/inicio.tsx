@@ -422,7 +422,7 @@ function InicioPage() {
   if (!loading && !user) return <Navigate to="/auth/login" />;
   if (profile === undefined) {
     return (
-      <div className="min-h-screen">
+      <div className="min-h-screen bg-gradient-to-b from-[var(--petal)]/20 via-background to-background">
         <Header />
         <div className="mx-auto max-w-6xl px-4 py-16">
           <div className="h-40 animate-pulse rounded-3xl bg-muted/40" />
@@ -507,10 +507,10 @@ function InicioPage() {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-gradient-to-b from-[var(--petal)]/20 via-background to-background">
       <Header />
 
-      <main className="relative mx-auto w-full max-w-6xl px-4 pb-16 pt-6 sm:px-6 sm:pt-10">
+      <main className="relative mx-auto w-full max-w-6xl px-4 pb-20 pt-5 sm:px-6 sm:pt-10">
         {/* AVISOS SÉRIOS DA EQUIPE */}
         {activeWarnings.length > 0 && (
           <section className="mb-6 space-y-3">

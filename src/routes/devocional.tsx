@@ -329,6 +329,11 @@ function Devocional() {
     return arr;
   }, [posts, sort, commentCount, reactionTotals]);
 
+  const featuredPost = posts[0] ?? null;
+  const archivePosts = featuredPost
+    ? sortedPosts.filter((post) => post.id !== featuredPost.id)
+    : sortedPosts;
+
   async function toggleReaction(postId: string, reaction: Reaction) {
     if (!user) return;
     const mine = reactions.find(
@@ -530,23 +535,60 @@ function Devocional() {
 
   if (!loading && !user) return <Navigate to="/auth/login" />;
 
+  const renderPostCard = (post: Post, featured = false) => (
+    <PostCard
+      key={post.id}
+      post={post}
+      author={profiles[post.author_id]}
+      reactions={reactions.filter((reaction) => reaction.post_id === post.id)}
+      myUserId={user!.id}
+      prayedToday={prayedToday}
+      commentsCount={commentCount[post.id] ?? 0}
+      onReact={(reaction) => toggleReaction(post.id, reaction)}
+      onPray={() => prayToday(post.id)}
+      onShare={() => sharePost(post)}
+      comments={comments.filter((comment) => comment.post_id === post.id)}
+      profiles={profiles}
+      likes={likes}
+      myLikes={myLikes}
+      onSubmitComment={(event) => submitComment(event, post.id)}
+      draft={draft[post.id] ?? ""}
+      onDraftChange={(value) => setDraft((current) => ({ ...current, [post.id]: value }))}
+      replyTo={replyTo[post.id] ?? null}
+      onSetReply={(comment) => setReplyTo((current) => ({ ...current, [post.id]: comment }))}
+      editing={editing}
+      onStartEdit={(comment) => setEditing({ id: comment.id, text: comment.content })}
+      onCancelEdit={() => setEditing(null)}
+      onSaveEdit={saveEdit}
+      onChangeEdit={(value) =>
+        setEditing((current) => (current ? { ...current, text: value } : current))
+      }
+      onDelete={deleteComment}
+      onTogglePin={togglePin}
+      onToggleLike={toggleLike}
+      onReport={(comment) => setReportFor(comment)}
+      canModerate={canModerate || isAdmin}
+      featured={featured}
+    />
+  );
+
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-gradient-to-b from-[var(--petal)]/25 via-background to-background">
       <Header />
-      <main className="mx-auto max-w-3xl px-4 py-8 sm:py-10">
-        <header className="animate-fade-up flex items-start gap-3">
+      <main className="mx-auto max-w-5xl px-4 pb-16 pt-5 sm:py-10">
+        <header className="animate-fade-up rounded-[1.75rem] border border-[var(--rose)]/15 bg-card/85 p-5 shadow-soft backdrop-blur sm:flex sm:items-center sm:gap-4 sm:rounded-3xl sm:p-7">
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-love shadow-glow">
             <BookHeart className="h-5 w-5 text-white" />
           </div>
-          <div className="flex-1">
+          <div className="mt-4 flex-1 sm:mt-0">
             <h1 className="text-3xl font-semibold tracking-tight">Devocional</h1>
             <p className="text-sm text-muted-foreground">
-              Sua jornada espiritual diária — ore, reflita e compartilhe.
+              Um momento diário para ler, orar e refletir com calma.
             </p>
           </div>
           <Link
             to="/oracoes"
-            className="inline-flex shrink-0 items-center gap-1.5 px-3 py-2 rounded-full text-xs font-medium border border-border hover:bg-accent transition"
+            className="mt-4 inline-flex shrink-0 items-center gap-1.5 rounded-full border border-border px-3 py-2 text-xs font-medium transition hover:bg-accent sm:mt-0"
           >
             <HandHeart className="h-4 w-4" />
             <span className="hidden sm:inline">Pedidos de oração</span>
@@ -572,58 +614,62 @@ function Devocional() {
           />
         </div>
 
-        {/* Filters */}
-        <div className="mt-6 flex flex-wrap gap-2">
-          <FilterChip active={sort === "recent"} onClick={() => setSort("recent")}>
-            Mais recentes
-          </FilterChip>
-          <FilterChip active={sort === "commented"} onClick={() => setSort("commented")}>
-            Mais comentados
-          </FilterChip>
-          <FilterChip active={sort === "reactions"} onClick={() => setSort("reactions")}>
-            Mais reações
-          </FilterChip>
-        </div>
-
         <section className="mt-6 space-y-6">
           {sortedPosts.length === 0 && !loadingPosts ? (
             <div className="glass rounded-3xl p-10 text-center text-muted-foreground shadow-soft">
               Nenhum devocional publicado ainda.
             </div>
           ) : (
-            sortedPosts.map((p) => (
-              <PostCard
-                key={p.id}
-                post={p}
-                author={profiles[p.author_id]}
-                reactions={reactions.filter((r) => r.post_id === p.id)}
-                myUserId={user!.id}
-                prayedToday={prayedToday}
-                commentsCount={commentCount[p.id] ?? 0}
-                onReact={(r) => toggleReaction(p.id, r)}
-                onPray={() => prayToday(p.id)}
-                onShare={() => sharePost(p)}
-                comments={comments.filter((c) => c.post_id === p.id)}
-                profiles={profiles}
-                likes={likes}
-                myLikes={myLikes}
-                onSubmitComment={(e) => submitComment(e, p.id)}
-                draft={draft[p.id] ?? ""}
-                onDraftChange={(v) => setDraft((d) => ({ ...d, [p.id]: v }))}
-                replyTo={replyTo[p.id] ?? null}
-                onSetReply={(c) => setReplyTo((r) => ({ ...r, [p.id]: c }))}
-                editing={editing}
-                onStartEdit={(c) => setEditing({ id: c.id, text: c.content })}
-                onCancelEdit={() => setEditing(null)}
-                onSaveEdit={saveEdit}
-                onChangeEdit={(v) => setEditing((e) => (e ? { ...e, text: v } : e))}
-                onDelete={deleteComment}
-                onTogglePin={togglePin}
-                onToggleLike={toggleLike}
-                onReport={(c) => setReportFor(c)}
-                canModerate={canModerate || isAdmin}
-              />
-            ))
+            <>
+              {featuredPost && (
+                <div>
+                  <div className="mb-3">
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--rose)]">
+                      Devocional do dia
+                    </p>
+                    <h2 className="mt-1 text-2xl font-semibold tracking-tight">Leia com calma</h2>
+                  </div>
+                  {renderPostCard(featuredPost, true)}
+                </div>
+              )}
+
+              <div className="rounded-[1.75rem] border border-border/70 bg-card/70 p-4 shadow-soft backdrop-blur sm:rounded-3xl sm:p-6">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                      Arquivo
+                    </p>
+                    <h2 className="mt-1 text-2xl font-semibold tracking-tight">
+                      Devocionais antigos
+                    </h2>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      Releia mensagens anteriores sem transformar a página em feed.
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <FilterChip active={sort === "recent"} onClick={() => setSort("recent")}>
+                      Recentes
+                    </FilterChip>
+                    <FilterChip active={sort === "commented"} onClick={() => setSort("commented")}>
+                      Comentados
+                    </FilterChip>
+                    <FilterChip active={sort === "reactions"} onClick={() => setSort("reactions")}>
+                      Reações
+                    </FilterChip>
+                  </div>
+                </div>
+
+                <div className="mt-5 space-y-4">
+                  {archivePosts.length === 0 && !loadingPosts ? (
+                    <div className="rounded-2xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
+                      Ainda não há devocionais antigos.
+                    </div>
+                  ) : (
+                    archivePosts.map((post) => renderPostCard(post))
+                  )}
+                </div>
+              </div>
+            </>
           )}
 
           {/* Sentinel & loader */}
@@ -634,7 +680,7 @@ function Devocional() {
             {loadingPosts ? (
               <Loader2 className="h-5 w-5 animate-spin" />
             ) : !hasMore && sortedPosts.length > 0 ? (
-              "Você chegou ao fim 🌿"
+              "Você chegou ao fim"
             ) : null}
           </div>
         </section>
@@ -734,10 +780,12 @@ type PostCardProps = {
   onToggleLike: (c: Comment) => void;
   onReport: (c: Comment) => void;
   canModerate: boolean;
+  featured?: boolean;
 };
 
 function PostCard(props: PostCardProps) {
-  const { post, author, reactions, myUserId, prayedToday, commentsCount, comments } = props;
+  const { post, author, reactions, myUserId, prayedToday, commentsCount, comments, featured } =
+    props;
   const [open, setOpen] = useState(false);
 
   const counts = useMemo(() => {
@@ -766,7 +814,9 @@ function PostCard(props: PostCardProps) {
   return (
     <article
       id={post.id}
-      className="animate-fade-up rounded-3xl border border-[var(--rose)]/15 bg-[var(--petal)]/30 p-5 shadow-soft sm:p-7"
+      className={`animate-fade-up rounded-3xl border border-[var(--rose)]/15 shadow-soft ${
+        featured ? "bg-[var(--petal)]/40 p-5 sm:p-8" : "bg-background/85 p-4 sm:p-6"
+      }`}
     >
       <div className="flex items-center gap-2 text-xs">
         <span className="inline-flex items-center gap-1 rounded-full bg-[var(--rose)] px-2.5 py-0.5 font-semibold uppercase tracking-wide text-white">
@@ -781,7 +831,13 @@ function PostCard(props: PostCardProps) {
         </span>
       </div>
 
-      <h2 className="mt-3 font-serif text-2xl italic leading-tight sm:text-3xl">{post.title}</h2>
+      <h2
+        className={`mt-3 font-serif italic leading-tight ${
+          featured ? "text-2xl sm:text-4xl" : "text-xl sm:text-2xl"
+        }`}
+      >
+        {post.title}
+      </h2>
       {post.bible_reference && (
         <div className="mt-3 rounded-xl border-l-4 border-[var(--rose)] bg-[var(--petal)]/40 p-3">
           <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-[var(--rose)]">

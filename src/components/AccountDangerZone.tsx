@@ -120,7 +120,7 @@ export function AccountDangerZone() {
   return (
     <div className="space-y-4">
       {isPendingDeletion && state?.deletion_scheduled_for && (
-        <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+        <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-800 shadow-soft dark:border-red-400/40 dark:bg-red-950/45 dark:text-red-100">
           <div className="flex items-start gap-3">
             <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0" />
             <div className="flex-1">
@@ -156,7 +156,7 @@ export function AccountDangerZone() {
         </div>
       )}
 
-      <div className="rounded-2xl border border-border bg-card/40 p-5">
+      <div className="rounded-2xl border border-border bg-card/70 p-5 shadow-soft">
         <h3 className="text-base font-semibold">Desativar conta</h3>
         <p className="mt-1 text-sm text-muted-foreground">
           Seu perfil ficará invisível e você não receberá novos interesses. Suas conversas ficam
@@ -172,9 +172,12 @@ export function AccountDangerZone() {
         </Button>
       </div>
 
-      <div className="rounded-2xl border border-red-200 bg-red-50/40 p-5">
-        <h3 className="text-base font-semibold text-red-700">Excluir conta</h3>
-        <p className="mt-1 text-sm text-red-700/80">
+      <div className="rounded-2xl border border-red-200 bg-red-50 p-5 text-red-950 shadow-soft dark:border-red-400/50 dark:bg-red-50">
+        <h3 className="flex items-center gap-2 text-base font-semibold text-red-800">
+          <AlertTriangle className="h-4 w-4" />
+          Excluir conta
+        </h3>
+        <p className="mt-1 text-sm text-red-900/80">
           Ação permanente. Após 30 dias seus dados serão removidos definitivamente. Você pode
           cancelar dentro desse prazo.
         </p>
