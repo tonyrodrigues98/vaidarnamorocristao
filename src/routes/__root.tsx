@@ -160,6 +160,7 @@ function shouldShowFooter(pathname: string) {
 function RootComponent() {
   const location = useLocation();
   const showFooter = shouldShowFooter(location.pathname);
+  const isChatRoute = location.pathname === "/comunidade" || location.pathname.startsWith("/conversas/");
 
   return (
     <ThemeProvider>
@@ -168,7 +169,13 @@ function RootComponent() {
           <NotificationsBridge />
           <BanGuard />
           <MobileAppShell>
-            <div className="flex min-h-screen flex-col">
+            <div
+              className={
+                isChatRoute
+                  ? "flex h-[var(--app-visual-height,100dvh)] flex-col overflow-hidden"
+                  : "flex min-h-screen flex-col"
+              }
+            >
               <div className="flex-1">
                 <Outlet />
               </div>
