@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, Clock, Heart, Music2, Radio } from "lucide-react";
 
+import { InstallAppButton } from "@/components/InstallAppButton";
 import { Button } from "@/components/ui/button";
 import carenHeroAsset from "@/assets/caren-hero.jpeg.asset.json";
 
@@ -119,12 +120,15 @@ function LiveTopNav() {
           </div>
         </Link>
 
-        <Button
-          asChild
-          className="h-11 rounded-full border border-white/15 bg-white px-4 text-xs font-black text-[#111113] shadow-[0_14px_36px_rgba(255,255,255,0.08)] transition hover:bg-white/90 sm:px-6 sm:text-sm"
-        >
-          <Link to={COMMUNITY_AUTH_ROUTE}>Acessar comunidade</Link>
-        </Button>
+        <div className="flex shrink-0 items-center gap-2">
+          <InstallAppButton compact />
+          <Button
+            asChild
+            className="h-11 rounded-full border border-white/15 bg-white px-4 text-xs font-black text-[#111113] shadow-[0_14px_36px_rgba(255,255,255,0.08)] transition hover:bg-white/90 sm:px-6 sm:text-sm"
+          >
+            <Link to={COMMUNITY_AUTH_ROUTE}>Acessar comunidade</Link>
+          </Button>
+        </div>
       </div>
     </header>
   );
