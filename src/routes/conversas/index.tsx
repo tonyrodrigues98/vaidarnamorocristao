@@ -184,11 +184,11 @@ function List() {
                 params={{ matchId: i.matchId }}
                 className="glass hover-lift flex items-center gap-4 rounded-2xl p-4 shadow-soft"
               >
-                <div className="relative flex h-14 w-14 shrink-0 items-center justify-center">
+                <div className="relative flex shrink-0 items-center justify-center">
                   <DecoratedAvatar
                     photoUrl={i.partner.photo_url}
                     fallback={i.partner.full_name.charAt(0)}
-                    size={56}
+                    size={44}
                     frameId={i.partner.equipped_frame_id ?? null}
                     auraId={i.partner.equipped_aura_id ?? null}
                     isCommitted={i.partner.committed}

@@ -546,7 +546,7 @@ function Comunidade() {
   }
 
   return (
-    <div className="mobile-chat-screen mobile-chat-screen-with-nav flex min-h-screen flex-col bg-background md:min-h-screen">
+    <div className="mobile-chat-screen flex min-h-screen flex-col bg-background md:min-h-screen">
       <Header />
       <main className="mx-auto flex min-h-0 w-full max-w-4xl flex-1 flex-col px-3 py-3 md:px-4 md:py-6">
         <div className="animate-fade-up flex items-center gap-3 rounded-3xl border border-border/70 bg-card/85 px-4 py-3 shadow-soft backdrop-blur md:rounded-none md:border-0 md:bg-transparent md:px-0 md:py-0 md:shadow-none md:backdrop-blur-none">

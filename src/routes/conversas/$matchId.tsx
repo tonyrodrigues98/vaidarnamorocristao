@@ -395,11 +395,11 @@ function Chat() {
             params={{ id: partner.id }}
             className="flex flex-1 items-center gap-3 rounded-lg -mx-1 px-1 py-1 transition hover:bg-accent/50"
           >
-            <div className="flex h-10 w-10 items-center justify-center">
+            <div className="flex shrink-0 items-center justify-center">
               <DecoratedAvatar
                 photoUrl={partner.photo_url}
                 fallback={partner.full_name?.charAt(0) ?? "?"}
-                size={40}
+                size={32}
                 frameId={partner.equipped_frame_id ?? null}
                 auraId={partner.equipped_aura_id ?? null}
                 isCommitted={partnerCommitted}
@@ -758,7 +758,7 @@ function Chat() {
                         <DecoratedAvatar
                           photoUrl={item.partner.photo_url}
                           fallback={item.partner.full_name?.charAt(0) ?? "?"}
-                          size={44}
+                          size={36}
                           frameId={item.partner.equipped_frame_id ?? null}
                           auraId={item.partner.equipped_aura_id ?? null}
                         />
