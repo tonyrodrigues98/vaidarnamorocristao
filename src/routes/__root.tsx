@@ -44,6 +44,10 @@ export const Route = createRootRoute({
       { name: "mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-status-bar-style", content: "default" },
       { name: "apple-mobile-web-app-title", content: "VaiDarNamoro" },
+      {
+        name: "google-site-verification",
+        content: "PXzDRZhAILyhetuReW3wOrUOPfeN11JyBmm0bVeO0Hg",
+      },
       { title: "VaiDarNamoro — Namoro cristão sério com propósito" },
       {
         name: "description",
