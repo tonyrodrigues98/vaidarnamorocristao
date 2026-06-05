@@ -617,6 +617,9 @@ function Admin() {
               <Button asChild variant="outline" size="sm" className="mr-2">
                 <Link to="/admin/equipe-live">Equipe da Live</Link>
               </Button>
+              <Button asChild variant="outline" size="sm" className="mr-2">
+                <Link to="/admin/gradientes-nome">Gradientes de Nome</Link>
+              </Button>
               {isSuperAdmin && (
                 <Button asChild variant="outline" size="sm">
                   <Link to="/admin/stickers">Stickers</Link>

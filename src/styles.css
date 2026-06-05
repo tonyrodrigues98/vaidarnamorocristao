@@ -95,7 +95,7 @@
   --gold-soft: #fff3c4;
 
   --gradient-love: linear-gradient(135deg, #ff4f68 0%, #ff7a45 52%, #7c3aed 120%);
-  --gradient-warm: linear-gradient(180deg, oklch(1 0 0) 0%, oklch(0.965 0.004 255) 100%);
+  --gradient-warm: oklch(1 0 0);
   --gradient-text: linear-gradient(120deg, #ff4f68 0%, #ff7a45 48%, #7c3aed 100%);
   --gradient-night: linear-gradient(135deg, #0b1633 0%, #13234a 48%, #243b6b 100%);
 
