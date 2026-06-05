@@ -25,6 +25,8 @@ const MOBILE_APP_PREFIXES = [
 ];
 
 const MOBILE_APP_HIDDEN_PREFIXES = ["/auth", "/admin", "/onboarding", "/suporte"];
+const MOBILE_FOCUSED_CHAT_PREFIXES = ["/conversas/"];
+const MOBILE_CHAT_PREFIXES = ["/comunidade", "/conversas/"];
 
 function matchesPrefix(pathname: string, prefix: string) {
   return pathname === prefix || pathname.startsWith(`${prefix}/`);
@@ -37,15 +39,27 @@ function shouldShowMobileAppShell(pathname: string, hasUser: boolean) {
   return MOBILE_APP_PREFIXES.some((prefix) => matchesPrefix(pathname, prefix));
 }
 
+function shouldShowMobileBottomNav(pathname: string) {
+  return !MOBILE_FOCUSED_CHAT_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+}
+
 export function MobileAppShell({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
   const location = useLocation();
   const showMobileShell = shouldShowMobileAppShell(location.pathname, Boolean(user) && !loading);
+  const showBottomNav = showMobileShell && shouldShowMobileBottomNav(location.pathname);
+  const isChatScreen = MOBILE_CHAT_PREFIXES.some((prefix) =>
+    matchesPrefix(location.pathname, prefix),
+  );
 
   return (
     <>
-      <div className={cn(showMobileShell && "mobile-app-shell")}>{children}</div>
-      {showMobileShell && <MobileBottomNav />}
+      <div
+        className={cn(showMobileShell && "mobile-app-shell", isChatScreen && "mobile-chat-shell")}
+      >
+        {children}
+      </div>
+      {showBottomNav && <MobileBottomNav />}
     </>
   );
 }

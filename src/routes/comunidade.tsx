@@ -7,7 +7,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Send,
   Trash2,
@@ -540,17 +539,23 @@ function Comunidade() {
     setTimeout(() => setHighlightId((cur) => (cur === id ? null : cur)), 1600);
   }
 
+  function blurComposer() {
+    if (typeof document === "undefined") return;
+    const active = document.activeElement;
+    if (active instanceof HTMLElement) active.blur();
+  }
+
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="mobile-chat-screen mobile-chat-screen-with-nav flex min-h-screen flex-col bg-background md:min-h-screen">
       <Header />
-      <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col px-4 py-6">
-        <div className="animate-fade-up flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-love shadow-glow">
+      <main className="mx-auto flex min-h-0 w-full max-w-4xl flex-1 flex-col px-3 py-3 md:px-4 md:py-6">
+        <div className="animate-fade-up flex items-center gap-3 rounded-3xl border border-border/70 bg-card/85 px-4 py-3 shadow-soft backdrop-blur md:rounded-none md:border-0 md:bg-transparent md:px-0 md:py-0 md:shadow-none md:backdrop-blur-none">
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-love shadow-glow md:h-12 md:w-12">
             <Users className="h-5 w-5 text-white" />
           </div>
           <div className="flex-1 min-w-0">
-            <h1 className="text-3xl font-semibold">Comunidade</h1>
-            <p className="text-sm text-muted-foreground">
+            <h1 className="text-xl font-semibold md:text-3xl">Chat Global</h1>
+            <p className="text-xs text-muted-foreground md:text-sm">
               Chat global em tempo real — converse com todos
             </p>
           </div>
@@ -564,7 +569,7 @@ function Comunidade() {
           </Link>
         </div>
 
-        <div className="glass mt-6 flex flex-1 flex-col overflow-hidden rounded-3xl shadow-soft">
+        <div className="glass mt-3 flex min-h-0 flex-1 flex-col overflow-hidden rounded-[1.75rem] shadow-soft md:mt-6 md:rounded-3xl">
           {pinnedMessages.length > 0 && (
             <div className="space-y-2 border-b border-primary/20 bg-primary/5 p-3">
               <div className="flex items-center gap-2 text-xs font-semibold text-primary">
@@ -613,8 +618,12 @@ function Comunidade() {
           )}
           <div
             ref={scrollRef}
-            className="flex-1 space-y-5 overflow-y-auto p-4 sm:p-6"
-            style={{ maxHeight: "calc(100vh - 280px)" }}
+            className="mobile-chat-scroll flex-1 space-y-4 overflow-y-auto p-3 sm:p-6 md:space-y-5"
+            onPointerDown={(event) => {
+              const target = event.target as HTMLElement;
+              if (target.closest("button,a,input,textarea,[role='dialog']")) return;
+              blurComposer();
+            }}
           >
             {messages.length === 0 ? (
               <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
@@ -1164,10 +1173,10 @@ const ChatComposer = memo(function ChatComposer({
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex flex-col gap-0 border-t border-border bg-background/60"
+      className="mobile-chat-composer flex flex-col gap-0 border-t border-border bg-background/88 backdrop-blur-xl"
     >
       <TypingIndicator selfId={userId} />
-      <div className="flex flex-col gap-2 p-3 pt-2">
+      <div className="flex flex-col gap-2 px-3 pb-3 pt-2">
         {replyTo && (
           <div className="flex items-stretch gap-2 rounded-lg border border-border bg-muted/40 px-3 py-2">
             <span className="w-1 shrink-0 rounded bg-primary" />
@@ -1197,14 +1206,14 @@ const ChatComposer = memo(function ChatComposer({
             </button>
           </div>
         )}
-        <div className="relative flex items-center gap-2">
+        <div className="relative flex items-end gap-2">
           <div className="relative">
             <button
               type="button"
               onClick={() => setPlusOpen((v) => !v)}
               disabled={!approved}
               aria-label="Mais opções de envio"
-              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-muted/40 text-muted-foreground transition hover:bg-accent hover:text-foreground disabled:opacity-50"
+              className="tap flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-muted/70 text-muted-foreground transition hover:bg-accent hover:text-foreground disabled:opacity-50"
             >
               <motion.span
                 animate={{ rotate: plusOpen ? 45 : 0 }}
@@ -1245,33 +1254,36 @@ const ChatComposer = memo(function ChatComposer({
               onPick={handleSticker}
             />
           </div>
-          <Input
-            value={text}
-            onChange={(e) => {
-              setText(e.target.value);
-              if (e.target.value.trim().length > 0) broadcastTyping();
-            }}
-            placeholder={
-              !approved
-                ? "Aguardando aprovação para enviar mensagens"
-                : "Escreva uma mensagem para a comunidade..."
-            }
-            maxLength={2000}
-            disabled={!approved || sending}
-            className="flex-1"
-          />
-          <Button
-            type="submit"
-            disabled={!approved || sending || !text.trim() || cooldownLeft > 0}
-            size="icon"
-            className="rounded-full"
-          >
-            {cooldownLeft > 0 ? (
-              <span className="text-[10px] font-semibold">{Math.ceil(cooldownLeft / 1000)}s</span>
-            ) : (
-              <Send className="h-4 w-4" />
-            )}
-          </Button>
+          <div className="flex min-h-11 flex-1 items-end gap-2 rounded-[1.4rem] border border-border/80 bg-card px-3 py-2 shadow-sm focus-within:border-primary/60 focus-within:ring-2 focus-within:ring-primary/15">
+            <textarea
+              value={text}
+              onChange={(e) => {
+                setText(e.target.value);
+                if (e.target.value.trim().length > 0) broadcastTyping();
+              }}
+              placeholder={
+                !approved
+                  ? "Aguardando aprovação para enviar mensagens"
+                  : "Mensagem para a comunidade..."
+              }
+              maxLength={2000}
+              disabled={!approved || sending}
+              rows={1}
+              className="max-h-36 min-h-7 flex-1 resize-none bg-transparent py-1 text-base leading-6 outline-none placeholder:text-muted-foreground disabled:opacity-60"
+            />
+            <Button
+              type="submit"
+              disabled={!approved || sending || !text.trim() || cooldownLeft > 0}
+              size="icon"
+              className="tap h-8 w-8 shrink-0 rounded-full"
+            >
+              {cooldownLeft > 0 ? (
+                <span className="text-[10px] font-semibold">{Math.ceil(cooldownLeft / 1000)}s</span>
+              ) : (
+                <Send className="h-4 w-4" />
+              )}
+            </Button>
+          </div>
         </div>
       </div>
     </form>

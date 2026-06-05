@@ -1,4 +1,11 @@
-import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
+import {
+  Outlet,
+  Link,
+  createRootRoute,
+  HeadContent,
+  Scripts,
+  useLocation,
+} from "@tanstack/react-router";
 import { AuthProvider } from "@/lib/auth";
 import { Toaster } from "@/components/ui/sonner";
 import { NotificationsBridge } from "@/lib/useRealtimeNotifications";
@@ -127,7 +134,33 @@ function RootShell({ children }: { children: React.ReactNode }) {
   );
 }
 
+const FOOTER_HIDDEN_PREFIXES = [
+  "/admin",
+  "/comunidade",
+  "/conversas",
+  "/perfil",
+  "/loja",
+  "/conta",
+  "/verificacao",
+  "/bloqueados",
+  "/presentes",
+  "/oracoes",
+  "/suporte",
+  "/onboarding",
+  "/auth",
+];
+
+function shouldShowFooter(pathname: string) {
+  if (pathname === "/") return false;
+  return !FOOTER_HIDDEN_PREFIXES.some(
+    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
+  );
+}
+
 function RootComponent() {
+  const location = useLocation();
+  const showFooter = shouldShowFooter(location.pathname);
+
   return (
     <ThemeProvider>
       <AuthProvider>
@@ -139,20 +172,22 @@ function RootComponent() {
               <div className="flex-1">
                 <Outlet />
               </div>
-              <footer className="border-t border-border/50 bg-background/60 py-4 mt-8">
-                <div className="mx-auto flex max-w-7xl items-center justify-end gap-4 px-4 text-xs text-muted-foreground">
-                  <Link to="/termos" className="hover:text-[var(--rose)] hover:underline">
-                    Termos e Condições
-                  </Link>
-                  <span aria-hidden className="opacity-40">
-                    •
-                  </span>
-                  <Link to="/manual" className="hover:text-[var(--rose)] hover:underline">
-                    Manual do Usuário
-                  </Link>
-                  <SupportFooterButton />
-                </div>
-              </footer>
+              {showFooter && (
+                <footer className="mt-8 border-t border-border/50 bg-background/60 py-4">
+                  <div className="mx-auto flex max-w-7xl items-center justify-end gap-4 px-4 text-xs text-muted-foreground">
+                    <Link to="/termos" className="hover:text-[var(--rose)] hover:underline">
+                      Termos e Condições
+                    </Link>
+                    <span aria-hidden className="opacity-40">
+                      •
+                    </span>
+                    <Link to="/manual" className="hover:text-[var(--rose)] hover:underline">
+                      Manual do Usuário
+                    </Link>
+                    <SupportFooterButton />
+                  </div>
+                </footer>
+              )}
             </div>
           </MobileAppShell>
           <TermsGate />

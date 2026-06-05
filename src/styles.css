@@ -363,6 +363,19 @@
   .mobile-app-shell {
     padding-bottom: calc(var(--mobile-bottom-nav-height) + env(safe-area-inset-bottom));
   }
+  .mobile-chat-shell {
+    padding-bottom: 0;
+  }
+  .mobile-chat-screen {
+    min-height: 100vh;
+  }
+  .mobile-chat-scroll {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+  .mobile-chat-composer {
+    padding-bottom: max(env(safe-area-inset-bottom), 0.75rem);
+  }
   .mobile-app-card {
     border-radius: 1.5rem;
     border: 1px solid color-mix(in oklab, var(--border) 78%, transparent);
@@ -380,6 +393,14 @@
     }
   }
   @media (max-width: 767px) {
+    .mobile-chat-screen {
+      height: 100dvh;
+      min-height: 0;
+      overflow: hidden;
+    }
+    .mobile-chat-screen-with-nav {
+      height: calc(100dvh - var(--mobile-bottom-nav-height) - env(safe-area-inset-bottom));
+    }
     .mobile-app-shell {
       background:
         radial-gradient(
