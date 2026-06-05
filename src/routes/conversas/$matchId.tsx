@@ -85,6 +85,7 @@ function Chat() {
   const [sending, setSending] = useState(false);
   const [authorized, setAuthorized] = useState<boolean | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editText, setEditText] = useState("");
   const [actionsOpenId, setActionsOpenId] = useState<string | null>(null);
@@ -329,6 +330,7 @@ function Chat() {
     }
     setInput("");
     setReplyTo(null);
+    if (inputRef.current) inputRef.current.style.height = "auto";
   }
 
   async function handleDelete(messageId: string) {
@@ -688,6 +690,7 @@ function Chat() {
           )}
           <div className="flex min-h-11 min-w-0 items-end gap-2 rounded-[1.4rem] border border-border/80 bg-card px-3 py-2 shadow-sm focus-within:border-primary/60 focus-within:ring-2 focus-within:ring-primary/15">
             <textarea
+              ref={inputRef}
               value={input}
               onChange={(e) => {
                 setInput(e.target.value);

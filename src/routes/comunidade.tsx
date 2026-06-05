@@ -1120,6 +1120,7 @@ const ChatComposer = memo(function ChatComposer({
   const [plusOpen, setPlusOpen] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
   const lastSentRef = useRef<number>(0);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const broadcastTyping = useTypingBroadcaster(userId);
 
   useEffect(() => {
@@ -1152,6 +1153,7 @@ const ChatComposer = memo(function ChatComposer({
     setSending(false);
     if (ok) {
       setText("");
+      if (textareaRef.current) textareaRef.current.style.height = "auto";
       lastSentRef.current = Date.now();
       setCooldownLeft(COOLDOWN_MS);
     }
@@ -1256,6 +1258,7 @@ const ChatComposer = memo(function ChatComposer({
           </div>
           <div className="flex min-h-11 min-w-0 flex-1 items-end gap-2 rounded-[1.4rem] border border-border/80 bg-card px-3 py-2 shadow-sm focus-within:border-primary/60 focus-within:ring-2 focus-within:ring-primary/15">
             <textarea
+              ref={textareaRef}
               value={text}
               onChange={(e) => {
                 setText(e.target.value);
