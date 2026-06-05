@@ -2,7 +2,7 @@ export function StickerMessage({ url, alt }: { url: string; alt?: string }) {
   return (
     <img
       src={url}
-      alt={alt ?? "sticker"}
+      alt={alt ?? "Figurinha de chat"}
       loading="lazy"
       decoding="async"
       draggable={false}

@@ -108,7 +108,7 @@ export function CoinsCard() {
         <div className="flex items-center gap-2">
           <img
             src={coinIcon}
-            alt="moeda"
+            alt="Ícone de moeda"
             className={`h-9 w-9 drop-shadow ${pulse ? "animate-bounce" : ""}`}
           />
           <span

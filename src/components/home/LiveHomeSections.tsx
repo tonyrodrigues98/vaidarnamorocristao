@@ -78,7 +78,7 @@ export function LiveHowItWorksSection() {
             <p className="mt-6 text-[11px] font-black uppercase tracking-[0.22em] text-[#ff7a8c]">
               {step.eyebrow}
             </p>
-            <h3 className="mt-2 text-2xl font-black text-white">{step.title}</h3>
+            <h2 className="mt-2 text-2xl font-black text-white">{step.title}</h2>
             <p className="mt-3 text-sm leading-6 text-white/64">{step.text}</p>
           </div>
         ))}

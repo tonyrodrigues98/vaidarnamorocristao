@@ -168,7 +168,7 @@ export function SaldoTab() {
         <div className="relative mt-4 flex items-end gap-3">
           <img
             src={coinIcon}
-            alt="moeda"
+            alt="Ícone de moeda"
             className={`h-12 w-12 drop-shadow ${pulse ? "animate-bounce" : ""}`}
           />
           <div
@@ -340,7 +340,7 @@ function TxRow({ tx }: { tx: CoinTx }) {
         >
           {isIn ? "+" : "−"}
           {tx.amount}
-          <img src={coinIcon} alt="moedas" className="h-4 w-4 drop-shadow" />
+          <img src={coinIcon} alt="Saldo de moedas" className="h-4 w-4 drop-shadow" />
         </span>
         <span className="text-[11px] text-muted-foreground tabular-nums">
           {date} · {time}

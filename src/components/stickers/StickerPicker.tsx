@@ -79,7 +79,7 @@ export function StickerPicker({ open, onClose, onPick }: Props) {
               >
                 <img
                   src={s.public_url}
-                  alt={s.name}
+                  alt={`Figurinha ${s.name}`}
                   loading="lazy"
                   decoding="async"
                   draggable={false}
