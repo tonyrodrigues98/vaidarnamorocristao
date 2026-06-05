@@ -339,7 +339,7 @@ function CouplePage() {
     if (!user || !input.trim()) return;
 
     const content = input.trim().slice(0, 2000);
-    const hit = findRestrictedWord(content, restrictedWords);
+    const hit = await findRestrictedWord(content);
 
     if (hit) {
       setWarning(hit);
