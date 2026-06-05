@@ -29,7 +29,7 @@ export const Route = createFileRoute("/como-funciona")({
   component: ComoFuncionaPage,
   head: () => ({
     meta: [
-      { title: "Como funciona o VaiDarNamoro — Namoro cristão com aprovação manual" },
+      { title: "Como Funciona o VaiDarNamoro — Namoro Seguro" },
       {
         name: "description",
         content:
