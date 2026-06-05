@@ -1,5 +1,5 @@
 import { createFileRoute, Navigate, Link } from "@tanstack/react-router";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
@@ -31,6 +31,8 @@ import {
   MailOpen,
   Gavel,
   Loader2,
+  Gem,
+  Sparkles,
 } from "lucide-react";
 import { CoinIcon } from "@/components/icons/CoinIcon";
 import { PhotoImg } from "@/components/PhotoImg";
@@ -582,52 +584,114 @@ function Admin() {
   }
 
   return (
-    <div className="min-h-screen bg-muted/20">
+    <div className="min-h-screen bg-gradient-to-b from-muted/40 via-background to-background">
       <Header />
-      <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
-        <div className="animate-fade-up">
-          <h1 className="text-4xl font-semibold">Painel administrativo</h1>
-          <p className="mt-1 text-muted-foreground">
-            {isSuperAdmin
-              ? "Gestão completa da plataforma"
-              : isApresentador
-                ? "Pré-cadastros para controle de pessoas"
-                : "Aprovação de perfis, denúncias e conteúdo"}
-          </p>
-          {(isAdmin || isSuperAdmin) && (
-            <div className="mt-3">
-              <Button asChild variant="outline" size="sm" className="mr-2">
-                <Link to="/admin/verificacoes">✔ Verificações de perfil</Link>
-              </Button>
-              <Button asChild variant="outline" size="sm" className="mr-2">
-                <Link to="/admin/fotos">Análise de Fotos</Link>
-              </Button>
-              <Button asChild variant="outline" size="sm" className="mr-2">
-                <Link to="/admin/presentes">Catálogo de Presentes</Link>
-              </Button>
-              <Button asChild variant="outline" size="sm" className="mr-2">
-                <Link to="/admin/molduras">Molduras</Link>
-              </Button>
-              <Button asChild variant="outline" size="sm" className="mr-2">
-                <Link to="/admin/auras">Auras</Link>
-              </Button>
-              <Button asChild variant="outline" size="sm" className="mr-2">
-                <Link to="/admin/fundos">Fundos de Perfil</Link>
-              </Button>
-              <Button asChild variant="outline" size="sm" className="mr-2">
-                <Link to="/admin/equipe-live">Equipe da Live</Link>
-              </Button>
-              <Button asChild variant="outline" size="sm" className="mr-2">
-                <Link to="/admin/gradientes-nome">Gradientes de Nome</Link>
-              </Button>
-              {isSuperAdmin && (
-                <Button asChild variant="outline" size="sm">
-                  <Link to="/admin/stickers">Stickers</Link>
-                </Button>
-              )}
+      <main className="mx-auto max-w-7xl px-4 pb-16 pt-5 sm:px-6 sm:py-10">
+        <section className="animate-fade-up overflow-hidden rounded-[2rem] border border-border/70 bg-card/85 p-5 shadow-soft backdrop-blur sm:p-7">
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <div className="inline-flex items-center gap-2 rounded-full border border-border bg-background/70 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                <Settings className="h-3.5 w-3.5 text-[var(--rose)]" />
+                Administração
+              </div>
+              <h1 className="mt-4 text-3xl font-semibold tracking-tight sm:text-4xl">
+                Painel administrativo
+              </h1>
+              <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
+                {isSuperAdmin
+                  ? "Gestão completa da plataforma, comunidade, economia, conteúdo e segurança."
+                  : isApresentador
+                    ? "Pré-cadastros, conteúdo e moderação operacional da live."
+                    : "Aprovação de perfis, denúncias, conteúdo e sinalizações da comunidade."}
+              </p>
             </div>
-          )}
-        </div>
+            <div className="grid grid-cols-2 gap-3 sm:flex sm:flex-wrap sm:justify-end">
+              <AdminMetricPill label="Perfil" value={role ?? "admin"} />
+              <AdminMetricPill label="Áreas" value={availableTabs.length} />
+            </div>
+          </div>
+        </section>
+
+        {(isAdmin || isSuperAdmin) && (
+          <section className="mt-6 grid gap-4 lg:grid-cols-3">
+            <AdminModuleGroup
+              title="Usuários e moderação"
+              description="Aprovação, verificação, fotos e suporte."
+              icon={<UsersIcon className="h-5 w-5" />}
+            >
+              <AdminModuleLink
+                to="/admin/verificacoes"
+                icon={<BadgeCheck className="h-4 w-4" />}
+                title="Verificações de perfil"
+                description="Revisar solicitações de verificação."
+              />
+              <AdminModuleLink
+                to="/admin/fotos"
+                icon={<Eye className="h-4 w-4" />}
+                title="Análise de fotos"
+                description="Validar imagens enviadas pelos usuários."
+              />
+            </AdminModuleGroup>
+
+            <AdminModuleGroup
+              title="Loja e customização"
+              description="Catálogos, cosméticos e economia visual."
+              icon={<Gem className="h-5 w-5" />}
+            >
+              <AdminModuleLink
+                to="/admin/presentes"
+                icon={<Heart className="h-4 w-4" />}
+                title="Presentes"
+                description="Gerenciar catálogo de presentes."
+              />
+              <AdminModuleLink
+                to="/admin/molduras"
+                icon={<Settings className="h-4 w-4" />}
+                title="Molduras"
+                description="Administrar molduras de perfil."
+              />
+              <AdminModuleLink
+                to="/admin/auras"
+                icon={<Sparkles className="h-4 w-4" />}
+                title="Auras"
+                description="Administrar auras de avatar."
+              />
+              <AdminModuleLink
+                to="/admin/fundos"
+                icon={<Newspaper className="h-4 w-4" />}
+                title="Fundos de perfil"
+                description="Gerenciar fundos premium."
+              />
+              <AdminModuleLink
+                to="/admin/gradientes-nome"
+                icon={<AwardIcon className="h-4 w-4" />}
+                title="Gradientes de nome"
+                description="Customizações do nome público."
+              />
+              {isSuperAdmin && (
+                <AdminModuleLink
+                  to="/admin/stickers"
+                  icon={<MessageSquare className="h-4 w-4" />}
+                  title="Stickers"
+                  description="Gerenciar stickers do chat."
+                />
+              )}
+            </AdminModuleGroup>
+
+            <AdminModuleGroup
+              title="Conteúdo e live"
+              description="Equipe pública, destaques e textos."
+              icon={<Newspaper className="h-5 w-5" />}
+            >
+              <AdminModuleLink
+                to="/admin/equipe-live"
+                icon={<UsersIcon className="h-4 w-4" />}
+                title="Equipe da live"
+                description="Cards públicos da página inicial."
+              />
+            </AdminModuleGroup>
+          </section>
+        )}
 
         <Tabs value={tab} onValueChange={(v) => setTab(v as TabKey)} className="mt-8">
           <TabsList className="grid h-auto w-full grid-cols-1 gap-3 rounded-3xl border bg-background/70 p-3 shadow-soft backdrop-blur sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -1150,6 +1214,84 @@ function Admin() {
         </Tabs>
       </main>
     </div>
+  );
+}
+
+type AdminModuleTo =
+  | "/admin/verificacoes"
+  | "/admin/fotos"
+  | "/admin/presentes"
+  | "/admin/molduras"
+  | "/admin/auras"
+  | "/admin/fundos"
+  | "/admin/equipe-live"
+  | "/admin/gradientes-nome"
+  | "/admin/stickers";
+
+function AdminMetricPill({ label, value }: { label: string; value: string | number }) {
+  return (
+    <div className="rounded-2xl border border-border bg-background/70 px-4 py-3 text-left shadow-sm">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+        {label}
+      </p>
+      <p className="mt-1 text-sm font-semibold text-foreground">{value}</p>
+    </div>
+  );
+}
+
+function AdminModuleGroup({
+  title,
+  description,
+  icon,
+  children,
+}: {
+  title: string;
+  description: string;
+  icon: ReactNode;
+  children: ReactNode;
+}) {
+  return (
+    <div className="rounded-[1.75rem] border border-border/70 bg-card/85 p-4 shadow-soft backdrop-blur sm:rounded-3xl sm:p-5">
+      <div className="flex items-start gap-3">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[var(--petal)] text-[var(--rose)]">
+          {icon}
+        </div>
+        <div>
+          <h2 className="text-base font-semibold">{title}</h2>
+          <p className="mt-1 text-xs text-muted-foreground">{description}</p>
+        </div>
+      </div>
+      <div className="mt-4 grid gap-2">{children}</div>
+    </div>
+  );
+}
+
+function AdminModuleLink({
+  to,
+  icon,
+  title,
+  description,
+}: {
+  to: AdminModuleTo;
+  icon: ReactNode;
+  title: string;
+  description: string;
+}) {
+  return (
+    <Link
+      to={to}
+      className="group flex items-center gap-3 rounded-2xl border border-border/70 bg-background/75 p-3 text-left transition hover:-translate-y-0.5 hover:border-[var(--rose)]/40 hover:shadow-soft"
+    >
+      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-muted text-muted-foreground transition group-hover:bg-[var(--rose)] group-hover:text-white">
+        {icon}
+      </span>
+      <span className="min-w-0">
+        <span className="block truncate text-sm font-semibold">{title}</span>
+        <span className="mt-0.5 line-clamp-1 block text-xs text-muted-foreground">
+          {description}
+        </span>
+      </span>
+    </Link>
   );
 }
 
