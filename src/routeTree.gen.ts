@@ -9,9 +9,144 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as VerificacaoRouteImport } from './routes/verificacao'
+import { Route as TermosRouteImport } from './routes/termos'
+import { Route as SobreRouteImport } from './routes/sobre'
+import { Route as RecadosRouteImport } from './routes/recados'
+import { Route as PerfilRouteImport } from './routes/perfil'
+import { Route as OracoesRouteImport } from './routes/oracoes'
+import { Route as MatchesRouteImport } from './routes/matches'
+import { Route as ManualRouteImport } from './routes/manual'
+import { Route as LojaRouteImport } from './routes/loja'
+import { Route as InteressesRouteImport } from './routes/interesses'
+import { Route as InicioRouteImport } from './routes/inicio'
+import { Route as DevocionalRouteImport } from './routes/devocional'
+import { Route as DepoimentosRouteImport } from './routes/depoimentos'
+import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as ContaRouteImport } from './routes/conta'
+import { Route as ComunidadeRouteImport } from './routes/comunidade'
+import { Route as ComoFuncionaRouteImport } from './routes/como-funciona'
+import { Route as BloqueadosRouteImport } from './routes/bloqueados'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as SuporteIndexRouteImport } from './routes/suporte/index'
+import { Route as PretendentesIndexRouteImport } from './routes/pretendentes/index'
+import { Route as PresentesIndexRouteImport } from './routes/presentes/index'
+import { Route as NoticiasIndexRouteImport } from './routes/noticias.index'
+import { Route as ConversasIndexRouteImport } from './routes/conversas/index'
+import { Route as BlogIndexRouteImport } from './routes/blog.index'
+import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as SuporteAjudaRouteImport } from './routes/suporte/ajuda'
+import { Route as SuporteIdRouteImport } from './routes/suporte/$id'
+import { Route as PropositoMatchIdRouteImport } from './routes/proposito/$matchId'
+import { Route as PretendentesIdRouteImport } from './routes/pretendentes/$id'
+import { Route as OnboardingEtapa2RouteImport } from './routes/onboarding/etapa-2'
+import { Route as OnboardingEtapa1RouteImport } from './routes/onboarding/etapa-1'
+import { Route as ConversasMatchIdRouteImport } from './routes/conversas/$matchId'
+import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
+import { Route as AuthSignupRouteImport } from './routes/auth/signup'
+import { Route as AuthResetPasswordRouteImport } from './routes/auth/reset-password'
+import { Route as AuthLoginRouteImport } from './routes/auth/login'
+import { Route as AuthForgotPasswordRouteImport } from './routes/auth/forgot-password'
+import { Route as AdminVerificacoesRouteImport } from './routes/admin/verificacoes'
+import { Route as AdminStickersRouteImport } from './routes/admin/stickers'
+import { Route as AdminPresentesRouteImport } from './routes/admin/presentes'
+import { Route as AdminMoldurasRouteImport } from './routes/admin/molduras'
+import { Route as AdminFundosRouteImport } from './routes/admin/fundos'
+import { Route as AdminFotosRouteImport } from './routes/admin/fotos'
+import { Route as AdminEquipeLiveRouteImport } from './routes/admin/equipe-live'
+import { Route as AdminAurasRouteImport } from './routes/admin/auras'
 
+const VerificacaoRoute = VerificacaoRouteImport.update({
+  id: '/verificacao',
+  path: '/verificacao',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermosRoute = TermosRouteImport.update({
+  id: '/termos',
+  path: '/termos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SobreRoute = SobreRouteImport.update({
+  id: '/sobre',
+  path: '/sobre',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RecadosRoute = RecadosRouteImport.update({
+  id: '/recados',
+  path: '/recados',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PerfilRoute = PerfilRouteImport.update({
+  id: '/perfil',
+  path: '/perfil',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OracoesRoute = OracoesRouteImport.update({
+  id: '/oracoes',
+  path: '/oracoes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MatchesRoute = MatchesRouteImport.update({
+  id: '/matches',
+  path: '/matches',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ManualRoute = ManualRouteImport.update({
+  id: '/manual',
+  path: '/manual',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LojaRoute = LojaRouteImport.update({
+  id: '/loja',
+  path: '/loja',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InteressesRoute = InteressesRouteImport.update({
+  id: '/interesses',
+  path: '/interesses',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InicioRoute = InicioRouteImport.update({
+  id: '/inicio',
+  path: '/inicio',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DevocionalRoute = DevocionalRouteImport.update({
+  id: '/devocional',
+  path: '/devocional',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DepoimentosRoute = DepoimentosRouteImport.update({
+  id: '/depoimentos',
+  path: '/depoimentos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContaRoute = ContaRouteImport.update({
+  id: '/conta',
+  path: '/conta',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ComunidadeRoute = ComunidadeRouteImport.update({
+  id: '/comunidade',
+  path: '/comunidade',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ComoFuncionaRoute = ComoFuncionaRouteImport.update({
+  id: '/como-funciona',
+  path: '/como-funciona',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BloqueadosRoute = BloqueadosRouteImport.update({
+  id: '/bloqueados',
+  path: '/bloqueados',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
   path: '/about',
@@ -22,35 +157,618 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SuporteIndexRoute = SuporteIndexRouteImport.update({
+  id: '/suporte/',
+  path: '/suporte/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PretendentesIndexRoute = PretendentesIndexRouteImport.update({
+  id: '/pretendentes/',
+  path: '/pretendentes/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PresentesIndexRoute = PresentesIndexRouteImport.update({
+  id: '/presentes/',
+  path: '/presentes/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NoticiasIndexRoute = NoticiasIndexRouteImport.update({
+  id: '/noticias/',
+  path: '/noticias/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConversasIndexRoute = ConversasIndexRouteImport.update({
+  id: '/conversas/',
+  path: '/conversas/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BlogIndexRoute = BlogIndexRouteImport.update({
+  id: '/blog/',
+  path: '/blog/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/admin/',
+  path: '/admin/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SuporteAjudaRoute = SuporteAjudaRouteImport.update({
+  id: '/suporte/ajuda',
+  path: '/suporte/ajuda',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SuporteIdRoute = SuporteIdRouteImport.update({
+  id: '/suporte/$id',
+  path: '/suporte/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PropositoMatchIdRoute = PropositoMatchIdRouteImport.update({
+  id: '/proposito/$matchId',
+  path: '/proposito/$matchId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PretendentesIdRoute = PretendentesIdRouteImport.update({
+  id: '/pretendentes/$id',
+  path: '/pretendentes/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OnboardingEtapa2Route = OnboardingEtapa2RouteImport.update({
+  id: '/onboarding/etapa-2',
+  path: '/onboarding/etapa-2',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OnboardingEtapa1Route = OnboardingEtapa1RouteImport.update({
+  id: '/onboarding/etapa-1',
+  path: '/onboarding/etapa-1',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConversasMatchIdRoute = ConversasMatchIdRouteImport.update({
+  id: '/conversas/$matchId',
+  path: '/conversas/$matchId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BlogSlugRoute = BlogSlugRouteImport.update({
+  id: '/blog/$slug',
+  path: '/blog/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthSignupRoute = AuthSignupRouteImport.update({
+  id: '/auth/signup',
+  path: '/auth/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthResetPasswordRoute = AuthResetPasswordRouteImport.update({
+  id: '/auth/reset-password',
+  path: '/auth/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthLoginRoute = AuthLoginRouteImport.update({
+  id: '/auth/login',
+  path: '/auth/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthForgotPasswordRoute = AuthForgotPasswordRouteImport.update({
+  id: '/auth/forgot-password',
+  path: '/auth/forgot-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminVerificacoesRoute = AdminVerificacoesRouteImport.update({
+  id: '/admin/verificacoes',
+  path: '/admin/verificacoes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminStickersRoute = AdminStickersRouteImport.update({
+  id: '/admin/stickers',
+  path: '/admin/stickers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminPresentesRoute = AdminPresentesRouteImport.update({
+  id: '/admin/presentes',
+  path: '/admin/presentes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminMoldurasRoute = AdminMoldurasRouteImport.update({
+  id: '/admin/molduras',
+  path: '/admin/molduras',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminFundosRoute = AdminFundosRouteImport.update({
+  id: '/admin/fundos',
+  path: '/admin/fundos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminFotosRoute = AdminFotosRouteImport.update({
+  id: '/admin/fotos',
+  path: '/admin/fotos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminEquipeLiveRoute = AdminEquipeLiveRouteImport.update({
+  id: '/admin/equipe-live',
+  path: '/admin/equipe-live',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminAurasRoute = AdminAurasRouteImport.update({
+  id: '/admin/auras',
+  path: '/admin/auras',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/bloqueados': typeof BloqueadosRoute
+  '/como-funciona': typeof ComoFuncionaRoute
+  '/comunidade': typeof ComunidadeRoute
+  '/conta': typeof ContaRoute
+  '/dashboard': typeof DashboardRoute
+  '/depoimentos': typeof DepoimentosRoute
+  '/devocional': typeof DevocionalRoute
+  '/inicio': typeof InicioRoute
+  '/interesses': typeof InteressesRoute
+  '/loja': typeof LojaRoute
+  '/manual': typeof ManualRoute
+  '/matches': typeof MatchesRoute
+  '/oracoes': typeof OracoesRoute
+  '/perfil': typeof PerfilRoute
+  '/recados': typeof RecadosRoute
+  '/sobre': typeof SobreRoute
+  '/termos': typeof TermosRoute
+  '/verificacao': typeof VerificacaoRoute
+  '/admin/auras': typeof AdminAurasRoute
+  '/admin/equipe-live': typeof AdminEquipeLiveRoute
+  '/admin/fotos': typeof AdminFotosRoute
+  '/admin/fundos': typeof AdminFundosRoute
+  '/admin/molduras': typeof AdminMoldurasRoute
+  '/admin/presentes': typeof AdminPresentesRoute
+  '/admin/stickers': typeof AdminStickersRoute
+  '/admin/verificacoes': typeof AdminVerificacoesRoute
+  '/auth/forgot-password': typeof AuthForgotPasswordRoute
+  '/auth/login': typeof AuthLoginRoute
+  '/auth/reset-password': typeof AuthResetPasswordRoute
+  '/auth/signup': typeof AuthSignupRoute
+  '/blog/$slug': typeof BlogSlugRoute
+  '/conversas/$matchId': typeof ConversasMatchIdRoute
+  '/onboarding/etapa-1': typeof OnboardingEtapa1Route
+  '/onboarding/etapa-2': typeof OnboardingEtapa2Route
+  '/pretendentes/$id': typeof PretendentesIdRoute
+  '/proposito/$matchId': typeof PropositoMatchIdRoute
+  '/suporte/$id': typeof SuporteIdRoute
+  '/suporte/ajuda': typeof SuporteAjudaRoute
+  '/admin/': typeof AdminIndexRoute
+  '/blog/': typeof BlogIndexRoute
+  '/conversas/': typeof ConversasIndexRoute
+  '/noticias/': typeof NoticiasIndexRoute
+  '/presentes/': typeof PresentesIndexRoute
+  '/pretendentes/': typeof PretendentesIndexRoute
+  '/suporte/': typeof SuporteIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/bloqueados': typeof BloqueadosRoute
+  '/como-funciona': typeof ComoFuncionaRoute
+  '/comunidade': typeof ComunidadeRoute
+  '/conta': typeof ContaRoute
+  '/dashboard': typeof DashboardRoute
+  '/depoimentos': typeof DepoimentosRoute
+  '/devocional': typeof DevocionalRoute
+  '/inicio': typeof InicioRoute
+  '/interesses': typeof InteressesRoute
+  '/loja': typeof LojaRoute
+  '/manual': typeof ManualRoute
+  '/matches': typeof MatchesRoute
+  '/oracoes': typeof OracoesRoute
+  '/perfil': typeof PerfilRoute
+  '/recados': typeof RecadosRoute
+  '/sobre': typeof SobreRoute
+  '/termos': typeof TermosRoute
+  '/verificacao': typeof VerificacaoRoute
+  '/admin/auras': typeof AdminAurasRoute
+  '/admin/equipe-live': typeof AdminEquipeLiveRoute
+  '/admin/fotos': typeof AdminFotosRoute
+  '/admin/fundos': typeof AdminFundosRoute
+  '/admin/molduras': typeof AdminMoldurasRoute
+  '/admin/presentes': typeof AdminPresentesRoute
+  '/admin/stickers': typeof AdminStickersRoute
+  '/admin/verificacoes': typeof AdminVerificacoesRoute
+  '/auth/forgot-password': typeof AuthForgotPasswordRoute
+  '/auth/login': typeof AuthLoginRoute
+  '/auth/reset-password': typeof AuthResetPasswordRoute
+  '/auth/signup': typeof AuthSignupRoute
+  '/blog/$slug': typeof BlogSlugRoute
+  '/conversas/$matchId': typeof ConversasMatchIdRoute
+  '/onboarding/etapa-1': typeof OnboardingEtapa1Route
+  '/onboarding/etapa-2': typeof OnboardingEtapa2Route
+  '/pretendentes/$id': typeof PretendentesIdRoute
+  '/proposito/$matchId': typeof PropositoMatchIdRoute
+  '/suporte/$id': typeof SuporteIdRoute
+  '/suporte/ajuda': typeof SuporteAjudaRoute
+  '/admin': typeof AdminIndexRoute
+  '/blog': typeof BlogIndexRoute
+  '/conversas': typeof ConversasIndexRoute
+  '/noticias': typeof NoticiasIndexRoute
+  '/presentes': typeof PresentesIndexRoute
+  '/pretendentes': typeof PretendentesIndexRoute
+  '/suporte': typeof SuporteIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/bloqueados': typeof BloqueadosRoute
+  '/como-funciona': typeof ComoFuncionaRoute
+  '/comunidade': typeof ComunidadeRoute
+  '/conta': typeof ContaRoute
+  '/dashboard': typeof DashboardRoute
+  '/depoimentos': typeof DepoimentosRoute
+  '/devocional': typeof DevocionalRoute
+  '/inicio': typeof InicioRoute
+  '/interesses': typeof InteressesRoute
+  '/loja': typeof LojaRoute
+  '/manual': typeof ManualRoute
+  '/matches': typeof MatchesRoute
+  '/oracoes': typeof OracoesRoute
+  '/perfil': typeof PerfilRoute
+  '/recados': typeof RecadosRoute
+  '/sobre': typeof SobreRoute
+  '/termos': typeof TermosRoute
+  '/verificacao': typeof VerificacaoRoute
+  '/admin/auras': typeof AdminAurasRoute
+  '/admin/equipe-live': typeof AdminEquipeLiveRoute
+  '/admin/fotos': typeof AdminFotosRoute
+  '/admin/fundos': typeof AdminFundosRoute
+  '/admin/molduras': typeof AdminMoldurasRoute
+  '/admin/presentes': typeof AdminPresentesRoute
+  '/admin/stickers': typeof AdminStickersRoute
+  '/admin/verificacoes': typeof AdminVerificacoesRoute
+  '/auth/forgot-password': typeof AuthForgotPasswordRoute
+  '/auth/login': typeof AuthLoginRoute
+  '/auth/reset-password': typeof AuthResetPasswordRoute
+  '/auth/signup': typeof AuthSignupRoute
+  '/blog/$slug': typeof BlogSlugRoute
+  '/conversas/$matchId': typeof ConversasMatchIdRoute
+  '/onboarding/etapa-1': typeof OnboardingEtapa1Route
+  '/onboarding/etapa-2': typeof OnboardingEtapa2Route
+  '/pretendentes/$id': typeof PretendentesIdRoute
+  '/proposito/$matchId': typeof PropositoMatchIdRoute
+  '/suporte/$id': typeof SuporteIdRoute
+  '/suporte/ajuda': typeof SuporteAjudaRoute
+  '/admin/': typeof AdminIndexRoute
+  '/blog/': typeof BlogIndexRoute
+  '/conversas/': typeof ConversasIndexRoute
+  '/noticias/': typeof NoticiasIndexRoute
+  '/presentes/': typeof PresentesIndexRoute
+  '/pretendentes/': typeof PretendentesIndexRoute
+  '/suporte/': typeof SuporteIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about'
+  fullPaths:
+    | '/'
+    | '/about'
+    | '/bloqueados'
+    | '/como-funciona'
+    | '/comunidade'
+    | '/conta'
+    | '/dashboard'
+    | '/depoimentos'
+    | '/devocional'
+    | '/inicio'
+    | '/interesses'
+    | '/loja'
+    | '/manual'
+    | '/matches'
+    | '/oracoes'
+    | '/perfil'
+    | '/recados'
+    | '/sobre'
+    | '/termos'
+    | '/verificacao'
+    | '/admin/auras'
+    | '/admin/equipe-live'
+    | '/admin/fotos'
+    | '/admin/fundos'
+    | '/admin/molduras'
+    | '/admin/presentes'
+    | '/admin/stickers'
+    | '/admin/verificacoes'
+    | '/auth/forgot-password'
+    | '/auth/login'
+    | '/auth/reset-password'
+    | '/auth/signup'
+    | '/blog/$slug'
+    | '/conversas/$matchId'
+    | '/onboarding/etapa-1'
+    | '/onboarding/etapa-2'
+    | '/pretendentes/$id'
+    | '/proposito/$matchId'
+    | '/suporte/$id'
+    | '/suporte/ajuda'
+    | '/admin/'
+    | '/blog/'
+    | '/conversas/'
+    | '/noticias/'
+    | '/presentes/'
+    | '/pretendentes/'
+    | '/suporte/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about'
-  id: '__root__' | '/' | '/about'
+  to:
+    | '/'
+    | '/about'
+    | '/bloqueados'
+    | '/como-funciona'
+    | '/comunidade'
+    | '/conta'
+    | '/dashboard'
+    | '/depoimentos'
+    | '/devocional'
+    | '/inicio'
+    | '/interesses'
+    | '/loja'
+    | '/manual'
+    | '/matches'
+    | '/oracoes'
+    | '/perfil'
+    | '/recados'
+    | '/sobre'
+    | '/termos'
+    | '/verificacao'
+    | '/admin/auras'
+    | '/admin/equipe-live'
+    | '/admin/fotos'
+    | '/admin/fundos'
+    | '/admin/molduras'
+    | '/admin/presentes'
+    | '/admin/stickers'
+    | '/admin/verificacoes'
+    | '/auth/forgot-password'
+    | '/auth/login'
+    | '/auth/reset-password'
+    | '/auth/signup'
+    | '/blog/$slug'
+    | '/conversas/$matchId'
+    | '/onboarding/etapa-1'
+    | '/onboarding/etapa-2'
+    | '/pretendentes/$id'
+    | '/proposito/$matchId'
+    | '/suporte/$id'
+    | '/suporte/ajuda'
+    | '/admin'
+    | '/blog'
+    | '/conversas'
+    | '/noticias'
+    | '/presentes'
+    | '/pretendentes'
+    | '/suporte'
+  id:
+    | '__root__'
+    | '/'
+    | '/about'
+    | '/bloqueados'
+    | '/como-funciona'
+    | '/comunidade'
+    | '/conta'
+    | '/dashboard'
+    | '/depoimentos'
+    | '/devocional'
+    | '/inicio'
+    | '/interesses'
+    | '/loja'
+    | '/manual'
+    | '/matches'
+    | '/oracoes'
+    | '/perfil'
+    | '/recados'
+    | '/sobre'
+    | '/termos'
+    | '/verificacao'
+    | '/admin/auras'
+    | '/admin/equipe-live'
+    | '/admin/fotos'
+    | '/admin/fundos'
+    | '/admin/molduras'
+    | '/admin/presentes'
+    | '/admin/stickers'
+    | '/admin/verificacoes'
+    | '/auth/forgot-password'
+    | '/auth/login'
+    | '/auth/reset-password'
+    | '/auth/signup'
+    | '/blog/$slug'
+    | '/conversas/$matchId'
+    | '/onboarding/etapa-1'
+    | '/onboarding/etapa-2'
+    | '/pretendentes/$id'
+    | '/proposito/$matchId'
+    | '/suporte/$id'
+    | '/suporte/ajuda'
+    | '/admin/'
+    | '/blog/'
+    | '/conversas/'
+    | '/noticias/'
+    | '/presentes/'
+    | '/pretendentes/'
+    | '/suporte/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
+  BloqueadosRoute: typeof BloqueadosRoute
+  ComoFuncionaRoute: typeof ComoFuncionaRoute
+  ComunidadeRoute: typeof ComunidadeRoute
+  ContaRoute: typeof ContaRoute
+  DashboardRoute: typeof DashboardRoute
+  DepoimentosRoute: typeof DepoimentosRoute
+  DevocionalRoute: typeof DevocionalRoute
+  InicioRoute: typeof InicioRoute
+  InteressesRoute: typeof InteressesRoute
+  LojaRoute: typeof LojaRoute
+  ManualRoute: typeof ManualRoute
+  MatchesRoute: typeof MatchesRoute
+  OracoesRoute: typeof OracoesRoute
+  PerfilRoute: typeof PerfilRoute
+  RecadosRoute: typeof RecadosRoute
+  SobreRoute: typeof SobreRoute
+  TermosRoute: typeof TermosRoute
+  VerificacaoRoute: typeof VerificacaoRoute
+  AdminAurasRoute: typeof AdminAurasRoute
+  AdminEquipeLiveRoute: typeof AdminEquipeLiveRoute
+  AdminFotosRoute: typeof AdminFotosRoute
+  AdminFundosRoute: typeof AdminFundosRoute
+  AdminMoldurasRoute: typeof AdminMoldurasRoute
+  AdminPresentesRoute: typeof AdminPresentesRoute
+  AdminStickersRoute: typeof AdminStickersRoute
+  AdminVerificacoesRoute: typeof AdminVerificacoesRoute
+  AuthForgotPasswordRoute: typeof AuthForgotPasswordRoute
+  AuthLoginRoute: typeof AuthLoginRoute
+  AuthResetPasswordRoute: typeof AuthResetPasswordRoute
+  AuthSignupRoute: typeof AuthSignupRoute
+  BlogSlugRoute: typeof BlogSlugRoute
+  ConversasMatchIdRoute: typeof ConversasMatchIdRoute
+  OnboardingEtapa1Route: typeof OnboardingEtapa1Route
+  OnboardingEtapa2Route: typeof OnboardingEtapa2Route
+  PretendentesIdRoute: typeof PretendentesIdRoute
+  PropositoMatchIdRoute: typeof PropositoMatchIdRoute
+  SuporteIdRoute: typeof SuporteIdRoute
+  SuporteAjudaRoute: typeof SuporteAjudaRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+  BlogIndexRoute: typeof BlogIndexRoute
+  ConversasIndexRoute: typeof ConversasIndexRoute
+  NoticiasIndexRoute: typeof NoticiasIndexRoute
+  PresentesIndexRoute: typeof PresentesIndexRoute
+  PretendentesIndexRoute: typeof PretendentesIndexRoute
+  SuporteIndexRoute: typeof SuporteIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/verificacao': {
+      id: '/verificacao'
+      path: '/verificacao'
+      fullPath: '/verificacao'
+      preLoaderRoute: typeof VerificacaoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/termos': {
+      id: '/termos'
+      path: '/termos'
+      fullPath: '/termos'
+      preLoaderRoute: typeof TermosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sobre': {
+      id: '/sobre'
+      path: '/sobre'
+      fullPath: '/sobre'
+      preLoaderRoute: typeof SobreRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/recados': {
+      id: '/recados'
+      path: '/recados'
+      fullPath: '/recados'
+      preLoaderRoute: typeof RecadosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/perfil': {
+      id: '/perfil'
+      path: '/perfil'
+      fullPath: '/perfil'
+      preLoaderRoute: typeof PerfilRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/oracoes': {
+      id: '/oracoes'
+      path: '/oracoes'
+      fullPath: '/oracoes'
+      preLoaderRoute: typeof OracoesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/matches': {
+      id: '/matches'
+      path: '/matches'
+      fullPath: '/matches'
+      preLoaderRoute: typeof MatchesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/manual': {
+      id: '/manual'
+      path: '/manual'
+      fullPath: '/manual'
+      preLoaderRoute: typeof ManualRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/loja': {
+      id: '/loja'
+      path: '/loja'
+      fullPath: '/loja'
+      preLoaderRoute: typeof LojaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/interesses': {
+      id: '/interesses'
+      path: '/interesses'
+      fullPath: '/interesses'
+      preLoaderRoute: typeof InteressesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/inicio': {
+      id: '/inicio'
+      path: '/inicio'
+      fullPath: '/inicio'
+      preLoaderRoute: typeof InicioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/devocional': {
+      id: '/devocional'
+      path: '/devocional'
+      fullPath: '/devocional'
+      preLoaderRoute: typeof DevocionalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/depoimentos': {
+      id: '/depoimentos'
+      path: '/depoimentos'
+      fullPath: '/depoimentos'
+      preLoaderRoute: typeof DepoimentosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/conta': {
+      id: '/conta'
+      path: '/conta'
+      fullPath: '/conta'
+      preLoaderRoute: typeof ContaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/comunidade': {
+      id: '/comunidade'
+      path: '/comunidade'
+      fullPath: '/comunidade'
+      preLoaderRoute: typeof ComunidadeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/como-funciona': {
+      id: '/como-funciona'
+      path: '/como-funciona'
+      fullPath: '/como-funciona'
+      preLoaderRoute: typeof ComoFuncionaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/bloqueados': {
+      id: '/bloqueados'
+      path: '/bloqueados'
+      fullPath: '/bloqueados'
+      preLoaderRoute: typeof BloqueadosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/about': {
       id: '/about'
       path: '/about'
@@ -65,12 +783,246 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/suporte/': {
+      id: '/suporte/'
+      path: '/suporte'
+      fullPath: '/suporte/'
+      preLoaderRoute: typeof SuporteIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pretendentes/': {
+      id: '/pretendentes/'
+      path: '/pretendentes'
+      fullPath: '/pretendentes/'
+      preLoaderRoute: typeof PretendentesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/presentes/': {
+      id: '/presentes/'
+      path: '/presentes'
+      fullPath: '/presentes/'
+      preLoaderRoute: typeof PresentesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/noticias/': {
+      id: '/noticias/'
+      path: '/noticias'
+      fullPath: '/noticias/'
+      preLoaderRoute: typeof NoticiasIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/conversas/': {
+      id: '/conversas/'
+      path: '/conversas'
+      fullPath: '/conversas/'
+      preLoaderRoute: typeof ConversasIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/blog/': {
+      id: '/blog/'
+      path: '/blog'
+      fullPath: '/blog/'
+      preLoaderRoute: typeof BlogIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/admin'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/suporte/ajuda': {
+      id: '/suporte/ajuda'
+      path: '/suporte/ajuda'
+      fullPath: '/suporte/ajuda'
+      preLoaderRoute: typeof SuporteAjudaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/suporte/$id': {
+      id: '/suporte/$id'
+      path: '/suporte/$id'
+      fullPath: '/suporte/$id'
+      preLoaderRoute: typeof SuporteIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/proposito/$matchId': {
+      id: '/proposito/$matchId'
+      path: '/proposito/$matchId'
+      fullPath: '/proposito/$matchId'
+      preLoaderRoute: typeof PropositoMatchIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pretendentes/$id': {
+      id: '/pretendentes/$id'
+      path: '/pretendentes/$id'
+      fullPath: '/pretendentes/$id'
+      preLoaderRoute: typeof PretendentesIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/onboarding/etapa-2': {
+      id: '/onboarding/etapa-2'
+      path: '/onboarding/etapa-2'
+      fullPath: '/onboarding/etapa-2'
+      preLoaderRoute: typeof OnboardingEtapa2RouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/onboarding/etapa-1': {
+      id: '/onboarding/etapa-1'
+      path: '/onboarding/etapa-1'
+      fullPath: '/onboarding/etapa-1'
+      preLoaderRoute: typeof OnboardingEtapa1RouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/conversas/$matchId': {
+      id: '/conversas/$matchId'
+      path: '/conversas/$matchId'
+      fullPath: '/conversas/$matchId'
+      preLoaderRoute: typeof ConversasMatchIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/blog/$slug': {
+      id: '/blog/$slug'
+      path: '/blog/$slug'
+      fullPath: '/blog/$slug'
+      preLoaderRoute: typeof BlogSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/signup': {
+      id: '/auth/signup'
+      path: '/auth/signup'
+      fullPath: '/auth/signup'
+      preLoaderRoute: typeof AuthSignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/reset-password': {
+      id: '/auth/reset-password'
+      path: '/auth/reset-password'
+      fullPath: '/auth/reset-password'
+      preLoaderRoute: typeof AuthResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/login': {
+      id: '/auth/login'
+      path: '/auth/login'
+      fullPath: '/auth/login'
+      preLoaderRoute: typeof AuthLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/forgot-password': {
+      id: '/auth/forgot-password'
+      path: '/auth/forgot-password'
+      fullPath: '/auth/forgot-password'
+      preLoaderRoute: typeof AuthForgotPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/verificacoes': {
+      id: '/admin/verificacoes'
+      path: '/admin/verificacoes'
+      fullPath: '/admin/verificacoes'
+      preLoaderRoute: typeof AdminVerificacoesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/stickers': {
+      id: '/admin/stickers'
+      path: '/admin/stickers'
+      fullPath: '/admin/stickers'
+      preLoaderRoute: typeof AdminStickersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/presentes': {
+      id: '/admin/presentes'
+      path: '/admin/presentes'
+      fullPath: '/admin/presentes'
+      preLoaderRoute: typeof AdminPresentesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/molduras': {
+      id: '/admin/molduras'
+      path: '/admin/molduras'
+      fullPath: '/admin/molduras'
+      preLoaderRoute: typeof AdminMoldurasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/fundos': {
+      id: '/admin/fundos'
+      path: '/admin/fundos'
+      fullPath: '/admin/fundos'
+      preLoaderRoute: typeof AdminFundosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/fotos': {
+      id: '/admin/fotos'
+      path: '/admin/fotos'
+      fullPath: '/admin/fotos'
+      preLoaderRoute: typeof AdminFotosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/equipe-live': {
+      id: '/admin/equipe-live'
+      path: '/admin/equipe-live'
+      fullPath: '/admin/equipe-live'
+      preLoaderRoute: typeof AdminEquipeLiveRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/auras': {
+      id: '/admin/auras'
+      path: '/admin/auras'
+      fullPath: '/admin/auras'
+      preLoaderRoute: typeof AdminAurasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  BloqueadosRoute: BloqueadosRoute,
+  ComoFuncionaRoute: ComoFuncionaRoute,
+  ComunidadeRoute: ComunidadeRoute,
+  ContaRoute: ContaRoute,
+  DashboardRoute: DashboardRoute,
+  DepoimentosRoute: DepoimentosRoute,
+  DevocionalRoute: DevocionalRoute,
+  InicioRoute: InicioRoute,
+  InteressesRoute: InteressesRoute,
+  LojaRoute: LojaRoute,
+  ManualRoute: ManualRoute,
+  MatchesRoute: MatchesRoute,
+  OracoesRoute: OracoesRoute,
+  PerfilRoute: PerfilRoute,
+  RecadosRoute: RecadosRoute,
+  SobreRoute: SobreRoute,
+  TermosRoute: TermosRoute,
+  VerificacaoRoute: VerificacaoRoute,
+  AdminAurasRoute: AdminAurasRoute,
+  AdminEquipeLiveRoute: AdminEquipeLiveRoute,
+  AdminFotosRoute: AdminFotosRoute,
+  AdminFundosRoute: AdminFundosRoute,
+  AdminMoldurasRoute: AdminMoldurasRoute,
+  AdminPresentesRoute: AdminPresentesRoute,
+  AdminStickersRoute: AdminStickersRoute,
+  AdminVerificacoesRoute: AdminVerificacoesRoute,
+  AuthForgotPasswordRoute: AuthForgotPasswordRoute,
+  AuthLoginRoute: AuthLoginRoute,
+  AuthResetPasswordRoute: AuthResetPasswordRoute,
+  AuthSignupRoute: AuthSignupRoute,
+  BlogSlugRoute: BlogSlugRoute,
+  ConversasMatchIdRoute: ConversasMatchIdRoute,
+  OnboardingEtapa1Route: OnboardingEtapa1Route,
+  OnboardingEtapa2Route: OnboardingEtapa2Route,
+  PretendentesIdRoute: PretendentesIdRoute,
+  PropositoMatchIdRoute: PropositoMatchIdRoute,
+  SuporteIdRoute: SuporteIdRoute,
+  SuporteAjudaRoute: SuporteAjudaRoute,
+  AdminIndexRoute: AdminIndexRoute,
+  BlogIndexRoute: BlogIndexRoute,
+  ConversasIndexRoute: ConversasIndexRoute,
+  NoticiasIndexRoute: NoticiasIndexRoute,
+  PresentesIndexRoute: PresentesIndexRoute,
+  PretendentesIndexRoute: PretendentesIndexRoute,
+  SuporteIndexRoute: SuporteIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

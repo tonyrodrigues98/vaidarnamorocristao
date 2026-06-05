@@ -13,6 +13,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Header } from "../components/layout/Header";
 import { Footer } from "../components/layout/Footer";
+import { Toaster } from "../components/ui/sonner";
 
 function NotFoundComponent() {
   return (
@@ -79,18 +80,26 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "A foundational React application built with Vite, TypeScript, and Tailwind CSS for a clean project structure." },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "A foundational React application built with Vite, TypeScript, and Tailwind CSS for a clean project structure." },
+      { title: "VaiDarNamoro Cristao" },
+      { name: "description", content: "Prototipo visual publico do VaiDarNamoro Cristao." },
+      { name: "author", content: "VaiDarNamoro" },
+      { property: "og:title", content: "VaiDarNamoro Cristao" },
+      { property: "og:description", content: "Prototipo visual publico do produto." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
-      { name: "twitter:title", content: "Lovable App" },
-      { name: "twitter:description", content: "A foundational React application built with Vite, TypeScript, and Tailwind CSS for a clean project structure." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/99dd1c05-2301-4f93-8faa-475ca754b063/id-preview-6952d0ad--65eb41b7-e0f2-462c-ace5-074bfe5bfdeb.lovable.app-1780623121622.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/99dd1c05-2301-4f93-8faa-475ca754b063/id-preview-6952d0ad--65eb41b7-e0f2-462c-ace5-074bfe5bfdeb.lovable.app-1780623121622.png" },
+      { name: "twitter:title", content: "VaiDarNamoro Cristao" },
+      { name: "twitter:description", content: "Prototipo visual publico do produto." },
+      {
+        property: "og:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/99dd1c05-2301-4f93-8faa-475ca754b063/id-preview-6952d0ad--65eb41b7-e0f2-462c-ace5-074bfe5bfdeb.lovable.app-1780623121622.png",
+      },
+      {
+        name: "twitter:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/99dd1c05-2301-4f93-8faa-475ca754b063/id-preview-6952d0ad--65eb41b7-e0f2-462c-ace5-074bfe5bfdeb.lovable.app-1780623121622.png",
+      },
     ],
     links: [
       {
@@ -131,6 +140,7 @@ function RootComponent() {
           <Outlet />
         </main>
         <Footer />
+        <Toaster richColors position="top-right" />
       </div>
     </QueryClientProvider>
   );
