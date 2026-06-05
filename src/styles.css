@@ -397,6 +397,10 @@
     }
   }
   @media (max-width: 767px) {
+    .mobile-chat-shell {
+      height: var(--app-visual-height, 100dvh);
+      overflow: hidden;
+    }
     .mobile-chat-screen {
       height: var(--app-visual-height, 100dvh);
       min-height: 0;
