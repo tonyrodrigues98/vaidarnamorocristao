@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createClient } from "@supabase/supabase-js";
+import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 type VerifyResult = {
   is_human: boolean;
@@ -75,7 +76,8 @@ export const Route = createFileRoute("/api/verify-photo")({
           const dbScope = scope === "main" ? "avatar" : "extra";
 
           // Load admin-configured thresholds (singleton row).
-          const { data: settings } = await sb
+          // Use service-role client because the settings table is now restricted to admins.
+          const { data: settings } = await supabaseAdmin
             .from("photo_moderation_settings")
             .select(
               "extra_reject_threshold, extra_review_threshold, main_approve_threshold, main_review_threshold",
