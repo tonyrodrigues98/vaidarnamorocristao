@@ -318,7 +318,7 @@ function NotificationRow({
             {n.image_url && (
               <img
                 src={n.image_url}
-                alt=""
+                alt="Imagem anexada à notificação"
                 loading="lazy"
                 className="mt-2 h-24 w-24 rounded-lg border object-cover"
               />
