@@ -367,7 +367,7 @@ function Comunidade() {
   const sendMessage = useCallback(
     async (content: string): Promise<boolean> => {
       if (!content || !user) return false;
-      const hit = findRestrictedWord(content, restrictedWords);
+      const hit = await findRestrictedWord(content);
       if (hit) {
         setWarning(hit);
         return false;
