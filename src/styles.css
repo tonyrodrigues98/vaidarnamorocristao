@@ -398,7 +398,7 @@
   }
   @media (max-width: 767px) {
     .mobile-chat-screen {
-      height: 100dvh;
+      height: var(--app-visual-height, 100dvh);
       min-height: 0;
       overflow: hidden;
     }
