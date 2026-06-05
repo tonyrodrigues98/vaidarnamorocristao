@@ -31,6 +31,7 @@ import {
 } from "framer-motion";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { EnableNotificationsCard } from "@/components/EnableNotificationsCard";
 
 export const Route = createFileRoute("/notificacoes")({
   head: () => ({
@@ -44,8 +45,7 @@ export const Route = createFileRoute("/notificacoes")({
       { property: "og:title", content: "Notificações — VaiDarNamoro" },
       {
         property: "og:description",
-        content:
-          "Acompanhe novos interesses, mensagens e matches da sua jornada no VaiDarNamoro.",
+        content: "Acompanhe novos interesses, mensagens e matches da sua jornada no VaiDarNamoro.",
       },
     ],
   }),
@@ -179,6 +179,8 @@ function NotificacoesPage() {
             </Button>
           )}
         </div>
+
+        <EnableNotificationsCard />
 
         {loading ? (
           <p className="text-sm text-muted-foreground">Carregando…</p>

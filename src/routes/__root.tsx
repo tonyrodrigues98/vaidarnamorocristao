@@ -7,6 +7,7 @@ import { TermsGate } from "@/components/TermsGate";
 import { SupportFooterButton } from "@/components/SupportFooterButton";
 import { PresenceProvider } from "@/lib/presence";
 import { BanGuard } from "@/components/BanGuard";
+import { MobileAppShell } from "@/components/mobile/MobileAppShell";
 
 import appCss from "../styles.css?url";
 import coinPng from "@/assets/coin.webp";
@@ -77,8 +78,16 @@ export const Route = createRootRoute({
         content:
           "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/1b750425-4e0b-4a54-9e82-fd801fe3d681/id-preview-24502e78--3b50ea40-46ee-4b11-9926-5be9286cb827.lovable.app-1780599389099.png",
       },
-      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/GKTUFlq77iPwT8Pw4jhZzy7Szyp2/social-images/social-1780667467585-8a3c052a-1309-44dc-bb48-6fffc6504f58.webp" },
-      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/GKTUFlq77iPwT8Pw4jhZzy7Szyp2/social-images/social-1780667467585-8a3c052a-1309-44dc-bb48-6fffc6504f58.webp" },
+      {
+        property: "og:image",
+        content:
+          "https://storage.googleapis.com/gpt-engineer-file-uploads/GKTUFlq77iPwT8Pw4jhZzy7Szyp2/social-images/social-1780667467585-8a3c052a-1309-44dc-bb48-6fffc6504f58.webp",
+      },
+      {
+        name: "twitter:image",
+        content:
+          "https://storage.googleapis.com/gpt-engineer-file-uploads/GKTUFlq77iPwT8Pw4jhZzy7Szyp2/social-images/social-1780667467585-8a3c052a-1309-44dc-bb48-6fffc6504f58.webp",
+      },
     ],
     links: [
       { rel: "preload", as: "image", href: coinPng },
@@ -125,25 +134,27 @@ function RootComponent() {
         <PresenceProvider>
           <NotificationsBridge />
           <BanGuard />
-          <div className="flex min-h-screen flex-col">
-            <div className="flex-1">
-              <Outlet />
-            </div>
-            <footer className="border-t border-border/50 bg-background/60 py-4 mt-8">
-              <div className="mx-auto flex max-w-7xl items-center justify-end gap-4 px-4 text-xs text-muted-foreground">
-                <Link to="/termos" className="hover:text-[var(--rose)] hover:underline">
-                  Termos e Condições
-                </Link>
-                <span aria-hidden className="opacity-40">
-                  •
-                </span>
-                <Link to="/manual" className="hover:text-[var(--rose)] hover:underline">
-                  Manual do Usuário
-                </Link>
-                <SupportFooterButton />
+          <MobileAppShell>
+            <div className="flex min-h-screen flex-col">
+              <div className="flex-1">
+                <Outlet />
               </div>
-            </footer>
-          </div>
+              <footer className="border-t border-border/50 bg-background/60 py-4 mt-8">
+                <div className="mx-auto flex max-w-7xl items-center justify-end gap-4 px-4 text-xs text-muted-foreground">
+                  <Link to="/termos" className="hover:text-[var(--rose)] hover:underline">
+                    Termos e Condições
+                  </Link>
+                  <span aria-hidden className="opacity-40">
+                    •
+                  </span>
+                  <Link to="/manual" className="hover:text-[var(--rose)] hover:underline">
+                    Manual do Usuário
+                  </Link>
+                  <SupportFooterButton />
+                </div>
+              </footer>
+            </div>
+          </MobileAppShell>
           <TermsGate />
         </PresenceProvider>
         <Toaster richColors position="top-right" />

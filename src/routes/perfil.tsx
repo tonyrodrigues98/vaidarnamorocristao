@@ -42,6 +42,7 @@ import {
   Eye,
   Gift as GiftIcon,
   PencilLine,
+  Settings,
   X,
 } from "lucide-react";
 import {
@@ -873,10 +874,12 @@ function PerfilPage() {
                       <Button
                         type="button"
                         onClick={() => setEditingProfile(true)}
-                        className="rounded-full"
+                        className="rounded-full max-sm:h-[58px] max-sm:w-[58px] max-sm:flex-col max-sm:gap-1 max-sm:px-0 max-sm:text-[11px]"
                       >
-                        <PencilLine className="mr-2 h-4 w-4" />
-                        Editar perfil
+                        <Settings className="h-5 w-5 sm:hidden" />
+                        <PencilLine className="mr-2 h-4 w-4 max-sm:hidden" />
+                        <span className="max-sm:hidden">Editar perfil</span>
+                        <span className="hidden max-sm:inline">Editar</span>
                       </Button>
                     </div>
 
@@ -1117,10 +1120,12 @@ function PerfilPage() {
                       <Button
                         type="button"
                         onClick={() => setEditingPrefs(true)}
-                        className="rounded-full"
+                        className="rounded-full max-sm:h-[58px] max-sm:w-[58px] max-sm:flex-col max-sm:gap-1 max-sm:px-0 max-sm:text-[11px]"
                       >
-                        <PencilLine className="mr-2 h-4 w-4" />
-                        Editar preferências
+                        <Settings className="h-5 w-5 sm:hidden" />
+                        <PencilLine className="mr-2 h-4 w-4 max-sm:hidden" />
+                        <span className="max-sm:hidden">Editar preferências</span>
+                        <span className="hidden max-sm:inline">Editar</span>
                       </Button>
                     </div>
 

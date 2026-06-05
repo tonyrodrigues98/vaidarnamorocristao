@@ -247,7 +247,7 @@ export function Header() {
     .toUpperCase();
 
   return (
-    <header className="sticky top-0 z-50 glass">
+    <header className="sticky top-0 z-50 glass pt-safe-top">
       <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-3 px-4 sm:px-6 min-w-0">
         <Link to="/" className="flex items-center gap-2.5 group min-w-0 shrink-0" onClick={close}>
           <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-love shadow-glow transition-transform group-hover:scale-105">

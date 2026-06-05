@@ -1,4 +1,4 @@
-const CACHE_VERSION = "vaidarnamoro-pwa-v1";
+const CACHE_VERSION = "vaidarnamoro-pwa-v2";
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 
 const STATIC_ASSETS = [
@@ -104,4 +104,58 @@ self.addEventListener("fetch", (event) => {
   if (isSafeStaticRequest(request, url)) {
     event.respondWith(cacheFirst(request));
   }
+});
+
+self.addEventListener("push", (event) => {
+  if (!event.data) return;
+
+  let payload = {};
+
+  try {
+    payload = event.data.json();
+  } catch {
+    payload = {
+      title: "VaiDarNamoro",
+      body: event.data.text(),
+    };
+  }
+
+  const title = typeof payload.title === "string" ? payload.title : "VaiDarNamoro";
+  const options = {
+    body: typeof payload.body === "string" ? payload.body : "Voce tem uma nova notificacao.",
+    icon: "/icon-192.png",
+    badge: "/icon-192.png",
+    data: {
+      url:
+        payload.data && typeof payload.data.url === "string"
+          ? payload.data.url
+          : typeof payload.url === "string"
+            ? payload.url
+            : "/notificacoes",
+    },
+  };
+
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+
+  const targetUrl =
+    event.notification.data && typeof event.notification.data.url === "string"
+      ? event.notification.data.url
+      : "/notificacoes";
+  const url = new URL(targetUrl, self.location.origin).href;
+
+  event.waitUntil(
+    clients.matchAll({ type: "window", includeUncontrolled: true }).then((windowClients) => {
+      const existingClient = windowClients.find((client) => client.url === url);
+
+      if (existingClient) {
+        return existingClient.focus();
+      }
+
+      return clients.openWindow(url);
+    }),
+  );
 });

@@ -44,6 +44,7 @@
 
 :root {
   --radius: 1rem;
+  --mobile-bottom-nav-height: 88px;
 
   /* iOS-like motion tokens */
   --ease-ios: cubic-bezier(0.32, 0.72, 0, 1);
@@ -349,6 +350,48 @@
     color: oklch(0.7 0.2 155);
     filter: drop-shadow(0 0 4px oklch(0.7 0.2 155 / 0.55));
     animation: sparkle-pulse 2.4s ease-in-out infinite;
+  }
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .pt-safe {
+    padding-top: env(safe-area-inset-top);
+  }
+  .pt-safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+  .mobile-app-shell {
+    padding-bottom: calc(var(--mobile-bottom-nav-height) + env(safe-area-inset-bottom));
+  }
+  .mobile-app-card {
+    border-radius: 1.5rem;
+    border: 1px solid color-mix(in oklab, var(--border) 78%, transparent);
+    background: color-mix(in oklab, var(--card) 86%, transparent);
+    box-shadow: var(--shadow-soft);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+  @media (min-width: 768px) {
+    .mobile-app-shell {
+      padding-bottom: 0;
+    }
+    .pt-safe-top {
+      padding-top: 0;
+    }
+  }
+  @media (max-width: 767px) {
+    .mobile-app-shell {
+      background:
+        radial-gradient(
+          circle at 50% -10%,
+          color-mix(in oklab, var(--rose) 8%, transparent),
+          transparent 22rem
+        ),
+        color-mix(in oklab, var(--background) 94%, var(--petal));
+    }
+    .mobile-app-shell main {
+      scroll-margin-bottom: calc(var(--mobile-bottom-nav-height) + env(safe-area-inset-bottom));
+    }
   }
 }
 
