@@ -1,4 +1,5 @@
 import { useLocation } from "@tanstack/react-router";
+import { useEffect } from "react";
 
 import { useAuth } from "@/lib/auth";
 import { cn } from "@/lib/utils";
@@ -51,6 +52,28 @@ export function MobileAppShell({ children }: { children: React.ReactNode }) {
   const isChatScreen = MOBILE_CHAT_PREFIXES.some((prefix) =>
     matchesPrefix(location.pathname, prefix),
   );
+
+  useEffect(() => {
+    if (!isChatScreen || typeof window === "undefined") return;
+
+    const root = document.documentElement;
+    const viewport = window.visualViewport;
+    const setChatHeight = () => {
+      root.style.setProperty("--app-visual-height", `${viewport?.height ?? window.innerHeight}px`);
+    };
+
+    setChatHeight();
+    viewport?.addEventListener("resize", setChatHeight);
+    viewport?.addEventListener("scroll", setChatHeight);
+    window.addEventListener("resize", setChatHeight);
+
+    return () => {
+      viewport?.removeEventListener("resize", setChatHeight);
+      viewport?.removeEventListener("scroll", setChatHeight);
+      window.removeEventListener("resize", setChatHeight);
+      root.style.removeProperty("--app-visual-height");
+    };
+  }, [isChatScreen]);
 
   return (
     <>
