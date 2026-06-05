@@ -936,6 +936,42 @@ export type Database = {
           },
         ]
       }
+      name_gradients: {
+        Row: {
+          color_a: string
+          color_b: string
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          price: number
+          sort_order: number
+          updated_at: string | null
+        }
+        Insert: {
+          color_a?: string
+          color_b?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          price?: number
+          sort_order?: number
+          updated_at?: string | null
+        }
+        Update: {
+          color_a?: string
+          color_b?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          price?: number
+          sort_order?: number
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           actor_id: string | null
@@ -1672,6 +1708,7 @@ export type Database = {
           equipped_aura_id: string | null
           equipped_background_id: string | null
           equipped_frame_id: string | null
+          equipped_name_gradient_id: string | null
           equipped_sticker_id: string | null
           full_name: string
           height_cm: number | null
@@ -1708,6 +1745,7 @@ export type Database = {
           equipped_aura_id?: string | null
           equipped_background_id?: string | null
           equipped_frame_id?: string | null
+          equipped_name_gradient_id?: string | null
           equipped_sticker_id?: string | null
           full_name: string
           height_cm?: number | null
@@ -1744,6 +1782,7 @@ export type Database = {
           equipped_aura_id?: string | null
           equipped_background_id?: string | null
           equipped_frame_id?: string | null
+          equipped_name_gradient_id?: string | null
           equipped_sticker_id?: string | null
           full_name?: string
           height_cm?: number | null
@@ -1781,6 +1820,13 @@ export type Database = {
             columns: ["equipped_frame_id"]
             isOneToOne: false
             referencedRelation: "avatar_decorations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_equipped_name_gradient_id_fkey"
+            columns: ["equipped_name_gradient_id"]
+            isOneToOne: false
+            referencedRelation: "name_gradients"
             referencedColumns: ["id"]
           },
           {
@@ -2361,6 +2407,35 @@ export type Database = {
         }
         Relationships: []
       }
+      user_name_gradients: {
+        Row: {
+          gradient_id: string
+          id: string
+          purchased_at: string
+          user_id: string
+        }
+        Insert: {
+          gradient_id: string
+          id?: string
+          purchased_at?: string
+          user_id: string
+        }
+        Update: {
+          gradient_id?: string
+          id?: string
+          purchased_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_name_gradients_gradient_id_fkey"
+            columns: ["gradient_id"]
+            isOneToOne: false
+            referencedRelation: "name_gradients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_profile_backgrounds: {
         Row: {
           background_id: string
@@ -2686,6 +2761,7 @@ export type Database = {
       }
       current_terms_version: { Args: never; Returns: string }
       equip_decoration: { Args: { _decoration_id: string }; Returns: Json }
+      equip_name_gradient: { Args: { _gradient_id: string }; Returns: Json }
       equip_profile_background: {
         Args: { _background_id: string }
         Returns: undefined
@@ -2817,6 +2893,7 @@ export type Database = {
       mark_all_notifications_read: { Args: never; Returns: number }
       mark_message_read: { Args: { _message_id: string }; Returns: undefined }
       purchase_decoration: { Args: { _decoration_id: string }; Returns: Json }
+      purchase_name_gradient: { Args: { _gradient_id: string }; Returns: Json }
       purchase_profile_background: {
         Args: { _background_id: string }
         Returns: Json
@@ -2873,6 +2950,7 @@ export type Database = {
         Args: { _type: Database["public"]["Enums"]["decoration_type"] }
         Returns: Json
       }
+      unequip_name_gradient: { Args: never; Returns: Json }
       unequip_profile_background: { Args: never; Returns: undefined }
       unmatch: { Args: { _match_id: string }; Returns: undefined }
     }
