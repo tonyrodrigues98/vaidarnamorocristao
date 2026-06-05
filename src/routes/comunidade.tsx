@@ -822,9 +822,9 @@ function Comunidade() {
                 );
               })
             )}
-          </div>
+      </main>
 
-          <ChatComposer
+      <ChatComposer
             approved={!!approved}
             userId={user?.id ?? null}
             replyTo={replyTo}
@@ -837,9 +837,7 @@ function Comunidade() {
             onCancelReply={() => setReplyTo(null)}
             onSend={sendMessage}
             onSendSticker={sendSticker}
-          />
-        </div>
-      </main>
+      />
       <RestrictedWordDialog word={warning} onClose={() => setWarning(null)} />
       <ActionsSheet
         msg={actionsOpenId ? (messagesById.get(actionsOpenId) ?? null) : null}
