@@ -2662,6 +2662,7 @@ export type Database = {
         Returns: boolean
       }
       cancel_account_deletion: { Args: never; Returns: undefined }
+      check_text_restricted: { Args: { _text: string }; Returns: string }
       claim_daily_coins: {
         Args: never
         Returns: {
