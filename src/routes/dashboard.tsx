@@ -105,12 +105,13 @@ function Dashboard() {
 
   useEffect(() => {
     if (!user) return;
-    supabase
-      .from("profiles")
-      .select("status, full_name, rejection_reason, equipped_name_gradient_id")
-      .eq("id", user.id)
-      .maybeSingle()
-      .then(async ({ data }) => {
+    (async () => {
+      try {
+        const { data } = await supabase
+          .from("profiles")
+          .select("status, full_name, rejection_reason, equipped_name_gradient_id")
+          .eq("id", user.id)
+          .maybeSingle();
         const next = data as Profile | null;
         setProfile(next);
         const gradients = await fetchNameGradientsByIds([next?.equipped_name_gradient_id]);
@@ -119,8 +120,10 @@ function Dashboard() {
             ? (gradients[next.equipped_name_gradient_id] ?? null)
             : null,
         );
-      })
-      .catch(() => setProfileNameGradient(null));
+      } catch {
+        setProfileNameGradient(null);
+      }
+    })();
   }, [user]);
 
   useEffect(() => {
