@@ -176,7 +176,7 @@ function RootComponent() {
                   : "flex min-h-screen flex-col"
               }
             >
-              <div className="flex-1">
+              <div className={isChatRoute ? "min-h-0 flex-1 overflow-hidden" : "flex-1"}>
                 <Outlet />
               </div>
               {showFooter && (
