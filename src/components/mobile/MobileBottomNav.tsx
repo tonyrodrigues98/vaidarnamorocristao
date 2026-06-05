@@ -1,5 +1,5 @@
 import { Link, useLocation } from "@tanstack/react-router";
-import { BookOpen, Heart, Home, User } from "lucide-react";
+import { BookOpen, Heart, Home, User, Users } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { PhotoImg } from "@/components/PhotoImg";
@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 
-type AppNavRoute = "/inicio" | "/devocional" | "/pretendentes" | "/perfil";
+type AppNavRoute = "/inicio" | "/devocional" | "/comunidade" | "/pretendentes" | "/perfil";
 
 type NavItem = {
   to: AppNavRoute;
@@ -23,6 +23,7 @@ type NavProfile = {
 const navItems: NavItem[] = [
   { to: "/inicio", label: "Inicio", icon: Home },
   { to: "/devocional", label: "Devocional", icon: BookOpen },
+  { to: "/comunidade", label: "Comunidade", icon: Users },
   { to: "/pretendentes", label: "Pretendentes", icon: Heart },
   { to: "/perfil", label: "Perfil", icon: User },
 ];
@@ -77,7 +78,7 @@ export function MobileBottomNav() {
       className="fixed inset-x-0 bottom-0 z-50 md:hidden"
     >
       <div className="mx-auto max-w-md px-3 pb-[max(env(safe-area-inset-bottom),0.5rem)]">
-        <div className="grid h-[72px] grid-cols-4 overflow-hidden rounded-[1.75rem] border border-border/70 bg-background/88 shadow-[0_-16px_48px_rgba(15,23,42,0.14)] backdrop-blur-2xl dark:border-white/10 dark:bg-card/88 dark:shadow-[0_-16px_48px_rgba(0,0,0,0.38)]">
+        <div className="grid h-[72px] grid-cols-5 overflow-hidden rounded-[1.75rem] border border-border/70 bg-background/88 shadow-[0_-16px_48px_rgba(15,23,42,0.14)] backdrop-blur-2xl dark:border-white/10 dark:bg-card/88 dark:shadow-[0_-16px_48px_rgba(0,0,0,0.38)]">
           {navItems.map((item) => {
             const active = isActivePath(location.pathname, item.to);
             const Icon = item.icon;
