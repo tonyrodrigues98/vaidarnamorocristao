@@ -57,6 +57,13 @@ export const Route = createFileRoute("/loja")({
         content:
           "Use suas moedas para desbloquear molduras, auras e personalizações exclusivas do seu perfil.",
       },
+      { property: "og:title", content: "Loja — VaiDarNamoro" },
+      {
+        property: "og:description",
+        content:
+          "Use suas moedas para desbloquear molduras, auras e personalizações exclusivas do seu perfil.",
+      },
+      { property: "og:url", content: "https://vaidarnamoro.com/loja" },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
