@@ -10,6 +10,7 @@ import {
   Ban,
   UserX,
   Heart,
+  Sparkles,
 } from "lucide-react";
 
 import {
@@ -34,7 +35,8 @@ export type AdminTab =
   | "pre_cadastros"
   | "restricted_words"
   | "flags"
-  | "interests";
+  | "interests"
+  | "name_gradients";
 
 interface AdminSidebarProps {
   currentTab: AdminTab;
@@ -103,6 +105,11 @@ export function AdminSidebar({ currentTab, availableTabs, onTabChange }: AdminSi
       key: "interests",
       label: "Interesses & Matches",
       icon: Heart,
+    },
+    {
+      key: "name_gradients",
+      label: "Gradientes de Nome",
+      icon: Sparkles,
     },
   ] as const;
 

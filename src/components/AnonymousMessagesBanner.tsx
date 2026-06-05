@@ -10,13 +10,7 @@ import letterImage from "@/assets/anonymous-letter.webp";
  */
 export function AnonymousMessagesBanner() {
   return (
-    <div
-      className="relative overflow-hidden rounded-[2rem] border border-white/60"
-      style={{
-        background: "linear-gradient(90deg, #FFF0F5 0%, #F8EDFF 50%, #FDEEFF 100%)",
-        boxShadow: "0 10px 40px rgba(0,0,0,0.04)",
-      }}
-    >
+    <div className="relative overflow-hidden rounded-[2rem] border border-white/60 bg-[linear-gradient(90deg,#FFF0F5_0%,#F8EDFF_50%,#FDEEFF_100%)] shadow-[0_10px_40px_rgba(0,0,0,0.04)] dark:border-white/10 dark:bg-[linear-gradient(135deg,#101d3a_0%,#17264b_52%,#2a1f4a_100%)] dark:shadow-[0_18px_52px_rgba(0,0,0,0.28)]">
       {/* soft ambient blobs */}
       <div
         aria-hidden
@@ -47,7 +41,7 @@ export function AnonymousMessagesBanner() {
 
           {/* title */}
           <h2
-            className="font-extrabold text-[#111827] leading-[1.02] tracking-tight"
+            className="font-extrabold leading-[1.02] tracking-tight text-[#111827] dark:text-white"
             style={{ fontSize: "clamp(32px, 5.2vw, 52px)" }}
           >
             Chegaram os{" "}
@@ -71,7 +65,7 @@ export function AnonymousMessagesBanner() {
 
           {/* description */}
           <p
-            className="text-[#6B7280]"
+            className="text-[#6B7280] dark:text-slate-200/80"
             style={{ fontSize: "clamp(15px, 1.6vw, 18px)", lineHeight: 1.7, maxWidth: 520 }}
           >
             Receba mensagens especiais de forma anônima. Surpresas, elogios e declarações no seu
@@ -87,7 +81,7 @@ export function AnonymousMessagesBanner() {
             ].map(({ icon: Icon, label }) => (
               <span
                 key={label}
-                className="inline-flex items-center gap-2 h-10 px-4 rounded-full text-sm font-medium text-[#374151]"
+                className="inline-flex h-10 items-center gap-2 rounded-full px-4 text-sm font-medium text-[#374151] dark:text-slate-100"
                 style={{
                   background: "rgba(255,255,255,0.75)",
                   border: "1px solid rgba(123,97,255,0.08)",

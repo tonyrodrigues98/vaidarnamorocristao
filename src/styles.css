@@ -63,7 +63,7 @@
   --popover-foreground: oklch(0.16 0.006 255);
 
   /* Coral-rose primary — vibrant love */
-  --primary: oklch(0.12 0.004 255);
+  --primary: #ff4f68;
   --primary-foreground: oklch(1 0 0);
 
   --secondary: oklch(0.955 0.004 255);
@@ -80,39 +80,24 @@
 
   --border: oklch(0.895 0.006 255);
   --input: oklch(0.91 0.006 255);
-  --ring: oklch(0.32 0.008 255);
+  --ring: #ff4f68;
 
   /* Brand tokens */
-  --rose: oklch(0.12 0.004 255);
-  --rose-soft: oklch(0.32 0.008 255);
-  --coral: oklch(0.46 0.01 255);
-  --petal: oklch(0.94 0.004 255);
+  --rose: #ff4f68;
+  --rose-soft: #ff8fa0;
+  --coral: #ff7a45;
+  --petal: #fff0f3;
   --cream: oklch(0.985 0.002 255);
   --ink: oklch(0.08 0.002 255);
 
   /* Sparky gold — admin highlight */
-  --gold: oklch(0.58 0.012 255);
-  --gold-soft: oklch(0.9 0.006 255);
+  --gold: #f6b93b;
+  --gold-soft: #fff3c4;
 
-  --gradient-love: linear-gradient(
-    135deg,
-    oklch(0.08 0.002 255) 0%,
-    oklch(0.24 0.006 255) 55%,
-    oklch(0.48 0.012 255) 130%
-  );
+  --gradient-love: linear-gradient(135deg, #ff4f68 0%, #ff7a45 52%, #7c3aed 120%);
   --gradient-warm: linear-gradient(180deg, oklch(1 0 0) 0%, oklch(0.965 0.004 255) 100%);
-  --gradient-text: linear-gradient(
-    120deg,
-    oklch(0.08 0.002 255) 0%,
-    oklch(0.42 0.012 255) 48%,
-    oklch(0.08 0.002 255) 100%
-  );
-  --gradient-night: linear-gradient(
-    135deg,
-    oklch(0.08 0.002 255) 0%,
-    oklch(0.18 0.006 255) 48%,
-    oklch(0.34 0.01 255) 100%
-  );
+  --gradient-text: linear-gradient(120deg, #ff4f68 0%, #ff7a45 48%, #7c3aed 100%);
+  --gradient-night: linear-gradient(135deg, #0b1633 0%, #13234a 48%, #243b6b 100%);
 
   --shadow-soft: 0 1px 2px oklch(0 0 0 / 0.04), 0 8px 24px oklch(0 0 0 / 0.06);
   --shadow-elegant: 0 2px 4px oklch(0 0 0 / 0.05), 0 18px 48px oklch(0 0 0 / 0.1);
@@ -120,57 +105,42 @@
 }
 
 .dark {
-  --background: oklch(0.08 0.002 255);
-  --foreground: oklch(0.97 0.002 255);
-  --card: oklch(0.13 0.004 255);
+  --background: #0b1633;
+  --foreground: oklch(0.975 0.004 245);
+  --card: #111f3f;
   --card-foreground: oklch(0.97 0.002 255);
-  --popover: oklch(0.13 0.004 255);
+  --popover: #111f3f;
   --popover-foreground: oklch(0.97 0.002 255);
-  --primary: oklch(0.97 0.002 255);
-  --primary-foreground: oklch(0.08 0.002 255);
-  --secondary: oklch(0.2 0.006 255);
+  --primary: #ff4f68;
+  --primary-foreground: oklch(1 0 0);
+  --secondary: #17264b;
   --secondary-foreground: oklch(0.97 0.002 255);
-  --muted: oklch(0.18 0.006 255);
-  --muted-foreground: oklch(0.72 0.01 255);
-  --accent: oklch(0.24 0.006 255);
+  --muted: #16254a;
+  --muted-foreground: #b9c5df;
+  --accent: #213762;
   --accent-foreground: oklch(0.97 0.002 255);
   --destructive: oklch(0.62 0.22 25);
   --destructive-foreground: oklch(1 0 0);
-  --border: oklch(0.28 0.006 255);
-  --input: oklch(0.28 0.006 255);
-  --ring: oklch(0.86 0.006 255);
+  --border: oklch(0.38 0.035 255 / 0.7);
+  --input: oklch(0.38 0.035 255 / 0.8);
+  --ring: #ff4f68;
 
   /* Brand tokens — adapted for dark */
-  --rose: oklch(0.96 0.002 255);
-  --rose-soft: oklch(0.72 0.01 255);
-  --coral: oklch(0.62 0.012 255);
-  --petal: oklch(0.22 0.006 255);
-  --cream: oklch(0.12 0.004 255);
+  --rose: #ff4f68;
+  --rose-soft: #ff9aac;
+  --coral: #ff8a4c;
+  --petal: #321f42;
+  --cream: #101d3a;
   --ink: oklch(0.97 0.002 255);
 
   /* Sparky gold — admin highlight (dark) */
-  --gold: oklch(0.8 0.01 255);
-  --gold-soft: oklch(0.3 0.006 255);
+  --gold: #f7c948;
+  --gold-soft: #4a3f22;
 
-  --gradient-love: linear-gradient(
-    135deg,
-    oklch(0.98 0.002 255) 0%,
-    oklch(0.72 0.01 255) 55%,
-    oklch(0.34 0.01 255) 130%
-  );
-  --gradient-warm: linear-gradient(180deg, oklch(0.08 0.002 255) 0%, oklch(0.15 0.004 255) 100%);
-  --gradient-text: linear-gradient(
-    120deg,
-    oklch(1 0 0) 0%,
-    oklch(0.68 0.01 255) 52%,
-    oklch(1 0 0) 100%
-  );
-  --gradient-night: linear-gradient(
-    135deg,
-    oklch(0.05 0.002 255) 0%,
-    oklch(0.12 0.004 255) 50%,
-    oklch(0.28 0.008 255) 100%
-  );
+  --gradient-love: linear-gradient(135deg, #ff4f68 0%, #ff8a4c 55%, #7c3aed 130%);
+  --gradient-warm: linear-gradient(180deg, #0b1633 0%, #13234a 100%);
+  --gradient-text: linear-gradient(120deg, #ff9aac 0%, #ff4f68 52%, #ff8a4c 100%);
+  --gradient-night: linear-gradient(135deg, #071126 0%, #0b1a3a 50%, #173669 100%);
 
   --shadow-soft: 0 1px 2px oklch(0 0 0 / 0.4), 0 8px 24px oklch(0 0 0 / 0.45);
   --shadow-elegant: 0 2px 4px oklch(0 0 0 / 0.4), 0 18px 48px oklch(0 0 0 / 0.5);
@@ -191,8 +161,16 @@
   }
   body {
     background:
-      radial-gradient(circle at 15% 0%, oklch(0.9 0.006 255 / 0.42), transparent 34rem),
-      radial-gradient(circle at 80% 10%, oklch(0.75 0.01 255 / 0.18), transparent 26rem),
+      radial-gradient(
+        circle at 15% 0%,
+        color-mix(in oklab, var(--rose) 14%, transparent),
+        transparent 34rem
+      ),
+      radial-gradient(
+        circle at 80% 10%,
+        color-mix(in oklab, var(--coral) 10%, transparent),
+        transparent 26rem
+      ),
       var(--background);
     color: var(--color-foreground);
     font-feature-settings: "ss01";

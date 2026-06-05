@@ -26,6 +26,14 @@ import {
   unequipProfileBackground,
   type ProfileBackground,
 } from "@/lib/profileBackgrounds";
+import {
+  equipNameGradient,
+  fetchMyOwnedNameGradientIds,
+  fetchNameGradientCatalog,
+  nameGradientStyle,
+  unequipNameGradient,
+  type NameGradient,
+} from "@/lib/nameGradients";
 
 type EquippedMap = { frame: string | null; aura: string | null; sticker: string | null };
 
@@ -39,6 +47,7 @@ const CATEGORIES: Category[] = [
   { key: "frame", label: "Molduras" },
   { key: "aura", label: "Aura" },
   { key: "background", label: "Meus Fundos" },
+  { key: "soon-pets", label: "Nome", soon: false },
   { key: "soon-badges", label: "Badges", soon: true },
   { key: "soon-effects", label: "Efeitos", soon: true },
   { key: "soon-themes", label: "Temas", soon: true },
@@ -50,8 +59,11 @@ export function CustomizacaoTab({ photoUrl }: { photoUrl: string | null }) {
   const [backgrounds, setBackgrounds] = useState<ProfileBackground[]>([]);
   const [owned, setOwned] = useState<Set<string>>(new Set());
   const [ownedBackgrounds, setOwnedBackgrounds] = useState<Set<string>>(new Set());
+  const [nameGradients, setNameGradients] = useState<NameGradient[]>([]);
+  const [ownedNameGradients, setOwnedNameGradients] = useState<Set<string>>(new Set());
   const [equipped, setEquipped] = useState<EquippedMap>({ frame: null, aura: null, sticker: null });
   const [equippedBackground, setEquippedBackground] = useState<string | null>(null);
+  const [equippedNameGradient, setEquippedNameGradient] = useState<string | null>(null);
   const [preview, setPreview] = useState<EquippedMap>({
     frame: null,
     aura: null,
@@ -100,21 +112,29 @@ export function CustomizacaoTab({ photoUrl }: { photoUrl: string | null }) {
       }
 
       try {
-        const [bg, ownedBg, bgProf] = await Promise.all([
+        const [bg, ownedBg, nameGradientCatalog, ownedNameGradientIds, bgProf] = await Promise.all([
           fetchProfileBackgroundCatalog(),
           fetchMyOwnedBackgroundIds(),
+          fetchNameGradientCatalog(),
+          fetchMyOwnedNameGradientIds(),
           supabase
             .from("profiles")
-            .select("equipped_background_id")
+            .select("equipped_background_id, equipped_name_gradient_id")
             .eq("id", user.id)
             .maybeSingle(),
         ]);
         if (!alive) return;
         setBackgrounds(bg);
         setOwnedBackgrounds(ownedBg);
+        setNameGradients(nameGradientCatalog);
+        setOwnedNameGradients(ownedNameGradientIds);
         setEquippedBackground(
           ((bgProf.data ?? {}) as { equipped_background_id?: string | null })
             .equipped_background_id ?? null,
+        );
+        setEquippedNameGradient(
+          ((bgProf.data ?? {}) as { equipped_name_gradient_id?: string | null })
+            .equipped_name_gradient_id ?? null,
         );
       } catch {
         if (!alive) return;
@@ -212,6 +232,31 @@ export function CustomizacaoTab({ photoUrl }: { photoUrl: string | null }) {
       setPreviewBackground(null);
     } catch {
       toast.error("Erro ao remover fundo");
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const handleEquipNameGradient = async (gradient: NameGradient) => {
+    setBusyId(gradient.id);
+    try {
+      await equipNameGradient(gradient.id);
+      setEquippedNameGradient(gradient.id);
+      toast.success(`${gradient.name} equipado`);
+    } catch {
+      toast.error("Erro ao equipar gradiente");
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const handleUnequipNameGradient = async () => {
+    setBusyId("unequip-name-gradient");
+    try {
+      await unequipNameGradient();
+      setEquippedNameGradient(null);
+    } catch {
+      toast.error("Erro ao remover gradiente");
     } finally {
       setBusyId(null);
     }
@@ -431,6 +476,72 @@ export function CustomizacaoTab({ photoUrl }: { photoUrl: string | null }) {
     );
   };
 
+  const renderNameGradients = () => {
+    const ownedItems = nameGradients.filter((gradient) => ownedNameGradients.has(gradient.id));
+    if (ownedItems.length === 0) {
+      return (
+        <div className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-dashed bg-background/40 py-12 text-center">
+          <Sparkles className="h-5 w-5 text-[var(--rose)]" />
+          <p className="text-sm font-medium">Voce ainda nao possui gradientes</p>
+          <p className="max-w-xs text-xs text-muted-foreground">
+            Compre gradientes na loja para deixar seu nome em destaque.
+          </p>
+          <Button asChild size="sm" variant="outline" className="mt-2">
+            <Link to="/loja">
+              <ShoppingBag className="mr-1.5 h-3.5 w-3.5" /> Ir para loja
+            </Link>
+          </Button>
+        </div>
+      );
+    }
+
+    return (
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        {ownedItems.map((gradient) => {
+          const isEquipped = equippedNameGradient === gradient.id;
+          const busy = busyId === gradient.id;
+          return (
+            <div
+              key={gradient.id}
+              className={`rounded-2xl border bg-card/70 p-4 ${
+                isEquipped
+                  ? "border-[var(--rose)] ring-2 ring-[var(--rose)]/20"
+                  : "border-border/60"
+              }`}
+            >
+              <p className="text-2xl font-black" style={nameGradientStyle(gradient)}>
+                {gradient.name}
+              </p>
+              <p className="mt-1 text-xs text-muted-foreground">Preview do seu nome em destaque</p>
+              <div className="mt-3">
+                {isEquipped ? (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full text-xs"
+                    disabled={busyId === "unequip-name-gradient"}
+                    onClick={handleUnequipNameGradient}
+                  >
+                    Remover
+                  </Button>
+                ) : (
+                  <Button
+                    size="sm"
+                    className="w-full text-xs"
+                    disabled={busy}
+                    onClick={() => handleEquipNameGradient(gradient)}
+                  >
+                    {busy ? <Loader2 className="h-3 w-3 animate-spin" /> : "Equipar"}
+                  </Button>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
+
   if (loading) {
     return (
       <div className="rounded-3xl border bg-card/50 p-10 text-center text-sm text-muted-foreground">
@@ -561,6 +672,8 @@ export function CustomizacaoTab({ photoUrl }: { photoUrl: string | null }) {
             </div>
           ) : activeCat === "background" ? (
             renderBackgrounds()
+          ) : activeCat === "soon-pets" ? (
+            renderNameGradients()
           ) : (
             renderGrid(activeCat as DecorationType)
           )}

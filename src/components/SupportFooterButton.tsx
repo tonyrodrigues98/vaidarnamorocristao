@@ -14,7 +14,7 @@ export function SupportFooterButton() {
         to="/suporte"
         aria-label="Suporte"
         title="Suporte"
-        className="inline-flex items-center gap-1 text-[var(--rose)] hover:underline"
+        className="inline-flex items-center gap-1 text-[#ff4f68] hover:underline"
       >
         <LifeBuoy className="h-4 w-4" />
         <span className="hidden sm:inline">Suporte</span>

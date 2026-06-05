@@ -160,7 +160,11 @@ function getHeroTheme() {
     sectionClass: isNight ? "bg-gradient-night" : "bg-gradient-warm",
     blobA: isNight ? "bg-[oklch(0.82_0.08_285)]" : "bg-[var(--petal)]",
     blobB: isNight ? "bg-[oklch(0.92_0.06_40)]/60" : "bg-[var(--coral)]/20",
-    titleStyle: isNight ? { color: "oklch(0.18 0.04 270)" } : undefined,
+    titleStyle: isNight ? { color: "oklch(0.98 0.004 245)" } : undefined,
+    textClass: isNight ? "text-slate-200/90" : "text-muted-foreground",
+    pillClass: isNight
+      ? "border-white/15 bg-white/10 text-white"
+      : "border-[var(--rose)]/15 bg-white/60 text-[var(--rose)]",
   };
 }
 
@@ -619,7 +623,9 @@ function InicioPage() {
               />
 
               <div className="relative">
-                <div className="animate-fade-up inline-flex items-center gap-2 rounded-full border border-[var(--rose)]/15 bg-white/60 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--rose)] backdrop-blur dark:bg-white/10">
+                <div
+                  className={`animate-fade-up inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] backdrop-blur ${hero.pillClass}`}
+                >
                   <Sparkles className="h-3 w-3" /> Seu espaço
                 </div>
                 <h1
@@ -633,7 +639,7 @@ function InicioPage() {
                   />
                 </h1>
                 <p
-                  className="animate-fade-up mt-3 max-w-xl text-base text-muted-foreground sm:text-lg"
+                  className={`animate-fade-up mt-3 max-w-xl text-base sm:text-lg ${hero.textClass}`}
                   style={{ animationDelay: "140ms" }}
                 >
                   {subGreeting()}{" "}
@@ -1017,10 +1023,15 @@ function InicioPage() {
                       style={{ width: `${completion}%` }}
                     />
                   </div>
-                  <p className="mt-3 text-xs text-muted-foreground">
-                    {completion >= 90
-                      ? "Seu perfil está brilhando ✨"
-                      : "Perfis completos recebem mais interesses."}
+                  <p className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
+                    {completion >= 90 ? (
+                      <>
+                        <Sparkles className="h-3.5 w-3.5 text-[#ff4f68]" />
+                        <span className="text-[#ff4f68]">Seu perfil está brilhando</span>
+                      </>
+                    ) : (
+                      "Perfis completos recebem mais interesses."
+                    )}
                   </p>
                 </div>
 

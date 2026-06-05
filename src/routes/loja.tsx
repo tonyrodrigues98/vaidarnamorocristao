@@ -37,6 +37,15 @@ import {
   unequipProfileBackground,
   type ProfileBackground,
 } from "@/lib/profileBackgrounds";
+import {
+  equipNameGradient,
+  fetchMyOwnedNameGradientIds,
+  fetchNameGradientCatalog,
+  nameGradientStyle,
+  purchaseNameGradient,
+  unequipNameGradient,
+  type NameGradient,
+} from "@/lib/nameGradients";
 
 export const Route = createFileRoute("/loja")({
   component: LojaPage,
@@ -54,7 +63,7 @@ export const Route = createFileRoute("/loja")({
 });
 
 type EquippedMap = { frame: string | null; aura: string | null; sticker: string | null };
-type CategoryKey = "frame" | "aura" | "background" | "soon";
+type CategoryKey = "frame" | "aura" | "background" | "name-gradient" | "soon";
 
 const CATEGORIES: {
   key: CategoryKey;
@@ -64,6 +73,7 @@ const CATEGORIES: {
   { key: "frame", label: "Molduras", type: "frame" },
   { key: "aura", label: "Auras", type: "aura" },
   { key: "background", label: "Fundos de Perfil", type: "background" },
+  { key: "name-gradient", label: "Gradiente no Nome", type: null },
   { key: "soon", label: "Em breve", type: null },
 ];
 
@@ -73,12 +83,15 @@ function LojaPage() {
   const [backgrounds, setBackgrounds] = useState<ProfileBackground[]>([]);
   const [owned, setOwned] = useState<Set<string>>(new Set());
   const [ownedBackgrounds, setOwnedBackgrounds] = useState<Set<string>>(new Set());
+  const [nameGradients, setNameGradients] = useState<NameGradient[]>([]);
+  const [ownedNameGradients, setOwnedNameGradients] = useState<Set<string>>(new Set());
   const [equipped, setEquipped] = useState<EquippedMap>({
     frame: null,
     aura: null,
     sticker: null,
   });
   const [equippedBackground, setEquippedBackground] = useState<string | null>(null);
+  const [equippedNameGradient, setEquippedNameGradient] = useState<string | null>(null);
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [balance, setBalance] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -126,21 +139,29 @@ function LojaPage() {
       }
 
       try {
-        const [bg, ownedBg, bgProf] = await Promise.all([
+        const [bg, ownedBg, nameGradientCatalog, ownedNameGradientIds, bgProf] = await Promise.all([
           fetchProfileBackgroundCatalog(),
           fetchMyOwnedBackgroundIds(),
+          fetchNameGradientCatalog(),
+          fetchMyOwnedNameGradientIds(),
           supabase
             .from("profiles")
-            .select("equipped_background_id")
+            .select("equipped_background_id, equipped_name_gradient_id")
             .eq("id", user.id)
             .maybeSingle(),
         ]);
         if (!alive) return;
         setBackgrounds(bg);
         setOwnedBackgrounds(ownedBg);
+        setNameGradients(nameGradientCatalog);
+        setOwnedNameGradients(ownedNameGradientIds);
         setEquippedBackground(
           ((bgProf.data ?? {}) as { equipped_background_id?: string | null })
             .equipped_background_id ?? null,
+        );
+        setEquippedNameGradient(
+          ((bgProf.data ?? {}) as { equipped_name_gradient_id?: string | null })
+            .equipped_name_gradient_id ?? null,
         );
       } catch {
         if (!alive) return;
@@ -267,6 +288,48 @@ function LojaPage() {
     }
   };
 
+  const handleBuyNameGradient = async (gradient: NameGradient) => {
+    setBusyId(gradient.id);
+    try {
+      const result = await purchaseNameGradient(gradient.id);
+      setBalance(result.new_balance);
+      setOwnedNameGradients((prev) => new Set([...prev, gradient.id]));
+      toast.success(`${gradient.name} desbloqueado`);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "";
+      if (message.includes("insufficient")) toast.error("Moedas insuficientes");
+      else if (message.includes("already_owned")) toast.error("Voce ja possui esse gradiente");
+      else toast.error("Nao foi possivel comprar o gradiente");
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const handleEquipNameGradient = async (gradient: NameGradient) => {
+    setBusyId(gradient.id);
+    try {
+      await equipNameGradient(gradient.id);
+      setEquippedNameGradient(gradient.id);
+      toast.success(`${gradient.name} equipado`);
+    } catch {
+      toast.error("Erro ao equipar gradiente");
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const handleUnequipNameGradient = async () => {
+    setBusyId("unequip-name-gradient");
+    try {
+      await unequipNameGradient();
+      setEquippedNameGradient(null);
+    } catch {
+      toast.error("Erro ao remover gradiente");
+    } finally {
+      setBusyId(null);
+    }
+  };
+
   if (!authLoading && !user) return <Navigate to="/auth/login" />;
 
   const activeCategory = CATEGORIES.find((c) => c.key === activeTab)!;
@@ -369,6 +432,107 @@ function LojaPage() {
           </div>
         ) : activeTab === "soon" ? (
           <ComingSoon />
+        ) : activeTab === "name-gradient" ? (
+          nameGradients.length === 0 ? (
+            <p className="py-16 text-center text-sm text-muted-foreground">
+              Em breve novos gradientes de nome.
+            </p>
+          ) : (
+            <>
+              {equippedNameGradient && (
+                <div className="mb-4 flex justify-end">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-xs text-muted-foreground"
+                    onClick={handleUnequipNameGradient}
+                    disabled={busyId === "unequip-name-gradient"}
+                  >
+                    <X className="mr-1 h-3 w-3" />
+                    Remover gradiente atual
+                  </Button>
+                </div>
+              )}
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {nameGradients.map((gradient) => {
+                  const isOwned = ownedNameGradients.has(gradient.id);
+                  const isEquipped = equippedNameGradient === gradient.id;
+                  const busy = busyId === gradient.id;
+                  const canAfford = balance >= gradient.price;
+                  return (
+                    <article
+                      key={gradient.id}
+                      className={`overflow-hidden rounded-2xl border bg-card p-5 transition hover:-translate-y-0.5 hover:shadow-soft ${
+                        isEquipped
+                          ? "border-[var(--rose)] ring-1 ring-[var(--rose)]/30"
+                          : "hover:border-[var(--rose-soft)]"
+                      }`}
+                    >
+                      <div className="rounded-2xl border bg-background p-5 text-center">
+                        <p className="text-xs text-muted-foreground">Preview no perfil</p>
+                        <p className="mt-2 text-3xl font-black" style={nameGradientStyle(gradient)}>
+                          {gradient.name}
+                        </p>
+                      </div>
+                      <div className="mt-4 flex items-center justify-between gap-3">
+                        <div>
+                          <h3 className="font-black">{gradient.name}</h3>
+                          <p className="text-xs text-muted-foreground">{gradient.price} moedas</p>
+                        </div>
+                        {isEquipped && (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-[var(--rose)] px-2 py-0.5 text-[10px] font-semibold text-white">
+                            <Check className="h-3 w-3" /> Equipado
+                          </span>
+                        )}
+                      </div>
+                      <div className="mt-4">
+                        {isEquipped ? (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="w-full text-xs"
+                            disabled={busyId === "unequip-name-gradient"}
+                            onClick={handleUnequipNameGradient}
+                          >
+                            Equipado
+                          </Button>
+                        ) : isOwned ? (
+                          <Button
+                            size="sm"
+                            className="w-full text-xs"
+                            disabled={busy}
+                            onClick={() => handleEquipNameGradient(gradient)}
+                          >
+                            {busy ? <Loader2 className="h-3 w-3 animate-spin" /> : "Equipar"}
+                          </Button>
+                        ) : (
+                          <Button
+                            size="sm"
+                            className="w-full text-xs"
+                            disabled={busy || !canAfford}
+                            onClick={() => handleBuyNameGradient(gradient)}
+                          >
+                            {busy ? (
+                              <Loader2 className="h-3 w-3 animate-spin" />
+                            ) : canAfford ? (
+                              <span className="inline-flex items-center gap-1.5">
+                                Comprar
+                                <span className="inline-flex items-center gap-1 opacity-80">
+                                  <CoinIcon className="h-3 w-3" /> {gradient.price}
+                                </span>
+                              </span>
+                            ) : (
+                              "Moedas insuficientes"
+                            )}
+                          </Button>
+                        )}
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            </>
+          )
         ) : activeTab === "background" ? (
           backgrounds.length === 0 ? (
             <p className="py-16 text-center text-sm text-muted-foreground">

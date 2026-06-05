@@ -50,6 +50,7 @@ import { fetchStickers, type Sticker } from "@/lib/stickers";
 import { AnimatePresence, motion } from "framer-motion";
 import { spendCoin } from "@/lib/coins";
 import { TypingIndicator, useTypingBroadcaster } from "@/components/TypingIndicator";
+import { GradientName } from "@/components/GradientName";
 
 const COOLDOWN_MS = 10_000;
 
@@ -71,6 +72,8 @@ type Profile = {
   contributor_highlight?: boolean | null;
   equipped_frame_id?: string | null;
   equipped_aura_id?: string | null;
+  equipped_name_gradient_id?: string | null;
+  name_gradient?: { color_a: string; color_b: string } | null;
   committed?: boolean;
 };
 
@@ -192,7 +195,7 @@ function Comunidade() {
     const { data } = await supabase
       .from("profiles")
       .select(
-        "id, full_name, photo_url, verified, contributor_highlight, equipped_frame_id, equipped_aura_id",
+        "id, full_name, photo_url, verified, contributor_highlight, equipped_frame_id, equipped_aura_id, equipped_name_gradient_id",
       )
       .in("id", missing);
     const { data: commitments } = await supabase
@@ -212,11 +215,33 @@ function Comunidade() {
       committedUsers.add(c.user_b);
     });
     if (data) {
+      const gradientIds = Array.from(
+        new Set(
+          (data as Profile[])
+            .map((profile) => profile.equipped_name_gradient_id)
+            .filter(Boolean) as string[],
+        ),
+      );
+      let gradients: Record<string, { color_a: string; color_b: string }> = {};
+      if (gradientIds.length) {
+        const { data: gradientRows } = await supabase
+          .from("name_gradients" as never)
+          .select("id, color_a, color_b")
+          .in("id", gradientIds);
+        gradients = Object.fromEntries(
+          ((gradientRows ?? []) as Array<{ id: string; color_a: string; color_b: string }>).map(
+            (gradient) => [gradient.id, { color_a: gradient.color_a, color_b: gradient.color_b }],
+          ),
+        );
+      }
       setProfiles((p) => {
         const next = { ...p };
         for (const pr of data) {
           next[pr.id] = {
             ...(pr as Profile),
+            name_gradient: pr.equipped_name_gradient_id
+              ? (gradients[pr.equipped_name_gradient_id] ?? null)
+              : null,
 
             committed: committedUsers.has(pr.id),
           };
@@ -562,7 +587,7 @@ function Comunidade() {
                       <span className="w-0.5 shrink-0 rounded bg-primary" />
                       <span className="min-w-0 flex-1">
                         <span className="flex items-center gap-1 font-semibold text-foreground">
-                          {name}
+                          <GradientName name={name} gradient={p?.name_gradient} />
                           {p?.verified && <VerifiedBadge size="sm" />}
                           {senderStaff && (
                             <RoleBadge role={senderStaff.role} color={senderStaff.color} />
@@ -670,7 +695,7 @@ function Comunidade() {
                       <div className="flex items-baseline gap-2">
                         {mine ? (
                           <span className="flex items-center gap-1 text-sm font-semibold">
-                            {name}
+                            <GradientName name={name} gradient={p?.name_gradient} />
                             {p?.verified && <VerifiedBadge size="sm" />}
                             {senderStaff &&
                               (senderIsAdmin ? (

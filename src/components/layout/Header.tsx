@@ -232,7 +232,7 @@ export function Header() {
   const close = () => setOpen(false);
   const Badge = ({ n }: { n: number }) =>
     n > 0 ? (
-      <span className="ml-1 rounded-full bg-[var(--rose)] px-1.5 py-[1px] text-[10px] font-bold text-white">
+      <span className="ml-1 rounded-full bg-[#ff4f68] px-1.5 py-[1px] text-[10px] font-black text-white shadow-sm">
         {n > 99 ? "99+" : n}
       </span>
     ) : null;
@@ -370,7 +370,7 @@ export function Header() {
                 <Link to="/notificacoes">
                   <Bell className="h-4 w-4" />
                   {notifUnread > 0 && (
-                    <span className="absolute -right-0.5 -top-0.5 rounded-full bg-[var(--rose)] px-1.5 py-[1px] text-[10px] font-bold text-white">
+                    <span className="absolute -right-0.5 -top-0.5 rounded-full bg-[#ff4f68] px-1.5 py-[1px] text-[10px] font-black text-white shadow-sm">
                       {notifUnread > 99 ? "99+" : notifUnread}
                     </span>
                   )}
@@ -418,7 +418,7 @@ export function Header() {
                     </DropdownMenuItem>
                   )}
                   <DropdownMenuItem asChild>
-                    <Link to="/suporte" className="flex items-center gap-2">
+                    <Link to="/suporte" className="flex items-center gap-2 text-[#ff4f68]">
                       <LifeBuoy className="h-4 w-4" /> Suporte
                     </Link>
                   </DropdownMenuItem>
@@ -613,7 +613,7 @@ export function Header() {
                     </MobileItem>
                   )}
                   <MobileItem to="/suporte" onClick={close}>
-                    <span className="flex items-center gap-2">
+                    <span className="flex items-center gap-2 text-[#ff4f68]">
                       <LifeBuoy className="h-4 w-4" /> Suporte
                     </span>
                   </MobileItem>
@@ -751,7 +751,7 @@ function MegaItem({
         <span className="flex items-center gap-1 text-sm font-medium">
           {title}
           {badge && badge > 0 ? (
-            <span className="rounded-full bg-[var(--rose)] px-1.5 py-[1px] text-[10px] font-bold text-white">
+            <span className="rounded-full bg-[#ff4f68] px-1.5 py-[1px] text-[10px] font-black text-white shadow-sm">
               {badge > 99 ? "99+" : badge}
             </span>
           ) : null}

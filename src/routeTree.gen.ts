@@ -54,6 +54,7 @@ import { Route as AdminVerificacoesRouteImport } from './routes/admin/verificaco
 import { Route as AdminStickersRouteImport } from './routes/admin/stickers'
 import { Route as AdminPresentesRouteImport } from './routes/admin/presentes'
 import { Route as AdminMoldurasRouteImport } from './routes/admin/molduras'
+import { Route as AdminGradientesNomeRouteImport } from './routes/admin/gradientes-nome'
 import { Route as AdminFundosRouteImport } from './routes/admin/fundos'
 import { Route as AdminFotosRouteImport } from './routes/admin/fotos'
 import { Route as AdminEquipeLiveRouteImport } from './routes/admin/equipe-live'
@@ -284,6 +285,11 @@ const AdminMoldurasRoute = AdminMoldurasRouteImport.update({
   path: '/admin/molduras',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminGradientesNomeRoute = AdminGradientesNomeRouteImport.update({
+  id: '/admin/gradientes-nome',
+  path: '/admin/gradientes-nome',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminFundosRoute = AdminFundosRouteImport.update({
   id: '/admin/fundos',
   path: '/admin/fundos',
@@ -330,6 +336,7 @@ export interface FileRoutesByFullPath {
   '/admin/equipe-live': typeof AdminEquipeLiveRoute
   '/admin/fotos': typeof AdminFotosRoute
   '/admin/fundos': typeof AdminFundosRoute
+  '/admin/gradientes-nome': typeof AdminGradientesNomeRoute
   '/admin/molduras': typeof AdminMoldurasRoute
   '/admin/presentes': typeof AdminPresentesRoute
   '/admin/stickers': typeof AdminStickersRoute
@@ -381,6 +388,7 @@ export interface FileRoutesByTo {
   '/admin/equipe-live': typeof AdminEquipeLiveRoute
   '/admin/fotos': typeof AdminFotosRoute
   '/admin/fundos': typeof AdminFundosRoute
+  '/admin/gradientes-nome': typeof AdminGradientesNomeRoute
   '/admin/molduras': typeof AdminMoldurasRoute
   '/admin/presentes': typeof AdminPresentesRoute
   '/admin/stickers': typeof AdminStickersRoute
@@ -433,6 +441,7 @@ export interface FileRoutesById {
   '/admin/equipe-live': typeof AdminEquipeLiveRoute
   '/admin/fotos': typeof AdminFotosRoute
   '/admin/fundos': typeof AdminFundosRoute
+  '/admin/gradientes-nome': typeof AdminGradientesNomeRoute
   '/admin/molduras': typeof AdminMoldurasRoute
   '/admin/presentes': typeof AdminPresentesRoute
   '/admin/stickers': typeof AdminStickersRoute
@@ -486,6 +495,7 @@ export interface FileRouteTypes {
     | '/admin/equipe-live'
     | '/admin/fotos'
     | '/admin/fundos'
+    | '/admin/gradientes-nome'
     | '/admin/molduras'
     | '/admin/presentes'
     | '/admin/stickers'
@@ -537,6 +547,7 @@ export interface FileRouteTypes {
     | '/admin/equipe-live'
     | '/admin/fotos'
     | '/admin/fundos'
+    | '/admin/gradientes-nome'
     | '/admin/molduras'
     | '/admin/presentes'
     | '/admin/stickers'
@@ -588,6 +599,7 @@ export interface FileRouteTypes {
     | '/admin/equipe-live'
     | '/admin/fotos'
     | '/admin/fundos'
+    | '/admin/gradientes-nome'
     | '/admin/molduras'
     | '/admin/presentes'
     | '/admin/stickers'
@@ -640,6 +652,7 @@ export interface RootRouteChildren {
   AdminEquipeLiveRoute: typeof AdminEquipeLiveRoute
   AdminFotosRoute: typeof AdminFotosRoute
   AdminFundosRoute: typeof AdminFundosRoute
+  AdminGradientesNomeRoute: typeof AdminGradientesNomeRoute
   AdminMoldurasRoute: typeof AdminMoldurasRoute
   AdminPresentesRoute: typeof AdminPresentesRoute
   AdminStickersRoute: typeof AdminStickersRoute
@@ -984,6 +997,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminMoldurasRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/gradientes-nome': {
+      id: '/admin/gradientes-nome'
+      path: '/admin/gradientes-nome'
+      fullPath: '/admin/gradientes-nome'
+      preLoaderRoute: typeof AdminGradientesNomeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/fundos': {
       id: '/admin/fundos'
       path: '/admin/fundos'
@@ -1040,6 +1060,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminEquipeLiveRoute: AdminEquipeLiveRoute,
   AdminFotosRoute: AdminFotosRoute,
   AdminFundosRoute: AdminFundosRoute,
+  AdminGradientesNomeRoute: AdminGradientesNomeRoute,
   AdminMoldurasRoute: AdminMoldurasRoute,
   AdminPresentesRoute: AdminPresentesRoute,
   AdminStickersRoute: AdminStickersRoute,
@@ -1069,3 +1090,12 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
