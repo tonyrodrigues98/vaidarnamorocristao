@@ -52,6 +52,8 @@ import { ROLE_PRIORITY, type AppRole, type RoleColor } from "@/lib/roles";
 import { SendAnonymousButton } from "@/components/anonymous/SendAnonymousButton";
 import { GiftHighlights } from "@/components/gifts/GiftHighlights";
 import type { ProfileBackground } from "@/lib/profileBackgrounds";
+import { GradientName } from "@/components/GradientName";
+import { fetchNameGradientsByIds, type NameGradient } from "@/lib/nameGradients";
 
 type Full = {
   id: string;
@@ -70,6 +72,7 @@ type Full = {
   equipped_background_id?: string | null;
   equipped_frame_id?: string | null;
   equipped_aura_id?: string | null;
+  equipped_name_gradient_id?: string | null;
 };
 type Prefs = {
   age_min: number;
@@ -109,6 +112,7 @@ function Detail() {
   );
   const [extraPhotos, setExtraPhotos] = useState<string[]>([]);
   const [equippedBackground, setEquippedBackground] = useState<ProfileBackground | null>(null);
+  const [profileNameGradient, setProfileNameGradient] = useState<NameGradient | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -157,6 +161,9 @@ function Detail() {
         .eq("status", "approved")
         .maybeSingle();
       setProfile(prof as Full | null);
+      const gradientId = (prof as Full | null)?.equipped_name_gradient_id;
+      const gradients = await fetchNameGradientsByIds([gradientId]);
+      setProfileNameGradient(gradientId ? (gradients[gradientId] ?? null) : null);
       const backgroundId = (prof as Full | null)?.equipped_background_id;
       if (backgroundId) {
         const { data: bg } = await supabase
@@ -405,7 +412,7 @@ function Detail() {
 
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 z-0 h-[380px] bg-[linear-gradient(120deg,rgba(255,255,255,0.96),rgba(255,241,242,0.82)_32%,rgba(239,246,255,0.82)_68%,rgba(254,243,199,0.72))] dark:bg-[linear-gradient(120deg,rgba(10,10,18,0.98),rgba(49,22,38,0.72)_34%,rgba(15,35,58,0.76)_70%,rgba(50,36,18,0.48))]"
+        className="pointer-events-none absolute inset-x-0 top-0 z-0 h-[380px] bg-white dark:bg-[linear-gradient(120deg,rgba(10,16,34,0.98),rgba(17,31,63,0.82)_34%,rgba(18,44,82,0.78)_70%,rgba(42,35,22,0.44))]"
       />
 
       {equippedBackground?.image_url && (
@@ -510,8 +517,9 @@ function Detail() {
               >
                 <div className="space-y-4">
                   <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                    <h1 className="text-3xl font-bold leading-tight text-foreground sm:text-4xl">
-                      {profile.full_name}, {profile.age}
+                    <h1 className="text-3xl font-black leading-tight text-foreground sm:text-4xl">
+                      <GradientName name={profile.full_name} gradient={profileNameGradient} />,{" "}
+                      {profile.age}
                     </h1>
                     {profile.verified && <VerifiedBadge size="md" />}
                   </div>

@@ -63,10 +63,10 @@ export function ReceivedGiftsTab({ userId }: { userId: string }) {
             </p>
           </div>
           <div
-            className="hidden text-5xl drop-shadow-2xl sm:block"
+            className="hidden rounded-3xl bg-white/20 p-4 text-white drop-shadow-2xl backdrop-blur sm:block"
             style={{ animation: "gift-float 3s ease-in-out infinite" }}
           >
-            🎁
+            <Gift className="h-12 w-12" />
           </div>
         </div>
       </div>
@@ -76,8 +76,9 @@ export function ReceivedGiftsTab({ userId }: { userId: string }) {
       ) : items.length === 0 ? (
         <div className="rounded-3xl border border-dashed border-purple-400/40 bg-purple-500/5 p-10 text-center">
           <Inbox className="mx-auto h-10 w-10 text-purple-400" />
-          <p className="mt-3 text-sm text-muted-foreground">
-            Você ainda não recebeu presentes. Eles aparecerão aqui ✨
+          <p className="mt-3 flex items-center justify-center gap-2 text-sm text-muted-foreground">
+            Você ainda não recebeu presentes. Eles aparecerão aqui
+            <Sparkles className="h-4 w-4 text-purple-400" />
           </p>
         </div>
       ) : (

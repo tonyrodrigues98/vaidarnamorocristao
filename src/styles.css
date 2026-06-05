@@ -53,7 +53,7 @@
   --dur-slow: 320ms;
 
   /* Off-white cream base, warm love palette */
-  --background: oklch(0.985 0.002 255);
+  --background: #ffffff;
   --foreground: oklch(0.16 0.006 255);
 
   --card: oklch(1 0 0);
@@ -87,7 +87,7 @@
   --rose-soft: #ff8fa0;
   --coral: #ff7a45;
   --petal: #fff0f3;
-  --cream: oklch(0.985 0.002 255);
+  --cream: #ffffff;
   --ink: oklch(0.08 0.002 255);
 
   /* Sparky gold — admin highlight */
@@ -160,6 +160,15 @@
     -webkit-tap-highlight-color: transparent;
   }
   body {
+    background: var(--background);
+    color: var(--color-foreground);
+    font-feature-settings: "ss01";
+    letter-spacing: -0.01em;
+    -webkit-overflow-scrolling: touch;
+    /* Permite scroll natural do mouse e trackpad; só contém o "bounce" ao chegar nas bordas */
+    overscroll-behavior-y: auto;
+  }
+  .dark body {
     background:
       radial-gradient(
         circle at 15% 0%,
@@ -172,12 +181,6 @@
         transparent 26rem
       ),
       var(--background);
-    color: var(--color-foreground);
-    font-feature-settings: "ss01";
-    letter-spacing: -0.01em;
-    -webkit-overflow-scrolling: touch;
-    /* Permite scroll natural do mouse e trackpad; só contém o "bounce" ao chegar nas bordas */
-    overscroll-behavior-y: auto;
   }
   html,
   body {

@@ -41,6 +41,8 @@ import {
   Store,
   Eye,
   Gift as GiftIcon,
+  PencilLine,
+  X,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -58,10 +60,13 @@ import { recomputeMyBadges } from "@/lib/recomputeBadges";
 import commitmentRing from "@/assets/commitment-ring.webp";
 import { getActiveCommitmentByUser, type RelationshipCommitment } from "@/lib/commitments";
 import { ProfileAdvancedForm } from "@/components/ProfileAdvancedForm";
+import { ProfileAdvancedView } from "@/components/ProfileAdvancedView";
 import { ProfilePhotosManager } from "@/components/ProfilePhotosManager";
 import { AdminWarningBanner } from "@/components/AdminWarningBanner";
 import { CustomizacaoTab } from "@/components/CustomizacaoTab";
 import { ReceivedGiftsTab } from "@/components/gifts/ReceivedGiftsTab";
+import { GradientName } from "@/components/GradientName";
+import { fetchNameGradientsByIds, type NameGradient } from "@/lib/nameGradients";
 
 export const Route = createFileRoute("/perfil")({ component: PerfilPage });
 
@@ -190,8 +195,11 @@ function PerfilPage() {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [savingProfile, setSavingProfile] = useState(false);
   const [savingPrefs, setSavingPrefs] = useState(false);
+  const [editingProfile, setEditingProfile] = useState(false);
+  const [editingPrefs, setEditingPrefs] = useState(false);
   const [status, setStatus] = useState<"pending" | "approved" | "rejected" | "banned" | null>(null);
   const [activeCommitment, setActiveCommitment] = useState<RelationshipCommitment | null>(null);
+  const [profileNameGradient, setProfileNameGradient] = useState<NameGradient | null>(null);
 
   const [commitmentPartner, setCommitmentPartner] = useState<string | null>(null);
 
@@ -227,6 +235,10 @@ function PerfilPage() {
       ]);
       if (p) {
         setStatus(p.status);
+        const gradients = await fetchNameGradientsByIds([p.equipped_name_gradient_id]);
+        setProfileNameGradient(
+          p.equipped_name_gradient_id ? (gradients[p.equipped_name_gradient_id] ?? null) : null,
+        );
         setProfile({
           full_name: p.full_name ?? "",
           age: String(p.age ?? ""),
@@ -446,6 +458,7 @@ function PerfilPage() {
     }
     toast.success("Perfil atualizado!");
     setPhotoFile(null);
+    setEditingProfile(false);
     void recomputeMyBadges(user?.id);
   }
 
@@ -475,6 +488,7 @@ function PerfilPage() {
       return;
     }
     toast.success("Preferências salvas!");
+    setEditingPrefs(false);
   }
 
   const setP = <K extends keyof typeof profile>(k: K, v: (typeof profile)[K]) =>
@@ -512,7 +526,7 @@ function PerfilPage() {
       <main className="relative mx-auto max-w-[1440px] px-4 py-6 sm:px-6 lg:px-8 lg:py-10">
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[520px] bg-[linear-gradient(120deg,rgba(255,255,255,0.96),rgba(255,241,242,0.82)_32%,rgba(239,246,255,0.82)_68%,rgba(254,243,199,0.72))] dark:bg-[linear-gradient(120deg,rgba(10,10,18,0.98),rgba(49,22,38,0.72)_34%,rgba(15,35,58,0.76)_70%,rgba(50,36,18,0.48))]"
+          className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[520px] bg-white dark:bg-[linear-gradient(120deg,rgba(10,16,34,0.98),rgba(17,31,63,0.82)_34%,rgba(18,44,82,0.78)_70%,rgba(42,35,22,0.44))]"
         />
         <AdminWarningBanner />
         <section className="animate-fade-up overflow-hidden rounded-[2.25rem] border border-border/70 bg-card/75 shadow-[0_26px_90px_rgba(31,41,55,0.10)] backdrop-blur dark:bg-card/72 dark:shadow-[0_28px_90px_rgba(0,0,0,0.42)]">
@@ -605,8 +619,12 @@ function PerfilPage() {
               <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
                 <div className="min-w-0">
                   <p className="text-sm font-medium text-[var(--rose)]">Perfil pessoal</p>
-                  <h1 className="mt-2 text-3xl font-semibold tracking-tight text-foreground sm:text-5xl">
-                    {profile.full_name || "Meu perfil"}
+                  <h1 className="mt-2 text-3xl font-black tracking-tight text-foreground sm:text-5xl">
+                    <GradientName
+                      name={profile.full_name}
+                      gradient={profileNameGradient}
+                      fallback="Meu perfil"
+                    />
                   </h1>
                   <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">
                     Organize sua apresentacao, fotos, preferencias e personalizacoes em um painel
@@ -816,291 +834,454 @@ function PerfilPage() {
 
               {/* Profile tab */}
               <TabsContent value="profile" className="mt-6 lg:mt-0">
-                <form onSubmit={saveProfile} className={`${panelClass} animate-fade-up space-y-6`}>
-                  <div className="flex flex-col items-center gap-3">
-                    <button
-                      type="button"
-                      onClick={() => fileInputRef.current?.click()}
-                      aria-label="Trocar foto de perfil"
-                      className="group relative h-32 w-32 cursor-pointer overflow-hidden rounded-full border-2 border-dashed border-[var(--rose-soft)] bg-card/60 shadow-soft transition hover:border-[var(--rose)]"
+                {!editingProfile ? (
+                  <div className={`${panelClass} animate-fade-up space-y-6`}>
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-wide text-[var(--rose)]">
+                          Sobre mim
+                        </p>
+                        <h2 className="mt-1 text-2xl font-black tracking-tight">
+                          <GradientName
+                            name={profile.full_name}
+                            gradient={profileNameGradient}
+                            fallback="Meu perfil"
+                          />
+                        </h2>
+                        <p className="mt-2 text-sm text-muted-foreground">
+                          Resumo público das principais informações do seu perfil.
+                        </p>
+                      </div>
+                      <Button
+                        type="button"
+                        onClick={() => setEditingProfile(true)}
+                        className="rounded-full"
+                      >
+                        <PencilLine className="mr-2 h-4 w-4" />
+                        Editar perfil
+                      </Button>
+                    </div>
+
+                    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                      <SummaryItem
+                        label="Idade"
+                        value={profile.age ? `${profile.age} anos` : "Não informada"}
+                      />
+                      <SummaryItem
+                        label="Localização"
+                        value={
+                          [profile.city, profile.state].filter(Boolean).join(", ") ||
+                          "Não informada"
+                        }
+                      />
+                      <SummaryItem label="Igreja" value={profile.church || "Não informada"} />
+                      <SummaryItem
+                        label="Batismo"
+                        value={
+                          profile.years_baptized
+                            ? `${profile.years_baptized} ano(s)`
+                            : "Não informado"
+                        }
+                      />
+                    </div>
+
+                    <div className="rounded-2xl border border-border/70 bg-background/55 p-4 dark:bg-background/25">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        Bio
+                      </p>
+                      <p className="mt-2 text-sm leading-relaxed text-foreground/85">
+                        {profile.bio || "Você ainda não adicionou uma apresentação."}
+                      </p>
+                    </div>
+
+                    {user && <ProfileAdvancedView userId={user.id} />}
+                  </div>
+                ) : (
+                  <>
+                    <div className="mb-4 flex justify-end">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setEditingProfile(false)}
+                        className="rounded-full"
+                      >
+                        <X className="mr-2 h-4 w-4" />
+                        Fechar edição
+                      </Button>
+                    </div>
+                    <form
+                      onSubmit={saveProfile}
+                      className={`${panelClass} animate-fade-up space-y-6`}
                     >
-                      {photoPreview ? (
-                        <PhotoImg
-                          src={photoPreview}
-                          alt=""
-                          className="pointer-events-none h-full w-full object-cover"
+                      <div className="flex flex-col items-center gap-3">
+                        <button
+                          type="button"
+                          onClick={() => fileInputRef.current?.click()}
+                          aria-label="Trocar foto de perfil"
+                          className="group relative h-32 w-32 cursor-pointer overflow-hidden rounded-full border-2 border-dashed border-[var(--rose-soft)] bg-card/60 shadow-soft transition hover:border-[var(--rose)]"
+                        >
+                          {photoPreview ? (
+                            <PhotoImg
+                              src={photoPreview}
+                              alt=""
+                              className="pointer-events-none h-full w-full object-cover"
+                            />
+                          ) : (
+                            <div className="pointer-events-none flex h-full w-full flex-col items-center justify-center text-muted-foreground">
+                              <Camera className="h-6 w-6" />
+                              <span className="mt-1 text-xs">Foto</span>
+                            </div>
+                          )}
+                        </button>
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          accept="image/*,image/heic,image/heif"
+                          onChange={handlePhoto}
+                          className="sr-only"
+                          tabIndex={-1}
+                          aria-hidden="true"
                         />
-                      ) : (
-                        <div className="pointer-events-none flex h-full w-full flex-col items-center justify-center text-muted-foreground">
-                          <Camera className="h-6 w-6" />
-                          <span className="mt-1 text-xs">Foto</span>
+                        <p className="text-xs text-muted-foreground">
+                          Clique para trocar (até 5MB)
+                        </p>
+                      </div>
+
+                      {user && (
+                        <div className="rounded-2xl border bg-card/50 p-4">
+                          <ProfilePhotosManager userId={user.id} />
                         </div>
                       )}
-                    </button>
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept="image/*,image/heic,image/heif"
-                      onChange={handlePhoto}
-                      className="sr-only"
-                      tabIndex={-1}
-                      aria-hidden="true"
-                    />
-                    <p className="text-xs text-muted-foreground">Clique para trocar (até 5MB)</p>
-                  </div>
 
-                  {user && (
-                    <div className="rounded-2xl border bg-card/50 p-4">
-                      <ProfilePhotosManager userId={user.id} />
-                    </div>
-                  )}
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        <div className="space-y-2 sm:col-span-2">
+                          <Label>Nome completo</Label>
+                          <Input
+                            value={profile.full_name}
+                            onChange={(e) => setP("full_name", e.target.value)}
+                            required
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Idade</Label>
+                          <Input
+                            type="number"
+                            min={18}
+                            max={110}
+                            value={profile.age}
+                            onChange={(e) => setP("age", e.target.value)}
+                            required
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Altura (cm)</Label>
+                          <Input
+                            type="number"
+                            min={120}
+                            max={230}
+                            value={profile.height_cm}
+                            onChange={(e) => setP("height_cm", e.target.value)}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Sexo</Label>
+                          <Select
+                            value={profile.sex}
+                            onValueChange={(v) => setP("sex", v as "masculino" | "feminino")}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="masculino">Masculino</SelectItem>
+                              <SelectItem value="feminino">Feminino</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Estado civil</Label>
+                          <Select
+                            value={profile.marital}
+                            onValueChange={(v) => setP("marital", v as "solteiro" | "divorciado")}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="solteiro">Solteiro(a)</SelectItem>
+                              <SelectItem value="divorciado">Divorciado(a)</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Cidade</Label>
+                          <Input
+                            value={profile.city}
+                            onChange={(e) => setP("city", e.target.value)}
+                            required
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Estado</Label>
+                          <Select value={profile.state} onValueChange={(v) => setP("state", v)}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="UF" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {BR_STATES.map((s) => (
+                                <SelectItem key={s} value={s}>
+                                  {s}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2 sm:col-span-2">
+                          <Label>Igreja que frequenta</Label>
+                          <Input
+                            value={profile.church}
+                            onChange={(e) => setP("church", e.target.value)}
+                            required
+                          />
+                        </div>
+                        <div className="space-y-2 sm:col-span-2">
+                          <Label>Anos de batismo</Label>
+                          <Input
+                            type="number"
+                            min={0}
+                            max={100}
+                            value={profile.years_baptized}
+                            onChange={(e) => setP("years_baptized", e.target.value)}
+                            required
+                          />
+                        </div>
+                        <div className="space-y-2 sm:col-span-2">
+                          <Label>Sobre você</Label>
+                          <Textarea
+                            rows={4}
+                            maxLength={600}
+                            value={profile.bio}
+                            onChange={(e) => setP("bio", e.target.value)}
+                          />
+                        </div>
+                      </div>
 
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <div className="space-y-2 sm:col-span-2">
-                      <Label>Nome completo</Label>
-                      <Input
-                        value={profile.full_name}
-                        onChange={(e) => setP("full_name", e.target.value)}
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Idade</Label>
-                      <Input
-                        type="number"
-                        min={18}
-                        max={110}
-                        value={profile.age}
-                        onChange={(e) => setP("age", e.target.value)}
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Altura (cm)</Label>
-                      <Input
-                        type="number"
-                        min={120}
-                        max={230}
-                        value={profile.height_cm}
-                        onChange={(e) => setP("height_cm", e.target.value)}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Sexo</Label>
-                      <Select
-                        value={profile.sex}
-                        onValueChange={(v) => setP("sex", v as "masculino" | "feminino")}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="masculino">Masculino</SelectItem>
-                          <SelectItem value="feminino">Feminino</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Estado civil</Label>
-                      <Select
-                        value={profile.marital}
-                        onValueChange={(v) => setP("marital", v as "solteiro" | "divorciado")}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="solteiro">Solteiro(a)</SelectItem>
-                          <SelectItem value="divorciado">Divorciado(a)</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Cidade</Label>
-                      <Input
-                        value={profile.city}
-                        onChange={(e) => setP("city", e.target.value)}
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Estado</Label>
-                      <Select value={profile.state} onValueChange={(v) => setP("state", v)}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="UF" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {BR_STATES.map((s) => (
-                            <SelectItem key={s} value={s}>
-                              {s}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2 sm:col-span-2">
-                      <Label>Igreja que frequenta</Label>
-                      <Input
-                        value={profile.church}
-                        onChange={(e) => setP("church", e.target.value)}
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2 sm:col-span-2">
-                      <Label>Anos de batismo</Label>
-                      <Input
-                        type="number"
-                        min={0}
-                        max={100}
-                        value={profile.years_baptized}
-                        onChange={(e) => setP("years_baptized", e.target.value)}
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2 sm:col-span-2">
-                      <Label>Sobre você</Label>
-                      <Textarea
-                        rows={4}
-                        maxLength={600}
-                        value={profile.bio}
-                        onChange={(e) => setP("bio", e.target.value)}
-                      />
-                    </div>
-                  </div>
-
-                  <Button type="submit" size="lg" className="w-full" disabled={savingProfile}>
-                    <Save className="mr-2 h-4 w-4" />{" "}
-                    {savingProfile ? "Salvando..." : "Salvar perfil"}
-                  </Button>
-                </form>
-                {user && (
-                  <div className="mt-6">
-                    <ProfileAdvancedForm userId={user.id} mode="about" />
-                  </div>
+                      <Button type="submit" size="lg" className="w-full" disabled={savingProfile}>
+                        <Save className="mr-2 h-4 w-4" />{" "}
+                        {savingProfile ? "Salvando..." : "Salvar perfil"}
+                      </Button>
+                    </form>
+                    {user && (
+                      <div className="mt-6">
+                        <ProfileAdvancedForm userId={user.id} mode="about" />
+                      </div>
+                    )}
+                  </>
                 )}
               </TabsContent>
 
               {/* Preferences tab */}
               <TabsContent value="prefs" className="mt-6 lg:mt-0">
-                <form onSubmit={savePrefs} className={`${panelClass} animate-fade-up space-y-6`}>
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label>Idade mínima</Label>
-                      <Input
-                        type="number"
-                        min={18}
-                        max={110}
-                        value={prefs.age_min}
-                        onChange={(e) => setPrefs({ ...prefs, age_min: e.target.value })}
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Idade máxima</Label>
-                      <Input
-                        type="number"
-                        min={18}
-                        max={110}
-                        value={prefs.age_max}
-                        onChange={(e) => setPrefs({ ...prefs, age_max: e.target.value })}
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-3">
-                    <Label>Localização desejada</Label>
-                    <RadioGroup
-                      value={prefs.location_scope}
-                      onValueChange={(v) =>
-                        setPrefs({ ...prefs, location_scope: v as typeof prefs.location_scope })
-                      }
-                    >
-                      {[
-                        { v: "regiao", l: "Minha região" },
-                        { v: "brasil", l: "Qualquer lugar do Brasil" },
-                        { v: "mundo", l: "Qualquer lugar do mundo" },
-                        { v: "personalizado", l: "Personalizado (estados)" },
-                      ].map((o) => (
-                        <label
-                          key={o.v}
-                          className="flex cursor-pointer items-center gap-3 rounded-xl border border-border bg-card/40 p-3 transition hover:border-[var(--rose-soft)]"
-                        >
-                          <RadioGroupItem value={o.v} />
-                          <span className="text-sm">{o.l}</span>
-                        </label>
-                      ))}
-                    </RadioGroup>
-                  </div>
-
-                  {prefs.location_scope === "personalizado" && (
-                    <div className="animate-fade-in space-y-2">
-                      <Label>Estados</Label>
-                      <div className="flex flex-wrap gap-2">
-                        {BR_STATES.map((s) => (
-                          <button
-                            type="button"
-                            key={s}
-                            onClick={() => togglePrefState(s)}
-                            className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
-                              prefs.custom_states.includes(s)
-                                ? "border-[var(--rose)] bg-[var(--rose)] text-white"
-                                : "border-border bg-card/60 text-muted-foreground hover:border-[var(--rose-soft)]"
-                            }`}
-                          >
-                            {s}
-                          </button>
-                        ))}
+                {!editingPrefs ? (
+                  <div className={`${panelClass} animate-fade-up space-y-6`}>
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-wide text-[var(--rose)]">
+                          Preferências
+                        </p>
+                        <h2 className="mt-1 text-2xl font-black tracking-tight">
+                          O que você busca
+                        </h2>
+                        <p className="mt-2 text-sm text-muted-foreground">
+                          Um resumo das suas escolhas para conexões e compatibilidade.
+                        </p>
                       </div>
+                      <Button
+                        type="button"
+                        onClick={() => setEditingPrefs(true)}
+                        className="rounded-full"
+                      >
+                        <PencilLine className="mr-2 h-4 w-4" />
+                        Editar preferências
+                      </Button>
                     </div>
-                  )}
 
-                  <div className="space-y-2">
-                    <Label>Qualidade que busca</Label>
-                    <Input
-                      value={prefs.desired_quality}
-                      onChange={(e) => setPrefs({ ...prefs, desired_quality: e.target.value })}
-                      placeholder="Ex: temor a Deus, integridade..."
-                    />
+                    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                      <SummaryItem label="Idade" value={`${prefs.age_min}-${prefs.age_max} anos`} />
+                      <SummaryItem
+                        label="Localização"
+                        value={
+                          prefs.location_scope === "personalizado"
+                            ? prefs.custom_states.length
+                              ? prefs.custom_states.join(", ")
+                              : "Estados personalizados"
+                            : prefs.location_scope === "regiao"
+                              ? "Minha região"
+                              : prefs.location_scope === "brasil"
+                                ? "Brasil todo"
+                                : "Mundo todo"
+                        }
+                      />
+                      <SummaryItem
+                        label="Filhos"
+                        value={
+                          prefs.accepts_children === "sim" ? "Aceita filhos" : "Não aceita filhos"
+                        }
+                      />
+                      <SummaryItem
+                        label="Qualidade"
+                        value={prefs.desired_quality || "Não informada"}
+                      />
+                    </div>
+
+                    <div className="rounded-2xl border border-border/70 bg-background/55 p-4 dark:bg-background/25">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        Sobre o que procura
+                      </p>
+                      <p className="mt-2 text-sm leading-relaxed text-foreground/85">
+                        {prefs.looking_for_bio || "Você ainda não descreveu o que procura."}
+                      </p>
+                    </div>
+
+                    {user && <ProfileAdvancedView userId={user.id} />}
                   </div>
-
-                  <div className="space-y-3">
-                    <Label>Aceita pessoa com filhos?</Label>
-                    <RadioGroup
-                      value={prefs.accepts_children}
-                      onValueChange={(v) =>
-                        setPrefs({ ...prefs, accepts_children: v as "sim" | "nao" })
-                      }
-                      className="flex gap-3"
+                ) : (
+                  <>
+                    <div className="mb-4 flex justify-end">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setEditingPrefs(false)}
+                        className="rounded-full"
+                      >
+                        <X className="mr-2 h-4 w-4" />
+                        Fechar edição
+                      </Button>
+                    </div>
+                    <form
+                      onSubmit={savePrefs}
+                      className={`${panelClass} animate-fade-up space-y-6`}
                     >
-                      <label className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl border border-border bg-card/40 p-3">
-                        <RadioGroupItem value="sim" /> Sim
-                      </label>
-                      <label className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl border border-border bg-card/40 p-3">
-                        <RadioGroupItem value="nao" /> Não
-                      </label>
-                    </RadioGroup>
-                  </div>
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        <div className="space-y-2">
+                          <Label>Idade mínima</Label>
+                          <Input
+                            type="number"
+                            min={18}
+                            max={110}
+                            value={prefs.age_min}
+                            onChange={(e) => setPrefs({ ...prefs, age_min: e.target.value })}
+                            required
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Idade máxima</Label>
+                          <Input
+                            type="number"
+                            min={18}
+                            max={110}
+                            value={prefs.age_max}
+                            onChange={(e) => setPrefs({ ...prefs, age_max: e.target.value })}
+                            required
+                          />
+                        </div>
+                      </div>
 
-                  <div className="space-y-2">
-                    <Label>Sobre o que procura</Label>
-                    <Textarea
-                      rows={4}
-                      maxLength={600}
-                      value={prefs.looking_for_bio}
-                      onChange={(e) => setPrefs({ ...prefs, looking_for_bio: e.target.value })}
-                    />
-                  </div>
+                      <div className="space-y-3">
+                        <Label>Localização desejada</Label>
+                        <RadioGroup
+                          value={prefs.location_scope}
+                          onValueChange={(v) =>
+                            setPrefs({ ...prefs, location_scope: v as typeof prefs.location_scope })
+                          }
+                        >
+                          {[
+                            { v: "regiao", l: "Minha região" },
+                            { v: "brasil", l: "Qualquer lugar do Brasil" },
+                            { v: "mundo", l: "Qualquer lugar do mundo" },
+                            { v: "personalizado", l: "Personalizado (estados)" },
+                          ].map((o) => (
+                            <label
+                              key={o.v}
+                              className="flex cursor-pointer items-center gap-3 rounded-xl border border-border bg-card/40 p-3 transition hover:border-[var(--rose-soft)]"
+                            >
+                              <RadioGroupItem value={o.v} />
+                              <span className="text-sm">{o.l}</span>
+                            </label>
+                          ))}
+                        </RadioGroup>
+                      </div>
 
-                  <Button type="submit" size="lg" className="w-full" disabled={savingPrefs}>
-                    <Save className="mr-2 h-4 w-4" />{" "}
-                    {savingPrefs ? "Salvando..." : "Salvar preferências"}
-                  </Button>
-                </form>
-                {user && (
-                  <div className="mt-6">
-                    <ProfileAdvancedForm userId={user.id} mode="prefs" />
-                  </div>
+                      {prefs.location_scope === "personalizado" && (
+                        <div className="animate-fade-in space-y-2">
+                          <Label>Estados</Label>
+                          <div className="flex flex-wrap gap-2">
+                            {BR_STATES.map((s) => (
+                              <button
+                                type="button"
+                                key={s}
+                                onClick={() => togglePrefState(s)}
+                                className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
+                                  prefs.custom_states.includes(s)
+                                    ? "border-[var(--rose)] bg-[var(--rose)] text-white"
+                                    : "border-border bg-card/60 text-muted-foreground hover:border-[var(--rose-soft)]"
+                                }`}
+                              >
+                                {s}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="space-y-2">
+                        <Label>Qualidade que busca</Label>
+                        <Input
+                          value={prefs.desired_quality}
+                          onChange={(e) => setPrefs({ ...prefs, desired_quality: e.target.value })}
+                          placeholder="Ex: temor a Deus, integridade..."
+                        />
+                      </div>
+
+                      <div className="space-y-3">
+                        <Label>Aceita pessoa com filhos?</Label>
+                        <RadioGroup
+                          value={prefs.accepts_children}
+                          onValueChange={(v) =>
+                            setPrefs({ ...prefs, accepts_children: v as "sim" | "nao" })
+                          }
+                          className="flex gap-3"
+                        >
+                          <label className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl border border-border bg-card/40 p-3">
+                            <RadioGroupItem value="sim" /> Sim
+                          </label>
+                          <label className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl border border-border bg-card/40 p-3">
+                            <RadioGroupItem value="nao" /> Não
+                          </label>
+                        </RadioGroup>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label>Sobre o que procura</Label>
+                        <Textarea
+                          rows={4}
+                          maxLength={600}
+                          value={prefs.looking_for_bio}
+                          onChange={(e) => setPrefs({ ...prefs, looking_for_bio: e.target.value })}
+                        />
+                      </div>
+
+                      <Button type="submit" size="lg" className="w-full" disabled={savingPrefs}>
+                        <Save className="mr-2 h-4 w-4" />{" "}
+                        {savingPrefs ? "Salvando..." : "Salvar preferências"}
+                      </Button>
+                    </form>
+                    {user && (
+                      <div className="mt-6">
+                        <ProfileAdvancedForm userId={user.id} mode="prefs" />
+                      </div>
+                    )}
+                  </>
                 )}
               </TabsContent>
 
@@ -1229,6 +1410,17 @@ function PerfilPage() {
           </Link>
         </div>
       </main>
+    </div>
+  );
+}
+
+function SummaryItem({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-2xl border border-border/70 bg-background/65 p-4 shadow-soft dark:bg-background/30">
+      <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+        {label}
+      </p>
+      <p className="mt-2 truncate text-sm font-bold text-foreground">{value}</p>
     </div>
   );
 }

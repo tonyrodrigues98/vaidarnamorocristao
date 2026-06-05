@@ -22,6 +22,9 @@ export function nameGradientStyle(gradient: Pick<NameGradient, "color_a" | "colo
     backgroundClip: "text",
     color: "transparent",
     WebkitTextFillColor: "transparent",
+    fontWeight: 900,
+    letterSpacing: "-0.035em",
+    filter: `drop-shadow(0.018em 0 0 ${gradient.color_a}) drop-shadow(-0.012em 0 0 ${gradient.color_b})`,
   } as const;
 }
 
@@ -40,6 +43,23 @@ export async function fetchNameGradientCatalog(): Promise<NameGradient[]> {
 
 export function invalidateNameGradientCatalog() {
   catalogCache = null;
+}
+
+export async function fetchNameGradientsByIds(
+  ids: Array<string | null | undefined>,
+): Promise<Record<string, NameGradient>> {
+  const cleanIds = Array.from(new Set(ids.filter(Boolean) as string[]));
+  if (!cleanIds.length) return {};
+
+  const { data, error } = await supabase
+    .from("name_gradients" as never)
+    .select("*")
+    .in("id", cleanIds);
+  if (error) throw error;
+
+  return Object.fromEntries(
+    ((data ?? []) as unknown as NameGradient[]).map((gradient) => [gradient.id, gradient]),
+  );
 }
 
 export async function fetchAllNameGradientsAdmin(): Promise<NameGradient[]> {

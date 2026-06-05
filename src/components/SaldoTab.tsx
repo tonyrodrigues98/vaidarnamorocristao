@@ -9,10 +9,12 @@ import {
   Inbox,
   DollarSign,
   VenetianMask,
+  Gift,
+  Sticker,
 } from "lucide-react";
 import coinIcon from "@/assets/coin.webp";
 import coinSound from "@/assets/coin-reward.mp3";
-import { DECORATION_ASSETS } from "@/lib/decorations";
+import { DECORATION_ASSETS, assetFor } from "@/lib/decorations";
 import {
   claimDailyCoins,
   COIN_DAILY,
@@ -297,16 +299,21 @@ function TxRow({ tx }: { tx: CoinTx }) {
   const time = d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
   const resolvedIcon = tx.icon_url
     ? (DECORATION_ASSETS[tx.icon_url] ??
+      assetFor({ image_url: tx.icon_url }) ??
       (tx.icon_url.startsWith("http") || tx.icon_url.startsWith("/") ? tx.icon_url : null))
     : null;
   const KindIcon =
     tx.kind === "daily_claim"
       ? DollarSign
-      : tx.kind === "anonymous_extra"
-        ? VenetianMask
-        : isIn
-          ? ArrowDownLeft
-          : ArrowUpRight;
+      : tx.kind === "sticker_spend"
+        ? Sticker
+        : tx.kind === "gift_sent" || tx.kind === "gift_redeem" || tx.kind === "admin_grant"
+          ? Gift
+          : tx.kind === "anonymous_extra"
+            ? VenetianMask
+            : isIn
+              ? ArrowDownLeft
+              : ArrowUpRight;
   return (
     <li className="group flex items-center gap-3 rounded-2xl border border-border/60 bg-card/50 p-3 shadow-soft backdrop-blur transition hover:border-border hover:bg-card/80">
       <div className="relative shrink-0">

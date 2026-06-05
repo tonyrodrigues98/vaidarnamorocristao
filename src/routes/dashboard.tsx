@@ -6,6 +6,8 @@ import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { ProfileCompletenessAlert } from "@/components/ProfileCompletenessAlert";
+import { GradientName } from "@/components/GradientName";
+import { fetchNameGradientsByIds, type NameGradient } from "@/lib/nameGradients";
 import {
   Clock,
   CheckCircle2,
@@ -41,6 +43,7 @@ type Profile = {
   status: "pending" | "approved" | "rejected" | "banned";
   full_name: string | null;
   rejection_reason: string | null;
+  equipped_name_gradient_id?: string | null;
 };
 type ViewRow = {
   id: string;
@@ -57,6 +60,8 @@ type Visitor = {
   city: string;
   state: string;
   age: number;
+  equipped_name_gradient_id?: string | null;
+  name_gradient?: NameGradient | null;
 };
 type LatestNews = { id: string; title: string; content: string; published_at: string };
 
@@ -83,6 +88,7 @@ function Dashboard() {
   const [visitorsMap, setVisitorsMap] = useState<Record<string, Visitor>>({});
   const [stats, setStats] = useState({ interests: 0, matches: 0, unread: 0 });
   const [latestNews, setLatestNews] = useState<LatestNews | null>(null);
+  const [profileNameGradient, setProfileNameGradient] = useState<NameGradient | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -101,10 +107,20 @@ function Dashboard() {
     if (!user) return;
     supabase
       .from("profiles")
-      .select("status, full_name, rejection_reason")
+      .select("status, full_name, rejection_reason, equipped_name_gradient_id")
       .eq("id", user.id)
       .maybeSingle()
-      .then(({ data }) => setProfile(data as Profile | null));
+      .then(async ({ data }) => {
+        const next = data as Profile | null;
+        setProfile(next);
+        const gradients = await fetchNameGradientsByIds([next?.equipped_name_gradient_id]);
+        setProfileNameGradient(
+          next?.equipped_name_gradient_id
+            ? (gradients[next.equipped_name_gradient_id] ?? null)
+            : null,
+        );
+      })
+      .catch(() => setProfileNameGradient(null));
   }, [user]);
 
   useEffect(() => {
@@ -151,10 +167,20 @@ function Dashboard() {
       if (uniqIds.length) {
         const { data: profs } = await supabase
           .from("profiles")
-          .select("id, full_name, photo_url, city, state, age")
+          .select("id, full_name, photo_url, city, state, age, equipped_name_gradient_id")
           .in("id", uniqIds);
+        const gradients = await fetchNameGradientsByIds(
+          ((profs ?? []) as Visitor[]).map((p) => p.equipped_name_gradient_id),
+        );
         const map: Record<string, Visitor> = {};
-        for (const p of (profs ?? []) as Visitor[]) map[p.id] = p;
+        for (const p of (profs ?? []) as Visitor[]) {
+          map[p.id] = {
+            ...p,
+            name_gradient: p.equipped_name_gradient_id
+              ? (gradients[p.equipped_name_gradient_id] ?? null)
+              : null,
+          };
+        }
         setVisitorsMap(map);
       } else {
         setVisitorsMap({});
@@ -284,8 +310,12 @@ function Dashboard() {
       <main className="mx-auto max-w-6xl px-4 py-10">
         <div className="animate-fade-up">
           <p className="text-sm text-muted-foreground">Olá,</p>
-          <h1 className="text-4xl font-semibold">
-            {profile.full_name?.split(" ")[0] ?? "Bem-vindo(a)"}
+          <h1 className="text-4xl font-black tracking-tight">
+            <GradientName
+              name={profile.full_name?.split(" ")[0]}
+              gradient={profileNameGradient}
+              fallback="Bem-vindo(a)"
+            />
           </h1>
         </div>
 
@@ -513,8 +543,12 @@ function Dashboard() {
                         )}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-semibold">
-                          {p.full_name.split(" ")[0]}, {p.age}
+                        <p className="truncate text-sm font-black">
+                          <GradientName
+                            name={p.full_name.split(" ")[0]}
+                            gradient={p.name_gradient}
+                          />
+                          , {p.age}
                         </p>
                         <p className="truncate text-xs text-muted-foreground">
                           {p.city} · {p.state}
