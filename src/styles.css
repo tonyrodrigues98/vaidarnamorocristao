@@ -19,6 +19,8 @@
  */
 
 @theme inline {
+  --font-sans: "Manrope", "Segoe UI", sans-serif;
+  --font-display: "Fraunces", "Georgia", serif;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -59,42 +61,48 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  --color-blush: var(--blush);
+  --color-sand: var(--sand);
+  --color-ink-soft: var(--ink-soft);
 }
 
 :root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.129 0.042 264.695);
+  --radius: 0.9rem;
+  --background: oklch(0.985 0.008 70);
+  --foreground: oklch(0.24 0.03 28);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.129 0.042 264.695);
+  --card-foreground: oklch(0.24 0.03 28);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.129 0.042 264.695);
-  --primary: oklch(0.208 0.042 265.755);
-  --primary-foreground: oklch(0.984 0.003 247.858);
-  --secondary: oklch(0.968 0.007 247.896);
-  --secondary-foreground: oklch(0.208 0.042 265.755);
-  --muted: oklch(0.968 0.007 247.896);
-  --muted-foreground: oklch(0.554 0.046 257.417);
-  --accent: oklch(0.968 0.007 247.896);
-  --accent-foreground: oklch(0.208 0.042 265.755);
+  --popover-foreground: oklch(0.24 0.03 28);
+  --primary: oklch(0.61 0.14 23);
+  --primary-foreground: oklch(0.99 0.004 70);
+  --secondary: oklch(0.955 0.014 40);
+  --secondary-foreground: oklch(0.24 0.03 28);
+  --muted: oklch(0.965 0.01 65);
+  --muted-foreground: oklch(0.48 0.028 28);
+  --accent: oklch(0.95 0.02 32);
+  --accent-foreground: oklch(0.3 0.05 25);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.984 0.003 247.858);
-  --border: oklch(0.929 0.013 255.508);
-  --input: oklch(0.929 0.013 255.508);
-  --ring: oklch(0.704 0.04 256.788);
+  --border: oklch(0.9 0.014 32);
+  --input: oklch(0.93 0.012 32);
+  --ring: oklch(0.67 0.08 24);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.984 0.003 247.858);
-  --sidebar-foreground: oklch(0.129 0.042 264.695);
-  --sidebar-primary: oklch(0.208 0.042 265.755);
-  --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-accent: oklch(0.968 0.007 247.896);
-  --sidebar-accent-foreground: oklch(0.208 0.042 265.755);
-  --sidebar-border: oklch(0.929 0.013 255.508);
-  --sidebar-ring: oklch(0.704 0.04 256.788);
+  --sidebar: oklch(0.984 0.006 70);
+  --sidebar-foreground: oklch(0.24 0.03 28);
+  --sidebar-primary: oklch(0.61 0.14 23);
+  --sidebar-primary-foreground: oklch(0.99 0.004 70);
+  --sidebar-accent: oklch(0.955 0.014 40);
+  --sidebar-accent-foreground: oklch(0.24 0.03 28);
+  --sidebar-border: oklch(0.9 0.014 32);
+  --sidebar-ring: oklch(0.67 0.08 24);
+  --blush: oklch(0.93 0.03 24);
+  --sand: oklch(0.95 0.02 75);
+  --ink-soft: oklch(0.4 0.02 25);
 }
 
 .dark {
@@ -137,8 +145,46 @@
     border-color: var(--color-border);
   }
 
+  html {
+    font-family: var(--font-sans);
+    scroll-behavior: smooth;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    letter-spacing: -0.03em;
+  }
+
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
+    background-image:
+      radial-gradient(circle at top left, oklch(0.94 0.03 24 / 0.8), transparent 26%),
+      radial-gradient(circle at top right, oklch(0.95 0.02 80 / 0.9), transparent 22%),
+      linear-gradient(180deg, oklch(0.99 0.004 70) 0%, oklch(0.97 0.01 55) 100%);
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+@layer utilities {
+  .glass-panel {
+    background: linear-gradient(180deg, oklch(1 0 0 / 0.78), oklch(0.985 0.008 70 / 0.55));
+    backdrop-filter: blur(18px);
+    box-shadow: 0 22px 60px oklch(0.35 0.03 24 / 0.1);
+  }
+
+  .hero-gradient {
+    background:
+      radial-gradient(circle at 15% 20%, oklch(0.93 0.04 20 / 0.8), transparent 28%),
+      radial-gradient(circle at 82% 18%, oklch(0.95 0.03 78 / 0.85), transparent 22%),
+      linear-gradient(135deg, oklch(0.995 0.003 70) 0%, oklch(0.965 0.014 45) 55%, oklch(0.94 0.02 32) 100%);
+  }
+
+  .button-glow {
+    box-shadow: 0 18px 36px oklch(0.6 0.14 23 / 0.24);
   }
 }
