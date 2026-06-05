@@ -48,18 +48,6 @@ function looksLikeRawProfilePath(value: string) {
   return value.includes("/");
 }
 
-function isProfileStorageUrl(value: string | null) {
-  return Boolean(value && PROFILE_MARKERS.some((marker) => value.includes(marker)));
-}
-
-function isPublicProfileUrl(value: string | null) {
-  return Boolean(value?.includes(`/storage/v1/object/public/${BUCKET}/`));
-}
-
-function publicUrlForPath(path: string) {
-  return supabase.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
-}
-
 export function extractProfilePhotoPath(url: string | null | undefined): string | null {
   const clean = url?.trim();
   if (!clean) return null;
@@ -118,10 +106,10 @@ function getSigned(
   const pending = signPath(path).then((url) => {
     if (url) {
       cache.set(path, { url, expiresAt: Date.now() + SIGN_TTL_SECONDS * 1000 });
-    } else if (!cached?.url) {
-      cache.set(path, { url: publicUrlForPath(path), expiresAt: EMPTY_SIGNED_EXPIRES_AT });
-    } else {
+    } else if (cached?.url) {
       cache.set(path, { url: cached.url, expiresAt: cached.expiresAt });
+    } else {
+      cache.set(path, { url: "", expiresAt: EMPTY_SIGNED_EXPIRES_AT });
     }
     return url;
   });
@@ -145,13 +133,7 @@ export function refreshSignedProfilePhoto(input: string | null | undefined) {
 export function useSignedPhotoUrlResult(input: string | null | undefined): SignedResult {
   const trimmedInput = input?.trim() || null;
   const path = useMemo(() => extractProfilePhotoPath(trimmedInput), [trimmedInput]);
-  const publicFallback = useMemo(() => {
-    if (!path) return null;
-    if (trimmedInput && isProfileStorageUrl(trimmedInput) && isPublicProfileUrl(trimmedInput)) {
-      return trimmedInput;
-    }
-    return publicUrlForPath(path);
-  }, [path, trimmedInput]);
+  const publicFallback = null as string | null;
   const passthrough = !trimmedInput || path ? null : trimmedInput;
   const [refreshToken, setRefreshToken] = useState(0);
 
@@ -159,7 +141,7 @@ export function useSignedPhotoUrlResult(input: string | null | undefined): Signe
     if (!path) return passthrough;
     const cached = cache.get(path);
     if (cached?.url && cached.expiresAt - REFRESH_BEFORE_MS > Date.now()) return cached.url;
-    return publicFallback;
+    return null;
   }, [path, passthrough, publicFallback]);
 
   const [url, setUrl] = useState<string | null>(initial);
