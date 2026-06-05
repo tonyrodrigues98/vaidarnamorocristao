@@ -41,7 +41,7 @@ export function LiveTeamSection({ members }: { members: LiveTeamMember[] }) {
               <div key={category} className="space-y-5">
                 <div className="flex items-end justify-between gap-4">
                   <div>
-                    <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-white/40">
+                    <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-white/80">
                       Categoria
                     </p>
                     <h3 className="mt-1 text-2xl font-black">
@@ -96,7 +96,7 @@ function LiveTeamCard({ member }: { member: LiveTeamMember }) {
       )}
 
       <div className="absolute inset-x-0 bottom-0 p-5">
-        <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-white/50">
+        <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-white/85">
           {LIVE_TEAM_CATEGORY_LABELS[member.category]}
         </p>
         <h4 className="mt-2 text-2xl font-black leading-tight">{member.name}</h4>

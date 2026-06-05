@@ -191,7 +191,7 @@ function RankingPanel({ type, items }: { type: LiveHighlightType; items: LiveMon
           </span>
           <div>
             <h3 className="text-xl font-black text-white">{LIVE_HIGHLIGHT_TYPE_LABELS[type]}</h3>
-            <p className="text-xs text-white/50">Top 3 do mês atual</p>
+            <p className="text-xs text-white/80">Top 3 do mês atual</p>
           </div>
         </div>
       </div>
