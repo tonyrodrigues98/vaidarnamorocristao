@@ -190,6 +190,10 @@
     /* Garante que a roda do mouse role a página verticalmente */
     overflow-y: auto;
   }
+  #root,
+  #__root {
+    min-height: 100dvh;
+  }
   /* Avoid iOS auto-zoom on input focus (which feels laggy) */
   @media (max-width: 767px) {
     input,
@@ -374,7 +378,7 @@
     overscroll-behavior: contain;
   }
   .mobile-chat-composer {
-    padding-bottom: max(env(safe-area-inset-bottom), 0.75rem);
+    padding-bottom: env(safe-area-inset-bottom);
   }
   .mobile-app-card {
     border-radius: 1.5rem;
@@ -397,6 +401,9 @@
       height: 100dvh;
       min-height: 0;
       overflow: hidden;
+    }
+    .mobile-chat-composer {
+      flex-shrink: 0;
     }
     .mobile-chat-screen-with-nav {
       height: calc(100dvh - var(--mobile-bottom-nav-height) - env(safe-area-inset-bottom));
