@@ -1120,6 +1120,7 @@ const ChatComposer = memo(function ChatComposer({
   const [plusOpen, setPlusOpen] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
   const lastSentRef = useRef<number>(0);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const broadcastTyping = useTypingBroadcaster(userId);
 
   useEffect(() => {
@@ -1152,6 +1153,7 @@ const ChatComposer = memo(function ChatComposer({
     setSending(false);
     if (ok) {
       setText("");
+      if (textareaRef.current) textareaRef.current.style.height = "auto";
       lastSentRef.current = Date.now();
       setCooldownLeft(COOLDOWN_MS);
     }
@@ -1254,11 +1256,15 @@ const ChatComposer = memo(function ChatComposer({
               onPick={handleSticker}
             />
           </div>
-          <div className="flex min-h-11 flex-1 items-end gap-2 rounded-[1.4rem] border border-border/80 bg-card px-3 py-2 shadow-sm focus-within:border-primary/60 focus-within:ring-2 focus-within:ring-primary/15">
+          <div className="flex min-h-11 min-w-0 flex-1 items-end gap-2 rounded-[1.4rem] border border-border/80 bg-card px-3 py-2 shadow-sm focus-within:border-primary/60 focus-within:ring-2 focus-within:ring-primary/15">
             <textarea
+              ref={textareaRef}
               value={text}
               onChange={(e) => {
                 setText(e.target.value);
+                const el = e.target as HTMLTextAreaElement;
+                el.style.height = "auto";
+                el.style.height = Math.min(el.scrollHeight, 144) + "px";
                 if (e.target.value.trim().length > 0) broadcastTyping();
               }}
               placeholder={
@@ -1269,7 +1275,8 @@ const ChatComposer = memo(function ChatComposer({
               maxLength={2000}
               disabled={!approved || sending}
               rows={1}
-              className="max-h-36 min-h-7 flex-1 resize-none bg-transparent py-1 text-base leading-6 outline-none placeholder:text-muted-foreground disabled:opacity-60"
+              cols={1}
+              className="block max-h-36 min-h-[28px] w-full min-w-0 flex-1 resize-none overflow-y-auto bg-transparent py-1 text-base leading-6 outline-none placeholder:text-muted-foreground disabled:opacity-60"
             />
             <Button
               type="submit"
