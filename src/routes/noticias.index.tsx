@@ -15,7 +15,25 @@ type Post = {
   author_id: string;
 };
 
-export const Route = createFileRoute("/noticias/")({ component: Noticias });
+export const Route = createFileRoute("/noticias/")({
+  component: Noticias,
+  head: () => ({
+    meta: [
+      { title: "Notícias — VaiDarNamoro" },
+      {
+        name: "description",
+        content:
+          "Notícias e atualizações da comunidade VaiDarNamoro: novidades, eventos e avisos importantes.",
+      },
+      { property: "og:title", content: "Notícias — VaiDarNamoro" },
+      {
+        property: "og:description",
+        content: "Notícias e atualizações da comunidade VaiDarNamoro.",
+      },
+      { property: "og:url", content: "https://vaidarnamoro.com/noticias" },
+    ],
+  }),
+});
 
 function Noticias() {
   const { user, loading } = useAuth();
