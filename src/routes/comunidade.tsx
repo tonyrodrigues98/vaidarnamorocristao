@@ -548,29 +548,27 @@ function Comunidade() {
   return (
     <div className="mobile-chat-screen flex min-h-screen flex-col bg-background md:min-h-screen">
       <Header />
-      <main className="mx-auto flex min-h-0 w-full max-w-4xl flex-1 flex-col px-3 py-3 md:px-4 md:py-6">
-        <div className="animate-fade-up flex items-center gap-3 rounded-3xl border border-border/70 bg-card/85 px-4 py-3 shadow-soft backdrop-blur md:rounded-none md:border-0 md:bg-transparent md:px-0 md:py-0 md:shadow-none md:backdrop-blur-none">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-love shadow-glow md:h-12 md:w-12">
-            <Users className="h-5 w-5 text-white" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <h1 className="text-xl font-semibold md:text-3xl">Chat Global</h1>
-            <p className="text-xs text-muted-foreground md:text-sm">
-              Chat global em tempo real — converse com todos
-            </p>
-          </div>
-          <Link
-            to="/oracoes"
-            className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-border px-3 py-2 text-xs font-medium transition hover:bg-accent"
-          >
-            <HandHeart className="h-4 w-4" />
-            <span className="hidden sm:inline">Pedidos de oração</span>
-            <span className="sm:hidden">Orações</span>
-          </Link>
+      <div className="glass mx-auto flex w-full max-w-3xl items-center gap-3 px-3 py-3 shadow-soft md:px-4">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-love shadow-glow">
+          <Users className="h-5 w-5 text-white" />
         </div>
+        <div className="min-w-0 flex-1">
+          <h1 className="truncate text-base font-semibold leading-tight md:text-lg">Chat Global</h1>
+          <p className="truncate text-[11px] text-muted-foreground">
+            Chat global em tempo real
+          </p>
+        </div>
+        <Link
+          to="/oracoes"
+          className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-border px-3 py-2 text-xs font-medium transition hover:bg-accent"
+        >
+          <HandHeart className="h-4 w-4" />
+          <span className="hidden sm:inline">Orações</span>
+        </Link>
+      </div>
 
-        <div className="glass mt-3 flex min-h-0 flex-1 flex-col overflow-hidden rounded-[1.75rem] shadow-soft md:mt-6 md:rounded-3xl">
-          {pinnedMessages.length > 0 && (
+      {pinnedMessages.length > 0 && (
+        <div className="mx-auto w-full max-w-3xl border-b border-primary/20 bg-primary/5">
             <div className="space-y-2 border-b border-primary/20 bg-primary/5 p-3">
               <div className="flex items-center gap-2 text-xs font-semibold text-primary">
                 <Pin className="h-3.5 w-3.5" /> Mensagens fixadas
@@ -615,16 +613,18 @@ function Comunidade() {
                 );
               })}
             </div>
-          )}
-          <div
-            ref={scrollRef}
-            className="mobile-chat-scroll flex-1 space-y-4 overflow-y-auto p-3 sm:p-6 md:space-y-5"
-            onPointerDown={(event) => {
-              const target = event.target as HTMLElement;
-              if (target.closest("button,a,input,textarea,[role='dialog']")) return;
-              blurComposer();
-            }}
-          >
+        </div>
+      )}
+
+      <main
+        ref={scrollRef}
+        className="mobile-chat-scroll mx-auto min-h-0 w-full max-w-3xl flex-1 space-y-4 overflow-y-auto px-3 py-4 md:space-y-5 md:px-4 md:py-6"
+        onPointerDown={(event) => {
+          const target = event.target as HTMLElement;
+          if (target.closest("button,a,input,textarea,[role='dialog']")) return;
+          blurComposer();
+        }}
+      >
             {messages.length === 0 ? (
               <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
                 Nenhuma mensagem ainda. Seja o primeiro!
