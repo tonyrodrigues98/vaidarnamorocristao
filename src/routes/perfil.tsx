@@ -68,7 +68,25 @@ import { ReceivedGiftsTab } from "@/components/gifts/ReceivedGiftsTab";
 import { GradientName } from "@/components/GradientName";
 import { fetchNameGradientsByIds, type NameGradient } from "@/lib/nameGradients";
 
-export const Route = createFileRoute("/perfil")({ component: PerfilPage });
+export const Route = createFileRoute("/perfil")({
+  component: PerfilPage,
+  head: () => ({
+    meta: [
+      { title: "Meu Perfil — VaiDarNamoro" },
+      {
+        name: "description",
+        content:
+          "Edite seu perfil no VaiDarNamoro: fotos, bio, interesses e preferências para encontrar relacionamentos cristãos sérios com propósito.",
+      },
+      { property: "og:title", content: "Meu Perfil — VaiDarNamoro" },
+      {
+        property: "og:description",
+        content: "Gerencie suas fotos, bio e preferências no VaiDarNamoro.",
+      },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
+  }),
+});
 
 const profileSchema = z.object({
   full_name: z.string().trim().min(2).max(100),

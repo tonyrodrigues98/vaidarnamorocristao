@@ -7,7 +7,7 @@ export const Route = createFileRoute("/blog/")({
   component: BlogIndex,
   head: () => ({
     meta: [
-      { title: "Blog VaiDarNamoro — Artigos sobre namoro cristão e relacionamentos" },
+      { title: "Blog VaiDarNamoro — Relacionamentos com Propósito" },
       {
         name: "description",
         content:

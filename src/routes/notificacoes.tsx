@@ -36,7 +36,17 @@ export const Route = createFileRoute("/notificacoes")({
   head: () => ({
     meta: [
       { title: "Notificações — VaiDarNamoro" },
-      { name: "description", content: "Sua central de notificações." },
+      {
+        name: "description",
+        content:
+          "Sua central de notificações no VaiDarNamoro: novos interesses, mensagens, matches e atualizações da comunidade em um só lugar.",
+      },
+      { property: "og:title", content: "Notificações — VaiDarNamoro" },
+      {
+        property: "og:description",
+        content:
+          "Acompanhe novos interesses, mensagens e matches da sua jornada no VaiDarNamoro.",
+      },
     ],
   }),
   component: NotificacoesPage,
