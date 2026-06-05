@@ -37,10 +37,10 @@ export function GradientText({ children }: { children: ReactNode }) {
 
 export function BadgePill({ badge }: { badge: Badge }) {
   const tone = {
-    rose: "border-rose-200 bg-rose-50 text-rose-700",
-    gold: "border-amber-200 bg-amber-50 text-amber-800",
-    emerald: "border-emerald-200 bg-emerald-50 text-emerald-700",
-    slate: "border-slate-200 bg-slate-50 text-slate-700",
+    rose: "border-neutral-200 bg-neutral-100 text-neutral-700",
+    gold: "border-neutral-200 bg-white text-neutral-800",
+    emerald: "border-neutral-300 bg-neutral-950 text-white",
+    slate: "border-neutral-200 bg-neutral-100 text-neutral-700",
   }[badge.tone];
 
   return (
@@ -62,7 +62,7 @@ export function GlassCard({
 }) {
   return (
     <div
-      className={`rounded-[1.5rem] border border-black/5 bg-white/76 shadow-[0_24px_70px_rgba(24,21,20,0.07)] backdrop-blur-xl ${className}`}
+      className={`rounded-2xl border border-neutral-200/80 bg-white shadow-[0_8px_30px_rgba(0,0,0,0.04)] ${className}`}
     >
       {children}
     </div>
@@ -77,7 +77,7 @@ export function Breadcrumbs({ items }: { items: string[] }) {
       </a>
       {items.map((item) => (
         <span key={item} className="flex items-center gap-2">
-          <span className="h-1 w-1 rounded-full bg-primary/50" />
+          <span className="h-1 w-1 rounded-full bg-neutral-300" />
           <span className="text-foreground/75">{item}</span>
         </span>
       ))}
@@ -104,7 +104,7 @@ export function PageHeader({
       <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
         <div className="max-w-3xl">
           {eyebrow ? (
-            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-primary/80">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-neutral-500">
               {eyebrow}
             </p>
           ) : null}
@@ -133,7 +133,7 @@ export function PrimaryButton({
   disabled?: boolean;
 }) {
   const className =
-    "inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-[0_18px_40px_rgba(176,77,67,0.22)] transition hover:-translate-y-0.5 disabled:pointer-events-none disabled:opacity-55";
+    "inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-neutral-950 px-5 py-2.5 text-sm font-semibold text-white shadow-[0_12px_28px_rgba(0,0,0,0.12)] transition hover:bg-neutral-800 disabled:pointer-events-none disabled:opacity-55";
 
   if (href) {
     return (
@@ -164,7 +164,7 @@ export function SecondaryButton({
   icon?: ReactNode;
 }) {
   const className =
-    "inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-black/10 bg-white/80 px-5 py-2.5 text-sm font-semibold text-foreground shadow-sm transition hover:bg-white";
+    "inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-neutral-200 bg-white px-5 py-2.5 text-sm font-semibold text-neutral-950 shadow-sm transition hover:bg-neutral-50";
 
   if (href) {
     return (
@@ -207,12 +207,12 @@ export function MockModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/35 px-4 py-5 backdrop-blur-sm sm:items-center"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 px-4 py-5 backdrop-blur-sm sm:items-center"
       onMouseDown={onClose}
       role="presentation"
     >
       <div
-        className="max-h-[88vh] w-full max-w-xl overflow-y-auto rounded-[1.5rem] border border-white/70 bg-white/90 p-5 shadow-[0_30px_90px_rgba(15,15,15,0.22)] backdrop-blur-xl"
+        className="max-h-[88vh] w-full max-w-xl overflow-y-auto rounded-2xl border border-neutral-200 bg-white p-5 shadow-[0_30px_90px_rgba(0,0,0,0.18)]"
         onMouseDown={(event) => event.stopPropagation()}
         role="dialog"
         aria-modal="true"
@@ -220,14 +220,14 @@ export function MockModal({
       >
         <div className="mb-5 flex items-start justify-between gap-4">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-500">
               Prototipo visual
             </p>
             <h2 className="mt-1 text-2xl font-semibold">{title}</h2>
           </div>
           <button
             onClick={onClose}
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-black/10 bg-white text-muted-foreground transition hover:text-foreground"
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-neutral-200 bg-white text-muted-foreground transition hover:bg-neutral-100 hover:text-foreground"
             aria-label="Fechar modal"
           >
             <X className="h-4 w-4" />
@@ -258,20 +258,20 @@ export function ProfileAvatar({
 
   return (
     <div className={`relative ${sizes[size]} shrink-0`}>
-      <div className="absolute inset-[-12%] rounded-full bg-[radial-gradient(circle,rgba(255,200,154,0.82),rgba(225,95,120,0.24),transparent_70%)] blur-md" />
+      <div className="absolute inset-[-10%] rounded-full bg-[radial-gradient(circle,rgba(17,24,39,0.14),rgba(17,24,39,0.04),transparent_70%)] blur-md" />
       <img
         src={profile.photos[0]}
         alt={profile.name}
-        className="relative h-full w-full rounded-full border-4 border-white object-cover shadow-[0_16px_36px_rgba(25,20,18,0.18)]"
+        className="relative h-full w-full rounded-full border-4 border-white object-cover shadow-[0_16px_36px_rgba(0,0,0,0.14)]"
       />
-      <div className="pointer-events-none absolute inset-[-3px] rounded-full border-2 border-amber-300/80" />
+      <div className="pointer-events-none absolute inset-[-3px] rounded-full border border-neutral-300" />
       {profile.verified ? (
-        <span className="absolute -right-1 bottom-1 flex h-7 w-7 items-center justify-center rounded-full border-2 border-white bg-emerald-500 text-white">
+        <span className="absolute -right-1 bottom-1 flex h-7 w-7 items-center justify-center rounded-full border-2 border-white bg-neutral-950 text-white">
           <BadgeCheck className="h-4 w-4" />
         </span>
       ) : null}
       {profile.online ? (
-        <span className="absolute left-1 bottom-2 h-3.5 w-3.5 rounded-full border-2 border-white bg-emerald-400" />
+        <span className="absolute left-1 bottom-2 h-3.5 w-3.5 rounded-full border-2 border-white bg-emerald-500" />
       ) : null}
     </div>
   );
@@ -282,7 +282,7 @@ export function ProfileCard({ profile }: { profile: MockProfile }) {
   const [giftOpen, setGiftOpen] = useState(false);
 
   return (
-    <GlassCard className="group overflow-hidden transition hover:-translate-y-1 hover:shadow-[0_30px_80px_rgba(24,21,20,0.1)]">
+    <GlassCard className="group overflow-hidden transition hover:-translate-y-1 hover:shadow-[0_20px_50px_rgba(0,0,0,0.08)]">
       <div className="relative aspect-[4/3] overflow-hidden">
         <img
           src={profile.photos[0]}
@@ -319,7 +319,7 @@ export function ProfileCard({ profile }: { profile: MockProfile }) {
           {profile.faithTags.slice(0, 3).map((tag) => (
             <span
               key={tag}
-              className="rounded-full bg-secondary px-3 py-1 text-xs font-medium text-secondary-foreground"
+              className="rounded-full border border-neutral-200 bg-neutral-100 px-3 py-1 text-xs font-medium text-neutral-700"
             >
               {tag}
             </span>
@@ -349,7 +349,7 @@ export function ProfileCard({ profile }: { profile: MockProfile }) {
         </div>
         <button
           onClick={() => setGiftOpen(true)}
-          className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-full border border-primary/15 bg-primary/5 px-4 py-2.5 text-sm font-semibold text-primary transition hover:bg-primary/10"
+          className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-full border border-neutral-200 bg-white px-4 py-2.5 text-sm font-semibold text-neutral-950 transition hover:bg-neutral-100"
         >
           <Gift className="h-4 w-4" />
           Enviar presente
@@ -379,7 +379,9 @@ export function GiftModal({
             key={gift.id}
             onClick={() => setSelected(gift.id)}
             className={`rounded-2xl border p-4 text-left transition ${
-              selected === gift.id ? "border-primary bg-primary/5" : "border-black/5 bg-white/70"
+              selected === gift.id
+                ? "border-neutral-950 bg-neutral-100"
+                : "border-neutral-200 bg-white"
             }`}
           >
             <div className="mb-3 h-20 rounded-xl" style={{ background: gift.image }} />
@@ -389,7 +391,7 @@ export function GiftModal({
         ))}
       </div>
       <textarea
-        className="mt-4 min-h-24 w-full rounded-2xl border border-black/10 bg-white/70 p-3 text-sm outline-none focus:border-primary"
+        className="mt-4 min-h-24 w-full rounded-2xl border border-neutral-200 bg-white p-3 text-sm outline-none focus:border-neutral-950"
         placeholder="Mensagem opcional com respeito e proposito..."
       />
       <div className="mt-4 flex justify-end gap-3">
@@ -414,7 +416,7 @@ export function MockTabs({ tabs }: { tabs: { id: string; label: string; content:
 
   return (
     <div>
-      <div className="flex gap-2 overflow-x-auto border-b border-black/10">
+      <div className="flex gap-2 overflow-x-auto border-b border-neutral-200">
         {tabs.map((tab) => (
           <button
             key={tab.id}
@@ -425,7 +427,7 @@ export function MockTabs({ tabs }: { tabs: { id: string; label: string; content:
           >
             {tab.label}
             {active === tab.id ? (
-              <span className="absolute inset-x-2 bottom-0 h-0.5 rounded-full bg-primary" />
+              <span className="absolute inset-x-2 bottom-0 h-0.5 rounded-full bg-neutral-950" />
             ) : null}
           </button>
         ))}
@@ -454,7 +456,7 @@ export function StatCard({
           <p className="mt-2 text-3xl font-semibold text-foreground">{value}</p>
           {detail ? <p className="mt-2 text-sm text-muted-foreground">{detail}</p> : null}
         </div>
-        <span className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 text-primary">
+        <span className="flex h-11 w-11 items-center justify-center rounded-full border border-neutral-200 bg-neutral-100 text-neutral-900">
           {icon ?? <Sparkles className="h-5 w-5" />}
         </span>
       </div>
@@ -477,13 +479,13 @@ export function StoreItemCard({ item }: { item: StoreItem }) {
           <p className="font-semibold">{item.name}</p>
           <p className="mt-1 text-sm text-muted-foreground">{item.description}</p>
         </div>
-        <span className="rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold capitalize text-amber-800">
+        <span className="rounded-full border border-neutral-200 bg-neutral-100 px-2.5 py-1 text-xs font-semibold capitalize text-neutral-700">
           {item.rarity}
         </span>
       </div>
       <div className="mt-4 flex items-center justify-between gap-3">
         <span className="inline-flex items-center gap-1 text-sm font-semibold">
-          <Coins className="h-4 w-4 text-amber-600" />
+          <Coins className="h-4 w-4 text-neutral-600" />
           {item.price}
         </span>
         <PrimaryButton
@@ -520,7 +522,7 @@ export function GiftCard({ gift, onSend }: { gift: GiftType; onSend?: () => void
       </div>
       <button
         onClick={onSend}
-        className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground"
+        className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full bg-neutral-950 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-neutral-800"
       >
         <Gift className="h-4 w-4" />
         Enviar por {gift.price}
@@ -548,7 +550,7 @@ export function ChatMock({
 
   return (
     <GlassCard className="overflow-hidden">
-      <div className="border-b border-black/5 bg-white/70 p-4">
+      <div className="border-b border-neutral-200 bg-white p-4">
         <p className="font-semibold">{personName}</p>
         <p className="text-sm text-muted-foreground">Conversa com proposito e respeito</p>
       </div>
@@ -561,8 +563,8 @@ export function ChatMock({
             <div
               className={`max-w-[78%] rounded-2xl px-4 py-2.5 text-sm leading-6 ${
                 message.from === "me"
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-white text-foreground"
+                  ? "bg-neutral-950 text-white"
+                  : "border border-neutral-200 bg-white text-foreground"
               }`}
             >
               <p>{message.text}</p>
@@ -578,8 +580,8 @@ export function ChatMock({
           {personName.split(" ")[0]} esta digitando...
         </p>
       </div>
-      <div className="flex gap-2 border-t border-black/5 bg-white/70 p-3">
-        <button className="flex h-11 w-11 items-center justify-center rounded-full border border-black/10 bg-white text-primary">
+      <div className="flex gap-2 border-t border-neutral-200 bg-white p-3">
+        <button className="flex h-11 w-11 items-center justify-center rounded-full border border-neutral-200 bg-white text-neutral-700">
           <Sparkles className="h-4 w-4" />
         </button>
         <input
@@ -588,12 +590,12 @@ export function ChatMock({
           onKeyDown={(event) => {
             if (event.key === "Enter") sendMessage();
           }}
-          className="min-w-0 flex-1 rounded-full border border-black/10 bg-white px-4 text-sm outline-none focus:border-primary"
+          className="min-w-0 flex-1 rounded-full border border-neutral-200 bg-white px-4 text-sm outline-none focus:border-neutral-950"
           placeholder="Escreva com respeito..."
         />
         <button
           onClick={sendMessage}
-          className="flex h-11 w-11 items-center justify-center rounded-full bg-primary text-primary-foreground"
+          className="flex h-11 w-11 items-center justify-center rounded-full bg-neutral-950 text-white"
         >
           <Send className="h-4 w-4" />
         </button>
@@ -612,7 +614,7 @@ export function SearchBar({
   onChange?: (value: string) => void;
 }) {
   return (
-    <label className="flex min-h-11 items-center gap-2 rounded-full border border-black/10 bg-white/80 px-4 text-sm shadow-sm">
+    <label className="flex min-h-11 items-center gap-2 rounded-full border border-neutral-200 bg-white px-4 text-sm shadow-sm">
       <Search className="h-4 w-4 text-muted-foreground" />
       <input
         className="min-w-0 flex-1 bg-transparent outline-none"
@@ -639,8 +641,8 @@ export function AdminFrame({ children, title }: { children: ReactNode; title: st
 
   return (
     <div className="mx-auto grid max-w-7xl gap-6 px-5 pb-12 sm:px-6 lg:grid-cols-[260px_1fr] lg:px-8">
-      <aside className="rounded-[1.5rem] border border-black/5 bg-white/78 p-3 shadow-sm backdrop-blur-xl lg:sticky lg:top-24 lg:h-fit">
-        <p className="px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+      <aside className="rounded-2xl border border-neutral-200 bg-white p-3 shadow-sm lg:sticky lg:top-24 lg:h-fit">
+        <p className="px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-neutral-500">
           Admin
         </p>
         <nav className="grid gap-1">
@@ -648,7 +650,7 @@ export function AdminFrame({ children, title }: { children: ReactNode; title: st
             <a
               key={href}
               href={href}
-              className="rounded-2xl px-3 py-2.5 text-sm font-medium text-muted-foreground transition hover:bg-secondary hover:text-foreground"
+              className="rounded-2xl px-3 py-2.5 text-sm font-medium text-muted-foreground transition hover:bg-neutral-100 hover:text-foreground"
             >
               {label}
             </a>
@@ -667,10 +669,10 @@ export function DataTable({ rows }: { rows: Record<string, string>[] }) {
   const keys = useMemo(() => Object.keys(rows[0] ?? {}), [rows]);
 
   return (
-    <div className="overflow-hidden rounded-[1.5rem] border border-black/5 bg-white/82 shadow-sm">
+    <div className="overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm">
       <div className="overflow-x-auto">
         <table className="w-full min-w-[680px] text-left text-sm">
-          <thead className="bg-secondary text-xs uppercase tracking-[0.12em] text-muted-foreground">
+          <thead className="bg-neutral-100 text-xs uppercase tracking-[0.12em] text-muted-foreground">
             <tr>
               {keys.map((key) => (
                 <th key={key} className="px-4 py-3 font-semibold">
@@ -682,7 +684,7 @@ export function DataTable({ rows }: { rows: Record<string, string>[] }) {
           </thead>
           <tbody>
             {rows.map((row, index) => (
-              <tr key={index} className="border-t border-black/5">
+              <tr key={index} className="border-t border-neutral-200">
                 {keys.map((key) => (
                   <td key={key} className="px-4 py-3 text-foreground/82">
                     {row[key]}
@@ -691,7 +693,7 @@ export function DataTable({ rows }: { rows: Record<string, string>[] }) {
                 <td className="px-4 py-3">
                   <button
                     onClick={() => toast.success("Acao administrativa simulada.")}
-                    className="rounded-full border border-black/10 px-3 py-1.5 text-xs font-semibold"
+                    className="rounded-full border border-neutral-200 px-3 py-1.5 text-xs font-semibold transition hover:bg-neutral-100"
                   >
                     Editar
                   </button>
@@ -712,7 +714,7 @@ export function AccountChip() {
     <div className="relative">
       <button
         onClick={() => setOpen((value) => !value)}
-        className="flex items-center gap-2 rounded-full border border-black/10 bg-white/75 py-1 pl-1 pr-3 text-sm font-semibold shadow-sm"
+        className="flex items-center gap-2 rounded-full border border-neutral-200 bg-white py-1 pl-1 pr-3 text-sm font-semibold shadow-sm"
       >
         <img
           src={currentUser.photo}
@@ -723,7 +725,7 @@ export function AccountChip() {
         <ChevronDown className="h-4 w-4 text-muted-foreground" />
       </button>
       {open ? (
-        <div className="absolute right-0 top-12 z-50 w-64 rounded-2xl border border-black/5 bg-white/95 p-3 shadow-[0_24px_70px_rgba(24,21,20,0.16)] backdrop-blur-xl">
+        <div className="absolute right-0 top-12 z-50 w-64 rounded-2xl border border-neutral-200 bg-white p-3 shadow-[0_20px_50px_rgba(0,0,0,0.12)]">
           <a
             href="/perfil"
             className="block rounded-xl px-3 py-2 text-sm font-medium hover:bg-secondary"
@@ -751,11 +753,11 @@ export function AccountChip() {
 export function HeaderQuickStats() {
   return (
     <div className="hidden items-center gap-2 lg:flex">
-      <span className="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-sm font-semibold text-amber-800">
+      <span className="inline-flex items-center gap-1 rounded-full border border-neutral-200 bg-neutral-100 px-3 py-1.5 text-sm font-semibold text-neutral-800">
         <Coins className="h-4 w-4" />
         {currentUser.coins}
       </span>
-      <button className="flex h-10 w-10 items-center justify-center rounded-full border border-black/10 bg-white/75">
+      <button className="flex h-10 w-10 items-center justify-center rounded-full border border-neutral-200 bg-white">
         <Bell className="h-4 w-4" />
       </button>
     </div>
@@ -811,7 +813,7 @@ export const megaNavGroups = [
 
 export function PremiumIcon({ children }: { children: ReactNode }) {
   return (
-    <span className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 text-primary">
+    <span className="flex h-11 w-11 items-center justify-center rounded-full border border-neutral-200 bg-neutral-100 text-neutral-900">
       {children}
     </span>
   );

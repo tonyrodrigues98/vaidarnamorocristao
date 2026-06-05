@@ -8,7 +8,7 @@ export function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-black/5 bg-[#fdfbf7]/82 backdrop-blur-xl">
+    <header className="sticky top-0 z-40 border-b border-neutral-200/80 bg-white/86 backdrop-blur-md">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-3 sm:px-6 lg:px-8">
         <a href="/" className="min-w-0">
           <p className="text-base font-bold text-foreground">VaiDarNamoro Cristao</p>
@@ -22,14 +22,14 @@ export function Header() {
             <a
               key={item.href}
               href={item.href}
-              className="rounded-full px-3 py-2 text-sm font-semibold text-muted-foreground transition hover:bg-white/80 hover:text-foreground"
+              className="rounded-full px-3 py-2 text-sm font-medium text-muted-foreground transition hover:bg-neutral-100 hover:text-foreground"
             >
               {item.label}
             </a>
           ))}
           <button
             onClick={() => setMegaOpen((value) => !value)}
-            className="rounded-full px-3 py-2 text-sm font-semibold text-muted-foreground transition hover:bg-white/80 hover:text-foreground"
+            className="rounded-full px-3 py-2 text-sm font-medium text-muted-foreground transition hover:bg-neutral-100 hover:text-foreground"
           >
             Todas as rotas
           </button>
@@ -39,7 +39,7 @@ export function Header() {
           <HeaderQuickStats />
           <AccountChip />
           <button
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-black/10 bg-white/75 lg:hidden"
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-neutral-200 bg-white lg:hidden"
             onClick={() => setMobileOpen(true)}
             aria-label="Abrir menu"
           >
@@ -49,14 +49,14 @@ export function Header() {
       </div>
 
       {megaOpen ? (
-        <div className="absolute inset-x-0 top-full hidden border-b border-black/5 bg-[#fdfbf7]/95 shadow-[0_22px_70px_rgba(20,16,14,0.12)] backdrop-blur-xl lg:block">
+        <div className="absolute inset-x-0 top-full hidden border-b border-neutral-200 bg-white/95 shadow-[0_20px_50px_rgba(0,0,0,0.08)] backdrop-blur-md lg:block">
           <div className="mx-auto grid max-w-7xl gap-5 px-8 py-6 md:grid-cols-3">
             {megaNavGroups.map((group) => (
               <div
                 key={group.title}
-                className="rounded-[1.25rem] border border-black/5 bg-white/70 p-4"
+                className="rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm"
               >
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-500">
                   {group.title}
                 </p>
                 <div className="mt-3 grid gap-1">
@@ -64,7 +64,7 @@ export function Header() {
                     <a
                       key={href}
                       href={href}
-                      className="rounded-xl px-3 py-2 text-sm font-medium text-muted-foreground transition hover:bg-secondary hover:text-foreground"
+                      className="rounded-xl px-3 py-2 text-sm font-medium text-muted-foreground transition hover:bg-neutral-100 hover:text-foreground"
                     >
                       {label}
                     </a>
@@ -83,7 +83,7 @@ export function Header() {
           role="presentation"
         >
           <div
-            className="ml-auto h-full w-full max-w-sm overflow-y-auto bg-[#fdfbf7] p-5 shadow-2xl"
+            className="ml-auto h-full w-full max-w-sm overflow-y-auto bg-white p-5 shadow-2xl"
             onMouseDown={(event) => event.stopPropagation()}
           >
             <div className="flex items-center justify-between">
@@ -102,7 +102,7 @@ export function Header() {
             <div className="mt-6 grid gap-5">
               {megaNavGroups.map((group) => (
                 <div key={group.title}>
-                  <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-neutral-500">
                     {group.title}
                   </p>
                   <div className="grid gap-1">
@@ -110,7 +110,7 @@ export function Header() {
                       <a
                         key={href}
                         href={href}
-                        className="rounded-2xl bg-white/80 px-4 py-3 text-sm font-semibold"
+                        className="rounded-2xl border border-neutral-200 bg-white px-4 py-3 text-sm font-semibold shadow-sm"
                         onClick={() => setMobileOpen(false)}
                       >
                         {label}

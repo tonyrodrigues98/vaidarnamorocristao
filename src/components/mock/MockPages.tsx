@@ -107,16 +107,16 @@ function CompactList({
 
 export function HomeLanding() {
   return (
-    <Shell className="bg-[linear-gradient(135deg,#141111,#38201f_45%,#fbf7ef_45%,#fffaf4)]">
+    <Shell className="bg-neutral-50">
       <section className="mx-auto grid min-h-[calc(100vh-84px)] max-w-7xl items-center gap-10 px-5 py-10 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:px-8">
-        <div className="text-white">
-          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-amber-200">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-neutral-500">
             Live oficial e comunidade
           </p>
           <h1 className="mt-5 max-w-3xl text-5xl font-semibold leading-tight sm:text-6xl">
             <GradientText>VaiDarNamoro Cristao</GradientText>
           </h1>
-          <p className="mt-5 max-w-xl text-lg leading-8 text-white/76">
+          <p className="mt-5 max-w-xl text-lg leading-8 text-muted-foreground">
             Um prototipo navegavel para visualizar uma plataforma crista de relacionamento com
             maturidade, seguranca, comunidade e proposito.
           </p>
@@ -133,7 +133,7 @@ export function HomeLanding() {
               (item) => (
                 <span
                   key={item}
-                  className="rounded-full border border-white/16 bg-white/10 px-3 py-1.5 text-sm text-white/82"
+                  className="rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-sm text-neutral-700 shadow-sm"
                 >
                   {item}
                 </span>
@@ -180,7 +180,7 @@ export function HomeLanding() {
 
       <Section className="grid gap-6 lg:grid-cols-[0.8fr_1.2fr]">
         <GlassCard className="p-6">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-neutral-500">
             Top 3 mensal
           </p>
           <h2 className="mt-3 text-3xl font-semibold">
@@ -198,7 +198,7 @@ export function HomeLanding() {
           {profiles.slice(0, 3).map((profile, index) => (
             <GlassCard key={profile.id} className="p-5 text-center">
               <ProfileAvatar profile={profile} size="lg" />
-              <p className="mt-4 text-sm font-semibold uppercase tracking-[0.18em] text-primary">
+              <p className="mt-4 text-sm font-semibold uppercase tracking-[0.18em] text-neutral-500">
                 #{index + 1}
               </p>
               <h3 className="mt-1 text-xl font-semibold">{profile.name}</h3>
@@ -225,7 +225,7 @@ export function HomeLanding() {
                 <a
                   key={item}
                   href={`/${item.toLowerCase() === "faq" ? "como-funciona" : item.toLowerCase()}`}
-                  className="rounded-2xl border border-black/5 bg-white/76 p-4 font-semibold"
+                  className="rounded-2xl border border-neutral-200 bg-white p-4 font-semibold shadow-sm transition hover:bg-neutral-50"
                 >
                   {item}
                 </a>
@@ -299,7 +299,7 @@ function AuthFrame({
         <p className="mt-4 max-w-lg text-lg leading-8 text-muted-foreground">{text}</p>
         <GlassCard className="mt-8 p-5">
           <div className="flex items-start gap-3">
-            <ShieldCheck className="mt-1 h-5 w-5 text-primary" />
+            <ShieldCheck className="mt-1 h-5 w-5 text-neutral-900" />
             <p className="text-sm leading-6 text-muted-foreground">
               Todo fluxo desta versao e publico, visual e alimentado por dados mockados locais.
             </p>
@@ -311,7 +311,7 @@ function AuthFrame({
           <label className="grid gap-2 text-sm font-semibold">
             Email
             <input
-              className="rounded-2xl border border-black/10 bg-white/80 px-4 py-3 outline-none focus:border-primary"
+              className="rounded-2xl border border-neutral-200 bg-white px-4 py-3 outline-none focus:border-neutral-950"
               placeholder="antonio@email.com"
             />
           </label>
@@ -319,7 +319,7 @@ function AuthFrame({
             <label className="grid gap-2 text-sm font-semibold">
               Senha
               <input
-                className="rounded-2xl border border-black/10 bg-white/80 px-4 py-3 outline-none focus:border-primary"
+                className="rounded-2xl border border-neutral-200 bg-white px-4 py-3 outline-none focus:border-neutral-950"
                 type="password"
                 placeholder="********"
               />
@@ -339,7 +339,7 @@ function AuthFrame({
                 </SecondaryButton>
               </div>
               <div className="flex flex-wrap justify-between gap-3 text-sm">
-                <a href="/auth/signup" className="font-semibold text-primary">
+                <a href="/auth/signup" className="font-semibold text-neutral-950">
                   Criar cadastro
                 </a>
                 <a
@@ -375,7 +375,7 @@ export function SignupPage() {
               <button
                 key={label}
                 onClick={() => setStep(index)}
-                className={`rounded-2xl border px-4 py-3 text-left text-sm font-semibold ${step === index ? "border-primary bg-primary/5 text-primary" : "border-black/5 bg-white/70"}`}
+                className={`rounded-2xl border px-4 py-3 text-left text-sm font-semibold ${step === index ? "border-neutral-950 bg-neutral-100 text-neutral-950" : "border-neutral-200 bg-white text-neutral-600"}`}
               >
                 {index + 1}. {label}
               </button>
@@ -385,7 +385,7 @@ export function SignupPage() {
         <GlassCard className="p-6">
           <div className="mb-5 h-2 overflow-hidden rounded-full bg-secondary">
             <div
-              className="h-full rounded-full bg-primary transition-all"
+              className="h-full rounded-full bg-neutral-950 transition-all"
               style={{ width: `${((step + 1) / steps.length) * 100}%` }}
             />
           </div>
@@ -447,7 +447,7 @@ function SignupStep({ step }: { step: number }) {
         <label key={label} className="grid gap-2 text-sm font-semibold">
           {label}
           <input
-            className="rounded-2xl border border-black/10 bg-white/80 px-4 py-3 outline-none focus:border-primary"
+            className="rounded-2xl border border-neutral-200 bg-white px-4 py-3 outline-none focus:border-neutral-950"
             placeholder={placeholder}
           />
         </label>
@@ -488,7 +488,7 @@ export function OnboardingPage({ step }: { step: 1 | 2 }) {
               <label key={field} className="grid gap-2 text-sm font-semibold">
                 {field}
                 <input
-                  className="rounded-2xl border border-black/10 bg-white/80 px-4 py-3 outline-none focus:border-primary"
+                  className="rounded-2xl border border-neutral-200 bg-white px-4 py-3 outline-none focus:border-neutral-950"
                   placeholder={field}
                 />
               </label>
@@ -561,9 +561,9 @@ export function InicioPage() {
             ].map((item, index) => (
               <div
                 key={item}
-                className="flex items-center gap-3 rounded-2xl border border-black/5 bg-white/70 p-4"
+                className="flex items-center gap-3 rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm"
               >
-                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
+                <span className="flex h-9 w-9 items-center justify-center rounded-full border border-neutral-200 bg-neutral-100 text-sm font-semibold text-neutral-900">
                   {index + 1}
                 </span>
                 <span className="font-medium">{item}</span>
@@ -599,9 +599,9 @@ export function InicioPage() {
           <a
             key={href as string}
             href={href as string}
-            className="rounded-[1.5rem] border border-black/5 bg-white/75 p-5 shadow-sm transition hover:-translate-y-1"
+            className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-[0_16px_40px_rgba(0,0,0,0.06)]"
           >
-            <Icon className="h-5 w-5 text-primary" />
+            <Icon className="h-5 w-5 text-neutral-900" />
             <p className="mt-4 font-semibold">{label as string}</p>
           </a>
         ))}
@@ -652,7 +652,7 @@ export function DashboardPage() {
             {[38, 64, 52, 78, 92, 70, 100].map((value, index) => (
               <div key={index} className="flex flex-1 flex-col items-center gap-2">
                 <div
-                  className="w-full rounded-t-2xl bg-gradient-to-t from-primary to-amber-300"
+                  className="w-full rounded-t-2xl bg-gradient-to-t from-neutral-950 to-neutral-400"
                   style={{ height: `${value}%` }}
                 />
                 <span className="text-xs text-muted-foreground">
@@ -721,7 +721,7 @@ export function PretendentesPage() {
           <h2 className="text-xl font-semibold">Filtros</h2>
           <div className="mt-4 grid gap-3">
             <SearchBar placeholder="Buscar nome, cidade ou ministerio" />
-            <label className="flex items-center gap-3 rounded-2xl bg-white/70 p-3 text-sm font-semibold">
+            <label className="flex items-center gap-3 rounded-2xl border border-neutral-200 bg-white p-3 text-sm font-semibold shadow-sm">
               <input
                 type="checkbox"
                 checked={onlyOnline}
@@ -766,7 +766,7 @@ export function PretendenteProfilePage({ id }: { id?: string }) {
 
   return (
     <Shell>
-      <section className="relative overflow-hidden bg-[linear-gradient(135deg,#fffaf4,#f3d6c7_52%,#e9eef0)]">
+      <section className="relative overflow-hidden border-b border-neutral-200 bg-[linear-gradient(135deg,#ffffff,#f9fafb_55%,#f3f4f6)]">
         <div className="mx-auto max-w-7xl px-5 py-10 sm:px-6 lg:px-8">
           <Breadcrumbs items={["Pretendentes", profile.name]} />
           <div className="grid gap-8 lg:grid-cols-[auto_1fr] lg:items-end">
@@ -863,9 +863,9 @@ export function PretendenteProfilePage({ id }: { id?: string }) {
             <h2 className="text-2xl font-semibold">
               {profile.compatibilityPercent}% de compatibilidade
             </h2>
-            <div className="mt-4 h-3 overflow-hidden rounded-full bg-secondary">
+            <div className="mt-4 h-3 overflow-hidden rounded-full bg-neutral-100">
               <div
-                className="h-full rounded-full bg-primary"
+                className="h-full rounded-full bg-neutral-950"
                 style={{ width: `${profile.compatibilityPercent}%` }}
               />
             </div>
@@ -874,7 +874,10 @@ export function PretendenteProfilePage({ id }: { id?: string }) {
             <h2 className="text-2xl font-semibold">Presentes recebidos</h2>
             <div className="mt-4 grid gap-2">
               {profile.giftsReceived.map((gift) => (
-                <div key={gift} className="rounded-2xl bg-white/72 p-3 text-sm font-semibold">
+                <div
+                  key={gift}
+                  className="rounded-2xl border border-neutral-200 bg-white p-3 text-sm font-semibold shadow-sm"
+                >
                   {gift}
                 </div>
               ))}
@@ -918,7 +921,7 @@ function ProfileDetail({ profile, fields }: { profile: MockProfile; fields: stri
   return (
     <div className="grid gap-3 sm:grid-cols-2">
       {fields.map((field) => (
-        <div key={field} className="rounded-2xl bg-white/72 p-4">
+        <div key={field} className="rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm">
           <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">{field}</p>
           <p className="mt-1 font-semibold">{values[field]}</p>
         </div>
@@ -942,7 +945,7 @@ function ChipCloud({ items }: { items: string[] }) {
 export function PerfilPage() {
   return (
     <Shell>
-      <section className="bg-[linear-gradient(135deg,#fffaf4,#f0d6ca,#eaf2ee)]">
+      <section className="border-b border-neutral-200 bg-[linear-gradient(135deg,#ffffff,#f9fafb,#f3f4f6)]">
         <div className="mx-auto max-w-7xl px-5 py-10 sm:px-6 lg:px-8">
           <Breadcrumbs items={["Perfil"]} />
           <div className="grid gap-6 lg:grid-cols-[auto_1fr_auto] lg:items-center">
@@ -1018,7 +1021,7 @@ function MockForm({ fields }: { fields: string[] }) {
         <label key={field} className="grid gap-2 text-sm font-semibold">
           {field}
           <input
-            className="rounded-2xl border border-black/10 bg-white/80 px-4 py-3 outline-none focus:border-primary"
+            className="rounded-2xl border border-neutral-200 bg-white px-4 py-3 outline-none focus:border-neutral-950"
             placeholder={field}
           />
         </label>
@@ -1065,9 +1068,12 @@ function TransactionList() {
         "Missao diaria concluida",
         "Pacote de moedas",
       ].map((item, index) => (
-        <div key={item} className="flex items-center justify-between rounded-2xl bg-white/72 p-4">
+        <div
+          key={item}
+          className="flex items-center justify-between rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm"
+        >
           <span className="font-medium">{item}</span>
-          <span className={index === 2 ? "text-emerald-700" : "text-primary"}>
+          <span className={index === 2 ? "text-emerald-700" : "text-neutral-900"}>
             {index === 2 ? "+80" : index === 3 ? "+600" : "-120"}
           </span>
         </div>
@@ -1081,7 +1087,7 @@ function MissionGrid() {
     <div className="grid gap-4 md:grid-cols-3">
       {["Ler devocional", "Enviar mensagem", "Orar por alguem"].map((item) => (
         <GlassCard key={item} className="p-5">
-          <Trophy className="h-5 w-5 text-primary" />
+          <Trophy className="h-5 w-5 text-neutral-900" />
           <p className="mt-4 font-semibold">{item}</p>
           <p className="mt-2 text-sm text-muted-foreground">Recompensa visual: 40 moedas.</p>
         </GlassCard>
@@ -1254,7 +1260,10 @@ function InterestCards({
   return (
     <div className="grid gap-4 md:grid-cols-2">
       {cards.map((profile) => (
-        <div key={profile.id} className="rounded-2xl border border-black/5 bg-white/72 p-4">
+        <div
+          key={profile.id}
+          className="rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm"
+        >
           <div className="flex items-center gap-4">
             <ProfileAvatar profile={profile} size="md" />
             <div>
@@ -1294,7 +1303,7 @@ export function ConversasPage() {
               <a
                 key={conversation.id}
                 href={`/conversas/${conversation.id}`}
-                className="flex items-center gap-3 rounded-2xl bg-white/72 p-3 transition hover:bg-secondary"
+                className="flex items-center gap-3 rounded-2xl border border-neutral-200 bg-white p-3 transition hover:bg-neutral-100"
               >
                 <ProfileAvatar profile={conversation.person} size="sm" />
                 <div className="min-w-0 flex-1">
@@ -1302,7 +1311,7 @@ export function ConversasPage() {
                   <p className="truncate text-sm text-muted-foreground">{conversation.last}</p>
                 </div>
                 {conversation.unread ? (
-                  <span className="rounded-full bg-primary px-2 py-1 text-xs font-semibold text-white">
+                  <span className="rounded-full bg-neutral-950 px-2 py-1 text-xs font-semibold text-white">
                     {conversation.unread}
                   </span>
                 ) : null}
@@ -1377,7 +1386,7 @@ export function ComunidadePage() {
           </GlassCard>
           {posts.map((post) => (
             <GlassCard key={post.id} className="p-5">
-              <p className="text-sm font-semibold text-primary">{post.author}</p>
+              <p className="text-sm font-semibold text-neutral-900">{post.author}</p>
               <h2 className="mt-2 text-2xl font-semibold">{post.title}</h2>
               <p className="mt-3 leading-7 text-muted-foreground">{post.text}</p>
               <div className="mt-4 flex gap-3 text-sm text-muted-foreground">
@@ -1418,7 +1427,7 @@ export function OracoesPage() {
       <Section className="grid gap-4 md:grid-cols-3">
         {items.map((item) => (
           <GlassCard key={item.id} className="p-5">
-            <p className="text-sm font-semibold text-primary">{item.category}</p>
+            <p className="text-sm font-semibold text-neutral-900">{item.category}</p>
             <h2 className="mt-2 text-xl font-semibold">{item.name}</h2>
             <p className="mt-3 leading-7 text-muted-foreground">{item.text}</p>
             <button
@@ -1427,7 +1436,7 @@ export function OracoesPage() {
                   prev.map((row) => (row.id === item.id ? { ...row, count: row.count + 1 } : row)),
                 )
               }
-              className="mt-4 inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-2 text-sm font-semibold text-primary"
+              className="mt-4 inline-flex items-center gap-2 rounded-full border border-neutral-200 bg-neutral-100 px-4 py-2 text-sm font-semibold text-neutral-900"
             >
               <HeartHandshake className="h-4 w-4" />
               Estou orando ({item.count})
@@ -1450,7 +1459,7 @@ export function DevocionalPage() {
       />
       <Section className="grid gap-6 lg:grid-cols-[1fr_0.7fr]">
         <GlassCard className="p-6">
-          <p className="text-lg font-semibold text-primary">{devotionals[0].verse}</p>
+          <p className="text-lg font-semibold text-neutral-900">{devotionals[0].verse}</p>
           <p className="mt-5 text-xl leading-9 text-foreground/84">{devotionals[0].text}</p>
           <div className="mt-6 flex gap-3">
             <PrimaryButton
@@ -1489,7 +1498,7 @@ export function NoticiasPage() {
       <Section className="grid gap-5 md:grid-cols-3">
         {news.map((item, index) => (
           <GlassCard key={item.id} className={`p-5 ${index === 0 ? "md:col-span-2" : ""}`}>
-            <p className="text-sm font-semibold text-primary">
+            <p className="text-sm font-semibold text-neutral-900">
               {item.category} - {item.date}
             </p>
             <h2 className="mt-2 text-2xl font-semibold">{item.title}</h2>
@@ -1519,7 +1528,7 @@ export function RecadosPage() {
       <Section className="grid gap-4 md:grid-cols-3">
         {["Pendente", "Dica enviada", "Revelacao solicitada"].map((status, index) => (
           <GlassCard key={status} className="p-5">
-            <p className="text-sm font-semibold text-primary">{status}</p>
+            <p className="text-sm font-semibold text-neutral-900">{status}</p>
             <h2 className="mt-3 text-xl font-semibold">Alguem admirou seu perfil</h2>
             <p className="mt-3 text-muted-foreground">
               Mensagem respeitosa com intencao clara e opcao de revelar visualmente.
@@ -1568,8 +1577,11 @@ export function VerificacaoPage() {
               "Aguardar moderacao",
               "Receber badge",
             ].map((step, index) => (
-              <div key={step} className="flex items-center gap-3 rounded-2xl bg-white/72 p-4">
-                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 font-semibold text-primary">
+              <div
+                key={step}
+                className="flex items-center gap-3 rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm"
+              >
+                <span className="flex h-9 w-9 items-center justify-center rounded-full border border-neutral-200 bg-neutral-100 font-semibold text-neutral-900">
                   {index + 1}
                 </span>
                 <span className="font-medium">{step}</span>
@@ -1578,11 +1590,11 @@ export function VerificacaoPage() {
           </div>
         </GlassCard>
         <GlassCard className="p-6">
-          <Camera className="h-8 w-8 text-primary" />
+          <Camera className="h-8 w-8 text-neutral-900" />
           <p className="mt-4 text-xl font-semibold">Upload visual</p>
           <button
             onClick={() => toast.success("Foto anexada visualmente.")}
-            className="mt-4 w-full rounded-2xl border border-dashed border-primary/40 bg-primary/5 p-8 text-sm font-semibold text-primary"
+            className="mt-4 w-full rounded-2xl border border-dashed border-neutral-300 bg-neutral-50 p-8 text-sm font-semibold text-neutral-900 transition hover:bg-neutral-100"
           >
             Selecionar foto
           </button>
@@ -1703,7 +1715,7 @@ function SettingsGrid({ items }: { items: string[] }) {
       {items.map((item) => (
         <label
           key={item}
-          className="flex items-center justify-between rounded-2xl bg-white/72 p-4 font-medium"
+          className="flex items-center justify-between rounded-2xl border border-neutral-200 bg-white p-4 font-medium shadow-sm"
         >
           {item}
           <input type="checkbox" defaultChecked />
@@ -1717,12 +1729,12 @@ export function PropositoPage({ id }: { id?: string }) {
   const profile = getProfile(id);
   return (
     <Shell>
-      <section className="bg-[linear-gradient(135deg,#fffaf2,#f4dfb7,#f8eeee)]">
+      <section className="border-b border-neutral-200 bg-[linear-gradient(135deg,#ffffff,#f9fafb,#f3f4f6)]">
         <div className="mx-auto max-w-7xl px-5 py-12 sm:px-6 lg:px-8">
           <Breadcrumbs items={["Proposito Firmado", profile.name]} />
           <div className="grid gap-8 lg:grid-cols-[1fr_auto] lg:items-center">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-neutral-500">
                 Pagina do casal
               </p>
               <h1 className="mt-3 text-5xl font-semibold">
@@ -1735,7 +1747,7 @@ export function PropositoPage({ id }: { id?: string }) {
             </div>
             <div className="flex items-center">
               <ProfileAvatar profile={profiles[0]} size="xl" />
-              <HeartHandshake className="mx-4 h-8 w-8 text-primary" />
+              <HeartHandshake className="mx-4 h-8 w-8 text-neutral-900" />
               <ProfileAvatar profile={profile} size="xl" />
             </div>
           </div>
@@ -1760,7 +1772,10 @@ export function PropositoPage({ id }: { id?: string }) {
               "Capsula criada",
               "Presente recebido",
             ].map((item) => (
-              <div key={item} className="rounded-2xl bg-white/72 p-4 font-semibold">
+              <div
+                key={item}
+                className="rounded-2xl border border-neutral-200 bg-white p-4 font-semibold shadow-sm"
+              >
                 {item}
               </div>
             ))}
@@ -1817,7 +1832,7 @@ export function SuportePage() {
       <Section className="grid gap-4 md:grid-cols-3">
         {items.map((ticket) => (
           <GlassCard key={ticket.id} className="p-5">
-            <Ticket className="h-5 w-5 text-primary" />
+            <Ticket className="h-5 w-5 text-neutral-900" />
             <h2 className="mt-3 text-xl font-semibold">{ticket.title}</h2>
             <p className="mt-2 text-sm text-muted-foreground">
               {ticket.id} - {ticket.status} - {ticket.priority}
@@ -1980,13 +1995,13 @@ export function AdminVerificationPage({ title, kind }: { title: string; kind: st
             <GlassCard key={row.name} className="p-5">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <p className="text-sm font-semibold text-primary">{row.type}</p>
+                  <p className="text-sm font-semibold text-neutral-900">{row.type}</p>
                   <h2 className="text-2xl font-semibold">{row.name}</h2>
                   <p className="mt-2 text-muted-foreground">
                     Score mockado: {row.risk === "Baixo" ? "94" : "72"}%
                   </p>
                 </div>
-                <ShieldCheck className="h-6 w-6 text-primary" />
+                <ShieldCheck className="h-6 w-6 text-neutral-900" />
               </div>
               <div className="mt-5 flex gap-2">
                 <PrimaryButton
@@ -2057,7 +2072,7 @@ export function BlogPage() {
           "Esperar com sabedoria nao e passividade",
         ].map((title, index) => (
           <GlassCard key={title} className="p-5">
-            <p className="text-sm font-semibold text-primary">Artigo {index + 1}</p>
+            <p className="text-sm font-semibold text-neutral-900">Artigo {index + 1}</p>
             <h2 className="mt-3 text-2xl font-semibold">{title}</h2>
             <p className="mt-3 text-muted-foreground">
               Reflexao pratica para quem deseja viver uma jornada afetiva com fe, clareza e

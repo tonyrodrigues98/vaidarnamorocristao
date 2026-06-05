@@ -1,6 +1,6 @@
 export function Footer() {
   return (
-    <footer className="border-t border-black/5 bg-[#fdfbf7]/82">
+    <footer className="border-t border-neutral-200 bg-white">
       <div className="mx-auto grid max-w-7xl gap-5 px-5 py-8 text-sm text-muted-foreground sm:px-6 lg:grid-cols-[1fr_auto] lg:px-8">
         <div>
           <p className="font-semibold text-foreground">VaiDarNamoro Cristao</p>
