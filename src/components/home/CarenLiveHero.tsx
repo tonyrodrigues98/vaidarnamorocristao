@@ -133,7 +133,7 @@ function LiveTopNav() {
 function TikTokLiveButton() {
   return (
     <div className="lg:ml-auto">
-      <p className="mb-2 text-center text-[11px] font-bold uppercase tracking-[0.22em] text-white/50 lg:text-right">
+      <p className="mb-2 text-center text-[11px] font-bold uppercase tracking-[0.22em] text-white/85 lg:text-right">
         Acompanhe no TikTok
       </p>
       <Button
