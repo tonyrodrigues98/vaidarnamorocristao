@@ -758,7 +758,7 @@ function Chat() {
                         <DecoratedAvatar
                           photoUrl={item.partner.photo_url}
                           fallback={item.partner.full_name?.charAt(0) ?? "?"}
-                          size={44}
+                          size={36}
                           frameId={item.partner.equipped_frame_id ?? null}
                           auraId={item.partner.equipped_aura_id ?? null}
                         />
