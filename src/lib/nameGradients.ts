@@ -24,7 +24,6 @@ export function nameGradientStyle(gradient: Pick<NameGradient, "color_a" | "colo
     WebkitTextFillColor: "transparent",
     fontWeight: 900,
     letterSpacing: "-0.035em",
-    filter: `drop-shadow(0.018em 0 0 ${gradient.color_a}) drop-shadow(-0.012em 0 0 ${gradient.color_b})`,
   } as const;
 }
 
