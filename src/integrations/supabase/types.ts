@@ -1838,6 +1838,42 @@ export type Database = {
           },
         ]
       }
+      push_queue: {
+        Row: {
+          attempts: number
+          body: string | null
+          created_at: string
+          id: string
+          last_error: string | null
+          processed_at: string | null
+          title: string
+          url: string | null
+          user_id: string
+        }
+        Insert: {
+          attempts?: number
+          body?: string | null
+          created_at?: string
+          id?: string
+          last_error?: string | null
+          processed_at?: string | null
+          title: string
+          url?: string | null
+          user_id: string
+        }
+        Update: {
+          attempts?: number
+          body?: string | null
+          created_at?: string
+          id?: string
+          last_error?: string | null
+          processed_at?: string | null
+          title?: string
+          url?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       push_subscriptions: {
         Row: {
           auth: string
