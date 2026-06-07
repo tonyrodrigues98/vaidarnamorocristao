@@ -405,9 +405,16 @@
       height: var(--app-visual-height, 100dvh);
       min-height: 0;
       overflow: hidden;
+      width: 100%;
+      max-width: 100vw;
     }
     .mobile-chat-composer {
       flex-shrink: 0;
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+    .mobile-chat-scroll {
+      width: 100%;
+      max-width: 100vw;
     }
     .mobile-chat-screen-with-nav {
       height: calc(100dvh - var(--mobile-bottom-nav-height) - env(safe-area-inset-bottom));

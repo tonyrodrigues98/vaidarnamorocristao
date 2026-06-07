@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { subscribePush, unsubscribePush } from "@/lib/push.functions";
+import { VAPID_PUBLIC_KEY } from "@/lib/pushVapid";
 
 type PushStatus =
   | "checking"
@@ -7,11 +9,6 @@ type PushStatus =
   | "denied"
   | "enabled"
   | "setup-needed";
-
-const VAPID_PUBLIC_KEY = import.meta.env.VITE_WEB_PUSH_PUBLIC_KEY as string | undefined;
-const PUSH_SUBSCRIPTION_ENDPOINT = import.meta.env.VITE_PUSH_SUBSCRIPTION_ENDPOINT as
-  | string
-  | undefined;
 
 function hasPushSupport() {
   return (
@@ -41,16 +38,25 @@ async function getExistingSubscription() {
 }
 
 async function saveSubscription(subscription: PushSubscription) {
-  if (!PUSH_SUBSCRIPTION_ENDPOINT) return false;
-
-  const response = await fetch(PUSH_SUBSCRIPTION_ENDPOINT, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-    body: JSON.stringify(subscription.toJSON()),
-  });
-
-  return response.ok;
+  const json = subscription.toJSON();
+  const endpoint = json.endpoint;
+  const p256dh = json.keys?.p256dh;
+  const auth = json.keys?.auth;
+  if (!endpoint || !p256dh || !auth) return false;
+  try {
+    await subscribePush({
+      data: {
+        endpoint,
+        p256dh,
+        auth,
+        user_agent: typeof navigator !== "undefined" ? navigator.userAgent : null,
+      },
+    });
+    return true;
+  } catch (err) {
+    console.error("[push] subscribe failed", err);
+    return false;
+  }
 }
 
 export function usePushNotifications() {
@@ -103,7 +109,7 @@ export function usePushNotifications() {
         return;
       }
 
-      if (!VAPID_PUBLIC_KEY || !PUSH_SUBSCRIPTION_ENDPOINT) {
+      if (!VAPID_PUBLIC_KEY) {
         setStatus("setup-needed");
         return;
       }
@@ -124,6 +130,27 @@ export function usePushNotifications() {
     }
   }, []);
 
+  const disable = useCallback(async () => {
+    if (!hasPushSupport()) return;
+    setBusy(true);
+    try {
+      const registration = await navigator.serviceWorker.ready;
+      const existing = await registration.pushManager.getSubscription();
+      if (existing) {
+        const endpoint = existing.endpoint;
+        await existing.unsubscribe();
+        try {
+          await unsubscribePush({ data: { endpoint } });
+        } catch (err) {
+          console.error("[push] server unsubscribe failed", err);
+        }
+      }
+      setStatus(Notification.permission === "granted" ? "setup-needed" : "needs-permission");
+    } finally {
+      setBusy(false);
+    }
+  }, []);
+
   return useMemo(
     () => ({
       status,
@@ -133,7 +160,8 @@ export function usePushNotifications() {
       isEnabled: status === "enabled",
       needsBackendSetup: status === "setup-needed",
       enable,
+      disable,
     }),
-    [busy, enable, permission, status],
+    [busy, disable, enable, permission, status],
   );
 }
