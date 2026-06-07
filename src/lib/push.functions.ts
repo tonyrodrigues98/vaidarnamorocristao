@@ -60,3 +60,15 @@ export const unsubscribePush = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+export const sendTestPush = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { sendPushToUser } = await import("@/lib/pushDispatch.server");
+    const results = await sendPushToUser(context.userId, {
+      title: "VaiDarNamoro",
+      body: "Notificação de teste — está funcionando! 🎉",
+      url: "/notificacoes",
+    });
+    return { results };
+  });
