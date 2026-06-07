@@ -1,7 +1,10 @@
-import { Bell, BellRing, CheckCircle2, ShieldAlert } from "lucide-react";
+import { Bell, BellRing, CheckCircle2, ShieldAlert, Send } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
+import { sendTestPush } from "@/lib/push.functions";
 
 export function EnableNotificationsCard() {
   const { busy, enable, isEnabled, isSupported, needsBackendSetup, permission, status } =
@@ -10,6 +13,27 @@ export function EnableNotificationsCard() {
   if (!isSupported) return null;
 
   const denied = permission === "denied" || status === "denied";
+  const [testing, setTesting] = useState(false);
+
+  const handleTest = async () => {
+    setTesting(true);
+    try {
+      const { results } = await sendTestPush();
+      const ok = results.filter((r) => r.ok).length;
+      const fail = results.length - ok;
+      if (results.length === 0) {
+        toast.error("Nenhum dispositivo inscrito para este usuário.");
+      } else if (fail === 0) {
+        toast.success(`Push enviado para ${ok} dispositivo(s).`);
+      } else {
+        toast.warning(`Enviado para ${ok}, falhou em ${fail}.`);
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Falha ao enviar push.");
+    } finally {
+      setTesting(false);
+    }
+  };
 
   return (
     <section className="mobile-app-card mb-5 p-4 sm:p-5">
@@ -51,6 +75,19 @@ export function EnableNotificationsCard() {
           >
             <Bell className="h-4 w-4" />
             <span className="hidden sm:inline">{busy ? "Ativando..." : "Ativar"}</span>
+          </Button>
+        )}
+        {isEnabled && (
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={handleTest}
+            disabled={testing}
+            className="shrink-0 rounded-full"
+          >
+            <Send className="h-4 w-4" />
+            <span className="hidden sm:inline">{testing ? "Enviando..." : "Testar"}</span>
           </Button>
         )}
       </div>
