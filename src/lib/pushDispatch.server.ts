@@ -47,9 +47,20 @@ async function hkdf(
   info: Uint8Array,
   length: number,
 ): Promise<Uint8Array> {
-  const baseKey = await crypto.subtle.importKey("raw", ikm, "HKDF", false, ["deriveBits"]);
+  const baseKey = await crypto.subtle.importKey(
+    "raw",
+    ikm as unknown as BufferSource,
+    "HKDF",
+    false,
+    ["deriveBits"],
+  );
   const bits = await crypto.subtle.deriveBits(
-    { name: "HKDF", hash: "SHA-256", salt, info },
+    {
+      name: "HKDF",
+      hash: "SHA-256",
+      salt: salt as unknown as BufferSource,
+      info: info as unknown as BufferSource,
+    },
     baseKey,
     length * 8,
   );
@@ -119,7 +130,7 @@ async function signVapidJwt(endpoint: string): Promise<string> {
   const sig = await crypto.subtle.sign(
     { name: "ECDSA", hash: "SHA-256" },
     key,
-    enc.encode(signingInput),
+    enc.encode(signingInput) as unknown as BufferSource,
   );
   return `${signingInput}.${bytesToB64Url(ecdsaDerToJose(new Uint8Array(sig)))}`;
 }
@@ -144,7 +155,7 @@ async function encryptPayload(
 
   const uaKey = await crypto.subtle.importKey(
     "raw",
-    uaPublicKey,
+    uaPublicKey as unknown as BufferSource,
     { name: "ECDH", namedCurve: "P-256" },
     false,
     [],
@@ -179,7 +190,11 @@ async function encryptPayload(
     "encrypt",
   ]);
   const ciphertext = new Uint8Array(
-    await crypto.subtle.encrypt({ name: "AES-GCM", iv: nonce }, cekKey, plaintext),
+    await crypto.subtle.encrypt(
+      { name: "AES-GCM", iv: nonce as unknown as BufferSource },
+      cekKey,
+      plaintext as unknown as BufferSource,
+    ),
   );
 
   // Header: salt(16) || rs(4, big-endian = 4096) || idlen(1) || keyid(idlen)
@@ -217,7 +232,7 @@ export async function sendPushToSubscription(
         TTL: "2419200",
         Urgency: "normal",
       },
-      body,
+      body: body as unknown as BodyInit,
     });
 
     const removed = res.status === 404 || res.status === 410;
