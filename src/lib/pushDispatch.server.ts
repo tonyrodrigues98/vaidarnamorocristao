@@ -186,9 +186,13 @@ async function encryptPayload(
 
   // Plaintext padded: payload || 0x02 (last record delimiter).
   const plaintext = concat(payload, new Uint8Array([0x02]));
-  const cekKey = await crypto.subtle.importKey("raw", cek, { name: "AES-GCM" }, false, [
-    "encrypt",
-  ]);
+  const cekKey = await crypto.subtle.importKey(
+    "raw",
+    cek as unknown as BufferSource,
+    { name: "AES-GCM" },
+    false,
+    ["encrypt"],
+  );
   const ciphertext = new Uint8Array(
     await crypto.subtle.encrypt(
       { name: "AES-GCM", iv: nonce as unknown as BufferSource },
