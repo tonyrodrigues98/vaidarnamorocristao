@@ -57,7 +57,6 @@ async function processBatch() {
       ),
     );
     const anyOk = results.some((r) => r.ok);
-    const allFatal = results.every((r) => !r.ok && !r.removed === false ? false : !r.ok);
     for (const r of results) {
       if (r.ok) sent++;
       if (r.removed) toRemoveEndpoints.add(r.endpoint);

@@ -59,6 +59,7 @@ import { Route as AdminFundosRouteImport } from './routes/admin/fundos'
 import { Route as AdminFotosRouteImport } from './routes/admin/fotos'
 import { Route as AdminEquipeLiveRouteImport } from './routes/admin/equipe-live'
 import { Route as AdminAurasRouteImport } from './routes/admin/auras'
+import { Route as ApiPublicHooksPushDispatchRouteImport } from './routes/api/public/hooks/push-dispatch'
 
 const VerificacaoRoute = VerificacaoRouteImport.update({
   id: '/verificacao',
@@ -310,6 +311,12 @@ const AdminAurasRoute = AdminAurasRouteImport.update({
   path: '/admin/auras',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicHooksPushDispatchRoute =
+  ApiPublicHooksPushDispatchRouteImport.update({
+    id: '/api/public/hooks/push-dispatch',
+    path: '/api/public/hooks/push-dispatch',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -362,6 +369,7 @@ export interface FileRoutesByFullPath {
   '/presentes/': typeof PresentesIndexRoute
   '/pretendentes/': typeof PretendentesIndexRoute
   '/suporte/': typeof SuporteIndexRoute
+  '/api/public/hooks/push-dispatch': typeof ApiPublicHooksPushDispatchRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -414,6 +422,7 @@ export interface FileRoutesByTo {
   '/presentes': typeof PresentesIndexRoute
   '/pretendentes': typeof PretendentesIndexRoute
   '/suporte': typeof SuporteIndexRoute
+  '/api/public/hooks/push-dispatch': typeof ApiPublicHooksPushDispatchRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -467,6 +476,7 @@ export interface FileRoutesById {
   '/presentes/': typeof PresentesIndexRoute
   '/pretendentes/': typeof PretendentesIndexRoute
   '/suporte/': typeof SuporteIndexRoute
+  '/api/public/hooks/push-dispatch': typeof ApiPublicHooksPushDispatchRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -521,6 +531,7 @@ export interface FileRouteTypes {
     | '/presentes/'
     | '/pretendentes/'
     | '/suporte/'
+    | '/api/public/hooks/push-dispatch'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -573,6 +584,7 @@ export interface FileRouteTypes {
     | '/presentes'
     | '/pretendentes'
     | '/suporte'
+    | '/api/public/hooks/push-dispatch'
   id:
     | '__root__'
     | '/'
@@ -625,6 +637,7 @@ export interface FileRouteTypes {
     | '/presentes/'
     | '/pretendentes/'
     | '/suporte/'
+    | '/api/public/hooks/push-dispatch'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -678,6 +691,7 @@ export interface RootRouteChildren {
   PresentesIndexRoute: typeof PresentesIndexRoute
   PretendentesIndexRoute: typeof PretendentesIndexRoute
   SuporteIndexRoute: typeof SuporteIndexRoute
+  ApiPublicHooksPushDispatchRoute: typeof ApiPublicHooksPushDispatchRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1032,6 +1046,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAurasRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/push-dispatch': {
+      id: '/api/public/hooks/push-dispatch'
+      path: '/api/public/hooks/push-dispatch'
+      fullPath: '/api/public/hooks/push-dispatch'
+      preLoaderRoute: typeof ApiPublicHooksPushDispatchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -1086,6 +1107,7 @@ const rootRouteChildren: RootRouteChildren = {
   PresentesIndexRoute: PresentesIndexRoute,
   PretendentesIndexRoute: PretendentesIndexRoute,
   SuporteIndexRoute: SuporteIndexRoute,
+  ApiPublicHooksPushDispatchRoute: ApiPublicHooksPushDispatchRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
