@@ -1,97 +1,53 @@
-## Sistema de Presentes Virtuais
+# Plano
 
-Feature grande. Vou implementar em camadas: backend → admin → loja `/presentes` → perfil → notificações.
+## 1. Componente compartilhado `MobileChatScreen`
 
-### 1. Backend (migration única)
+Criar `src/components/mobile/MobileChatScreen.tsx` com a casca usada hoje nas duas páginas:
 
-**Tabelas novas:**
+- Wrapper `mobile-chat-screen` (flex coluna, altura `--app-visual-height`).
+- Slot `header` (Header global + barra do chat).
+- Slot `pinned` opcional (mensagens fixadas / progresso de propósito).
+- Slot `messages` — área rolável única (`mobile-chat-scroll`, `flex-1 min-h-0 overflow-y-auto w-full`).
+- Slot `composer` — colado ao rodapé via `mobile-chat-composer`.
+- `ref` para o scroll exposto via `forwardRef` para auto-scroll ao chegar mensagem nova.
 
-- `virtual_gifts` — catálogo (id, name, slug, image_url, price_coins, category, rarity, active, sort_order)
-- `gift_transactions` — envios (id, sender_id, receiver_id, gift_id, price_paid, message, status: held|redeemed, created_at, redeemed_at, redeemed_coins)
+Refatorar:
 
-**Enums:** `gift_category` (romantic, spiritual, caring, friendship, fun, legendary), `gift_rarity` (common, rare, epic, legendary, exclusive)
+- `src/routes/comunidade.tsx` → usar `MobileChatScreen` (remove a `glass` wrapper com `max-w-3xl` que limita largura; força full-width no mobile, mantém `max-w-3xl` só no desktop via prop).
+- `src/routes/conversas/$matchId.tsx` → usar o mesmo componente.
 
-**Funções RPC (SECURITY DEFINER):**
+Sem mexer em lógica (envio, realtime, stickers, flags, edição). Só a casca de layout.
 
-- `send_virtual_gift(_receiver_id, _gift_id, _message)` — debita moedas, cria transação, envia notificação, loga `coin_transactions`
-- `redeem_virtual_gift(_tx_id)` — devolve 30% das moedas (arredondado, mínimo 1), marca `redeemed`
-- `get_received_gifts(_user_id)` — lista para perfil próprio/público (limita públicos a held)
+## 2. Fallback de altura via VisualViewport
 
-**RLS:**
+Ampliar o effect já em `MobileAppShell`:
 
-- `virtual_gifts`: SELECT público para `active=true`; ALL para admins
-- `gift_transactions`: SELECT para sender/receiver; INSERT/UPDATE só via RPC
+- Manter `--app-visual-height` em sync com `visualViewport.height`.
+- Adicionar fallback: quando `visualViewport` é indisponível, escutar `window.resize` + `orientationchange` e usar `window.innerHeight`.
+- Forçar reflow ao `focusin`/`focusout` de inputs dentro de telas de chat (iOS às vezes não dispara `resize`).
+- Em `styles.css`, garantir que `.mobile-chat-screen`, `.mobile-chat-composer` e o wrapper de scroll usem `height: var(--app-visual-height, 100dvh)` consistentemente e que não exista padding extra abaixo do composer.
 
-**Storage bucket:** `gift-images` público (SELECT all, INSERT/UPDATE admins)
+## 3. Endpoint Web Push
 
-### 2. Catálogo inicial
+Backend:
 
-Seed ~18 presentes cobrindo as 6 categorias com emojis/placeholders (Rosa Encantada, Coração de Cristal, Oração, Café, etc.). Imagens via geração ou emoji renderizado.
+- Migração: criar `public.push_subscriptions` (`user_id`, `endpoint UNIQUE`, `p256dh`, `auth`, `user_agent`, timestamps) com RLS (usuário só vê/manipula as próprias; service_role total) e GRANTs.
 
-### 3. Rota `/presentes`
+Server function (autenticada):
 
-`src/routes/presentes/index.tsx` — fora da loja, identidade própria:
+- `src/lib/push.functions.ts` com `subscribePush` e `unsubscribePush` usando `requireSupabaseAuth`.
+- `usePushNotifications` chama essas serverFns no lugar de `VITE_PUSH_SUBSCRIPTION_ENDPOINT`.
 
-- Header 220px gradiente `#FF5FA2 → #FF7BC3 → #A855F7 → #6D5BFF`, blur orbs flutuantes, partículas CSS
-- Card saldo glassmorphism + botão "Ver Extrato" → `/loja?tab=saldo`
-- Filtros por categoria (chips com ícones lucide)
-- Grid 2/3/4 colunas
-- `GiftCard` com glow por raridade (border + box-shadow coloridos), hover scale, badge raridade
-- `SendGiftModal` — escolhe pretendente (autocomplete pretendentes aprovados) ou recebe `?to=<id>`, campo mensagem 120 chars, confirma
-- `GiftSendAnimation` — overlay com presente subindo + partículas (CSS keyframes)
+Chaves VAPID:
 
-### 4. Integração perfil
+- `VITE_WEB_PUSH_PUBLIC_KEY` (publishable, vai no `.env`/secret) + `WEB_PUSH_PRIVATE_KEY` + `WEB_PUSH_SUBJECT` (secrets do servidor).
+- Sem dispatcher de push agora (só persistência da subscription). Envio real ficará para um próximo passo, pois exige biblioteca `web-push` compatível com Workers (avaliar `@negrel/webpush` ou chamada HTTP direta ao FCM/Apple).
 
-- Nova aba "Presentes" em `/perfil` (junto com Sobre, Preferências, Saldo, etc.) — grid de recebidos com ações Guardar/Resgatar
-- Seção "🎁 Destaques" em `/pretendentes/$id` — carrossel horizontal últimos 6 presentes held
-- Botão "Enviar Presente" no perfil público → `/presentes?to=<id>`
+## Fora do escopo
 
-### 5. Admin
+- Reescrever lógica de mensagens/stickers/flags.
+- Implementar o dispatcher de push notifications (envio real). Só persistência da subscription neste turno.
 
-`src/routes/admin/presentes.tsx` (super_admin only) — CRUD: nome, preço, imagem (upload), categoria, raridade, ativo. Lista com toggle.
+## Pergunta
 
-### 6. Notificações
-
-Notification type `gift_received` já cabe no schema existente (`create_notification`). Link `/perfil?tab=presentes`.
-
-### 7. Tokens visuais
-
-Adicionar em `src/styles.css`:
-
-- `--gift-gradient`, `--rarity-common/rare/epic/legendary/exclusive` (cores + glow shadows)
-- Keyframes `gift-float`, `gift-sparkle`, `gift-rise`
-
----
-
-### Arquivos a criar/editar
-
-**Backend (migration):**
-
-- `supabase/migrations/<ts>_virtual_gifts.sql`
-- `supabase/migrations/<ts>_seed_gifts.sql` (ou via insert tool após primeira migration)
-
-**Frontend novo:**
-
-- `src/routes/presentes/index.tsx`
-- `src/routes/admin/presentes.tsx`
-- `src/components/gifts/GiftCard.tsx`
-- `src/components/gifts/SendGiftModal.tsx`
-- `src/components/gifts/GiftSendAnimation.tsx`
-- `src/components/gifts/CategoryFilter.tsx`
-- `src/components/gifts/ReceivedGiftsGrid.tsx` (aba perfil)
-- `src/components/gifts/GiftHighlights.tsx` (carrossel perfil público)
-- `src/lib/gifts.ts` (RPC wrappers)
-
-**Frontend editado:**
-
-- `src/routes/perfil.tsx` (adicionar aba)
-- `src/routes/pretendentes/$id.tsx` (seção destaques + botão enviar)
-- `src/routes/admin/index.tsx` (link menu)
-- `src/styles.css` (tokens raridade + keyframes)
-
-### Notas
-
-- Tipos do Supabase regeneram automaticamente após a migration; usaremos `as never` temporariamente nos casts onde necessário, como em `coinTx.ts`
-- Imagens dos presentes: uso emojis grandes renderizados sobre fundo gradiente como fallback (não bloqueia entrega); admin pode trocar depois
-- Resgate: 30% (configurável) — segue regra "sink de moedas"
-- Mobile-first: testar viewport 393px (atual do user)
+Para o Web Push você já tem um par de chaves VAPID gerado? Se não, gero localmente e te passo as três variáveis (`VITE_WEB_PUSH_PUBLIC_KEY`, `WEB_PUSH_PRIVATE_KEY`, `WEB_PUSH_SUBJECT` — o subject é um `mailto:` ou URL de contato).

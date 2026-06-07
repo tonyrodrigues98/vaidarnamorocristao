@@ -59,18 +59,41 @@ export function MobileAppShell({ children }: { children: React.ReactNode }) {
     const root = document.documentElement;
     const viewport = window.visualViewport;
     const setChatHeight = () => {
-      root.style.setProperty("--app-visual-height", `${viewport?.height ?? window.innerHeight}px`);
+      const height = viewport?.height ?? window.innerHeight;
+      root.style.setProperty("--app-visual-height", `${height}px`);
     };
 
     setChatHeight();
+    // Schedule a few extra reads after focus changes — iOS Safari does not
+    // always fire `resize` immediately when the keyboard opens/closes.
+    const scheduleReads = () => {
+      setChatHeight();
+      requestAnimationFrame(setChatHeight);
+      window.setTimeout(setChatHeight, 100);
+      window.setTimeout(setChatHeight, 350);
+    };
+    const onFocusIn = (event: FocusEvent) => {
+      const target = event.target as HTMLElement | null;
+      if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA")) {
+        scheduleReads();
+      }
+    };
+    const onFocusOut = () => scheduleReads();
+
     viewport?.addEventListener("resize", setChatHeight);
     viewport?.addEventListener("scroll", setChatHeight);
     window.addEventListener("resize", setChatHeight);
+    window.addEventListener("orientationchange", scheduleReads);
+    document.addEventListener("focusin", onFocusIn);
+    document.addEventListener("focusout", onFocusOut);
 
     return () => {
       viewport?.removeEventListener("resize", setChatHeight);
       viewport?.removeEventListener("scroll", setChatHeight);
       window.removeEventListener("resize", setChatHeight);
+      window.removeEventListener("orientationchange", scheduleReads);
+      document.removeEventListener("focusin", onFocusIn);
+      document.removeEventListener("focusout", onFocusOut);
       root.style.removeProperty("--app-visual-height");
     };
   }, [isChatScreen]);
