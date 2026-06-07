@@ -161,6 +161,7 @@ function RootComponent() {
   const location = useLocation();
   const showFooter = shouldShowFooter(location.pathname);
   const isChatRoute = location.pathname === "/comunidade" || location.pathname.startsWith("/conversas/");
+  const isHome = location.pathname === "/";
 
   return (
     <ThemeProvider>
@@ -169,6 +170,9 @@ function RootComponent() {
           <NotificationsBridge />
           <BanGuard />
           <MobileAppShell>
+            {isHome ? (
+              <Outlet />
+            ) : (
             <div
               className={
                 isChatRoute
@@ -180,7 +184,7 @@ function RootComponent() {
                 <Outlet />
               </div>
               {showFooter && (
-                <footer className="mt-8 border-t border-border/50 bg-background/60 py-4">
+                <footer className="mt-8 border-t border-border/40 bg-card/60 py-4 text-muted-foreground">
                   <div className="mx-auto flex max-w-7xl items-center justify-end gap-4 px-4 text-xs text-muted-foreground">
                     <Link to="/termos" className="hover:text-[var(--rose)] hover:underline">
                       Termos e Condições
@@ -196,6 +200,7 @@ function RootComponent() {
                 </footer>
               )}
             </div>
+            )}
           </MobileAppShell>
           <TermsGate />
         </PresenceProvider>
