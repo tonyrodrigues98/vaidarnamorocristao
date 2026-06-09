@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { subscribePush, unsubscribePush } from "@/lib/push.functions";
 import { VAPID_PUBLIC_KEY } from "@/lib/pushVapid";
+import { registerAppServiceWorker } from "@/lib/registerSW";
 
 type PushStatus =
   | "checking"
@@ -33,6 +34,7 @@ function urlBase64ToUint8Array(base64String: string) {
 }
 
 async function getExistingSubscription() {
+  await registerAppServiceWorker();
   const registration = await navigator.serviceWorker.ready;
   return registration.pushManager.getSubscription();
 }
@@ -114,6 +116,7 @@ export function usePushNotifications() {
         return;
       }
 
+      await registerAppServiceWorker();
       const registration = await navigator.serviceWorker.ready;
       const existing = await registration.pushManager.getSubscription();
       const subscription =
@@ -134,6 +137,7 @@ export function usePushNotifications() {
     if (!hasPushSupport()) return;
     setBusy(true);
     try {
+      await registerAppServiceWorker();
       const registration = await navigator.serviceWorker.ready;
       const existing = await registration.pushManager.getSubscription();
       if (existing) {

@@ -18,6 +18,8 @@ import { MobileAppShell } from "@/components/mobile/MobileAppShell";
 
 import appCss from "../styles.css?url";
 import coinPng from "@/assets/coin.webp";
+import { useEffect } from "react";
+import { registerAppServiceWorker } from "@/lib/registerSW";
 
 function NotFoundComponent() {
   return (
@@ -162,6 +164,10 @@ function RootComponent() {
   const showFooter = shouldShowFooter(location.pathname);
   const isChatRoute = location.pathname === "/comunidade" || location.pathname.startsWith("/conversas/");
   const isHome = location.pathname === "/";
+
+  useEffect(() => {
+    registerAppServiceWorker();
+  }, []);
 
   return (
     <ThemeProvider>
