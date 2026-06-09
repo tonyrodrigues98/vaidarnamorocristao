@@ -48,7 +48,11 @@ export function EnableNotificationsCard() {
       } else if (fail === 0) {
         toast.success(`Push enviado para ${ok} dispositivo(s).`);
       } else {
-        toast.warning(`Enviado para ${ok}, falhou em ${fail}.`);
+        const first = results.find((r) => !r.ok);
+        const detail = first
+          ? `[${first.status || "?"}] ${first.error || "erro desconhecido"}`
+          : "erro desconhecido";
+        toast.warning(`Falhou em ${fail}/${results.length}: ${detail}`, { duration: 12000 });
       }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Falha ao enviar push.");
