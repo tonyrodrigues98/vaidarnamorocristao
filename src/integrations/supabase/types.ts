@@ -2829,6 +2829,10 @@ export type Database = {
         Returns: string
       }
       current_terms_version: { Args: never; Returns: string }
+      enqueue_push_for_shop_item: {
+        Args: { p_emoji: string; p_label: string; p_name: string }
+        Returns: undefined
+      }
       equip_decoration: { Args: { _decoration_id: string }; Returns: Json }
       equip_name_gradient: { Args: { _gradient_id: string }; Returns: Json }
       equip_profile_background: {
