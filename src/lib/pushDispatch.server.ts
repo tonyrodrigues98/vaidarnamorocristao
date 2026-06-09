@@ -25,43 +25,46 @@ export async function sendPushToSubscription(
   sub: Subscription,
   payload: PushPayload,
 ): Promise<SendResult> {
-  try {
-    const jwt = await signVapidJwt(sub.endpoint);
-    const payloadBytes = new TextEncoder().encode(JSON.stringify(payload));
-    const uaPublicKey = b64UrlToBytes(sub.p256dh);
-    const authSecret = b64UrlToBytes(sub.auth);
-    const { body } = await encryptPayload(payloadBytes, uaPublicKey, authSecret);
+  const pushSubscription: PushSubscription = {
+    endpoint: sub.endpoint,
+    keys: {
+      p256dh: sub.p256dh,
+      auth: sub.auth,
+    },
+  };
 
-    const res = await fetch(sub.endpoint, {
-      method: "POST",
-      headers: {
-        Authorization: `vapid t=${jwt}, k=${VAPID_PUBLIC_KEY}`,
-        "Content-Type": "application/octet-stream",
-        "Content-Encoding": "aes128gcm",
-        TTL: "2419200",
-        Urgency: "normal",
+  try {
+    const privateKey = process.env.WEB_PUSH_PRIVATE_KEY;
+    const subject = process.env.WEB_PUSH_SUBJECT || "mailto:contato@vaidarnamoro.com";
+    if (!privateKey) throw new Error("WEB_PUSH_PRIVATE_KEY missing");
+
+    const result = await sendNotification(pushSubscription, JSON.stringify(payload), {
+      TTL: 60 * 60 * 24 * 28,
+      urgency: "high",
+      vapidDetails: {
+        subject,
+        publicKey: VAPID_PUBLIC_KEY,
+        privateKey,
       },
-      body: body as unknown as BodyInit,
     });
 
-    const removed = res.status === 404 || res.status === 410;
-    if (!res.ok) {
-      const text = await res.text().catch(() => "");
-      return {
-        endpoint: sub.endpoint,
-        ok: false,
-        status: res.status,
-        removed,
-        error: text.slice(0, 300),
-      };
-    }
-    return { endpoint: sub.endpoint, ok: true, status: res.status };
+    return { endpoint: sub.endpoint, ok: true, status: result.statusCode };
   } catch (err) {
+    const status = err instanceof WebPushError ? err.statusCode : 0;
+    const removed = status === 404 || status === 410;
+    const error =
+      err instanceof WebPushError
+        ? `${err.message}${err.body ? `: ${err.body}` : ""}`
+        : err instanceof Error
+          ? err.message
+          : String(err);
+
     return {
       endpoint: sub.endpoint,
       ok: false,
-      status: 0,
-      error: err instanceof Error ? err.message : String(err),
+      status,
+      removed,
+      error: error.slice(0, 300),
     };
   }
 }
