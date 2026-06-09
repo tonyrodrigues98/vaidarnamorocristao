@@ -1,6 +1,7 @@
 import { Link, useLocation } from "@tanstack/react-router";
 import { BookOpen, Heart, Home, User, Users } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 
 import { PhotoImg } from "@/components/PhotoImg";
 import { supabase } from "@/integrations/supabase/client";
@@ -36,6 +37,11 @@ export function MobileBottomNav() {
   const { user } = useAuth();
   const location = useLocation();
   const [profile, setProfile] = useState<NavProfile | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (!user) {
@@ -72,7 +78,7 @@ export function MobileBottomNav() {
     );
   }, [profile?.full_name, user?.email]);
 
-  return (
+  const nav = (
     <nav
       aria-label="Navegacao principal mobile"
       className="fixed inset-x-0 bottom-0 z-50 md:hidden"
@@ -137,4 +143,7 @@ export function MobileBottomNav() {
       </div>
     </nav>
   );
+
+  if (!mounted || typeof document === "undefined") return null;
+  return createPortal(nav, document.body);
 }
