@@ -71,21 +71,6 @@ export function EnableNotificationsCard() {
           className="mt-1 shrink-0"
         />
       </div>
-      {isEnabled && (
-        <div className="mt-3 flex justify-end">
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            onClick={handleTest}
-            disabled={testing}
-            className="rounded-full"
-          >
-            <Send className="mr-1 h-4 w-4" />
-            {testing ? "Enviando..." : "Enviar teste"}
-          </Button>
-        </div>
-      )}
     </section>
   );
 }
