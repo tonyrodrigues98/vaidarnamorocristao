@@ -1,17 +1,13 @@
-import { BellRing, CheckCircle2, ShieldAlert, Send } from "lucide-react";
-import { useState } from "react";
+import { BellRing, CheckCircle2, ShieldAlert } from "lucide-react";
 import { toast } from "sonner";
 
-import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
-import { sendTestPush } from "@/lib/push.functions";
 
 export function EnableNotificationsCard() {
   // IMPORTANT: all hooks must run unconditionally — never put hooks after an early return.
   const { busy, enable, disable, isEnabled, isSupported, needsBackendSetup, permission, status } =
     usePushNotifications();
-  const [testing, setTesting] = useState(false);
 
   if (!isSupported) return null;
 
@@ -34,30 +30,6 @@ export function EnableNotificationsCard() {
       }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Não foi possível alterar as notificações.");
-    }
-  };
-
-  const handleTest = async () => {
-    setTesting(true);
-    try {
-      const { results } = await sendTestPush();
-      const ok = results.filter((r) => r.ok).length;
-      const fail = results.length - ok;
-      if (results.length === 0) {
-        toast.error("Nenhum dispositivo inscrito para este usuário.");
-      } else if (fail === 0) {
-        toast.success(`Push enviado para ${ok} dispositivo(s).`);
-      } else {
-        const first = results.find((r) => !r.ok);
-        const detail = first
-          ? `[${first.status || "?"}] ${first.error || "erro desconhecido"}`
-          : "erro desconhecido";
-        toast.warning(`Falhou em ${fail}/${results.length}: ${detail}`, { duration: 12000 });
-      }
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Falha ao enviar push.");
-    } finally {
-      setTesting(false);
     }
   };
 
@@ -99,21 +71,6 @@ export function EnableNotificationsCard() {
           className="mt-1 shrink-0"
         />
       </div>
-      {isEnabled && (
-        <div className="mt-3 flex justify-end">
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            onClick={handleTest}
-            disabled={testing}
-            className="rounded-full"
-          >
-            <Send className="mr-1 h-4 w-4" />
-            {testing ? "Enviando..." : "Enviar teste"}
-          </Button>
-        </div>
-      )}
     </section>
   );
 }
