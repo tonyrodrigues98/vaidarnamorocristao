@@ -59,6 +59,13 @@ export async function sendPushToSubscription(
           ? err.message
           : String(err);
 
+    console.error("[push] send failed", {
+      status,
+      endpoint: sub.endpoint.slice(0, 60),
+      error,
+      stack: err instanceof Error ? err.stack?.slice(0, 500) : undefined,
+    });
+
     return {
       endpoint: sub.endpoint,
       ok: false,
