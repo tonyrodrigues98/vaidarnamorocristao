@@ -33,10 +33,23 @@ function urlBase64ToUint8Array(base64String: string) {
   return outputArray;
 }
 
+function matchesCurrentVapidKey(subscription: PushSubscription) {
+  const serverKey = subscription.options?.applicationServerKey;
+  if (!serverKey || !VAPID_PUBLIC_KEY) return true;
+  const saved = new Uint8Array(serverKey);
+  const current = urlBase64ToUint8Array(VAPID_PUBLIC_KEY);
+  return saved.length === current.length && saved.every((value, index) => value === current[index]);
+}
+
 async function getExistingSubscription() {
   await registerAppServiceWorker();
   const registration = await navigator.serviceWorker.ready;
-  return registration.pushManager.getSubscription();
+  const subscription = await registration.pushManager.getSubscription();
+  if (subscription && !matchesCurrentVapidKey(subscription)) {
+    await subscription.unsubscribe().catch(() => undefined);
+    return null;
+  }
+  return subscription;
 }
 
 async function saveSubscription(subscription: PushSubscription) {
@@ -80,9 +93,10 @@ export function usePushNotifications() {
     }
 
     getExistingSubscription()
-      .then((subscription) => {
+      .then(async (subscription) => {
         if (subscription) {
-          setStatus("enabled");
+          const saved = await saveSubscription(subscription);
+          setStatus(saved ? "enabled" : "setup-needed");
           return;
         }
         setStatus(Notification.permission === "granted" ? "setup-needed" : "needs-permission");
@@ -119,8 +133,13 @@ export function usePushNotifications() {
       await registerAppServiceWorker();
       const registration = await navigator.serviceWorker.ready;
       const existing = await registration.pushManager.getSubscription();
+      if (existing && !matchesCurrentVapidKey(existing)) {
+        await existing.unsubscribe().catch(() => undefined);
+      }
       const subscription =
-        existing ??
+        existing && matchesCurrentVapidKey(existing)
+          ? existing
+          :
         (await registration.pushManager.subscribe({
           userVisibleOnly: true,
           applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
