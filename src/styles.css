@@ -380,6 +380,12 @@
   .mobile-chat-composer {
     padding-bottom: env(safe-area-inset-bottom);
   }
+  /* When the chat screen is rendered alongside the mobile bottom nav
+     (e.g. /comunidade), the composer must clear the nav so it isn't
+     hidden behind the floating tab bar. */
+  .mobile-chat-screen[data-has-bottom-nav="true"] .mobile-chat-composer {
+    padding-bottom: calc(env(safe-area-inset-bottom) + var(--mobile-bottom-nav-height));
+  }
   .mobile-app-card {
     border-radius: 1.5rem;
     border: 1px solid color-mix(in oklab, var(--border) 78%, transparent);
@@ -411,6 +417,9 @@
     .mobile-chat-composer {
       flex-shrink: 0;
       padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+    .mobile-chat-screen[data-has-bottom-nav="true"] .mobile-chat-composer {
+      padding-bottom: calc(env(safe-area-inset-bottom, 0px) + var(--mobile-bottom-nav-height));
     }
     .mobile-chat-scroll {
       width: 100%;
