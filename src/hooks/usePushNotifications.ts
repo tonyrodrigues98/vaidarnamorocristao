@@ -36,10 +36,7 @@ function urlBase64ToUint8Array(base64String: string) {
 function matchesCurrentVapidKey(subscription: PushSubscription) {
   const serverKey = subscription.options?.applicationServerKey;
   if (!serverKey || !VAPID_PUBLIC_KEY) return true;
-  const saved =
-    serverKey instanceof ArrayBuffer
-      ? new Uint8Array(serverKey)
-      : new Uint8Array(serverKey.buffer, serverKey.byteOffset, serverKey.byteLength);
+  const saved = new Uint8Array(serverKey as ArrayBuffer);
   const current = urlBase64ToUint8Array(VAPID_PUBLIC_KEY);
   return saved.length === current.length && saved.every((value, index) => value === current[index]);
 }
