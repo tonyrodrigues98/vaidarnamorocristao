@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
+import { MobileAppHeader } from "@/components/mobile/MobileAppHeader";
 import { Button } from "@/components/ui/button";
 import { StickersChatBanner } from "@/components/StickersChatBanner";
 import { AnonymousMessagesBanner } from "@/components/AnonymousMessagesBanner";
