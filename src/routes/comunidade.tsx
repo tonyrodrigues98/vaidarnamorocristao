@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
+import { MobileAppHeader } from "@/components/mobile/MobileAppHeader";
 import { Button } from "@/components/ui/button";
 import {
   Send,
@@ -546,9 +547,28 @@ function Comunidade() {
   }
 
   return (
-    <div className="mobile-chat-screen flex min-h-screen flex-col bg-background md:min-h-screen">
-      <Header />
-      <div className="glass mx-auto flex w-full max-w-3xl items-center gap-3 px-3 py-3 shadow-soft md:px-4">
+    <div
+      data-has-bottom-nav="true"
+      className="mobile-chat-screen flex min-h-screen flex-col bg-background md:min-h-screen"
+    >
+      <div className="hidden md:block">
+        <Header />
+      </div>
+      <MobileAppHeader
+        title="Comunidade"
+        subtitle="Chat global em tempo real"
+        rightAction={
+          <Link
+            to="/oracoes"
+            aria-label="Orações"
+            className="tap inline-flex h-9 items-center gap-1.5 rounded-full border border-border bg-card/60 px-3 text-xs font-medium text-foreground/80 transition hover:bg-accent"
+          >
+            <HandHeart className="h-4 w-4" />
+            <span>Orações</span>
+          </Link>
+        }
+      />
+      <div className="glass mx-auto hidden w-full max-w-3xl items-center gap-3 px-3 py-3 shadow-soft md:flex md:px-4">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-love shadow-glow">
           <Users className="h-5 w-5 text-white" />
         </div>
