@@ -26,7 +26,8 @@ const MOBILE_APP_PREFIXES = [
 ];
 
 const MOBILE_APP_HIDDEN_PREFIXES = ["/auth", "/admin", "/onboarding", "/suporte"];
-const MOBILE_FOCUSED_CHAT_PREFIXES = ["/conversas/", "/comunidade"];
+/** Routes that hide the bottom nav for focused, full-screen chat. */
+const MOBILE_FOCUSED_CHAT_PREFIXES = ["/conversas/"];
 const MOBILE_CHAT_PREFIXES = ["/comunidade", "/conversas/"];
 
 function matchesPrefix(pathname: string, prefix: string) {
