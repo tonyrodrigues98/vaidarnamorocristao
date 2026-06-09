@@ -44,3 +44,34 @@ export function isChatRoute(pathname: string): boolean {
 export function chatRouteHasBottomNav(pathname: string): boolean {
   return pathname === "/comunidade";
 }
+
+/**
+ * Internal app routes that, on mobile, replace the global marketing
+ * Header with the contextual MobileAppHeader so the PWA feels like a
+ * native app instead of a website with a bottom nav.
+ */
+const MOBILE_APP_HEADER_PREFIXES = [
+  "/inicio",
+  "/devocional",
+  "/pretendentes",
+  "/comunidade",
+  "/perfil",
+  "/loja",
+  "/notificacoes",
+  "/conta",
+  "/interesses",
+  "/matches",
+  "/recados",
+  "/oracoes",
+  "/presentes",
+  "/bloqueados",
+  "/verificacao",
+  "/dashboard",
+  "/proposito",
+];
+
+export function isMobileAppRoute(pathname: string): boolean {
+  return MOBILE_APP_HEADER_PREFIXES.some(
+    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
+  );
+}
