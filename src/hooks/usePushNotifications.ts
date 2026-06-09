@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { subscribePush, unsubscribePush } from "@/lib/push.functions";
+import { getPushPublicKey, subscribePush, unsubscribePush } from "@/lib/push.functions";
 import { VAPID_PUBLIC_KEY } from "@/lib/pushVapid";
 import { registerAppServiceWorker } from "@/lib/registerSW";
 
@@ -33,19 +33,30 @@ function urlBase64ToUint8Array(base64String: string) {
   return outputArray;
 }
 
-function matchesCurrentVapidKey(subscription: PushSubscription) {
+async function getCurrentVapidPublicKey() {
+  try {
+    const { publicKey } = await getPushPublicKey();
+    return publicKey || VAPID_PUBLIC_KEY;
+  } catch (err) {
+    console.error("[push] public key fetch failed", err);
+    return VAPID_PUBLIC_KEY;
+  }
+}
+
+function matchesCurrentVapidKey(subscription: PushSubscription, publicKey: string) {
   const serverKey = subscription.options?.applicationServerKey;
-  if (!serverKey || !VAPID_PUBLIC_KEY) return true;
+  if (!serverKey || !publicKey) return true;
   const saved = new Uint8Array(serverKey as ArrayBuffer);
-  const current = urlBase64ToUint8Array(VAPID_PUBLIC_KEY);
+  const current = urlBase64ToUint8Array(publicKey);
   return saved.length === current.length && saved.every((value, index) => value === current[index]);
 }
 
 async function getExistingSubscription() {
+  const publicKey = await getCurrentVapidPublicKey();
   await registerAppServiceWorker();
   const registration = await navigator.serviceWorker.ready;
   const subscription = await registration.pushManager.getSubscription();
-  if (subscription && !matchesCurrentVapidKey(subscription)) {
+  if (subscription && !matchesCurrentVapidKey(subscription, publicKey)) {
     await subscription.unsubscribe().catch(() => undefined);
     return null;
   }
@@ -125,7 +136,8 @@ export function usePushNotifications() {
         return;
       }
 
-      if (!VAPID_PUBLIC_KEY) {
+      const publicKey = await getCurrentVapidPublicKey();
+      if (!publicKey) {
         setStatus("setup-needed");
         return;
       }
@@ -133,15 +145,15 @@ export function usePushNotifications() {
       await registerAppServiceWorker();
       const registration = await navigator.serviceWorker.ready;
       const existing = await registration.pushManager.getSubscription();
-      if (existing && !matchesCurrentVapidKey(existing)) {
+      if (existing && !matchesCurrentVapidKey(existing, publicKey)) {
         await existing.unsubscribe().catch(() => undefined);
       }
       const subscription =
-        existing && matchesCurrentVapidKey(existing)
+        existing && matchesCurrentVapidKey(existing, publicKey)
           ? existing
           : await registration.pushManager.subscribe({
               userVisibleOnly: true,
-              applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+              applicationServerKey: urlBase64ToUint8Array(publicKey),
             });
 
       const saved = await saveSubscription(subscription);
