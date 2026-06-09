@@ -36,7 +36,10 @@ function urlBase64ToUint8Array(base64String: string) {
 function matchesCurrentVapidKey(subscription: PushSubscription) {
   const serverKey = subscription.options?.applicationServerKey;
   if (!serverKey || !VAPID_PUBLIC_KEY) return true;
-  const saved = new Uint8Array(serverKey);
+  const saved =
+    serverKey instanceof ArrayBuffer
+      ? new Uint8Array(serverKey)
+      : new Uint8Array(serverKey.buffer, serverKey.byteOffset, serverKey.byteLength);
   const current = urlBase64ToUint8Array(VAPID_PUBLIC_KEY);
   return saved.length === current.length && saved.every((value, index) => value === current[index]);
 }
@@ -139,11 +142,10 @@ export function usePushNotifications() {
       const subscription =
         existing && matchesCurrentVapidKey(existing)
           ? existing
-          :
-        (await registration.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
-        }));
+          : await registration.pushManager.subscribe({
+              userVisibleOnly: true,
+              applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+            });
 
       const saved = await saveSubscription(subscription);
       setStatus(saved ? "enabled" : "setup-needed");
