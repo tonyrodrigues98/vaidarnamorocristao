@@ -22,7 +22,7 @@ type NavProfile = {
 };
 
 const navItems: NavItem[] = [
-  { to: "/inicio", label: "Inicio", icon: Home },
+  { to: "/inicio", label: "Início", icon: Home },
   { to: "/devocional", label: "Devocional", icon: BookOpen },
   { to: "/comunidade", label: "Comunidade", icon: Users },
   { to: "/pretendentes", label: "Pretendentes", icon: Heart },

@@ -15,6 +15,7 @@ import { SupportFooterButton } from "@/components/SupportFooterButton";
 import { PresenceProvider } from "@/lib/presence";
 import { BanGuard } from "@/components/BanGuard";
 import { MobileAppShell } from "@/components/mobile/MobileAppShell";
+import { isChatRoute, shouldShowFooter } from "@/lib/layoutVisibility";
 
 import appCss from "../styles.css?url";
 import coinPng from "@/assets/coin.webp";
@@ -136,33 +137,10 @@ function RootShell({ children }: { children: React.ReactNode }) {
   );
 }
 
-const FOOTER_HIDDEN_PREFIXES = [
-  "/admin",
-  "/comunidade",
-  "/conversas",
-  "/perfil",
-  "/loja",
-  "/conta",
-  "/verificacao",
-  "/bloqueados",
-  "/presentes",
-  "/oracoes",
-  "/suporte",
-  "/onboarding",
-  "/auth",
-];
-
-function shouldShowFooter(pathname: string) {
-  if (pathname === "/") return false;
-  return !FOOTER_HIDDEN_PREFIXES.some(
-    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
-  );
-}
-
 function RootComponent() {
   const location = useLocation();
   const showFooter = shouldShowFooter(location.pathname);
-  const isChatRoute = location.pathname === "/comunidade" || location.pathname.startsWith("/conversas/");
+  const chatRoute = isChatRoute(location.pathname);
   const isHome = location.pathname === "/";
 
   useEffect(() => {
@@ -181,12 +159,12 @@ function RootComponent() {
             ) : (
             <div
               className={
-                isChatRoute
+                chatRoute
                   ? "flex h-[var(--app-visual-height,100dvh)] flex-col overflow-hidden"
                   : "flex min-h-screen flex-col"
               }
             >
-              <div className={isChatRoute ? "min-h-0 flex-1 overflow-hidden" : "flex-1"}>
+              <div className={chatRoute ? "min-h-0 flex-1 overflow-hidden" : "flex-1"}>
                 <Outlet />
               </div>
               {showFooter && (
