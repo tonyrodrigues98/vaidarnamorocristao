@@ -1,19 +1,41 @@
-import { Bell, BellRing, CheckCircle2, ShieldAlert, Send } from "lucide-react";
+import { BellRing, CheckCircle2, ShieldAlert, Send } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { sendTestPush } from "@/lib/push.functions";
 
 export function EnableNotificationsCard() {
-  const { busy, enable, isEnabled, isSupported, needsBackendSetup, permission, status } =
+  // IMPORTANT: all hooks must run unconditionally — never put hooks after an early return.
+  const { busy, enable, disable, isEnabled, isSupported, needsBackendSetup, permission, status } =
     usePushNotifications();
+  const [testing, setTesting] = useState(false);
 
   if (!isSupported) return null;
 
   const denied = permission === "denied" || status === "denied";
-  const [testing, setTesting] = useState(false);
+
+  const handleToggle = async (checked: boolean) => {
+    try {
+      if (checked) {
+        await enable();
+        if (Notification.permission === "denied") {
+          toast.error("Permissão negada pelo navegador. Libere nas configurações do site.");
+        } else if (Notification.permission !== "granted") {
+          toast.warning("Permissão não concedida.");
+        } else {
+          toast.success("Notificações ativadas neste aparelho.");
+        }
+      } else {
+        await disable();
+        toast("Notificações desativadas neste aparelho.");
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Não foi possível alterar as notificações.");
+    }
+  };
 
   const handleTest = async () => {
     setTesting(true);
@@ -50,47 +72,44 @@ export function EnableNotificationsCard() {
         <div className="min-w-0 flex-1">
           <p className="text-sm font-bold text-foreground">
             {isEnabled
-              ? "Notificacoes ativadas"
+              ? "Notificações ativadas"
               : denied
-                ? "Notificacoes bloqueadas"
-                : "Ative notificacoes do app"}
+                ? "Notificações bloqueadas"
+                : "Ative notificações do app"}
           </p>
           <p className="mt-1 text-xs leading-5 text-muted-foreground">
             {isEnabled
-              ? "Voce ja permitiu notificacoes neste aparelho."
+              ? "Você já permitiu notificações neste aparelho."
               : denied
-                ? "Para ativar, libere as notificacoes nas configuracoes do navegador."
+                ? "Para ativar, libere as notificações nas configurações do navegador."
                 : needsBackendSetup
-                  ? "Permissao do aparelho pronta. Falta conectar o endpoint de Web Push para envio automatico."
+                  ? "Permissão pronta. Toque no botão novamente para concluir a inscrição."
                   : "Receba avisos quando tiver mensagens, interesses, matches e presentes."}
           </p>
         </div>
-        {!isEnabled && !denied && (
-          <Button
-            type="button"
-            size="sm"
-            onClick={enable}
-            disabled={busy}
-            className="shrink-0 rounded-full"
-          >
-            <Bell className="h-4 w-4" />
-            <span className="hidden sm:inline">{busy ? "Ativando..." : "Ativar"}</span>
-          </Button>
-        )}
-        {isEnabled && (
+        <Switch
+          checked={isEnabled}
+          onCheckedChange={handleToggle}
+          disabled={busy || denied}
+          aria-label="Ativar notificações push"
+          className="mt-1 shrink-0"
+        />
+      </div>
+      {isEnabled && (
+        <div className="mt-3 flex justify-end">
           <Button
             type="button"
             size="sm"
             variant="outline"
             onClick={handleTest}
             disabled={testing}
-            className="shrink-0 rounded-full"
+            className="rounded-full"
           >
-            <Send className="h-4 w-4" />
-            <span className="hidden sm:inline">{testing ? "Enviando..." : "Testar"}</span>
+            <Send className="mr-1 h-4 w-4" />
+            {testing ? "Enviando..." : "Enviar teste"}
           </Button>
-        )}
-      </div>
+        </div>
+      )}
     </section>
   );
 }
