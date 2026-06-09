@@ -1,5 +1,5 @@
 import { sendNotification, WebPushError, type PushSubscription } from "web-push-neo";
-import { VAPID_PUBLIC_KEY } from "@/lib/pushVapid";
+import { getPushVapidDetails } from "@/lib/pushKeys.server";
 
 type PushPayload = {
   title: string;
@@ -34,18 +34,12 @@ export async function sendPushToSubscription(
   };
 
   try {
-    const privateKey = process.env.WEB_PUSH_PRIVATE_KEY;
-    const subject = process.env.WEB_PUSH_SUBJECT || "mailto:contato@vaidarnamoro.com";
-    if (!privateKey) throw new Error("WEB_PUSH_PRIVATE_KEY missing");
+    const vapidDetails = await getPushVapidDetails();
 
     const result = await sendNotification(pushSubscription, JSON.stringify(payload), {
       TTL: 60 * 60 * 24 * 28,
       urgency: "high",
-      vapidDetails: {
-        subject,
-        publicKey: VAPID_PUBLIC_KEY,
-        privateKey,
-      },
+      vapidDetails,
     });
 
     return { endpoint: sub.endpoint, ok: true, status: result.statusCode };
