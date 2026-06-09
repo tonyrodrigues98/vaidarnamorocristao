@@ -8,6 +8,12 @@ type SubscribePayload = {
   user_agent?: string | null;
 };
 
+export const getPushPublicKey = createServerFn({ method: "GET" }).handler(async () => {
+  const { getPushVapidDetails } = await import("@/lib/pushKeys.server");
+  const { publicKey } = await getPushVapidDetails();
+  return { publicKey };
+});
+
 function validatePayload(input: unknown): SubscribePayload {
   if (!input || typeof input !== "object") throw new Error("invalid payload");
   const data = input as Record<string, unknown>;
