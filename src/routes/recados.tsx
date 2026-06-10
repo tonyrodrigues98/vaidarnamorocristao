@@ -5,7 +5,6 @@ import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
 import { RequireApproved } from "@/components/RequireApproved";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import {
   Dialog,
@@ -14,6 +13,13 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Mail,
@@ -31,6 +37,8 @@ import {
   Clock,
   Wand2,
   RefreshCw,
+  Settings2,
+  Inbox,
 } from "lucide-react";
 import { toast } from "sonner";
 import { friendlyError } from "@/lib/errors";
@@ -109,7 +117,8 @@ function StatusBadge({ status }: { status: string }) {
 
 function RecadosPage() {
   const { user } = useAuth();
-  const [tab, setTab] = useState("inbox");
+  const [tab, setTab] = useState<"inbox" | "outbox">("inbox");
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [inbox, setInbox] = useState<InboxRow[]>([]);
   const [outbox, setOutbox] = useState<OutboxRow[]>([]);
   const [hints, setHints] = useState<Record<string, Hint[]>>({});
@@ -225,14 +234,23 @@ function RecadosPage() {
     <div className="min-h-screen">
       <Header />
       <RevealCeremony target={reveal} onClose={() => setReveal(null)} />
-      <main className="mx-auto max-w-3xl px-4 py-8">
-        <div className="mb-6">
-          <h1 className="flex items-center gap-2 text-3xl font-semibold">
-            <Sparkles className="h-6 w-6 text-[var(--rose)]" /> Recados Anônimos
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Mistério, leveza e consentimento mútuo. A identidade só é revelada se ambos aceitarem.
-          </p>
+      <main className="mx-auto max-w-2xl px-4 pb-24 pt-6">
+        {/* Large iOS-style title */}
+        <div className="mb-5 flex items-end justify-between">
+          <div>
+            <h1 className="text-[34px] font-bold leading-tight tracking-tight">Recados</h1>
+            <p className="mt-0.5 text-[13px] text-muted-foreground">
+              Mistério leve. Identidade revelada só com consentimento mútuo.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setSettingsOpen(true)}
+            aria-label="Configurações"
+            className="grid h-10 w-10 place-items-center rounded-full border border-border/60 bg-background/60 backdrop-blur-md transition active:scale-95"
+          >
+            <Settings2 className="h-[18px] w-[18px] text-foreground/70" />
+          </button>
         </div>
 
         {activeCommitment ? (
@@ -247,60 +265,139 @@ function RecadosPage() {
             <div className="glass h-24 animate-pulse rounded-2xl" />
           </div>
         ) : (
-          <Tabs value={tab} onValueChange={setTab}>
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="inbox">
-                <Mail className="mr-1 h-4 w-4" /> Recebidos
-              </TabsTrigger>
-              <TabsTrigger value="outbox">
-                <Eye className="mr-1 h-4 w-4" /> Enviados
-              </TabsTrigger>
-              <TabsTrigger value="config">Configurações</TabsTrigger>
-            </TabsList>
+          <>
+            {/* iOS-style segmented control */}
+            <SegmentedControl
+              value={tab}
+              onChange={setTab}
+              segments={[
+                { value: "inbox", label: "Recebidos", count: inbox.length },
+                { value: "outbox", label: "Enviados", count: outbox.length },
+              ]}
+            />
 
-            <TabsContent value="inbox" className="space-y-3">
-              {inbox.length === 0 && (
-                <p className="rounded-2xl border border-dashed p-8 text-center text-sm text-muted-foreground">
-                  <span className="inline-flex items-center gap-2">
-                    <Mail className="h-4 w-4" /> Nenhum recado por enquanto.
-                  </span>
-                </p>
+            <div className="mt-5 space-y-3">
+              {tab === "inbox" ? (
+                inbox.length === 0 ? (
+                  <EmptyState
+                    icon={<Inbox className="h-7 w-7" />}
+                    title="Sua caixa está em silêncio"
+                    subtitle="Quando alguém te enviar um recado anônimo, ele aparece aqui."
+                  />
+                ) : (
+                  inbox.map((m) => (
+                    <InboxCard key={m.id} m={m} hints={hints[m.id] ?? []} onChange={load} />
+                  ))
+                )
+              ) : outbox.length === 0 ? (
+                <EmptyState
+                  icon={<Send className="h-7 w-7" />}
+                  title="Nada enviado ainda"
+                  subtitle="Encontre alguém em Pretendentes e envie um recado anônimo."
+                />
+              ) : (
+                outbox.map((m) => (
+                  <OutboxCard key={m.id} m={m} hints={hints[m.id] ?? []} onChange={load} />
+                ))
               )}
-              {inbox.map((m) => (
-                <InboxCard key={m.id} m={m} hints={hints[m.id] ?? []} onChange={load} />
-              ))}
-            </TabsContent>
-
-            <TabsContent value="outbox" className="space-y-3">
-              {outbox.length === 0 && (
-                <p className="rounded-2xl border border-dashed p-8 text-center text-sm text-muted-foreground">
-                  Você ainda não enviou recados.
-                </p>
-              )}
-              {outbox.map((m) => (
-                <OutboxCard key={m.id} m={m} hints={hints[m.id] ?? []} onChange={load} />
-              ))}
-            </TabsContent>
-
-            <TabsContent value="config">
-              <div className="space-y-4">
-                <AnonymousExtrasCard />
-                <div className="rounded-2xl border p-5">
-                  <label className="flex items-center justify-between">
-                    <div>
-                      <div className="font-medium">Aceitar recados anônimos</div>
-                      <div className="text-xs text-muted-foreground">
-                        Quando desativado, ninguém poderá enviar recados anônimos para você.
-                      </div>
-                    </div>
-                    <Switch checked={accept} onCheckedChange={toggleOptout} />
-                  </label>
-                </div>
-              </div>
-            </TabsContent>
-          </Tabs>
+            </div>
+          </>
         )}
+
+        {/* Settings Sheet */}
+        <Sheet open={settingsOpen} onOpenChange={setSettingsOpen}>
+          <SheetContent side="bottom" className="rounded-t-3xl border-t bg-background/95 backdrop-blur-xl">
+            <SheetHeader className="text-left">
+              <SheetTitle className="text-xl">Configurações</SheetTitle>
+              <SheetDescription>
+                Controle como você recebe recados anônimos.
+              </SheetDescription>
+            </SheetHeader>
+            <div className="mt-4 space-y-3">
+              <div className="rounded-2xl border bg-card/50 p-4">
+                <label className="flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="text-[15px] font-medium">Aceitar recados anônimos</div>
+                    <div className="mt-0.5 text-xs text-muted-foreground">
+                      Quando desativado, ninguém poderá te enviar recados.
+                    </div>
+                  </div>
+                  <Switch checked={accept} onCheckedChange={toggleOptout} />
+                </label>
+              </div>
+              <AnonymousExtrasCard />
+            </div>
+          </SheetContent>
+        </Sheet>
       </main>
+    </div>
+  );
+}
+
+function SegmentedControl<T extends string>({
+  value,
+  onChange,
+  segments,
+}: {
+  value: T;
+  onChange: (v: T) => void;
+  segments: { value: T; label: string; count?: number }[];
+}) {
+  return (
+    <div
+      role="tablist"
+      className="relative grid w-full gap-1 rounded-2xl bg-muted/60 p-1 backdrop-blur"
+      style={{ gridTemplateColumns: `repeat(${segments.length}, minmax(0, 1fr))` }}
+    >
+      {segments.map((s) => {
+        const active = s.value === value;
+        return (
+          <button
+            key={s.value}
+            role="tab"
+            aria-selected={active}
+            onClick={() => onChange(s.value)}
+            className={[
+              "relative z-10 flex items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-[14px] font-medium transition-all",
+              active
+                ? "bg-background text-foreground shadow-[0_1px_2px_rgba(0,0,0,0.06),0_4px_12px_-4px_rgba(0,0,0,0.12)]"
+                : "text-muted-foreground hover:text-foreground",
+            ].join(" ")}
+          >
+            {s.label}
+            {typeof s.count === "number" && s.count > 0 && (
+              <span
+                className={[
+                  "min-w-[20px] rounded-full px-1.5 text-[11px] font-semibold leading-[18px]",
+                  active ? "bg-[var(--rose)]/15 text-[var(--rose)]" : "bg-foreground/10 text-foreground/70",
+                ].join(" ")}
+              >
+                {s.count}
+              </span>
+            )}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function EmptyState({
+  icon,
+  title,
+  subtitle,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  subtitle: string;
+}) {
+  return (
+    <div className="flex flex-col items-center justify-center px-6 py-16 text-center">
+      <div className="mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-muted text-muted-foreground">
+        {icon}
+      </div>
+      <h3 className="text-[17px] font-semibold">{title}</h3>
+      <p className="mt-1 max-w-xs text-[13px] text-muted-foreground">{subtitle}</p>
     </div>
   );
 }
