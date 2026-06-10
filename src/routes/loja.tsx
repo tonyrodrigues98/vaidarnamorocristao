@@ -1,7 +1,20 @@
 import { createFileRoute, Navigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
-import { Check, ImageIcon, Loader2, Sparkles, X, Lock, Gem } from "lucide-react";
+import {
+  Check,
+  ImageIcon,
+  Loader2,
+  Sparkles,
+  X,
+  Gem,
+  Frame as FrameIcon,
+  Sparkle,
+  Image as ImageLucide,
+  Type as TypeIcon,
+  Package,
+  Star,
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { ShopSkeleton } from "@/components/ui/AppSkeletons";
 import { AppEmptyState } from "@/components/ui/AppEmptyState";
@@ -77,19 +90,35 @@ export const Route = createFileRoute("/loja")({
 });
 
 type EquippedMap = { frame: string | null; aura: string | null; sticker: string | null };
-type CategoryKey = "frame" | "aura" | "background" | "name-gradient" | "soon";
+type CategoryKey =
+  | "all"
+  | "frame"
+  | "aura"
+  | "background"
+  | "name-gradient"
+  | "inventory";
 
 const CATEGORIES: {
   key: CategoryKey;
   label: string;
+  icon: typeof FrameIcon;
   type: DecorationType | "background" | null;
 }[] = [
-  { key: "frame", label: "Molduras", type: "frame" },
-  { key: "aura", label: "Auras", type: "aura" },
-  { key: "background", label: "Fundos de Perfil", type: "background" },
-  { key: "name-gradient", label: "Gradiente no Nome", type: null },
-  { key: "soon", label: "Em breve", type: null },
+  { key: "all", label: "Todos", icon: Sparkles, type: null },
+  { key: "frame", label: "Molduras", icon: FrameIcon, type: "frame" },
+  { key: "aura", label: "Auras", icon: Sparkle, type: "aura" },
+  { key: "background", label: "Fundos", icon: ImageLucide, type: "background" },
+  { key: "name-gradient", label: "Gradientes", icon: TypeIcon, type: null },
+  { key: "inventory", label: "Inventário", icon: Package, type: null },
 ];
+
+const RARITY_WEIGHT: Record<string, number> = {
+  exclusive: 5,
+  legendary: 4,
+  epic: 3,
+  rare: 2,
+  common: 1,
+};
 
 function LojaPage() {
   const { user, loading: authLoading } = useAuth();
@@ -111,7 +140,7 @@ function LojaPage() {
   const [loading, setLoading] = useState(true);
   const { isOnline } = useNetworkStatus();
   const [busyId, setBusyId] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<CategoryKey>("frame");
+  const [activeTab, setActiveTab] = useState<CategoryKey>("all");
   const [confirm, setConfirm] = useState<Decoration | null>(null);
   const [confirmBackground, setConfirmBackground] = useState<ProfileBackground | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
@@ -384,8 +413,41 @@ function LojaPage() {
       <MobileAppHeader title="Loja" subtitle="Personalize sua experiência" />
       <PullToRefresh onRefresh={handlePullRefresh} disabled={!user || !isOnline}>
 
-      {/* Hero */}
-      <section className="relative overflow-hidden border-b">
+      {/* Mobile compact balance widget */}
+      <section className="md:hidden border-b border-border/60 bg-background">
+        <div className="px-4 py-4">
+          <div
+            className="relative overflow-hidden rounded-2xl border border-border/60 px-4 py-3 shadow-soft"
+            style={{
+              background:
+                "linear-gradient(120deg, color-mix(in oklab, var(--rose) 14%, var(--card)) 0%, color-mix(in oklab, #f59e0b 12%, var(--card)) 100%)",
+            }}
+          >
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-100 text-amber-700">
+                  <CoinIcon className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                    Seu saldo
+                  </p>
+                  <p className="text-lg font-semibold leading-none">
+                    {balance}
+                    <span className="ml-1 text-xs font-normal text-muted-foreground">moedas</span>
+                  </p>
+                </div>
+              </div>
+              <span className="inline-flex items-center gap-1 rounded-full bg-background/80 px-2.5 py-1 text-[10px] font-medium text-muted-foreground backdrop-blur">
+                <Gem className="h-3 w-3 text-[var(--rose)]" /> Loja do App
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Hero (desktop) */}
+      <section className="relative overflow-hidden border-b hidden md:block">
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 -z-10"
@@ -439,30 +501,30 @@ function LojaPage() {
         </div>
       </section>
 
-      {/* Tabs */}
-      <div className="mx-auto max-w-5xl px-4 pt-6">
-        <div className="flex flex-wrap gap-2">
-          {CATEGORIES.map((c) => {
-            const active = activeTab === c.key;
-            return (
-              <button
-                key={c.key}
-                onClick={() => setActiveTab(c.key)}
-                className={`relative rounded-full px-4 py-2 text-sm font-medium transition ${
-                  active
-                    ? "bg-foreground text-background shadow-soft"
-                    : "border bg-card text-foreground hover:border-[var(--rose-soft)]"
-                }`}
-              >
-                {c.label}
-                {c.key === "soon" && (
-                  <span className="ml-1.5 inline-flex items-center text-[10px] opacity-70">
-                    <Lock className="h-3 w-3" />
-                  </span>
-                )}
-              </button>
-            );
-          })}
+      {/* Categorias horizontais */}
+      <div className="sticky top-[calc(env(safe-area-inset-top,0px)+3.25rem)] z-20 -mb-2 bg-background/95 backdrop-blur md:static md:top-auto md:z-auto md:mb-0 md:bg-transparent md:backdrop-blur-0">
+        <div className="mx-auto max-w-5xl px-4 pt-4 md:pt-6">
+          <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-3 md:mx-0 md:flex-wrap md:overflow-visible md:px-0 md:pb-0 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+            {CATEGORIES.map((c) => {
+              const active = activeTab === c.key;
+              const Icon = c.icon;
+              return (
+                <button
+                  key={c.key}
+                  type="button"
+                  onClick={() => setActiveTab(c.key)}
+                  className={`app-pressable inline-flex shrink-0 items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition ${
+                    active
+                      ? "bg-foreground text-background shadow-soft"
+                      : "border bg-card text-foreground hover:border-[var(--rose-soft)]"
+                  }`}
+                >
+                  <Icon className="h-3.5 w-3.5" />
+                  {c.label}
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
 
@@ -472,8 +534,40 @@ function LojaPage() {
           <ShopSkeleton cards={8} />
         ) : !isOnline && catalog.length === 0 ? (
           <OfflineState className="my-12" />
-        ) : activeTab === "soon" ? (
-          <ComingSoon />
+        ) : activeTab === "all" ? (
+          <HighlightsView
+            decorations={catalog}
+            backgrounds={backgrounds}
+            owned={owned}
+            ownedBackgrounds={ownedBackgrounds}
+            equipped={equipped}
+            equippedBackground={equippedBackground}
+            onPickCategory={setActiveTab}
+          />
+        ) : activeTab === "inventory" ? (
+          <InventoryView
+            decorations={catalog}
+            backgrounds={backgrounds}
+            nameGradients={nameGradients}
+            owned={owned}
+            ownedBackgrounds={ownedBackgrounds}
+            ownedNameGradients={ownedNameGradients}
+            equipped={equipped}
+            equippedBackground={equippedBackground}
+            equippedNameGradient={equippedNameGradient}
+            busyId={busyId}
+            photoUrl={photoUrl}
+            userEmail={user?.email ?? null}
+            onEquipFrame={handleEquip}
+            onEquipAura={handleEquip}
+            onUnequipFrame={() => handleUnequip("frame")}
+            onUnequipAura={() => handleUnequip("aura")}
+            onEquipBackground={handleEquipBackground}
+            onUnequipBackground={handleUnequipBackground}
+            onEquipNameGradient={handleEquipNameGradient}
+            onUnequipNameGradient={handleUnequipNameGradient}
+            onBrowse={() => setActiveTab("all")}
+          />
         ) : activeTab === "name-gradient" ? (
           nameGradients.length === 0 ? (
             <AppEmptyState
@@ -507,7 +601,7 @@ function LojaPage() {
                   return (
                     <article
                       key={gradient.id}
-                      className={`overflow-hidden rounded-2xl border bg-card p-5 transition hover:-translate-y-0.5 hover:shadow-soft ${
+                      className={`app-card-interactive overflow-hidden rounded-2xl border bg-card p-5 transition ${
                         isEquipped
                           ? "border-[var(--rose)] ring-1 ring-[var(--rose)]/30"
                           : "hover:border-[var(--rose-soft)]"
@@ -614,7 +708,7 @@ function LojaPage() {
                   return (
                     <article
                       key={background.id}
-                      className={`group overflow-hidden rounded-2xl border bg-card transition hover:-translate-y-0.5 hover:shadow-soft ${
+                      className={`app-card-interactive group overflow-hidden rounded-2xl border bg-card transition ${
                         isEquipped
                           ? "border-[var(--rose)] ring-1 ring-[var(--rose)]/30"
                           : rarity.border
@@ -625,6 +719,7 @@ function LojaPage() {
                           <img
                             src={background.image_url}
                             alt={background.name}
+                            loading="lazy"
                             className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
                           />
                         ) : (
@@ -749,7 +844,7 @@ function LojaPage() {
                 return (
                   <article
                     key={d.id}
-                    className={`group relative flex flex-col overflow-hidden rounded-2xl border bg-card p-4 transition hover:-translate-y-0.5 hover:shadow-soft ${
+                    className={`app-card-interactive group relative flex flex-col overflow-hidden rounded-2xl border bg-card p-4 transition ${
                       isEquipped
                         ? "border-[var(--rose)] ring-1 ring-[var(--rose)]/30"
                         : "hover:border-[var(--rose-soft)]"
@@ -993,31 +1088,462 @@ function LojaPage() {
   );
 }
 
-function ComingSoon() {
-  const items = [
-    { name: "Fundos de Perfil", desc: "Cenários exclusivos atrás da sua foto" },
-    { name: "Stickers Especiais", desc: "Adesivos para conversas e perfil" },
-    { name: "Efeitos Premium", desc: "Animações exclusivas e raras" },
-    { name: "Itens Sazonais", desc: "Coleções limitadas por temporada" },
-    { name: "Presentes Virtuais", desc: "Envie um carinho para alguém especial" },
-    { name: "Coleções Exclusivas", desc: "Conjuntos completos com bônus" },
+type HighlightItem =
+  | { kind: "decoration"; item: Decoration }
+  | { kind: "background"; item: ProfileBackground };
+
+function HighlightsView({
+  decorations,
+  backgrounds,
+  owned,
+  ownedBackgrounds,
+  equipped,
+  equippedBackground,
+  onPickCategory,
+}: {
+  decorations: Decoration[];
+  backgrounds: ProfileBackground[];
+  owned: Set<string>;
+  ownedBackgrounds: Set<string>;
+  equipped: EquippedMap;
+  equippedBackground: string | null;
+  onPickCategory: (key: CategoryKey) => void;
+}) {
+  const highlights = useMemo<HighlightItem[]>(() => {
+    const decs = decorations
+      .filter((d) => d.active && !owned.has(d.id))
+      .map<HighlightItem>((d) => ({ kind: "decoration", item: d }));
+    const bgs = backgrounds
+      .filter((b) => b.is_active && !ownedBackgrounds.has(b.id))
+      .map<HighlightItem>((b) => ({ kind: "background", item: b }));
+    const all = [...decs, ...bgs];
+    all.sort((a, b) => {
+      const ra = RARITY_WEIGHT[(a.kind === "decoration" ? a.item.rarity : a.item.rarity) as string] ?? 0;
+      const rb = RARITY_WEIGHT[(b.kind === "decoration" ? b.item.rarity : b.item.rarity) as string] ?? 0;
+      if (rb !== ra) return rb - ra;
+      const pa = a.kind === "decoration" ? a.item.price_coins : a.item.price;
+      const pb = b.kind === "decoration" ? b.item.price_coins : b.item.price;
+      return pb - pa;
+    });
+    return all.slice(0, 8);
+  }, [decorations, backgrounds, owned, ownedBackgrounds]);
+
+  const sections: { key: CategoryKey; label: string; count: number }[] = [
+    { key: "frame", label: "Molduras", count: decorations.filter((d) => d.type === "frame").length },
+    { key: "aura", label: "Auras", count: decorations.filter((d) => d.type === "aura").length },
+    { key: "background", label: "Fundos de Perfil", count: backgrounds.length },
   ];
+
+  if (highlights.length === 0 && decorations.length === 0 && backgrounds.length === 0) {
+    return (
+      <AppEmptyState
+        icon={<GemIcon className="h-5 w-5" />}
+        title="A loja está sendo preparada"
+        description="Novos itens de personalização aparecerão por aqui em breve."
+        className="my-12"
+      />
+    );
+  }
+
   return (
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-      {items.map((i) => (
-        <div key={i.name} className="relative overflow-hidden rounded-2xl border bg-card/50 p-5">
-          <div
-            aria-hidden
-            className="pointer-events-none absolute -right-6 -top-6 h-24 w-24 rounded-full opacity-40 blur-2xl"
-            style={{ background: "color-mix(in oklab, var(--rose) 40%, transparent)" }}
-          />
-          <div className="inline-flex items-center gap-1.5 rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
-            <Lock className="h-3 w-3" /> Em breve
+    <div className="space-y-8">
+      {highlights.length > 0 && (
+        <section>
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="inline-flex items-center gap-2 text-base font-semibold">
+              <Star className="h-4 w-4 text-[var(--rose)]" /> Destaques
+            </h2>
+            <span className="text-xs text-muted-foreground">Itens raros e especiais</span>
           </div>
-          <h3 className="mt-3 text-sm font-semibold">{i.name}</h3>
-          <p className="mt-1 text-xs text-muted-foreground">{i.desc}</p>
+          <div className="-mx-4 flex gap-3 overflow-x-auto px-4 pb-2 md:mx-0 md:grid md:grid-cols-4 md:overflow-visible md:px-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {highlights.map((h) => {
+              const isEquipped =
+                h.kind === "decoration"
+                  ? equipped[h.item.type] === h.item.id
+                  : equippedBackground === h.item.id;
+              return (
+                <button
+                  key={`${h.kind}-${h.item.id}`}
+                  type="button"
+                  onClick={() =>
+                    onPickCategory(
+                      h.kind === "background"
+                        ? "background"
+                        : h.item.type === "frame"
+                          ? "frame"
+                          : h.item.type === "aura"
+                            ? "aura"
+                            : "all",
+                    )
+                  }
+                  className="app-card-interactive w-[170px] shrink-0 overflow-hidden rounded-2xl border bg-card text-left md:w-auto"
+                >
+                  <div className="relative aspect-square overflow-hidden bg-gradient-to-br from-muted to-card">
+                    {h.kind === "background" ? (
+                      h.item.image_url ? (
+                        <img
+                          src={h.item.image_url}
+                          alt={h.item.name}
+                          loading="lazy"
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-full items-center justify-center text-muted-foreground">
+                          <ImageIcon className="h-8 w-8" />
+                        </div>
+                      )
+                    ) : (
+                      <div className="flex h-full items-center justify-center">
+                        {h.item.image_url ? (
+                          <img
+                            src={h.item.image_url}
+                            alt={h.item.name}
+                            loading="lazy"
+                            className="h-3/4 w-3/4 object-contain"
+                          />
+                        ) : (
+                          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted text-muted-foreground">
+                            {h.item.type === "frame" ? (
+                              <FrameIcon className="h-6 w-6" />
+                            ) : (
+                              <Sparkle className="h-6 w-6" />
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    <span className="absolute left-2 top-2 rounded-full bg-background/85 px-2 py-0.5 text-[10px] font-semibold capitalize text-foreground backdrop-blur">
+                      {h.item.rarity}
+                    </span>
+                    {isEquipped && (
+                      <span className="absolute right-2 top-2 inline-flex items-center gap-1 rounded-full bg-[var(--rose)] px-2 py-0.5 text-[10px] font-semibold text-white">
+                        <Check className="h-3 w-3" />
+                      </span>
+                    )}
+                  </div>
+                  <div className="p-3">
+                    <p className="line-clamp-1 text-sm font-semibold">{h.item.name}</p>
+                    <div className="mt-1 flex items-center justify-between">
+                      <span className="text-[11px] text-muted-foreground">
+                        {h.kind === "background"
+                          ? "Fundo"
+                          : h.item.type === "frame"
+                            ? "Moldura"
+                            : "Aura"}
+                      </span>
+                      <span className="inline-flex items-center gap-1 text-xs font-medium">
+                        <CoinIcon className="h-3 w-3" />
+                        {h.kind === "background" ? h.item.price : h.item.price_coins}
+                      </span>
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
+      <section>
+        <h2 className="mb-3 text-base font-semibold">Categorias</h2>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {sections
+            .filter((s) => s.count > 0)
+            .map((s) => (
+              <button
+                key={s.key}
+                type="button"
+                onClick={() => onPickCategory(s.key)}
+                className="app-card-interactive flex items-center justify-between rounded-2xl border bg-card p-4 text-left"
+              >
+                <div>
+                  <p className="text-sm font-semibold">{s.label}</p>
+                  <p className="text-xs text-muted-foreground">{s.count} itens disponíveis</p>
+                </div>
+                <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-muted text-foreground">
+                  <Sparkles className="h-4 w-4" />
+                </span>
+              </button>
+            ))}
         </div>
-      ))}
+      </section>
     </div>
+  );
+}
+
+function InventoryView({
+  decorations,
+  backgrounds,
+  nameGradients,
+  owned,
+  ownedBackgrounds,
+  ownedNameGradients,
+  equipped,
+  equippedBackground,
+  equippedNameGradient,
+  busyId,
+  photoUrl,
+  userEmail,
+  onEquipFrame,
+  onEquipAura,
+  onUnequipFrame,
+  onUnequipAura,
+  onEquipBackground,
+  onUnequipBackground,
+  onEquipNameGradient,
+  onUnequipNameGradient,
+  onBrowse,
+}: {
+  decorations: Decoration[];
+  backgrounds: ProfileBackground[];
+  nameGradients: NameGradient[];
+  owned: Set<string>;
+  ownedBackgrounds: Set<string>;
+  ownedNameGradients: Set<string>;
+  equipped: EquippedMap;
+  equippedBackground: string | null;
+  equippedNameGradient: string | null;
+  busyId: string | null;
+  photoUrl: string | null;
+  userEmail: string | null;
+  onEquipFrame: (d: Decoration) => void;
+  onEquipAura: (d: Decoration) => void;
+  onUnequipFrame: () => void;
+  onUnequipAura: () => void;
+  onEquipBackground: (b: ProfileBackground) => void;
+  onUnequipBackground: () => void;
+  onEquipNameGradient: (g: NameGradient) => void;
+  onUnequipNameGradient: () => void;
+  onBrowse: () => void;
+}) {
+  const myFrames = decorations.filter((d) => d.type === "frame" && owned.has(d.id));
+  const myAuras = decorations.filter((d) => d.type === "aura" && owned.has(d.id));
+  const myBackgrounds = backgrounds.filter((b) => ownedBackgrounds.has(b.id));
+  const myGradients = nameGradients.filter((g) => ownedNameGradients.has(g.id));
+
+  const isEmpty =
+    myFrames.length === 0 &&
+    myAuras.length === 0 &&
+    myBackgrounds.length === 0 &&
+    myGradients.length === 0;
+
+  if (isEmpty) {
+    return (
+      <AppEmptyState
+        icon={<Package className="h-5 w-5" />}
+        title="Seu inventário ainda está vazio"
+        description="Compre molduras, auras, fundos ou gradientes para personalizar sua experiência."
+        actionLabel="Ver destaques"
+        onAction={onBrowse}
+        className="my-12"
+      />
+    );
+  }
+
+  const initials = userEmail?.[0]?.toUpperCase() ?? "?";
+
+  return (
+    <div className="space-y-8">
+      {myFrames.length > 0 && (
+        <InventorySection title="Molduras" icon={<FrameIcon className="h-4 w-4" />}>
+          {myFrames.map((d) => {
+            const isEq = equipped.frame === d.id;
+            const busy = busyId === d.id || (isEq && busyId === "unequip-frame");
+            return (
+              <InventoryCard
+                key={d.id}
+                name={d.name}
+                rarity={d.rarity}
+                preview={
+                  <DecoratedAvatar
+                    photoUrl={photoUrl}
+                    fallback={initials}
+                    size={56}
+                    frameId={d.id}
+                    auraId={equipped.aura}
+                  />
+                }
+                equipped={isEq}
+                busy={busy}
+                onEquip={() => onEquipFrame(d)}
+                onUnequip={onUnequipFrame}
+              />
+            );
+          })}
+        </InventorySection>
+      )}
+
+      {myAuras.length > 0 && (
+        <InventorySection title="Auras" icon={<Sparkle className="h-4 w-4" />}>
+          {myAuras.map((d) => {
+            const isEq = equipped.aura === d.id;
+            const busy = busyId === d.id || (isEq && busyId === "unequip-aura");
+            return (
+              <InventoryCard
+                key={d.id}
+                name={d.name}
+                rarity={d.rarity}
+                preview={
+                  <DecoratedAvatar
+                    photoUrl={photoUrl}
+                    fallback={initials}
+                    size={56}
+                    frameId={equipped.frame}
+                    auraId={d.id}
+                  />
+                }
+                equipped={isEq}
+                busy={busy}
+                onEquip={() => onEquipAura(d)}
+                onUnequip={onUnequipAura}
+              />
+            );
+          })}
+        </InventorySection>
+      )}
+
+      {myBackgrounds.length > 0 && (
+        <InventorySection title="Fundos" icon={<ImageLucide className="h-4 w-4" />}>
+          {myBackgrounds.map((b) => {
+            const isEq = equippedBackground === b.id;
+            const busy = busyId === b.id || (isEq && busyId === "unequip-background");
+            return (
+              <InventoryCard
+                key={b.id}
+                name={b.name}
+                rarity={b.rarity}
+                preview={
+                  b.image_url ? (
+                    <img
+                      src={b.image_url}
+                      alt={b.name}
+                      loading="lazy"
+                      className="h-full w-full rounded-xl object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center rounded-xl bg-muted text-muted-foreground">
+                      <ImageIcon className="h-6 w-6" />
+                    </div>
+                  )
+                }
+                previewFill
+                equipped={isEq}
+                busy={busy}
+                onEquip={() => onEquipBackground(b)}
+                onUnequip={onUnequipBackground}
+              />
+            );
+          })}
+        </InventorySection>
+      )}
+
+      {myGradients.length > 0 && (
+        <InventorySection title="Gradientes" icon={<TypeIcon className="h-4 w-4" />}>
+          {myGradients.map((g) => {
+            const isEq = equippedNameGradient === g.id;
+            const busy = busyId === g.id || (isEq && busyId === "unequip-name-gradient");
+            return (
+              <InventoryCard
+                key={g.id}
+                name={g.name}
+                preview={
+                  <span
+                    className="text-xl font-black"
+                    style={nameGradientStyle(g)}
+                  >
+                    {g.name.slice(0, 6) || "Nome"}
+                  </span>
+                }
+                equipped={isEq}
+                busy={busy}
+                onEquip={() => onEquipNameGradient(g)}
+                onUnequip={onUnequipNameGradient}
+              />
+            );
+          })}
+        </InventorySection>
+      )}
+    </div>
+  );
+}
+
+function InventorySection({
+  title,
+  icon,
+  children,
+}: {
+  title: string;
+  icon: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <section>
+      <h2 className="mb-3 inline-flex items-center gap-2 text-base font-semibold">
+        {icon}
+        {title}
+      </h2>
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">{children}</div>
+    </section>
+  );
+}
+
+function InventoryCard({
+  name,
+  rarity,
+  preview,
+  previewFill,
+  equipped,
+  busy,
+  onEquip,
+  onUnequip,
+}: {
+  name: string;
+  rarity?: string;
+  preview: React.ReactNode;
+  previewFill?: boolean;
+  equipped: boolean;
+  busy: boolean;
+  onEquip: () => void;
+  onUnequip: () => void;
+}) {
+  return (
+    <article
+      className={`flex flex-col overflow-hidden rounded-2xl border bg-card p-3 transition ${
+        equipped ? "border-[var(--rose)] ring-1 ring-[var(--rose)]/30" : ""
+      }`}
+    >
+      <div
+        className={`relative flex items-center justify-center ${
+          previewFill ? "aspect-[4/3] overflow-hidden rounded-xl bg-muted" : "h-24"
+        }`}
+      >
+        {preview}
+        {rarity && (
+          <span className="absolute left-1.5 top-1.5 rounded-full bg-background/85 px-1.5 py-0.5 text-[9px] font-semibold capitalize text-foreground backdrop-blur">
+            {rarity}
+          </span>
+        )}
+      </div>
+      <h3 className="mt-3 line-clamp-1 text-center text-sm font-semibold" title={name}>
+        {name}
+      </h3>
+      <div className="mt-2">
+        {equipped ? (
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full text-xs"
+            disabled={busy}
+            onClick={onUnequip}
+          >
+            {busy ? <Loader2 className="h-3 w-3 animate-spin" /> : "Equipado"}
+          </Button>
+        ) : (
+          <Button size="sm" className="w-full text-xs" disabled={busy} onClick={onEquip}>
+            {busy ? <Loader2 className="h-3 w-3 animate-spin" /> : "Equipar"}
+          </Button>
+        )}
+      </div>
+    </article>
   );
 }
