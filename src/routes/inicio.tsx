@@ -1166,6 +1166,12 @@ function InicioPage() {
                   hint="Quem te quer"
                 />
                 <ActivityChip
+                  to="/matches"
+                  icon={<Heart className="h-4 w-4" />}
+                  label="Matches"
+                  hint="Conexões mútuas"
+                />
+                <ActivityChip
                   to="/recados"
                   icon={<VenetianMask className="h-4 w-4" />}
                   label="Recados"

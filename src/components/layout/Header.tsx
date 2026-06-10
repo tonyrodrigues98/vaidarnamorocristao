@@ -26,7 +26,6 @@ import {
   BookHeart,
   Settings,
   Bell,
-  LayoutDashboard,
 } from "lucide-react";
 import { toast } from "sonner";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
@@ -254,11 +253,6 @@ export function Header() {
             <>
               <Button variant="ghost" size="sm" asChild>
                 <Link to="/inicio">Início</Link>
-              </Button>
-              <Button variant="ghost" size="sm" asChild>
-                <Link to="/dashboard">
-                  <LayoutDashboard className="mr-1 h-4 w-4" /> Dashboard
-                </Link>
               </Button>
               {isApproved && (
                 <DropdownMenu>
@@ -495,12 +489,6 @@ export function Header() {
                 <MobileItem to="/inicio" onClick={close}>
                   <span className="flex items-center gap-2">
                     <Heart className="h-4 w-4" /> Início
-                  </span>
-                </MobileItem>
-
-                <MobileItem to="/dashboard" onClick={close}>
-                  <span className="flex items-center gap-2">
-                    <LayoutDashboard className="h-4 w-4" /> Dashboard
                   </span>
                 </MobileItem>
 
