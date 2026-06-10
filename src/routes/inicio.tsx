@@ -1164,10 +1164,11 @@ function InicioPage() {
           )}
 
           {/* MOLDURA GRÁTIS */}
-          {isApproved && !frameClaimed && (
+          {isApproved && !frameClaimed && !ownsAnyFrame && (
             <section>
               <Link
                 to="/perfil"
+                search={{ tab: "customizacao" } as never}
                 className="app-card-interactive flex items-center gap-3 rounded-2xl border border-[var(--rose)]/30 bg-gradient-to-br from-[var(--petal)]/60 to-white p-4 shadow-soft"
               >
                 <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-[var(--rose)] shadow-sm">
