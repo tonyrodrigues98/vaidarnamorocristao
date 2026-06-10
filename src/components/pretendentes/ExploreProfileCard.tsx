@@ -177,7 +177,7 @@ export function ExploreProfileCard({
           type="button"
           variant="outline"
           size="lg"
-          className="app-pressable h-12 w-12 shrink-0 rounded-full p-0"
+          className="app-pressable hidden h-12 w-12 shrink-0 rounded-full p-0 sm:inline-flex"
           onClick={onPrev}
           disabled={!canPrev}
           aria-label="Perfil anterior"
@@ -212,7 +212,7 @@ export function ExploreProfileCard({
           type="button"
           variant="outline"
           size="lg"
-          className="app-pressable h-12 w-12 shrink-0 rounded-full p-0"
+          className="app-pressable hidden h-12 w-12 shrink-0 rounded-full p-0 sm:inline-flex"
           onClick={onNext}
           disabled={!canNext}
           aria-label="Próximo perfil"
