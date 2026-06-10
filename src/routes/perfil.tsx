@@ -1340,6 +1340,13 @@ function PerfilPage() {
 
                       <div className="space-y-2">
                         <Label>Sobre o que procura</Label>
+                        <BioPromptChips
+                          variant="looking_for"
+                          current={prefs.looking_for_bio}
+                          onApply={(starter: string) =>
+                            setPrefs({ ...prefs, looking_for_bio: starter + (prefs.looking_for_bio ?? "") })
+                          }
+                        />
                         <Textarea
                           rows={4}
                           maxLength={600}
