@@ -201,7 +201,7 @@ function RootComponent() {
               }
             >
               <div className={chatRoute ? "min-h-0 flex-1 overflow-hidden" : "flex-1"}>
-                <MobileRouteTransition disabled={chatRoute} className={chatRoute ? undefined : "h-full"}>
+                <MobileRouteTransition disabled={chatRoute}>
                   <Outlet />
                 </MobileRouteTransition>
               </div>
