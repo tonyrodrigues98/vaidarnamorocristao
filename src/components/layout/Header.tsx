@@ -493,12 +493,6 @@ export function Header() {
                   </span>
                 </MobileItem>
 
-                <MobileItem to="/dashboard" onClick={close}>
-                  <span className="flex items-center gap-2">
-                    <LayoutDashboard className="h-4 w-4" /> Dashboard
-                  </span>
-                </MobileItem>
-
                 <MobileItem to="/notificacoes" onClick={close}>
                   <span className="flex items-center gap-2">
                     <Bell className="h-4 w-4" /> Notificações
