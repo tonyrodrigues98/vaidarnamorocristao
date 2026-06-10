@@ -98,7 +98,14 @@ function Comunidade() {
   const canModerateMessages = isAdmin || role === "moderador";
   const canFlagMessages = isAdmin || role === "moderador" || role === "apresentador";
   const isStaffViewer = canFlagMessages;
-  const [messages, setMessages] = useState<GMsg[]>([]);
+  const [messages, setMessages] = useState<LocalGMsg[]>([]);
+  const [loadingOlder, setLoadingOlder] = useState(false);
+  const [hasMoreOlder, setHasMoreOlder] = useState(true);
+  const [showNewBadge, setShowNewBadge] = useState(false);
+  const nearBottomRef = useRef(true);
+  const initializedScrollRef = useRef(false);
+  const prevLenRef = useRef(0);
+  const PAGE_SIZE = 50;
   const [profiles, setProfiles] = useState<Record<string, Profile>>({});
   const [approved, setApproved] = useState<boolean | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
