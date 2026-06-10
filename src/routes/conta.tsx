@@ -5,6 +5,8 @@ import { Header } from "@/components/layout/Header";
 import { MobileAppHeader } from "@/components/mobile/MobileAppHeader";
 import { AccountDangerZone } from "@/components/AccountDangerZone";
 import { useAuth } from "@/lib/auth";
+import { useTheme } from "@/lib/theme";
+import { Switch } from "@/components/ui/switch";
 import {
   ChevronRight,
   User as UserIcon,
@@ -17,6 +19,8 @@ import {
   UserX,
   LogOut,
   AlertTriangle,
+  Moon,
+  LayoutDashboard,
 } from "lucide-react";
 
 export const Route = createFileRoute("/conta")({
@@ -134,7 +138,9 @@ function SettingsItem(props: SettingsItemProps) {
 }
 
 function ContaPage() {
-  const { user, signOut } = useAuth();
+  const { user, signOut, role } = useAuth();
+  const { theme, toggle: toggleTheme } = useTheme();
+  const isStaff = role !== "user";
   const [signingOut, setSigningOut] = useState(false);
 
   const handleSignOut = async () => {
@@ -200,6 +206,17 @@ function ContaPage() {
         ) : null}
 
         <div className="space-y-6">
+          {isStaff && (
+            <SettingsGroup title="Equipe">
+              <SettingsItem
+                icon={LayoutDashboard}
+                title="Painel administrativo"
+                description="Acesse o painel de gestão"
+                to="/admin"
+              />
+            </SettingsGroup>
+          )}
+
           <SettingsGroup title="Perfil e segurança">
             <SettingsItem
               icon={UserIcon}
@@ -227,6 +244,20 @@ function ContaPage() {
               title="Notificações"
               description="Veja e gerencie suas novidades"
               to="/notificacoes"
+            />
+            <SettingsItem
+              icon={Moon}
+              title="Tema do app"
+              description={theme === "dark" ? "Modo escuro ativado" : "Modo claro ativado"}
+              onClick={toggleTheme}
+              showChevron={false}
+              rightContent={
+                <Switch
+                  checked={theme === "dark"}
+                  onCheckedChange={toggleTheme}
+                  aria-label="Alternar tema claro e escuro"
+                />
+              }
             />
           </SettingsGroup>
 
