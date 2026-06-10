@@ -354,15 +354,7 @@ function List() {
       <div className="min-h-screen bg-gradient-to-b from-rose-50/70 via-background to-background dark:from-rose-950/10 dark:via-background dark:to-background">
         <Header />
         <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-          <div className="h-56 animate-pulse rounded-3xl border border-border/70 bg-card/70 shadow-soft" />
-          <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {[1, 2, 3].map((item) => (
-              <div
-                key={item}
-                className="h-80 animate-pulse rounded-3xl border border-border/70 bg-card/70 shadow-soft"
-              />
-            ))}
-          </div>
+          <PretendentesSkeleton cards={3} />
         </main>
       </div>
     );
@@ -615,13 +607,8 @@ function List() {
 
         {canBrowsePretendentes &&
           (loadingList ? (
-            <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {[1, 2, 3].map((i) => (
-                <div
-                  key={i}
-                  className="h-80 animate-pulse rounded-3xl border border-border/70 bg-card/70 shadow-soft"
-                />
-              ))}
+            <div className="mt-8">
+              <PretendentesSkeleton cards={3} />
             </div>
           ) : filtered.length === 0 ? (
             <div className="mt-8 rounded-3xl border border-border/70 bg-card/80 p-10 text-center shadow-soft backdrop-blur sm:p-12">
