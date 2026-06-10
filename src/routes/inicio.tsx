@@ -431,7 +431,7 @@ function InicioPage() {
       </div>
     );
   }
-  if (!profile) return <Navigate to="/onboarding/etapa-1" />;
+  if (!profile) return <Navigate to="/onboarding" />;
 
   const firstName = (profile.full_name ?? "").split(" ")[0] || "amig@";
   const isApproved = profile.status === "approved";

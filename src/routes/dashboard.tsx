@@ -271,7 +271,7 @@ function Dashboard() {
         <Header />
       </div>
     );
-  if (!profile) return <Navigate to="/onboarding/etapa-1" />;
+  if (!profile) return <Navigate to="/onboarding" />;
 
   const statusInfo = {
     pending: {
@@ -332,7 +332,7 @@ function Dashboard() {
             <p className="mt-1 text-sm text-muted-foreground">{statusInfo.text}</p>
             {profile.status === "rejected" && (
               <Button asChild variant="outline" className="mt-4">
-                <Link to="/onboarding/etapa-1">Editar perfil</Link>
+                <Link to="/onboarding">Editar perfil</Link>
               </Button>
             )}
           </div>

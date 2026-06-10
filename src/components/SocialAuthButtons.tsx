@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
  * Botões de login social (Google e Apple).
  * Após o redirect, o usuário volta autenticado. Em src/routes/__root.tsx
  * (ou no fluxo pós-login) verificamos se ele já tem perfil e enviamos
- * para /onboarding/etapa-1 se não tiver.
+ * para /onboarding se não tiver.
  */
 export function SocialAuthButtons({ mode = "login" }: { mode?: "login" | "signup" }) {
   const [loading, setLoading] = useState<null | "google" | "apple">(null);
