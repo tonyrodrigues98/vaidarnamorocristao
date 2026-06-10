@@ -8,6 +8,8 @@ import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
 import { MobileAppHeader } from "@/components/mobile/MobileAppHeader";
 import { ChatSkeleton } from "@/components/ui/AppSkeletons";
+import { AppEmptyState } from "@/components/ui/AppEmptyState";
+import { UsersRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Send,
@@ -821,8 +823,13 @@ function Comunidade() {
               !initialLoaded ? (
                 <ChatSkeleton bubbles={8} />
               ) : (
-                <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-                  Nenhuma mensagem ainda. Seja o primeiro!
+                <div className="flex h-full items-center justify-center">
+                  <AppEmptyState
+                    compact
+                    icon={<UsersRound className="h-5 w-5" />}
+                    title="Seja o primeiro a falar hoje"
+                    description="Compartilhe uma mensagem leve, respeitosa e edificante com a comunidade."
+                  />
                 </div>
               )
             ) : (

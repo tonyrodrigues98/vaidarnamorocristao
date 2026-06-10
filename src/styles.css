@@ -783,6 +783,42 @@
   }
 }
 
+/* Compact icon button — circular tap target with subtle press feedback */
+.app-icon-button {
+  -webkit-tap-highlight-color: transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  transition:
+    transform 120ms cubic-bezier(0.22, 0.61, 0.36, 1),
+    background-color 120ms ease;
+}
+.app-icon-button:active {
+  transform: scale(0.92);
+}
+/* Soft pill button — gentle press */
+.app-soft-button {
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform 120ms cubic-bezier(0.22, 0.61, 0.36, 1),
+    box-shadow 120ms ease,
+    background-color 120ms ease;
+}
+.app-soft-button:active {
+  transform: scale(0.97);
+}
+@media (prefers-reduced-motion: reduce) {
+  .app-icon-button,
+  .app-soft-button {
+    transition: none;
+  }
+  .app-icon-button:active,
+  .app-soft-button:active {
+    transform: none;
+  }
+}
+
 /* Network status banner — soft fade-in */
 .app-network-banner {
   animation: appNetworkBannerIn 180ms cubic-bezier(0.22, 0.61, 0.36, 1) both;

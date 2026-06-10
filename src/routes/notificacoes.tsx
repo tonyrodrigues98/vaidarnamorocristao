@@ -4,6 +4,7 @@ import { MobileAppHeader } from "@/components/mobile/MobileAppHeader";
 import { useNotifications, type AppNotification } from "@/lib/notifications";
 import { Button } from "@/components/ui/button";
 import { NotificationSkeleton } from "@/components/ui/AppSkeletons";
+import { AppEmptyState } from "@/components/ui/AppEmptyState";
 import {
   Bell,
   Check,
@@ -188,10 +189,13 @@ function NotificacoesPage() {
         {loading ? (
           <NotificationSkeleton rows={6} />
         ) : visible.length === 0 ? (
-          <div className="glass rounded-2xl p-8 text-center">
-            <Bell className="mx-auto mb-3 h-8 w-8 text-muted-foreground" />
-            <p className="text-sm text-muted-foreground">Nenhuma notificação por enquanto.</p>
-          </div>
+          <AppEmptyState
+            icon={<Bell className="h-5 w-5" />}
+            title="Nenhuma notificação por enquanto"
+            description="Quando alguém interagir com você, suas novidades aparecerão aqui."
+            actionLabel="Explorar pretendentes"
+            actionTo="/pretendentes"
+          />
         ) : (
           <ul className="space-y-2">
             <AnimatePresence initial={false}>

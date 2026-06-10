@@ -12,6 +12,7 @@ import { DecoratedAvatar } from "@/components/DecoratedAvatar";
 import { CommitmentPauseCard } from "@/components/commitment/CommitmentPauseCard";
 import { useConversationsList } from "@/hooks/useConversationsList";
 import { ConversationListSkeleton } from "@/components/ui/AppSkeletons";
+import { AppEmptyState } from "@/components/ui/AppEmptyState";
 
 export const Route = createFileRoute("/conversas/")({
   component: () => (
@@ -95,21 +96,27 @@ function List() {
           ) : loadingList ? (
             <ConversationListSkeleton rows={6} />
           ) : items.length === 0 ? (
-            <div className="rounded-2xl border border-border/50 bg-card/70 p-10 text-center text-sm text-muted-foreground shadow-sm">
-              <MessageCircle className="mx-auto mb-3 h-7 w-7 text-[var(--rose)]" />
-              Quando houver interesse mútuo, suas conversas aparecerão aqui.
-            </div>
+            <AppEmptyState
+              icon={<MessageCircle className="h-5 w-5" />}
+              title="Nenhuma conversa privada ainda"
+              description="Quando você tiver um match ou iniciar uma conversa, ela aparecerá aqui."
+              actionLabel="Ver pretendentes"
+              actionTo="/pretendentes"
+            />
           ) : filteredItems.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-border/50 bg-card/40 p-6 text-center text-sm text-muted-foreground">
-              Nenhuma conversa encontrada para "{query}".
-            </div>
+            <AppEmptyState
+              compact
+              icon={<Search className="h-5 w-5" />}
+              title="Nada encontrado"
+              description="Tente buscar por outro nome ou abra a Comunidade Geral."
+            />
           ) : (
             filteredItems.map((i) => (
               <Link
                 key={i.matchId}
                 to="/conversas/$matchId"
                 params={{ matchId: i.matchId }}
-                className="flex items-center gap-4 rounded-2xl border border-border/40 bg-card/80 p-3.5 shadow-sm transition hover:bg-card hover:shadow-md active:scale-[0.997]"
+                className="app-card-interactive flex items-center gap-4 rounded-2xl border border-border/40 bg-card/80 p-3.5 shadow-sm transition hover:bg-card hover:shadow-md"
               >
                 <div className="relative flex shrink-0 items-center justify-center">
                   <DecoratedAvatar
