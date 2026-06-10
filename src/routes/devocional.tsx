@@ -989,6 +989,17 @@ function PostCard(props: PostCardProps) {
         {post.content}
       </p>
 
+      {featured && (
+        <div className="mt-5 rounded-2xl border border-[var(--rose)]/15 bg-background/70 p-4">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--rose)]">
+            Para refletir
+          </p>
+          <p className="mt-1.5 text-sm leading-relaxed text-foreground/80">
+            Leia com calma, ore sobre isso e carregue essa palavra com você durante o dia.
+          </p>
+        </div>
+      )}
+
       {author && (
         <div className="mt-5 flex items-center gap-2 text-xs text-muted-foreground">
           <Avatar profile={author} size={6} />
