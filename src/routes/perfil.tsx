@@ -793,7 +793,54 @@ function PerfilPage() {
             </div>
           </div>
         </section>
-        {user && <HomeStarterSection userId={user.id} />}
+        {user && (
+          <HomeStarterSection
+            userId={user.id}
+            topSpacing
+            onAction={(id) => {
+              const scrollTop = () => {
+                if (typeof window === "undefined") return;
+                window.setTimeout(() => {
+                  const el = document.getElementById("perfil-tabs");
+                  el?.scrollIntoView({ behavior: "smooth", block: "start" });
+                }, 60);
+              };
+              if (id === "photo" || id === "extra_photos") {
+                setActiveTab("profile");
+                setEditingProfile(true);
+                scrollTop();
+                return true;
+              }
+              if (
+                id === "name" ||
+                id === "bio" ||
+                id === "city" ||
+                id === "marital" ||
+                id === "church" ||
+                id === "height" ||
+                id === "seeking"
+              ) {
+                setActiveTab("profile");
+                setEditingProfile(true);
+                scrollTop();
+                return true;
+              }
+              if (id === "looking_for_bio") {
+                setActiveTab("prefs");
+                setEditingPrefs(true);
+                scrollTop();
+                return true;
+              }
+              if (id === "free_frame") {
+                setActiveTab("customizacao");
+                scrollTop();
+                return true;
+              }
+              return false;
+            }}
+          />
+        )}
+        <div id="perfil-tabs" />
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-8">
           <div className="grid gap-6 lg:grid-cols-[292px_minmax(0,1fr)]">
             <aside className="hidden lg:block">

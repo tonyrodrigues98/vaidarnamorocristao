@@ -33,6 +33,15 @@ import {
 
 type Props = {
   userId: string;
+  /**
+   * Optional override for next-action clicks. Receives the action id and
+   * the default link target. Returning true skips the default navigation.
+   * Lets host pages (like /perfil) switch tabs / scroll to real sections
+   * instead of relying on Link navigation.
+   */
+  onAction?: (actionId: string, to: string) => boolean | void;
+  /** Add top margin so the card breathes away from preceding content. */
+  topSpacing?: boolean;
 };
 
 /**
@@ -45,7 +54,7 @@ type Props = {
  * All values are derived from real profile/advanced/preferences data.
  * Never fabricates data, never deducts coins.
  */
-export function HomeStarterSection({ userId }: Props) {
+export function HomeStarterSection({ userId, onAction, topSpacing }: Props) {
   const [profile, setProfile] = useState<StrengthProfile | null>(null);
   const [advanced, setAdvanced] = useState<StrengthAdvanced>(null);
   const [prefs, setPrefs] = useState<StrengthPreferences>(null);
@@ -66,7 +75,7 @@ export function HomeStarterSection({ userId }: Props) {
           supabase
             .from("profiles")
             .select(
-              "full_name, age, sex, photo_url, city, state, height_cm, marital_status, bio, church, years_baptized",
+              "full_name, age, sex, photo_url, city, state, height_cm, marital, bio, church, years_baptized",
             )
             .eq("id", userId)
             .maybeSingle(),
@@ -181,7 +190,7 @@ export function HomeStarterSection({ userId }: Props) {
 
   if (loading) {
     return (
-      <section className="mb-4 px-4 sm:mb-6 sm:px-0">
+      <section className={`mb-4 px-4 sm:mb-6 sm:px-0 ${topSpacing ? "mt-6 sm:mt-8" : ""}`}>
         <div className="h-28 animate-pulse rounded-3xl bg-muted/40" />
       </section>
     );
@@ -194,8 +203,24 @@ export function HomeStarterSection({ userId }: Props) {
         ? "text-amber-700 dark:text-amber-300"
         : "text-rose-700 dark:text-rose-300";
 
+  const primaryMissing = nextActions[0]?.id;
+  const dynamicHint =
+    percent >= 90
+      ? "Otimo! Seu perfil esta completo. Continue cuidando dele."
+      : percent >= 70
+        ? "Seu perfil ja transmite mais confianca."
+        : primaryMissing === "photo"
+          ? "Uma boa foto deixa seu perfil mais real e confiavel."
+          : primaryMissing === "bio"
+            ? "Completar a bio ajuda as pessoas certas a te conhecerem."
+            : primaryMissing === "city"
+              ? "Informar sua cidade ajuda a mostrar pessoas mais proximas."
+              : primaryMissing === "name"
+                ? "Preencher seu nome deixa o perfil mais humano."
+                : "Pequenos ajustes deixam seu perfil mais forte.";
+
   return (
-    <section className="mb-4 px-4 sm:mb-6 sm:px-0">
+    <section className={`mb-4 px-4 sm:mb-6 sm:px-0 ${topSpacing ? "mt-6 sm:mt-8" : ""}`}>
       <div className="rounded-3xl border border-border/60 bg-card/75 p-4 shadow-soft backdrop-blur sm:p-5">
         {/* Strength */}
         <div className="flex items-start gap-3">
@@ -213,11 +238,7 @@ export function HomeStarterSection({ userId }: Props) {
                 style={{ width: `${Math.max(4, percent)}%` }}
               />
             </div>
-            <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-              {percent >= 90
-                ? "Ótimo! Seu perfil está completo. Continue cuidando dele."
-                : "Completar bio e adicionar mais fotos ajuda as pessoas certas a te conhecerem."}
-            </p>
+            <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{dynamicHint}</p>
           </div>
         </div>
 
@@ -232,32 +253,51 @@ export function HomeStarterSection({ userId }: Props) {
               {nextActions.map((a) => {
                 const Icon = a.icon;
                 const isFreeFrame = a.id === "free_frame";
+                const handleClick = () => {
+                  if (onAction) {
+                    const handled = onAction(a.id, a.to);
+                    if (handled) return;
+                  }
+                };
                 return (
                   <li
                     key={a.id}
-                    className="flex items-center gap-3 rounded-2xl border border-border/50 bg-background/60 p-3"
+                    className="flex flex-wrap items-center gap-3 rounded-2xl border border-border/50 bg-background/60 p-3"
                   >
                     <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[var(--petal)]/40 text-[var(--rose)]">
                       <Icon className="h-4 w-4" />
                     </div>
-                    <div className="min-w-0 flex-1">
+                    <div className="min-w-0 flex-1 basis-[140px]">
                       <p className="truncate text-sm font-medium text-foreground">{a.title}</p>
                       <p className="line-clamp-2 text-xs text-muted-foreground">{a.description}</p>
                     </div>
                     {isFreeFrame ? (
                       <Button
                         size="sm"
-                        className="app-pressable shrink-0 rounded-full"
-                        onClick={openFrameModal}
+                        className="app-pressable ml-auto shrink-0 rounded-full"
+                        onClick={() => {
+                          if (onAction && onAction(a.id, a.to)) return;
+                          openFrameModal();
+                        }}
                       >
                         {a.ctaLabel}
+                      </Button>
+                    ) : onAction ? (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="app-pressable ml-auto shrink-0 rounded-full"
+                        onClick={handleClick}
+                      >
+                        {a.ctaLabel}
+                        <ArrowRight className="ml-1 h-3.5 w-3.5" />
                       </Button>
                     ) : (
                       <Button
                         asChild
                         size="sm"
                         variant="outline"
-                        className="app-pressable shrink-0 rounded-full"
+                        className="app-pressable ml-auto shrink-0 rounded-full"
                       >
                         <Link to={a.to as never}>
                           {a.ctaLabel}
