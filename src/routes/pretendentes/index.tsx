@@ -7,6 +7,7 @@ import { PretendenteFeaturedCard } from "@/components/pretendentes/PretendenteFe
 import { useAuth } from "@/lib/auth";
 import { getActiveCommitmentByUser } from "@/lib/commitments";
 import { Header } from "@/components/layout/Header";
+import { MobileAppHeader } from "@/components/mobile/MobileAppHeader";
 import { Input } from "@/components/ui/input";
 import {
   Select,
