@@ -10,7 +10,6 @@ import { AuthProvider } from "@/lib/auth";
 import { Toaster } from "@/components/ui/sonner";
 import { NotificationsBridge } from "@/lib/useRealtimeNotifications";
 import { ThemeProvider } from "@/lib/theme";
-import { TermsGate } from "@/components/TermsGate";
 import { SupportFooterButton } from "@/components/SupportFooterButton";
 import { PresenceProvider } from "@/lib/presence";
 import { BanGuard } from "@/components/BanGuard";
@@ -224,7 +223,6 @@ function RootComponent() {
             </div>
             )}
           </MobileAppShell>
-          <TermsGate />
         </PresenceProvider>
         <Toaster richColors position="top-right" />
       </AuthProvider>
