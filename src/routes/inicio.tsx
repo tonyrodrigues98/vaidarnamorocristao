@@ -235,6 +235,7 @@ function InicioPage() {
   const [commitmentPartner, setCommitmentPartner] = useState<string | null>(null);
   const [commitmentDays, setCommitmentDays] = useState(0);
   const [frameClaimed, setFrameClaimed] = useState(false);
+  const [ownsAnyFrame, setOwnsAnyFrame] = useState(false);
 
   // Live clock — updates every 60s and on visibility change so the
   // greeting/theme transitions naturally from afternoon to night, etc.
@@ -255,6 +256,28 @@ function InicioPage() {
   useEffect(() => {
     if (!user) return;
     setFrameClaimed(hasClaimedFreeFrameLocal(user.id));
+  }, [user]);
+
+  // Check if the user already owns at least one frame decoration. If so we
+  // treat the "free frame" mission as completed and hide the redeem banner.
+  useEffect(() => {
+    if (!user) return;
+    let cancel = false;
+    (async () => {
+      const { count } = await supabase
+        .from("user_decorations" as never)
+        .select("decoration_id, avatar_decorations!inner(type)", {
+          count: "exact",
+          head: true,
+        })
+        .eq("user_id", user.id)
+        .eq("avatar_decorations.type", "frame");
+      if (cancel) return;
+      setOwnsAnyFrame((count ?? 0) > 0);
+    })();
+    return () => {
+      cancel = true;
+    };
   }, [user]);
 
   useEffect(() => {
