@@ -1,11 +1,13 @@
 import {
   Outlet,
   Link,
-  createRootRoute,
+  createRootRouteWithContext,
   HeadContent,
   Scripts,
   useLocation,
 } from "@tanstack/react-router";
+import { QueryClientProvider } from "@tanstack/react-query";
+import type { AppRouterContext } from "@/router";
 import { AuthProvider } from "@/lib/auth";
 import { Toaster } from "@/components/ui/sonner";
 import { NotificationsBridge } from "@/lib/useRealtimeNotifications";
@@ -45,7 +47,7 @@ function NotFoundComponent() {
   );
 }
 
-export const Route = createRootRoute({
+export const Route = createRootRouteWithContext<AppRouterContext>()({
   head: () => ({
     meta: [
       { charSet: "utf-8" },
@@ -168,6 +170,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   const location = useLocation();
+  const { queryClient } = Route.useRouteContext();
   const showFooter = shouldShowFooter(location.pathname);
   const chatRoute = isChatRoute(location.pathname);
   const isHome = location.pathname === "/";
@@ -189,8 +192,9 @@ function RootComponent() {
   }, []);
 
   return (
-    <ThemeProvider>
-      <AuthProvider>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider>
+        <AuthProvider>
         <PresenceProvider>
           <NotificationsBridge />
           <BanGuard />
@@ -232,7 +236,8 @@ function RootComponent() {
           </MobileAppShell>
         </PresenceProvider>
         <Toaster richColors position="top-right" />
-      </AuthProvider>
-    </ThemeProvider>
+        </AuthProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
   );
 }

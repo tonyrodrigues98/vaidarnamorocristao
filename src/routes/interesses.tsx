@@ -2,10 +2,11 @@ import { PhotoImg } from "@/components/PhotoImg";
 import { friendlyError } from "@/lib/errors";
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { RequireApproved } from "@/components/RequireApproved";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -28,6 +29,64 @@ type ProfileLite = {
 type ReceivedRow = { id: string; created_at: string; sender: ProfileLite | null };
 type SentRow = { id: string; created_at: string; receiver: ProfileLite | null };
 
+type InterestsPayload = {
+  received: ReceivedRow[];
+  sent: SentRow[];
+  matchedIds: string[];
+  commitment: RelationshipCommitment | null;
+};
+
+async function fetchInterests(userId: string): Promise<InterestsPayload> {
+  const commitment = await getActiveCommitmentByUser(userId);
+  if (commitment) {
+    return { received: [], sent: [], matchedIds: [], commitment };
+  }
+  const [r, s, mts] = await Promise.all([
+    supabase
+      .from("interests")
+      .select("id, created_at, sender_id")
+      .eq("receiver_id", userId)
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("interests")
+      .select("id, created_at, receiver_id")
+      .eq("sender_id", userId)
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("matches")
+      .select("user_a, user_b")
+      .or(`user_a.eq.${userId},user_b.eq.${userId}`),
+  ]);
+  const ids = Array.from(
+    new Set<string>([
+      ...(r.data ?? []).map((x) => x.sender_id),
+      ...(s.data ?? []).map((x) => x.receiver_id),
+    ]),
+  );
+  const profsRes = ids.length
+    ? await supabase
+        .from("profiles")
+        .select("id,full_name,age,city,state,church,photo_url,verified")
+        .in("id", ids)
+    : { data: [] as ProfileLite[] };
+  const map = new Map<string, ProfileLite>(
+    (profsRes.data ?? []).map((p) => [p.id, p as ProfileLite]),
+  );
+  const received: ReceivedRow[] = (r.data ?? []).map((x) => ({
+    id: x.id,
+    created_at: x.created_at,
+    sender: map.get(x.sender_id) ?? null,
+  }));
+  const sent: SentRow[] = (s.data ?? []).map((x) => ({
+    id: x.id,
+    created_at: x.created_at,
+    receiver: map.get(x.receiver_id) ?? null,
+  }));
+  const matchedIds: string[] = [];
+  (mts.data ?? []).forEach((m) => matchedIds.push(m.user_a === userId ? m.user_b : m.user_a));
+  return { received, sent, matchedIds, commitment: null };
+}
+
 export const Route = createFileRoute("/interesses")({
   component: () => (
     <RequireApproved>
@@ -38,119 +97,72 @@ export const Route = createFileRoute("/interesses")({
 
 function Page() {
   const { user, loading } = useAuth();
-  const [received, setReceived] = useState<ReceivedRow[]>([]);
-  const [sent, setSent] = useState<SentRow[]>([]);
-  const [matchedIds, setMatchedIds] = useState<Set<string>>(new Set());
-  const [busy, setBusy] = useState<string | null>(null);
-  const [loadingList, setLoadingList] = useState(true);
-  const [activeCommitment, setActiveCommitment] = useState<RelationshipCommitment | null>(null);
+  const qc = useQueryClient();
+  const queryKey = ["interests", user?.id] as const;
 
-  async function load() {
-    if (!user) return;
-    setLoadingList(true);
-    const commitment = await getActiveCommitmentByUser(user.id);
-    setActiveCommitment(commitment);
-    if (commitment) {
-      setReceived([]);
-      setSent([]);
-      setMatchedIds(new Set());
-      setLoadingList(false);
-      return;
-    }
-    const [r, s, mts] = await Promise.all([
-      supabase
-        .from("interests")
-        .select("id, created_at, sender_id")
-        .eq("receiver_id", user.id)
-        .order("created_at", { ascending: false }),
-      supabase
-        .from("interests")
-        .select("id, created_at, receiver_id")
-        .eq("sender_id", user.id)
-        .order("created_at", { ascending: false }),
-      supabase
-        .from("matches")
-        .select("user_a, user_b")
-        .or(`user_a.eq.${user.id},user_b.eq.${user.id}`),
-    ]);
-    const ids = Array.from(
-      new Set<string>([
-        ...(r.data ?? []).map((x) => x.sender_id),
-        ...(s.data ?? []).map((x) => x.receiver_id),
-      ]),
-    );
-    const profsRes = ids.length
-      ? await supabase
-          .from("profiles")
-          .select("id,full_name,age,city,state,church,photo_url,verified")
-          .in("id", ids)
-      : { data: [] as ProfileLite[] };
-    const map = new Map<string, ProfileLite>(
-      (profsRes.data ?? []).map((p) => [p.id, p as ProfileLite]),
-    );
-    setReceived(
-      (r.data ?? []).map((x) => ({
-        id: x.id,
-        created_at: x.created_at,
-        sender: map.get(x.sender_id) ?? null,
-      })),
-    );
-    setSent(
-      (s.data ?? []).map((x) => ({
-        id: x.id,
-        created_at: x.created_at,
-        receiver: map.get(x.receiver_id) ?? null,
-      })),
-    );
-    const matched = new Set<string>();
-    (mts.data ?? []).forEach((m) => matched.add(m.user_a === user.id ? m.user_b : m.user_a));
-    setMatchedIds(matched);
-    setLoadingList(false);
-  }
+  const { data, isPending } = useQuery({
+    queryKey,
+    queryFn: () => fetchInterests(user!.id),
+    enabled: !!user,
+  });
+  const received = data?.received ?? [];
+  const sent = data?.sent ?? [];
+  const matchedIds = new Set(data?.matchedIds ?? []);
+  const activeCommitment = data?.commitment ?? null;
+  const loadingList = isPending && !!user;
 
   useEffect(() => {
     if (!user) return;
-    load();
     markSeen(user.id, "interests");
+    const invalidate = () => qc.invalidateQueries({ queryKey });
     const ch = supabase
       .channel("interests-page")
-      .on("postgres_changes", { event: "*", schema: "public", table: "interests" }, load)
-      .on("postgres_changes", { event: "*", schema: "public", table: "matches" }, load)
+      .on("postgres_changes", { event: "*", schema: "public", table: "interests" }, invalidate)
+      .on("postgres_changes", { event: "*", schema: "public", table: "matches" }, invalidate)
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "relationship_commitments" },
-        load,
+        invalidate,
       )
       .subscribe();
     return () => {
       supabase.removeChannel(ch);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]);
+  }, [user?.id]);
+
+  const retribuirMut = useMutation({
+    mutationFn: async (senderId: string) => {
+      if (!user) throw new Error("Sem sessão");
+      const { error } = await supabase
+        .from("interests")
+        .insert({ sender_id: user.id, receiver_id: senderId });
+      if (error && !error.message.includes("duplicate")) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Match! Vocês já podem conversar.");
+      qc.invalidateQueries({ queryKey });
+    },
+    onError: (err: Error) => toast.error(friendlyError(err)),
+  });
+  const cancelarMut = useMutation({
+    mutationFn: async (interestId: string) => {
+      await supabase.from("interests").delete().eq("id", interestId);
+      return interestId;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey }),
+  });
+  const busy =
+    retribuirMut.isPending && retribuirMut.variables
+      ? retribuirMut.variables
+      : cancelarMut.isPending && cancelarMut.variables
+        ? cancelarMut.variables
+        : null;
 
   if (!loading && !user) return <Navigate to="/auth/login" />;
 
-  async function retribuir(senderId: string) {
-    if (!user) return;
-    setBusy(senderId);
-    const { error } = await supabase
-      .from("interests")
-      .insert({ sender_id: user.id, receiver_id: senderId });
-    setBusy(null);
-    if (error && !error.message.includes("duplicate")) {
-      toast.error(friendlyError(error));
-      return;
-    }
-    toast.success("Match! Vocês já podem conversar.");
-    load();
-  }
-
-  async function cancelar(interestId: string) {
-    setBusy(interestId);
-    await supabase.from("interests").delete().eq("id", interestId);
-    setBusy(null);
-    load();
-  }
+  const retribuir = (senderId: string) => retribuirMut.mutate(senderId);
+  const cancelar = (interestId: string) => cancelarMut.mutate(interestId);
 
   return (
     <div className="min-h-screen">

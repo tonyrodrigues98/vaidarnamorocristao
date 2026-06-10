@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { Heart, MessageCircle, User as UserIcon, HeartCrack } from "lucide-react";
@@ -41,6 +42,39 @@ type MatchItem = {
   };
 };
 
+type MatchesPayload = {
+  items: MatchItem[];
+  commitment: RelationshipCommitment | null;
+};
+
+async function fetchMatches(userId: string): Promise<MatchesPayload> {
+  const commitment = await getActiveCommitmentByUser(userId);
+  if (commitment) return { items: [], commitment };
+  const { data: matches } = await supabase
+    .from("matches")
+    .select("id, user_a, user_b, created_at")
+    .or(`user_a.eq.${userId},user_b.eq.${userId}`)
+    .order("created_at", { ascending: false });
+  if (!matches?.length) return { items: [], commitment: null };
+  const partnerIds = matches.map((m) => (m.user_a === userId ? m.user_b : m.user_a));
+  const { data: profs } = await supabase
+    .from("profiles")
+    .select(
+      "id, full_name, age, city, state, photo_url, verified, equipped_frame_id, equipped_aura_id, equipped_sticker_id",
+    )
+    .in("id", partnerIds);
+  const map = new Map((profs ?? []).map((p) => [p.id, p]));
+  const items: MatchItem[] = matches
+    .map((m) => {
+      const pid = m.user_a === userId ? m.user_b : m.user_a;
+      const p = map.get(pid);
+      if (!p) return null;
+      return { matchId: m.id, createdAt: m.created_at, partner: p } satisfies MatchItem;
+    })
+    .filter((x): x is MatchItem => !!x);
+  return { items, commitment: null };
+}
+
 export const Route = createFileRoute("/matches")({
   component: () => (
     <RequireApproved>
@@ -51,85 +85,56 @@ export const Route = createFileRoute("/matches")({
 
 function MatchesPage() {
   const { user, loading } = useAuth();
-  const [items, setItems] = useState<MatchItem[]>([]);
-  const [loadingList, setLoadingList] = useState(true);
-  const [busy, setBusy] = useState<string | null>(null);
-  const [activeCommitment, setActiveCommitment] = useState<RelationshipCommitment | null>(null);
+  const qc = useQueryClient();
+  const queryKey = ["matches", user?.id] as const;
 
-  async function load() {
-    if (!user) return;
-    const commitment = await getActiveCommitmentByUser(user.id);
-    setActiveCommitment(commitment);
-    if (commitment) {
-      setItems([]);
-      setLoadingList(false);
-      return;
-    }
-    const { data: matches } = await supabase
-      .from("matches")
-      .select("id, user_a, user_b, created_at")
-      .or(`user_a.eq.${user.id},user_b.eq.${user.id}`)
-      .order("created_at", { ascending: false });
-    if (!matches?.length) {
-      setItems([]);
-      setLoadingList(false);
-      return;
-    }
-    const partnerIds = matches.map((m) => (m.user_a === user.id ? m.user_b : m.user_a));
-    const { data: profs } = await supabase
-      .from("profiles")
-      .select(
-        "id, full_name, age, city, state, photo_url, verified, equipped_frame_id, equipped_aura_id, equipped_sticker_id",
-      )
-      .in("id", partnerIds);
-    const map = new Map((profs ?? []).map((p) => [p.id, p]));
-    const list: MatchItem[] = matches
-      .map((m) => {
-        const pid = m.user_a === user.id ? m.user_b : m.user_a;
-        const p = map.get(pid);
-        if (!p) return null;
-        return {
-          matchId: m.id,
-          createdAt: m.created_at,
-          partner: p,
-        } satisfies MatchItem;
-      })
-      .filter((x): x is MatchItem => !!x);
-    setItems(list);
-    setLoadingList(false);
-  }
+  const { data, isPending } = useQuery({
+    queryKey,
+    queryFn: () => fetchMatches(user!.id),
+    enabled: !!user,
+  });
+  const items = data?.items ?? [];
+  const activeCommitment = data?.commitment ?? null;
+  const loadingList = isPending && !!user;
 
   useEffect(() => {
     if (!user) return;
-    load();
+    const invalidate = () => qc.invalidateQueries({ queryKey });
     const ch = supabase
       .channel("matches-list")
-      .on("postgres_changes", { event: "*", schema: "public", table: "matches" }, load)
+      .on("postgres_changes", { event: "*", schema: "public", table: "matches" }, invalidate)
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "relationship_commitments" },
-        load,
+        invalidate,
       )
       .subscribe();
     return () => {
       supabase.removeChannel(ch);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]);
+  }, [user?.id]);
+
+  const unmatchMut = useMutation({
+    mutationFn: async (matchId: string) => {
+      const { error } = await supabase.rpc("unmatch", { _match_id: matchId });
+      if (error) throw error;
+      return matchId;
+    },
+    onSuccess: (matchId) => {
+      toast.success("Match desfeito.");
+      qc.setQueryData<MatchesPayload>(queryKey, (prev) =>
+        prev ? { ...prev, items: prev.items.filter((i) => i.matchId !== matchId) } : prev,
+      );
+      qc.invalidateQueries({ queryKey });
+    },
+    onError: (err: Error) => toast.error(err.message),
+  });
+  const busy = unmatchMut.isPending ? unmatchMut.variables ?? null : null;
 
   if (!loading && !user) return <Navigate to="/auth/login" />;
 
-  async function unmatch(matchId: string) {
-    setBusy(matchId);
-    const { error } = await supabase.rpc("unmatch", { _match_id: matchId });
-    setBusy(null);
-    if (error) {
-      toast.error(error.message);
-      return;
-    }
-    toast.success("Match desfeito.");
-    setItems((prev) => prev.filter((i) => i.matchId !== matchId));
-  }
+  const unmatch = (matchId: string) => unmatchMut.mutate(matchId);
 
   return (
     <div className="min-h-screen">
