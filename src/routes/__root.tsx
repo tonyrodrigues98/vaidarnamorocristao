@@ -171,11 +171,12 @@ function RootComponent() {
   useEffect(() => {
     const el = document.getElementById("app-splash");
     if (!el) return;
-    const hide = () => {
+    const done = (window as unknown as { __splashDone?: () => void }).__splashDone;
+    if (done) done();
+    const t = window.setTimeout(() => {
       el.classList.add("is-hiding");
       window.setTimeout(() => el.remove(), 400);
-    };
-    const t = window.setTimeout(hide, 250);
+    }, 280);
     return () => window.clearTimeout(t);
   }, []);
 
