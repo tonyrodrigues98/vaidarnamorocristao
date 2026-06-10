@@ -10,6 +10,7 @@ import { MobileAppHeader } from "@/components/mobile/MobileAppHeader";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
+import { AppEmptyState } from "@/components/ui/AppEmptyState";
 import { recomputeMyBadges } from "@/lib/recomputeBadges";
 import { markHomeChecklistStep } from "@/lib/homeChecklist";
 import {
@@ -618,9 +619,11 @@ function Devocional() {
 
         <section className="mt-6 space-y-6">
           {sortedPosts.length === 0 && !loadingPosts ? (
-            <div className="glass rounded-3xl p-10 text-center text-muted-foreground shadow-soft">
-              Nenhum devocional publicado ainda.
-            </div>
+            <AppEmptyState
+              icon={<BookOpen className="h-6 w-6" />}
+              title="Nenhum devocional disponível"
+              description="Volte em breve para um novo momento de reflexão e fé."
+            />
           ) : (
             <>
               {featuredPost && (

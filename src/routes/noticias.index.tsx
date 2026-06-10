@@ -6,6 +6,7 @@ import { useAuth } from "@/lib/auth";
 import { markSeen } from "@/lib/lastSeen";
 import { Header } from "@/components/layout/Header";
 import { ArrowRight, Newspaper } from "lucide-react";
+import { AppEmptyState } from "@/components/ui/AppEmptyState";
 
 type Post = {
   id: string;
@@ -87,9 +88,11 @@ function Noticias() {
 
         <div className="mt-6 space-y-5">
           {posts.length === 0 ? (
-            <div className="glass rounded-3xl p-10 text-center text-muted-foreground shadow-soft">
-              Nenhuma notícia publicada ainda.
-            </div>
+            <AppEmptyState
+              icon={<Newspaper className="h-6 w-6" />}
+              title="Nenhuma notícia por enquanto"
+              description="As novidades da comunidade aparecerão aqui quando forem publicadas."
+            />
           ) : (
             <>
               {latestPost && (

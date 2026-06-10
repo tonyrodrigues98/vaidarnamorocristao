@@ -24,6 +24,7 @@ import {
   Gem,
   Heart,
   Lock,
+  SearchX,
   ShieldCheck,
   SlidersHorizontal,
   Sparkles,
@@ -37,6 +38,7 @@ import { LOVE_LANGUAGE, MINISTRY, type AdvancedProfile } from "@/lib/profileAdva
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
 import { markHomeChecklistStep } from "@/lib/homeChecklist";
+import { AppEmptyState } from "@/components/ui/AppEmptyState";
 
 type Profile = {
   id: string;
@@ -622,23 +624,18 @@ function List() {
               <PretendentesSkeleton cards={3} />
             </div>
           ) : filtered.length === 0 ? (
-            <div className="mt-8 rounded-3xl border border-border/70 bg-card/80 p-10 text-center shadow-soft backdrop-blur sm:p-12">
-              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-rose-100 text-rose-600 dark:bg-rose-950/40 dark:text-rose-300">
-                <Sparkles className="h-7 w-7" />
-              </div>
-              <p className="mt-4 text-xl font-semibold">
-                {hasFilters
-                  ? "Nenhum perfil corresponde aos filtros."
-                  : "Ainda não há pretendentes para mostrar."}
-              </p>
-              <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
-                Ajuste a busca ou volte mais tarde para encontrar novos perfis aprovados.
-              </p>
-              {hasFilters && (
-                <Button variant="outline" className="mt-5 rounded-full" onClick={clearAll}>
-                  Limpar filtros
-                </Button>
-              )}
+            <div className="mt-8">
+              <AppEmptyState
+                icon={<SearchX className="h-6 w-6" />}
+                title={hasFilters ? "Filtros muito específicos" : "Nenhum pretendente encontrado"}
+                description={
+                  hasFilters
+                    ? "Tente ampliar sua busca para encontrar mais pessoas compatíveis."
+                    : "Ajuste os filtros ou volte mais tarde para conhecer novas pessoas com propósito."
+                }
+                actionLabel={hasFilters ? "Limpar filtros" : undefined}
+                onAction={hasFilters ? clearAll : undefined}
+              />
             </div>
           ) : (
             <>
