@@ -1300,6 +1300,7 @@ function InicioPage() {
             </section>
           </>
         )}
+        </div>
       </main>
     </div>
   );
