@@ -223,7 +223,6 @@ function RootComponent() {
             </div>
             )}
           </MobileAppShell>
-          <TermsGate />
         </PresenceProvider>
         <Toaster richColors position="top-right" />
       </AuthProvider>
