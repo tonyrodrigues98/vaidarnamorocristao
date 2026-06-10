@@ -413,8 +413,41 @@ function LojaPage() {
       <MobileAppHeader title="Loja" subtitle="Personalize sua experiência" />
       <PullToRefresh onRefresh={handlePullRefresh} disabled={!user || !isOnline}>
 
-      {/* Hero */}
-      <section className="relative overflow-hidden border-b">
+      {/* Mobile compact balance widget */}
+      <section className="md:hidden border-b border-border/60 bg-background">
+        <div className="px-4 py-4">
+          <div
+            className="relative overflow-hidden rounded-2xl border border-border/60 px-4 py-3 shadow-soft"
+            style={{
+              background:
+                "linear-gradient(120deg, color-mix(in oklab, var(--rose) 14%, var(--card)) 0%, color-mix(in oklab, #f59e0b 12%, var(--card)) 100%)",
+            }}
+          >
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-100 text-amber-700">
+                  <CoinIcon className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                    Seu saldo
+                  </p>
+                  <p className="text-lg font-semibold leading-none">
+                    {balance}
+                    <span className="ml-1 text-xs font-normal text-muted-foreground">moedas</span>
+                  </p>
+                </div>
+              </div>
+              <span className="inline-flex items-center gap-1 rounded-full bg-background/80 px-2.5 py-1 text-[10px] font-medium text-muted-foreground backdrop-blur">
+                <Gem className="h-3 w-3 text-[var(--rose)]" /> Loja do App
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Hero (desktop) */}
+      <section className="relative overflow-hidden border-b hidden md:block">
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 -z-10"
