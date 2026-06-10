@@ -664,7 +664,9 @@ function Devocional() {
             <AppEmptyState
               icon={<BookOpen className="h-6 w-6" />}
               title="Nenhum devocional disponível"
-              description="Volte em breve para um novo momento de reflexão e fé."
+              description="Volte amanhã para um novo momento de reflexão e fé."
+              actionLabel="Voltar ao início"
+              actionTo="/inicio"
             />
           ) : (
             <>
