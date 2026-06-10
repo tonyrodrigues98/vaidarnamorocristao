@@ -5,6 +5,7 @@ import { useNotifications, type AppNotification } from "@/lib/notifications";
 import { Button } from "@/components/ui/button";
 import { NotificationSkeleton } from "@/components/ui/AppSkeletons";
 import { AppEmptyState } from "@/components/ui/AppEmptyState";
+import { PullToRefresh } from "@/components/mobile/PullToRefresh";
 import {
   Bell,
   Check,
@@ -167,6 +168,7 @@ function NotificacoesPage() {
     <div className="min-h-screen">
       <Header />
       <MobileAppHeader title="Notificações" subtitle="Acompanhe o que aconteceu" />
+      <PullToRefresh onRefresh={reload}>
       <main className="mx-auto w-full max-w-2xl px-4 py-8">
         <div className="mb-6 flex items-center justify-between gap-3">
           <div>
