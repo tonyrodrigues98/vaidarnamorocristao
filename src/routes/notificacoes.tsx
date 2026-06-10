@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { Header } from "@/components/layout/Header";
+import { MobileAppHeader } from "@/components/mobile/MobileAppHeader";
 import { useNotifications, type AppNotification } from "@/lib/notifications";
 import { Button } from "@/components/ui/button";
 import {
