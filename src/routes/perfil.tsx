@@ -567,7 +567,7 @@ function PerfilPage() {
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
                     aria-label="Trocar foto de perfil"
-                    className="group relative h-44 w-44 cursor-pointer overflow-hidden rounded-[2rem] border border-border/70 bg-background/70 p-2 shadow-[0_22px_60px_rgba(15,23,42,0.18)] transition hover:-translate-y-1 hover:shadow-[0_28px_70px_rgba(15,23,42,0.22)] dark:shadow-[0_24px_70px_rgba(0,0,0,0.45)]"
+                    className="app-pressable group relative h-44 w-44 cursor-pointer overflow-hidden rounded-[2rem] border border-border/70 bg-background/70 p-2 shadow-[0_22px_60px_rgba(15,23,42,0.18)] transition hover:-translate-y-1 hover:shadow-[0_28px_70px_rgba(15,23,42,0.22)] dark:shadow-[0_24px_70px_rgba(0,0,0,0.45)]"
                   >
                     <span className="block h-full w-full overflow-hidden rounded-[1.55rem] bg-card">
                       {photoPreview ? (
@@ -639,7 +639,7 @@ function PerfilPage() {
             <div className="p-6 sm:p-8 lg:p-10">
               <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
                 <div className="min-w-0">
-                  <p className="text-sm font-medium text-[var(--rose)]">Perfil pessoal</p>
+                  <p className="hidden text-sm font-medium text-[var(--rose)] sm:block">Perfil pessoal</p>
                   <h1 className="mt-2 text-3xl font-black tracking-tight text-foreground sm:text-5xl">
                     <GradientName
                       name={profile.full_name}
@@ -647,35 +647,64 @@ function PerfilPage() {
                       fallback="Meu perfil"
                     />
                   </h1>
-                  <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">
+                  <p className="mt-3 hidden max-w-2xl text-sm leading-6 text-muted-foreground sm:block sm:text-base">
                     Organize sua apresentacao, fotos, preferencias e personalizacoes em um painel
                     mais claro e bonito.
                   </p>
                 </div>
 
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2 -mx-1 px-1 overflow-x-auto sm:overflow-visible [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                   {user && (
                     <Button
                       asChild
                       variant="outline"
-                      className="rounded-full bg-background/70 backdrop-blur"
+                      size="sm"
+                      className="shrink-0 rounded-full bg-background/70 backdrop-blur sm:size-default"
                     >
                       <Link to="/pretendentes/$id" params={{ id: user.id }}>
                         <Eye className="mr-2 h-4 w-4" />
-                        Ver perfil publico
+                        Ver público
                       </Link>
                     </Button>
                   )}
-                  <Button asChild className="rounded-full">
+                  <Button asChild size="sm" className="shrink-0 rounded-full sm:size-default">
                     <Link to="/loja">
                       <Store className="mr-2 h-4 w-4" />
-                      Ir para loja
+                      Loja
                     </Link>
                   </Button>
                 </div>
               </div>
 
-              <div className="mt-8 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+              {/* MOBILE: quick actions row */}
+              <div className="mt-5 -mx-2 flex gap-2 overflow-x-auto px-2 pb-1 sm:hidden [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                {[
+                  { label: "Editar", icon: Eye, onClick: () => setActiveTab("profile") },
+                  { label: "Fotos", icon: Camera, onClick: () => setActiveTab("profile") },
+                  { label: "Visual", icon: Sparkles, onClick: () => setActiveTab("customizacao") },
+                  { label: "Saldo", icon: Store, onClick: () => setActiveTab("saldo") },
+                  { label: "Presentes", icon: Heart, onClick: () => setActiveTab("presentes") },
+                ].map((q) => {
+                  const QIcon = q.icon;
+                  return (
+                    <button
+                      key={q.label}
+                      type="button"
+                      onClick={q.onClick}
+                      className="app-pressable flex min-w-[76px] shrink-0 flex-col items-center gap-1.5 rounded-2xl border border-border/60 bg-background/80 px-3 py-2.5 text-center shadow-sm backdrop-blur"
+                    >
+                      <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--petal)] text-[var(--rose)]">
+                        <QIcon className="h-4 w-4" />
+                      </span>
+                      <span className="text-[11px] font-semibold leading-tight text-foreground">
+                        {q.label}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="mt-6 hidden gap-3 sm:mt-8 sm:grid sm:grid-cols-2 xl:grid-cols-4">
                 <div className="rounded-2xl border border-rose-100 bg-rose-50/70 p-4 dark:border-rose-400/20 dark:bg-rose-400/10">
                   <div className="flex items-center gap-2 text-sm font-medium text-rose-700 dark:text-rose-200">
                     <MapPin className="h-4 w-4" />
@@ -719,31 +748,31 @@ function PerfilPage() {
               </div>
 
               {activeCommitment && (
-                <div className="mt-6 rounded-[1.5rem] border border-emerald-200 bg-gradient-to-r from-emerald-50 via-card to-teal-50 p-4 shadow-soft dark:border-emerald-400/25 dark:from-emerald-500/15 dark:via-card/80 dark:to-teal-500/10 sm:p-5">
-                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+                <div className="mt-5 rounded-3xl border border-emerald-200 bg-gradient-to-r from-emerald-50 via-card to-teal-50 p-3.5 shadow-soft dark:border-emerald-400/25 dark:from-emerald-500/15 dark:via-card/80 dark:to-teal-500/10 sm:mt-6 sm:p-5">
+                  <div className="flex flex-row items-center gap-3 sm:gap-4">
                     <img
                       src={commitmentRing}
                       alt=""
-                      className="h-14 w-14 object-contain drop-shadow-sm"
+                      className="h-11 w-11 shrink-0 object-contain drop-shadow-sm sm:h-14 sm:w-14"
                     />
-                    <div className="flex-1">
-                      <h2 className="font-semibold text-emerald-800 dark:text-emerald-200">
+                    <div className="min-w-0 flex-1">
+                      <h2 className="text-sm font-semibold text-emerald-800 dark:text-emerald-200 sm:text-base">
                         Proposito Firmado
                       </h2>
-                      <p className="text-sm text-emerald-700 dark:text-emerald-100/80">
+                      <p className="truncate text-xs text-emerald-700 dark:text-emerald-100/80 sm:text-sm">
                         {commitmentPartner
                           ? `Voce esta em proposito com ${commitmentPartner}.`
                           : "Voce esta em proposito."}
                       </p>
                     </div>
-                    <Button asChild className="rounded-full">
+                    <Button asChild size="sm" className="shrink-0 rounded-full sm:size-default">
                       <Link
                         to="/proposito/$matchId"
                         params={{
                           matchId: activeCommitment.match_id,
                         }}
                       >
-                        Ver pagina
+                        Página
                       </Link>
                     </Button>
                   </div>
