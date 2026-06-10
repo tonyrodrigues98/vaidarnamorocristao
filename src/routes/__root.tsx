@@ -104,6 +104,13 @@ export const Route = createRootRoute({
       { rel: "preload", as: "image", href: coinPng },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
+      // Preconnect to Supabase host so the first signed-URL image (avatars,
+      // photos, etc.) doesn't pay DNS + TLS on the critical path.
+      {
+        rel: "preconnect",
+        href: (import.meta.env.VITE_SUPABASE_URL as string | undefined) ?? "",
+        crossOrigin: "anonymous",
+      },
       { rel: "icon", href: "/favicon.ico", sizes: "any" },
       { rel: "apple-touch-icon", href: "/apple-touch-icon.png", sizes: "180x180" },
       { rel: "manifest", href: "/manifest.webmanifest" },
