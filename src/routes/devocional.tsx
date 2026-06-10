@@ -833,6 +833,59 @@ function StatCard({ icon, label, value }: { icon: React.ReactNode; label: string
   );
 }
 
+function InlineMetric({
+  icon,
+  label,
+  value,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-border/60 bg-card/70 px-2.5 py-1 text-[11px]">
+      {icon}
+      <span className="text-muted-foreground">{label}</span>
+      <span className="font-semibold tabular-nums">{value}</span>
+    </div>
+  );
+}
+
+function DevotionalSkeleton() {
+  return (
+    <div className="space-y-4">
+      <div className="rounded-3xl border border-[var(--rose)]/15 bg-[var(--petal)]/30 p-5 sm:p-7">
+        <div className="h-3 w-28 animate-pulse rounded-full bg-foreground/10" />
+        <div className="mt-4 h-7 w-3/4 animate-pulse rounded-md bg-foreground/10" />
+        <div className="mt-4 rounded-xl border-l-4 border-[var(--rose)]/40 bg-background/60 p-3">
+          <div className="h-3 w-24 animate-pulse rounded-full bg-foreground/10" />
+          <div className="mt-2 h-3 w-full animate-pulse rounded-full bg-foreground/10" />
+          <div className="mt-1.5 h-3 w-5/6 animate-pulse rounded-full bg-foreground/10" />
+        </div>
+        <div className="mt-4 space-y-2">
+          <div className="h-3 w-full animate-pulse rounded-full bg-foreground/10" />
+          <div className="h-3 w-11/12 animate-pulse rounded-full bg-foreground/10" />
+          <div className="h-3 w-10/12 animate-pulse rounded-full bg-foreground/10" />
+        </div>
+        <div className="mt-5 flex gap-2">
+          <div className="h-8 w-20 animate-pulse rounded-full bg-foreground/10" />
+          <div className="h-8 w-20 animate-pulse rounded-full bg-foreground/10" />
+          <div className="h-8 w-20 animate-pulse rounded-full bg-foreground/10" />
+        </div>
+      </div>
+      <div className="rounded-3xl border border-border/60 bg-card/60 p-4 sm:p-6">
+        <div className="h-3 w-20 animate-pulse rounded-full bg-foreground/10" />
+        <div className="mt-2 h-5 w-1/3 animate-pulse rounded-md bg-foreground/10" />
+        <div className="mt-4 space-y-2">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="h-12 w-full animate-pulse rounded-2xl bg-foreground/5" />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 type PostCardProps = {
   post: Post;
   author?: ProfileLite;
