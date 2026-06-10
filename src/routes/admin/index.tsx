@@ -82,6 +82,7 @@ import { BADGE_META, type BadgeCode } from "@/lib/badges";
 import { Award as AwardIcon } from "lucide-react";
 import { BibleVerseSelector, type BibleSelection } from "@/components/BibleVerseSelector";
 import { InterestsPanel } from "@/components/admin/InterestsPanel";
+import { AdminTopNav } from "@/components/admin/AdminTopNav";
 
 type Row = Database["public"]["Tables"]["profiles"]["Row"];
 type ProfileUpdate = Database["public"]["Tables"]["profiles"]["Update"];
