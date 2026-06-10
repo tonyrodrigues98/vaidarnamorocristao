@@ -239,10 +239,15 @@ function Chat() {
         .from("messages")
         .select("*")
         .eq("match_id", matchId)
-        .order("created_at");
-      setMessages((msgs ?? []) as Msg[]);
+        .order("created_at", { ascending: false })
+        .limit(PAGE_SIZE);
+      const initial = ((msgs ?? []) as Msg[]).slice().reverse();
+      setMessages(initial as LocalMsg[]);
+      setHasMoreOlder((msgs?.length ?? 0) === PAGE_SIZE);
+      initializedScrollRef.current = false;
+      nearBottomRef.current = true;
       // mark received as read via SECURITY DEFINER RPC (only updates read_at)
-      const unread = (msgs ?? []).filter((m: Msg) => m.sender_id !== user.id && !m.read_at);
+      const unread = initial.filter((m: Msg) => m.sender_id !== user.id && !m.read_at);
       await Promise.all(
         unread.map((m) => supabase.rpc("mark_message_read", { _message_id: m.id })),
       );
