@@ -546,6 +546,11 @@ function InicioPage() {
           </section>
         )}
 
+        {/* SMART STARTER: profile strength + checklist + free frame */}
+        {isApproved && user && (
+          <HomeStarterSection userId={user.id} />
+        )}
+
         {/* HERO */}
         {(() => {
           const hero = getHeroTheme();
