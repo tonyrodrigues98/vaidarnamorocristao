@@ -75,6 +75,22 @@ import { fetchNameGradientsByIds, type NameGradient } from "@/lib/nameGradients"
 
 export const Route = createFileRoute("/perfil")({
   component: PerfilPage,
+  validateSearch: (search: Record<string, unknown>) => {
+    const rawTab = search.tab;
+    const allowed = new Set([
+      "profile",
+      "prefs",
+      "customizacao",
+      "saldo",
+      "presentes",
+      "missions",
+      "role",
+    ]);
+    const tab = typeof rawTab === "string" && allowed.has(rawTab) ? rawTab : undefined;
+    const edit =
+      search.edit === 1 || search.edit === "1" || search.edit === true ? 1 : undefined;
+    return { tab, edit } as { tab?: string; edit?: 1 };
+  },
   head: () => ({
     meta: [
       { title: "Meu Perfil — VaiDarNamoro" },
