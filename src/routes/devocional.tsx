@@ -574,16 +574,23 @@ function Devocional() {
     />
   );
 
+  const todayLabel = new Date().toLocaleDateString("pt-BR", {
+    weekday: "long",
+    day: "2-digit",
+    month: "long",
+  });
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-[var(--petal)]/25 via-background to-background">
       <Header />
       <MobileAppHeader title="Devocional" subtitle="Um momento com Deus" />
-      <main className="mx-auto max-w-5xl px-4 pb-16 pt-5 sm:py-10">
-        <header className="animate-fade-up rounded-[1.75rem] border border-[var(--rose)]/15 bg-card/85 p-5 shadow-soft backdrop-blur sm:flex sm:items-center sm:gap-4 sm:rounded-3xl sm:p-7">
+      <main className="mx-auto max-w-5xl px-4 pb-20 pt-4 sm:py-10">
+        {/* Header desktop */}
+        <header className="animate-fade-up hidden rounded-[1.75rem] border border-[var(--rose)]/15 bg-card/85 p-5 shadow-soft backdrop-blur md:flex md:items-center md:gap-4 md:rounded-3xl md:p-7">
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-love shadow-glow">
             <BookHeart className="h-5 w-5 text-white" />
           </div>
-          <div className="mt-4 flex-1 sm:mt-0">
+          <div className="flex-1">
             <h1 className="text-3xl font-semibold tracking-tight">Devocional</h1>
             <p className="text-sm text-muted-foreground">
               Um momento diário para ler, orar e refletir com calma.
@@ -591,15 +598,48 @@ function Devocional() {
           </div>
           <Link
             to="/oracoes"
-            className="mt-4 inline-flex shrink-0 items-center gap-1.5 rounded-full border border-border px-3 py-2 text-xs font-medium transition hover:bg-accent sm:mt-0"
+            className="app-pressable inline-flex shrink-0 items-center gap-1.5 rounded-full border border-border px-3 py-2 text-xs font-medium transition hover:bg-accent"
           >
             <HandHeart className="h-4 w-4" />
-            <span className="hidden sm:inline">Pedidos de oração</span>
-            <span className="sm:hidden">Orações</span>
+            Pedidos de oração
           </Link>
         </header>
 
-        <div className="animate-fade-up mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
+        {/* Mobile-only contemplative strip */}
+        <div className="mb-4 md:hidden">
+          <div className="flex items-center justify-between">
+            <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+              {todayLabel}
+            </p>
+            <Link
+              to="/oracoes"
+              className="app-pressable inline-flex items-center gap-1 rounded-full border border-border bg-card/70 px-2.5 py-1 text-[11px] font-medium text-muted-foreground"
+            >
+              <HandHeart className="h-3 w-3 text-[var(--rose)]" />
+              Orações
+            </Link>
+          </div>
+          <div className="mt-3 flex items-center gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <InlineMetric
+              icon={<Flame className="h-3 w-3 text-orange-500" />}
+              label="Sequência"
+              value={`${streak.current}${streak.current === 1 ? " dia" : " dias"}`}
+            />
+            <InlineMetric
+              icon={<Trophy className="h-3 w-3 text-amber-500" />}
+              label="Recorde"
+              value={`${streak.best}`}
+            />
+            <InlineMetric
+              icon={<Hand className="h-3 w-3 text-[var(--rose)]" />}
+              label="Hoje"
+              value={prayedToday ? "Orei" : "Pendente"}
+            />
+          </div>
+        </div>
+
+        {/* Desktop streak strip */}
+        <div className="animate-fade-up mt-6 hidden grid-cols-3 gap-3 md:grid">
           <StatCard
             icon={<Flame className="h-4 w-4 text-orange-500" />}
             label="Sequência"
@@ -617,8 +657,10 @@ function Devocional() {
           />
         </div>
 
-        <section className="mt-6 space-y-6">
-          {sortedPosts.length === 0 && !loadingPosts ? (
+        <section className="mt-5 space-y-6 md:mt-6">
+          {loadingPosts && posts.length === 0 ? (
+            <DevotionalSkeleton />
+          ) : sortedPosts.length === 0 && !loadingPosts ? (
             <AppEmptyState
               icon={<BookOpen className="h-6 w-6" />}
               title="Nenhum devocional disponível"
@@ -628,30 +670,24 @@ function Devocional() {
             <>
               {featuredPost && (
                 <div>
-                  <div className="mb-3">
-                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--rose)]">
-                      Devocional do dia
-                    </p>
-                    <h2 className="mt-1 text-2xl font-semibold tracking-tight">Leia com calma</h2>
-                  </div>
+                  <p className="mb-3 hidden text-xs font-semibold uppercase tracking-[0.18em] text-[var(--rose)] md:block">
+                    Devocional de hoje
+                  </p>
                   {renderPostCard(featuredPost, true)}
                 </div>
               )}
 
               <div className="rounded-[1.75rem] border border-border/70 bg-card/70 p-4 shadow-soft backdrop-blur sm:rounded-3xl sm:p-6">
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                       Arquivo
                     </p>
-                    <h2 className="mt-1 text-2xl font-semibold tracking-tight">
+                    <h2 className="mt-1 text-xl font-semibold tracking-tight sm:text-2xl">
                       Devocionais antigos
                     </h2>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      Releia mensagens anteriores sem transformar a página em feed.
-                    </p>
                   </div>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="-mx-1 flex flex-nowrap gap-2 overflow-x-auto px-1 pb-1 sm:flex-wrap sm:overflow-visible [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                     <FilterChip active={sort === "recent"} onClick={() => setSort("recent")}>
                       Recentes
                     </FilterChip>
@@ -664,13 +700,54 @@ function Devocional() {
                   </div>
                 </div>
 
-                <div className="mt-5 space-y-4">
+                <div className="mt-4 space-y-3">
                   {archivePosts.length === 0 && !loadingPosts ? (
                     <div className="rounded-2xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
                       Ainda não há devocionais antigos.
                     </div>
                   ) : (
-                    archivePosts.map((post) => renderPostCard(post))
+                    archivePosts.map((post) => (
+                      <details
+                        key={post.id}
+                        className="app-card-interactive group overflow-hidden rounded-2xl border border-border/60 bg-background/70 transition open:bg-card open:shadow-soft"
+                      >
+                        <summary className="flex cursor-pointer list-none items-start gap-3 p-3 sm:p-4 [&::-webkit-details-marker]:hidden">
+                          <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[var(--petal)]/50 text-[var(--rose)]">
+                            <BookHeart className="h-4 w-4" />
+                          </span>
+                          <span className="min-w-0 flex-1">
+                            <span className="line-clamp-1 block font-serif italic text-[15px] leading-tight">
+                              {post.title}
+                            </span>
+                            <span className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-muted-foreground">
+                              {post.bible_reference && (
+                                <span className="inline-flex items-center gap-1 font-semibold uppercase tracking-wide text-[var(--rose)]/80">
+                                  <BookOpen className="h-3 w-3" />
+                                  {post.bible_reference}
+                                </span>
+                              )}
+                              <span>
+                                {new Date(post.published_at).toLocaleDateString("pt-BR", {
+                                  day: "2-digit",
+                                  month: "short",
+                                  year: "numeric",
+                                })}
+                              </span>
+                              {(commentCount[post.id] ?? 0) > 0 && (
+                                <span className="inline-flex items-center gap-1">
+                                  <MessageCircle className="h-3 w-3" />
+                                  {commentCount[post.id]}
+                                </span>
+                              )}
+                            </span>
+                          </span>
+                          <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground transition group-open:opacity-0">
+                            Abrir
+                          </span>
+                        </summary>
+                        <div className="border-t border-border/40 p-3 sm:p-4">{renderPostCard(post)}</div>
+                      </details>
+                    ))
                   )}
                 </div>
               </div>
@@ -751,6 +828,59 @@ function StatCard({ icon, label, value }: { icon: React.ReactNode; label: string
       <div className="min-w-0">
         <p className="text-[11px] uppercase tracking-wide text-muted-foreground">{label}</p>
         <p className="truncate text-sm font-semibold">{value}</p>
+      </div>
+    </div>
+  );
+}
+
+function InlineMetric({
+  icon,
+  label,
+  value,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-border/60 bg-card/70 px-2.5 py-1 text-[11px]">
+      {icon}
+      <span className="text-muted-foreground">{label}</span>
+      <span className="font-semibold tabular-nums">{value}</span>
+    </div>
+  );
+}
+
+function DevotionalSkeleton() {
+  return (
+    <div className="space-y-4">
+      <div className="rounded-3xl border border-[var(--rose)]/15 bg-[var(--petal)]/30 p-5 sm:p-7">
+        <div className="h-3 w-28 animate-pulse rounded-full bg-foreground/10" />
+        <div className="mt-4 h-7 w-3/4 animate-pulse rounded-md bg-foreground/10" />
+        <div className="mt-4 rounded-xl border-l-4 border-[var(--rose)]/40 bg-background/60 p-3">
+          <div className="h-3 w-24 animate-pulse rounded-full bg-foreground/10" />
+          <div className="mt-2 h-3 w-full animate-pulse rounded-full bg-foreground/10" />
+          <div className="mt-1.5 h-3 w-5/6 animate-pulse rounded-full bg-foreground/10" />
+        </div>
+        <div className="mt-4 space-y-2">
+          <div className="h-3 w-full animate-pulse rounded-full bg-foreground/10" />
+          <div className="h-3 w-11/12 animate-pulse rounded-full bg-foreground/10" />
+          <div className="h-3 w-10/12 animate-pulse rounded-full bg-foreground/10" />
+        </div>
+        <div className="mt-5 flex gap-2">
+          <div className="h-8 w-20 animate-pulse rounded-full bg-foreground/10" />
+          <div className="h-8 w-20 animate-pulse rounded-full bg-foreground/10" />
+          <div className="h-8 w-20 animate-pulse rounded-full bg-foreground/10" />
+        </div>
+      </div>
+      <div className="rounded-3xl border border-border/60 bg-card/60 p-4 sm:p-6">
+        <div className="h-3 w-20 animate-pulse rounded-full bg-foreground/10" />
+        <div className="mt-2 h-5 w-1/3 animate-pulse rounded-md bg-foreground/10" />
+        <div className="mt-4 space-y-2">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="h-12 w-full animate-pulse rounded-2xl bg-foreground/5" />
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -858,6 +988,17 @@ function PostCard(props: PostCardProps) {
       <p className="mt-3 whitespace-pre-wrap font-serif text-[15px] italic leading-relaxed text-foreground/85 sm:text-base">
         {post.content}
       </p>
+
+      {featured && (
+        <div className="mt-5 rounded-2xl border border-[var(--rose)]/15 bg-background/70 p-4">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--rose)]">
+            Para refletir
+          </p>
+          <p className="mt-1.5 text-sm leading-relaxed text-foreground/80">
+            Leia com calma, ore sobre isso e carregue essa palavra com você durante o dia.
+          </p>
+        </div>
+      )}
 
       {author && (
         <div className="mt-5 flex items-center gap-2 text-xs text-muted-foreground">
