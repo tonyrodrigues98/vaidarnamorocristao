@@ -214,6 +214,7 @@ function NotificacoesPage() {
           </Link>
         </div>
       </main>
+      </PullToRefresh>
     </div>
   );
 }
