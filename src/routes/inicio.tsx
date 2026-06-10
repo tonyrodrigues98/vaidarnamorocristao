@@ -39,8 +39,6 @@ import {
   Moon,
   Users,
   Radar,
-  Smile,
-  EyeOff,
   Clock,
 } from "lucide-react";
 import { toast } from "sonner";
