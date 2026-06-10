@@ -465,7 +465,7 @@ function NotificationRow({
         onDragEnd={onDragEnd}
         animate={controls}
         style={{ x }}
-        className={`group relative flex items-start gap-3 rounded-2xl border p-4 backdrop-blur-sm transition-colors ${
+        className={`app-card-interactive group relative flex items-start gap-3 rounded-2xl border p-3.5 backdrop-blur-sm transition-colors ${
           n.read_at ? "border-border bg-card/80" : "border-[var(--rose)]/30 bg-[var(--petal)]/40"
         }`}
       >
