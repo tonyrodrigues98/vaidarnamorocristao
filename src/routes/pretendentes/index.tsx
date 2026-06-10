@@ -319,6 +319,11 @@ function List() {
       .slice(0, 10);
   }, [filtered, affinityByProfile]);
 
+  // Reset explore index whenever the visible list changes (filters, data load)
+  useEffect(() => {
+    setExploreIndex(0);
+  }, [filtered.length, search.q, search.state, search.marital, search.ageMin, search.ageMax, search.church, search.ministry, search.loveLang, search.verified, search.sort]);
+
   const nearbyProfiles = useMemo(() => {
     return filtered.filter((p) => p.state === myPrefs.state).slice(0, 10);
   }, [filtered, myPrefs.state]);
