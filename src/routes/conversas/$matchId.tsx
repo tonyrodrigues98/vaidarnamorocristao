@@ -537,7 +537,9 @@ function Chat() {
 
   return (
     <div className="mobile-chat-screen flex min-h-screen flex-col bg-background md:min-h-screen">
-      <Header />
+      <div className="hidden md:block">
+        <Header />
+      </div>
       <div className="glass mx-auto flex w-full max-w-3xl items-center gap-3 px-3 py-3 shadow-soft md:px-4">
         <Link to="/conversas" className="text-muted-foreground hover:text-foreground">
           <ArrowLeft className="h-5 w-5" />
