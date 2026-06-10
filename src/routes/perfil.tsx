@@ -751,8 +751,7 @@ function PerfilPage() {
               {/* MOBILE: quick actions row */}
               <div className="mt-5 -mx-2 flex gap-2 overflow-x-auto px-2 pb-1 sm:hidden [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                 {[
-                  { label: "Editar", icon: Eye, onClick: () => setActiveTab("profile") },
-                  { label: "Fotos", icon: Camera, onClick: () => setActiveTab("profile") },
+                  { label: "Editar", icon: Eye, onClick: () => { setActiveTab("profile"); setEditingProfile(true); } },
                   { label: "Visual", icon: Sparkles, onClick: () => setActiveTab("customizacao") },
                   { label: "Saldo", icon: Store, onClick: () => setActiveTab("saldo") },
                   { label: "Presentes", icon: Heart, onClick: () => setActiveTab("presentes") },
