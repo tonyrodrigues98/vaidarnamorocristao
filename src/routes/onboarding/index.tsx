@@ -710,7 +710,7 @@ function Wheel({
         style={{
           height: PAD,
           background:
-            "linear-gradient(to bottom, hsl(var(--card)) 0%, hsl(var(--card) / 0.85) 35%, transparent 100%)",
+            "linear-gradient(to bottom, var(--card) 0%, color-mix(in oklab, var(--card) 80%, transparent) 45%, transparent 100%)",
         }}
       />
       <div
@@ -718,7 +718,7 @@ function Wheel({
         style={{
           height: PAD,
           background:
-            "linear-gradient(to top, hsl(var(--card)) 0%, hsl(var(--card) / 0.85) 35%, transparent 100%)",
+            "linear-gradient(to top, var(--card) 0%, color-mix(in oklab, var(--card) 80%, transparent) 45%, transparent 100%)",
         }}
       />
       <div
