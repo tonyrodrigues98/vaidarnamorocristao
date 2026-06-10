@@ -16,6 +16,7 @@ import { PresenceProvider } from "@/lib/presence";
 import { BanGuard } from "@/components/BanGuard";
 import { MobileAppShell } from "@/components/mobile/MobileAppShell";
 import { NetworkStatusBanner } from "@/components/mobile/NetworkStatusBanner";
+import { MobileRouteTransition } from "@/components/mobile/MobileRouteTransition";
 import { isChatRoute, shouldShowFooter } from "@/lib/layoutVisibility";
 
 import appCss from "../styles.css?url";
@@ -200,7 +201,9 @@ function RootComponent() {
               }
             >
               <div className={chatRoute ? "min-h-0 flex-1 overflow-hidden" : "flex-1"}>
-                <Outlet />
+                <MobileRouteTransition disabled={chatRoute}>
+                  <Outlet />
+                </MobileRouteTransition>
               </div>
               {showFooter && (
                 <footer className="mt-8 border-t border-border/40 bg-card/60 py-4 text-muted-foreground">
