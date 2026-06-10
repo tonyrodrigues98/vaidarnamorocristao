@@ -840,7 +840,7 @@ function PerfilPage() {
             }}
           />
         )}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-8">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-8" id="perfil-tabs">
           <div className="grid gap-6 lg:grid-cols-[292px_minmax(0,1fr)]">
             <aside className="hidden lg:block">
               <div className="sticky top-24 rounded-[2rem] border border-border/70 bg-card/80 p-3 shadow-[0_18px_60px_rgba(31,41,55,0.08)] backdrop-blur dark:shadow-[0_22px_70px_rgba(0,0,0,0.36)]">
