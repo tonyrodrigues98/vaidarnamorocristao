@@ -30,6 +30,7 @@ import {
 import { useLongPress } from "@/hooks/use-long-press";
 import { useRestrictedWords, findRestrictedWord } from "@/lib/profanity";
 import { ShieldAlert } from "lucide-react";
+import { MessageCircle } from "lucide-react";
 import {
   Dialog,
   DialogContent,
