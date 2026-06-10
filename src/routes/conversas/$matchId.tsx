@@ -1,7 +1,7 @@
 import { friendlyError } from "@/lib/errors";
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { RequireApproved } from "@/components/RequireApproved";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { getActiveCommitmentByUser, type RelationshipCommitment } from "@/lib/commitments";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -21,8 +21,6 @@ import {
   MoreHorizontal,
   CheckCheck,
   PanelLeft,
-  Search,
-  MessageCircle,
   Clock,
   AlertCircle,
   Loader2,
@@ -39,9 +37,9 @@ import {
 } from "@/components/ui/dialog";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { OnlineDot } from "@/components/OnlineDot";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { CommitmentProgressCard } from "@/components/commitment/CommitmentProgressCard";
 import { CommitmentPauseCard } from "@/components/commitment/CommitmentPauseCard";
+import { ConversationDrawer } from "@/components/conversations/ConversationDrawer";
 
 type Msg = {
   id: string;
