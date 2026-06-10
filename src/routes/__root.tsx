@@ -15,6 +15,7 @@ import { SupportFooterButton } from "@/components/SupportFooterButton";
 import { PresenceProvider } from "@/lib/presence";
 import { BanGuard } from "@/components/BanGuard";
 import { MobileAppShell } from "@/components/mobile/MobileAppShell";
+import { NetworkStatusBanner } from "@/components/mobile/NetworkStatusBanner";
 import { isChatRoute, shouldShowFooter } from "@/lib/layoutVisibility";
 
 import appCss from "../styles.css?url";
@@ -186,6 +187,7 @@ function RootComponent() {
         <PresenceProvider>
           <NotificationsBridge />
           <BanGuard />
+          <NetworkStatusBanner />
           <MobileAppShell>
             {isHome ? (
               <Outlet />
