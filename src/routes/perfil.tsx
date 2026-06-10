@@ -61,7 +61,8 @@ import { SaldoTab } from "@/components/SaldoTab";
 import { recomputeMyBadges } from "@/lib/recomputeBadges";
 import commitmentRing from "@/assets/commitment-ring.webp";
 import { getActiveCommitmentByUser, type RelationshipCommitment } from "@/lib/commitments";
-import { ProfileAdvancedForm } from "@/components/ProfileAdvancedForm";
+import { ProfileAdvancedForm, type ProfileAdvancedFormHandle } from "@/components/ProfileAdvancedForm";
+import { NumericInput } from "@/components/ui/NumericInput";
 import { ProfileAdvancedView } from "@/components/ProfileAdvancedView";
 import { ProfilePhotosManager } from "@/components/ProfilePhotosManager";
 import { AdminWarningBanner } from "@/components/AdminWarningBanner";
@@ -215,6 +216,8 @@ function PerfilPage() {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [savingProfile, setSavingProfile] = useState(false);
   const [savingPrefs, setSavingPrefs] = useState(false);
+  const advancedAboutRef = useRef<ProfileAdvancedFormHandle | null>(null);
+  const advancedPrefsRef = useRef<ProfileAdvancedFormHandle | null>(null);
   const [editingProfile, setEditingProfile] = useState(false);
   const [editingPrefs, setEditingPrefs] = useState(false);
   const [status, setStatus] = useState<"pending" | "approved" | "rejected" | "banned" | null>(null);
