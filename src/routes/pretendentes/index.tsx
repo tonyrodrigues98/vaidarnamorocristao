@@ -40,6 +40,8 @@ import { z } from "zod";
 import { markHomeChecklistStep } from "@/lib/homeChecklist";
 import { AppEmptyState } from "@/components/ui/AppEmptyState";
 import { PullToRefresh } from "@/components/mobile/PullToRefresh";
+import { OfflineState } from "@/components/ui/OfflineState";
+import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 
 type Profile = {
   id: string;
@@ -84,6 +86,7 @@ function List() {
   const { user, loading, role, rolesLoaded } = useAuth();
   const search = Route.useSearch();
   const navigate = useNavigate({ from: "/pretendentes/" });
+  const { isOnline } = useNetworkStatus();
 
   function update<K extends keyof typeof search>(key: K, value: (typeof search)[K] | undefined) {
     navigate({
@@ -391,7 +394,7 @@ function List() {
     <div className="min-h-screen bg-gradient-to-b from-rose-50/70 via-background to-background dark:from-rose-950/10 dark:via-background dark:to-background">
       <Header />
       <MobileAppHeader title="Pretendentes" subtitle="Conheça pessoas com propósito" />
-      <PullToRefresh onRefresh={handlePullRefresh} disabled={!user || !rolesLoaded}>
+      <PullToRefresh onRefresh={handlePullRefresh} disabled={!user || !rolesLoaded || !isOnline}>
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <section className="relative overflow-hidden rounded-3xl border border-white/70 bg-white/75 p-6 shadow-soft backdrop-blur-xl dark:border-white/10 dark:bg-card/70 sm:p-8 lg:p-10">
           <div className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full bg-rose-300/25 blur-3xl dark:bg-rose-700/20" />
@@ -640,6 +643,9 @@ function List() {
             </div>
           ) : filtered.length === 0 ? (
             <div className="mt-8">
+              {!isOnline ? (
+                <OfflineState />
+              ) : (
               <AppEmptyState
                 icon={<SearchX className="h-6 w-6" />}
                 title={hasFilters ? "Filtros muito específicos" : "Nenhum pretendente encontrado"}
@@ -651,6 +657,7 @@ function List() {
                 actionLabel={hasFilters ? "Limpar filtros" : undefined}
                 onAction={hasFilters ? clearAll : undefined}
               />
+              )}
             </div>
           ) : (
             <>

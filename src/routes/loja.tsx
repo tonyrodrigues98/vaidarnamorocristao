@@ -6,6 +6,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { ShopSkeleton } from "@/components/ui/AppSkeletons";
 import { AppEmptyState } from "@/components/ui/AppEmptyState";
 import { PullToRefresh } from "@/components/mobile/PullToRefresh";
+import { OfflineState } from "@/components/ui/OfflineState";
+import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 import { Gem as GemIcon } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
@@ -107,6 +109,7 @@ function LojaPage() {
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [balance, setBalance] = useState(0);
   const [loading, setLoading] = useState(true);
+  const { isOnline } = useNetworkStatus();
   const [busyId, setBusyId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<CategoryKey>("frame");
   const [confirm, setConfirm] = useState<Decoration | null>(null);
@@ -209,6 +212,10 @@ function LojaPage() {
   }, [catalog]);
 
   const handleBuy = async (d: Decoration) => {
+    if (!isOnline) {
+      toast.error("Sem conexão. Tente novamente quando estiver online.");
+      return;
+    }
     setBusyId(d.id);
     try {
       const r = await purchaseDecoration(d.id);
@@ -227,6 +234,10 @@ function LojaPage() {
   };
 
   const handleBuyBackground = async (background: ProfileBackground) => {
+    if (!isOnline) {
+      toast.error("Sem conexão. Tente novamente quando estiver online.");
+      return;
+    }
     setBusyId(background.id);
     try {
       const r = await purchaseProfileBackground(background.id);
@@ -316,6 +327,10 @@ function LojaPage() {
   };
 
   const handleBuyNameGradient = async (gradient: NameGradient) => {
+    if (!isOnline) {
+      toast.error("Sem conexão. Tente novamente quando estiver online.");
+      return;
+    }
     setBusyId(gradient.id);
     try {
       const result = await purchaseNameGradient(gradient.id);
@@ -367,7 +382,7 @@ function LojaPage() {
     <div className="min-h-screen bg-background">
       <Header />
       <MobileAppHeader title="Loja" subtitle="Personalize sua experiência" />
-      <PullToRefresh onRefresh={handlePullRefresh} disabled={!user}>
+      <PullToRefresh onRefresh={handlePullRefresh} disabled={!user || !isOnline}>
 
       {/* Hero */}
       <section className="relative overflow-hidden border-b">
@@ -455,6 +470,8 @@ function LojaPage() {
       <main className="mx-auto max-w-5xl px-4 pb-24 pt-6">
         {loading ? (
           <ShopSkeleton cards={8} />
+        ) : !isOnline && catalog.length === 0 ? (
+          <OfflineState className="my-12" />
         ) : activeTab === "soon" ? (
           <ComingSoon />
         ) : activeTab === "name-gradient" ? (

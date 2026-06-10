@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { NotificationSkeleton } from "@/components/ui/AppSkeletons";
 import { AppEmptyState } from "@/components/ui/AppEmptyState";
 import { PullToRefresh } from "@/components/mobile/PullToRefresh";
+import { OfflineState } from "@/components/ui/OfflineState";
+import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 import {
   Bell,
   Check,
@@ -111,6 +113,7 @@ function NotificacoesPage() {
   const router = useRouter();
   const [hidden, setHidden] = useState<Set<string>>(new Set());
   const pendingTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
+  const { isOnline } = useNetworkStatus();
 
   const visible = useMemo(() => items.filter((n) => !hidden.has(n.id)), [items, hidden]);
   const visibleUnread = visible.filter((n) => !n.read_at).length;
@@ -168,7 +171,7 @@ function NotificacoesPage() {
     <div className="min-h-screen">
       <Header />
       <MobileAppHeader title="Notificações" subtitle="Acompanhe o que aconteceu" />
-      <PullToRefresh onRefresh={reload}>
+      <PullToRefresh onRefresh={reload} disabled={!isOnline}>
       <main className="mx-auto w-full max-w-2xl px-4 py-8">
         <div className="mb-6 flex items-center justify-between gap-3">
           <div>
@@ -190,6 +193,11 @@ function NotificacoesPage() {
 
         {loading ? (
           <NotificationSkeleton rows={6} />
+        ) : visible.length === 0 && !isOnline ? (
+          <OfflineState
+            actionLabel="Tentar novamente"
+            onAction={() => reload()}
+          />
         ) : visible.length === 0 ? (
           <AppEmptyState
             icon={<Bell className="h-5 w-5" />}
