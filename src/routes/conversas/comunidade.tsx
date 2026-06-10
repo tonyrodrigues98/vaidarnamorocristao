@@ -698,14 +698,24 @@ function Comunidade() {
         title="Comunidade"
         subtitle="Chat global em tempo real"
         rightAction={
-          <Link
-            to="/oracoes"
-            aria-label="Orações"
-            className="tap inline-flex h-9 items-center gap-1.5 rounded-full border border-border bg-card/60 px-3 text-xs font-medium text-foreground/80 transition hover:bg-accent"
-          >
-            <HandHeart className="h-4 w-4" />
-            <span>Orações</span>
-          </Link>
+          <>
+            <Link
+              to="/oracoes"
+              aria-label="Orações"
+              className="tap inline-flex h-9 items-center gap-1.5 rounded-full border border-border bg-card/60 px-3 text-xs font-medium text-foreground/80 transition hover:bg-accent"
+            >
+              <HandHeart className="h-4 w-4" />
+              <span>Orações</span>
+            </Link>
+            <button
+              type="button"
+              onClick={() => setDrawerOpen(true)}
+              aria-label="Abrir outras conversas"
+              className="tap inline-flex h-9 w-9 items-center justify-center rounded-full border border-border bg-card/60 text-foreground/80 transition hover:bg-accent"
+            >
+              <PanelLeft className="h-4 w-4" />
+            </button>
+          </>
         }
       />
       <div className="glass mx-auto hidden w-full max-w-3xl items-center gap-3 px-3 py-3 shadow-soft md:flex md:px-4">
