@@ -35,7 +35,6 @@ import {
   Heart,
   Trophy,
   Briefcase,
-  MoreHorizontal,
   Wallet,
   Sparkles,
   MapPin,
@@ -48,13 +47,6 @@ import {
   Settings,
   X,
 } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-} from "@/components/ui/dropdown-menu";
 import { Switch } from "@/components/ui/switch";
 import { ROLE_CONFIG, COLOR_HEX, type RoleColor } from "@/lib/roles";
 import { RoleBadge } from "@/components/RoleBadge";
@@ -72,6 +64,7 @@ import { CustomizacaoTab } from "@/components/CustomizacaoTab";
 import { ReceivedGiftsTab } from "@/components/gifts/ReceivedGiftsTab";
 import { GradientName } from "@/components/GradientName";
 import { fetchNameGradientsByIds, type NameGradient } from "@/lib/nameGradients";
+import { ProfileActionHub, type HubSection } from "@/components/profile/ProfileActionHub";
 
 export const Route = createFileRoute("/perfil")({
   component: PerfilPage,
@@ -573,6 +566,35 @@ function PerfilPage() {
 
   const panelClass =
     "rounded-[2rem] border border-border/70 bg-card/85 p-5 shadow-[0_20px_70px_rgba(31,41,55,0.08)] backdrop-blur sm:p-6 dark:bg-card/80 dark:shadow-[0_24px_80px_rgba(0,0,0,0.35)]";
+
+  const scrollToTabs = () => {
+    if (typeof window === "undefined") return;
+    window.setTimeout(() => {
+      document
+        .getElementById("perfil-tabs")
+        ?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 60);
+  };
+
+  const handleHubSelect = (id: HubSection) => {
+    if (id === "preferences") {
+      setActiveTab("prefs");
+    } else if (id === "visual") {
+      setActiveTab("customizacao");
+    } else {
+      setActiveTab("profile");
+      if (id === "identity" || id === "faith" || id === "photos") {
+        setEditingProfile(true);
+      }
+    }
+    scrollToTabs();
+  };
+
+  const handleHubResource = (id: "saldo" | "presentes" | "customizacao" | "role") => {
+    setActiveTab(id);
+    scrollToTabs();
+  };
+
   const tabItems = [
     { value: "profile", label: "Sobre mim", icon: UserIcon, hint: "Dados, fotos e historia" },
     { value: "prefs", label: "Preferencias", icon: Heart, hint: "O que voce busca" },
@@ -928,57 +950,12 @@ function PerfilPage() {
             </aside>
 
             <div className="min-w-0">
-              <TabsList className="grid h-auto w-full grid-cols-3 items-stretch gap-2 bg-transparent p-0 lg:hidden">
-                {[
-                  { value: "profile", label: "Sobre mim", icon: UserIcon },
-                  { value: "prefs", label: "Preferências", icon: Heart },
-                ].map(({ value, label, icon: Icon }) => (
-                  <TabsTrigger
-                    key={value}
-                    value={value}
-                    className="group flex h-full min-h-[84px] w-full cursor-pointer flex-col items-center justify-center gap-2 overflow-hidden rounded-2xl border border-border/60 bg-card/60 px-1 py-4 text-sm font-medium text-muted-foreground shadow-soft transition active:scale-[0.98] data-[state=active]:border-[var(--rose)]/50 data-[state=active]:bg-[var(--rose-soft)]/40 data-[state=active]:text-[var(--rose)] data-[state=active]:shadow-elegant"
-                  >
-                    <Icon className="h-6 w-6" />
-                    <span className="truncate max-w-full text-[13px] leading-none">{label}</span>
-                  </TabsTrigger>
-                ))}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <button
-                      type="button"
-                      className="group flex h-full min-h-[84px] w-full cursor-pointer flex-col items-center justify-center gap-2 overflow-hidden rounded-2xl border border-border/60 bg-card/60 px-1 py-4 text-sm font-medium text-muted-foreground shadow-soft transition active:scale-[0.98] hover:text-foreground"
-                    >
-                      <MoreHorizontal className="h-6 w-6" />
-                      <span className="truncate max-w-full text-[13px] leading-none">Mais</span>
-                    </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56">
-                    <DropdownMenuLabel>Mais opções</DropdownMenuLabel>
-                    <DropdownMenuItem onSelect={() => setActiveTab("customizacao")}>
-                      <Sparkles className="mr-2 h-4 w-4" />
-                      Customização
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onSelect={() => setActiveTab("saldo")}>
-                      <Wallet className="mr-2 h-4 w-4" />
-                      Saldo
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onSelect={() => setActiveTab("presentes")}>
-                      <GiftIcon className="mr-2 h-4 w-4" />
-                      Presentes
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onSelect={() => setActiveTab("missions")}>
-                      <Trophy className="mr-2 h-4 w-4" />
-                      Conquistas
-                    </DropdownMenuItem>
-                    {isStaff && (
-                      <DropdownMenuItem onSelect={() => setActiveTab("role")}>
-                        <Briefcase className="mr-2 h-4 w-4" />
-                        Cargo
-                      </DropdownMenuItem>
-                    )}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </TabsList>
+              <ProfileActionHub
+                activeTab={activeTab}
+                isStaff={isStaff}
+                onSelect={handleHubSelect}
+                onOpenResource={handleHubResource}
+              />
 
               {/* Profile tab */}
               <TabsContent value="profile" className="mt-6 lg:mt-0">
