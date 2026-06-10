@@ -16,15 +16,29 @@ import {
 
 export type StrengthProfile = {
   full_name?: string | null;
+  name?: string | null;
+  display_name?: string | null;
   age?: number | null;
+  birth_date?: string | null;
+  date_of_birth?: string | null;
   sex?: string | null;
+  gender?: string | null;
   photo_url?: string | null;
+  avatar_url?: string | null;
+  main_photo_url?: string | null;
   city?: string | null;
+  cidade?: string | null;
   state?: string | null;
+  estado?: string | null;
+  uf?: string | null;
   height_cm?: number | null;
+  height?: number | null;
   marital_status?: string | null;
+  marital?: string | null;
   bio?: string | null;
+  about?: string | null;
   church?: string | null;
+  igreja?: string | null;
   years_baptized?: number | null;
 };
 
@@ -53,16 +67,53 @@ type FieldWeight = {
   ) => boolean;
 };
 
+const txt = (v: unknown) => (typeof v === "string" ? v.trim() : "");
+const num = (v: unknown) => {
+  if (typeof v === "number" && Number.isFinite(v)) return v;
+  if (typeof v === "string" && v.trim() !== "" && !Number.isNaN(Number(v))) return Number(v);
+  return null;
+};
+const pickText = (p: StrengthProfile, keys: (keyof StrengthProfile)[]) =>
+  keys.map((k) => txt(p[k])).find((v) => v.length > 0) ?? "";
+const pickNum = (p: StrengthProfile, keys: (keyof StrengthProfile)[]) => {
+  for (const k of keys) {
+    const n = num(p[k]);
+    if (n != null) return n;
+  }
+  return null;
+};
+const hasName = (p: StrengthProfile) =>
+  pickText(p, ["full_name", "name", "display_name"]).length > 1;
+const hasAge = (p: StrengthProfile) => {
+  const a = pickNum(p, ["age"]);
+  if (a != null && a >= 18) return true;
+  const bd = pickText(p, ["birth_date", "date_of_birth"]);
+  return bd.length > 0;
+};
+const hasPhoto = (p: StrengthProfile) =>
+  pickText(p, ["photo_url", "avatar_url", "main_photo_url"]).length > 0;
+const hasCity = (p: StrengthProfile) =>
+  pickText(p, ["city", "cidade"]).length > 0 && pickText(p, ["state", "estado", "uf"]).length > 0;
+const hasHeight = (p: StrengthProfile) => {
+  const h = pickNum(p, ["height_cm", "height"]);
+  return h != null && h > 0;
+};
+const hasMarital = (p: StrengthProfile) =>
+  pickText(p, ["marital", "marital_status"]).length > 0;
+const hasBio = (p: StrengthProfile) => pickText(p, ["bio", "about"]).length >= 20;
+const hasChurch = (p: StrengthProfile) => pickText(p, ["church", "igreja"]).length > 1;
+const hasSex = (p: StrengthProfile) => pickText(p, ["sex", "gender"]).length > 0;
+
 const FIELDS: FieldWeight[] = [
-  { key: "name", weight: 8, has: (p) => !!p.full_name && p.full_name.trim().length > 1 },
-  { key: "age", weight: 6, has: (p) => !!p.age && p.age >= 18 },
-  { key: "sex", weight: 5, has: (p) => !!p.sex },
-  { key: "photo", weight: 14, has: (p) => !!p.photo_url },
-  { key: "city", weight: 6, has: (p) => !!p.city && !!p.state },
-  { key: "height", weight: 4, has: (p) => !!p.height_cm && p.height_cm > 0 },
-  { key: "marital", weight: 4, has: (p) => !!p.marital_status },
-  { key: "bio", weight: 12, has: (p) => !!p.bio && p.bio.trim().length >= 20 },
-  { key: "church", weight: 5, has: (p) => !!p.church && p.church.trim().length > 1 },
+  { key: "name", weight: 8, has: (p) => hasName(p) },
+  { key: "age", weight: 6, has: (p) => hasAge(p) },
+  { key: "sex", weight: 5, has: (p) => hasSex(p) },
+  { key: "photo", weight: 14, has: (p) => hasPhoto(p) },
+  { key: "city", weight: 6, has: (p) => hasCity(p) },
+  { key: "height", weight: 4, has: (p) => hasHeight(p) },
+  { key: "marital", weight: 4, has: (p) => hasMarital(p) },
+  { key: "bio", weight: 12, has: (p) => hasBio(p) },
+  { key: "church", weight: 5, has: (p) => hasChurch(p) },
   { key: "baptism", weight: 3, has: (p) => p.years_baptized != null && p.years_baptized >= 0 },
   { key: "seeking", weight: 6, has: (_p, a) => !!a?.seeking },
   { key: "faith_moment", weight: 4, has: (_p, a) => !!a?.faith_moment },
@@ -135,7 +186,7 @@ export function getProfileStrengthNextActions(
   const p = profile ?? {};
   const actions: ChecklistAction[] = [];
 
-  if (!p.photo_url) {
+  if (!hasPhoto(p)) {
     actions.push({
       id: "photo",
       title: "Adicione sua foto principal",
@@ -146,7 +197,7 @@ export function getProfileStrengthNextActions(
       priority: 100,
     });
   }
-  if (!p.full_name || p.full_name.trim().length < 2) {
+  if (!hasName(p)) {
     actions.push({
       id: "name",
       title: "Preencha seu nome",
@@ -157,7 +208,7 @@ export function getProfileStrengthNextActions(
       priority: 95,
     });
   }
-  if (!p.city || !p.state) {
+  if (!hasCity(p)) {
     actions.push({
       id: "city",
       title: "Informe sua cidade",
@@ -168,7 +219,7 @@ export function getProfileStrengthNextActions(
       priority: 80,
     });
   }
-  if (!p.marital_status) {
+  if (!hasMarital(p)) {
     actions.push({
       id: "marital",
       title: "Informe seu estado civil",
@@ -179,7 +230,7 @@ export function getProfileStrengthNextActions(
       priority: 70,
     });
   }
-  if (!p.bio || p.bio.trim().length < 20) {
+  if (!hasBio(p)) {
     actions.push({
       id: "bio",
       title: "Escreva uma bio",
@@ -190,7 +241,7 @@ export function getProfileStrengthNextActions(
       priority: 65,
     });
   }
-  if (!p.church || p.church.trim().length < 2) {
+  if (!hasChurch(p)) {
     actions.push({
       id: "church",
       title: "Adicione sua igreja",
@@ -212,7 +263,7 @@ export function getProfileStrengthNextActions(
       priority: 50,
     });
   }
-  if (!p.height_cm || p.height_cm <= 0) {
+  if (!hasHeight(p)) {
     actions.push({
       id: "height",
       title: "Informe sua altura",
