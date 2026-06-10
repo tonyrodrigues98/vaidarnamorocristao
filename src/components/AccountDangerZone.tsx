@@ -172,12 +172,12 @@ export function AccountDangerZone() {
         </Button>
       </div>
 
-      <div className="rounded-2xl border border-red-200 bg-red-50 p-5 text-red-950 shadow-soft dark:border-red-400/50 dark:bg-red-50">
-        <h3 className="flex items-center gap-2 text-base font-semibold text-red-800">
+      <div className="rounded-2xl border border-red-200 bg-red-50 p-5 text-red-950 shadow-soft dark:border-red-400/40 dark:bg-red-950/40 dark:text-red-50">
+        <h3 className="flex items-center gap-2 text-base font-semibold text-red-800 dark:text-red-200">
           <AlertTriangle className="h-4 w-4" />
           Excluir conta
         </h3>
-        <p className="mt-1 text-sm text-red-900/80">
+        <p className="mt-1 text-sm text-red-900/80 dark:text-red-100/80">
           Ação permanente. Após 30 dias seus dados serão removidos definitivamente. Você pode
           cancelar dentro desse prazo.
         </p>
