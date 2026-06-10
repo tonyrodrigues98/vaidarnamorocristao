@@ -8,6 +8,7 @@ import { useAuth } from "@/lib/auth";
 import { getActiveCommitmentByUser } from "@/lib/commitments";
 import { Header } from "@/components/layout/Header";
 import { MobileAppHeader } from "@/components/mobile/MobileAppHeader";
+import { PretendentesSkeleton } from "@/components/ui/AppSkeletons";
 import { Input } from "@/components/ui/input";
 import {
   Select,

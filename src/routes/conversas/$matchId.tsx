@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
 import { DecoratedAvatar } from "@/components/DecoratedAvatar";
+import { ChatSkeleton } from "@/components/ui/AppSkeletons";
 import { Button } from "@/components/ui/button";
 import {
   ArrowLeft,

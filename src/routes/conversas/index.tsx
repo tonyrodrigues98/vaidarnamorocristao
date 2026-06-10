@@ -11,6 +11,7 @@ import { UserBadges } from "@/components/UserBadges";
 import { DecoratedAvatar } from "@/components/DecoratedAvatar";
 import { CommitmentPauseCard } from "@/components/commitment/CommitmentPauseCard";
 import { useConversationsList } from "@/hooks/useConversationsList";
+import { ConversationListSkeleton } from "@/components/ui/AppSkeletons";
 
 export const Route = createFileRoute("/conversas/")({
   component: () => (
