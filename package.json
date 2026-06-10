@@ -11,13 +11,7 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "test": "vitest run",
-    "cap:sync": "cap sync",
-    "cap:add:ios": "cap add ios",
-    "cap:add:android": "cap add android",
-    "cap:open:ios": "cap open ios",
-    "cap:open:android": "cap open android",
-    "cap:run:ios": "cap run ios",
-    "cap:run:android": "cap run android"
+    "test": "vitest run"
   },
   "dependencies": {
     "@cloudflare/vite-plugin": "^1.25.5",
