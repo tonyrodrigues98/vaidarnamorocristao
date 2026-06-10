@@ -1126,9 +1126,9 @@ function InicioPage() {
                   />
                   <PulseRow
                     icon={<Globe className="h-4 w-4" />}
-                    label="Espaço da comunidade"
+                    label="Espaço de conversas"
                     value="ativo"
-                    cta={{ to: "/comunidade", label: "Entrar" }}
+                    cta={{ to: "/conversas", label: "Entrar" }}
                   />
                 </ul>
               </div>
