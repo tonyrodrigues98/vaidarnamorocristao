@@ -59,7 +59,7 @@ export function ExploreProfileCard({
   return (
     <div className="vt-fade-in flex flex-col gap-4">
       <div className="relative overflow-hidden rounded-[28px] border border-border/60 bg-card shadow-soft">
-        <div className="relative aspect-[4/5]">
+        <div className="relative aspect-[4/5] max-h-[62dvh] sm:max-h-none">
           <PhotoCarousel
             photos={photos}
             alt={profile.full_name}
@@ -73,6 +73,27 @@ export function ExploreProfileCard({
           />
 
           <div className="pointer-events-none absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
+
+          {/* Floating navigation chevrons — always reachable on mobile,
+              even before the user scrolls to the bottom action row. */}
+          <button
+            type="button"
+            onClick={onPrev}
+            disabled={!canPrev}
+            aria-label="Perfil anterior"
+            className="tap app-pressable absolute left-2 top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-foreground shadow-md backdrop-blur-sm transition disabled:pointer-events-none disabled:opacity-0 dark:bg-black/60 dark:text-white"
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </button>
+          <button
+            type="button"
+            onClick={onNext}
+            disabled={!canNext}
+            aria-label="Próximo perfil"
+            className="tap app-pressable absolute right-2 top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-foreground shadow-md backdrop-blur-sm transition disabled:pointer-events-none disabled:opacity-0 dark:bg-black/60 dark:text-white"
+          >
+            <ChevronRight className="h-5 w-5" />
+          </button>
 
           <div className="absolute left-3 right-3 top-3 flex items-start justify-between gap-2">
             <div className="flex flex-wrap items-center gap-1.5">
