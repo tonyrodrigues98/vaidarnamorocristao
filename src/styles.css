@@ -891,3 +891,42 @@
     transition: none;
   }
 }
+
+/* ============================================================
+ * Native-feel locks (PWA standalone)
+ * ============================================================ */
+html {
+  touch-action: manipulation; /* mata o atraso de 300ms e duplo-toque-zoom */
+}
+
+a,
+button,
+[role="button"] {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}
+
+@media all and (display-mode: standalone) {
+  html,
+  body {
+    overscroll-behavior: none; /* bloqueia pull-to-refresh do Chrome e bounce */
+  }
+  body {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  input,
+  textarea,
+  [contenteditable="true"],
+  .app-selectable {
+    -webkit-user-select: text;
+    user-select: text;
+  }
+}
+
+/* Pares com apple-mobile-web-app-status-bar-style: black-translucent
+ * — o conteúdo passa por baixo da barra do iOS, então o shell mobile
+ * precisa respeitar a safe-area no topo. */
+.mobile-app-shell {
+  padding-top: env(safe-area-inset-top, 0px);
+}
