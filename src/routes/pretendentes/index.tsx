@@ -1,7 +1,6 @@
 import { createFileRoute, Link, Navigate, useNavigate } from "@tanstack/react-router";
 import { RequireApproved } from "@/components/RequireApproved";
-import { useEffect, useMemo, useState } from "react";
-import { useCallback, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PretendenteCarousel } from "@/components/pretendentes/PretendenteCarousel";
 import { PretendenteFeaturedCard } from "@/components/pretendentes/PretendenteFeaturedCard";
