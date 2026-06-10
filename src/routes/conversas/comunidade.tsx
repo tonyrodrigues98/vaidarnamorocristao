@@ -782,6 +782,16 @@ function Comunidade() {
           blurComposer();
         }}
       >
+            {loadingOlder && (
+              <div className="flex justify-center py-2 text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" />
+              </div>
+            )}
+            {!hasMoreOlder && messages.length >= PAGE_SIZE && (
+              <p className="text-center text-[11px] text-muted-foreground/70">
+                Início do chat
+              </p>
+            )}
             {messages.length === 0 ? (
               <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
                 Nenhuma mensagem ainda. Seja o primeiro!
