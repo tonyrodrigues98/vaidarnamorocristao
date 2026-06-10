@@ -4,39 +4,41 @@ import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
-import { MobileAppHeader } from "@/components/mobile/MobileAppHeader";
 import { Button } from "@/components/ui/button";
-import { StickersChatBanner } from "@/components/StickersChatBanner";
-import { AnonymousMessagesBanner } from "@/components/AnonymousMessagesBanner";
-import { getHomeChecklistSteps, type HomeChecklistStep } from "@/lib/homeChecklist";
+import { Textarea } from "@/components/ui/textarea";
+import { getActiveCommitmentByUser } from "@/lib/commitments";
+import commitmentRing from "@/assets/commitment-ring.webp";
+import {
+  calculateProfileStrength,
+  getProfileStrengthLabel,
+  getProfileStrengthNextActions,
+  hasClaimedFreeFrameLocal,
+  type StrengthAdvanced,
+  type StrengthPreferences,
+  type StrengthProfile,
+  type ChecklistAction,
+} from "@/lib/profileStrength";
 import {
   Sparkles,
-  CheckCircle2,
-  Circle,
   ArrowRight,
   BookHeart,
-  Users,
   Heart,
   MessageCircle,
-  Camera,
-  Globe,
   Compass,
-  ShieldCheck,
-  ChevronLeft,
-  ChevronRight,
-  Flame,
-  Hand,
+  Bell,
+  Frame,
   Ban,
   ClipboardList,
   AlertTriangle,
   MessageSquareWarning,
   Send,
+  ChevronRight,
+  Stars,
+  Coffee,
+  Sunset,
+  Moon,
 } from "lucide-react";
 import { toast } from "sonner";
-import { Textarea } from "@/components/ui/textarea";
-import { getActiveCommitmentByUser } from "@/lib/commitments";
-import commitmentRing from "@/assets/commitment-ring.webp";
-import { HomeStarterSection } from "@/components/home/HomeStarterSection";
 
 export const Route = createFileRoute("/inicio")({
   component: InicioPage,
@@ -60,6 +62,9 @@ type Profile = {
   state: string | null;
   age: number | null;
   sex: "masculino" | "feminino" | null;
+  marital_status?: string | null;
+  church?: string | null;
+  years_baptized?: number | null;
   banned_reason?: string | null;
   banned_at?: string | null;
   rejection_reason?: string | null;
@@ -104,132 +109,117 @@ type Suggestion = {
   state: string | null;
   photo_url: string | null;
 };
-type ActivityState = {
-  explored: boolean;
-  interestSent: boolean;
-  community: boolean;
-  devotional: boolean;
-};
 
-const TIPS = [
-  {
-    icon: Camera,
-    title: "Capriche nas fotos",
-    text: "Use luz natural, mostre seu sorriso e evite filtros pesados. A primeira impressão importa.",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Segurança em primeiro lugar",
-    text: "Nunca compartilhe dados sensíveis no início. Conheça a pessoa devagar e com calma.",
-  },
-  {
-    icon: BookHeart,
-    title: "Conexões com propósito",
-    text: "Comece conversas com perguntas reais sobre fé, sonhos e o dia a dia — fuja do 'oi'.",
-  },
-  {
-    icon: Sparkles,
-    title: "Mostre quem você é",
-    text: "Seu testemunho, versículo favorito e linguagem do amor falam mais que mil fotos.",
-  },
-  {
-    icon: Heart,
-    title: "Demonstre interesse",
-    text: "Não tenha medo de dar o primeiro passo. Um interesse pode mudar uma história.",
-  },
-];
+type TimeBand = "morning" | "afternoon" | "evening";
 
-function greeting(name: string | null) {
+function getTimeBand(): TimeBand {
   const h = new Date().getHours();
-  const first = (name ?? "").split(" ")[0] || "por aqui";
-  if (h < 5) return `Boa madrugada, ${first}`;
-  if (h < 12) return `Bom dia, ${first}`;
-  if (h < 18) return `Boa tarde, ${first}`;
+  if (h < 12) return "morning";
+  if (h < 18) return "afternoon";
+  return "evening";
+}
+
+function getHeroTheme(band: TimeBand) {
+  if (band === "morning") {
+    return {
+      bg: "bg-[linear-gradient(160deg,oklch(0.98_0.04_70)_0%,oklch(0.94_0.08_30)_55%,oklch(0.88_0.10_15)_100%)]",
+      pill: "border-white/40 bg-white/60 text-[oklch(0.45_0.15_25)]",
+      title: "text-[oklch(0.25_0.10_25)]",
+      sub: "text-[oklch(0.35_0.08_25)]",
+      btn: "bg-[oklch(0.45_0.18_25)] hover:bg-[oklch(0.40_0.18_25)] text-white",
+      btnGhost: "bg-white/50 hover:bg-white/70 text-[oklch(0.30_0.10_25)] border-white/60",
+      Icon: Coffee,
+      label: "Manhã",
+    };
+  }
+  if (band === "afternoon") {
+    return {
+      bg: "bg-[linear-gradient(160deg,oklch(0.94_0.10_30)_0%,oklch(0.82_0.16_20)_55%,oklch(0.70_0.18_10)_100%)]",
+      pill: "border-white/40 bg-white/60 text-[oklch(0.35_0.16_20)]",
+      title: "text-white",
+      sub: "text-white/85",
+      btn: "bg-white text-[oklch(0.35_0.16_20)] hover:bg-white/95",
+      btnGhost: "bg-white/15 hover:bg-white/25 text-white border-white/30 backdrop-blur",
+      Icon: Sunset,
+      label: "Tarde",
+    };
+  }
+  return {
+    bg: "bg-[linear-gradient(160deg,oklch(0.22_0.06_280)_0%,oklch(0.28_0.10_300)_55%,oklch(0.32_0.12_15)_100%)]",
+    pill: "border-white/15 bg-white/10 text-white",
+    title: "text-white",
+    sub: "text-white/80",
+    btn: "bg-white text-[oklch(0.25_0.10_300)] hover:bg-white/95",
+    btnGhost: "bg-white/10 hover:bg-white/20 text-white border-white/20 backdrop-blur",
+    Icon: Moon,
+    label: "Noite",
+  };
+}
+
+function greeting(name: string | null, band: TimeBand) {
+  const first = (name ?? "").split(" ")[0] || "amig@";
+  if (band === "morning") return `Bom dia, ${first}`;
+  if (band === "afternoon") return `Boa tarde, ${first}`;
   return `Boa noite, ${first}`;
 }
-function subGreeting() {
-  const h = new Date().getHours();
-  if (h < 12) return "Que seu dia comece com leveza e propósito.";
-  if (h < 18) return "Que bom ter você por aqui de novo.";
-  return "Esperamos que seu dia tenha sido abençoado.";
+function subGreeting(band: TimeBand) {
+  if (band === "morning") return "Que hoje seja um dia de bons encontros.";
+  if (band === "afternoon") return "Ainda dá tempo de viver uma conexão com propósito.";
+  return "Finalize o dia com calma, fé e boas conversas.";
 }
-
-function getHeroTheme() {
-  const h = new Date().getHours();
-  const isNight = h >= 18 || h < 5;
-  return {
-    isNight,
-    sectionClass: isNight ? "bg-gradient-night" : "bg-gradient-warm",
-    blobA: isNight ? "bg-[oklch(0.82_0.08_285)]" : "bg-[var(--petal)]",
-    blobB: isNight ? "bg-[oklch(0.92_0.06_40)]/60" : "bg-[var(--coral)]/20",
-    titleStyle: isNight ? { color: "oklch(0.98 0.004 245)" } : undefined,
-    textClass: isNight ? "text-slate-200/90" : "text-muted-foreground",
-    pillClass: isNight
-      ? "border-white/15 bg-white/10 text-white"
-      : "border-[var(--rose)]/15 bg-white/60 text-[var(--rose)]",
-  };
+function backTomorrow(band: TimeBand) {
+  if (band === "morning") return "Amanhã pode ter uma nova conexão esperando por você.";
+  if (band === "afternoon") return "Volte amanhã para novas sugestões e um novo devocional.";
+  return "Seu devocional e suas sugestões continuam por aqui amanhã.";
 }
 
 function InicioPage() {
   const { user, loading } = useAuth();
   const [profile, setProfile] = useState<Profile | null | undefined>(undefined);
-  const [advCount, setAdvCount] = useState<{ done: number; total: number }>({ done: 0, total: 8 });
+  const [advanced, setAdvanced] = useState<StrengthAdvanced>(null);
+  const [prefs, setPrefs] = useState<StrengthPreferences>(null);
+  const [photosCount, setPhotosCount] = useState(0);
   const [devo, setDevo] = useState<Devotional | null>(null);
-  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
-  const [activity, setActivity] = useState<ActivityState>({
-    explored: false,
-    interestSent: false,
-    community: false,
-    devotional: false,
-  });
-  const [completedSteps, setCompletedSteps] = useState<Set<HomeChecklistStep>>(new Set());
-  const [community, setCommunity] = useState({ newProfiles: 0, online: 0, newComments: 0 });
-  const [tipIndex, setTipIndex] = useState(0);
+  const [suggestion, setSuggestion] = useState<Suggestion | null>(null);
+  const [unreadConvos, setUnreadConvos] = useState(0);
+  const [unreadNotifs, setUnreadNotifs] = useState(0);
+  const [newProfiles7d, setNewProfiles7d] = useState(0);
   const [adminRequests, setAdminRequests] = useState<AdminRequest[]>([]);
   const [adminWarnings, setAdminWarnings] = useState<AdminWarning[]>([]);
   const [banAppeals, setBanAppeals] = useState<BanAppeal[]>([]);
   const [appealText, setAppealText] = useState("");
   const [appealBusy, setAppealBusy] = useState(false);
   const [activeCommitment, setActiveCommitment] = useState<any>(null);
-
   const [commitmentPartner, setCommitmentPartner] = useState<string | null>(null);
-
   const [commitmentDays, setCommitmentDays] = useState(0);
+  const [frameClaimed, setFrameClaimed] = useState(false);
+
+  const band = useMemo(() => getTimeBand(), []);
+  const theme = useMemo(() => getHeroTheme(band), [band]);
 
   useEffect(() => {
-    if (!user) {
-      setCompletedSteps(new Set());
-      return;
-    }
-    setCompletedSteps(getHomeChecklistSteps(user.id));
+    if (!user) return;
+    setFrameClaimed(hasClaimedFreeFrameLocal(user.id));
   }, [user]);
 
   useEffect(() => {
     if (!user) return;
-
     (async () => {
       const commitment = await getActiveCommitmentByUser(user.id);
-
       setActiveCommitment(commitment);
-
       if (!commitment) return;
-
       const partnerId = commitment.user_a === user.id ? commitment.user_b : commitment.user_a;
-
       const { data } = await supabase
         .from("profiles")
         .select("full_name")
         .eq("id", partnerId)
         .maybeSingle();
-
       setCommitmentPartner(data?.full_name ?? null);
-
       if (commitment.accepted_at) {
         const days = Math.max(
           1,
           Math.floor((Date.now() - new Date(commitment.accepted_at).getTime()) / 86400000),
         );
-
         setCommitmentDays(days);
       }
     })();
@@ -242,12 +232,9 @@ function InicioPage() {
       const [
         { data: p },
         { data: adv },
+        { data: pr },
+        { data: photos },
         { data: d },
-        viewedRes,
-        interestRes,
-        communityRes,
-        prayedRes,
-        reactionRes,
         { data: reqs },
         { data: warns },
         { data: appeals },
@@ -255,17 +242,24 @@ function InicioPage() {
         supabase
           .from("profiles")
           .select(
-            "id, full_name, photo_url, bio, height_cm, status, city, state, age, sex, banned_reason, banned_at, rejection_reason",
+            "id, full_name, photo_url, bio, height_cm, status, city, state, age, sex, marital_status, church, years_baptized, banned_reason, banned_at, rejection_reason",
           )
           .eq("id", user.id)
           .maybeSingle(),
         supabase
-          .from("profile_advanced")
-          .select(
-            "life_verse, testimony, seeking, essential_quality, hobbies, love_language, wants_marriage, wants_children",
-          )
+          .from("profile_advanced" as never)
+          .select("seeking, faith_moment, spiritual_routine, worship_style, essential_quality")
           .eq("user_id", user.id)
           .maybeSingle(),
+        supabase
+          .from("profile_preferences" as never)
+          .select("looking_for_bio, age_min, age_max")
+          .eq("user_id", user.id)
+          .maybeSingle(),
+        supabase
+          .from("profile_photos" as never)
+          .select("id")
+          .eq("user_id", user.id),
         supabase
           .from("daily_posts")
           .select("id, title, content, bible_reference, bible_text, published_at")
@@ -274,11 +268,6 @@ function InicioPage() {
           .order("published_at", { ascending: false })
           .limit(1)
           .maybeSingle(),
-        supabase.from("profile_views").select("id").eq("viewer_id", user.id).limit(1),
-        supabase.from("interests").select("id").eq("sender_id", user.id).limit(1),
-        supabase.from("global_messages").select("id").eq("sender_id", user.id).limit(1),
-        supabase.from("devotional_prayed").select("id").eq("user_id", user.id).limit(1),
-        supabase.from("devotional_reactions").select("post_id").eq("user_id", user.id).limit(1),
         supabase
           .from("user_admin_requests")
           .select("id, kind, message, status, created_at")
@@ -298,36 +287,18 @@ function InicioPage() {
       ]);
       if (cancel) return;
       setProfile(p as Profile | null);
+      setAdvanced((adv as StrengthAdvanced) ?? null);
+      setPrefs((pr as StrengthPreferences) ?? null);
+      setPhotosCount(Array.isArray(photos) ? photos.length : 0);
       setDevo(d as Devotional | null);
       setAdminRequests((reqs ?? []) as AdminRequest[]);
       setAdminWarnings((warns ?? []) as AdminWarning[]);
       setBanAppeals((appeals ?? []) as BanAppeal[]);
-      setActivity({
-        explored: !!viewedRes.data?.length || !!interestRes.data?.length,
-        interestSent: !!interestRes.data?.length,
-        community: !!communityRes.data?.length,
-        devotional: !!prayedRes.data?.length || !!reactionRes.data?.length,
-      });
-      const fields = adv
-        ? [
-            adv.life_verse,
-            adv.testimony,
-            adv.seeking,
-            adv.essential_quality,
-            adv.hobbies,
-            adv.love_language,
-            adv.wants_marriage,
-            adv.wants_children,
-          ]
-        : [];
-      setAdvCount({ done: fields.filter(Boolean).length, total: 8 });
 
       if ((p as Profile | null)?.status === "approved") {
         const targetSex = (p as Profile).sex === "masculino" ? "feminino" : "masculino";
-        const since24h = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
         const sinceWeek = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-
-        const [{ data: sugg }, newProfilesRes, newCommentsRes] = await Promise.all([
+        const [{ data: sugg }, newProfilesRes] = await Promise.all([
           supabase
             .from("profiles")
             .select("id, full_name, age, city, state, photo_url")
@@ -336,24 +307,32 @@ function InicioPage() {
             .neq("id", user.id)
             .not("photo_url", "is", null)
             .order("created_at", { ascending: false })
-            .limit(6),
+            .limit(1)
+            .maybeSingle(),
           supabase
             .from("profiles")
             .select("id", { count: "exact", head: true })
             .eq("status", "approved")
             .gte("created_at", sinceWeek),
-          supabase
-            .from("messages")
-            .select("id", { count: "exact", head: true })
-            .gte("created_at", since24h),
         ]);
         if (cancel) return;
-        setSuggestions((sugg as Suggestion[] | null) ?? []);
-        setCommunity({
-          newProfiles: newProfilesRes.count ?? 0,
-          online: 0,
-          newComments: newCommentsRes.count ?? 0,
-        });
+        setSuggestion((sugg as Suggestion | null) ?? null);
+        setNewProfiles7d(newProfilesRes.count ?? 0);
+
+        const [convRes, notifRes] = await Promise.all([
+          supabase
+            .from("conversations" as never)
+            .select("id", { count: "exact", head: true })
+            .or(`user_a.eq.${user.id},user_b.eq.${user.id}`),
+          supabase
+            .from("notifications" as never)
+            .select("id", { count: "exact", head: true })
+            .eq("user_id", user.id)
+            .is("read_at", null),
+        ]);
+        if (cancel) return;
+        setUnreadConvos(convRes.count ?? 0);
+        setUnreadNotifs(notifRes.count ?? 0);
       }
     })();
     return () => {
@@ -361,80 +340,37 @@ function InicioPage() {
     };
   }, [user]);
 
-  const checklist = useMemo(() => {
-    const p = profile;
-    return [
-      {
-        key: "photo",
-        label: "Adicione uma boa foto",
-        done: !!p?.photo_url,
-        to: "/perfil" as const,
-      },
-      {
-        key: "bio",
-        label: "Capriche na sua bio",
-        done: !!(p?.bio && p.bio.trim().length >= 30),
-        to: "/perfil" as const,
-      },
-      {
-        key: "advanced",
-        label: "Conte sobre você (testemunho, versículo…)",
-        done: advCount.done >= 5,
-        to: "/perfil" as const,
-      },
-      {
-        key: "interest",
-        label: "Demonstre interesse",
-        done: activity.interestSent,
-        to: "/pretendentes" as const,
-      },
-      {
-        key: "explore",
-        label: "Explore pretendentes",
-        done: activity.explored || completedSteps.has("explore"),
-        to: "/pretendentes" as const,
-        manual: true,
-      },
-      {
-        key: "community",
-        label: "Participe das conversas",
-        done: activity.community,
-        to: "/conversas" as const,
-        manual: true,
-      },
-      {
-        key: "devotional",
-        label: "Leia o devocional do dia",
-        done: activity.devotional || completedSteps.has("devotional"),
-        to: "/devocional" as const,
-        manual: true,
-      },
-    ];
-  }, [profile, advCount, activity, completedSteps]);
+  const strength = useMemo(
+    () => calculateProfileStrength(profile ?? null, advanced, prefs, photosCount),
+    [profile, advanced, prefs, photosCount],
+  );
+  const strengthLabel = useMemo(() => getProfileStrengthLabel(strength), [strength]);
 
-  const completion = useMemo(() => {
-    const p = profile;
-    if (!p) return 0;
-    const baseChecks = [!!p.photo_url, !!(p.bio && p.bio.trim().length >= 30), !!p.height_cm];
-    const total = baseChecks.length + advCount.total;
-    const done = baseChecks.filter(Boolean).length + advCount.done;
-    return Math.round((done / total) * 100);
-  }, [profile, advCount]);
+  const nextActions: ChecklistAction[] = useMemo(
+    () =>
+      getProfileStrengthNextActions(profile ?? null, advanced, prefs, photosCount, {
+        freeFrameAvailable: !frameClaimed,
+        sawSuggestion: !!suggestion,
+      }),
+    [profile, advanced, prefs, photosCount, frameClaimed, suggestion],
+  );
 
   if (!loading && !user) return <Navigate to="/auth/login" />;
+
   if (profile === undefined) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-[var(--petal)]/20 via-background to-background">
+      <div className="min-h-[100dvh] bg-background">
         <Header />
-        <div className="mx-auto max-w-6xl px-4 py-16">
-          <div className="h-40 animate-pulse rounded-3xl bg-muted/40" />
-        </div>
+        <main className="mx-auto w-full max-w-2xl px-4 pt-4 pb-24">
+          <div className="h-[58dvh] animate-pulse rounded-3xl bg-muted/40" />
+          <div className="mt-4 h-24 animate-pulse rounded-2xl bg-muted/30" />
+          <div className="mt-3 h-40 animate-pulse rounded-2xl bg-muted/30" />
+        </main>
       </div>
     );
   }
   if (!profile) return <Navigate to="/onboarding" />;
 
-  const firstName = (profile.full_name ?? "").split(" ")[0] || "amig@";
   const isApproved = profile.status === "approved";
   const isBanned = profile.status === "banned";
   const isRejected = profile.status === "rejected";
@@ -446,6 +382,25 @@ function InicioPage() {
   const canAppeal = isBanned && (!latestAppeal || latestAppeal.status === "ignored");
   const canReverify =
     isRejected && (!latestRejectionAppeal || latestRejectionAppeal.status === "ignored");
+
+  // Primary CTA logic
+  let primaryCta: { to: any; params?: any; label: string } = { to: "/perfil", label: "Completar perfil" };
+  if (isBanned) {
+    primaryCta = { to: "/suporte", label: "Falar com o suporte" };
+  } else if (isRejected) {
+    primaryCta = { to: "/perfil", label: "Revisar meu perfil" };
+  } else if (!isApproved) {
+    primaryCta = { to: "/perfil", label: "Continuar perfil" };
+  } else if (strength < 50) {
+    primaryCta = { to: "/perfil", label: "Completar perfil" };
+  } else if (devo) {
+    primaryCta = { to: "/devocional", label: "Ler devocional" };
+  } else {
+    primaryCta = { to: "/pretendentes", label: "Explorar pretendentes" };
+  }
+  const secondaryCta: { to: any; label: string } = isApproved
+    ? { to: "/conversas", label: "Conversas" }
+    : { to: "/perfil", label: "Meu perfil" };
 
   async function acknowledgeWarning(id: string) {
     const { error } = await supabase
@@ -489,7 +444,6 @@ function InicioPage() {
       }
       setAppealText("");
       toast.success("Pedido de reanálise enviado. Seu perfil voltou para análise.");
-      // O perfil agora é 'pending' — recarrega para sair do modo rejeitado
       setTimeout(() => window.location.reload(), 600);
       return;
     }
@@ -508,836 +462,628 @@ function InicioPage() {
     toast.success("Apelação enviada. A equipe vai analisar.");
   }
 
+  const firstName = (profile.full_name ?? "").split(" ")[0] || "amig@";
+
   return (
-    <div className="min-h-[100dvh] bg-gradient-to-b from-[var(--petal)]/20 via-background to-background">
+    <div className="min-h-[100dvh] bg-background">
       <Header />
-      <MobileAppHeader title="Início" subtitle="Seu dia no VaiDarNamoro" />
 
-      <main className="relative mx-auto w-full max-w-6xl pb-24 pt-0 sm:px-6 sm:pt-10">
-        {/* AVISOS SÉRIOS DA EQUIPE */}
-        {activeWarnings.length > 0 && (
-          <section className="mb-4 space-y-3 px-4 sm:mb-6 sm:px-0">
-            {activeWarnings.map((w) => (
-              <div
-                key={w.id}
-                className={`flex items-start gap-3 rounded-2xl border p-4 shadow-soft ${
-                  w.severity === "severe"
-                    ? "border-red-500/40 bg-red-500/10 text-red-900 dark:text-red-200"
-                    : "border-amber-500/40 bg-amber-500/10 text-amber-900 dark:text-amber-200"
-                }`}
-              >
-                <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0" />
-                <div className="flex-1">
-                  <p className="text-sm font-semibold">
-                    {w.severity === "severe" ? "Aviso sério da moderação" : "Aviso da moderação"}
-                  </p>
-                  <p className="mt-1 whitespace-pre-wrap text-sm">{w.message}</p>
-                </div>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => acknowledgeWarning(w.id)}
-                  className="shrink-0 bg-background/50"
-                >
-                  Entendi
-                </Button>
-              </div>
-            ))}
-          </section>
-        )}
-
-        {/* SMART STARTER: profile strength + checklist + free frame */}
-        {isApproved && user && (
-          <HomeStarterSection userId={user.id} />
-        )}
-
-        {/* HERO */}
-        {(() => {
-          const hero = getHeroTheme();
-          return (
-            <section
-              className={`relative overflow-hidden border border-border/60 ${hero.sectionClass} px-6 pt-10 pb-12 shadow-soft min-h-[58dvh] flex flex-col justify-end rounded-b-[2.25rem] sm:rounded-[2rem] sm:min-h-0 sm:px-10 sm:py-14 sm:flex-none sm:justify-start`}
+      <main className="mx-auto w-full max-w-2xl pb-28 md:max-w-4xl md:px-6 md:pt-8">
+        {/* HERO — app-like first screen */}
+        <section
+          className={`relative overflow-hidden ${theme.bg} px-5 pb-7 pt-[max(env(safe-area-inset-top),1rem)] min-h-[60dvh] flex flex-col rounded-b-[2rem] md:rounded-3xl md:min-h-[44dvh] md:px-8 md:pt-10`}
+        >
+          {/* In-hero compact header (mobile only) */}
+          <div className="flex items-center justify-between md:hidden">
+            <Link
+              to="/perfil"
+              className="app-pressable flex items-center gap-2"
+              aria-label="Meu perfil"
             >
-              {!hero.isNight && (
-                <>
-                  <div
-                    aria-hidden
-                    className={`pointer-events-none absolute -top-32 -left-20 h-[420px] w-[420px] rounded-full ${hero.blobA} opacity-70 blur-3xl`}
-                  />
-                  <div
-                    aria-hidden
-                    className={`pointer-events-none absolute -bottom-24 -right-16 h-[380px] w-[380px] rounded-full ${hero.blobB} blur-3xl`}
-                  />
-                </>
+              <span className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-white/30 bg-white/30 text-sm font-bold text-white backdrop-blur">
+                {profile.photo_url ? (
+                  <PhotoImg src={profile.photo_url} alt="" className="h-full w-full object-cover" />
+                ) : (
+                  firstName.charAt(0).toUpperCase()
+                )}
+              </span>
+            </Link>
+            <div className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] backdrop-blur ${theme.pill}`}>
+              <theme.Icon className="h-3 w-3" /> {theme.label}
+            </div>
+            <Link
+              to="/notificacoes"
+              aria-label="Notificações"
+              className="app-pressable relative flex h-9 w-9 items-center justify-center rounded-full border border-white/30 bg-white/20 text-white backdrop-blur"
+            >
+              <Bell className="h-4 w-4" />
+              {unreadNotifs > 0 && (
+                <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-[oklch(0.62_0.22_15)] px-1 text-[9px] font-bold text-white">
+                  {unreadNotifs > 9 ? "9+" : unreadNotifs}
+                </span>
               )}
-              {hero.isNight && (
-                <>
-                  {/* Lua crescente */}
-                  <svg
-                    aria-hidden
-                    viewBox="0 0 64 64"
-                    className="pointer-events-none absolute top-6 right-6 h-24 w-24 sm:h-32 sm:w-32"
-                    style={{ filter: "drop-shadow(0 4px 18px oklch(0.94 0.08 85 / 0.45))" }}
-                  >
-                    <defs>
-                      <radialGradient id="moonGlow" cx="50%" cy="50%" r="50%">
-                        <stop offset="0%" stopColor="oklch(0.96 0.09 85)" />
-                        <stop offset="100%" stopColor="oklch(0.88 0.10 75)" />
-                      </radialGradient>
-                    </defs>
-                    <path d="M44 8a24 24 0 1 0 12 42A20 20 0 0 1 44 8z" fill="url(#moonGlow)" />
-                  </svg>
-                  {/* Estrelinhas cintilantes */}
-                  {[
-                    { top: "18%", left: "55%", size: 8, delay: "0s" },
-                    { top: "8%", left: "42%", size: 6, delay: "0.6s" },
-                    { top: "62%", left: "82%", size: 7, delay: "1.2s" },
-                    { top: "78%", left: "70%", size: 5, delay: "1.8s" },
-                    { top: "48%", left: "92%", size: 6, delay: "2.4s" },
-                    { top: "34%", left: "78%", size: 5, delay: "0.3s" },
-                    { top: "86%", left: "58%", size: 7, delay: "1.5s" },
-                  ].map((s, i) => (
-                    <svg
-                      key={i}
-                      aria-hidden
-                      viewBox="0 0 10 10"
-                      className="pointer-events-none absolute animate-pulse"
-                      style={{
-                        top: s.top,
-                        left: s.left,
-                        width: s.size,
-                        height: s.size,
-                        animationDelay: s.delay,
-                        animationDuration: "2.5s",
-                      }}
-                    >
-                      <path
-                        d="M5 0 L6 4 L10 5 L6 6 L5 10 L4 6 L0 5 L4 4 Z"
-                        fill="oklch(0.96 0.08 85)"
-                        opacity="0.85"
-                      />
-                    </svg>
-                  ))}
-                </>
-              )}
-              <div
-                aria-hidden
-                className="pointer-events-none absolute top-10 right-1/3 h-2 w-2 animate-pulse rounded-full bg-[var(--rose)]/60"
-              />
-              <div
-                aria-hidden
-                className="pointer-events-none absolute bottom-16 left-1/4 h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--coral)]/70"
-                style={{ animationDelay: "1.2s" }}
-              />
+            </Link>
+          </div>
 
-              <div className="relative">
+          {/* Decorative blobs */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -top-24 -right-16 h-72 w-72 rounded-full bg-white/15 blur-3xl"
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -bottom-20 -left-16 h-72 w-72 rounded-full bg-white/10 blur-3xl"
+          />
+          {band === "evening" && (
+            <>
+              {[
+                { top: "14%", left: "60%", size: 7, delay: "0s" },
+                { top: "22%", left: "78%", size: 5, delay: "0.6s" },
+                { top: "9%", left: "30%", size: 6, delay: "1.2s" },
+                { top: "40%", left: "88%", size: 5, delay: "1.8s" },
+              ].map((s, i) => (
+                <Stars
+                  key={i}
+                  aria-hidden
+                  className="pointer-events-none absolute animate-pulse text-white/80"
+                  style={{ top: s.top, left: s.left, width: s.size * 2, height: s.size * 2, animationDelay: s.delay }}
+                />
+              ))}
+            </>
+          )}
+
+          <div className="relative mt-auto pt-10 md:pt-0">
+            <h1 className={`text-[28px] font-extrabold leading-[1.1] tracking-tight md:text-4xl ${theme.title}`}>
+              {greeting(profile.full_name, band)}
+            </h1>
+            <p className={`mt-2 max-w-md text-[15px] leading-relaxed md:text-base ${theme.sub}`}>
+              {subGreeting(band)}
+            </p>
+
+            <div className="mt-6 flex flex-wrap gap-2.5">
+              <Button asChild size="lg" className={`app-pressable rounded-full px-5 ${theme.btn}`}>
+                <Link to={primaryCta.to} params={primaryCta.params}>
+                  {primaryCta.label}
+                </Link>
+              </Button>
+              <Button
+                asChild
+                size="lg"
+                variant="outline"
+                className={`app-pressable rounded-full px-5 ${theme.btnGhost}`}
+              >
+                <Link to={secondaryCta.to}>{secondaryCta.label}</Link>
+              </Button>
+            </div>
+          </div>
+        </section>
+
+        {/* CONTENT */}
+        <div className="space-y-5 px-4 pt-5 md:px-0">
+          {/* ACTIVE WARNINGS — prioritized */}
+          {activeWarnings.length > 0 && (
+            <section className="space-y-2.5">
+              {activeWarnings.map((w) => (
                 <div
-                  className={`animate-fade-up inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] backdrop-blur ${hero.pillClass}`}
+                  key={w.id}
+                  className={`flex items-start gap-3 rounded-2xl border p-3.5 ${
+                    w.severity === "severe"
+                      ? "border-red-500/40 bg-red-500/10"
+                      : "border-amber-500/40 bg-amber-500/10"
+                  }`}
                 >
-                  <Sparkles className="h-3 w-3" /> Seu espaço
+                  <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+                  <div className="flex-1 text-sm">
+                    <p className="font-semibold">
+                      {w.severity === "severe" ? "Aviso sério da moderação" : "Aviso da moderação"}
+                    </p>
+                    <p className="mt-1 whitespace-pre-wrap">{w.message}</p>
+                  </div>
+                  <Button size="sm" variant="outline" onClick={() => acknowledgeWarning(w.id)} className="shrink-0">
+                    Entendi
+                  </Button>
                 </div>
-                <h1
-                  className="animate-fade-up mt-5 text-3xl font-extrabold leading-[1.1] tracking-tight sm:text-5xl"
-                  style={{ animationDelay: "60ms", ...hero.titleStyle }}
-                >
-                  {greeting(profile.full_name)}{" "}
-                  <Hand
-                    className="ml-1 inline-block h-7 w-7 -translate-y-0.5 text-[var(--rose)] sm:h-9 sm:w-9"
-                    aria-hidden
-                  />
-                </h1>
-                <p
-                  className={`animate-fade-up mt-3 max-w-xl text-base sm:text-lg ${hero.textClass}`}
-                  style={{ animationDelay: "140ms" }}
-                >
-                  {subGreeting()}{" "}
-                  {isApproved
-                    ? "Sua jornada continua — explore, converse e deixe Deus surpreender você."
-                    : isBanned
-                      ? "Sua conta está temporariamente suspensa. Você ainda pode falar com a gente e enviar uma apelação abaixo."
-                      : isRejected
-                        ? "Sua conta foi negada. Revise suas informações e clique em Verificar Novamente para uma reanálise."
-                        : "Logo seu perfil será revisado e você poderá começar a explorar."}
-                </p>
+              ))}
+            </section>
+          )}
 
-                <div
-                  className="animate-fade-up mt-7 flex flex-wrap gap-3"
-                  style={{ animationDelay: "220ms" }}
-                >
-                  {isBanned ? (
-                    <Button
-                      asChild
-                      size="lg"
-                      variant="outline"
-                      className="rounded-full px-6 backdrop-blur bg-white/40 dark:bg-white/5"
-                    >
-                      <Link to="/suporte">
-                        <MessageSquareWarning className="mr-2 h-4 w-4" /> Falar com o suporte
-                      </Link>
-                    </Button>
-                  ) : isApproved ? (
-                    <>
-                      <Button asChild size="lg" className="rounded-full px-6">
-                        <Link to="/pretendentes">
-                          <Compass className="mr-2 h-4 w-4" /> Ver pretendentes
-                        </Link>
-                      </Button>
-                      <Button
-                        asChild
-                        size="lg"
-                        variant="outline"
-                        className="rounded-full px-6 backdrop-blur bg-white/40 dark:bg-white/5"
-                      >
-                        <Link to="/devocional">
-                          <BookHeart className="mr-2 h-4 w-4" /> Devocional do dia
-                        </Link>
-                      </Button>
-                    </>
-                  ) : (
-                    <Button asChild size="lg" className="rounded-full px-6">
-                      <Link to="/perfil">Continuar perfil</Link>
-                    </Button>
+          {/* BAN PANEL */}
+          {isBanned && (
+            <section className="rounded-3xl border border-red-500/30 bg-red-500/5 p-5">
+              <div className="flex items-start gap-3">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-red-500/15 text-red-600">
+                  <Ban className="h-4 w-4" />
+                </span>
+                <div className="flex-1">
+                  <h2 className="text-base font-semibold text-red-700 dark:text-red-300">Conta suspensa</h2>
+                  {profile.banned_reason && (
+                    <p className="mt-1 whitespace-pre-wrap text-sm">
+                      <span className="font-semibold">Motivo:</span> {profile.banned_reason}
+                    </p>
+                  )}
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    Se acredita que houve um engano, envie uma apelação acolhedora.
+                  </p>
+                </div>
+              </div>
+              {latestAppeal && (
+                <div className="mt-4 rounded-2xl border border-border/60 bg-background/60 p-3">
+                  <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                    Sua apelação · {new Date(latestAppeal.created_at).toLocaleDateString("pt-BR")} ·{" "}
+                    {latestAppeal.status === "pending" && "aguardando"}
+                    {latestAppeal.status === "answered" && "respondida"}
+                    {latestAppeal.status === "ignored" && "encerrada"}
+                  </p>
+                  <p className="mt-1.5 whitespace-pre-wrap text-sm">{latestAppeal.appeal_text}</p>
+                  {latestAppeal.status === "answered" && latestAppeal.response_text && (
+                    <div className="mt-2 rounded-xl bg-[var(--petal)]/40 p-2.5 text-sm">
+                      <p className="text-[11px] font-semibold uppercase tracking-wide text-[var(--rose)]">
+                        Resposta da equipe
+                      </p>
+                      <p className="mt-1 whitespace-pre-wrap">{latestAppeal.response_text}</p>
+                    </div>
                   )}
                 </div>
+              )}
+              {canAppeal && (
+                <div className="mt-4">
+                  <label className="text-sm font-semibold">Recorrer da decisão</label>
+                  <Textarea
+                    value={appealText}
+                    onChange={(e) => setAppealText(e.target.value)}
+                    maxLength={2000}
+                    placeholder="Conte com calma o que aconteceu..."
+                    className="mt-2 min-h-[100px]"
+                  />
+                  <div className="mt-2 flex justify-end">
+                    <Button onClick={() => submitAppeal("ban")} disabled={appealBusy} size="sm">
+                      <Send className="mr-2 h-3.5 w-3.5" /> Enviar apelação
+                    </Button>
+                  </div>
+                </div>
+              )}
+              <div className="mt-4">
+                <Button asChild variant="outline" size="sm" className="rounded-full">
+                  <Link to="/suporte">
+                    <MessageSquareWarning className="mr-2 h-3.5 w-3.5" /> Falar com o suporte
+                  </Link>
+                </Button>
               </div>
             </section>
-          );
-        })()}
+          )}
 
-        {/* QUICK SHORTCUTS — mobile only */}
-        {!isBanned && !isRejected && (
-          <section
-            aria-label="Atalhos rápidos"
-            className="md:hidden -mt-6 px-4"
-          >
-            <div className="flex gap-3 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              {[
-                { to: "/pretendentes" as const, label: "Pretendentes", icon: Heart },
-                { to: "/conversas" as const, label: "Conversas", icon: MessageCircle },
-                { to: "/devocional" as const, label: "Devocional", icon: BookHeart },
-                { to: "/loja" as const, label: "Loja", icon: Sparkles },
-                { to: "/perfil" as const, label: "Perfil", icon: Users },
-              ].map((s) => {
-                const SIcon = s.icon;
-                return (
-                  <Link
-                    key={s.to}
-                    to={s.to}
-                    className="app-pressable flex min-w-[78px] shrink-0 flex-col items-center gap-1.5 rounded-2xl border border-border/60 bg-card/85 px-3 py-3 text-center shadow-sm backdrop-blur"
-                  >
-                    <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--petal)] text-[var(--rose)]">
-                      <SIcon className="h-4 w-4" />
-                    </span>
-                    <span className="text-[11px] font-semibold leading-tight text-foreground">
-                      {s.label}
-                    </span>
-                  </Link>
-                );
-              })}
-            </div>
-          </section>
-        )}
-
-        {/* CONTAINER PADDING for the rest of the content */}
-        <div className="px-4 sm:px-0">
-
-        {activeCommitment && (
-          <section className="mt-6 animate-fade-up sm:mt-8">
-            <div
-              className="
-        overflow-hidden
-        rounded-3xl
-        border
-        border-emerald-200/60
-        bg-gradient-to-br
-        from-emerald-50
-        via-white
-        to-emerald-50
-        p-4 sm:p-6
-        shadow-soft
-      "
-            >
-              <div className="flex flex-row items-center gap-4 sm:gap-5">
-                <img
-                  src={commitmentRing}
-                  alt=""
-                  className="
-            h-12 sm:h-16
-            w-12 sm:w-16
-            object-contain
-            drop-shadow-sm
-          "
-                />
-
+          {/* REJECTED PANEL */}
+          {isRejected && (
+            <section className="rounded-3xl border border-amber-500/40 bg-amber-500/5 p-5">
+              <div className="flex items-start gap-3">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-amber-500/15 text-amber-600">
+                  <AlertTriangle className="h-4 w-4" />
+                </span>
                 <div className="flex-1">
-                  <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-[0.18em] text-emerald-600">
+                  <h2 className="text-base font-semibold text-amber-700 dark:text-amber-300">Conta negada</h2>
+                  {profile.rejection_reason && (
+                    <p className="mt-2 whitespace-pre-wrap rounded-lg bg-amber-500/10 p-2 text-sm">
+                      <span className="font-semibold">Motivo:</span> {profile.rejection_reason}
+                    </p>
+                  )}
+                  <div className="mt-3">
+                    <Button asChild size="sm" variant="outline" className="rounded-full">
+                      <Link to="/perfil">Editar meu perfil</Link>
+                    </Button>
+                  </div>
+                </div>
+              </div>
+              {latestRejectionAppeal && (
+                <div className="mt-4 rounded-2xl border border-border/60 bg-background/60 p-3">
+                  <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                    Solicitação · {new Date(latestRejectionAppeal.created_at).toLocaleDateString("pt-BR")} ·{" "}
+                    {latestRejectionAppeal.status === "pending" && "aguardando"}
+                    {latestRejectionAppeal.status === "answered" && "respondida"}
+                    {latestRejectionAppeal.status === "ignored" && "encerrada"}
+                  </p>
+                  <p className="mt-1.5 whitespace-pre-wrap text-sm">{latestRejectionAppeal.appeal_text}</p>
+                  {latestRejectionAppeal.status === "answered" && latestRejectionAppeal.response_text && (
+                    <div className="mt-2 rounded-xl bg-[var(--petal)]/40 p-2.5 text-sm">
+                      <p className="mt-1 whitespace-pre-wrap">{latestRejectionAppeal.response_text}</p>
+                    </div>
+                  )}
+                </div>
+              )}
+              {canReverify && (
+                <div className="mt-4">
+                  <label className="text-sm font-semibold">Pedir nova análise</label>
+                  <Textarea
+                    value={appealText}
+                    onChange={(e) => setAppealText(e.target.value)}
+                    maxLength={2000}
+                    placeholder="Conte o que mudou no seu perfil..."
+                    className="mt-2 min-h-[100px]"
+                  />
+                  <div className="mt-2 flex justify-end">
+                    <Button onClick={() => submitAppeal("rejection")} disabled={appealBusy} size="sm">
+                      <Send className="mr-2 h-3.5 w-3.5" /> Verificar Novamente
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </section>
+          )}
+
+          {/* ADMIN REQUESTS */}
+          {adminRequests.length > 0 && (
+            <section className="rounded-3xl border border-border/60 bg-card/70 p-4 shadow-soft">
+              <div className="flex items-center gap-2">
+                <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-[var(--petal)] text-[var(--rose)]">
+                  <ClipboardList className="h-3.5 w-3.5" />
+                </span>
+                <h2 className="text-sm font-semibold">Solicitações da equipe</h2>
+              </div>
+              <ul className="mt-3 space-y-2">
+                {adminRequests.map((r) => (
+                  <li key={r.id} className="rounded-2xl border border-border/50 bg-background/40 p-3">
+                    <p className="text-[11px] font-semibold uppercase tracking-wide text-[var(--rose)]">
+                      {r.kind === "photo" && "Foto"}
+                      {r.kind === "bio" && "Biografia"}
+                      {r.kind === "behavior" && "Comportamento"}
+                      {r.kind === "other" && "Outro"}
+                      {" · "}
+                      {new Date(r.created_at).toLocaleDateString("pt-BR")}
+                    </p>
+                    <p className="mt-1 whitespace-pre-wrap text-sm">{r.message}</p>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {(r.kind === "photo" || r.kind === "bio") && (
+                        <Button asChild size="sm" variant="outline" className="h-7 rounded-full text-xs">
+                          <Link to="/perfil">Ir para o perfil</Link>
+                        </Button>
+                      )}
+                      <Button size="sm" onClick={() => resolveRequest(r.id)} className="h-7 rounded-full text-xs">
+                        Marcar como resolvida
+                      </Button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {/* PROPÓSITO FIRMADO */}
+          {activeCommitment && (
+            <section className="overflow-hidden rounded-3xl border border-emerald-200/60 bg-gradient-to-br from-emerald-50 via-white to-emerald-50 p-4 shadow-soft">
+              <div className="flex items-center gap-3">
+                <img src={commitmentRing} alt="" className="h-12 w-12 shrink-0 object-contain" />
+                <div className="min-w-0 flex-1">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-emerald-600">
                     Propósito Firmado
                   </p>
-
-                  <h2 className="mt-0.5 text-base sm:text-2xl font-bold leading-tight">
-                    {commitmentPartner
-                      ? `Você está em propósito com ${commitmentPartner}`
-                      : "Você está em propósito"}
+                  <h2 className="mt-0.5 truncate text-sm font-bold leading-tight md:text-base">
+                    {commitmentPartner ? `Em propósito com ${commitmentPartner}` : "Você está em propósito"}
                   </h2>
-
-                  <p className="mt-1 text-xs sm:text-sm text-muted-foreground">
-                    {commitmentDays} dias juntos em propósito.
+                  <p className="mt-0.5 text-xs text-muted-foreground">
+                    {commitmentDays} {commitmentDays === 1 ? "dia" : "dias"} juntos.
                   </p>
                 </div>
-
-                <Button asChild size="sm" className="shrink-0 rounded-full sm:size-default">
+                <Button asChild size="sm" className="shrink-0 rounded-full">
                   <Link
                     to="/proposito/$matchId"
-                    params={{
-                      matchId: activeCommitment.match_id,
-                    }}
+                    params={{ matchId: activeCommitment.match_id }}
                   >
                     Página
                   </Link>
                 </Button>
               </div>
-            </div>
-          </section>
-        )}
+            </section>
+          )}
 
-        {/* NOVIDADES PARA VOCÊ */}
-        {!isBanned && !isRejected && (
-          <section className="mt-6 animate-fade-up sm:mt-8" style={{ animationDelay: "300ms" }}>
-            <h2 className="mb-3 px-1 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-              Novidades para você
-            </h2>
-            <div className="space-y-3 sm:space-y-4">
-              <StickersChatBanner />
-              <AnonymousMessagesBanner />
-            </div>
-          </section>
-        )}
+          {/* COMECE POR AQUI */}
+          {!isBanned && !isRejected && nextActions.length > 0 && (
+            <section>
+              <h2 className="mb-2.5 px-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                Comece por aqui
+              </h2>
+              <div className="-mx-4 flex gap-2.5 overflow-x-auto px-4 pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:mx-0 md:grid md:grid-cols-3 md:overflow-visible md:px-0">
+                {nextActions.map((a) => {
+                  const Icon = a.icon;
+                  return (
+                    <Link
+                      key={a.id}
+                      to={a.to}
+                      className="app-card-interactive flex min-w-[230px] shrink-0 items-start gap-3 rounded-2xl border border-border/60 bg-card p-3.5 shadow-soft md:min-w-0"
+                    >
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[var(--petal)] text-[var(--rose)]">
+                        <Icon className="h-4 w-4" />
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-semibold leading-tight">{a.title}</p>
+                        <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">{a.description}</p>
+                      </div>
+                      <ChevronRight className="mt-1 h-4 w-4 shrink-0 text-muted-foreground" />
+                    </Link>
+                  );
+                })}
+              </div>
+            </section>
+          )}
 
-        {/* PAINEL DE BANIMENTO */}
-        {isBanned && (
-          <section className="mt-6 rounded-3xl border border-red-500/30 bg-red-500/5 p-6 shadow-soft">
-            <div className="flex items-start gap-3">
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-red-500/15 text-red-600">
-                <Ban className="h-5 w-5" />
-              </span>
-              <div className="flex-1">
-                <h2 className="text-lg font-semibold text-red-700 dark:text-red-300">
-                  Conta suspensa
+          {/* SUGESTÃO DO DIA */}
+          {isApproved && (
+            suggestion ? (
+              <section>
+                <h2 className="mb-2.5 px-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                  Sugestão do dia
                 </h2>
-                {profile.banned_reason && (
-                  <p className="mt-1 whitespace-pre-wrap text-sm text-red-900/80 dark:text-red-200/80">
-                    <span className="font-semibold">Motivo:</span> {profile.banned_reason}
-                  </p>
-                )}
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Sentimos muito por isso. Se você acredita que houve um engano, envie uma apelação
-                  acolhedora e a equipe vai analisar.
-                </p>
-              </div>
-            </div>
-
-            {latestAppeal && (
-              <div className="mt-5 rounded-2xl border border-border/60 bg-background/60 p-4">
-                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                  Sua apelação · {new Date(latestAppeal.created_at).toLocaleString("pt-BR")} ·{" "}
-                  {latestAppeal.status === "pending" && "aguardando resposta"}
-                  {latestAppeal.status === "answered" && "respondida"}
-                  {latestAppeal.status === "ignored" && "encerrada"}
-                </p>
-                <p className="mt-2 whitespace-pre-wrap text-sm">{latestAppeal.appeal_text}</p>
-                {latestAppeal.status === "answered" && latestAppeal.response_text && (
-                  <div className="mt-3 rounded-xl bg-[var(--petal)]/40 p-3 text-sm">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-[var(--rose)]">
-                      Resposta da equipe
-                    </p>
-                    <p className="mt-1 whitespace-pre-wrap">{latestAppeal.response_text}</p>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {canAppeal && (
-              <div className="mt-5">
-                <label className="text-sm font-semibold">Recorrer da decisão</label>
-                <Textarea
-                  value={appealText}
-                  onChange={(e) => setAppealText(e.target.value)}
-                  maxLength={2000}
-                  placeholder="Conte com calma o que aconteceu e por que acredita que houve engano..."
-                  className="mt-2 min-h-[120px]"
-                />
-                <div className="mt-3 flex justify-end">
-                  <Button onClick={() => submitAppeal("ban")} disabled={appealBusy}>
-                    <Send className="mr-2 h-4 w-4" /> Enviar apelação
-                  </Button>
-                </div>
-              </div>
-            )}
-          </section>
-        )}
-
-        {/* SOLICITAÇÕES DA EQUIPE */}
-        {isRejected && (
-          <section className="mt-6 rounded-3xl border border-amber-500/40 bg-amber-500/5 p-6 shadow-soft">
-            <div className="flex items-start gap-3">
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-amber-500/15 text-amber-600">
-                <AlertTriangle className="h-5 w-5" />
-              </span>
-              <div className="flex-1">
-                <h2 className="text-lg font-semibold text-amber-700 dark:text-amber-300">
-                  Conta negada
-                </h2>
-                <p className="mt-1 text-sm text-amber-900/80 dark:text-amber-200/80">
-                  Revise sua conta e tente novamente.
-                </p>
-                {profile.rejection_reason && (
-                  <p className="mt-2 whitespace-pre-wrap rounded-lg bg-amber-500/10 p-2 text-sm text-amber-900 dark:text-amber-200">
-                    <span className="font-semibold">Motivo:</span> {profile.rejection_reason}
-                  </p>
-                )}
-                <div className="mt-3">
-                  <Button asChild size="sm" variant="outline">
-                    <Link to="/perfil">Editar meu perfil</Link>
-                  </Button>
-                </div>
-              </div>
-            </div>
-
-            {latestRejectionAppeal && (
-              <div className="mt-5 rounded-2xl border border-border/60 bg-background/60 p-4">
-                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                  Sua solicitação ·{" "}
-                  {new Date(latestRejectionAppeal.created_at).toLocaleString("pt-BR")} ·{" "}
-                  {latestRejectionAppeal.status === "pending" && "aguardando resposta"}
-                  {latestRejectionAppeal.status === "answered" && "respondida"}
-                  {latestRejectionAppeal.status === "ignored" && "encerrada"}
-                </p>
-                <p className="mt-2 whitespace-pre-wrap text-sm">
-                  {latestRejectionAppeal.appeal_text}
-                </p>
-                {latestRejectionAppeal.status === "answered" &&
-                  latestRejectionAppeal.response_text && (
-                    <div className="mt-3 rounded-xl bg-[var(--petal)]/40 p-3 text-sm">
-                      <p className="text-xs font-semibold uppercase tracking-wide text-[var(--rose)]">
-                        Resposta da equipe
-                      </p>
-                      <p className="mt-1 whitespace-pre-wrap">
-                        {latestRejectionAppeal.response_text}
-                      </p>
-                    </div>
-                  )}
-              </div>
-            )}
-
-            {canReverify && (
-              <div className="mt-5">
-                <label className="text-sm font-semibold">Pedir nova análise</label>
-                <Textarea
-                  value={appealText}
-                  onChange={(e) => setAppealText(e.target.value)}
-                  maxLength={2000}
-                  placeholder="Conte o que mudou no seu perfil ou justifique para reanálise..."
-                  className="mt-2 min-h-[120px]"
-                />
-                <div className="mt-3 flex justify-end">
-                  <Button onClick={() => submitAppeal("rejection")} disabled={appealBusy}>
-                    <Send className="mr-2 h-4 w-4" /> Verificar Novamente
-                  </Button>
-                </div>
-              </div>
-            )}
-          </section>
-        )}
-
-        {adminRequests.length > 0 && (
-          <section className="mt-6 rounded-3xl border border-border/60 bg-card/70 p-6 shadow-soft backdrop-blur">
-            <div className="flex items-center gap-2">
-              <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-[var(--petal)] text-[var(--rose)]">
-                <ClipboardList className="h-4 w-4" />
-              </span>
-              <h2 className="text-lg font-semibold">Solicitações da equipe</h2>
-            </div>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Pequenos ajustes pedidos pela moderação para manter o espaço saudável.
-            </p>
-            <ul className="mt-4 space-y-3">
-              {adminRequests.map((r) => (
-                <li key={r.id} className="rounded-2xl border border-border/50 bg-background/40 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-[var(--rose)]">
-                    {r.kind === "photo" && "Foto"}
-                    {r.kind === "bio" && "Biografia"}
-                    {r.kind === "behavior" && "Comportamento"}
-                    {r.kind === "other" && "Outro"}
-                    {" · "}
-                    {new Date(r.created_at).toLocaleDateString("pt-BR")}
-                  </p>
-                  <p className="mt-1 whitespace-pre-wrap text-sm">{r.message}</p>
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {(r.kind === "photo" || r.kind === "bio") && (
-                      <Button asChild size="sm" variant="outline">
-                        <Link to="/perfil">Ir para o perfil</Link>
-                      </Button>
-                    )}
-                    <Button size="sm" onClick={() => resolveRequest(r.id)}>
-                      Marcar como resolvida
-                    </Button>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </section>
-        )}
-
-        {/* GRID */}
-        {!isBanned && !isRejected && (
-          <>
-            <section className="mt-8 grid gap-6 lg:grid-cols-3">
-              {/* CHECKLIST */}
-              <div className="animate-fade-up rounded-3xl border border-border/60 bg-card/70 p-6 shadow-soft backdrop-blur lg:col-span-2">
-                <div className="flex items-center gap-2">
-                  <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-[var(--petal)] text-[var(--rose)]">
-                    <Sparkles className="h-4 w-4" />
-                  </span>
-                  <h2 className="text-lg font-semibold">Como começar</h2>
-                </div>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Pequenos passos que abrem grandes histórias.
-                </p>
-                <ul className="mt-5 space-y-2">
-                  {checklist.map((item) => (
-                    <li key={item.key}>
-                      <Link
-                        to={item.to}
-                        className="group flex items-center gap-3 rounded-2xl border border-transparent px-3 py-3 transition hover:border-border/60 hover:bg-muted/40"
-                      >
-                        <span
-                          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition ${
-                            item.done
-                              ? "bg-[var(--rose)]/15 text-[var(--rose)]"
-                              : "bg-muted text-muted-foreground"
-                          }`}
-                        >
-                          {item.done ? (
-                            <CheckCircle2 className="h-4 w-4" />
-                          ) : (
-                            <Circle className="h-4 w-4" />
-                          )}
-                        </span>
-                        <span
-                          className={`flex-1 text-sm ${item.done ? "text-muted-foreground line-through" : "font-medium"}`}
-                        >
-                          {item.label}
-                        </span>
-                        <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 transition group-hover:translate-x-0.5 group-hover:opacity-100" />
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              {/* PERFIL */}
-              <div
-                className="animate-fade-up rounded-3xl border border-border/60 bg-card/70 p-6 shadow-soft backdrop-blur"
-                style={{ animationDelay: "80ms" }}
-              >
-                <div className="flex items-center gap-3">
-                  <span className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-gradient-love text-lg font-bold text-white">
-                    {profile.photo_url ? (
+                <Link
+                  to="/pretendentes/$id"
+                  params={{ id: suggestion.id }}
+                  className="app-card-interactive group relative block overflow-hidden rounded-3xl border border-border/60 bg-card shadow-soft"
+                >
+                  <div className="relative aspect-[16/12] w-full overflow-hidden bg-muted md:aspect-[16/9]">
+                    {suggestion.photo_url ? (
                       <PhotoImg
-                        src={profile.photo_url}
-                        alt=""
-                        className="h-full w-full object-cover"
+                        src={suggestion.photo_url}
+                        alt={suggestion.full_name}
+                        className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
+                        loading="lazy"
                       />
                     ) : (
-                      firstName.charAt(0).toUpperCase()
+                      <div className="flex h-full w-full items-center justify-center bg-gradient-love text-5xl text-white">
+                        {suggestion.full_name.charAt(0)}
+                      </div>
                     )}
-                  </span>
-                  <div className="min-w-0">
-                    <p className="truncate text-sm text-muted-foreground">Seu perfil</p>
-                    <h3 className="truncate text-base font-semibold">
-                      {profile.full_name ?? "Você"}
-                    </h3>
-                  </div>
-                </div>
-
-                <div className="mt-5">
-                  <div className="flex items-baseline justify-between">
-                    <span className="text-sm text-muted-foreground">Completude</span>
-                    <span className="text-2xl font-extrabold tracking-tight">{completion}%</span>
-                  </div>
-                  <div className="mt-2 h-2 overflow-hidden rounded-full bg-muted">
-                    <div
-                      className="h-full rounded-full bg-gradient-to-r from-[var(--coral)] to-[var(--rose)] transition-all duration-700"
-                      style={{ width: `${completion}%` }}
-                    />
-                  </div>
-                  <p className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
-                    {completion >= 90 ? (
-                      <>
-                        <Sparkles className="h-3.5 w-3.5 text-[#ff4f68]" />
-                        <span className="text-[#ff4f68]">Seu perfil está brilhando</span>
-                      </>
-                    ) : (
-                      "Perfis completos recebem mais interesses."
-                    )}
-                  </p>
-                </div>
-
-                <Button
-                  asChild
-                  className="mt-5 w-full rounded-full"
-                  variant={completion >= 90 ? "outline" : "default"}
-                >
-                  <Link to="/perfil">
-                    {completion >= 90 ? "Ver meu perfil" : "Completar perfil"}
-                  </Link>
-                </Button>
-              </div>
-            </section>
-
-            {/* DEVOCIONAL + COMUNIDADE */}
-            <section className="mt-6 grid gap-6 lg:grid-cols-3">
-              {/* DEVOCIONAL */}
-              <div className="animate-fade-up relative overflow-hidden rounded-3xl border border-border/60 bg-card/70 p-6 shadow-soft backdrop-blur lg:col-span-2">
-                <div
-                  aria-hidden
-                  className="pointer-events-none absolute -top-12 -right-12 h-44 w-44 rounded-full bg-[var(--petal)] opacity-60 blur-3xl"
-                />
-                <div className="relative">
-                  <div className="flex items-center gap-2">
-                    <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-[var(--petal)] text-[var(--rose)]">
-                      <BookHeart className="h-4 w-4" />
-                    </span>
-                    <h2 className="text-lg font-semibold">Devocional do dia</h2>
-                  </div>
-                  {devo ? (
-                    <>
-                      {devo.bible_reference && (
-                        <p className="mt-5 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--rose)]">
-                          {devo.bible_reference}
+                    <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
+                    <div className="absolute inset-x-0 bottom-0 p-4 text-white">
+                      <span className="mb-2 inline-flex items-center gap-1 rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider backdrop-blur">
+                        <Sparkles className="h-3 w-3" /> Sugestão de hoje
+                      </span>
+                      <p className="text-lg font-bold leading-tight">
+                        {suggestion.full_name.split(" ")[0]}
+                        {suggestion.age ? `, ${suggestion.age}` : ""}
+                      </p>
+                      {(suggestion.city || suggestion.state) && (
+                        <p className="text-xs opacity-90">
+                          {[suggestion.city, suggestion.state].filter(Boolean).join(" · ")}
                         </p>
                       )}
-                      {devo.bible_text && (
-                        <blockquote className="mt-2 border-l-2 border-[var(--rose)]/40 pl-4 text-base italic leading-relaxed text-foreground/90 sm:text-lg">
-                          “{devo.bible_text}”
-                        </blockquote>
-                      )}
-                      <h3 className="mt-5 text-xl font-semibold tracking-tight">{devo.title}</h3>
-                      <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-muted-foreground">
-                        {devo.content}
+                      <p className="mt-1 max-w-sm text-[13px] opacity-90">
+                        Uma conexão com propósito para conhecer com calma.
                       </p>
-                      <div className="mt-5">
-                        <Button
-                          asChild
-                          variant="outline"
-                          className="rounded-full bg-white/50 backdrop-blur dark:bg-white/5"
-                        >
-                          <Link to="/devocional">
-                            Ler agora <ArrowRight className="ml-1 h-4 w-4" />
-                          </Link>
-                        </Button>
-                      </div>
-                    </>
-                  ) : (
-                    <p className="mt-6 text-sm text-muted-foreground">
-                      Em breve, um novo devocional para o seu dia.
-                    </p>
-                  )}
-                </div>
-              </div>
+                    </div>
+                  </div>
+                </Link>
+              </section>
+            ) : (
+              <section>
+                <Link
+                  to="/pretendentes"
+                  className="app-card-interactive flex items-center gap-3 rounded-2xl border border-border/60 bg-card p-4 shadow-soft"
+                >
+                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--petal)] text-[var(--rose)]">
+                    <Compass className="h-4 w-4" />
+                  </span>
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold">Explore pessoas com propósito</p>
+                    <p className="text-xs text-muted-foreground">Veja perfis aprovados na plataforma.</p>
+                  </div>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                </Link>
+              </section>
+            )
+          )}
 
-              {/* COMUNIDADE VIVA */}
-              <div
-                className="animate-fade-up rounded-3xl border border-border/60 bg-card/70 p-6 shadow-soft backdrop-blur"
-                style={{ animationDelay: "80ms" }}
+          {/* DEVOCIONAL */}
+          {devo && (
+            <section>
+              <Link
+                to="/devocional"
+                className="app-card-interactive block overflow-hidden rounded-3xl border border-border/60 bg-gradient-to-br from-[oklch(0.98_0.02_60)] via-[oklch(0.97_0.04_30)] to-[oklch(0.95_0.06_15)] p-5 shadow-soft"
               >
                 <div className="flex items-center gap-2">
-                  <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-[var(--petal)] text-[var(--rose)]">
-                    <Flame className="h-4 w-4" />
+                  <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-white/70 text-[var(--rose)] backdrop-blur">
+                    <BookHeart className="h-4 w-4" />
                   </span>
-                  <h2 className="text-lg font-semibold">Comunidade viva</h2>
-                </div>
-                <p className="mt-1 text-sm text-muted-foreground">O que está acontecendo agora.</p>
-
-                <ul className="mt-5 space-y-3">
-                  <PulseRow
-                    icon={<Users className="h-4 w-4" />}
-                    label="Novos perfis (7d)"
-                    value={community.newProfiles}
-                  />
-                  <PulseRow
-                    icon={<MessageCircle className="h-4 w-4" />}
-                    label="Mensagens (24h)"
-                    value={community.newComments}
-                  />
-                  <PulseRow
-                    icon={<Globe className="h-4 w-4" />}
-                    label="Espaço de conversas"
-                    value="ativo"
-                    cta={{ to: "/conversas", label: "Entrar" }}
-                  />
-                </ul>
-              </div>
-            </section>
-
-            {/* POSSÍVEIS CONEXÕES */}
-            {isApproved && suggestions.length > 0 && (
-              <section className="mt-8 animate-fade-up">
-                <div className="flex items-end justify-between gap-4">
-                  <div>
-                    <h2 className="text-xl font-semibold">Possíveis conexões</h2>
-                    <p className="text-sm text-muted-foreground">
-                      Pessoas que podem combinar com você.
-                    </p>
-                  </div>
-                  <Button asChild variant="ghost" size="sm" className="shrink-0 rounded-full">
-                    <Link to="/pretendentes">
-                      Ver todos <ArrowRight className="ml-1 h-4 w-4" />
-                    </Link>
-                  </Button>
-                </div>
-
-                <div className="mt-5 -mx-4 flex gap-3 overflow-x-auto px-4 pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:grid sm:grid-cols-2 sm:gap-4 sm:overflow-visible sm:px-0 sm:pb-0 lg:grid-cols-3">
-                  {suggestions.slice(0, 6).map((s) => (
-                    <Link
-                      key={s.id}
-                      to="/pretendentes/$id"
-                      params={{ id: s.id }}
-                      className="group app-card-interactive relative w-[180px] shrink-0 overflow-hidden rounded-3xl border border-border/60 bg-card shadow-soft transition hover:-translate-y-0.5 hover:shadow-elegant sm:w-auto"
-                    >
-                      <div className="aspect-[4/5] w-full overflow-hidden bg-muted">
-                        {s.photo_url ? (
-                          <PhotoImg
-                            src={s.photo_url}
-                            alt={s.full_name}
-                            className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.04]"
-                            loading="lazy"
-                          />
-                        ) : (
-                          <div className="flex h-full w-full items-center justify-center bg-gradient-love text-4xl text-white">
-                            {s.full_name.charAt(0)}
-                          </div>
-                        )}
-                      </div>
-                      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
-                      <div className="absolute inset-x-0 bottom-0 p-4 text-white">
-                        <p className="truncate text-base font-semibold">
-                          {s.full_name.split(" ")[0]}
-                          {s.age ? `, ${s.age}` : ""}
-                        </p>
-                        {(s.city || s.state) && (
-                          <p className="truncate text-xs opacity-80">
-                            {[s.city, s.state].filter(Boolean).join(" · ")}
-                          </p>
-                        )}
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {/* DICAS */}
-            <section className="mt-10 animate-fade-up">
-              <div className="flex items-end justify-between gap-4">
-                <div>
-                  <h2 className="text-xl font-semibold">Dicas da plataforma</h2>
-                  <p className="text-sm text-muted-foreground">
-                    Pequenos guias para uma jornada mais leve.
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[oklch(0.40_0.12_25)]">
+                    Devocional de hoje
                   </p>
                 </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => setTipIndex((i) => (i - 1 + TIPS.length) % TIPS.length)}
-                    aria-label="Dica anterior"
-                    className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-card/60 backdrop-blur transition hover:bg-muted"
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                  </button>
-                  <button
-                    onClick={() => setTipIndex((i) => (i + 1) % TIPS.length)}
-                    aria-label="Próxima dica"
-                    className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-card/60 backdrop-blur transition hover:bg-muted"
-                  >
-                    <ChevronRight className="h-4 w-4" />
-                  </button>
-                </div>
-              </div>
+                {devo.bible_reference && (
+                  <p className="mt-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--rose)]">
+                    {devo.bible_reference}
+                  </p>
+                )}
+                <h3 className="mt-1.5 text-lg font-bold leading-snug">{devo.title}</h3>
+                {devo.bible_text && (
+                  <p className="mt-2 line-clamp-2 text-sm italic leading-relaxed text-foreground/75">
+                    “{devo.bible_text}”
+                  </p>
+                )}
+                <p className="mt-3 inline-flex items-center text-sm font-semibold text-[oklch(0.45_0.18_25)]">
+                  Ler agora <ArrowRight className="ml-1 h-3.5 w-3.5" />
+                </p>
+              </Link>
+            </section>
+          )}
 
-              <div className="mt-5 overflow-hidden">
+          {/* JORNADA DO PERFIL */}
+          {!isBanned && !isRejected && (
+            <section className="rounded-3xl border border-border/60 bg-card p-4 shadow-soft">
+              <div className="flex items-center justify-between gap-3">
+                <div className="min-w-0 flex-1">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                    Sua jornada
+                  </p>
+                  <p className="mt-0.5 text-sm font-semibold">
+                    {strengthLabel.label}
+                    <span className="ml-1.5 text-muted-foreground">· {strength}%</span>
+                  </p>
+                </div>
+                <Button asChild size="sm" variant="outline" className="h-8 shrink-0 rounded-full text-xs">
+                  <Link to="/perfil">Melhorar</Link>
+                </Button>
+              </div>
+              <div className="mt-2.5 h-2 overflow-hidden rounded-full bg-muted">
                 <div
-                  className="flex transition-transform duration-500 ease-out"
-                  style={{ transform: `translateX(-${tipIndex * 100}%)` }}
-                >
-                  {TIPS.map((t, i) => (
-                    <div key={i} className="w-full shrink-0 px-1">
-                      <div className="relative overflow-hidden rounded-3xl border border-border/60 bg-card/70 p-6 shadow-soft backdrop-blur sm:p-8">
-                        <div
-                          aria-hidden
-                          className="pointer-events-none absolute -right-16 -top-16 h-44 w-44 rounded-full bg-[var(--petal)] opacity-60 blur-3xl"
-                        />
-                        <div className="relative flex items-start gap-4">
-                          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[var(--petal)] text-[var(--rose)]">
-                            <t.icon className="h-5 w-5" />
-                          </span>
-                          <div className="min-w-0">
-                            <h3 className="text-base font-semibold sm:text-lg">{t.title}</h3>
-                            <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-                              {t.text}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                  className="h-full rounded-full bg-gradient-to-r from-[var(--coral)] to-[var(--rose)] transition-all duration-700"
+                  style={{ width: `${Math.max(4, strength)}%` }}
+                />
               </div>
+              {nextActions[0] && (
+                <p className="mt-2.5 text-xs text-muted-foreground">
+                  Próximo passo: <span className="font-medium text-foreground">{nextActions[0].title}</span>
+                </p>
+              )}
+            </section>
+          )}
 
-              <div className="mt-4 flex justify-center gap-1.5">
-                {TIPS.map((_, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setTipIndex(i)}
-                    aria-label={`Ir para dica ${i + 1}`}
-                    className={`h-1.5 rounded-full transition-all ${i === tipIndex ? "w-6 bg-[var(--rose)]" : "w-1.5 bg-muted-foreground/30"}`}
-                  />
-                ))}
+          {/* AGORA NO APP */}
+          {isApproved && (
+            <section>
+              <h2 className="mb-2.5 px-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                Agora no app
+              </h2>
+              <div className="grid grid-cols-2 gap-2.5 md:grid-cols-4">
+                <ActivityChip
+                  to="/pretendentes"
+                  icon={<Heart className="h-4 w-4" />}
+                  label="Pretendentes"
+                  hint={newProfiles7d > 0 ? `${newProfiles7d} novos (7d)` : "Explorar"}
+                />
+                <ActivityChip
+                  to="/conversas"
+                  icon={<MessageCircle className="h-4 w-4" />}
+                  label="Conversas"
+                  hint={unreadConvos > 0 ? `${unreadConvos} ativas` : "Abrir"}
+                />
+                <ActivityChip
+                  to="/notificacoes"
+                  icon={<Bell className="h-4 w-4" />}
+                  label="Notificações"
+                  hint={unreadNotifs > 0 ? `${unreadNotifs} novas` : "Ver"}
+                  highlight={unreadNotifs > 0}
+                />
+                <ActivityChip
+                  to="/devocional"
+                  icon={<BookHeart className="h-4 w-4" />}
+                  label="Devocional"
+                  hint={devo ? "Hoje" : "Em breve"}
+                />
               </div>
             </section>
-          </>
-        )}
+          )}
+
+          {/* PERSONALIZAÇÃO / MOLDURA GRÁTIS */}
+          {isApproved && !frameClaimed && (
+            <section>
+              <Link
+                to="/perfil"
+                className="app-card-interactive flex items-center gap-3 rounded-2xl border border-[var(--rose)]/30 bg-gradient-to-br from-[var(--petal)]/60 to-white p-4 shadow-soft"
+              >
+                <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-[var(--rose)] shadow-sm">
+                  <Frame className="h-5 w-5" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold">Escolha sua primeira moldura</p>
+                  <p className="text-xs text-muted-foreground">
+                    Personalize seu perfil com uma moldura comum ou rara grátis.
+                  </p>
+                </div>
+                <span className="shrink-0 rounded-full bg-[var(--rose)] px-3 py-1 text-[11px] font-semibold text-white">
+                  Resgatar
+                </span>
+              </Link>
+            </section>
+          )}
+
+          {/* NOVIDADES COMPACTAS */}
+          {isApproved && (
+            <section>
+              <h2 className="mb-2.5 px-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                Novidades
+              </h2>
+              <div className="grid gap-2.5 md:grid-cols-2">
+                <NewsCard
+                  to="/conversas"
+                  icon={<Sparkles className="h-4 w-4" />}
+                  title="Stickers no chat"
+                  description="Expresse seu jeito com stickers nas conversas."
+                />
+                <NewsCard
+                  to="/conversas"
+                  icon={<MessageSquareWarning className="h-4 w-4" />}
+                  title="Recado anônimo"
+                  description="Envie um recado anônimo para alguém especial."
+                />
+              </div>
+            </section>
+          )}
+
+          {/* VOLTE AMANHÃ */}
+          {!isBanned && !isRejected && (
+            <p className="pt-2 text-center text-xs text-muted-foreground">{backTomorrow(band)}</p>
+          )}
         </div>
       </main>
     </div>
   );
 }
 
-function PulseRow({
+function ActivityChip({
+  to,
   icon,
   label,
-  value,
-  cta,
+  hint,
+  highlight,
 }: {
+  to: any;
   icon: React.ReactNode;
   label: string;
-  value: number | string;
-  cta?: { to: "/conversas"; label: string };
+  hint: string;
+  highlight?: boolean;
 }) {
   return (
-    <li className="flex items-center gap-3 rounded-2xl border border-border/50 bg-background/40 px-3 py-2.5 backdrop-blur">
-      <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--petal)] text-[var(--rose)]">
+    <Link
+      to={to}
+      className={`app-pressable flex items-center gap-2.5 rounded-2xl border bg-card p-3 shadow-sm ${
+        highlight ? "border-[var(--rose)]/50" : "border-border/60"
+      }`}
+    >
+      <span
+        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${
+          highlight ? "bg-[var(--rose)]/15 text-[var(--rose)]" : "bg-[var(--petal)] text-[var(--rose)]"
+        }`}
+      >
         {icon}
       </span>
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-medium">{label}</p>
+        <p className="truncate text-[13px] font-semibold leading-tight">{label}</p>
+        <p className="truncate text-[11px] text-muted-foreground">{hint}</p>
       </div>
-      {cta ? (
-        <Button asChild size="sm" variant="ghost" className="h-7 rounded-full px-3 text-xs">
-          <Link to={cta.to}>{cta.label}</Link>
-        </Button>
-      ) : (
-        <span className="text-sm font-bold tabular-nums">{value}</span>
-      )}
-    </li>
+    </Link>
+  );
+}
+
+function NewsCard({
+  to,
+  icon,
+  title,
+  description,
+}: {
+  to: any;
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+}) {
+  return (
+    <Link
+      to={to}
+      className="app-card-interactive flex items-start gap-3 rounded-2xl border border-border/60 bg-card p-3.5 shadow-soft"
+    >
+      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[var(--petal)] text-[var(--rose)]">
+        {icon}
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-semibold leading-tight">{title}</p>
+        <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">{description}</p>
+      </div>
+      <ChevronRight className="mt-1 h-4 w-4 shrink-0 text-muted-foreground" />
+    </Link>
   );
 }
