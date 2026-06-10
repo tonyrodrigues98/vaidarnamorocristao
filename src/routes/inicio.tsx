@@ -39,8 +39,6 @@ import {
   Moon,
   Users,
   Radar,
-  Smile,
-  EyeOff,
   Clock,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -1187,29 +1185,6 @@ function InicioPage() {
             </section>
           )}
 
-          {/* RECURSOS ESPECIAIS — compacto */}
-          {isApproved && (
-            <section>
-              <h2 className="mb-2.5 px-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-                Recursos especiais
-              </h2>
-              <div className="grid gap-2.5 md:grid-cols-2">
-                <NewsCard
-                  to="/conversas"
-                  icon={<Smile className="h-4 w-4" />}
-                  title="Stickers no chat"
-                  description="Deixe suas conversas mais leves e divertidas."
-                />
-                <NewsCard
-                  to="/conversas"
-                  icon={<EyeOff className="h-4 w-4" />}
-                  title="Recado anônimo"
-                  description="Demonstre interesse com mistério e respeito."
-                />
-              </div>
-            </section>
-          )}
-
           {/* VOLTE AMANHÃ */}
           {!isBanned && !isRejected && (
             <p className="pt-2 text-center text-xs text-muted-foreground">{mood.backTomorrow}</p>
@@ -1255,30 +1230,3 @@ function ActivityChip({
   );
 }
 
-function NewsCard({
-  to,
-  icon,
-  title,
-  description,
-}: {
-  to: any;
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-}) {
-  return (
-    <Link
-      to={to}
-      className="app-card-interactive flex items-start gap-3 rounded-2xl border border-border/60 bg-card p-3.5 shadow-soft"
-    >
-      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[var(--petal)] text-[var(--rose)]">
-        {icon}
-      </span>
-      <div className="min-w-0 flex-1">
-        <p className="text-sm font-semibold leading-tight">{title}</p>
-        <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">{description}</p>
-      </div>
-      <ChevronRight className="mt-1 h-4 w-4 shrink-0 text-muted-foreground" />
-    </Link>
-  );
-}
