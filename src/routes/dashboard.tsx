@@ -16,7 +16,6 @@ import {
   Heart,
   MessageCircle,
   Sparkles,
-  Globe,
   Newspaper,
   Eye,
   TrendingUp,
@@ -611,12 +610,6 @@ function Dashboard() {
               Icon={MessageCircle}
               title="Conversas"
               desc="Suas mensagens privadas"
-            />
-            <DashCard
-              to="/comunidade"
-              Icon={Globe}
-              title="Comunidade"
-              desc="Chat global em tempo real"
             />
             <DashCard
               to="/pretendentes"

@@ -396,9 +396,9 @@ function InicioPage() {
       },
       {
         key: "community",
-        label: "Participe da comunidade",
+        label: "Participe das conversas",
         done: activity.community,
-        to: "/comunidade" as const,
+        to: "/conversas" as const,
         manual: true,
       },
       {
@@ -1126,9 +1126,9 @@ function InicioPage() {
                   />
                   <PulseRow
                     icon={<Globe className="h-4 w-4" />}
-                    label="Espaço da comunidade"
+                    label="Espaço de conversas"
                     value="ativo"
-                    cta={{ to: "/comunidade", label: "Entrar" }}
+                    cta={{ to: "/conversas", label: "Entrar" }}
                   />
                 </ul>
               </div>
@@ -1274,7 +1274,7 @@ function PulseRow({
   icon: React.ReactNode;
   label: string;
   value: number | string;
-  cta?: { to: "/comunidade"; label: string };
+  cta?: { to: "/conversas"; label: string };
 }) {
   return (
     <li className="flex items-center gap-3 rounded-2xl border border-border/50 bg-background/40 px-3 py-2.5 backdrop-blur">

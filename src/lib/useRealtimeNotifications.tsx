@@ -154,8 +154,8 @@ export function useRealtimeNotifications() {
         async (payload) => {
           const m = payload.new as { sender_id: string; content: string };
           if (m.sender_id === user.id) return;
-          // Suppress when the user is already on the community page.
-          if (typeof window !== "undefined" && window.location.pathname.startsWith("/comunidade"))
+          // Suppress when the user is already inside the messaging area.
+          if (typeof window !== "undefined" && window.location.pathname.startsWith("/conversas"))
             return;
           const { data: prof } = await supabase
             .from("profiles")
@@ -164,7 +164,7 @@ export function useRealtimeNotifications() {
             .maybeSingle();
           toast("Comunidade", {
             description: `${prof?.full_name?.split(" ")[0] ?? "Alguém"}: ${m.content.slice(0, 60)}`,
-            action: { label: "Abrir", onClick: () => router.navigate({ to: "/comunidade" }) },
+            action: { label: "Abrir", onClick: () => router.navigate({ to: "/conversas" }) },
           });
         },
       )
