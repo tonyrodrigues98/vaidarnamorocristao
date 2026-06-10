@@ -1,29 +1,13 @@
-import { useEffect, useMemo, useState } from "react";
-import { Link } from "@tanstack/react-router";
+import { memo, useCallback, useMemo, useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
 import { MessageCircle, Search, UsersRound } from "lucide-react";
 
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { DecoratedAvatar } from "@/components/DecoratedAvatar";
 import { OnlineDot } from "@/components/OnlineDot";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
-import { getActiveCommitmentByUser } from "@/lib/commitments";
-
-export type ConversationShortcut = {
-  matchId: string;
-  partner: {
-    id: string;
-    full_name: string;
-    photo_url: string | null;
-    verified?: boolean | null;
-    equipped_frame_id?: string | null;
-    equipped_aura_id?: string | null;
-  };
-  lastMessage: string | null;
-  lastAt: string;
-  unread: boolean;
-};
+import { useConversationsList, type ConversationItem } from "@/hooks/useConversationsList";
 
 type Props = {
   open: boolean;
@@ -45,84 +29,50 @@ export function ConversationDrawer({
   currentType,
 }: Props) {
   const { user } = useAuth();
-  const [items, setItems] = useState<ConversationShortcut[]>([]);
-  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
   const [query, setQuery] = useState("");
+  const { items: rawItems, commitment, loading } = useConversationsList(user?.id);
 
-  useEffect(() => {
-    if (!open || !user) return;
-    let cancelled = false;
-    (async () => {
-      setLoading(true);
-      const commitment = await getActiveCommitmentByUser(user.id);
-      const { data: matches } = await supabase
-        .from("matches")
-        .select("id, user_a, user_b, created_at")
-        .or(`user_a.eq.${user.id},user_b.eq.${user.id}`)
-        .order("created_at", { ascending: false });
-      const visible = commitment
-        ? (matches ?? []).filter((m) => m.id === commitment.match_id)
-        : (matches ?? []);
-      if (!visible.length) {
-        if (!cancelled) {
-          setItems([]);
-          setLoading(false);
-        }
-        return;
-      }
-      const partnerIds = visible.map((m) => (m.user_a === user.id ? m.user_b : m.user_a));
-      const { data: profs } = await supabase
-        .from("profiles")
-        .select("id, full_name, photo_url, verified, equipped_frame_id, equipped_aura_id")
-        .in("id", partnerIds);
-      const profMap = new Map((profs ?? []).map((p) => [p.id, p]));
-      const list = await Promise.all(
-        visible.map(async (m) => {
-          const partnerId = m.user_a === user.id ? m.user_b : m.user_a;
-          const { data: msgs } = await supabase
-            .from("messages")
-            .select("content, sender_id, created_at, read_at")
-            .eq("match_id", m.id)
-            .order("created_at", { ascending: false })
-            .limit(1);
-          const last = msgs?.[0] ?? null;
-          const p = profMap.get(partnerId);
-          return {
-            matchId: m.id,
-            partner: {
-              id: partnerId,
-              full_name: p?.full_name ?? "Conversa",
-              photo_url: p?.photo_url ?? null,
-              verified: p?.verified ?? null,
-              equipped_frame_id: p?.equipped_frame_id ?? null,
-              equipped_aura_id: p?.equipped_aura_id ?? null,
-            },
-            lastMessage: last?.content ?? null,
-            lastAt: last?.created_at ?? m.created_at,
-            unread: !!last && last.sender_id !== user.id && !last.read_at,
-          } satisfies ConversationShortcut;
-        }),
-      );
-      list.sort((a, b) => b.lastAt.localeCompare(a.lastAt));
-      if (!cancelled) {
-        setItems(list);
-        setLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [open, user]);
+  // If user is in an active commitment, only show that match.
+  const items = useMemo(
+    () =>
+      commitment
+        ? rawItems.filter((i) => i.matchId === commitment.match_id)
+        : rawItems,
+    [rawItems, commitment],
+  );
 
   const q = query.trim().toLowerCase();
   const filtered = useMemo(
-    () => (q ? items.filter((i) => i.partner.full_name.toLowerCase().includes(q)) : items),
+    () =>
+      q ? items.filter((i) => i.partner.full_name.toLowerCase().includes(q)) : items,
     [items, q],
   );
   const showCommunity = !q || COMMUNITY_KEYWORDS.some((k) => k.includes(q) || q.includes(k));
   const communityActive = currentType === "community";
 
-  const close = () => onOpenChange(false);
+  const close = useCallback(() => onOpenChange(false), [onOpenChange]);
+
+  const goCommunity = useCallback(() => {
+    if (communityActive) {
+      close();
+      return;
+    }
+    close();
+    void navigate({ to: "/conversas/comunidade" });
+  }, [communityActive, close, navigate]);
+
+  const goPrivate = useCallback(
+    (matchId: string) => {
+      if (currentType === "private" && matchId === currentMatchId) {
+        close();
+        return;
+      }
+      close();
+      void navigate({ to: "/conversas/$matchId", params: { matchId } });
+    },
+    [close, currentMatchId, currentType, navigate],
+  );
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -146,14 +96,14 @@ export function ConversationDrawer({
         </div>
         <div className="mobile-chat-scroll flex-1 overflow-y-auto p-3 space-y-2">
           {showCommunity && (
-            <Link
-              to="/conversas/comunidade"
-              onClick={close}
+            <button
+              type="button"
+              onClick={goCommunity}
               className={`tap flex items-center gap-3 rounded-2xl border px-3 py-3 transition ${
                 communityActive
                   ? "border-primary/40 bg-primary/10"
                   : "border-[var(--rose)]/15 bg-gradient-to-br from-[oklch(0.98_0.02_25)] to-[oklch(0.97_0.03_20)] hover:bg-muted/40 dark:from-[oklch(0.22_0.04_20)] dark:to-[oklch(0.18_0.03_20)]"
-              }`}
+              } w-full text-left`}
             >
               <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[var(--rose)] to-[oklch(0.72_0.15_30)] text-white shadow-sm">
                 <UsersRound className="h-5 w-5" />
@@ -169,10 +119,10 @@ export function ConversationDrawer({
                   Chat global do VaiDarNamoro
                 </p>
               </div>
-            </Link>
+            </button>
           )}
 
-          {loading ? (
+          {loading && items.length === 0 ? (
             <div className="space-y-2">
               {Array.from({ length: 4 }).map((_, i) => (
                 <div key={i} className="h-16 animate-pulse rounded-2xl bg-muted/60" />
@@ -184,54 +134,67 @@ export function ConversationDrawer({
               Nenhuma conversa encontrada.
             </div>
           ) : filtered.length === 0 ? null : (
-            filtered.map((item) => {
-              const active = currentType === "private" && item.matchId === currentMatchId;
-              return (
-                <Link
-                  key={item.matchId}
-                  to="/conversas/$matchId"
-                  params={{ matchId: item.matchId }}
-                  onClick={close}
-                  className={`tap flex items-center gap-3 rounded-2xl border px-3 py-3 transition ${
-                    active
-                      ? "border-primary/40 bg-primary/10"
-                      : "border-transparent hover:border-border hover:bg-muted/50"
-                  }`}
-                >
-                  <div className="relative shrink-0">
-                    <DecoratedAvatar
-                      photoUrl={item.partner.photo_url}
-                      fallback={item.partner.full_name?.charAt(0) ?? "?"}
-                      size={36}
-                      frameId={item.partner.equipped_frame_id ?? null}
-                      auraId={item.partner.equipped_aura_id ?? null}
-                    />
-                    <OnlineDot userId={item.partner.id} className="absolute -bottom-0.5 -right-0.5" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-1.5">
-                      <p className="truncate text-sm font-semibold">{item.partner.full_name}</p>
-                      {item.partner.verified && <VerifiedBadge size="sm" />}
-                    </div>
-                    <p className="truncate text-xs text-muted-foreground">
-                      {item.lastMessage ?? "Nenhuma mensagem ainda"}
-                    </p>
-                  </div>
-                  <div className="flex shrink-0 flex-col items-end gap-1">
-                    <span className="text-[10px] text-muted-foreground">
-                      {new Date(item.lastAt).toLocaleDateString("pt-BR", {
-                        day: "2-digit",
-                        month: "short",
-                      })}
-                    </span>
-                    {item.unread && <span className="h-2 w-2 rounded-full bg-primary" />}
-                  </div>
-                </Link>
-              );
-            })
+            filtered.map((item) => (
+              <ConversationRow
+                key={item.matchId}
+                item={item}
+                active={currentType === "private" && item.matchId === currentMatchId}
+                onSelect={goPrivate}
+              />
+            ))
           )}
         </div>
       </SheetContent>
     </Sheet>
   );
 }
+
+type RowProps = {
+  item: ConversationItem;
+  active: boolean;
+  onSelect: (matchId: string) => void;
+};
+
+const ConversationRow = memo(function ConversationRow({ item, active, onSelect }: RowProps) {
+  const handle = useCallback(() => onSelect(item.matchId), [item.matchId, onSelect]);
+  return (
+    <button
+      type="button"
+      onClick={handle}
+      className={`tap flex w-full items-center gap-3 rounded-2xl border px-3 py-3 text-left transition ${
+        active
+          ? "border-primary/40 bg-primary/10"
+          : "border-transparent hover:border-border hover:bg-muted/50"
+      }`}
+    >
+      <div className="relative shrink-0">
+        <DecoratedAvatar
+          photoUrl={item.partner.photo_url}
+          fallback={item.partner.full_name?.charAt(0) ?? "?"}
+          size={36}
+          frameId={item.partner.equipped_frame_id ?? null}
+          auraId={item.partner.equipped_aura_id ?? null}
+        />
+        <OnlineDot userId={item.partner.id} className="absolute -bottom-0.5 -right-0.5" />
+      </div>
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-1.5">
+          <p className="truncate text-sm font-semibold">{item.partner.full_name}</p>
+          {item.partner.verified && <VerifiedBadge size="sm" />}
+        </div>
+        <p className="truncate text-xs text-muted-foreground">
+          {item.lastMessage ?? "Nenhuma mensagem ainda"}
+        </p>
+      </div>
+      <div className="flex shrink-0 flex-col items-end gap-1">
+        <span className="text-[10px] text-muted-foreground">
+          {new Date(item.lastAt).toLocaleDateString("pt-BR", {
+            day: "2-digit",
+            month: "short",
+          })}
+        </span>
+        {item.unread && <span className="h-2 w-2 rounded-full bg-primary" />}
+      </div>
+    </button>
+  );
+});
