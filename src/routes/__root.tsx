@@ -128,8 +128,26 @@ function RootShell({ children }: { children: React.ReactNode }) {
     <html lang="pt-BR">
       <head>
         <HeadContent />
+        <style
+          dangerouslySetInnerHTML={{
+            __html: `
+#app-splash{position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#ffffff;transition:opacity .35s ease;}
+#app-splash.is-hiding{opacity:0;pointer-events:none;}
+#app-splash .app-splash-logo{width:min(60vw,200px);height:auto;object-fit:contain;display:block;filter:drop-shadow(0 8px 24px rgba(0,0,0,.08));}
+@media (min-width:768px){#app-splash .app-splash-logo{width:240px;}}
+#app-splash .app-splash-loader{margin-top:32px;width:140px;height:3px;background:rgba(0,0,0,.08);border-radius:999px;overflow:hidden;}
+#app-splash .app-splash-loader-bar{display:block;height:100%;width:40%;background:#000;border-radius:999px;animation:appSplashSlide 1.1s ease-in-out infinite;}
+@keyframes appSplashSlide{0%{transform:translateX(-110%);}100%{transform:translateX(360%);}}
+@media (prefers-reduced-motion: reduce){#app-splash .app-splash-loader-bar{animation:none;width:60%;}}
+`,
+          }}
+        />
       </head>
       <body>
+        <div id="app-splash" aria-hidden="true">
+          <img src="/splash-logo.png" alt="VaiDarNamoro" className="app-splash-logo" />
+          <div className="app-splash-loader"><span className="app-splash-loader-bar" /></div>
+        </div>
         {children}
         <Scripts />
       </body>
@@ -145,6 +163,17 @@ function RootComponent() {
 
   useEffect(() => {
     registerAppServiceWorker();
+  }, []);
+
+  useEffect(() => {
+    const el = document.getElementById("app-splash");
+    if (!el) return;
+    const hide = () => {
+      el.classList.add("is-hiding");
+      window.setTimeout(() => el.remove(), 400);
+    };
+    const t = window.setTimeout(hide, 250);
+    return () => window.clearTimeout(t);
   }, []);
 
   return (
