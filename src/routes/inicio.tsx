@@ -15,7 +15,6 @@ import {
   hasClaimedFreeFrameLocal,
   type StrengthAdvanced,
   type StrengthPreferences,
-  type StrengthProfile,
   type ChecklistAction,
 } from "@/lib/profileStrength";
 import {
@@ -34,9 +33,15 @@ import {
   Send,
   ChevronRight,
   Stars,
-  Coffee,
+  Sunrise,
+  Sun,
   Sunset,
   Moon,
+  Users,
+  Radar,
+  Smile,
+  EyeOff,
+  Clock,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -110,67 +115,104 @@ type Suggestion = {
   photo_url: string | null;
 };
 
-type TimeBand = "morning" | "afternoon" | "evening";
+type TimePeriod = "dawn" | "morning" | "afternoon" | "night";
 
-function getTimeBand(): TimeBand {
-  const h = new Date().getHours();
-  if (h < 12) return "morning";
-  if (h < 18) return "afternoon";
-  return "evening";
-}
+type TimeMood = {
+  period: TimePeriod;
+  greetingLabel: string;
+  subline: string;
+  devoLine: string;
+  backTomorrow: string;
+  heroBg: string;
+  pill: string;
+  title: string;
+  sub: string;
+  btn: string;
+  btnGhost: string;
+  Icon: typeof Sun;
+  label: string;
+};
 
-function getHeroTheme(band: TimeBand) {
-  if (band === "morning") {
+function getTimeMood(now: Date, firstName: string): TimeMood {
+  const h = now.getHours();
+  const greet = (g: string) => `${g}, ${firstName}`;
+
+  if (h < 5) {
     return {
-      bg: "bg-[linear-gradient(160deg,oklch(0.98_0.04_70)_0%,oklch(0.94_0.08_30)_55%,oklch(0.88_0.10_15)_100%)]",
-      pill: "border-white/40 bg-white/60 text-[oklch(0.45_0.15_25)]",
-      title: "text-[oklch(0.25_0.10_25)]",
-      sub: "text-[oklch(0.35_0.08_25)]",
-      btn: "bg-[oklch(0.45_0.18_25)] hover:bg-[oklch(0.40_0.18_25)] text-white",
-      btnGhost: "bg-white/50 hover:bg-white/70 text-[oklch(0.30_0.10_25)] border-white/60",
-      Icon: Coffee,
+      period: "dawn",
+      greetingLabel: greet("Boa madrugada"),
+      subline: "Mesmo no silêncio, boas histórias podem começar com calma.",
+      devoLine: "Uma palavra para acalmar o coração nesta hora silenciosa.",
+      backTomorrow: "Cuide do descanso. Amanhã você continua com calma.",
+      heroBg:
+        "bg-[linear-gradient(160deg,oklch(0.18_0.04_280)_0%,oklch(0.22_0.06_270)_55%,oklch(0.16_0.05_290)_100%)]",
+      pill: "border-white/15 bg-white/10 text-white",
+      title: "text-white",
+      sub: "text-white/75",
+      btn: "bg-white text-[oklch(0.22_0.06_280)] hover:bg-white/95",
+      btnGhost: "bg-white/10 hover:bg-white/20 text-white border-white/20 backdrop-blur",
+      Icon: Moon,
+      label: "Madrugada",
+    };
+  }
+  if (h < 12) {
+    return {
+      period: "morning",
+      greetingLabel: greet("Bom dia"),
+      subline: "Que hoje seja leve, cheio de fé e bons encontros.",
+      devoLine: "Comece o dia alinhando o coração.",
+      backTomorrow: "Volte mais tarde para ver novas conversas e continuar sua jornada.",
+      heroBg:
+        "bg-[linear-gradient(160deg,oklch(0.98_0.04_85)_0%,oklch(0.93_0.09_55)_55%,oklch(0.86_0.12_30)_100%)]",
+      pill: "border-white/40 bg-white/60 text-[oklch(0.40_0.14_30)]",
+      title: "text-[oklch(0.25_0.10_30)]",
+      sub: "text-[oklch(0.35_0.08_30)]",
+      btn: "bg-[oklch(0.45_0.18_30)] hover:bg-[oklch(0.40_0.18_30)] text-white",
+      btnGhost: "bg-white/55 hover:bg-white/75 text-[oklch(0.30_0.10_30)] border-white/60",
+      Icon: Sunrise,
       label: "Manhã",
     };
   }
-  if (band === "afternoon") {
+  if (h < 18) {
     return {
-      bg: "bg-[linear-gradient(160deg,oklch(0.94_0.10_30)_0%,oklch(0.82_0.16_20)_55%,oklch(0.70_0.18_10)_100%)]",
+      period: "afternoon",
+      greetingLabel: greet("Boa tarde"),
+      subline: "Ainda dá tempo de viver uma conexão com propósito hoje.",
+      devoLine: "Uma pausa para lembrar do que importa.",
+      backTomorrow: "Amanhã pode trazer novas sugestões e um novo devocional.",
+      heroBg:
+        "bg-[linear-gradient(160deg,oklch(0.94_0.10_35)_0%,oklch(0.80_0.16_20)_55%,oklch(0.68_0.18_10)_100%)]",
       pill: "border-white/40 bg-white/60 text-[oklch(0.35_0.16_20)]",
       title: "text-white",
       sub: "text-white/85",
       btn: "bg-white text-[oklch(0.35_0.16_20)] hover:bg-white/95",
       btnGhost: "bg-white/15 hover:bg-white/25 text-white border-white/30 backdrop-blur",
-      Icon: Sunset,
+      Icon: Sun,
       label: "Tarde",
     };
   }
   return {
-    bg: "bg-[linear-gradient(160deg,oklch(0.22_0.06_280)_0%,oklch(0.28_0.10_300)_55%,oklch(0.32_0.12_15)_100%)]",
+    period: "night",
+    greetingLabel: greet("Boa noite"),
+    subline: "Finalize o dia com calma, fé e boas conversas.",
+    devoLine: "Termine o dia com calma e fé.",
+    backTomorrow: "Descanse em paz. Amanhã a jornada continua.",
+    heroBg:
+      "bg-[linear-gradient(160deg,oklch(0.22_0.06_280)_0%,oklch(0.28_0.10_300)_55%,oklch(0.30_0.10_330)_100%)]",
     pill: "border-white/15 bg-white/10 text-white",
     title: "text-white",
     sub: "text-white/80",
     btn: "bg-white text-[oklch(0.25_0.10_300)] hover:bg-white/95",
     btnGhost: "bg-white/10 hover:bg-white/20 text-white border-white/20 backdrop-blur",
-    Icon: Moon,
+    Icon: Sunset,
     label: "Noite",
   };
 }
 
-function greeting(name: string | null, band: TimeBand) {
-  const first = (name ?? "").split(" ")[0] || "amig@";
-  if (band === "morning") return `Bom dia, ${first}`;
-  if (band === "afternoon") return `Boa tarde, ${first}`;
-  return `Boa noite, ${first}`;
-}
-function subGreeting(band: TimeBand) {
-  if (band === "morning") return "Que hoje seja um dia de bons encontros.";
-  if (band === "afternoon") return "Ainda dá tempo de viver uma conexão com propósito.";
-  return "Finalize o dia com calma, fé e boas conversas.";
-}
-function backTomorrow(band: TimeBand) {
-  if (band === "morning") return "Amanhã pode ter uma nova conexão esperando por você.";
-  if (band === "afternoon") return "Volte amanhã para novas sugestões e um novo devocional.";
-  return "Seu devocional e suas sugestões continuam por aqui amanhã.";
+function formatClock(now: Date) {
+  const hh = String(now.getHours()).padStart(2, "0");
+  const mm = String(now.getMinutes()).padStart(2, "0");
+  return `${hh}:${mm}`;
 }
 
 function InicioPage() {
@@ -194,8 +236,21 @@ function InicioPage() {
   const [commitmentDays, setCommitmentDays] = useState(0);
   const [frameClaimed, setFrameClaimed] = useState(false);
 
-  const band = useMemo(() => getTimeBand(), []);
-  const theme = useMemo(() => getHeroTheme(band), [band]);
+  // Live clock — updates every 60s and on visibility change so the
+  // greeting/theme transitions naturally from afternoon to night, etc.
+  const [now, setNow] = useState<Date>(() => new Date());
+  useEffect(() => {
+    const tick = () => setNow(new Date());
+    const id = window.setInterval(tick, 60_000);
+    const onVis = () => {
+      if (document.visibilityState === "visible") tick();
+    };
+    document.addEventListener("visibilitychange", onVis);
+    return () => {
+      window.clearInterval(id);
+      document.removeEventListener("visibilitychange", onVis);
+    };
+  }, []);
 
   useEffect(() => {
     if (!user) return;
@@ -340,6 +395,13 @@ function InicioPage() {
     };
   }, [user]);
 
+  const firstName = useMemo(
+    () => (profile?.full_name ?? "").split(" ")[0] || "amig@",
+    [profile?.full_name],
+  );
+  const mood = useMemo(() => getTimeMood(now, firstName), [now, firstName]);
+  const clock = useMemo(() => formatClock(now), [now]);
+
   const strength = useMemo(
     () => calculateProfileStrength(profile ?? null, advanced, prefs, photosCount),
     [profile, advanced, prefs, photosCount],
@@ -374,6 +436,7 @@ function InicioPage() {
   const isApproved = profile.status === "approved";
   const isBanned = profile.status === "banned";
   const isRejected = profile.status === "rejected";
+  const isPending = profile.status === "pending";
   const activeWarnings = adminWarnings.filter((w) => !w.acknowledged_at);
   const banAppealsList = banAppeals.filter((a) => a.kind !== "rejection");
   const rejectionAppealsList = banAppeals.filter((a) => a.kind === "rejection");
@@ -382,6 +445,13 @@ function InicioPage() {
   const canAppeal = isBanned && (!latestAppeal || latestAppeal.status === "ignored");
   const canReverify =
     isRejected && (!latestRejectionAppeal || latestRejectionAppeal.status === "ignored");
+
+  // Status line shown discretely in the hero
+  let heroStatus = "Você já pode conhecer pessoas com propósito.";
+  if (isBanned) heroStatus = "Sua conta está suspensa — fale com o suporte abaixo.";
+  else if (isRejected) heroStatus = "Seu perfil precisa de ajustes para ser aprovado.";
+  else if (isPending) heroStatus = "Seu perfil está em análise.";
+  else if (strength < 60) heroStatus = "Seu perfil ainda pode ficar mais forte.";
 
   // Primary CTA logic
   let primaryCta: { to: any; params?: any; label: string } = { to: "/perfil", label: "Completar perfil" };
@@ -462,19 +532,17 @@ function InicioPage() {
     toast.success("Apelação enviada. A equipe vai analisar.");
   }
 
-  const firstName = (profile.full_name ?? "").split(" ")[0] || "amig@";
-
   return (
     <div className="min-h-[100dvh] bg-background">
       <Header />
 
       <main className="mx-auto w-full max-w-2xl pb-28 md:max-w-4xl md:px-6 md:pt-8">
-        {/* HERO — app-like first screen */}
+        {/* HERO — entrada emocional da home */}
         <section
-          className={`relative overflow-hidden ${theme.bg} px-5 pb-7 pt-[max(env(safe-area-inset-top),1rem)] min-h-[60dvh] flex flex-col rounded-b-[2rem] md:rounded-3xl md:min-h-[44dvh] md:px-8 md:pt-10`}
+          className={`relative overflow-hidden ${mood.heroBg} px-5 pb-8 pt-[max(env(safe-area-inset-top),1rem)] min-h-[58dvh] flex flex-col rounded-b-[2rem] md:rounded-3xl md:min-h-[42dvh] md:px-8 md:pt-10 animate-in fade-in duration-500`}
         >
-          {/* In-hero compact header (mobile only) */}
-          <div className="flex items-center justify-between md:hidden">
+          {/* Mini header dentro do hero (mobile) */}
+          <div className="relative z-10 flex items-center justify-between md:hidden">
             <Link
               to="/perfil"
               className="app-pressable flex items-center gap-2"
@@ -488,8 +556,14 @@ function InicioPage() {
                 )}
               </span>
             </Link>
-            <div className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] backdrop-blur ${theme.pill}`}>
-              <theme.Icon className="h-3 w-3" /> {theme.label}
+            <div
+              className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] backdrop-blur ${mood.pill}`}
+            >
+              <mood.Icon className="h-3 w-3" /> {mood.label}
+              <span className="ml-1 inline-flex items-center gap-0.5 opacity-80">
+                <Clock className="h-2.5 w-2.5" />
+                {clock}
+              </span>
             </div>
             <Link
               to="/notificacoes"
@@ -505,7 +579,7 @@ function InicioPage() {
             </Link>
           </div>
 
-          {/* Decorative blobs */}
+          {/* Decorações por horário */}
           <div
             aria-hidden
             className="pointer-events-none absolute -top-24 -right-16 h-72 w-72 rounded-full bg-white/15 blur-3xl"
@@ -514,34 +588,55 @@ function InicioPage() {
             aria-hidden
             className="pointer-events-none absolute -bottom-20 -left-16 h-72 w-72 rounded-full bg-white/10 blur-3xl"
           />
-          {band === "evening" && (
+          {(mood.period === "night" || mood.period === "dawn") && (
             <>
               {[
                 { top: "14%", left: "60%", size: 7, delay: "0s" },
                 { top: "22%", left: "78%", size: 5, delay: "0.6s" },
                 { top: "9%", left: "30%", size: 6, delay: "1.2s" },
                 { top: "40%", left: "88%", size: 5, delay: "1.8s" },
+                { top: "30%", left: "12%", size: 4, delay: "2.4s" },
               ].map((s, i) => (
                 <Stars
                   key={i}
                   aria-hidden
                   className="pointer-events-none absolute animate-pulse text-white/80"
-                  style={{ top: s.top, left: s.left, width: s.size * 2, height: s.size * 2, animationDelay: s.delay }}
+                  style={{
+                    top: s.top,
+                    left: s.left,
+                    width: s.size * 2,
+                    height: s.size * 2,
+                    animationDelay: s.delay,
+                  }}
                 />
               ))}
             </>
           )}
+          {mood.period === "morning" && (
+            <div
+              aria-hidden
+              className="pointer-events-none absolute -top-10 right-6 h-40 w-40 rounded-full bg-[oklch(0.95_0.15_75)]/70 blur-2xl"
+            />
+          )}
 
-          <div className="relative mt-auto pt-10 md:pt-0">
-            <h1 className={`text-[28px] font-extrabold leading-[1.1] tracking-tight md:text-4xl ${theme.title}`}>
-              {greeting(profile.full_name, band)}
+          <div className="relative z-10 mt-auto pt-10 md:pt-0">
+            <h1
+              className={`text-[28px] font-extrabold leading-[1.1] tracking-tight md:text-4xl ${mood.title}`}
+            >
+              {mood.greetingLabel}
             </h1>
-            <p className={`mt-2 max-w-md text-[15px] leading-relaxed md:text-base ${theme.sub}`}>
-              {subGreeting(band)}
+            <p className={`mt-2 max-w-md text-[15px] leading-relaxed md:text-base ${mood.sub}`}>
+              {mood.subline}
+            </p>
+            <p
+              className={`mt-3 inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-medium backdrop-blur ${mood.pill}`}
+            >
+              <Sparkles className="h-3 w-3" />
+              {heroStatus}
             </p>
 
             <div className="mt-6 flex flex-wrap gap-2.5">
-              <Button asChild size="lg" className={`app-pressable rounded-full px-5 ${theme.btn}`}>
+              <Button asChild size="lg" className={`app-pressable rounded-full px-5 ${mood.btn}`}>
                 <Link to={primaryCta.to} params={primaryCta.params}>
                   {primaryCta.label}
                 </Link>
@@ -550,7 +645,7 @@ function InicioPage() {
                 asChild
                 size="lg"
                 variant="outline"
-                className={`app-pressable rounded-full px-5 ${theme.btnGhost}`}
+                className={`app-pressable rounded-full px-5 ${mood.btnGhost}`}
               >
                 <Link to={secondaryCta.to}>{secondaryCta.label}</Link>
               </Button>
@@ -560,7 +655,7 @@ function InicioPage() {
 
         {/* CONTENT */}
         <div className="space-y-5 px-4 pt-5 md:px-0">
-          {/* ACTIVE WARNINGS — prioritized */}
+          {/* ACTIVE WARNINGS — prioridade máxima */}
           {activeWarnings.length > 0 && (
             <section className="space-y-2.5">
               {activeWarnings.map((w) => (
@@ -579,7 +674,12 @@ function InicioPage() {
                     </p>
                     <p className="mt-1 whitespace-pre-wrap">{w.message}</p>
                   </div>
-                  <Button size="sm" variant="outline" onClick={() => acknowledgeWarning(w.id)} className="shrink-0">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => acknowledgeWarning(w.id)}
+                    className="shrink-0"
+                  >
                     Entendi
                   </Button>
                 </div>
@@ -595,7 +695,9 @@ function InicioPage() {
                   <Ban className="h-4 w-4" />
                 </span>
                 <div className="flex-1">
-                  <h2 className="text-base font-semibold text-red-700 dark:text-red-300">Conta suspensa</h2>
+                  <h2 className="text-base font-semibold text-red-700 dark:text-red-300">
+                    Conta suspensa
+                  </h2>
                   {profile.banned_reason && (
                     <p className="mt-1 whitespace-pre-wrap text-sm">
                       <span className="font-semibold">Motivo:</span> {profile.banned_reason}
@@ -660,7 +762,9 @@ function InicioPage() {
                   <AlertTriangle className="h-4 w-4" />
                 </span>
                 <div className="flex-1">
-                  <h2 className="text-base font-semibold text-amber-700 dark:text-amber-300">Conta negada</h2>
+                  <h2 className="text-base font-semibold text-amber-700 dark:text-amber-300">
+                    Conta negada
+                  </h2>
                   {profile.rejection_reason && (
                     <p className="mt-2 whitespace-pre-wrap rounded-lg bg-amber-500/10 p-2 text-sm">
                       <span className="font-semibold">Motivo:</span> {profile.rejection_reason}
@@ -676,17 +780,23 @@ function InicioPage() {
               {latestRejectionAppeal && (
                 <div className="mt-4 rounded-2xl border border-border/60 bg-background/60 p-3">
                   <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                    Solicitação · {new Date(latestRejectionAppeal.created_at).toLocaleDateString("pt-BR")} ·{" "}
+                    Solicitação ·{" "}
+                    {new Date(latestRejectionAppeal.created_at).toLocaleDateString("pt-BR")} ·{" "}
                     {latestRejectionAppeal.status === "pending" && "aguardando"}
                     {latestRejectionAppeal.status === "answered" && "respondida"}
                     {latestRejectionAppeal.status === "ignored" && "encerrada"}
                   </p>
-                  <p className="mt-1.5 whitespace-pre-wrap text-sm">{latestRejectionAppeal.appeal_text}</p>
-                  {latestRejectionAppeal.status === "answered" && latestRejectionAppeal.response_text && (
-                    <div className="mt-2 rounded-xl bg-[var(--petal)]/40 p-2.5 text-sm">
-                      <p className="mt-1 whitespace-pre-wrap">{latestRejectionAppeal.response_text}</p>
-                    </div>
-                  )}
+                  <p className="mt-1.5 whitespace-pre-wrap text-sm">
+                    {latestRejectionAppeal.appeal_text}
+                  </p>
+                  {latestRejectionAppeal.status === "answered" &&
+                    latestRejectionAppeal.response_text && (
+                      <div className="mt-2 rounded-xl bg-[var(--petal)]/40 p-2.5 text-sm">
+                        <p className="mt-1 whitespace-pre-wrap">
+                          {latestRejectionAppeal.response_text}
+                        </p>
+                      </div>
+                    )}
                 </div>
               )}
               {canReverify && (
@@ -736,7 +846,11 @@ function InicioPage() {
                           <Link to="/perfil">Ir para o perfil</Link>
                         </Button>
                       )}
-                      <Button size="sm" onClick={() => resolveRequest(r.id)} className="h-7 rounded-full text-xs">
+                      <Button
+                        size="sm"
+                        onClick={() => resolveRequest(r.id)}
+                        className="h-7 rounded-full text-xs"
+                      >
                         Marcar como resolvida
                       </Button>
                     </div>
@@ -748,18 +862,25 @@ function InicioPage() {
 
           {/* PROPÓSITO FIRMADO */}
           {activeCommitment && (
-            <section className="overflow-hidden rounded-3xl border border-emerald-200/60 bg-gradient-to-br from-emerald-50 via-white to-emerald-50 p-4 shadow-soft">
-              <div className="flex items-center gap-3">
+            <section className="relative overflow-hidden rounded-3xl border border-emerald-200/60 bg-gradient-to-br from-emerald-50 via-white to-emerald-50 p-4 shadow-soft">
+              <div
+                aria-hidden
+                className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-emerald-200/40 blur-2xl"
+              />
+              <div className="relative flex items-center gap-3">
                 <img src={commitmentRing} alt="" className="h-12 w-12 shrink-0 object-contain" />
                 <div className="min-w-0 flex-1">
                   <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-emerald-600">
                     Propósito Firmado
                   </p>
                   <h2 className="mt-0.5 truncate text-sm font-bold leading-tight md:text-base">
-                    {commitmentPartner ? `Em propósito com ${commitmentPartner}` : "Você está em propósito"}
+                    {commitmentPartner
+                      ? `Em propósito com ${commitmentPartner}`
+                      : "Você está em propósito"}
                   </h2>
                   <p className="mt-0.5 text-xs text-muted-foreground">
-                    {commitmentDays} {commitmentDays === 1 ? "dia" : "dias"} juntos.
+                    Vocês estão caminhando há {commitmentDays}{" "}
+                    {commitmentDays === 1 ? "dia" : "dias"}.
                   </p>
                 </div>
                 <Button asChild size="sm" className="shrink-0 rounded-full">
@@ -774,12 +895,17 @@ function InicioPage() {
             </section>
           )}
 
-          {/* COMECE POR AQUI */}
+          {/* MISSÃO DE HOJE */}
           {!isBanned && !isRejected && nextActions.length > 0 && (
             <section>
-              <h2 className="mb-2.5 px-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-                Comece por aqui
-              </h2>
+              <div className="mb-2.5 flex items-baseline justify-between px-1">
+                <h2 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                  Missão de hoje
+                </h2>
+                <span className="text-[10px] text-muted-foreground/80">
+                  Um passo simples para sua jornada
+                </span>
+              </div>
               <div className="-mx-4 flex gap-2.5 overflow-x-auto px-4 pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:mx-0 md:grid md:grid-cols-3 md:overflow-visible md:px-0">
                 {nextActions.map((a) => {
                   const Icon = a.icon;
@@ -787,14 +913,16 @@ function InicioPage() {
                     <Link
                       key={a.id}
                       to={a.to}
-                      className="app-card-interactive flex min-w-[230px] shrink-0 items-start gap-3 rounded-2xl border border-border/60 bg-card p-3.5 shadow-soft md:min-w-0"
+                      className="app-card-interactive flex min-w-[240px] shrink-0 items-start gap-3 rounded-2xl border border-border/60 bg-card p-3.5 shadow-soft md:min-w-0"
                     >
                       <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[var(--petal)] text-[var(--rose)]">
                         <Icon className="h-4 w-4" />
                       </span>
                       <div className="min-w-0 flex-1">
                         <p className="text-sm font-semibold leading-tight">{a.title}</p>
-                        <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">{a.description}</p>
+                        <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">
+                          {a.description}
+                        </p>
                       </div>
                       <ChevronRight className="mt-1 h-4 w-4 shrink-0 text-muted-foreground" />
                     </Link>
@@ -804,13 +932,16 @@ function InicioPage() {
             </section>
           )}
 
-          {/* SUGESTÃO DO DIA */}
+          {/* RADAR DE CONEXÃO */}
           {isApproved && (
-            suggestion ? (
-              <section>
-                <h2 className="mb-2.5 px-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-                  Sugestão do dia
+            <section>
+              <div className="mb-2.5 flex items-center gap-2 px-1">
+                <Radar className="h-3.5 w-3.5 text-[var(--rose)]" />
+                <h2 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                  Radar de conexão
                 </h2>
+              </div>
+              {suggestion ? (
                 <Link
                   to="/pretendentes/$id"
                   params={{ id: suggestion.id }}
@@ -832,7 +963,7 @@ function InicioPage() {
                     <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
                     <div className="absolute inset-x-0 bottom-0 p-4 text-white">
                       <span className="mb-2 inline-flex items-center gap-1 rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider backdrop-blur">
-                        <Sparkles className="h-3 w-3" /> Sugestão de hoje
+                        <Sparkles className="h-3 w-3" /> Uma possibilidade para hoje
                       </span>
                       <p className="text-lg font-bold leading-tight">
                         {suggestion.full_name.split(" ")[0]}
@@ -844,14 +975,12 @@ function InicioPage() {
                         </p>
                       )}
                       <p className="mt-1 max-w-sm text-[13px] opacity-90">
-                        Uma conexão com propósito para conhecer com calma.
+                        Uma possibilidade para conhecer com calma.
                       </p>
                     </div>
                   </div>
                 </Link>
-              </section>
-            ) : (
-              <section>
+              ) : (
                 <Link
                   to="/pretendentes"
                   className="app-card-interactive flex items-center gap-3 rounded-2xl border border-border/60 bg-card p-4 shadow-soft"
@@ -860,17 +989,19 @@ function InicioPage() {
                     <Compass className="h-4 w-4" />
                   </span>
                   <div className="flex-1">
-                    <p className="text-sm font-semibold">Explore pessoas com propósito</p>
-                    <p className="text-xs text-muted-foreground">Veja perfis aprovados na plataforma.</p>
+                    <p className="text-sm font-semibold">Seu radar está buscando novas conexões</p>
+                    <p className="text-xs text-muted-foreground">
+                      Explore pretendentes para encontrar pessoas com propósito.
+                    </p>
                   </div>
                   <ChevronRight className="h-4 w-4 text-muted-foreground" />
                 </Link>
-              </section>
-            )
+              )}
+            </section>
           )}
 
-          {/* DEVOCIONAL */}
-          {devo && (
+          {/* PALAVRA PARA HOJE */}
+          {devo ? (
             <section>
               <Link
                 to="/devocional"
@@ -881,9 +1012,12 @@ function InicioPage() {
                     <BookHeart className="h-4 w-4" />
                   </span>
                   <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[oklch(0.40_0.12_25)]">
-                    Devocional de hoje
+                    Palavra para hoje
                   </p>
                 </div>
+                <p className="mt-2 text-[12px] italic text-[oklch(0.40_0.10_25)]/80">
+                  {mood.devoLine}
+                </p>
                 {devo.bible_reference && (
                   <p className="mt-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--rose)]">
                     {devo.bible_reference}
@@ -891,28 +1025,38 @@ function InicioPage() {
                 )}
                 <h3 className="mt-1.5 text-lg font-bold leading-snug">{devo.title}</h3>
                 {devo.bible_text && (
-                  <p className="mt-2 line-clamp-2 text-sm italic leading-relaxed text-foreground/75">
+                  <p className="mt-2 line-clamp-3 text-sm italic leading-relaxed text-foreground/75">
                     “{devo.bible_text}”
                   </p>
                 )}
                 <p className="mt-3 inline-flex items-center text-sm font-semibold text-[oklch(0.45_0.18_25)]">
-                  Ler agora <ArrowRight className="ml-1 h-3.5 w-3.5" />
+                  Ler devocional <ArrowRight className="ml-1 h-3.5 w-3.5" />
                 </p>
               </Link>
             </section>
+          ) : (
+            isApproved && (
+              <section className="rounded-2xl border border-border/60 bg-card p-4 text-sm text-muted-foreground shadow-soft">
+                <div className="flex items-center gap-2">
+                  <BookHeart className="h-4 w-4 text-[var(--rose)]" />
+                  <p className="font-semibold text-foreground">Palavra para hoje</p>
+                </div>
+                <p className="mt-1 text-xs">O devocional estará disponível em breve.</p>
+              </section>
+            )
           )}
 
-          {/* JORNADA DO PERFIL */}
+          {/* SEU PERFIL NO APP */}
           {!isBanned && !isRejected && (
             <section className="rounded-3xl border border-border/60 bg-card p-4 shadow-soft">
               <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0 flex-1">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-                    Sua jornada
+                    Seu perfil no app
                   </p>
                   <p className="mt-0.5 text-sm font-semibold">
-                    {strengthLabel.label}
-                    <span className="ml-1.5 text-muted-foreground">· {strength}%</span>
+                    Seu perfil está {strength}% forte
+                    <span className="ml-1.5 text-muted-foreground">· {strengthLabel.label}</span>
                   </p>
                 </div>
                 <Button asChild size="sm" variant="outline" className="h-8 shrink-0 rounded-full text-xs">
@@ -927,17 +1071,18 @@ function InicioPage() {
               </div>
               {nextActions[0] && (
                 <p className="mt-2.5 text-xs text-muted-foreground">
-                  Próximo passo: <span className="font-medium text-foreground">{nextActions[0].title}</span>
+                  {nextActions[0].description}{" "}
+                  <span className="font-medium text-foreground">{nextActions[0].title}.</span>
                 </p>
               )}
             </section>
           )}
 
-          {/* AGORA NO APP */}
+          {/* AGORA NO VAIDARNAMORO */}
           {isApproved && (
             <section>
               <h2 className="mb-2.5 px-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-                Agora no app
+                Agora no VaiDarNamoro
               </h2>
               <div className="grid grid-cols-2 gap-2.5 md:grid-cols-4">
                 <ActivityChip
@@ -953,23 +1098,23 @@ function InicioPage() {
                   hint={unreadConvos > 0 ? `${unreadConvos} ativas` : "Abrir"}
                 />
                 <ActivityChip
+                  to="/conversas/comunidade"
+                  icon={<Users className="h-4 w-4" />}
+                  label="Comunidade"
+                  hint="Ativa agora"
+                />
+                <ActivityChip
                   to="/notificacoes"
                   icon={<Bell className="h-4 w-4" />}
                   label="Notificações"
                   hint={unreadNotifs > 0 ? `${unreadNotifs} novas` : "Ver"}
                   highlight={unreadNotifs > 0}
                 />
-                <ActivityChip
-                  to="/devocional"
-                  icon={<BookHeart className="h-4 w-4" />}
-                  label="Devocional"
-                  hint={devo ? "Hoje" : "Em breve"}
-                />
               </div>
             </section>
           )}
 
-          {/* PERSONALIZAÇÃO / MOLDURA GRÁTIS */}
+          {/* MOLDURA GRÁTIS */}
           {isApproved && !frameClaimed && (
             <section>
               <Link
@@ -992,24 +1137,24 @@ function InicioPage() {
             </section>
           )}
 
-          {/* NOVIDADES COMPACTAS */}
+          {/* RECURSOS ESPECIAIS — compacto */}
           {isApproved && (
             <section>
               <h2 className="mb-2.5 px-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-                Novidades
+                Recursos especiais
               </h2>
               <div className="grid gap-2.5 md:grid-cols-2">
                 <NewsCard
                   to="/conversas"
-                  icon={<Sparkles className="h-4 w-4" />}
+                  icon={<Smile className="h-4 w-4" />}
                   title="Stickers no chat"
-                  description="Expresse seu jeito com stickers nas conversas."
+                  description="Deixe suas conversas mais leves e divertidas."
                 />
                 <NewsCard
                   to="/conversas"
-                  icon={<MessageSquareWarning className="h-4 w-4" />}
+                  icon={<EyeOff className="h-4 w-4" />}
                   title="Recado anônimo"
-                  description="Envie um recado anônimo para alguém especial."
+                  description="Demonstre interesse com mistério e respeito."
                 />
               </div>
             </section>
@@ -1017,7 +1162,7 @@ function InicioPage() {
 
           {/* VOLTE AMANHÃ */}
           {!isBanned && !isRejected && (
-            <p className="pt-2 text-center text-xs text-muted-foreground">{backTomorrow(band)}</p>
+            <p className="pt-2 text-center text-xs text-muted-foreground">{mood.backTomorrow}</p>
           )}
         </div>
       </main>
