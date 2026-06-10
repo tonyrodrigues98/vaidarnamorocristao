@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { BioPromptChips } from "@/components/profile/BioPromptChips";
 import { BR_STATES } from "@/lib/constants";
 import {
   Camera,
