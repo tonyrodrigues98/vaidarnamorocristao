@@ -1119,6 +1119,12 @@ function PerfilPage() {
                         </div>
                         <div className="space-y-2 sm:col-span-2">
                           <Label>Sobre você</Label>
+                          <BioPromptChips
+                            current={profile.bio}
+                            onApply={(starter) =>
+                              setP("bio", starter + (profile.bio ?? ""))
+                            }
+                          />
                           <Textarea
                             rows={4}
                             maxLength={600}
