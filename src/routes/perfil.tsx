@@ -1128,16 +1128,22 @@ function PerfilPage() {
                         </div>
                       </div>
 
+                      {user && (
+                        <div className="-mx-1">
+                          <ProfileAdvancedForm
+                            ref={advancedAboutRef}
+                            userId={user.id}
+                            mode="about"
+                            hideSubmit
+                            silentToast
+                          />
+                        </div>
+                      )}
                       <Button type="submit" size="lg" className="w-full" disabled={savingProfile}>
                         <Save className="mr-2 h-4 w-4" />{" "}
-                        {savingProfile ? "Salvando..." : "Salvar perfil"}
+                        {savingProfile ? "Salvando..." : "Salvar sobre mim"}
                       </Button>
                     </form>
-                    {user && (
-                      <div className="mt-6">
-                        <ProfileAdvancedForm userId={user.id} mode="about" />
-                      </div>
-                    )}
                   </>
                 )}
               </TabsContent>
