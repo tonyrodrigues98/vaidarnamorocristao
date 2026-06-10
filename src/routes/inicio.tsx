@@ -215,6 +215,30 @@ function formatClock(now: Date) {
   return `${hh}:${mm}`;
 }
 
+// Maps a profile-strength action id to the search-params payload used to
+// deep-link directly to the right /perfil tab in edit mode. Pretendentes
+// links don't take search params.
+function actionSearch(id: string): Record<string, unknown> | undefined {
+  switch (id) {
+    case "photo":
+    case "extra_photos":
+    case "name":
+    case "bio":
+    case "city":
+    case "marital":
+    case "church":
+    case "height":
+    case "seeking":
+      return { tab: "profile", edit: 1 };
+    case "looking_for_bio":
+      return { tab: "prefs", edit: 1 };
+    case "free_frame":
+      return { tab: "customizacao" };
+    default:
+      return undefined;
+  }
+}
+
 function InicioPage() {
   const { user, loading } = useAuth();
   const [profile, setProfile] = useState<Profile | null | undefined>(undefined);
