@@ -1,7 +1,7 @@
 import { friendlyError } from "@/lib/errors";
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { RequireApproved } from "@/components/RequireApproved";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getActiveCommitmentByUser, type RelationshipCommitment } from "@/lib/commitments";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,6 +11,7 @@ import { DecoratedAvatar } from "@/components/DecoratedAvatar";
 import { Button } from "@/components/ui/button";
 import {
   ArrowLeft,
+  ArrowDown,
   Send,
   Trash2,
   Pencil,
@@ -22,6 +23,9 @@ import {
   PanelLeft,
   Search,
   MessageCircle,
+  Clock,
+  AlertCircle,
+  Loader2,
 } from "lucide-react";
 import { useLongPress } from "@/hooks/use-long-press";
 import { useRestrictedWords, findRestrictedWord } from "@/lib/profanity";
@@ -47,6 +51,10 @@ type Msg = {
   read_at: string | null;
   edited_at?: string | null;
   reply_to_id?: string | null;
+};
+type LocalMsg = Msg & {
+  _tempId?: string;
+  _status?: "sending" | "sent" | "failed";
 };
 type Partner = {
   id: string;
@@ -80,7 +88,14 @@ function Chat() {
   const [partnerCommitmentMatchId, setPartnerCommitmentMatchId] = useState<string | null>(null);
   const [currentCommitment, setCurrentCommitment] = useState<RelationshipCommitment | null>(null);
   const [pausedByCommitment, setPausedByCommitment] = useState(false);
-  const [messages, setMessages] = useState<Msg[]>([]);
+  const [messages, setMessages] = useState<LocalMsg[]>([]);
+  const [loadingOlder, setLoadingOlder] = useState(false);
+  const [hasMoreOlder, setHasMoreOlder] = useState(true);
+  const [showNewBadge, setShowNewBadge] = useState(false);
+  const nearBottomRef = useRef(true);
+  const initializedScrollRef = useRef(false);
+  const prevLenRef = useRef(0);
+  const PAGE_SIZE = 50;
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const [authorized, setAuthorized] = useState<boolean | null>(null);
@@ -224,10 +239,15 @@ function Chat() {
         .from("messages")
         .select("*")
         .eq("match_id", matchId)
-        .order("created_at");
-      setMessages((msgs ?? []) as Msg[]);
+        .order("created_at", { ascending: false })
+        .limit(PAGE_SIZE);
+      const initial = ((msgs ?? []) as Msg[]).slice().reverse();
+      setMessages(initial as LocalMsg[]);
+      setHasMoreOlder((msgs?.length ?? 0) === PAGE_SIZE);
+      initializedScrollRef.current = false;
+      nearBottomRef.current = true;
       // mark received as read via SECURITY DEFINER RPC (only updates read_at)
-      const unread = (msgs ?? []).filter((m: Msg) => m.sender_id !== user.id && !m.read_at);
+      const unread = initial.filter((m: Msg) => m.sender_id !== user.id && !m.read_at);
       await Promise.all(
         unread.map((m) => supabase.rpc("mark_message_read", { _message_id: m.id })),
       );
@@ -271,9 +291,82 @@ function Chat() {
     };
   }, [matchId, user]);
 
+  // Smart scroll: instant jump on first load; smooth on own send or when
+  // the user was already near the bottom. Otherwise show a "new message" pill.
   useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
-  }, [messages]);
+    const el = scrollRef.current;
+    if (!el) return;
+    const len = messages.length;
+    const prev = prevLenRef.current;
+    prevLenRef.current = len;
+    if (len === 0) return;
+    if (!initializedScrollRef.current) {
+      el.scrollTop = el.scrollHeight;
+      initializedScrollRef.current = true;
+      nearBottomRef.current = true;
+      return;
+    }
+    if (len <= prev) return;
+    const last = messages[len - 1];
+    const mine = last?.sender_id === user?.id;
+    if (mine || nearBottomRef.current) {
+      el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+      setShowNewBadge(false);
+    } else {
+      setShowNewBadge(true);
+    }
+  }, [messages, user?.id]);
+
+  // Track scroll position + trigger older page when near the top.
+  const loadOlder = useCallback(async () => {
+    if (loadingOlder || !hasMoreOlder) return;
+    const el = scrollRef.current;
+    const oldest = messages[0];
+    if (!oldest || !el) return;
+    setLoadingOlder(true);
+    const prevHeight = el.scrollHeight;
+    const prevTop = el.scrollTop;
+    const { data } = await supabase
+      .from("messages")
+      .select("*")
+      .eq("match_id", matchId)
+      .lt("created_at", oldest.created_at)
+      .order("created_at", { ascending: false })
+      .limit(PAGE_SIZE);
+    const olds = ((data ?? []) as Msg[]).slice().reverse() as LocalMsg[];
+    setMessages((prev) => {
+      const seen = new Set(prev.map((m) => m.id));
+      const merged = olds.filter((m) => !seen.has(m.id));
+      return [...merged, ...prev];
+    });
+    setHasMoreOlder((data?.length ?? 0) === PAGE_SIZE);
+    setLoadingOlder(false);
+    requestAnimationFrame(() => {
+      if (!el) return;
+      el.scrollTop = prevTop + (el.scrollHeight - prevHeight);
+    });
+  }, [loadingOlder, hasMoreOlder, messages, matchId]);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const onScroll = () => {
+      const dist = el.scrollHeight - el.scrollTop - el.clientHeight;
+      nearBottomRef.current = dist < 80;
+      if (nearBottomRef.current && showNewBadge) setShowNewBadge(false);
+      if (el.scrollTop < 80) void loadOlder();
+    };
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => el.removeEventListener("scroll", onScroll);
+  }, [loadOlder, showNewBadge]);
+
+  function scrollToBottom() {
+    const el = scrollRef.current;
+    if (!el) return;
+    el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+    nearBottomRef.current = true;
+    setShowNewBadge(false);
+  }
 
   if (!loading && !user) return <Navigate to="/auth/login" />;
   if (authorized === false)
@@ -316,21 +409,79 @@ function Chat() {
       setWarning(hit);
       return;
     }
-    setSending(true);
-    const { error } = await supabase.from("messages").insert({
-      match_id: matchId,
+    const replyId = replyTo?.id ?? null;
+    const tempId = `temp-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    const optimistic: LocalMsg = {
+      id: tempId,
+      _tempId: tempId,
+      _status: "sending",
       sender_id: user.id,
       content,
-      reply_to_id: replyTo?.id ?? null,
-    });
-    setSending(false);
-    if (error) {
-      toast.error(friendlyError(error));
-      return;
-    }
+      created_at: new Date().toISOString(),
+      read_at: null,
+      reply_to_id: replyId,
+    };
+    setMessages((prev) => [...prev, optimistic]);
     setInput("");
     setReplyTo(null);
     if (inputRef.current) inputRef.current.style.height = "auto";
+    nearBottomRef.current = true;
+    setSending(true);
+    const { data, error } = await supabase
+      .from("messages")
+      .insert({
+        match_id: matchId,
+        sender_id: user.id,
+        content,
+        reply_to_id: replyId,
+      })
+      .select()
+      .single();
+    setSending(false);
+    if (error || !data) {
+      setMessages((prev) =>
+        prev.map((m) => (m.id === tempId ? { ...m, _status: "failed" } : m)),
+      );
+      toast.error(friendlyError(error ?? new Error("Falha ao enviar")));
+      return;
+    }
+    const real = data as Msg;
+    setMessages((prev) => {
+      const hasReal = prev.some((m) => m.id === real.id);
+      if (hasReal) return prev.filter((m) => m.id !== tempId);
+      return prev.map((m) => (m.id === tempId ? { ...real, _status: "sent" } : m));
+    });
+  }
+
+  async function retrySend(tempId: string) {
+    const msg = messages.find((m) => m.id === tempId);
+    if (!msg || !user) return;
+    setMessages((prev) =>
+      prev.map((m) => (m.id === tempId ? { ...m, _status: "sending" } : m)),
+    );
+    const { data, error } = await supabase
+      .from("messages")
+      .insert({
+        match_id: matchId,
+        sender_id: user.id,
+        content: msg.content,
+        reply_to_id: msg.reply_to_id ?? null,
+      })
+      .select()
+      .single();
+    if (error || !data) {
+      setMessages((prev) =>
+        prev.map((m) => (m.id === tempId ? { ...m, _status: "failed" } : m)),
+      );
+      toast.error(friendlyError(error ?? new Error("Falha ao reenviar")));
+      return;
+    }
+    const real = data as Msg;
+    setMessages((prev) => {
+      const hasReal = prev.some((m) => m.id === real.id);
+      if (hasReal) return prev.filter((m) => m.id !== tempId);
+      return prev.map((m) => (m.id === tempId ? { ...real, _status: "sent" } : m));
+    });
   }
 
   async function handleDelete(messageId: string) {
@@ -386,7 +537,9 @@ function Chat() {
 
   return (
     <div className="mobile-chat-screen flex min-h-screen flex-col bg-background md:min-h-screen">
-      <Header />
+      <div className="hidden md:block">
+        <Header />
+      </div>
       <div className="glass mx-auto flex w-full max-w-3xl items-center gap-3 px-3 py-3 shadow-soft md:px-4">
         <Link to="/conversas" className="text-muted-foreground hover:text-foreground">
           <ArrowLeft className="h-5 w-5" />
@@ -478,6 +631,16 @@ function Chat() {
         }}
       >
         <CommitmentProgressCard matchId={matchId} />
+        {loadingOlder && (
+          <div className="flex justify-center py-2 text-muted-foreground">
+            <Loader2 className="h-4 w-4 animate-spin" />
+          </div>
+        )}
+        {!hasMoreOlder && messages.length >= PAGE_SIZE && (
+          <p className="text-center text-[11px] text-muted-foreground/70">
+            Início da conversa
+          </p>
+        )}
         {messages.length === 0 && (
           <p className="mt-12 text-center text-sm text-muted-foreground">
             Comece a conversa com graça e respeito 💗
@@ -578,7 +741,28 @@ function Chat() {
                           })}
                           {m.edited_at ? " · editado" : ""}
                         </span>
-                        {mine &&
+                        {mine && m._status === "sending" && (
+                          <span
+                            className="ml-0.5 inline-flex items-center gap-0.5"
+                            title="Enviando..."
+                          >
+                            <Clock className="h-3 w-3" />
+                          </span>
+                        )}
+                        {mine && m._status === "failed" && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              retrySend(m.id);
+                            }}
+                            className="ml-0.5 inline-flex items-center gap-0.5 text-destructive hover:underline"
+                            title="Falha ao enviar — tocar para tentar novamente"
+                          >
+                            <AlertCircle className="h-3 w-3" /> tentar
+                          </button>
+                        )}
+                        {mine && !m._status &&
                           (m.read_at ? (
                             <span
                               className="ml-0.5 inline-flex items-center gap-0.5"
@@ -660,6 +844,18 @@ function Chat() {
           );
         })}
       </main>
+
+      {showNewBadge && (
+        <div className="pointer-events-none flex justify-center">
+          <button
+            type="button"
+            onClick={scrollToBottom}
+            className="pointer-events-auto -mt-2 mb-2 inline-flex items-center gap-1.5 rounded-full bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground shadow-lg"
+          >
+            <ArrowDown className="h-3.5 w-3.5" /> Nova mensagem
+          </button>
+        </div>
+      )}
 
       <form
         onSubmit={send}

@@ -24,6 +24,10 @@ import {
   HandHeart,
   Plus,
   Sticker as StickerIcon,
+  ArrowDown,
+  Loader2,
+  Clock,
+  AlertCircle,
 } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { markSeen } from "@/lib/lastSeen";
@@ -64,6 +68,10 @@ type GMsg = {
   pinned_at?: string | null;
   sticker_id?: string | null;
 };
+type LocalGMsg = GMsg & {
+  _tempId?: string;
+  _status?: "sending" | "sent" | "failed";
+};
 type Profile = {
   id: string;
   full_name: string;
@@ -90,7 +98,14 @@ function Comunidade() {
   const canModerateMessages = isAdmin || role === "moderador";
   const canFlagMessages = isAdmin || role === "moderador" || role === "apresentador";
   const isStaffViewer = canFlagMessages;
-  const [messages, setMessages] = useState<GMsg[]>([]);
+  const [messages, setMessages] = useState<LocalGMsg[]>([]);
+  const [loadingOlder, setLoadingOlder] = useState(false);
+  const [hasMoreOlder, setHasMoreOlder] = useState(true);
+  const [showNewBadge, setShowNewBadge] = useState(false);
+  const nearBottomRef = useRef(true);
+  const initializedScrollRef = useRef(false);
+  const prevLenRef = useRef(0);
+  const PAGE_SIZE = 50;
   const [profiles, setProfiles] = useState<Record<string, Profile>>({});
   const [approved, setApproved] = useState<boolean | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -304,23 +319,23 @@ function Comunidade() {
         .from("global_messages")
         .select("*")
         .order("created_at", { ascending: false })
-        .limit(100);
+        .limit(PAGE_SIZE);
       if (error) {
         toast.error(friendlyError(error));
         return;
       }
       if (ignore) return;
-      const list = ((data ?? []) as GMsg[]).slice().reverse();
+      const list = ((data ?? []) as GMsg[]).slice().reverse() as LocalGMsg[];
       setMessages(list);
+      setHasMoreOlder((data?.length ?? 0) === PAGE_SIZE);
+      initializedScrollRef.current = false;
+      nearBottomRef.current = true;
       await loadProfiles(Array.from(new Set(list.map((m) => m.sender_id))));
       const stickerIds = Array.from(
         new Set(list.map((m) => m.sticker_id).filter(Boolean) as string[]),
       );
       if (stickerIds.length) loadStickersByIds(stickerIds);
       markSeen(user.id, "community");
-      requestAnimationFrame(() => {
-        if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-      });
     })();
 
     const ch = supabase
@@ -330,13 +345,26 @@ function Comunidade() {
         { event: "INSERT", schema: "public", table: "global_messages" },
         async (payload) => {
           const m = payload.new as GMsg;
-          setMessages((prev) => [...prev, m]);
+          setMessages((prev) => {
+            if (prev.some((x) => x.id === m.id)) return prev;
+            // Reconcile with an optimistic temp from the same sender + content/sticker.
+            const tempIdx = prev.findIndex(
+              (x) =>
+                x._tempId &&
+                x.sender_id === m.sender_id &&
+                (x.sticker_id ?? null) === (m.sticker_id ?? null) &&
+                (x.content ?? "") === (m.content ?? ""),
+            );
+            if (tempIdx >= 0) {
+              const next = prev.slice();
+              next[tempIdx] = { ...m };
+              return next;
+            }
+            return [...prev, m as LocalGMsg];
+          });
           await loadProfiles([m.sender_id]);
           if (m.sticker_id) loadStickersByIds([m.sticker_id]);
           if (user) markSeen(user.id, "community");
-          requestAnimationFrame(() => {
-            if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-          });
         },
       )
       .on(
@@ -389,6 +417,89 @@ function Comunidade() {
     [messages, flaggedIds, isStaffViewer, user],
   );
 
+  // Smart scroll: instant on first load, smooth on own send/near-bottom,
+  // otherwise show a "new message" pill.
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const len = messages.length;
+    const prev = prevLenRef.current;
+    prevLenRef.current = len;
+    if (len === 0) return;
+    if (!initializedScrollRef.current) {
+      el.scrollTop = el.scrollHeight;
+      initializedScrollRef.current = true;
+      nearBottomRef.current = true;
+      return;
+    }
+    if (len <= prev) return;
+    const last = messages[len - 1];
+    const mine = last?.sender_id === user?.id;
+    if (mine || nearBottomRef.current) {
+      el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+      setShowNewBadge(false);
+    } else {
+      setShowNewBadge(true);
+    }
+  }, [messages, user?.id]);
+
+  const loadOlder = useCallback(async () => {
+    if (loadingOlder || !hasMoreOlder) return;
+    const el = scrollRef.current;
+    const oldest = messages[0];
+    if (!oldest || !el) return;
+    setLoadingOlder(true);
+    const prevHeight = el.scrollHeight;
+    const prevTop = el.scrollTop;
+    const { data } = await supabase
+      .from("global_messages")
+      .select("*")
+      .lt("created_at", oldest.created_at)
+      .order("created_at", { ascending: false })
+      .limit(PAGE_SIZE);
+    const olds = ((data ?? []) as GMsg[]).slice().reverse() as LocalGMsg[];
+    setMessages((prev) => {
+      const seen = new Set(prev.map((m) => m.id));
+      const merged = olds.filter((m) => !seen.has(m.id));
+      return [...merged, ...prev];
+    });
+    setHasMoreOlder((data?.length ?? 0) === PAGE_SIZE);
+    if (olds.length) {
+      await loadProfiles(Array.from(new Set(olds.map((m) => m.sender_id))));
+      const sIds = Array.from(
+        new Set(olds.map((m) => m.sticker_id).filter(Boolean) as string[]),
+      );
+      if (sIds.length) loadStickersByIds(sIds);
+    }
+    setLoadingOlder(false);
+    requestAnimationFrame(() => {
+      if (!el) return;
+      el.scrollTop = prevTop + (el.scrollHeight - prevHeight);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loadingOlder, hasMoreOlder, messages, loadStickersByIds]);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const onScroll = () => {
+      const dist = el.scrollHeight - el.scrollTop - el.clientHeight;
+      nearBottomRef.current = dist < 80;
+      if (nearBottomRef.current && showNewBadge) setShowNewBadge(false);
+      if (el.scrollTop < 80) void loadOlder();
+    };
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => el.removeEventListener("scroll", onScroll);
+  }, [loadOlder, showNewBadge]);
+
+  function scrollToBottom() {
+    const el = scrollRef.current;
+    if (!el) return;
+    el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+    nearBottomRef.current = true;
+    setShowNewBadge(false);
+  }
+
   const sendMessage = useCallback(
     async (content: string): Promise<boolean> => {
       if (!content || !user) return false;
@@ -397,16 +508,42 @@ function Comunidade() {
         setWarning(hit);
         return false;
       }
-      const { error } = await supabase.from("global_messages").insert({
+      const replyId = replyTo?.id ?? null;
+      const tempId = `temp-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      const optimistic: LocalGMsg = {
+        id: tempId,
+        _tempId: tempId,
+        _status: "sending",
         sender_id: user.id,
         content,
-        reply_to_id: replyTo?.id ?? null,
-      });
-      if (error) {
-        toast.error(friendlyError(error));
+        created_at: new Date().toISOString(),
+        reply_to_id: replyId,
+      };
+      setMessages((prev) => [...prev, optimistic]);
+      setReplyTo(null);
+      nearBottomRef.current = true;
+      const { data, error } = await supabase
+        .from("global_messages")
+        .insert({
+          sender_id: user.id,
+          content,
+          reply_to_id: replyId,
+        })
+        .select()
+        .single();
+      if (error || !data) {
+        setMessages((prev) =>
+          prev.map((m) => (m.id === tempId ? { ...m, _status: "failed" } : m)),
+        );
+        toast.error(friendlyError(error ?? new Error("Falha ao enviar")));
         return false;
       }
-      setReplyTo(null);
+      const real = data as GMsg;
+      setMessages((prev) => {
+        const hasReal = prev.some((m) => m.id === real.id);
+        if (hasReal) return prev.filter((m) => m.id !== tempId);
+        return prev.map((m) => (m.id === tempId ? { ...real } : m));
+      });
       return true;
     },
     [user, restrictedWords, replyTo],
@@ -645,6 +782,16 @@ function Comunidade() {
           blurComposer();
         }}
       >
+            {loadingOlder && (
+              <div className="flex justify-center py-2 text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" />
+              </div>
+            )}
+            {!hasMoreOlder && messages.length >= PAGE_SIZE && (
+              <p className="text-center text-[11px] text-muted-foreground/70">
+                Início do chat
+              </p>
+            )}
             {messages.length === 0 ? (
               <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
                 Nenhuma mensagem ainda. Seja o primeiro!
@@ -763,6 +910,18 @@ function Comunidade() {
                           })}
                           {m.edited_at ? " · editado" : ""}
                         </span>
+                        {mine && m._status === "sending" && (
+                          <Clock
+                            className="h-3 w-3 text-muted-foreground"
+                            aria-label="Enviando"
+                          />
+                        )}
+                        {mine && m._status === "failed" && (
+                          <AlertCircle
+                            className="h-3 w-3 text-destructive"
+                            aria-label="Falha ao enviar"
+                          />
+                        )}
                       </div>
                       {replied && !isEditing && (
                         <button
@@ -843,6 +1002,18 @@ function Comunidade() {
               })
             )}
       </main>
+
+      {showNewBadge && (
+        <div className="pointer-events-none flex justify-center">
+          <button
+            type="button"
+            onClick={scrollToBottom}
+            className="pointer-events-auto -mt-2 mb-2 inline-flex items-center gap-1.5 rounded-full bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground shadow-lg"
+          >
+            <ArrowDown className="h-3.5 w-3.5" /> Nova mensagem
+          </button>
+        </div>
+      )}
 
       <ChatComposer
             approved={!!approved}
