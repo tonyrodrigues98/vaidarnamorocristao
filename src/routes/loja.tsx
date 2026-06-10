@@ -1,7 +1,20 @@
 import { createFileRoute, Navigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
-import { Check, ImageIcon, Loader2, Sparkles, X, Lock, Gem } from "lucide-react";
+import {
+  Check,
+  ImageIcon,
+  Loader2,
+  Sparkles,
+  X,
+  Gem,
+  Frame as FrameIcon,
+  Sparkle,
+  Image as ImageLucide,
+  Type as TypeIcon,
+  Package,
+  Star,
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { ShopSkeleton } from "@/components/ui/AppSkeletons";
 import { AppEmptyState } from "@/components/ui/AppEmptyState";
@@ -77,19 +90,35 @@ export const Route = createFileRoute("/loja")({
 });
 
 type EquippedMap = { frame: string | null; aura: string | null; sticker: string | null };
-type CategoryKey = "frame" | "aura" | "background" | "name-gradient" | "soon";
+type CategoryKey =
+  | "all"
+  | "frame"
+  | "aura"
+  | "background"
+  | "name-gradient"
+  | "inventory";
 
 const CATEGORIES: {
   key: CategoryKey;
   label: string;
+  icon: typeof FrameIcon;
   type: DecorationType | "background" | null;
 }[] = [
-  { key: "frame", label: "Molduras", type: "frame" },
-  { key: "aura", label: "Auras", type: "aura" },
-  { key: "background", label: "Fundos de Perfil", type: "background" },
-  { key: "name-gradient", label: "Gradiente no Nome", type: null },
-  { key: "soon", label: "Em breve", type: null },
+  { key: "all", label: "Todos", icon: Sparkles, type: null },
+  { key: "frame", label: "Molduras", icon: FrameIcon, type: "frame" },
+  { key: "aura", label: "Auras", icon: Sparkle, type: "aura" },
+  { key: "background", label: "Fundos", icon: ImageLucide, type: "background" },
+  { key: "name-gradient", label: "Gradientes", icon: TypeIcon, type: null },
+  { key: "inventory", label: "Inventário", icon: Package, type: null },
 ];
+
+const RARITY_WEIGHT: Record<string, number> = {
+  exclusive: 5,
+  legendary: 4,
+  epic: 3,
+  rare: 2,
+  common: 1,
+};
 
 function LojaPage() {
   const { user, loading: authLoading } = useAuth();
@@ -111,7 +140,7 @@ function LojaPage() {
   const [loading, setLoading] = useState(true);
   const { isOnline } = useNetworkStatus();
   const [busyId, setBusyId] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<CategoryKey>("frame");
+  const [activeTab, setActiveTab] = useState<CategoryKey>("all");
   const [confirm, setConfirm] = useState<Decoration | null>(null);
   const [confirmBackground, setConfirmBackground] = useState<ProfileBackground | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
