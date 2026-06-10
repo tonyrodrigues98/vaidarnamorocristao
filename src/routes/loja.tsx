@@ -501,30 +501,30 @@ function LojaPage() {
         </div>
       </section>
 
-      {/* Tabs */}
-      <div className="mx-auto max-w-5xl px-4 pt-6">
-        <div className="flex flex-wrap gap-2">
-          {CATEGORIES.map((c) => {
-            const active = activeTab === c.key;
-            return (
-              <button
-                key={c.key}
-                onClick={() => setActiveTab(c.key)}
-                className={`relative rounded-full px-4 py-2 text-sm font-medium transition ${
-                  active
-                    ? "bg-foreground text-background shadow-soft"
-                    : "border bg-card text-foreground hover:border-[var(--rose-soft)]"
-                }`}
-              >
-                {c.label}
-                {c.key === "soon" && (
-                  <span className="ml-1.5 inline-flex items-center text-[10px] opacity-70">
-                    <Lock className="h-3 w-3" />
-                  </span>
-                )}
-              </button>
-            );
-          })}
+      {/* Categorias horizontais */}
+      <div className="sticky top-[calc(env(safe-area-inset-top,0px)+3.25rem)] z-20 -mb-2 bg-background/95 backdrop-blur md:static md:top-auto md:z-auto md:mb-0 md:bg-transparent md:backdrop-blur-0">
+        <div className="mx-auto max-w-5xl px-4 pt-4 md:pt-6">
+          <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-3 md:mx-0 md:flex-wrap md:overflow-visible md:px-0 md:pb-0 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+            {CATEGORIES.map((c) => {
+              const active = activeTab === c.key;
+              const Icon = c.icon;
+              return (
+                <button
+                  key={c.key}
+                  type="button"
+                  onClick={() => setActiveTab(c.key)}
+                  className={`app-pressable inline-flex shrink-0 items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition ${
+                    active
+                      ? "bg-foreground text-background shadow-soft"
+                      : "border bg-card text-foreground hover:border-[var(--rose-soft)]"
+                  }`}
+                >
+                  <Icon className="h-3.5 w-3.5" />
+                  {c.label}
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
 
@@ -534,8 +534,40 @@ function LojaPage() {
           <ShopSkeleton cards={8} />
         ) : !isOnline && catalog.length === 0 ? (
           <OfflineState className="my-12" />
-        ) : activeTab === "soon" ? (
-          <ComingSoon />
+        ) : activeTab === "all" ? (
+          <HighlightsView
+            decorations={catalog}
+            backgrounds={backgrounds}
+            owned={owned}
+            ownedBackgrounds={ownedBackgrounds}
+            equipped={equipped}
+            equippedBackground={equippedBackground}
+            onPickCategory={setActiveTab}
+          />
+        ) : activeTab === "inventory" ? (
+          <InventoryView
+            decorations={catalog}
+            backgrounds={backgrounds}
+            nameGradients={nameGradients}
+            owned={owned}
+            ownedBackgrounds={ownedBackgrounds}
+            ownedNameGradients={ownedNameGradients}
+            equipped={equipped}
+            equippedBackground={equippedBackground}
+            equippedNameGradient={equippedNameGradient}
+            busyId={busyId}
+            photoUrl={photoUrl}
+            userEmail={user?.email ?? null}
+            onEquipFrame={handleEquip}
+            onEquipAura={handleEquip}
+            onUnequipFrame={() => handleUnequip("frame")}
+            onUnequipAura={() => handleUnequip("aura")}
+            onEquipBackground={handleEquipBackground}
+            onUnequipBackground={handleUnequipBackground}
+            onEquipNameGradient={handleEquipNameGradient}
+            onUnequipNameGradient={handleUnequipNameGradient}
+            onBrowse={() => setActiveTab("all")}
+          />
         ) : activeTab === "name-gradient" ? (
           nameGradients.length === 0 ? (
             <AppEmptyState
