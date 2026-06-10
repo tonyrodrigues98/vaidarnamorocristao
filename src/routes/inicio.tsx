@@ -1160,6 +1160,12 @@ function InicioPage() {
                   highlight={unreadNotifs > 0}
                 />
                 <ActivityChip
+                  to="/dashboard"
+                  icon={<TrendingUp className="h-4 w-4" />}
+                  label="Métricas"
+                  hint="Visitas e tendências"
+                />
+                <ActivityChip
                   to="/interesses"
                   icon={<Sparkles className="h-4 w-4" />}
                   label="Interesses"
