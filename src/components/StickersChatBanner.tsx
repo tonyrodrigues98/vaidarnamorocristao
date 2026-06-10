@@ -147,7 +147,7 @@ export function StickersChatBanner() {
           {/* CTA */}
           <div className="animate-fade-up mt-6" style={{ animationDelay: "300ms" }}>
             <Link
-              to="/comunidade"
+              to="/conversas"
               className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full bg-gradient-to-r from-[oklch(0.65_0.22_340)] to-[oklch(0.62_0.20_20)] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_8px_30px_-8px_oklch(0.65_0.22_340/0.6)] transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98] sm:px-6 sm:py-3 sm:text-base"
             >
               <span
