@@ -686,11 +686,11 @@ function PerfilPage() {
               </div>
             </div>
 
-            <div className="p-6 sm:p-8 lg:p-10">
+            <div className="min-w-0 p-4 sm:p-8 lg:p-10">
               <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-                <div className="min-w-0">
+                <div className="min-w-0 w-full">
                   <p className="hidden text-sm font-medium text-[var(--rose)] sm:block">Perfil pessoal</p>
-                  <h1 className="mt-2 text-3xl font-black tracking-tight text-foreground sm:text-5xl">
+                  <h1 className="mt-2 break-words text-2xl font-black tracking-tight text-foreground sm:text-4xl lg:text-5xl [overflow-wrap:anywhere]">
                     <GradientName
                       name={profile.full_name}
                       gradient={profileNameGradient}
@@ -703,7 +703,7 @@ function PerfilPage() {
                   </p>
                 </div>
 
-                <div className="flex flex-wrap gap-2 -mx-1 px-1 overflow-x-auto sm:overflow-visible [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                <div className="flex w-full min-w-0 flex-wrap gap-2 sm:w-auto sm:flex-nowrap">
                   {user && (
                     <Button
                       asChild
