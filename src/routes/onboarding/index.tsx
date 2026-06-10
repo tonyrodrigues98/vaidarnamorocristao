@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { NumericInput } from "@/components/ui/NumericInput";
 import { PhotoImg } from "@/components/PhotoImg";
+import { BioPromptChips } from "@/components/profile/BioPromptChips";
 import { normalizeImageFile } from "@/lib/imageNormalize";
 import { cn } from "@/lib/utils";
 import {
@@ -1102,6 +1103,12 @@ function StepBio({
       <p className="mt-3 text-sm text-muted-foreground">
         Uma frase sincera já ajuda as pessoas certas a te conhecerem melhor.
       </p>
+      <div className="mt-4">
+        <BioPromptChips
+          current={value}
+          onApply={(starter: string) => onChange(starter + value)}
+        />
+      </div>
       <textarea
         value={value}
         onChange={(e) => onChange(e.target.value)}
