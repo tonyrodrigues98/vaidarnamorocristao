@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
+import { MobileAppHeader } from "@/components/mobile/MobileAppHeader";
 import { Button } from "@/components/ui/button";
 import { StickersChatBanner } from "@/components/StickersChatBanner";
 import { AnonymousMessagesBanner } from "@/components/AnonymousMessagesBanner";
@@ -509,6 +510,7 @@ function InicioPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-[var(--petal)]/20 via-background to-background">
       <Header />
+      <MobileAppHeader title="Início" subtitle="Seu dia no VaiDarNamoro" />
 
       <main className="relative mx-auto w-full max-w-6xl px-4 pb-20 pt-5 sm:px-6 sm:pt-10">
         {/* AVISOS SÉRIOS DA EQUIPE */}

@@ -5,6 +5,7 @@ import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
+import { MobileAppHeader } from "@/components/mobile/MobileAppHeader";
 import { PhotoImg } from "@/components/PhotoImg";
 import { normalizeImageFile } from "@/lib/imageNormalize";
 import { Button } from "@/components/ui/button";
@@ -542,6 +543,7 @@ function PerfilPage() {
   return (
     <div className="min-h-screen overflow-x-hidden bg-background">
       <Header />
+      <MobileAppHeader title="Perfil" subtitle="Sua conta e seu visual" />
       <main className="relative mx-auto max-w-[1440px] px-4 py-6 sm:px-6 lg:px-8 lg:py-10">
         <div
           aria-hidden="true"

@@ -7,6 +7,7 @@ import { PretendenteFeaturedCard } from "@/components/pretendentes/PretendenteFe
 import { useAuth } from "@/lib/auth";
 import { getActiveCommitmentByUser } from "@/lib/commitments";
 import { Header } from "@/components/layout/Header";
+import { MobileAppHeader } from "@/components/mobile/MobileAppHeader";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -370,6 +371,7 @@ function List() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-rose-50/70 via-background to-background dark:from-rose-950/10 dark:via-background dark:to-background">
       <Header />
+      <MobileAppHeader title="Pretendentes" subtitle="Conheça pessoas com propósito" />
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <section className="relative overflow-hidden rounded-3xl border border-white/70 bg-white/75 p-6 shadow-soft backdrop-blur-xl dark:border-white/10 dark:bg-card/70 sm:p-8 lg:p-10">
           <div className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full bg-rose-300/25 blur-3xl dark:bg-rose-700/20" />

@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
@@ -35,6 +35,7 @@ import { DecoratedAvatar } from "@/components/DecoratedAvatar";
 import { getLastSeen } from "@/lib/lastSeen";
 import { useTheme } from "@/lib/theme";
 import { useNotifications } from "@/lib/notifications";
+import { isMobileAppRoute } from "@/lib/layoutVisibility";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -73,6 +74,8 @@ export function Header() {
   const { user, isAdmin, role, isApproved, signOut } = useAuth();
   const canSeeAdminPanel = isAdmin || role === "apresentador" || role === "moderador";
   const navigate = useNavigate();
+  const location = useLocation();
+  const hideOnMobile = Boolean(user) && isMobileAppRoute(location.pathname);
   const { theme, toggle: toggleTheme } = useTheme();
   const { unread: notifUnread } = useNotifications(20);
   const [interestCount, setInterestCount] = useState(0);
@@ -247,7 +250,13 @@ export function Header() {
     .toUpperCase();
 
   return (
-    <header className="sticky top-0 z-50 glass pt-safe-top">
+    <header
+      className={
+        hideOnMobile
+          ? "sticky top-0 z-50 glass pt-safe-top hidden md:block"
+          : "sticky top-0 z-50 glass pt-safe-top"
+      }
+    >
       <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-3 px-4 sm:px-6 min-w-0">
         <Link to="/" className="flex items-center gap-2.5 group min-w-0 shrink-0" onClick={close}>
           <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-love shadow-glow transition-transform group-hover:scale-105">

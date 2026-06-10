@@ -5,6 +5,7 @@ import { Check, ImageIcon, Loader2, Sparkles, X, Lock, Gem } from "lucide-react"
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
+import { MobileAppHeader } from "@/components/mobile/MobileAppHeader";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -346,6 +347,7 @@ function LojaPage() {
   return (
     <div className="min-h-screen bg-background">
       <Header />
+      <MobileAppHeader title="Loja" subtitle="Personalize sua experiência" />
 
       {/* Hero */}
       <section className="relative overflow-hidden border-b">

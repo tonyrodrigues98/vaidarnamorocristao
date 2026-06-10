@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
+import { MobileAppHeader } from "@/components/mobile/MobileAppHeader";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
@@ -575,6 +576,7 @@ function Devocional() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-[var(--petal)]/25 via-background to-background">
       <Header />
+      <MobileAppHeader title="Devocional" subtitle="Um momento com Deus" />
       <main className="mx-auto max-w-5xl px-4 pb-16 pt-5 sm:py-10">
         <header className="animate-fade-up rounded-[1.75rem] border border-[var(--rose)]/15 bg-card/85 p-5 shadow-soft backdrop-blur sm:flex sm:items-center sm:gap-4 sm:rounded-3xl sm:p-7">
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-love shadow-glow">
