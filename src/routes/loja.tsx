@@ -601,7 +601,7 @@ function LojaPage() {
                   return (
                     <article
                       key={gradient.id}
-                      className={`overflow-hidden rounded-2xl border bg-card p-5 transition hover:-translate-y-0.5 hover:shadow-soft ${
+                      className={`app-card-interactive overflow-hidden rounded-2xl border bg-card p-5 transition ${
                         isEquipped
                           ? "border-[var(--rose)] ring-1 ring-[var(--rose)]/30"
                           : "hover:border-[var(--rose-soft)]"
@@ -708,7 +708,7 @@ function LojaPage() {
                   return (
                     <article
                       key={background.id}
-                      className={`group overflow-hidden rounded-2xl border bg-card transition hover:-translate-y-0.5 hover:shadow-soft ${
+                      className={`app-card-interactive group overflow-hidden rounded-2xl border bg-card transition ${
                         isEquipped
                           ? "border-[var(--rose)] ring-1 ring-[var(--rose)]/30"
                           : rarity.border
@@ -719,6 +719,7 @@ function LojaPage() {
                           <img
                             src={background.image_url}
                             alt={background.name}
+                            loading="lazy"
                             className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
                           />
                         ) : (
@@ -843,7 +844,7 @@ function LojaPage() {
                 return (
                   <article
                     key={d.id}
-                    className={`group relative flex flex-col overflow-hidden rounded-2xl border bg-card p-4 transition hover:-translate-y-0.5 hover:shadow-soft ${
+                    className={`app-card-interactive group relative flex flex-col overflow-hidden rounded-2xl border bg-card p-4 transition ${
                       isEquipped
                         ? "border-[var(--rose)] ring-1 ring-[var(--rose)]/30"
                         : "hover:border-[var(--rose-soft)]"
