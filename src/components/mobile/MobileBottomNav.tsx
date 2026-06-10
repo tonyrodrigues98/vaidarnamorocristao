@@ -1,5 +1,5 @@
 import { Link, useLocation } from "@tanstack/react-router";
-import { BookOpen, Heart, Home, User, Users } from "lucide-react";
+import { BookOpen, Heart, Home, MessageCircle, User } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 
@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 
-type AppNavRoute = "/inicio" | "/devocional" | "/comunidade" | "/pretendentes" | "/perfil";
+type AppNavRoute = "/inicio" | "/devocional" | "/conversas" | "/pretendentes" | "/perfil";
 
 type NavItem = {
   to: AppNavRoute;
@@ -24,7 +24,7 @@ type NavProfile = {
 const navItems: NavItem[] = [
   { to: "/inicio", label: "Início", icon: Home },
   { to: "/devocional", label: "Devocional", icon: BookOpen },
-  { to: "/comunidade", label: "Comunidade", icon: Users },
+  { to: "/conversas", label: "Conversas", icon: MessageCircle },
   { to: "/pretendentes", label: "Pretendentes", icon: Heart },
   { to: "/perfil", label: "Perfil", icon: User },
 ];
