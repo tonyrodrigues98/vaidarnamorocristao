@@ -255,11 +255,6 @@ export function Header() {
               <Button variant="ghost" size="sm" asChild>
                 <Link to="/inicio">Início</Link>
               </Button>
-              <Button variant="ghost" size="sm" asChild>
-                <Link to="/dashboard">
-                  <LayoutDashboard className="mr-1 h-4 w-4" /> Dashboard
-                </Link>
-              </Button>
               {isApproved && (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
