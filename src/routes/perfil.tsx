@@ -479,6 +479,9 @@ function PerfilPage() {
       toast.error(error.message);
       return;
     }
+    // Also persist the embedded "Sobre mim" advanced section under the same click.
+    const advOk = (await advancedAboutRef.current?.saveAdvanced()) ?? true;
+    if (!advOk) return;
     toast.success("Perfil atualizado!");
     setPhotoFile(null);
     setEditingProfile(false);
@@ -505,11 +508,15 @@ function PerfilPage() {
       accepts_children: prefs.accepts_children === "sim",
       looking_for_bio: prefs.looking_for_bio || null,
     });
-    setSavingPrefs(false);
     if (error) {
+      setSavingPrefs(false);
       toast.error(error.message);
       return;
     }
+    // Also persist the embedded "preferences" advanced section.
+    const advOk = (await advancedPrefsRef.current?.saveAdvanced()) ?? true;
+    setSavingPrefs(false);
+    if (!advOk) return;
     toast.success("Preferências salvas!");
     setEditingPrefs(false);
   }
