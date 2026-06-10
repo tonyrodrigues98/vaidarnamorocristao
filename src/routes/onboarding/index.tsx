@@ -995,7 +995,330 @@ function StepMarital({
   );
 }
 
-/* --- Step 8: Welcome --- */
+/* --- Optional helpers --- */
+function OptionalFooter({
+  saving, onSkip, onSave, saveLabel = "Salvar e continuar",
+}: {
+  saving: boolean; onSkip: () => void; onSave: () => void; saveLabel?: string;
+}) {
+  return (
+    <div className="mt-8 space-y-2">
+      <Button
+        onClick={onSave}
+        size="lg"
+        disabled={saving}
+        className="app-pressable h-14 w-full rounded-2xl text-base font-semibold"
+      >
+        {saving ? "Salvando..." : saveLabel}
+      </Button>
+      <button
+        type="button"
+        onClick={onSkip}
+        disabled={saving}
+        className="app-pressable mx-auto block py-2 text-sm font-medium text-muted-foreground underline-offset-4 hover:underline"
+      >
+        Pular
+      </button>
+    </div>
+  );
+}
+
+function ChipGroup({
+  options, value, onChange,
+}: {
+  options: Array<{ v: string; l: string }>;
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  return (
+    <div className="flex flex-wrap gap-2">
+      {options.map((o) => {
+        const active = value === o.v;
+        return (
+          <button
+            key={o.v}
+            type="button"
+            onClick={() => onChange(active ? "" : o.v)}
+            className={cn(
+              "rounded-full border px-3.5 py-2 text-sm transition",
+              active
+                ? "border-[var(--rose)] bg-[var(--rose)]/10 text-[var(--rose)]"
+                : "border-border bg-card/40 text-foreground/80 hover:border-[var(--rose-soft)]",
+            )}
+          >
+            {o.l}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function ChipMultiGroup({
+  options, values, onChange,
+}: {
+  options: Array<{ v: string; l: string }>;
+  values: string[];
+  onChange: (vs: string[]) => void;
+}) {
+  function toggle(v: string) {
+    if (values.includes(v)) onChange(values.filter((x) => x !== v));
+    else onChange([...values, v]);
+  }
+  return (
+    <div className="flex flex-wrap gap-2">
+      {options.map((o) => {
+        const active = values.includes(o.v);
+        return (
+          <button
+            key={o.v}
+            type="button"
+            onClick={() => toggle(o.v)}
+            className={cn(
+              "rounded-full border px-3.5 py-2 text-sm transition",
+              active
+                ? "border-[var(--rose)] bg-[var(--rose)]/10 text-[var(--rose)]"
+                : "border-border bg-card/40 text-foreground/80 hover:border-[var(--rose-soft)]",
+            )}
+          >
+            {o.l}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+/* --- Step 8: Bio --- */
+function StepBio({
+  value, onChange, saving, onSkip, onSave,
+}: {
+  value: string; onChange: (v: string) => void;
+  saving: boolean; onSkip: () => void; onSave: () => void;
+}) {
+  return (
+    <div className="mx-auto flex w-full max-w-md flex-1 flex-col py-6">
+      <h1 className="text-3xl font-semibold leading-tight">Conte um pouco sobre você</h1>
+      <p className="mt-3 text-sm text-muted-foreground">
+        Uma frase sincera já ajuda as pessoas certas a te conhecerem melhor.
+      </p>
+      <textarea
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        maxLength={500}
+        rows={6}
+        placeholder="Gosto de conversar com calma, valorizo minha fé e quero conhecer alguém com propósito."
+        className="mt-6 w-full resize-none rounded-2xl border border-border bg-card/60 p-4 text-base outline-none focus:border-[var(--rose-soft)]"
+      />
+      <p className="mt-2 text-right text-xs text-muted-foreground">{value.length}/500</p>
+      <OptionalFooter saving={saving} onSkip={onSkip} onSave={onSave} />
+    </div>
+  );
+}
+
+/* --- Step 9: Faith --- */
+function StepFaith({
+  church, onChurch, years, onYears,
+  faithMoment, onFaithMoment, churchFrequency, onChurchFrequency,
+  saving, onSkip, onSave,
+}: {
+  church: string; onChurch: (v: string) => void;
+  years: string; onYears: (v: string) => void;
+  faithMoment: string; onFaithMoment: (v: string) => void;
+  churchFrequency: string; onChurchFrequency: (v: string) => void;
+  saving: boolean; onSkip: () => void; onSave: () => void;
+}) {
+  return (
+    <div className="mx-auto flex w-full max-w-md flex-1 flex-col py-6">
+      <h1 className="text-3xl font-semibold leading-tight">Sua fé e caminhada</h1>
+      <p className="mt-3 text-sm text-muted-foreground">
+        Essas informações ajudam a manter conexões com mais propósito.
+      </p>
+      <div className="mt-6 space-y-5">
+        <div>
+          <label className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Igreja</label>
+          <Input
+            value={church}
+            onChange={(e) => onChurch(e.target.value)}
+            maxLength={100}
+            placeholder="Ex.: Comunidade da Graça"
+            className="mt-2 h-12 rounded-2xl border-border bg-card/60 px-4"
+          />
+        </div>
+        <div>
+          <label className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Anos de batismo</label>
+          <NumericInput
+            value={years}
+            onChange={onYears}
+            placeholder="0"
+            maxLength={2}
+            className="mt-2 h-12 w-32 rounded-2xl border-border bg-card/60 px-4 text-base"
+          />
+        </div>
+        <div>
+          <label className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Momento de fé</label>
+          <div className="mt-2">
+            <ChipGroup options={FAITH_MOMENT} value={faithMoment} onChange={onFaithMoment} />
+          </div>
+        </div>
+        <div>
+          <label className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Frequência na igreja</label>
+          <div className="mt-2">
+            <ChipGroup options={CHURCH_FREQUENCY} value={churchFrequency} onChange={onChurchFrequency} />
+          </div>
+        </div>
+      </div>
+      <OptionalFooter saving={saving} onSkip={onSkip} onSave={onSave} />
+    </div>
+  );
+}
+
+/* --- Step 10: Routine --- */
+function StepRoutine({
+  routine, onRoutine, worship, onWorship,
+  saving, onSkip, onSave,
+}: {
+  routine: string[]; onRoutine: (v: string[]) => void;
+  worship: string; onWorship: (v: string) => void;
+  saving: boolean; onSkip: () => void; onSave: () => void;
+}) {
+  return (
+    <div className="mx-auto flex w-full max-w-md flex-1 flex-col py-6">
+      <h1 className="text-3xl font-semibold leading-tight">Como é sua rotina?</h1>
+      <p className="mt-3 text-sm text-muted-foreground">
+        Escolha o que combina com você. Pode pular se preferir.
+      </p>
+      <div className="mt-6 space-y-5">
+        <div>
+          <label className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Rotina espiritual</label>
+          <div className="mt-2">
+            <ChipMultiGroup options={SPIRITUAL_ROUTINE} values={routine} onChange={onRoutine} />
+          </div>
+        </div>
+        <div>
+          <label className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Estilo de culto</label>
+          <div className="mt-2">
+            <ChipGroup options={WORSHIP_STYLE} value={worship} onChange={onWorship} />
+          </div>
+        </div>
+      </div>
+      <OptionalFooter saving={saving} onSkip={onSkip} onSave={onSave} />
+    </div>
+  );
+}
+
+/* --- Step 11: Seeking --- */
+function StepSeeking({
+  seeking, onSeeking, pace, onPace, quality, onQuality,
+  saving, onSkip, onSave,
+}: {
+  seeking: string; onSeeking: (v: string) => void;
+  pace: string; onPace: (v: string) => void;
+  quality: string; onQuality: (v: string) => void;
+  saving: boolean; onSkip: () => void; onSave: () => void;
+}) {
+  return (
+    <div className="mx-auto flex w-full max-w-md flex-1 flex-col py-6">
+      <h1 className="text-3xl font-semibold leading-tight">O que você procura?</h1>
+      <p className="mt-3 text-sm text-muted-foreground">
+        Isso ajuda o app a te apresentar pessoas com intenção parecida.
+      </p>
+      <div className="mt-6 space-y-5">
+        <div>
+          <label className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Intenção</label>
+          <div className="mt-2">
+            <ChipGroup options={SEEKING} value={seeking} onChange={onSeeking} />
+          </div>
+        </div>
+        <div>
+          <label className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Ritmo</label>
+          <div className="mt-2">
+            <ChipGroup options={PACE} value={pace} onChange={onPace} />
+          </div>
+        </div>
+        <div>
+          <label className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Qualidade essencial</label>
+          <Input
+            value={quality}
+            onChange={(e) => onQuality(e.target.value)}
+            maxLength={120}
+            placeholder="Ex.: integridade, carinho, fé"
+            className="mt-2 h-12 rounded-2xl border-border bg-card/60 px-4"
+          />
+        </div>
+      </div>
+      <OptionalFooter saving={saving} onSkip={onSkip} onSave={onSave} />
+    </div>
+  );
+}
+
+/* --- Step 12: Basic prefs --- */
+function StepPrefs({
+  min, onMin, max, onMax, accepts, onAccepts,
+  saving, onSkip, onSave,
+}: {
+  min: string; onMin: (v: string) => void;
+  max: string; onMax: (v: string) => void;
+  accepts: "" | "sim" | "nao"; onAccepts: (v: "sim" | "nao") => void;
+  saving: boolean; onSkip: () => void; onSave: () => void;
+}) {
+  return (
+    <div className="mx-auto flex w-full max-w-md flex-1 flex-col py-6">
+      <h1 className="text-3xl font-semibold leading-tight">Suas preferências</h1>
+      <p className="mt-3 text-sm text-muted-foreground">Você poderá ajustar tudo depois.</p>
+      <div className="mt-6 space-y-5">
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Idade mínima</label>
+            <NumericInput
+              value={min}
+              onChange={onMin}
+              placeholder="25"
+              maxLength={3}
+              className="mt-2 h-12 rounded-2xl border-border bg-card/60 px-4"
+            />
+          </div>
+          <div>
+            <label className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Idade máxima</label>
+            <NumericInput
+              value={max}
+              onChange={onMax}
+              placeholder="45"
+              maxLength={3}
+              className="mt-2 h-12 rounded-2xl border-border bg-card/60 px-4"
+            />
+          </div>
+        </div>
+        <div>
+          <label className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Aceita pessoa com filhos?</label>
+          <div className="mt-2 flex gap-2">
+            {(["sim", "nao"] as const).map((v) => {
+              const active = accepts === v;
+              return (
+                <button
+                  key={v}
+                  type="button"
+                  onClick={() => onAccepts(v)}
+                  className={cn(
+                    "flex-1 rounded-2xl border-2 px-4 py-3 text-sm font-medium transition",
+                    active
+                      ? "border-[var(--rose)] bg-[var(--rose)]/10 text-[var(--rose)]"
+                      : "border-border bg-card/40 text-foreground/80",
+                  )}
+                >
+                  {v === "sim" ? "Sim" : "Não"}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+      <OptionalFooter saving={saving} onSkip={onSkip} onSave={onSave} />
+    </div>
+  );
+}
+
+/* --- Final: Welcome --- */
 function StepWelcome({
   name, onContinue, onCompletePerfil,
 }: { name: string; onContinue: () => void; onCompletePerfil: () => void }) {
