@@ -75,6 +75,22 @@ import { fetchNameGradientsByIds, type NameGradient } from "@/lib/nameGradients"
 
 export const Route = createFileRoute("/perfil")({
   component: PerfilPage,
+  validateSearch: (search: Record<string, unknown>) => {
+    const rawTab = search.tab;
+    const allowed = new Set([
+      "profile",
+      "prefs",
+      "customizacao",
+      "saldo",
+      "presentes",
+      "missions",
+      "role",
+    ]);
+    const tab = typeof rawTab === "string" && allowed.has(rawTab) ? rawTab : undefined;
+    const edit =
+      search.edit === 1 || search.edit === "1" || search.edit === true ? 1 : undefined;
+    return { tab, edit } as { tab?: string; edit?: 1 };
+  },
   head: () => ({
     meta: [
       { title: "Meu Perfil — VaiDarNamoro" },
@@ -108,6 +124,7 @@ const profileSchema = z.object({
 
 function PerfilPage() {
   const { user, loading, role, badgeColor, publicListing, refreshRole } = useAuth();
+  const search = Route.useSearch();
   const [savingRole, setSavingRole] = useState(false);
   const [activeTab, setActiveTab] = useState<string>("profile");
   const [localColor, setLocalColor] = useState<RoleColor | null>(null);
@@ -222,6 +239,27 @@ function PerfilPage() {
   const advancedPrefsRef = useRef<ProfileAdvancedFormHandle | null>(null);
   const [editingProfile, setEditingProfile] = useState(false);
   const [editingPrefs, setEditingPrefs] = useState(false);
+
+  // Apply ?tab=...&edit=1 deep-links (e.g. coming from /inicio missions).
+  useEffect(() => {
+    if (search?.tab) {
+      setActiveTab(search.tab);
+    }
+    if (search?.edit === 1) {
+      if (!search.tab || search.tab === "profile") setEditingProfile(true);
+      if (search.tab === "prefs") setEditingPrefs(true);
+    }
+    if (search?.tab || search?.edit) {
+      if (typeof window !== "undefined") {
+        window.setTimeout(() => {
+          document
+            .getElementById("perfil-tabs")
+            ?.scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 80);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search?.tab, search?.edit]);
   const [status, setStatus] = useState<"pending" | "approved" | "rejected" | "banned" | null>(null);
   const [activeCommitment, setActiveCommitment] = useState<RelationshipCommitment | null>(null);
   const [profileNameGradient, setProfileNameGradient] = useState<NameGradient | null>(null);

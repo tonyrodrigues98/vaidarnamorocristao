@@ -215,6 +215,30 @@ function formatClock(now: Date) {
   return `${hh}:${mm}`;
 }
 
+// Maps a profile-strength action id to the search-params payload used to
+// deep-link directly to the right /perfil tab in edit mode. Pretendentes
+// links don't take search params.
+function actionSearch(id: string): Record<string, unknown> | undefined {
+  switch (id) {
+    case "photo":
+    case "extra_photos":
+    case "name":
+    case "bio":
+    case "city":
+    case "marital":
+    case "church":
+    case "height":
+    case "seeking":
+      return { tab: "profile", edit: 1 };
+    case "looking_for_bio":
+      return { tab: "prefs", edit: 1 };
+    case "free_frame":
+      return { tab: "customizacao" };
+    default:
+      return undefined;
+  }
+}
+
 function InicioPage() {
   const { user, loading } = useAuth();
   const [profile, setProfile] = useState<Profile | null | undefined>(undefined);
@@ -235,6 +259,7 @@ function InicioPage() {
   const [commitmentPartner, setCommitmentPartner] = useState<string | null>(null);
   const [commitmentDays, setCommitmentDays] = useState(0);
   const [frameClaimed, setFrameClaimed] = useState(false);
+  const [ownsAnyFrame, setOwnsAnyFrame] = useState(false);
 
   // Live clock — updates every 60s and on visibility change so the
   // greeting/theme transitions naturally from afternoon to night, etc.
@@ -255,6 +280,28 @@ function InicioPage() {
   useEffect(() => {
     if (!user) return;
     setFrameClaimed(hasClaimedFreeFrameLocal(user.id));
+  }, [user]);
+
+  // Check if the user already owns at least one frame decoration. If so we
+  // treat the "free frame" mission as completed and hide the redeem banner.
+  useEffect(() => {
+    if (!user) return;
+    let cancel = false;
+    (async () => {
+      const { count } = await supabase
+        .from("user_decorations" as never)
+        .select("decoration_id, avatar_decorations!inner(type)", {
+          count: "exact",
+          head: true,
+        })
+        .eq("user_id", user.id)
+        .eq("avatar_decorations.type", "frame");
+      if (cancel) return;
+      setOwnsAnyFrame((count ?? 0) > 0);
+    })();
+    return () => {
+      cancel = true;
+    };
   }, [user]);
 
   useEffect(() => {
@@ -411,10 +458,10 @@ function InicioPage() {
   const nextActions: ChecklistAction[] = useMemo(
     () =>
       getProfileStrengthNextActions(profile ?? null, advanced, prefs, photosCount, {
-        freeFrameAvailable: !frameClaimed,
+        freeFrameAvailable: !frameClaimed && !ownsAnyFrame,
         sawSuggestion: !!suggestion,
       }),
-    [profile, advanced, prefs, photosCount, frameClaimed, suggestion],
+    [profile, advanced, prefs, photosCount, frameClaimed, ownsAnyFrame, suggestion],
   );
 
   if (!loading && !user) return <Navigate to="/auth/login" />;
@@ -909,10 +956,12 @@ function InicioPage() {
               <div className="-mx-4 flex gap-2.5 overflow-x-auto px-4 pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:mx-0 md:grid md:grid-cols-3 md:overflow-visible md:px-0">
                 {nextActions.map((a) => {
                   const Icon = a.icon;
+                  const search = actionSearch(a.id);
                   return (
                     <Link
                       key={a.id}
                       to={a.to}
+                      search={search as never}
                       className="app-card-interactive flex min-w-[240px] shrink-0 items-start gap-3 rounded-2xl border border-border/60 bg-card p-3.5 shadow-soft md:min-w-0"
                     >
                       <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[var(--petal)] text-[var(--rose)]">
@@ -1115,10 +1164,11 @@ function InicioPage() {
           )}
 
           {/* MOLDURA GRÁTIS */}
-          {isApproved && !frameClaimed && (
+          {isApproved && !frameClaimed && !ownsAnyFrame && (
             <section>
               <Link
                 to="/perfil"
+                search={{ tab: "customizacao" } as never}
                 className="app-card-interactive flex items-center gap-3 rounded-2xl border border-[var(--rose)]/30 bg-gradient-to-br from-[var(--petal)]/60 to-white p-4 shadow-soft"
               >
                 <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-[var(--rose)] shadow-sm">
