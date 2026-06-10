@@ -135,10 +135,10 @@ function RootShell({ children }: { children: React.ReactNode }) {
 #app-splash.is-hiding{opacity:0;pointer-events:none;}
 #app-splash .app-splash-logo{width:min(60vw,200px);height:auto;object-fit:contain;display:block;filter:drop-shadow(0 8px 24px rgba(0,0,0,.08));}
 @media (min-width:768px){#app-splash .app-splash-logo{width:240px;}}
-#app-splash .app-splash-loader{margin-top:32px;width:140px;height:3px;background:rgba(0,0,0,.08);border-radius:999px;overflow:hidden;}
-#app-splash .app-splash-loader-bar{display:block;height:100%;width:40%;background:#000;border-radius:999px;animation:appSplashSlide 1.1s ease-in-out infinite;}
-@keyframes appSplashSlide{0%{transform:translateX(-110%);}100%{transform:translateX(360%);}}
-@media (prefers-reduced-motion: reduce){#app-splash .app-splash-loader-bar{animation:none;width:60%;}}
+#app-splash .app-splash-loader{margin-top:32px;width:160px;height:3px;background:rgba(0,0,0,.08);border-radius:999px;overflow:hidden;}
+#app-splash .app-splash-loader-bar{display:block;height:100%;width:0%;background:#000;border-radius:999px;animation:appSplashProgress 2.2s cubic-bezier(.22,.61,.36,1) forwards;}
+@keyframes appSplashProgress{0%{width:0%;}30%{width:35%;}60%{width:65%;}85%{width:88%;}100%{width:100%;}}
+@media (prefers-reduced-motion: reduce){#app-splash .app-splash-loader-bar{animation:none;width:100%;}}
 `,
           }}
         />
