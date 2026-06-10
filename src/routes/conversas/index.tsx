@@ -93,7 +93,7 @@ function List() {
               description="Você está em um propósito ativo. Por isso, suas outras conversas ficam arquivadas e fora de vista enquanto esse compromisso estiver firmado."
             />
           ) : loadingList ? (
-            <div className="h-20 animate-pulse rounded-2xl bg-muted/40" />
+            <ConversationListSkeleton rows={6} />
           ) : items.length === 0 ? (
             <div className="rounded-2xl border border-border/50 bg-card/70 p-10 text-center text-sm text-muted-foreground shadow-sm">
               <MessageCircle className="mx-auto mb-3 h-7 w-7 text-[var(--rose)]" />
