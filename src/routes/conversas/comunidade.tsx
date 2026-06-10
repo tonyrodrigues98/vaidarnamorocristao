@@ -910,6 +910,18 @@ function Comunidade() {
                           })}
                           {m.edited_at ? " · editado" : ""}
                         </span>
+                        {mine && m._status === "sending" && (
+                          <Clock
+                            className="h-3 w-3 text-muted-foreground"
+                            aria-label="Enviando"
+                          />
+                        )}
+                        {mine && m._status === "failed" && (
+                          <AlertCircle
+                            className="h-3 w-3 text-destructive"
+                            aria-label="Falha ao enviar"
+                          />
+                        )}
                       </div>
                       {replied && !isEditing && (
                         <button
