@@ -5,6 +5,7 @@ import { Check, ImageIcon, Loader2, Sparkles, X, Lock, Gem } from "lucide-react"
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
+import { MobileAppHeader } from "@/components/mobile/MobileAppHeader";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
