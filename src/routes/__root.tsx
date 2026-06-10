@@ -148,6 +148,11 @@ function RootShell({ children }: { children: React.ReactNode }) {
         </div>
         {children}
         <Scripts />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){var b=document.querySelector('#app-splash .app-splash-loader-bar');if(!b)return;var p=5;b.style.width=p+'%';var tick=setInterval(function(){if(p<90){p+=Math.max(.4,(90-p)*0.04);b.style.width=p+'%';}},120);function set(v){if(v>p){p=v;b.style.width=p+'%';}}window.__splashSet=set;document.addEventListener('DOMContentLoaded',function(){set(35);});window.addEventListener('load',function(){set(70);});window.__splashDone=function(){clearInterval(tick);b.style.width='100%';};})();`,
+          }}
+        />
       </body>
     </html>
   );
