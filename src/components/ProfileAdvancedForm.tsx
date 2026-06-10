@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { NumericInput } from "@/components/ui/NumericInput";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -169,13 +170,22 @@ const ABOUT_SECTIONS: AdvancedSection[] = [
 ];
 const PREFS_SECTIONS: AdvancedSection[] = ["relationship", "seeking"];
 
-export function ProfileAdvancedForm({
-  userId,
-  mode = "all",
-}: {
+export type ProfileAdvancedFormHandle = {
+  /** Persist the advanced profile. Returns true on success. */
+  saveAdvanced: () => Promise<boolean>;
+};
+
+export type ProfileAdvancedFormProps = {
   userId: string;
   mode?: "about" | "prefs" | "all";
-}) {
+  /** When true, the form's own sticky submit button is not rendered. */
+  hideSubmit?: boolean;
+  /** When true, suppress the success toast (useful when a parent shows its own). */
+  silentToast?: boolean;
+};
+
+export const ProfileAdvancedForm = forwardRef<ProfileAdvancedFormHandle, ProfileAdvancedFormProps>(
+  function ProfileAdvancedForm({ userId, mode = "all", hideSubmit = false, silentToast = false }, ref) {
   const visible: AdvancedSection[] =
     mode === "about"
       ? ABOUT_SECTIONS
@@ -215,8 +225,7 @@ export function ProfileAdvancedForm({
 
   const set = <K extends keyof Form>(k: K, v: Form[K]) => setData((d) => ({ ...d, [k]: v }));
 
-  async function save(e: React.FormEvent) {
-    e.preventDefault();
+  async function persist(): Promise<boolean> {
     setSaving(true);
     const payload = {
       user_id: userId,
@@ -230,11 +239,19 @@ export function ProfileAdvancedForm({
     setSaving(false);
     if (error) {
       toast.error(error.message);
-      return;
+      return false;
     }
-    toast.success("Perfil avançado salvo!");
+    if (!silentToast) toast.success("Perfil avançado salvo!");
     void recomputeMyBadges(userId);
+    return true;
   }
+
+  async function save(e: React.FormEvent) {
+    e.preventDefault();
+    await persist();
+  }
+
+  useImperativeHandle(ref, () => ({ saveAdvanced: persist }), [data, userId, silentToast]);
 
   if (loading) return <div className="glass animate-pulse rounded-3xl p-6 shadow-soft h-96" />;
 
@@ -399,13 +416,13 @@ export function ProfileAdvancedForm({
           </Field>
           {data.wants_children === "sim" && (
             <Field label="Quantos (opcional)">
-              <Input
-                type="number"
+              <NumericInput
                 min={1}
                 max={10}
+                maxLength={2}
                 value={data.children_count ?? ""}
-                onChange={(e) =>
-                  set("children_count", e.target.value ? Number(e.target.value) : null)
+                onChange={(v) =>
+                  set("children_count", v ? Math.max(1, Math.min(10, Number(v))) : null)
                 }
                 className="max-w-[120px]"
               />
@@ -553,13 +570,15 @@ export function ProfileAdvancedForm({
         </Section>
       )}
 
-      <div className="sticky bottom-4 z-10">
-        <Button type="submit" size="lg" className="w-full shadow-glow" disabled={saving}>
-          <Save className="mr-2 h-4 w-4" /> {saving ? "Salvando..." : saveLabel}
-        </Button>
-      </div>
+      {!hideSubmit && (
+        <div className="sticky bottom-4 z-10">
+          <Button type="submit" size="lg" className="w-full shadow-glow" disabled={saving}>
+            <Save className="mr-2 h-4 w-4" /> {saving ? "Salvando..." : saveLabel}
+          </Button>
+        </div>
+      )}
 
       <Target className="hidden" />
     </form>
   );
-}
+});

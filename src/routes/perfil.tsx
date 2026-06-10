@@ -61,7 +61,8 @@ import { SaldoTab } from "@/components/SaldoTab";
 import { recomputeMyBadges } from "@/lib/recomputeBadges";
 import commitmentRing from "@/assets/commitment-ring.webp";
 import { getActiveCommitmentByUser, type RelationshipCommitment } from "@/lib/commitments";
-import { ProfileAdvancedForm } from "@/components/ProfileAdvancedForm";
+import { ProfileAdvancedForm, type ProfileAdvancedFormHandle } from "@/components/ProfileAdvancedForm";
+import { NumericInput } from "@/components/ui/NumericInput";
 import { ProfileAdvancedView } from "@/components/ProfileAdvancedView";
 import { ProfilePhotosManager } from "@/components/ProfilePhotosManager";
 import { AdminWarningBanner } from "@/components/AdminWarningBanner";
@@ -215,6 +216,8 @@ function PerfilPage() {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [savingProfile, setSavingProfile] = useState(false);
   const [savingPrefs, setSavingPrefs] = useState(false);
+  const advancedAboutRef = useRef<ProfileAdvancedFormHandle | null>(null);
+  const advancedPrefsRef = useRef<ProfileAdvancedFormHandle | null>(null);
   const [editingProfile, setEditingProfile] = useState(false);
   const [editingPrefs, setEditingPrefs] = useState(false);
   const [status, setStatus] = useState<"pending" | "approved" | "rejected" | "banned" | null>(null);
@@ -476,6 +479,9 @@ function PerfilPage() {
       toast.error(error.message);
       return;
     }
+    // Also persist the embedded "Sobre mim" advanced section under the same click.
+    const advOk = (await advancedAboutRef.current?.saveAdvanced()) ?? true;
+    if (!advOk) return;
     toast.success("Perfil atualizado!");
     setPhotoFile(null);
     setEditingProfile(false);
@@ -502,11 +508,15 @@ function PerfilPage() {
       accepts_children: prefs.accepts_children === "sim",
       looking_for_bio: prefs.looking_for_bio || null,
     });
-    setSavingPrefs(false);
     if (error) {
+      setSavingPrefs(false);
       toast.error(error.message);
       return;
     }
+    // Also persist the embedded "preferences" advanced section.
+    const advOk = (await advancedPrefsRef.current?.saveAdvanced()) ?? true;
+    setSavingPrefs(false);
+    if (!advOk) return;
     toast.success("Preferências salvas!");
     setEditingPrefs(false);
   }
@@ -1016,23 +1026,23 @@ function PerfilPage() {
                         </div>
                         <div className="space-y-2">
                           <Label>Idade</Label>
-                          <Input
-                            type="number"
+                          <NumericInput
                             min={18}
                             max={110}
+                            maxLength={3}
                             value={profile.age}
-                            onChange={(e) => setP("age", e.target.value)}
+                            onChange={(v) => setP("age", v)}
                             required
                           />
                         </div>
                         <div className="space-y-2">
                           <Label>Altura (cm)</Label>
-                          <Input
-                            type="number"
+                          <NumericInput
                             min={120}
                             max={230}
+                            maxLength={3}
                             value={profile.height_cm}
-                            onChange={(e) => setP("height_cm", e.target.value)}
+                            onChange={(v) => setP("height_cm", v)}
                           />
                         </div>
                         <div className="space-y-2">
@@ -1098,12 +1108,12 @@ function PerfilPage() {
                         </div>
                         <div className="space-y-2 sm:col-span-2">
                           <Label>Anos de batismo</Label>
-                          <Input
-                            type="number"
+                          <NumericInput
                             min={0}
                             max={100}
+                            maxLength={3}
                             value={profile.years_baptized}
-                            onChange={(e) => setP("years_baptized", e.target.value)}
+                            onChange={(v) => setP("years_baptized", v)}
                             required
                           />
                         </div>
@@ -1118,16 +1128,22 @@ function PerfilPage() {
                         </div>
                       </div>
 
+                      {user && (
+                        <div className="-mx-1">
+                          <ProfileAdvancedForm
+                            ref={advancedAboutRef}
+                            userId={user.id}
+                            mode="about"
+                            hideSubmit
+                            silentToast
+                          />
+                        </div>
+                      )}
                       <Button type="submit" size="lg" className="w-full" disabled={savingProfile}>
                         <Save className="mr-2 h-4 w-4" />{" "}
-                        {savingProfile ? "Salvando..." : "Salvar perfil"}
+                        {savingProfile ? "Salvando..." : "Salvar sobre mim"}
                       </Button>
                     </form>
-                    {user && (
-                      <div className="mt-6">
-                        <ProfileAdvancedForm userId={user.id} mode="about" />
-                      </div>
-                    )}
                   </>
                 )}
               </TabsContent>
@@ -1219,23 +1235,23 @@ function PerfilPage() {
                       <div className="grid gap-4 sm:grid-cols-2">
                         <div className="space-y-2">
                           <Label>Idade mínima</Label>
-                          <Input
-                            type="number"
+                          <NumericInput
                             min={18}
                             max={110}
+                            maxLength={3}
                             value={prefs.age_min}
-                            onChange={(e) => setPrefs({ ...prefs, age_min: e.target.value })}
+                            onChange={(v) => setPrefs({ ...prefs, age_min: v })}
                             required
                           />
                         </div>
                         <div className="space-y-2">
                           <Label>Idade máxima</Label>
-                          <Input
-                            type="number"
+                          <NumericInput
                             min={18}
                             max={110}
+                            maxLength={3}
                             value={prefs.age_max}
-                            onChange={(e) => setPrefs({ ...prefs, age_max: e.target.value })}
+                            onChange={(v) => setPrefs({ ...prefs, age_max: v })}
                             required
                           />
                         </div>
@@ -1325,16 +1341,22 @@ function PerfilPage() {
                         />
                       </div>
 
+                      {user && (
+                        <div className="-mx-1">
+                          <ProfileAdvancedForm
+                            ref={advancedPrefsRef}
+                            userId={user.id}
+                            mode="prefs"
+                            hideSubmit
+                            silentToast
+                          />
+                        </div>
+                      )}
                       <Button type="submit" size="lg" className="w-full" disabled={savingPrefs}>
                         <Save className="mr-2 h-4 w-4" />{" "}
                         {savingPrefs ? "Salvando..." : "Salvar preferências"}
                       </Button>
                     </form>
-                    {user && (
-                      <div className="mt-6">
-                        <ProfileAdvancedForm userId={user.id} mode="prefs" />
-                      </div>
-                    )}
                   </>
                 )}
               </TabsContent>
