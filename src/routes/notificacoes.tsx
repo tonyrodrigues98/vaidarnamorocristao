@@ -10,7 +10,10 @@ import { OfflineState } from "@/components/ui/OfflineState";
 import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 import {
   Bell,
+  BellRing,
+  BellOff,
   Check,
+  CheckCheck,
   Trash2,
   Heart,
   MessageCircle,
@@ -23,6 +26,11 @@ import {
   Unlock,
   HeartHandshake,
   Flag,
+  Gift,
+  BookOpen,
+  Newspaper,
+  UsersRound,
+  Info,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -99,6 +107,19 @@ function iconMeta(type: string): { icon: React.ReactNode; bg: string; fg: string
       };
     case "anonymous_report":
       return { icon: <Flag className="h-4 w-4" />, bg: "bg-red-100", fg: "text-red-600" };
+    case "gift":
+    case "gift_received":
+      return { icon: <Gift className="h-4 w-4" />, bg: "bg-amber-100", fg: "text-amber-700" };
+    case "devotional":
+      return { icon: <BookOpen className="h-4 w-4" />, bg: "bg-violet-100", fg: "text-violet-600" };
+    case "news":
+    case "noticia":
+      return { icon: <Newspaper className="h-4 w-4" />, bg: "bg-amber-100", fg: "text-amber-700" };
+    case "community":
+    case "conversation":
+      return { icon: <UsersRound className="h-4 w-4" />, bg: "bg-sky-100", fg: "text-sky-600" };
+    case "system":
+      return { icon: <Info className="h-4 w-4" />, bg: "bg-slate-100", fg: "text-slate-600" };
     default:
       return {
         icon: <Bell className="h-4 w-4" />,
@@ -108,15 +129,64 @@ function iconMeta(type: string): { icon: React.ReactNode; bg: string; fg: string
   }
 }
 
+type DateGroup = "Hoje" | "Ontem" | "Esta semana" | "Anteriores";
+const GROUP_ORDER: DateGroup[] = ["Hoje", "Ontem", "Esta semana", "Anteriores"];
+
+function groupNotificationsByDate(list: AppNotification[]): Record<DateGroup, AppNotification[]> {
+  const groups: Record<DateGroup, AppNotification[]> = {
+    Hoje: [],
+    Ontem: [],
+    "Esta semana": [],
+    Anteriores: [],
+  };
+  const now = new Date();
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  const startOfYesterday = startOfToday - 24 * 60 * 60 * 1000;
+  const startOfWeek = startOfToday - 7 * 24 * 60 * 60 * 1000;
+  for (const n of list) {
+    const t = new Date(n.created_at).getTime();
+    if (isNaN(t)) {
+      groups["Anteriores"].push(n);
+    } else if (t >= startOfToday) {
+      groups["Hoje"].push(n);
+    } else if (t >= startOfYesterday) {
+      groups["Ontem"].push(n);
+    } else if (t >= startOfWeek) {
+      groups["Esta semana"].push(n);
+    } else {
+      groups["Anteriores"].push(n);
+    }
+  }
+  return groups;
+}
+
 function NotificacoesPage() {
   const { items, unread, loading, markRead, markAllRead, reload } = useNotifications(100);
   const router = useRouter();
   const [hidden, setHidden] = useState<Set<string>>(new Set());
   const pendingTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
   const { isOnline } = useNetworkStatus();
+  const [filter, setFilter] = useState<"all" | "unread">("all");
+  const [markingAll, setMarkingAll] = useState(false);
 
   const visible = useMemo(() => items.filter((n) => !hidden.has(n.id)), [items, hidden]);
   const visibleUnread = visible.filter((n) => !n.read_at).length;
+  const filtered = useMemo(
+    () => (filter === "unread" ? visible.filter((n) => !n.read_at) : visible),
+    [visible, filter],
+  );
+  const grouped = useMemo(() => groupNotificationsByDate(filtered), [filtered]);
+  void unread;
+
+  const handleMarkAll = async () => {
+    if (markingAll || visibleUnread === 0) return;
+    setMarkingAll(true);
+    try {
+      await markAllRead();
+    } finally {
+      setMarkingAll(false);
+    }
+  };
 
   const handleDelete = (n: AppNotification) => {
     setHidden((prev) => {
@@ -170,23 +240,79 @@ function NotificacoesPage() {
   return (
     <div className="min-h-screen">
       <Header />
-      <MobileAppHeader title="Notificações" subtitle="Acompanhe o que aconteceu" />
+      <MobileAppHeader title="Atividades" subtitle="Suas novidades no VaiDarNamoro" />
       <PullToRefresh onRefresh={reload} disabled={!isOnline}>
-      <main className="mx-auto w-full max-w-2xl px-4 py-8">
-        <div className="mb-6 flex items-center justify-between gap-3">
-          <div>
-            <h1 className="text-2xl font-semibold sm:text-3xl">Notificações</h1>
-            <p className="text-sm text-muted-foreground">
-              {visibleUnread > 0
-                ? `${visibleUnread} não lida${visibleUnread > 1 ? "s" : ""}`
-                : "Tudo em dia"}
-            </p>
+      <main className="mx-auto w-full max-w-2xl px-4 py-6 sm:py-8">
+        {/* Summary panel */}
+        <div className="mb-4 rounded-2xl border border-[var(--rose)]/20 bg-gradient-to-br from-[var(--petal)]/60 via-white to-white p-4 shadow-sm">
+          <div className="flex items-center gap-3">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/80 text-[var(--rose)] shadow-sm">
+              {visibleUnread > 0 ? (
+                <BellRing className="h-5 w-5" />
+              ) : (
+                <Bell className="h-5 w-5" />
+              )}
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-semibold text-foreground">
+                {visibleUnread > 0
+                  ? `Você tem ${visibleUnread} novidade${visibleUnread > 1 ? "s" : ""}`
+                  : "Tudo em dia"}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {visibleUnread > 0
+                  ? "Toque para abrir e responder."
+                  : "Você já viu tudo por aqui."}
+              </p>
+            </div>
+            {visibleUnread > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleMarkAll}
+                disabled={markingAll}
+                className="app-pressable shrink-0"
+              >
+                <CheckCheck className="mr-1 h-4 w-4" />
+                <span className="hidden sm:inline">Marcar todas</span>
+                <span className="sm:hidden">Lidas</span>
+              </Button>
+            )}
           </div>
-          {visibleUnread > 0 && (
-            <Button variant="outline" size="sm" onClick={() => markAllRead()}>
-              <Check className="mr-1 h-4 w-4" /> Marcar todas
-            </Button>
-          )}
+        </div>
+
+        {/* Filter chips */}
+        <div className="mb-4 flex items-center gap-2">
+          {(
+            [
+              { id: "all" as const, label: "Todas", count: visible.length },
+              { id: "unread" as const, label: "Não lidas", count: visibleUnread },
+            ]
+          ).map((chip) => {
+            const active = filter === chip.id;
+            return (
+              <button
+                key={chip.id}
+                type="button"
+                onClick={() => setFilter(chip.id)}
+                className={`app-pressable inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
+                  active
+                    ? "border-[var(--rose)] bg-[var(--rose)] text-white shadow-sm"
+                    : "border-border bg-card text-muted-foreground hover:text-foreground"
+                }`}
+                aria-pressed={active}
+              >
+                {chip.label}
+                <span
+                  className={`rounded-full px-1.5 text-[10px] ${
+                    active ? "bg-white/20 text-white" : "bg-muted text-muted-foreground"
+                  }`}
+                >
+                  {chip.count}
+                </span>
+              </button>
+            );
+          })}
         </div>
 
         <EnableNotificationsCard />
@@ -194,26 +320,47 @@ function NotificacoesPage() {
         {loading ? (
           <NotificationSkeleton rows={6} />
         ) : visible.length === 0 && !isOnline ? (
-          <OfflineState
-            actionLabel="Tentar novamente"
-            onAction={() => reload()}
-          />
+          <OfflineState actionLabel="Tentar novamente" onAction={() => reload()} />
         ) : visible.length === 0 ? (
           <AppEmptyState
-            icon={<Bell className="h-5 w-5" />}
+            icon={<BellOff className="h-5 w-5" />}
             title="Nenhuma notificação por enquanto"
             description="Quando alguém interagir com você, suas novidades aparecerão aqui."
             actionLabel="Explorar pretendentes"
             actionTo="/pretendentes"
           />
+        ) : filtered.length === 0 ? (
+          <AppEmptyState
+            icon={<CheckCheck className="h-5 w-5" />}
+            title="Tudo em dia"
+            description="Você já viu todas as suas novidades."
+          />
         ) : (
-          <ul className="space-y-2">
-            <AnimatePresence initial={false}>
-              {visible.map((n) => (
-                <NotificationRow key={n.id} n={n} onOpen={onClick} onDelete={handleDelete} />
-              ))}
-            </AnimatePresence>
-          </ul>
+          <div className="space-y-5">
+            {GROUP_ORDER.map((group) => {
+              const list = grouped[group];
+              if (!list || list.length === 0) return null;
+              return (
+                <section key={group}>
+                  <h2 className="mb-2 px-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                    {group}
+                  </h2>
+                  <ul className="space-y-2">
+                    <AnimatePresence initial={false}>
+                      {list.map((n) => (
+                        <NotificationRow
+                          key={n.id}
+                          n={n}
+                          onOpen={onClick}
+                          onDelete={handleDelete}
+                        />
+                      ))}
+                    </AnimatePresence>
+                  </ul>
+                </section>
+              );
+            })}
+          </div>
         )}
 
         <div className="mt-6 text-center">
