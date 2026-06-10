@@ -1050,33 +1050,53 @@ function PerfilPage() {
                         </div>
                         <div className="space-y-2">
                           <Label>Sexo</Label>
-                          <Select
-                            value={profile.sex}
-                            onValueChange={(v) => setP("sex", v as "masculino" | "feminino")}
-                          >
-                            <SelectTrigger>
-                              <SelectValue placeholder="Selecione" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="masculino">Masculino</SelectItem>
-                              <SelectItem value="feminino">Feminino</SelectItem>
-                            </SelectContent>
-                          </Select>
+                          <div className="flex flex-wrap gap-2">
+                            {[
+                              { v: "masculino", l: "Homem" },
+                              { v: "feminino", l: "Mulher" },
+                            ].map((o) => {
+                              const active = profile.sex === o.v;
+                              return (
+                                <button
+                                  key={o.v}
+                                  type="button"
+                                  onClick={() => setP("sex", o.v as "masculino" | "feminino")}
+                                  className={`app-pressable rounded-full border px-4 py-2 text-sm transition ${
+                                    active
+                                      ? "border-[var(--rose)] bg-[var(--rose)] text-white"
+                                      : "border-border bg-background text-foreground"
+                                  }`}
+                                >
+                                  {o.l}
+                                </button>
+                              );
+                            })}
+                          </div>
                         </div>
                         <div className="space-y-2">
                           <Label>Estado civil</Label>
-                          <Select
-                            value={profile.marital}
-                            onValueChange={(v) => setP("marital", v as "solteiro" | "divorciado")}
-                          >
-                            <SelectTrigger>
-                              <SelectValue placeholder="Selecione" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="solteiro">Solteiro(a)</SelectItem>
-                              <SelectItem value="divorciado">Divorciado(a)</SelectItem>
-                            </SelectContent>
-                          </Select>
+                          <div className="flex flex-wrap gap-2">
+                            {[
+                              { v: "solteiro", l: "Solteiro(a)" },
+                              { v: "divorciado", l: "Divorciado(a)" },
+                            ].map((o) => {
+                              const active = profile.marital === o.v;
+                              return (
+                                <button
+                                  key={o.v}
+                                  type="button"
+                                  onClick={() => setP("marital", o.v as "solteiro" | "divorciado")}
+                                  className={`app-pressable rounded-full border px-4 py-2 text-sm transition ${
+                                    active
+                                      ? "border-[var(--rose)] bg-[var(--rose)] text-white"
+                                      : "border-border bg-background text-foreground"
+                                  }`}
+                                >
+                                  {o.l}
+                                </button>
+                              );
+                            })}
+                          </div>
                         </div>
                         <div className="space-y-2">
                           <Label>Cidade</Label>
