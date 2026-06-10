@@ -94,7 +94,7 @@ export function MobileBottomNav() {
                 key={item.to}
                 to={item.to}
                 className={cn(
-                  "tap flex min-w-0 flex-col items-center justify-center gap-1 px-1 text-[10px] font-semibold transition-colors",
+                  "tap app-pressable flex min-w-0 flex-col items-center justify-center gap-1 px-1 text-[10px] font-semibold transition-colors",
                   active
                     ? "text-[var(--rose)]"
                     : "text-muted-foreground hover:text-foreground active:text-foreground",
