@@ -852,3 +852,42 @@
     animation: none;
   }
 }
+
+/* -------------------------------------------------------------------------- */
+/* Soft card press + loading-state utilities                                  */
+/* -------------------------------------------------------------------------- */
+.app-pressable-soft {
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform 160ms cubic-bezier(0.22, 0.61, 0.36, 1),
+    background-color 160ms ease,
+    box-shadow 160ms ease;
+  will-change: transform;
+}
+.app-pressable-soft:active {
+  transform: scale(0.99);
+}
+.app-pressable-soft:disabled,
+.app-pressable-soft[aria-disabled="true"] {
+  transform: none;
+  cursor: not-allowed;
+}
+
+.app-loading-state {
+  pointer-events: none;
+  cursor: progress;
+  opacity: 0.75;
+  transition: opacity 120ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-pressable-soft {
+    transition: none;
+  }
+  .app-pressable-soft:active {
+    transform: none;
+  }
+  .app-loading-state {
+    transition: none;
+  }
+}
