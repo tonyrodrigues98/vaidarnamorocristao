@@ -103,6 +103,9 @@ function List() {
   const [myAdvanced, setMyAdvanced] = useState<AdvancedProfile | null>(null);
   const [advancedMap, setAdvancedMap] = useState<Record<string, AdvancedProfile>>({});
   const [extraPhotos, setExtraPhotos] = useState<Record<string, string[]>>({});
+  const isMobile = useIsMobile();
+  const [mobileMode, setMobileMode] = useState<"explore" | "list">("explore");
+  const [exploreIndex, setExploreIndex] = useState(0);
 
   const [ageMinInput, setAgeMinInput] = useState<string>(
     search.ageMin != null ? String(search.ageMin) : "",
