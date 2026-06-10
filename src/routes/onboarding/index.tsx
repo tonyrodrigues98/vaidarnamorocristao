@@ -1102,6 +1102,12 @@ function StepBio({
       <p className="mt-3 text-sm text-muted-foreground">
         Uma frase sincera já ajuda as pessoas certas a te conhecerem melhor.
       </p>
+      <div className="mt-4">
+        <BioPromptChips
+          current={value}
+          onApply={(starter: string) => onChange(starter + value)}
+        />
+      </div>
       <textarea
         value={value}
         onChange={(e) => onChange(e.target.value)}
