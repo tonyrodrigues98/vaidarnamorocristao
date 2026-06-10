@@ -601,8 +601,8 @@ function PerfilPage() {
         />
         <AdminWarningBanner />
         <section className="animate-fade-up overflow-hidden rounded-[2.25rem] border border-border/70 bg-card/75 shadow-[0_26px_90px_rgba(31,41,55,0.10)] backdrop-blur dark:bg-card/72 dark:shadow-[0_28px_90px_rgba(0,0,0,0.42)]">
-          <div className="grid gap-0 lg:grid-cols-[380px_minmax(0,1fr)]">
-            <div className="relative min-h-[360px] bg-[linear-gradient(145deg,#fff7ed,#fdf2f8_45%,#eff6ff)] p-6 dark:bg-[linear-gradient(145deg,rgba(49,22,38,0.88),rgba(20,20,34,0.94)_46%,rgba(15,35,58,0.88))] sm:p-8">
+          <div className="grid w-full min-w-0 gap-0 lg:grid-cols-[380px_minmax(0,1fr)]">
+            <div className="relative w-full min-w-0 overflow-hidden min-h-[320px] bg-[linear-gradient(145deg,#fff7ed,#fdf2f8_45%,#eff6ff)] p-4 dark:bg-[linear-gradient(145deg,rgba(49,22,38,0.88),rgba(20,20,34,0.94)_46%,rgba(15,35,58,0.88))] sm:p-8">
               <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-card/80 to-transparent" />
               <div className="relative z-10 flex h-full flex-col justify-between gap-8">
                 <div className="flex items-center justify-between gap-3">
@@ -612,12 +612,12 @@ function PerfilPage() {
                   <StatusPill status={status} />
                 </div>
 
-                <div className="flex flex-col items-center text-center">
+                <div className="flex w-full min-w-0 flex-col items-center text-center">
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
                     aria-label="Trocar foto de perfil"
-                    className="app-pressable group relative h-44 w-44 cursor-pointer overflow-hidden rounded-[2rem] border border-border/70 bg-background/70 p-2 shadow-[0_22px_60px_rgba(15,23,42,0.18)] transition hover:-translate-y-1 hover:shadow-[0_28px_70px_rgba(15,23,42,0.22)] dark:shadow-[0_24px_70px_rgba(0,0,0,0.45)]"
+                    className="app-pressable group relative h-36 w-36 max-w-full cursor-pointer overflow-hidden rounded-[2rem] border border-border/70 bg-background/70 p-2 shadow-[0_22px_60px_rgba(15,23,42,0.18)] transition hover:-translate-y-1 hover:shadow-[0_28px_70px_rgba(15,23,42,0.22)] dark:shadow-[0_24px_70px_rgba(0,0,0,0.45)] sm:h-44 sm:w-44"
                   >
                     <span className="block h-full w-full overflow-hidden rounded-[1.55rem] bg-card">
                       {photoPreview ? (
@@ -659,26 +659,26 @@ function PerfilPage() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-2 text-center">
-                  <div className="rounded-2xl bg-background/70 p-3 shadow-soft backdrop-blur dark:bg-background/35">
-                    <p className="text-lg font-semibold text-foreground">{profile.age || "--"}</p>
-                    <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
+                <div className="grid w-full min-w-0 grid-cols-3 gap-2 text-center">
+                  <div className="min-w-0 rounded-2xl bg-background/70 p-2 shadow-soft backdrop-blur dark:bg-background/35 sm:p-3">
+                    <p className="truncate text-base font-semibold text-foreground sm:text-lg">{profile.age || "--"}</p>
+                    <p className="truncate text-[10px] uppercase tracking-wide text-muted-foreground sm:text-[11px]">
                       anos
                     </p>
                   </div>
-                  <div className="rounded-2xl bg-background/70 p-3 shadow-soft backdrop-blur dark:bg-background/35">
-                    <p className="truncate text-lg font-semibold text-foreground">
+                  <div className="min-w-0 rounded-2xl bg-background/70 p-2 shadow-soft backdrop-blur dark:bg-background/35 sm:p-3">
+                    <p className="truncate text-base font-semibold text-foreground sm:text-lg">
                       {profile.state || "--"}
                     </p>
-                    <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
+                    <p className="truncate text-[10px] uppercase tracking-wide text-muted-foreground sm:text-[11px]">
                       estado
                     </p>
                   </div>
-                  <div className="rounded-2xl bg-background/70 p-3 shadow-soft backdrop-blur dark:bg-background/35">
-                    <p className="text-lg font-semibold text-foreground">
+                  <div className="min-w-0 rounded-2xl bg-background/70 p-2 shadow-soft backdrop-blur dark:bg-background/35 sm:p-3">
+                    <p className="truncate text-base font-semibold text-foreground sm:text-lg">
                       {prefs.age_min}-{prefs.age_max}
                     </p>
-                    <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
+                    <p className="truncate text-[10px] uppercase tracking-wide text-muted-foreground sm:text-[11px]">
                       busca
                     </p>
                   </div>
