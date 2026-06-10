@@ -932,10 +932,12 @@ function InicioPage() {
               <div className="-mx-4 flex gap-2.5 overflow-x-auto px-4 pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:mx-0 md:grid md:grid-cols-3 md:overflow-visible md:px-0">
                 {nextActions.map((a) => {
                   const Icon = a.icon;
+                  const search = actionSearch(a.id);
                   return (
                     <Link
                       key={a.id}
                       to={a.to}
+                      search={search as never}
                       className="app-card-interactive flex min-w-[240px] shrink-0 items-start gap-3 rounded-2xl border border-border/60 bg-card p-3.5 shadow-soft md:min-w-0"
                     >
                       <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[var(--petal)] text-[var(--rose)]">
