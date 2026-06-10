@@ -109,6 +109,14 @@ function List() {
   const isMobile = useIsMobile();
   const [mobileMode, setMobileMode] = useState<"explore" | "list">("explore");
   const [exploreIndex, setExploreIndex] = useState(0);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const refreshResolveRef = useRef<(() => void) | null>(null);
+  const handlePullRefresh = useCallback(() => {
+    return new Promise<void>((resolve) => {
+      refreshResolveRef.current = resolve;
+      setRefreshKey((k) => k + 1);
+    });
+  }, []);
 
   const [ageMinInput, setAgeMinInput] = useState<string>(
     search.ageMin != null ? String(search.ageMin) : "",
@@ -246,7 +254,17 @@ function List() {
       }
       setLoadingList(false);
     })();
-  }, [user, role, rolesLoaded]);
+  }, [user, role, rolesLoaded, refreshKey]);
+
+  // Resolve the active pull-to-refresh promise after the load effect settles.
+  useEffect(() => {
+    if (loadingList) return;
+    const resolve = refreshResolveRef.current;
+    if (resolve) {
+      refreshResolveRef.current = null;
+      resolve();
+    }
+  }, [loadingList, refreshKey]);
 
   // Compute affinity per profile (memoized)
   const affinityByProfile = useMemo(() => {
