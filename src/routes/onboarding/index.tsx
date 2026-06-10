@@ -187,19 +187,19 @@ function OnboardingFlow() {
       const maritalDb: "solteiro" | "divorciado" =
         marital === "divorciado" || marital === "viuvo" ? "divorciado" : "solteiro";
 
-      const payload: Record<string, unknown> = {
+      const payload = {
         id: user.id,
         full_name: name.trim(),
         age: ageFromBirth,
-        sex,
+        sex: sex as "masculino" | "feminino",
         city: city.trim(),
         state: stateUF,
         height_cm: Number(heightCm),
         marital: maritalDb,
         church: existing?.church ?? "Não informado",
         years_baptized: existing?.years_baptized ?? 0,
+        ...(photo_url ? { photo_url } : {}),
       };
-      if (photo_url) payload.photo_url = photo_url;
 
       const { error } = await supabase.from("profiles").upsert(payload);
       if (error) {
