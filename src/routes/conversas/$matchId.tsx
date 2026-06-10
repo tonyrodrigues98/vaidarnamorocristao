@@ -88,7 +88,14 @@ function Chat() {
   const [partnerCommitmentMatchId, setPartnerCommitmentMatchId] = useState<string | null>(null);
   const [currentCommitment, setCurrentCommitment] = useState<RelationshipCommitment | null>(null);
   const [pausedByCommitment, setPausedByCommitment] = useState(false);
-  const [messages, setMessages] = useState<Msg[]>([]);
+  const [messages, setMessages] = useState<LocalMsg[]>([]);
+  const [loadingOlder, setLoadingOlder] = useState(false);
+  const [hasMoreOlder, setHasMoreOlder] = useState(true);
+  const [showNewBadge, setShowNewBadge] = useState(false);
+  const nearBottomRef = useRef(true);
+  const initializedScrollRef = useRef(false);
+  const prevLenRef = useRef(0);
+  const PAGE_SIZE = 50;
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const [authorized, setAuthorized] = useState<boolean | null>(null);
