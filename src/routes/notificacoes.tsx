@@ -3,6 +3,7 @@ import { Header } from "@/components/layout/Header";
 import { MobileAppHeader } from "@/components/mobile/MobileAppHeader";
 import { useNotifications, type AppNotification } from "@/lib/notifications";
 import { Button } from "@/components/ui/button";
+import { NotificationSkeleton } from "@/components/ui/AppSkeletons";
 import {
   Bell,
   Check,
