@@ -1,7 +1,6 @@
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { RequireApproved } from "@/components/RequireApproved";
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
 import { MobileAppHeader } from "@/components/mobile/MobileAppHeader";
@@ -11,25 +10,7 @@ import { OnlineDot } from "@/components/OnlineDot";
 import { UserBadges } from "@/components/UserBadges";
 import { DecoratedAvatar } from "@/components/DecoratedAvatar";
 import { CommitmentPauseCard } from "@/components/commitment/CommitmentPauseCard";
-import { getActiveCommitmentByUser, type RelationshipCommitment } from "@/lib/commitments";
-
-type Item = {
-  matchId: string;
-  partner: {
-    id: string;
-    full_name: string;
-    photo_url: string | null;
-    city: string;
-    state: string;
-    verified?: boolean | null;
-    equipped_frame_id?: string | null;
-    equipped_aura_id?: string | null;
-    committed?: boolean;
-  };
-  lastMessage: string | null;
-  lastAt: string;
-  unread: boolean;
-};
+import { useConversationsList } from "@/hooks/useConversationsList";
 
 export const Route = createFileRoute("/conversas/")({
   component: () => (
@@ -41,118 +22,9 @@ export const Route = createFileRoute("/conversas/")({
 
 function List() {
   const { user, loading } = useAuth();
-  const [items, setItems] = useState<Item[]>([]);
-  const [loadingList, setLoadingList] = useState(true);
-  const [activeCommitment, setActiveCommitment] = useState<RelationshipCommitment | null>(null);
+  const { items, commitment: activeCommitment, loading: loadingList } =
+    useConversationsList(user?.id);
   const [query, setQuery] = useState("");
-
-  async function load() {
-    if (!user) return;
-    const commitment = await getActiveCommitmentByUser(user.id);
-    setActiveCommitment(commitment);
-    if (commitment) {
-      setItems([]);
-      setLoadingList(false);
-      return;
-    }
-    const { data: bl } = await supabase
-      .from("blocks")
-      .select("blocked_id")
-      .eq("blocker_id", user.id);
-    const blockedSet = new Set((bl ?? []).map((b) => b.blocked_id as string));
-    const { data: matches } = await supabase
-      .from("matches")
-      .select("id, user_a, user_b, created_at")
-      .or(`user_a.eq.${user.id},user_b.eq.${user.id}`)
-      .order("created_at", { ascending: false });
-    if (!matches?.length) {
-      setItems([]);
-      setLoadingList(false);
-      return;
-    }
-    const visibleMatches = matches.filter((m) => {
-      const partnerId = m.user_a === user.id ? m.user_b : m.user_a;
-      return !blockedSet.has(partnerId);
-    });
-    if (!visibleMatches.length) {
-      setItems([]);
-      setLoadingList(false);
-      return;
-    }
-    const partnerIds = visibleMatches.map((m) => (m.user_a === user.id ? m.user_b : m.user_a));
-    const { data: commitments } = await supabase
-      .from("relationship_commitments")
-      .select(
-        `
-      user_a,
-      user_b,
-      status
-    `,
-      )
-      .eq("status", "active");
-    const committedUsers = new Set<string>();
-
-    (commitments ?? []).forEach((c) => {
-      committedUsers.add(c.user_a);
-      committedUsers.add(c.user_b);
-    });
-    const { data: profs } = await supabase
-      .from("profiles")
-      .select("id,full_name,photo_url,city,state,verified,equipped_frame_id,equipped_aura_id")
-      .in("id", partnerIds);
-    const profMap = new Map((profs ?? []).map((p) => [p.id, p]));
-    const list: Item[] = await Promise.all(
-      visibleMatches.map(async (m) => {
-        const partnerId = m.user_a === user.id ? m.user_b : m.user_a;
-        const { data: msgs } = await supabase
-          .from("messages")
-          .select("content, sender_id, created_at, read_at")
-          .eq("match_id", m.id)
-          .order("created_at", { ascending: false })
-          .limit(1);
-        const last = msgs?.[0];
-        return {
-          matchId: m.id,
-          partner: {
-            ...(profMap.get(partnerId) ?? {
-              id: partnerId,
-              full_name: "—",
-              photo_url: null,
-              city: "",
-              state: "",
-            }),
-
-            committed: committedUsers.has(partnerId),
-          },
-          lastMessage: last?.content ?? null,
-          lastAt: last?.created_at ?? m.created_at,
-          unread: !!last && last.sender_id !== user.id && !last.read_at,
-        };
-      }),
-    );
-    list.sort((a, b) => b.lastAt.localeCompare(a.lastAt));
-    setItems(list);
-    setLoadingList(false);
-  }
-
-  useEffect(() => {
-    if (!user) return;
-    load();
-    const ch = supabase
-      .channel("conv-list")
-      .on("postgres_changes", { event: "*", schema: "public", table: "messages" }, load)
-      .on("postgres_changes", { event: "*", schema: "public", table: "matches" }, load)
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "relationship_commitments" },
-        load,
-      )
-      .subscribe();
-    return () => {
-      supabase.removeChannel(ch);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]);
 
   if (!loading && !user) return <Navigate to="/auth/login" />;
 
