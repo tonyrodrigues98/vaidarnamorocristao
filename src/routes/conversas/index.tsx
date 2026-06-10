@@ -13,7 +13,6 @@ import { CommitmentPauseCard } from "@/components/commitment/CommitmentPauseCard
 import { useConversationsList } from "@/hooks/useConversationsList";
 import { ConversationListSkeleton } from "@/components/ui/AppSkeletons";
 import { AppEmptyState } from "@/components/ui/AppEmptyState";
-import { Search as SearchIcon } from "lucide-react";
 
 export const Route = createFileRoute("/conversas/")({
   component: () => (
@@ -107,7 +106,7 @@ function List() {
           ) : filteredItems.length === 0 ? (
             <AppEmptyState
               compact
-              icon={<SearchIcon className="h-5 w-5" />}
+              icon={<Search className="h-5 w-5" />}
               title="Nada encontrado"
               description="Tente buscar por outro nome ou abra a Comunidade Geral."
             />
