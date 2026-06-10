@@ -42,6 +42,7 @@ import { Route as PropositoMatchIdRouteImport } from './routes/proposito/$matchI
 import { Route as PretendentesIdRouteImport } from './routes/pretendentes/$id'
 import { Route as OnboardingEtapa2RouteImport } from './routes/onboarding/etapa-2'
 import { Route as OnboardingEtapa1RouteImport } from './routes/onboarding/etapa-1'
+import { Route as ConversasComunidadeRouteImport } from './routes/conversas/comunidade'
 import { Route as ConversasMatchIdRouteImport } from './routes/conversas/$matchId'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as AuthSignupRouteImport } from './routes/auth/signup'
@@ -226,6 +227,11 @@ const OnboardingEtapa1Route = OnboardingEtapa1RouteImport.update({
   path: '/onboarding/etapa-1',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ConversasComunidadeRoute = ConversasComunidadeRouteImport.update({
+  id: '/conversas/comunidade',
+  path: '/conversas/comunidade',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ConversasMatchIdRoute = ConversasMatchIdRouteImport.update({
   id: '/conversas/$matchId',
   path: '/conversas/$matchId',
@@ -356,6 +362,7 @@ export interface FileRoutesByFullPath {
   '/auth/signup': typeof AuthSignupRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/conversas/$matchId': typeof ConversasMatchIdRoute
+  '/conversas/comunidade': typeof ConversasComunidadeRoute
   '/onboarding/etapa-1': typeof OnboardingEtapa1Route
   '/onboarding/etapa-2': typeof OnboardingEtapa2Route
   '/pretendentes/$id': typeof PretendentesIdRoute
@@ -409,6 +416,7 @@ export interface FileRoutesByTo {
   '/auth/signup': typeof AuthSignupRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/conversas/$matchId': typeof ConversasMatchIdRoute
+  '/conversas/comunidade': typeof ConversasComunidadeRoute
   '/onboarding/etapa-1': typeof OnboardingEtapa1Route
   '/onboarding/etapa-2': typeof OnboardingEtapa2Route
   '/pretendentes/$id': typeof PretendentesIdRoute
@@ -463,6 +471,7 @@ export interface FileRoutesById {
   '/auth/signup': typeof AuthSignupRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/conversas/$matchId': typeof ConversasMatchIdRoute
+  '/conversas/comunidade': typeof ConversasComunidadeRoute
   '/onboarding/etapa-1': typeof OnboardingEtapa1Route
   '/onboarding/etapa-2': typeof OnboardingEtapa2Route
   '/pretendentes/$id': typeof PretendentesIdRoute
@@ -518,6 +527,7 @@ export interface FileRouteTypes {
     | '/auth/signup'
     | '/blog/$slug'
     | '/conversas/$matchId'
+    | '/conversas/comunidade'
     | '/onboarding/etapa-1'
     | '/onboarding/etapa-2'
     | '/pretendentes/$id'
@@ -571,6 +581,7 @@ export interface FileRouteTypes {
     | '/auth/signup'
     | '/blog/$slug'
     | '/conversas/$matchId'
+    | '/conversas/comunidade'
     | '/onboarding/etapa-1'
     | '/onboarding/etapa-2'
     | '/pretendentes/$id'
@@ -624,6 +635,7 @@ export interface FileRouteTypes {
     | '/auth/signup'
     | '/blog/$slug'
     | '/conversas/$matchId'
+    | '/conversas/comunidade'
     | '/onboarding/etapa-1'
     | '/onboarding/etapa-2'
     | '/pretendentes/$id'
@@ -678,6 +690,7 @@ export interface RootRouteChildren {
   AuthSignupRoute: typeof AuthSignupRoute
   BlogSlugRoute: typeof BlogSlugRoute
   ConversasMatchIdRoute: typeof ConversasMatchIdRoute
+  ConversasComunidadeRoute: typeof ConversasComunidadeRoute
   OnboardingEtapa1Route: typeof OnboardingEtapa1Route
   OnboardingEtapa2Route: typeof OnboardingEtapa2Route
   PretendentesIdRoute: typeof PretendentesIdRoute
@@ -927,6 +940,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OnboardingEtapa1RouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/conversas/comunidade': {
+      id: '/conversas/comunidade'
+      path: '/conversas/comunidade'
+      fullPath: '/conversas/comunidade'
+      preLoaderRoute: typeof ConversasComunidadeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/conversas/$matchId': {
       id: '/conversas/$matchId'
       path: '/conversas/$matchId'
@@ -1094,6 +1114,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthSignupRoute: AuthSignupRoute,
   BlogSlugRoute: BlogSlugRoute,
   ConversasMatchIdRoute: ConversasMatchIdRoute,
+  ConversasComunidadeRoute: ConversasComunidadeRoute,
   OnboardingEtapa1Route: OnboardingEtapa1Route,
   OnboardingEtapa2Route: OnboardingEtapa2Route,
   PretendentesIdRoute: PretendentesIdRoute,
@@ -1112,3 +1133,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
