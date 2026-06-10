@@ -26,7 +26,6 @@ import {
   BookHeart,
   Settings,
   Bell,
-  LayoutDashboard,
 } from "lucide-react";
 import { toast } from "sonner";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
