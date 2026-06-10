@@ -64,9 +64,6 @@ const AGE_BUCKETS: { label: string; min: number; max: number }[] = [
   { label: "50+", min: 50, max: 200 },
 ];
 
-const ROSE = "var(--rose)";
-const CORAL = "var(--coral)";
-const PETAL = "var(--petal)";
 
 function Dashboard() {
   const { user, loading } = useAuth();
