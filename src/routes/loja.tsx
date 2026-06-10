@@ -1165,7 +1165,15 @@ function HighlightsView({
                   key={`${h.kind}-${h.item.id}`}
                   type="button"
                   onClick={() =>
-                    onPickCategory(h.kind === "background" ? "background" : h.item.type)
+                    onPickCategory(
+                      h.kind === "background"
+                        ? "background"
+                        : h.item.type === "frame"
+                          ? "frame"
+                          : h.item.type === "aura"
+                            ? "aura"
+                            : "all",
+                    )
                   }
                   className="app-card-interactive w-[170px] shrink-0 overflow-hidden rounded-2xl border bg-card text-left md:w-auto"
                 >
@@ -1324,7 +1332,8 @@ function InventoryView({
         icon={<Package className="h-5 w-5" />}
         title="Seu inventário ainda está vazio"
         description="Compre molduras, auras, fundos ou gradientes para personalizar sua experiência."
-        action={{ label: "Ver destaques", onClick: onBrowse }}
+        actionLabel="Ver destaques"
+        onAction={onBrowse}
         className="my-12"
       />
     );
