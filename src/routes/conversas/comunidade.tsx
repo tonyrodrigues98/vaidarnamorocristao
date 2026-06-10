@@ -104,6 +104,7 @@ function Comunidade() {
   const [messages, setMessages] = useState<LocalGMsg[]>([]);
   const [loadingOlder, setLoadingOlder] = useState(false);
   const [hasMoreOlder, setHasMoreOlder] = useState(true);
+  const [initialLoaded, setInitialLoaded] = useState(false);
   const [showNewBadge, setShowNewBadge] = useState(false);
   const nearBottomRef = useRef(true);
   const initializedScrollRef = useRef(false);
@@ -334,6 +335,7 @@ function Comunidade() {
       setHasMoreOlder((data?.length ?? 0) === PAGE_SIZE);
       initializedScrollRef.current = false;
       nearBottomRef.current = true;
+      setInitialLoaded(true);
       await loadProfiles(Array.from(new Set(list.map((m) => m.sender_id))));
       const stickerIds = Array.from(
         new Set(list.map((m) => m.sticker_id).filter(Boolean) as string[]),
@@ -816,9 +818,13 @@ function Comunidade() {
               </p>
             )}
             {messages.length === 0 ? (
-              <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-                Nenhuma mensagem ainda. Seja o primeiro!
-              </div>
+              !initialLoaded ? (
+                <ChatSkeleton bubbles={8} />
+              ) : (
+                <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
+                  Nenhuma mensagem ainda. Seja o primeiro!
+                </div>
+              )
             ) : (
               visibleMessages.map((m) => {
                 const p = profiles[m.sender_id];
