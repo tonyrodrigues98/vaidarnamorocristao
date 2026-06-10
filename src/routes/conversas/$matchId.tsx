@@ -825,92 +825,12 @@ function Chat() {
         </div>
       </form>
 
-      <Sheet open={drawerOpen} onOpenChange={setDrawerOpen}>
-        <SheetContent side="left" className="flex w-[88vw] max-w-sm flex-col p-0">
-          <SheetHeader className="border-b border-border px-4 pb-3 pt-5 text-left">
-            <SheetTitle className="flex items-center gap-2 text-lg">
-              <MessageCircle className="h-5 w-5 text-primary" />
-              Conversas
-            </SheetTitle>
-          </SheetHeader>
-          <div className="border-b border-border p-4">
-            <div className="flex items-center gap-2 rounded-2xl border border-border bg-muted/40 px-3 py-2">
-              <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
-              <input
-                value={conversationSearch}
-                onChange={(e) => setConversationSearch(e.target.value)}
-                placeholder="Buscar conversa"
-                className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
-              />
-            </div>
-          </div>
-          <div className="mobile-chat-scroll flex-1 overflow-y-auto p-3">
-            {loadingConversations ? (
-              <div className="space-y-2">
-                {Array.from({ length: 4 }).map((_, index) => (
-                  <div key={index} className="h-16 animate-pulse rounded-2xl bg-muted/60" />
-                ))}
-              </div>
-            ) : filteredConversationList.length === 0 ? (
-              <div className="flex h-full flex-col items-center justify-center px-6 text-center text-sm text-muted-foreground">
-                <MessageCircle className="mb-3 h-8 w-8 text-muted-foreground/60" />
-                Nenhuma conversa encontrada.
-              </div>
-            ) : (
-              <div className="space-y-2">
-                {filteredConversationList.map((item) => {
-                  const active = item.matchId === matchId;
-                  return (
-                    <Link
-                      key={item.matchId}
-                      to="/conversas/$matchId"
-                      params={{ matchId: item.matchId }}
-                      onClick={() => setDrawerOpen(false)}
-                      className={`tap flex items-center gap-3 rounded-2xl border px-3 py-3 transition ${
-                        active
-                          ? "border-primary/40 bg-primary/10"
-                          : "border-transparent hover:border-border hover:bg-muted/50"
-                      }`}
-                    >
-                      <div className="relative shrink-0">
-                        <DecoratedAvatar
-                          photoUrl={item.partner.photo_url}
-                          fallback={item.partner.full_name?.charAt(0) ?? "?"}
-                          size={36}
-                          frameId={item.partner.equipped_frame_id ?? null}
-                          auraId={item.partner.equipped_aura_id ?? null}
-                        />
-                        <OnlineDot
-                          userId={item.partner.id}
-                          className="absolute -bottom-0.5 -right-0.5"
-                        />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-1.5">
-                          <p className="truncate text-sm font-semibold">{item.partner.full_name}</p>
-                          {item.partner.verified && <VerifiedBadge size="sm" />}
-                        </div>
-                        <p className="truncate text-xs text-muted-foreground">
-                          {item.lastMessage ?? "Conversa iniciada"}
-                        </p>
-                      </div>
-                      <div className="flex shrink-0 flex-col items-end gap-1">
-                        <span className="text-[10px] text-muted-foreground">
-                          {new Date(item.lastAt).toLocaleDateString("pt-BR", {
-                            day: "2-digit",
-                            month: "short",
-                          })}
-                        </span>
-                        {item.unread && <span className="h-2 w-2 rounded-full bg-primary" />}
-                      </div>
-                    </Link>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        </SheetContent>
-      </Sheet>
+      <ConversationDrawer
+        open={drawerOpen}
+        onOpenChange={setDrawerOpen}
+        currentMatchId={matchId}
+        currentType="private"
+      />
 
       <Dialog open={!!warning} onOpenChange={(o) => !o && setWarning(null)}>
         <DialogContent className="sm:max-w-md">
