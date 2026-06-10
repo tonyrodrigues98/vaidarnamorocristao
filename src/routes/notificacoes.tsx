@@ -164,6 +164,7 @@ function NotificacoesPage() {
   return (
     <div className="min-h-screen">
       <Header />
+      <MobileAppHeader title="Notificações" subtitle="Acompanhe o que aconteceu" />
       <main className="mx-auto w-full max-w-2xl px-4 py-8">
         <div className="mb-6 flex items-center justify-between gap-3">
           <div>
