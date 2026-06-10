@@ -9,6 +9,7 @@ import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
 import { DecoratedAvatar } from "@/components/DecoratedAvatar";
 import { ChatSkeleton } from "@/components/ui/AppSkeletons";
+import { AppEmptyState } from "@/components/ui/AppEmptyState";
 import { Button } from "@/components/ui/button";
 import {
   ArrowLeft,
@@ -559,9 +560,14 @@ function Chat() {
           <ChatSkeleton bubbles={8} />
         )}
         {authorized === true && messages.length === 0 && (
-          <p className="mt-12 text-center text-sm text-muted-foreground">
-            Comece a conversa com graça e respeito 💗
-          </p>
+          <div className="mt-10 flex justify-center">
+            <AppEmptyState
+              compact
+              icon={<MessageCircle className="h-5 w-5" />}
+              title="Comece a conversa com propósito"
+              description="Envie uma mensagem respeitosa e verdadeira para iniciar esse diálogo."
+            />
+          </div>
         )}
         {messages.map((m) => {
           const mine = m.sender_id === user?.id;
