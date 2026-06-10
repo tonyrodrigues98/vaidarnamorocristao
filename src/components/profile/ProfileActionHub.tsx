@@ -205,7 +205,7 @@ function ResourceLink({
   Icon: ComponentType<{ className?: string }>;
   title: string;
   desc: string;
-  to: "/conta" | "/admin";
+  to: "/conta" | "/admin" | "/loja";
 }) {
   return (
     <li className="min-w-0">
