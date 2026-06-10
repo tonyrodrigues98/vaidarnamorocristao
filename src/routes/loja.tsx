@@ -830,6 +830,7 @@ function LojaPage() {
           </>
         )}
       </main>
+      </PullToRefresh>
 
       {/* Confirmation modal */}
       <Dialog open={!!confirm} onOpenChange={(o) => !o && setConfirm(null)}>
