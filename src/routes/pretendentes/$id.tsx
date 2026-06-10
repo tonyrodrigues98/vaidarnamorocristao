@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { getActiveCommitmentByUser } from "@/lib/commitments";
 import { Header } from "@/components/layout/Header";
+import { ProfileSkeleton } from "@/components/ui/AppSkeletons";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -347,14 +348,8 @@ function Detail() {
         <Header />
         <main className="mx-auto max-w-[1440px] px-4 py-10 sm:px-6 lg:px-8">
           <div className="mt-6 grid gap-8 md:grid-cols-[2fr_3fr]">
-            <div className="aspect-[4/5] animate-pulse rounded-[2rem] bg-muted shadow-elegant" />
-            <div className="space-y-4">
-              <div className="h-9 w-2/3 animate-pulse rounded-lg bg-muted" />
-              <div className="h-4 w-1/2 animate-pulse rounded-md bg-muted" />
-              <div className="h-4 w-2/5 animate-pulse rounded-md bg-muted" />
-              <div className="h-32 animate-pulse rounded-2xl bg-muted" />
-              <div className="h-24 animate-pulse rounded-2xl bg-muted" />
-            </div>
+            <ProfileSkeleton />
+            <ProfileSkeleton />
           </div>
         </main>
       </div>

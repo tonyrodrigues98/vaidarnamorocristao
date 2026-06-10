@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
 import { DecoratedAvatar } from "@/components/DecoratedAvatar";
+import { ChatSkeleton } from "@/components/ui/AppSkeletons";
 import { Button } from "@/components/ui/button";
 import {
   ArrowLeft,
@@ -554,7 +555,10 @@ function Chat() {
             Início da conversa
           </p>
         )}
-        {messages.length === 0 && (
+        {authorized === null && messages.length === 0 && (
+          <ChatSkeleton bubbles={8} />
+        )}
+        {authorized === true && messages.length === 0 && (
           <p className="mt-12 text-center text-sm text-muted-foreground">
             Comece a conversa com graça e respeito 💗
           </p>

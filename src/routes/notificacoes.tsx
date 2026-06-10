@@ -3,6 +3,7 @@ import { Header } from "@/components/layout/Header";
 import { MobileAppHeader } from "@/components/mobile/MobileAppHeader";
 import { useNotifications, type AppNotification } from "@/lib/notifications";
 import { Button } from "@/components/ui/button";
+import { NotificationSkeleton } from "@/components/ui/AppSkeletons";
 import {
   Bell,
   Check,
@@ -185,7 +186,7 @@ function NotificacoesPage() {
         <EnableNotificationsCard />
 
         {loading ? (
-          <p className="text-sm text-muted-foreground">Carregando…</p>
+          <NotificationSkeleton rows={6} />
         ) : visible.length === 0 ? (
           <div className="glass rounded-2xl p-8 text-center">
             <Bell className="mx-auto mb-3 h-8 w-8 text-muted-foreground" />
