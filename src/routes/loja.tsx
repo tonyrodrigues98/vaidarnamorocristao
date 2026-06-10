@@ -434,11 +434,7 @@ function LojaPage() {
       {/* Content */}
       <main className="mx-auto max-w-5xl px-4 pb-24 pt-6">
         {loading ? (
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-            {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="h-64 animate-pulse rounded-2xl border bg-card/50" />
-            ))}
-          </div>
+          <ShopSkeleton cards={8} />
         ) : activeTab === "soon" ? (
           <ComingSoon />
         ) : activeTab === "name-gradient" ? (
