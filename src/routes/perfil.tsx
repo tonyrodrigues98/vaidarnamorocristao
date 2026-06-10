@@ -72,6 +72,7 @@ import { CustomizacaoTab } from "@/components/CustomizacaoTab";
 import { ReceivedGiftsTab } from "@/components/gifts/ReceivedGiftsTab";
 import { GradientName } from "@/components/GradientName";
 import { fetchNameGradientsByIds, type NameGradient } from "@/lib/nameGradients";
+import { ProfileActionHub, type HubSection } from "@/components/profile/ProfileActionHub";
 
 export const Route = createFileRoute("/perfil")({
   component: PerfilPage,
