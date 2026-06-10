@@ -272,6 +272,9 @@ function Dashboard() {
       </div>
     );
   if (!profile) return <Navigate to="/onboarding" />;
+  // /dashboard is the landing for users still pending/rejected/banned. Approved
+  // users go straight to /inicio to avoid two competing "hubs".
+  if (profile.status === "approved") return <Navigate to="/inicio" replace />;
 
   const statusInfo = {
     pending: {
