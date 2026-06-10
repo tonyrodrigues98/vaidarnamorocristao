@@ -21,6 +21,7 @@ import { BR_STATES } from "@/lib/constants";
 import { Camera } from "lucide-react";
 import { PhotoImg } from "@/components/PhotoImg";
 import { normalizeImageFile } from "@/lib/imageNormalize";
+import { getOnboardingDraft, clearOnboardingDraft } from "@/lib/onboardingDraft";
 
 const schema = z.object({
   full_name: z.string().trim().min(2).max(100),
@@ -79,6 +80,19 @@ function Etapa1() {
             bio: data.bio ?? "",
           });
           if (data.photo_url) setPhotoPreview(data.photo_url);
+        } else {
+          // Hydrate from the post-signup onboarding draft.
+          const draft = getOnboardingDraft();
+          if (draft.full_name || draft.age || draft.sex || draft.photoFile) {
+            setForm((p) => ({
+              ...p,
+              full_name: draft.full_name || p.full_name,
+              age: draft.age ? String(draft.age) : p.age,
+              sex: (draft.sex as typeof p.sex) || p.sex,
+            }));
+            if (draft.photoFile) setPhotoFile(draft.photoFile);
+            if (draft.photoPreview) setPhotoPreview(draft.photoPreview);
+          }
         }
       });
   }, [user]);
@@ -221,6 +235,7 @@ function Etapa1() {
       toast.error(error.message);
       return;
     }
+    clearOnboardingDraft();
     toast.success("Etapa 1 concluída!");
     navigate({ to: "/onboarding/etapa-2" });
   }

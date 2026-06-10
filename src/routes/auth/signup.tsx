@@ -54,7 +54,7 @@ function Signup() {
         .insert({ user_id: uid, version: CURRENT_TERMS_VERSION });
     }
     toast.success("Conta criada! Vamos montar seu perfil.");
-    navigate({ to: "/onboarding/etapa-1" });
+    navigate({ to: "/onboarding" });
   }
 
   return (
