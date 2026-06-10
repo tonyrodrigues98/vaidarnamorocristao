@@ -6,12 +6,10 @@ import {
   MessageSquareText,
   BookOpen,
   HeartHandshake,
-  Camera,
-  Sparkles,
   Settings,
-  Wallet,
-  Gift as GiftIcon,
   BadgeCheck,
+  Trophy,
+  Store,
   ShieldCheck,
   LayoutDashboard,
   ChevronDown,
@@ -41,7 +39,7 @@ export type ProfileActionHubProps = {
   activeTab: string;
   isStaff: boolean;
   onSelect: (id: HubSection) => void;
-  onOpenResource: (id: "saldo" | "presentes" | "role") => void;
+  onOpenResource: (id: "missions" | "role") => void;
 };
 
 export function ProfileActionHub({ activeTab, isStaff, onSelect, onOpenResource }: ProfileActionHubProps) {
@@ -130,7 +128,7 @@ export function ProfileActionHub({ activeTab, isStaff, onSelect, onOpenResource 
               Icon={Trophy}
               title="Minhas conquistas"
               desc="Missões e badges desbloqueados."
-              onClick={() => onOpenResource("saldo" as never)}
+              onClick={() => onOpenResource("missions")}
             />
             {isStaff && (
               <ResourceButton
