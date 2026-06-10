@@ -1222,23 +1222,23 @@ function PerfilPage() {
                       <div className="grid gap-4 sm:grid-cols-2">
                         <div className="space-y-2">
                           <Label>Idade mínima</Label>
-                          <Input
-                            type="number"
+                          <NumericInput
                             min={18}
                             max={110}
+                            maxLength={3}
                             value={prefs.age_min}
-                            onChange={(e) => setPrefs({ ...prefs, age_min: e.target.value })}
+                            onChange={(v) => setPrefs({ ...prefs, age_min: v })}
                             required
                           />
                         </div>
                         <div className="space-y-2">
                           <Label>Idade máxima</Label>
-                          <Input
-                            type="number"
+                          <NumericInput
                             min={18}
                             max={110}
+                            maxLength={3}
                             value={prefs.age_max}
-                            onChange={(e) => setPrefs({ ...prefs, age_max: e.target.value })}
+                            onChange={(v) => setPrefs({ ...prefs, age_max: v })}
                             required
                           />
                         </div>
