@@ -555,7 +555,10 @@ function Chat() {
             Início da conversa
           </p>
         )}
-        {messages.length === 0 && (
+        {authorized === null && messages.length === 0 && (
+          <ChatSkeleton bubbles={8} />
+        )}
+        {authorized === true && messages.length === 0 && (
           <p className="mt-12 text-center text-sm text-muted-foreground">
             Comece a conversa com graça e respeito 💗
           </p>
