@@ -1,10 +1,11 @@
 import { createFileRoute, Navigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Check, ImageIcon, Loader2, Sparkles, X, Lock, Gem } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { ShopSkeleton } from "@/components/ui/AppSkeletons";
 import { AppEmptyState } from "@/components/ui/AppEmptyState";
+import { PullToRefresh } from "@/components/mobile/PullToRefresh";
 import { Gem as GemIcon } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
@@ -110,6 +111,14 @@ function LojaPage() {
   const [activeTab, setActiveTab] = useState<CategoryKey>("frame");
   const [confirm, setConfirm] = useState<Decoration | null>(null);
   const [confirmBackground, setConfirmBackground] = useState<ProfileBackground | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const refreshResolveRef = useRef<(() => void) | null>(null);
+  const handlePullRefresh = useCallback(() => {
+    return new Promise<void>((resolve) => {
+      refreshResolveRef.current = resolve;
+      setRefreshKey((k) => k + 1);
+    });
+  }, []);
 
   useEffect(() => {
     if (!user) return;
@@ -180,11 +189,18 @@ function LojaPage() {
         setOwnedBackgrounds(new Set());
         setEquippedBackground(null);
       }
+      if (alive) {
+        const resolve = refreshResolveRef.current;
+        if (resolve) {
+          refreshResolveRef.current = null;
+          resolve();
+        }
+      }
     })();
     return () => {
       alive = false;
     };
-  }, [user?.id]);
+  }, [user?.id, refreshKey]);
 
   const grouped = useMemo(() => {
     const g: Record<DecorationType, Decoration[]> = { frame: [], aura: [], sticker: [] };
@@ -351,6 +367,7 @@ function LojaPage() {
     <div className="min-h-screen bg-background">
       <Header />
       <MobileAppHeader title="Loja" subtitle="Personalize sua experiência" />
+      <PullToRefresh onRefresh={handlePullRefresh} disabled={!user}>
 
       {/* Hero */}
       <section className="relative overflow-hidden border-b">
@@ -813,6 +830,7 @@ function LojaPage() {
           </>
         )}
       </main>
+      </PullToRefresh>
 
       {/* Confirmation modal */}
       <Dialog open={!!confirm} onOpenChange={(o) => !o && setConfirm(null)}>

@@ -1,6 +1,6 @@
 import { createFileRoute, Link, Navigate, useNavigate } from "@tanstack/react-router";
 import { RequireApproved } from "@/components/RequireApproved";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PretendenteCarousel } from "@/components/pretendentes/PretendenteCarousel";
 import { PretendenteFeaturedCard } from "@/components/pretendentes/PretendenteFeaturedCard";
@@ -39,6 +39,7 @@ import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
 import { markHomeChecklistStep } from "@/lib/homeChecklist";
 import { AppEmptyState } from "@/components/ui/AppEmptyState";
+import { PullToRefresh } from "@/components/mobile/PullToRefresh";
 
 type Profile = {
   id: string;
@@ -108,6 +109,14 @@ function List() {
   const isMobile = useIsMobile();
   const [mobileMode, setMobileMode] = useState<"explore" | "list">("explore");
   const [exploreIndex, setExploreIndex] = useState(0);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const refreshResolveRef = useRef<(() => void) | null>(null);
+  const handlePullRefresh = useCallback(() => {
+    return new Promise<void>((resolve) => {
+      refreshResolveRef.current = resolve;
+      setRefreshKey((k) => k + 1);
+    });
+  }, []);
 
   const [ageMinInput, setAgeMinInput] = useState<string>(
     search.ageMin != null ? String(search.ageMin) : "",
@@ -244,8 +253,13 @@ function List() {
         }
       }
       setLoadingList(false);
+      const resolve = refreshResolveRef.current;
+      if (resolve) {
+        refreshResolveRef.current = null;
+        resolve();
+      }
     })();
-  }, [user, role, rolesLoaded]);
+  }, [user, role, rolesLoaded, refreshKey]);
 
   // Compute affinity per profile (memoized)
   const affinityByProfile = useMemo(() => {
@@ -377,6 +391,7 @@ function List() {
     <div className="min-h-screen bg-gradient-to-b from-rose-50/70 via-background to-background dark:from-rose-950/10 dark:via-background dark:to-background">
       <Header />
       <MobileAppHeader title="Pretendentes" subtitle="Conheça pessoas com propósito" />
+      <PullToRefresh onRefresh={handlePullRefresh} disabled={!user || !rolesLoaded}>
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <section className="relative overflow-hidden rounded-3xl border border-white/70 bg-white/75 p-6 shadow-soft backdrop-blur-xl dark:border-white/10 dark:bg-card/70 sm:p-8 lg:p-10">
           <div className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full bg-rose-300/25 blur-3xl dark:bg-rose-700/20" />
@@ -800,6 +815,7 @@ function List() {
             </>
           ))}
       </main>
+      </PullToRefresh>
     </div>
   );
 }

@@ -13,6 +13,7 @@ import { CommitmentPauseCard } from "@/components/commitment/CommitmentPauseCard
 import { useConversationsList } from "@/hooks/useConversationsList";
 import { ConversationListSkeleton } from "@/components/ui/AppSkeletons";
 import { AppEmptyState } from "@/components/ui/AppEmptyState";
+import { PullToRefresh } from "@/components/mobile/PullToRefresh";
 
 export const Route = createFileRoute("/conversas/")({
   component: () => (
@@ -24,7 +25,7 @@ export const Route = createFileRoute("/conversas/")({
 
 function List() {
   const { user, loading } = useAuth();
-  const { items, commitment: activeCommitment, loading: loadingList } =
+  const { items, commitment: activeCommitment, loading: loadingList, refetch } =
     useConversationsList(user?.id);
   const [query, setQuery] = useState("");
 
@@ -41,6 +42,7 @@ function List() {
     <div className="min-h-screen bg-[oklch(0.99_0.005_60)] dark:bg-background">
       <Header />
       <MobileAppHeader title="Conversas" subtitle="Mensagens e comunidade" />
+      <PullToRefresh onRefresh={refetch} disabled={!user}>
       <main className="mx-auto max-w-3xl px-4 pb-10 pt-4 sm:pt-8">
         <div className="hidden animate-fade-up sm:block">
           <h1 className="text-3xl font-semibold tracking-tight">Conversas</h1>
@@ -156,6 +158,7 @@ function List() {
           )}
         </div>
       </main>
+      </PullToRefresh>
     </div>
   );
 }
