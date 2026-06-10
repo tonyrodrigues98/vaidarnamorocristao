@@ -35,7 +35,6 @@ import {
   Heart,
   Trophy,
   Briefcase,
-  MoreHorizontal,
   Wallet,
   Sparkles,
   MapPin,
@@ -48,13 +47,6 @@ import {
   Settings,
   X,
 } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-} from "@/components/ui/dropdown-menu";
 import { Switch } from "@/components/ui/switch";
 import { ROLE_CONFIG, COLOR_HEX, type RoleColor } from "@/lib/roles";
 import { RoleBadge } from "@/components/RoleBadge";
