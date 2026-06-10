@@ -42,6 +42,7 @@ import {
   Target,
   Users2,
   Gem,
+  UserX,
 } from "lucide-react";
 import { RoleBadge } from "@/components/RoleBadge";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
