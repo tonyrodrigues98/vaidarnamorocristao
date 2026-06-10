@@ -1187,29 +1187,6 @@ function InicioPage() {
             </section>
           )}
 
-          {/* RECURSOS ESPECIAIS — compacto */}
-          {isApproved && (
-            <section>
-              <h2 className="mb-2.5 px-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-                Recursos especiais
-              </h2>
-              <div className="grid gap-2.5 md:grid-cols-2">
-                <NewsCard
-                  to="/conversas"
-                  icon={<Smile className="h-4 w-4" />}
-                  title="Stickers no chat"
-                  description="Deixe suas conversas mais leves e divertidas."
-                />
-                <NewsCard
-                  to="/conversas"
-                  icon={<EyeOff className="h-4 w-4" />}
-                  title="Recado anônimo"
-                  description="Demonstre interesse com mistério e respeito."
-                />
-              </div>
-            </section>
-          )}
-
           {/* VOLTE AMANHÃ */}
           {!isBanned && !isRejected && (
             <p className="pt-2 text-center text-xs text-muted-foreground">{mood.backTomorrow}</p>
