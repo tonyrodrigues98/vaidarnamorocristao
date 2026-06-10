@@ -1087,31 +1087,453 @@ function LojaPage() {
   );
 }
 
-function ComingSoon() {
-  const items = [
-    { name: "Fundos de Perfil", desc: "Cenários exclusivos atrás da sua foto" },
-    { name: "Stickers Especiais", desc: "Adesivos para conversas e perfil" },
-    { name: "Efeitos Premium", desc: "Animações exclusivas e raras" },
-    { name: "Itens Sazonais", desc: "Coleções limitadas por temporada" },
-    { name: "Presentes Virtuais", desc: "Envie um carinho para alguém especial" },
-    { name: "Coleções Exclusivas", desc: "Conjuntos completos com bônus" },
+type HighlightItem =
+  | { kind: "decoration"; item: Decoration }
+  | { kind: "background"; item: ProfileBackground };
+
+function HighlightsView({
+  decorations,
+  backgrounds,
+  owned,
+  ownedBackgrounds,
+  equipped,
+  equippedBackground,
+  onPickCategory,
+}: {
+  decorations: Decoration[];
+  backgrounds: ProfileBackground[];
+  owned: Set<string>;
+  ownedBackgrounds: Set<string>;
+  equipped: EquippedMap;
+  equippedBackground: string | null;
+  onPickCategory: (key: CategoryKey) => void;
+}) {
+  const highlights = useMemo<HighlightItem[]>(() => {
+    const decs = decorations
+      .filter((d) => d.active && !owned.has(d.id))
+      .map<HighlightItem>((d) => ({ kind: "decoration", item: d }));
+    const bgs = backgrounds
+      .filter((b) => b.is_active && !ownedBackgrounds.has(b.id))
+      .map<HighlightItem>((b) => ({ kind: "background", item: b }));
+    const all = [...decs, ...bgs];
+    all.sort((a, b) => {
+      const ra = RARITY_WEIGHT[(a.kind === "decoration" ? a.item.rarity : a.item.rarity) as string] ?? 0;
+      const rb = RARITY_WEIGHT[(b.kind === "decoration" ? b.item.rarity : b.item.rarity) as string] ?? 0;
+      if (rb !== ra) return rb - ra;
+      const pa = a.kind === "decoration" ? a.item.price_coins : a.item.price;
+      const pb = b.kind === "decoration" ? b.item.price_coins : b.item.price;
+      return pb - pa;
+    });
+    return all.slice(0, 8);
+  }, [decorations, backgrounds, owned, ownedBackgrounds]);
+
+  const sections: { key: CategoryKey; label: string; count: number }[] = [
+    { key: "frame", label: "Molduras", count: decorations.filter((d) => d.type === "frame").length },
+    { key: "aura", label: "Auras", count: decorations.filter((d) => d.type === "aura").length },
+    { key: "background", label: "Fundos de Perfil", count: backgrounds.length },
   ];
+
+  if (highlights.length === 0 && decorations.length === 0 && backgrounds.length === 0) {
+    return (
+      <AppEmptyState
+        icon={<GemIcon className="h-5 w-5" />}
+        title="A loja está sendo preparada"
+        description="Novos itens de personalização aparecerão por aqui em breve."
+        className="my-12"
+      />
+    );
+  }
+
   return (
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-      {items.map((i) => (
-        <div key={i.name} className="relative overflow-hidden rounded-2xl border bg-card/50 p-5">
-          <div
-            aria-hidden
-            className="pointer-events-none absolute -right-6 -top-6 h-24 w-24 rounded-full opacity-40 blur-2xl"
-            style={{ background: "color-mix(in oklab, var(--rose) 40%, transparent)" }}
-          />
-          <div className="inline-flex items-center gap-1.5 rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
-            <Lock className="h-3 w-3" /> Em breve
+    <div className="space-y-8">
+      {highlights.length > 0 && (
+        <section>
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="inline-flex items-center gap-2 text-base font-semibold">
+              <Star className="h-4 w-4 text-[var(--rose)]" /> Destaques
+            </h2>
+            <span className="text-xs text-muted-foreground">Itens raros e especiais</span>
           </div>
-          <h3 className="mt-3 text-sm font-semibold">{i.name}</h3>
-          <p className="mt-1 text-xs text-muted-foreground">{i.desc}</p>
+          <div className="-mx-4 flex gap-3 overflow-x-auto px-4 pb-2 md:mx-0 md:grid md:grid-cols-4 md:overflow-visible md:px-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {highlights.map((h) => {
+              const isEquipped =
+                h.kind === "decoration"
+                  ? equipped[h.item.type] === h.item.id
+                  : equippedBackground === h.item.id;
+              return (
+                <button
+                  key={`${h.kind}-${h.item.id}`}
+                  type="button"
+                  onClick={() =>
+                    onPickCategory(h.kind === "background" ? "background" : h.item.type)
+                  }
+                  className="app-card-interactive w-[170px] shrink-0 overflow-hidden rounded-2xl border bg-card text-left md:w-auto"
+                >
+                  <div className="relative aspect-square overflow-hidden bg-gradient-to-br from-muted to-card">
+                    {h.kind === "background" ? (
+                      h.item.image_url ? (
+                        <img
+                          src={h.item.image_url}
+                          alt={h.item.name}
+                          loading="lazy"
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-full items-center justify-center text-muted-foreground">
+                          <ImageIcon className="h-8 w-8" />
+                        </div>
+                      )
+                    ) : (
+                      <div className="flex h-full items-center justify-center">
+                        {h.item.image_url ? (
+                          <img
+                            src={h.item.image_url}
+                            alt={h.item.name}
+                            loading="lazy"
+                            className="h-3/4 w-3/4 object-contain"
+                          />
+                        ) : (
+                          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted text-muted-foreground">
+                            {h.item.type === "frame" ? (
+                              <FrameIcon className="h-6 w-6" />
+                            ) : (
+                              <Sparkle className="h-6 w-6" />
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    <span className="absolute left-2 top-2 rounded-full bg-background/85 px-2 py-0.5 text-[10px] font-semibold capitalize text-foreground backdrop-blur">
+                      {h.item.rarity}
+                    </span>
+                    {isEquipped && (
+                      <span className="absolute right-2 top-2 inline-flex items-center gap-1 rounded-full bg-[var(--rose)] px-2 py-0.5 text-[10px] font-semibold text-white">
+                        <Check className="h-3 w-3" />
+                      </span>
+                    )}
+                  </div>
+                  <div className="p-3">
+                    <p className="line-clamp-1 text-sm font-semibold">{h.item.name}</p>
+                    <div className="mt-1 flex items-center justify-between">
+                      <span className="text-[11px] text-muted-foreground">
+                        {h.kind === "background"
+                          ? "Fundo"
+                          : h.item.type === "frame"
+                            ? "Moldura"
+                            : "Aura"}
+                      </span>
+                      <span className="inline-flex items-center gap-1 text-xs font-medium">
+                        <CoinIcon className="h-3 w-3" />
+                        {h.kind === "background" ? h.item.price : h.item.price_coins}
+                      </span>
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
+      <section>
+        <h2 className="mb-3 text-base font-semibold">Categorias</h2>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {sections
+            .filter((s) => s.count > 0)
+            .map((s) => (
+              <button
+                key={s.key}
+                type="button"
+                onClick={() => onPickCategory(s.key)}
+                className="app-card-interactive flex items-center justify-between rounded-2xl border bg-card p-4 text-left"
+              >
+                <div>
+                  <p className="text-sm font-semibold">{s.label}</p>
+                  <p className="text-xs text-muted-foreground">{s.count} itens disponíveis</p>
+                </div>
+                <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-muted text-foreground">
+                  <Sparkles className="h-4 w-4" />
+                </span>
+              </button>
+            ))}
         </div>
-      ))}
+      </section>
     </div>
+  );
+}
+
+function InventoryView({
+  decorations,
+  backgrounds,
+  nameGradients,
+  owned,
+  ownedBackgrounds,
+  ownedNameGradients,
+  equipped,
+  equippedBackground,
+  equippedNameGradient,
+  busyId,
+  photoUrl,
+  userEmail,
+  onEquipFrame,
+  onEquipAura,
+  onUnequipFrame,
+  onUnequipAura,
+  onEquipBackground,
+  onUnequipBackground,
+  onEquipNameGradient,
+  onUnequipNameGradient,
+  onBrowse,
+}: {
+  decorations: Decoration[];
+  backgrounds: ProfileBackground[];
+  nameGradients: NameGradient[];
+  owned: Set<string>;
+  ownedBackgrounds: Set<string>;
+  ownedNameGradients: Set<string>;
+  equipped: EquippedMap;
+  equippedBackground: string | null;
+  equippedNameGradient: string | null;
+  busyId: string | null;
+  photoUrl: string | null;
+  userEmail: string | null;
+  onEquipFrame: (d: Decoration) => void;
+  onEquipAura: (d: Decoration) => void;
+  onUnequipFrame: () => void;
+  onUnequipAura: () => void;
+  onEquipBackground: (b: ProfileBackground) => void;
+  onUnequipBackground: () => void;
+  onEquipNameGradient: (g: NameGradient) => void;
+  onUnequipNameGradient: () => void;
+  onBrowse: () => void;
+}) {
+  const myFrames = decorations.filter((d) => d.type === "frame" && owned.has(d.id));
+  const myAuras = decorations.filter((d) => d.type === "aura" && owned.has(d.id));
+  const myBackgrounds = backgrounds.filter((b) => ownedBackgrounds.has(b.id));
+  const myGradients = nameGradients.filter((g) => ownedNameGradients.has(g.id));
+
+  const isEmpty =
+    myFrames.length === 0 &&
+    myAuras.length === 0 &&
+    myBackgrounds.length === 0 &&
+    myGradients.length === 0;
+
+  if (isEmpty) {
+    return (
+      <AppEmptyState
+        icon={<Package className="h-5 w-5" />}
+        title="Seu inventário ainda está vazio"
+        description="Compre molduras, auras, fundos ou gradientes para personalizar sua experiência."
+        action={{ label: "Ver destaques", onClick: onBrowse }}
+        className="my-12"
+      />
+    );
+  }
+
+  const initials = userEmail?.[0]?.toUpperCase() ?? "?";
+
+  return (
+    <div className="space-y-8">
+      {myFrames.length > 0 && (
+        <InventorySection title="Molduras" icon={<FrameIcon className="h-4 w-4" />}>
+          {myFrames.map((d) => {
+            const isEq = equipped.frame === d.id;
+            const busy = busyId === d.id || (isEq && busyId === "unequip-frame");
+            return (
+              <InventoryCard
+                key={d.id}
+                name={d.name}
+                rarity={d.rarity}
+                preview={
+                  <DecoratedAvatar
+                    photoUrl={photoUrl}
+                    fallback={initials}
+                    size={56}
+                    frameId={d.id}
+                    auraId={equipped.aura}
+                  />
+                }
+                equipped={isEq}
+                busy={busy}
+                onEquip={() => onEquipFrame(d)}
+                onUnequip={onUnequipFrame}
+              />
+            );
+          })}
+        </InventorySection>
+      )}
+
+      {myAuras.length > 0 && (
+        <InventorySection title="Auras" icon={<Sparkle className="h-4 w-4" />}>
+          {myAuras.map((d) => {
+            const isEq = equipped.aura === d.id;
+            const busy = busyId === d.id || (isEq && busyId === "unequip-aura");
+            return (
+              <InventoryCard
+                key={d.id}
+                name={d.name}
+                rarity={d.rarity}
+                preview={
+                  <DecoratedAvatar
+                    photoUrl={photoUrl}
+                    fallback={initials}
+                    size={56}
+                    frameId={equipped.frame}
+                    auraId={d.id}
+                  />
+                }
+                equipped={isEq}
+                busy={busy}
+                onEquip={() => onEquipAura(d)}
+                onUnequip={onUnequipAura}
+              />
+            );
+          })}
+        </InventorySection>
+      )}
+
+      {myBackgrounds.length > 0 && (
+        <InventorySection title="Fundos" icon={<ImageLucide className="h-4 w-4" />}>
+          {myBackgrounds.map((b) => {
+            const isEq = equippedBackground === b.id;
+            const busy = busyId === b.id || (isEq && busyId === "unequip-background");
+            return (
+              <InventoryCard
+                key={b.id}
+                name={b.name}
+                rarity={b.rarity}
+                preview={
+                  b.image_url ? (
+                    <img
+                      src={b.image_url}
+                      alt={b.name}
+                      loading="lazy"
+                      className="h-full w-full rounded-xl object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center rounded-xl bg-muted text-muted-foreground">
+                      <ImageIcon className="h-6 w-6" />
+                    </div>
+                  )
+                }
+                previewFill
+                equipped={isEq}
+                busy={busy}
+                onEquip={() => onEquipBackground(b)}
+                onUnequip={onUnequipBackground}
+              />
+            );
+          })}
+        </InventorySection>
+      )}
+
+      {myGradients.length > 0 && (
+        <InventorySection title="Gradientes" icon={<TypeIcon className="h-4 w-4" />}>
+          {myGradients.map((g) => {
+            const isEq = equippedNameGradient === g.id;
+            const busy = busyId === g.id || (isEq && busyId === "unequip-name-gradient");
+            return (
+              <InventoryCard
+                key={g.id}
+                name={g.name}
+                preview={
+                  <span
+                    className="text-xl font-black"
+                    style={nameGradientStyle(g)}
+                  >
+                    {g.name.slice(0, 6) || "Nome"}
+                  </span>
+                }
+                equipped={isEq}
+                busy={busy}
+                onEquip={() => onEquipNameGradient(g)}
+                onUnequip={onUnequipNameGradient}
+              />
+            );
+          })}
+        </InventorySection>
+      )}
+    </div>
+  );
+}
+
+function InventorySection({
+  title,
+  icon,
+  children,
+}: {
+  title: string;
+  icon: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <section>
+      <h2 className="mb-3 inline-flex items-center gap-2 text-base font-semibold">
+        {icon}
+        {title}
+      </h2>
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">{children}</div>
+    </section>
+  );
+}
+
+function InventoryCard({
+  name,
+  rarity,
+  preview,
+  previewFill,
+  equipped,
+  busy,
+  onEquip,
+  onUnequip,
+}: {
+  name: string;
+  rarity?: string;
+  preview: React.ReactNode;
+  previewFill?: boolean;
+  equipped: boolean;
+  busy: boolean;
+  onEquip: () => void;
+  onUnequip: () => void;
+}) {
+  return (
+    <article
+      className={`flex flex-col overflow-hidden rounded-2xl border bg-card p-3 transition ${
+        equipped ? "border-[var(--rose)] ring-1 ring-[var(--rose)]/30" : ""
+      }`}
+    >
+      <div
+        className={`relative flex items-center justify-center ${
+          previewFill ? "aspect-[4/3] overflow-hidden rounded-xl bg-muted" : "h-24"
+        }`}
+      >
+        {preview}
+        {rarity && (
+          <span className="absolute left-1.5 top-1.5 rounded-full bg-background/85 px-1.5 py-0.5 text-[9px] font-semibold capitalize text-foreground backdrop-blur">
+            {rarity}
+          </span>
+        )}
+      </div>
+      <h3 className="mt-3 line-clamp-1 text-center text-sm font-semibold" title={name}>
+        {name}
+      </h3>
+      <div className="mt-2">
+        {equipped ? (
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full text-xs"
+            disabled={busy}
+            onClick={onUnequip}
+          >
+            {busy ? <Loader2 className="h-3 w-3 animate-spin" /> : "Equipado"}
+          </Button>
+        ) : (
+          <Button size="sm" className="w-full text-xs" disabled={busy} onClick={onEquip}>
+            {busy ? <Loader2 className="h-3 w-3 animate-spin" /> : "Equipar"}
+          </Button>
+        )}
+      </div>
+    </article>
   );
 }
