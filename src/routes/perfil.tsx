@@ -22,6 +22,7 @@ import {
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { BioPromptChips } from "@/components/profile/BioPromptChips";
+import { HomeStarterSection } from "@/components/home/HomeStarterSection";
 import { BR_STATES } from "@/lib/constants";
 import {
   Camera,
