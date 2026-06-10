@@ -116,7 +116,7 @@ function List() {
                 key={i.matchId}
                 to="/conversas/$matchId"
                 params={{ matchId: i.matchId }}
-                className="flex items-center gap-4 rounded-2xl border border-border/40 bg-card/80 p-3.5 shadow-sm transition hover:bg-card hover:shadow-md active:scale-[0.997]"
+                className="app-card-interactive flex items-center gap-4 rounded-2xl border border-border/40 bg-card/80 p-3.5 shadow-sm transition hover:bg-card hover:shadow-md"
               >
                 <div className="relative flex shrink-0 items-center justify-center">
                   <DecoratedAvatar
