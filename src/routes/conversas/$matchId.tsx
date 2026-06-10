@@ -409,21 +409,79 @@ function Chat() {
       setWarning(hit);
       return;
     }
-    setSending(true);
-    const { error } = await supabase.from("messages").insert({
-      match_id: matchId,
+    const replyId = replyTo?.id ?? null;
+    const tempId = `temp-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    const optimistic: LocalMsg = {
+      id: tempId,
+      _tempId: tempId,
+      _status: "sending",
       sender_id: user.id,
       content,
-      reply_to_id: replyTo?.id ?? null,
-    });
-    setSending(false);
-    if (error) {
-      toast.error(friendlyError(error));
-      return;
-    }
+      created_at: new Date().toISOString(),
+      read_at: null,
+      reply_to_id: replyId,
+    };
+    setMessages((prev) => [...prev, optimistic]);
     setInput("");
     setReplyTo(null);
     if (inputRef.current) inputRef.current.style.height = "auto";
+    nearBottomRef.current = true;
+    setSending(true);
+    const { data, error } = await supabase
+      .from("messages")
+      .insert({
+        match_id: matchId,
+        sender_id: user.id,
+        content,
+        reply_to_id: replyId,
+      })
+      .select()
+      .single();
+    setSending(false);
+    if (error || !data) {
+      setMessages((prev) =>
+        prev.map((m) => (m.id === tempId ? { ...m, _status: "failed" } : m)),
+      );
+      toast.error(friendlyError(error ?? new Error("Falha ao enviar")));
+      return;
+    }
+    const real = data as Msg;
+    setMessages((prev) => {
+      const hasReal = prev.some((m) => m.id === real.id);
+      if (hasReal) return prev.filter((m) => m.id !== tempId);
+      return prev.map((m) => (m.id === tempId ? { ...real, _status: "sent" } : m));
+    });
+  }
+
+  async function retrySend(tempId: string) {
+    const msg = messages.find((m) => m.id === tempId);
+    if (!msg || !user) return;
+    setMessages((prev) =>
+      prev.map((m) => (m.id === tempId ? { ...m, _status: "sending" } : m)),
+    );
+    const { data, error } = await supabase
+      .from("messages")
+      .insert({
+        match_id: matchId,
+        sender_id: user.id,
+        content: msg.content,
+        reply_to_id: msg.reply_to_id ?? null,
+      })
+      .select()
+      .single();
+    if (error || !data) {
+      setMessages((prev) =>
+        prev.map((m) => (m.id === tempId ? { ...m, _status: "failed" } : m)),
+      );
+      toast.error(friendlyError(error ?? new Error("Falha ao reenviar")));
+      return;
+    }
+    const real = data as Msg;
+    setMessages((prev) => {
+      const hasReal = prev.some((m) => m.id === real.id);
+      if (hasReal) return prev.filter((m) => m.id !== tempId);
+      return prev.map((m) => (m.id === tempId ? { ...real, _status: "sent" } : m));
+    });
   }
 
   async function handleDelete(messageId: string) {
