@@ -22,6 +22,7 @@ import {
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { BioPromptChips } from "@/components/profile/BioPromptChips";
+import { HomeStarterSection } from "@/components/home/HomeStarterSection";
 import { BR_STATES } from "@/lib/constants";
 import {
   Camera,
@@ -792,6 +793,7 @@ function PerfilPage() {
             </div>
           </div>
         </section>
+        {user && <HomeStarterSection userId={user.id} />}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-8">
           <div className="grid gap-6 lg:grid-cols-[292px_minmax(0,1fr)]">
             <aside className="hidden lg:block">

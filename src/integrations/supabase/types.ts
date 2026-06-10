@@ -2424,18 +2424,21 @@ export type Database = {
         Row: {
           decoration_id: string
           id: string
+          is_free_claim: boolean
           purchased_at: string
           user_id: string
         }
         Insert: {
           decoration_id: string
           id?: string
+          is_free_claim?: boolean
           purchased_at?: string
           user_id: string
         }
         Update: {
           decoration_id?: string
           id?: string
+          is_free_claim?: boolean
           purchased_at?: string
           user_id?: string
         }
@@ -2814,6 +2817,7 @@ export type Database = {
           balance: number
         }[]
       }
+      claim_free_frame: { Args: { _decoration_id: string }; Returns: Json }
       cleanup_photo_moderation_rejects: { Args: never; Returns: number }
       count_advanced_sections: { Args: { _user_id: string }; Returns: number }
       create_notification: {

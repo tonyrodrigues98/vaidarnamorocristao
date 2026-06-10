@@ -652,10 +652,11 @@ function List() {
                 description={
                   hasFilters
                     ? "Tente ampliar sua busca para encontrar mais pessoas compatíveis."
-                    : "Ajuste os filtros ou volte mais tarde para conhecer novas pessoas com propósito."
+                    : "Volte amanhã: novos perfis podem aparecer conforme a comunidade cresce. Você também pode completar seu perfil para aparecer melhor."
                 }
-                actionLabel={hasFilters ? "Limpar filtros" : undefined}
+                actionLabel={hasFilters ? "Limpar filtros" : "Completar perfil"}
                 onAction={hasFilters ? clearAll : undefined}
+                actionTo={hasFilters ? undefined : "/perfil"}
               />
               )}
             </div>
