@@ -1230,30 +1230,3 @@ function ActivityChip({
   );
 }
 
-function NewsCard({
-  to,
-  icon,
-  title,
-  description,
-}: {
-  to: any;
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-}) {
-  return (
-    <Link
-      to={to}
-      className="app-card-interactive flex items-start gap-3 rounded-2xl border border-border/60 bg-card p-3.5 shadow-soft"
-    >
-      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[var(--petal)] text-[var(--rose)]">
-        {icon}
-      </span>
-      <div className="min-w-0 flex-1">
-        <p className="text-sm font-semibold leading-tight">{title}</p>
-        <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">{description}</p>
-      </div>
-      <ChevronRight className="mt-1 h-4 w-4 shrink-0 text-muted-foreground" />
-    </Link>
-  );
-}
