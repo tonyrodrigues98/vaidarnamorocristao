@@ -249,7 +249,6 @@ function ContaPage() {
               icon={Moon}
               title="Tema do app"
               description={theme === "dark" ? "Modo escuro ativado" : "Modo claro ativado"}
-              onClick={toggleTheme}
               showChevron={false}
               rightContent={
                 <Switch
