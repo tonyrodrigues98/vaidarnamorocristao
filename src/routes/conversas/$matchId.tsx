@@ -741,7 +741,28 @@ function Chat() {
                           })}
                           {m.edited_at ? " · editado" : ""}
                         </span>
-                        {mine &&
+                        {mine && m._status === "sending" && (
+                          <span
+                            className="ml-0.5 inline-flex items-center gap-0.5"
+                            title="Enviando..."
+                          >
+                            <Clock className="h-3 w-3" />
+                          </span>
+                        )}
+                        {mine && m._status === "failed" && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              retrySend(m.id);
+                            }}
+                            className="ml-0.5 inline-flex items-center gap-0.5 text-destructive hover:underline"
+                            title="Falha ao enviar — tocar para tentar novamente"
+                          >
+                            <AlertCircle className="h-3 w-3" /> tentar
+                          </button>
+                        )}
+                        {mine && !m._status &&
                           (m.read_at ? (
                             <span
                               className="ml-0.5 inline-flex items-center gap-0.5"
