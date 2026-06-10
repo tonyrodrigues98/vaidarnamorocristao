@@ -991,6 +991,18 @@ function Comunidade() {
             )}
       </main>
 
+      {showNewBadge && (
+        <div className="pointer-events-none flex justify-center">
+          <button
+            type="button"
+            onClick={scrollToBottom}
+            className="pointer-events-auto -mt-2 mb-2 inline-flex items-center gap-1.5 rounded-full bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground shadow-lg"
+          >
+            <ArrowDown className="h-3.5 w-3.5" /> Nova mensagem
+          </button>
+        </div>
+      )}
+
       <ChatComposer
             approved={!!approved}
             userId={user?.id ?? null}
