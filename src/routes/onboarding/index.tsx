@@ -632,44 +632,137 @@ function Wheel({
   format?: (v: number) => string; ariaLabel: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
-  const ITEM_H = 40; const VISIBLE = 5; const PAD = ITEM_H * Math.floor(VISIBLE / 2);
-  const timer = useRef<number | null>(null);
+  const ITEM_H = 40;
+  const VISIBLE = 5;
+  const PAD = ITEM_H * Math.floor(VISIBLE / 2);
+  const [activeIdx, setActiveIdx] = useState(() => Math.max(0, items.indexOf(value)));
+  const valueRef = useRef(value);
+  valueRef.current = value;
+  const itemsRef = useRef(items);
+  itemsRef.current = items;
+  const rafRef = useRef(0);
+  const idleRef = useRef<number | null>(null);
+  const lastHapticIdx = useRef(activeIdx);
+
+  // Keep the wheel aligned with the external value when items change
+  // (e.g. day count changes when month/year switch) or value updates.
   useEffect(() => {
-    const el = ref.current; if (!el) return;
+    const el = ref.current;
+    if (!el) return;
     const idx = Math.max(0, items.indexOf(value));
     el.scrollTop = idx * ITEM_H;
+    setActiveIdx(idx);
+    lastHapticIdx.current = idx;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [items]);
-  function handleScroll() {
-    if (timer.current) window.clearTimeout(timer.current);
-    timer.current = window.setTimeout(() => {
-      const el = ref.current; if (!el) return;
-      const idx = Math.round(el.scrollTop / ITEM_H);
-      const clamped = Math.max(0, Math.min(items.length - 1, idx));
-      const target = clamped * ITEM_H;
-      if (Math.abs(el.scrollTop - target) > 1) el.scrollTo({ top: target, behavior: "smooth" });
-      const v = items[clamped];
-      if (v !== value) onChange(v);
-    }, 90);
+  }, [items.length]);
+
+  function vibrate() {
+    if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+      try { navigator.vibrate(8); } catch { /* noop */ }
+    }
   }
+
+  function handleScroll() {
+    const el = ref.current;
+    if (!el) return;
+    if (rafRef.current) return;
+    rafRef.current = requestAnimationFrame(() => {
+      rafRef.current = 0;
+      const el2 = ref.current;
+      if (!el2) return;
+      const raw = el2.scrollTop / ITEM_H;
+      const idx = Math.max(0, Math.min(itemsRef.current.length - 1, Math.round(raw)));
+      if (idx !== lastHapticIdx.current) {
+        lastHapticIdx.current = idx;
+        vibrate();
+      }
+      setActiveIdx(idx);
+    });
+    // Snap after momentum settles
+    if (idleRef.current) window.clearTimeout(idleRef.current);
+    idleRef.current = window.setTimeout(() => {
+      const el3 = ref.current;
+      if (!el3) return;
+      const idx = Math.max(0, Math.min(itemsRef.current.length - 1, Math.round(el3.scrollTop / ITEM_H)));
+      const target = idx * ITEM_H;
+      if (Math.abs(el3.scrollTop - target) > 0.5) {
+        el3.scrollTo({ top: target, behavior: "smooth" });
+      }
+      const v = itemsRef.current[idx];
+      if (v !== valueRef.current) onChange(v);
+    }, 110);
+  }
+
   return (
-    <div className="relative" style={{ height: ITEM_H * VISIBLE }} aria-label={ariaLabel}>
-      <div className="pointer-events-none absolute inset-x-1 top-1/2 -translate-y-1/2 rounded-xl border-y border-[var(--rose-soft)]/50 bg-[var(--rose)]/5"
-        style={{ height: ITEM_H }} />
-      <div ref={ref} onScroll={handleScroll}
-        className="h-full overflow-y-scroll scroll-smooth snap-y snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+    <div
+      className="relative select-none"
+      style={{ height: ITEM_H * VISIBLE }}
+      aria-label={ariaLabel}
+    >
+      {/* Center highlight bar */}
+      <div
+        className="pointer-events-none absolute inset-x-1 top-1/2 z-10 -translate-y-1/2 rounded-xl bg-[var(--rose)]/8 ring-1 ring-inset ring-[var(--rose-soft)]/40"
+        style={{ height: ITEM_H }}
+      />
+      {/* Top & bottom fade for depth (iOS feel) */}
+      <div
+        className="pointer-events-none absolute inset-x-0 top-0 z-20"
+        style={{
+          height: PAD,
+          background:
+            "linear-gradient(to bottom, var(--card) 0%, color-mix(in oklab, var(--card) 80%, transparent) 45%, transparent 100%)",
+        }}
+      />
+      <div
+        className="pointer-events-none absolute inset-x-0 bottom-0 z-20"
+        style={{
+          height: PAD,
+          background:
+            "linear-gradient(to top, var(--card) 0%, color-mix(in oklab, var(--card) 80%, transparent) 45%, transparent 100%)",
+        }}
+      />
+      <div
+        ref={ref}
+        onScroll={handleScroll}
+        className="h-full overflow-y-scroll overscroll-contain snap-y snap-mandatory [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden"
+        style={{
+          perspective: "1000px",
+          WebkitMaskImage:
+            "linear-gradient(to bottom, transparent 0%, #000 25%, #000 75%, transparent 100%)",
+          maskImage:
+            "linear-gradient(to bottom, transparent 0%, #000 25%, #000 75%, transparent 100%)",
+        }}
+      >
         <div style={{ height: PAD }} />
-        {items.map((it) => {
+        {items.map((it, i) => {
+          const dist = i - activeIdx;
+          const abs = Math.abs(dist);
+          const rot = Math.max(-60, Math.min(60, dist * 18));
+          const opacity = abs === 0 ? 1 : abs === 1 ? 0.65 : abs === 2 ? 0.32 : 0.18;
+          const scale = abs === 0 ? 1 : 0.92;
           const active = it === value;
           return (
-            <button type="button" key={it}
+            <button
+              type="button"
+              key={it}
               onClick={() => {
-                const el = ref.current; if (!el) return;
-                el.scrollTo({ top: items.indexOf(it) * ITEM_H, behavior: "smooth" });
+                const el = ref.current;
+                if (!el) return;
+                el.scrollTo({ top: i * ITEM_H, behavior: "smooth" });
               }}
-              className={cn("flex w-full snap-center items-center justify-center text-base transition",
-                active ? "font-semibold text-foreground" : "text-muted-foreground/70")}
-              style={{ height: ITEM_H }}>
+              className={cn(
+                "flex w-full snap-center items-center justify-center text-base tabular-nums transition-[color,font-weight] duration-150",
+                active ? "font-semibold text-foreground" : "text-foreground",
+              )}
+              style={{
+                height: ITEM_H,
+                opacity,
+                transform: `rotateX(${rot}deg) scale(${scale})`,
+                transformOrigin: "center center",
+                transformStyle: "preserve-3d",
+                willChange: "transform, opacity",
+              }}
+            >
               {format ? format(it) : it}
             </button>
           );
