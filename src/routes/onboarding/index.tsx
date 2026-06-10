@@ -30,11 +30,22 @@ import {
   setOnboardingDraft,
   clearOnboardingDraft,
 } from "@/lib/onboardingDraft";
+import {
+  FAITH_MOMENT,
+  CHURCH_FREQUENCY,
+  SPIRITUAL_ROUTINE,
+  WORSHIP_STYLE,
+  SEEKING,
+  PACE,
+} from "@/lib/profileAdvanced";
 
 export const Route = createFileRoute("/onboarding/")({ component: OnboardingFlow });
 
-type Step = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8; // 8 = welcome
-const TOTAL_STEPS = 7;
+// 1-7 required, 8-12 optional, 13 = welcome
+type Step = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13;
+const REQUIRED_STEPS = 7;
+const TOTAL_STEPS = 12;
+const WELCOME_STEP: Step = 13;
 
 const UF_NAMES: Record<string, string> = {
   AC: "Acre", AL: "Alagoas", AP: "Amapá", AM: "Amazonas", BA: "Bahia",
@@ -79,31 +90,86 @@ function OnboardingFlow() {
   const [saving, setSaving] = useState(false);
   const [welcomeName, setWelcomeName] = useState<string>("");
 
+  // --- Complementary (optional) state ---
+  const [bio, setBio] = useState("");
+  const [church, setChurch] = useState("");
+  const [yearsBaptized, setYearsBaptized] = useState<string>("");
+  const [faithMoment, setFaithMoment] = useState<string>("");
+  const [churchFrequency, setChurchFrequency] = useState<string>("");
+  const [spiritualRoutine, setSpiritualRoutine] = useState<string[]>([]);
+  const [worshipStyle, setWorshipStyle] = useState<string>("");
+  const [seekingVal, setSeekingVal] = useState<string>("");
+  const [pace, setPace] = useState<string>("");
+  const [essentialQuality, setEssentialQuality] = useState<string>("");
+  const [prefAgeMin, setPrefAgeMin] = useState<string>("");
+  const [prefAgeMax, setPrefAgeMax] = useState<string>("");
+  const [acceptsChildren, setAcceptsChildren] = useState<"" | "sim" | "nao">("");
+  const [existingPrefScope, setExistingPrefScope] =
+    useState<"regiao" | "brasil" | "mundo" | "personalizado">("brasil");
+  const [existingPrefCustomStates, setExistingPrefCustomStates] = useState<string[]>([]);
+
   // Detect existing complete profile -> skip to welcome.
   useEffect(() => {
     if (!user) return;
-    supabase
-      .from("profiles")
-      .select("full_name, age, sex, photo_url, city, state, height_cm, marital")
-      .eq("id", user.id)
-      .maybeSingle()
-      .then(({ data }) => {
-        if (data && data.full_name && data.age && data.sex && data.photo_url &&
-            data.city && data.state && data.height_cm && data.marital) {
-          setWelcomeName(data.full_name);
-          setStep(8);
-        } else if (data) {
-          // Pre-fill from saved profile so user can resume.
-          if (data.full_name) setName(data.full_name);
-          if (data.sex) setSex(data.sex as "masculino" | "feminino");
-          if (data.city) setCity(data.city);
-          if (data.state) setStateUF(data.state);
-          if (data.height_cm) setHeightCm(String(data.height_cm));
-          if (data.marital) setMarital(data.marital as "solteiro" | "divorciado");
-          if (data.photo_url) setPhotoPreview(data.photo_url);
+    (async () => {
+      const [{ data: p }, { data: adv }, { data: pr }] = await Promise.all([
+        supabase
+          .from("profiles")
+          .select(
+            "full_name, age, sex, photo_url, city, state, height_cm, marital, bio, church, years_baptized",
+          )
+          .eq("id", user.id)
+          .maybeSingle(),
+        supabase
+          .from("profile_advanced")
+          .select(
+            "faith_moment, church_frequency, spiritual_routine, worship_style, seeking, pace, essential_quality",
+          )
+          .eq("user_id", user.id)
+          .maybeSingle(),
+        supabase
+          .from("profile_preferences")
+          .select("age_min, age_max, accepts_children, location_scope, custom_states")
+          .eq("user_id", user.id)
+          .maybeSingle(),
+      ]);
+      if (p) {
+        const requiredOk =
+          p.full_name && p.age && p.sex && p.photo_url &&
+          p.city && p.state && p.height_cm && p.marital;
+        if (p.full_name) setName(p.full_name);
+        if (p.sex) setSex(p.sex as "masculino" | "feminino");
+        if (p.city) setCity(p.city);
+        if (p.state) setStateUF(p.state);
+        if (p.height_cm) setHeightCm(String(p.height_cm));
+        if (p.marital) setMarital(p.marital as "solteiro" | "divorciado");
+        if (p.photo_url) setPhotoPreview(p.photo_url);
+        if (p.bio) setBio(p.bio);
+        if (p.church && p.church !== "Não informado") setChurch(p.church);
+        if (p.years_baptized) setYearsBaptized(String(p.years_baptized));
+        if (requiredOk) {
+          setWelcomeName(p.full_name);
+          setStep(WELCOME_STEP);
         }
-        setHydrated(true);
-      });
+      }
+      if (adv) {
+        if (adv.faith_moment) setFaithMoment(adv.faith_moment);
+        if (adv.church_frequency) setChurchFrequency(adv.church_frequency);
+        if (Array.isArray(adv.spiritual_routine)) setSpiritualRoutine(adv.spiritual_routine);
+        if (adv.worship_style) setWorshipStyle(adv.worship_style);
+        if (adv.seeking) setSeekingVal(adv.seeking);
+        if (adv.pace) setPace(adv.pace);
+        if (adv.essential_quality) setEssentialQuality(adv.essential_quality);
+      }
+      if (pr) {
+        setPrefAgeMin(String(pr.age_min));
+        setPrefAgeMax(String(pr.age_max));
+        setAcceptsChildren(pr.accepts_children ? "sim" : "nao");
+        setExistingPrefScope(pr.location_scope);
+        setExistingPrefCustomStates(pr.custom_states ?? []);
+      }
+      setHydrated(true);
+    })();
   }, [user]);
 
   const ageFromBirth = useMemo(() => computeAge(birth.y, birth.m, birth.d), [birth]);
@@ -219,6 +285,107 @@ function OnboardingFlow() {
     if (step > 1 && step <= TOTAL_STEPS) setStep((step - 1) as Step);
   }
 
+  // --- Optional step savers ---
+  async function saveBio(): Promise<boolean> {
+    if (!user) return false;
+    const trimmed = bio.trim();
+    if (trimmed.length === 0) return true;
+    const { error } = await supabase.from("profiles").update({ bio: trimmed }).eq("id", user.id);
+    if (error) { toast.error(error.message); return false; }
+    return true;
+  }
+
+  async function saveFaith(): Promise<boolean> {
+    if (!user) return false;
+    const profilePatch: { church?: string; years_baptized?: number } = {};
+    if (church.trim()) profilePatch.church = church.trim();
+    const yb = Number(yearsBaptized);
+    if (yearsBaptized && !Number.isNaN(yb) && yb >= 0 && yb <= 80) {
+      profilePatch.years_baptized = yb;
+    }
+    if (Object.keys(profilePatch).length > 0) {
+      const { error } = await supabase.from("profiles").update(profilePatch).eq("id", user.id);
+      if (error) { toast.error(error.message); return false; }
+    }
+    const advPatch: Record<string, unknown> = {};
+    if (faithMoment) advPatch.faith_moment = faithMoment;
+    if (churchFrequency) advPatch.church_frequency = churchFrequency;
+    if (Object.keys(advPatch).length > 0) {
+      const { error } = await supabase
+        .from("profile_advanced")
+        .upsert({ user_id: user.id, ...advPatch });
+      if (error) { toast.error(error.message); return false; }
+    }
+    return true;
+  }
+
+  async function saveRoutine(): Promise<boolean> {
+    if (!user) return false;
+    const advPatch: Record<string, unknown> = {};
+    if (spiritualRoutine.length > 0) advPatch.spiritual_routine = spiritualRoutine;
+    if (worshipStyle) advPatch.worship_style = worshipStyle;
+    if (Object.keys(advPatch).length === 0) return true;
+    const { error } = await supabase
+      .from("profile_advanced")
+      .upsert({ user_id: user.id, ...advPatch });
+    if (error) { toast.error(error.message); return false; }
+    return true;
+  }
+
+  async function saveSeeking(): Promise<boolean> {
+    if (!user) return false;
+    const advPatch: Record<string, unknown> = {};
+    if (seekingVal) advPatch.seeking = seekingVal;
+    if (pace) advPatch.pace = pace;
+    if (essentialQuality.trim()) advPatch.essential_quality = essentialQuality.trim();
+    if (Object.keys(advPatch).length === 0) return true;
+    const { error } = await supabase
+      .from("profile_advanced")
+      .upsert({ user_id: user.id, ...advPatch });
+    if (error) { toast.error(error.message); return false; }
+    return true;
+  }
+
+  async function savePrefs(): Promise<boolean> {
+    if (!user) return false;
+    const min = Number(prefAgeMin);
+    const max = Number(prefAgeMax);
+    const hasAge = prefAgeMin && prefAgeMax;
+    if (hasAge) {
+      if (min < 18) { toast.error("Idade mínima deve ser ao menos 18."); return false; }
+      if (max > 110) { toast.error("Idade máxima deve ser no máximo 110."); return false; }
+      if (max < min) { toast.error("Idade máxima deve ser maior que a mínima."); return false; }
+    }
+    if (!hasAge && !acceptsChildren) return true;
+    const payload = {
+      user_id: user.id,
+      age_min: hasAge ? min : 25,
+      age_max: hasAge ? max : 45,
+      accepts_children: acceptsChildren ? acceptsChildren === "sim" : true,
+      location_scope: existingPrefScope,
+      custom_states: existingPrefCustomStates,
+    };
+    const { error } = await supabase.from("profile_preferences").upsert(payload);
+    if (error) { toast.error(error.message); return false; }
+    return true;
+  }
+
+  async function handleOptional(saver: () => Promise<boolean>, nextStep: Step) {
+    if (saving) return;
+    setSaving(true);
+    try {
+      const ok = await saver();
+      if (ok) setStep(nextStep);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  function skipTo(nextStep: Step) {
+    if (saving) return;
+    setStep(nextStep);
+  }
+
   return (
     <div
       className="relative flex min-h-[100dvh] flex-col overflow-x-hidden bg-background text-foreground"
@@ -238,7 +405,7 @@ function OnboardingFlow() {
           <div className="flex-1 px-3">
             <ProgressBar value={(step / TOTAL_STEPS) * 100} />
             <p className="mt-1 text-center text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-              Etapa {step} de {TOTAL_STEPS}
+              {step <= REQUIRED_STEPS ? "Perfil básico" : "Complete se quiser"} · Etapa {step} de {TOTAL_STEPS}
             </p>
           </div>
           <div className="h-10 w-10" aria-hidden />
@@ -279,7 +446,68 @@ function OnboardingFlow() {
         {hydrated && step === 7 && (
           <StepMarital value={marital} onChange={setMarital} />
         )}
-        {step === 8 && (
+        {hydrated && step === 8 && (
+          <StepBio
+            value={bio}
+            onChange={setBio}
+            saving={saving}
+            onSkip={() => skipTo(9)}
+            onSave={() => handleOptional(saveBio, 9)}
+          />
+        )}
+        {hydrated && step === 9 && (
+          <StepFaith
+            church={church}
+            onChurch={setChurch}
+            years={yearsBaptized}
+            onYears={setYearsBaptized}
+            faithMoment={faithMoment}
+            onFaithMoment={setFaithMoment}
+            churchFrequency={churchFrequency}
+            onChurchFrequency={setChurchFrequency}
+            saving={saving}
+            onSkip={() => skipTo(10)}
+            onSave={() => handleOptional(saveFaith, 10)}
+          />
+        )}
+        {hydrated && step === 10 && (
+          <StepRoutine
+            routine={spiritualRoutine}
+            onRoutine={setSpiritualRoutine}
+            worship={worshipStyle}
+            onWorship={setWorshipStyle}
+            saving={saving}
+            onSkip={() => skipTo(11)}
+            onSave={() => handleOptional(saveRoutine, 11)}
+          />
+        )}
+        {hydrated && step === 11 && (
+          <StepSeeking
+            seeking={seekingVal}
+            onSeeking={setSeekingVal}
+            pace={pace}
+            onPace={setPace}
+            quality={essentialQuality}
+            onQuality={setEssentialQuality}
+            saving={saving}
+            onSkip={() => skipTo(12)}
+            onSave={() => handleOptional(saveSeeking, 12)}
+          />
+        )}
+        {hydrated && step === 12 && (
+          <StepPrefs
+            min={prefAgeMin}
+            onMin={setPrefAgeMin}
+            max={prefAgeMax}
+            onMax={setPrefAgeMax}
+            accepts={acceptsChildren}
+            onAccepts={setAcceptsChildren}
+            saving={saving}
+            onSkip={() => skipTo(WELCOME_STEP)}
+            onSave={() => handleOptional(savePrefs, WELCOME_STEP)}
+          />
+        )}
+        {step === WELCOME_STEP && (
           <StepWelcome
             name={welcomeName || name.trim()}
             onContinue={() => navigate({ to: "/inicio" })}
@@ -288,7 +516,7 @@ function OnboardingFlow() {
         )}
       </main>
 
-      {hydrated && step <= TOTAL_STEPS && (
+      {hydrated && step <= REQUIRED_STEPS && (
         <footer className="px-6 pb-6 pt-3">
           <Button
             onClick={goNext}
@@ -296,7 +524,7 @@ function OnboardingFlow() {
             disabled={saving}
             className="app-pressable h-14 w-full rounded-2xl text-base font-semibold"
           >
-            {saving ? "Salvando..." : step === TOTAL_STEPS ? "Finalizar" : "Continuar"}
+            {saving ? "Salvando..." : step === REQUIRED_STEPS ? "Finalizar" : "Continuar"}
           </Button>
         </footer>
       )}
@@ -767,7 +995,330 @@ function StepMarital({
   );
 }
 
-/* --- Step 8: Welcome --- */
+/* --- Optional helpers --- */
+function OptionalFooter({
+  saving, onSkip, onSave, saveLabel = "Salvar e continuar",
+}: {
+  saving: boolean; onSkip: () => void; onSave: () => void; saveLabel?: string;
+}) {
+  return (
+    <div className="mt-8 space-y-2">
+      <Button
+        onClick={onSave}
+        size="lg"
+        disabled={saving}
+        className="app-pressable h-14 w-full rounded-2xl text-base font-semibold"
+      >
+        {saving ? "Salvando..." : saveLabel}
+      </Button>
+      <button
+        type="button"
+        onClick={onSkip}
+        disabled={saving}
+        className="app-pressable mx-auto block py-2 text-sm font-medium text-muted-foreground underline-offset-4 hover:underline"
+      >
+        Pular
+      </button>
+    </div>
+  );
+}
+
+function ChipGroup({
+  options, value, onChange,
+}: {
+  options: Array<{ v: string; l: string }>;
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  return (
+    <div className="flex flex-wrap gap-2">
+      {options.map((o) => {
+        const active = value === o.v;
+        return (
+          <button
+            key={o.v}
+            type="button"
+            onClick={() => onChange(active ? "" : o.v)}
+            className={cn(
+              "rounded-full border px-3.5 py-2 text-sm transition",
+              active
+                ? "border-[var(--rose)] bg-[var(--rose)]/10 text-[var(--rose)]"
+                : "border-border bg-card/40 text-foreground/80 hover:border-[var(--rose-soft)]",
+            )}
+          >
+            {o.l}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function ChipMultiGroup({
+  options, values, onChange,
+}: {
+  options: Array<{ v: string; l: string }>;
+  values: string[];
+  onChange: (vs: string[]) => void;
+}) {
+  function toggle(v: string) {
+    if (values.includes(v)) onChange(values.filter((x) => x !== v));
+    else onChange([...values, v]);
+  }
+  return (
+    <div className="flex flex-wrap gap-2">
+      {options.map((o) => {
+        const active = values.includes(o.v);
+        return (
+          <button
+            key={o.v}
+            type="button"
+            onClick={() => toggle(o.v)}
+            className={cn(
+              "rounded-full border px-3.5 py-2 text-sm transition",
+              active
+                ? "border-[var(--rose)] bg-[var(--rose)]/10 text-[var(--rose)]"
+                : "border-border bg-card/40 text-foreground/80 hover:border-[var(--rose-soft)]",
+            )}
+          >
+            {o.l}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+/* --- Step 8: Bio --- */
+function StepBio({
+  value, onChange, saving, onSkip, onSave,
+}: {
+  value: string; onChange: (v: string) => void;
+  saving: boolean; onSkip: () => void; onSave: () => void;
+}) {
+  return (
+    <div className="mx-auto flex w-full max-w-md flex-1 flex-col py-6">
+      <h1 className="text-3xl font-semibold leading-tight">Conte um pouco sobre você</h1>
+      <p className="mt-3 text-sm text-muted-foreground">
+        Uma frase sincera já ajuda as pessoas certas a te conhecerem melhor.
+      </p>
+      <textarea
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        maxLength={500}
+        rows={6}
+        placeholder="Gosto de conversar com calma, valorizo minha fé e quero conhecer alguém com propósito."
+        className="mt-6 w-full resize-none rounded-2xl border border-border bg-card/60 p-4 text-base outline-none focus:border-[var(--rose-soft)]"
+      />
+      <p className="mt-2 text-right text-xs text-muted-foreground">{value.length}/500</p>
+      <OptionalFooter saving={saving} onSkip={onSkip} onSave={onSave} />
+    </div>
+  );
+}
+
+/* --- Step 9: Faith --- */
+function StepFaith({
+  church, onChurch, years, onYears,
+  faithMoment, onFaithMoment, churchFrequency, onChurchFrequency,
+  saving, onSkip, onSave,
+}: {
+  church: string; onChurch: (v: string) => void;
+  years: string; onYears: (v: string) => void;
+  faithMoment: string; onFaithMoment: (v: string) => void;
+  churchFrequency: string; onChurchFrequency: (v: string) => void;
+  saving: boolean; onSkip: () => void; onSave: () => void;
+}) {
+  return (
+    <div className="mx-auto flex w-full max-w-md flex-1 flex-col py-6">
+      <h1 className="text-3xl font-semibold leading-tight">Sua fé e caminhada</h1>
+      <p className="mt-3 text-sm text-muted-foreground">
+        Essas informações ajudam a manter conexões com mais propósito.
+      </p>
+      <div className="mt-6 space-y-5">
+        <div>
+          <label className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Igreja</label>
+          <Input
+            value={church}
+            onChange={(e) => onChurch(e.target.value)}
+            maxLength={100}
+            placeholder="Ex.: Comunidade da Graça"
+            className="mt-2 h-12 rounded-2xl border-border bg-card/60 px-4"
+          />
+        </div>
+        <div>
+          <label className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Anos de batismo</label>
+          <NumericInput
+            value={years}
+            onChange={onYears}
+            placeholder="0"
+            maxLength={2}
+            className="mt-2 h-12 w-32 rounded-2xl border-border bg-card/60 px-4 text-base"
+          />
+        </div>
+        <div>
+          <label className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Momento de fé</label>
+          <div className="mt-2">
+            <ChipGroup options={FAITH_MOMENT} value={faithMoment} onChange={onFaithMoment} />
+          </div>
+        </div>
+        <div>
+          <label className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Frequência na igreja</label>
+          <div className="mt-2">
+            <ChipGroup options={CHURCH_FREQUENCY} value={churchFrequency} onChange={onChurchFrequency} />
+          </div>
+        </div>
+      </div>
+      <OptionalFooter saving={saving} onSkip={onSkip} onSave={onSave} />
+    </div>
+  );
+}
+
+/* --- Step 10: Routine --- */
+function StepRoutine({
+  routine, onRoutine, worship, onWorship,
+  saving, onSkip, onSave,
+}: {
+  routine: string[]; onRoutine: (v: string[]) => void;
+  worship: string; onWorship: (v: string) => void;
+  saving: boolean; onSkip: () => void; onSave: () => void;
+}) {
+  return (
+    <div className="mx-auto flex w-full max-w-md flex-1 flex-col py-6">
+      <h1 className="text-3xl font-semibold leading-tight">Como é sua rotina?</h1>
+      <p className="mt-3 text-sm text-muted-foreground">
+        Escolha o que combina com você. Pode pular se preferir.
+      </p>
+      <div className="mt-6 space-y-5">
+        <div>
+          <label className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Rotina espiritual</label>
+          <div className="mt-2">
+            <ChipMultiGroup options={SPIRITUAL_ROUTINE} values={routine} onChange={onRoutine} />
+          </div>
+        </div>
+        <div>
+          <label className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Estilo de culto</label>
+          <div className="mt-2">
+            <ChipGroup options={WORSHIP_STYLE} value={worship} onChange={onWorship} />
+          </div>
+        </div>
+      </div>
+      <OptionalFooter saving={saving} onSkip={onSkip} onSave={onSave} />
+    </div>
+  );
+}
+
+/* --- Step 11: Seeking --- */
+function StepSeeking({
+  seeking, onSeeking, pace, onPace, quality, onQuality,
+  saving, onSkip, onSave,
+}: {
+  seeking: string; onSeeking: (v: string) => void;
+  pace: string; onPace: (v: string) => void;
+  quality: string; onQuality: (v: string) => void;
+  saving: boolean; onSkip: () => void; onSave: () => void;
+}) {
+  return (
+    <div className="mx-auto flex w-full max-w-md flex-1 flex-col py-6">
+      <h1 className="text-3xl font-semibold leading-tight">O que você procura?</h1>
+      <p className="mt-3 text-sm text-muted-foreground">
+        Isso ajuda o app a te apresentar pessoas com intenção parecida.
+      </p>
+      <div className="mt-6 space-y-5">
+        <div>
+          <label className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Intenção</label>
+          <div className="mt-2">
+            <ChipGroup options={SEEKING} value={seeking} onChange={onSeeking} />
+          </div>
+        </div>
+        <div>
+          <label className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Ritmo</label>
+          <div className="mt-2">
+            <ChipGroup options={PACE} value={pace} onChange={onPace} />
+          </div>
+        </div>
+        <div>
+          <label className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Qualidade essencial</label>
+          <Input
+            value={quality}
+            onChange={(e) => onQuality(e.target.value)}
+            maxLength={120}
+            placeholder="Ex.: integridade, carinho, fé"
+            className="mt-2 h-12 rounded-2xl border-border bg-card/60 px-4"
+          />
+        </div>
+      </div>
+      <OptionalFooter saving={saving} onSkip={onSkip} onSave={onSave} />
+    </div>
+  );
+}
+
+/* --- Step 12: Basic prefs --- */
+function StepPrefs({
+  min, onMin, max, onMax, accepts, onAccepts,
+  saving, onSkip, onSave,
+}: {
+  min: string; onMin: (v: string) => void;
+  max: string; onMax: (v: string) => void;
+  accepts: "" | "sim" | "nao"; onAccepts: (v: "sim" | "nao") => void;
+  saving: boolean; onSkip: () => void; onSave: () => void;
+}) {
+  return (
+    <div className="mx-auto flex w-full max-w-md flex-1 flex-col py-6">
+      <h1 className="text-3xl font-semibold leading-tight">Suas preferências</h1>
+      <p className="mt-3 text-sm text-muted-foreground">Você poderá ajustar tudo depois.</p>
+      <div className="mt-6 space-y-5">
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Idade mínima</label>
+            <NumericInput
+              value={min}
+              onChange={onMin}
+              placeholder="25"
+              maxLength={3}
+              className="mt-2 h-12 rounded-2xl border-border bg-card/60 px-4"
+            />
+          </div>
+          <div>
+            <label className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Idade máxima</label>
+            <NumericInput
+              value={max}
+              onChange={onMax}
+              placeholder="45"
+              maxLength={3}
+              className="mt-2 h-12 rounded-2xl border-border bg-card/60 px-4"
+            />
+          </div>
+        </div>
+        <div>
+          <label className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Aceita pessoa com filhos?</label>
+          <div className="mt-2 flex gap-2">
+            {(["sim", "nao"] as const).map((v) => {
+              const active = accepts === v;
+              return (
+                <button
+                  key={v}
+                  type="button"
+                  onClick={() => onAccepts(v)}
+                  className={cn(
+                    "flex-1 rounded-2xl border-2 px-4 py-3 text-sm font-medium transition",
+                    active
+                      ? "border-[var(--rose)] bg-[var(--rose)]/10 text-[var(--rose)]"
+                      : "border-border bg-card/40 text-foreground/80",
+                  )}
+                >
+                  {v === "sim" ? "Sim" : "Não"}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+      <OptionalFooter saving={saving} onSkip={onSkip} onSave={onSave} />
+    </div>
+  );
+}
+
+/* --- Final: Welcome --- */
 function StepWelcome({
   name, onContinue, onCompletePerfil,
 }: { name: string; onContinue: () => void; onCompletePerfil: () => void }) {
