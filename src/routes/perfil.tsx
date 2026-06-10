@@ -1122,7 +1122,7 @@ function PerfilPage() {
                           <Label>Sobre você</Label>
                           <BioPromptChips
                             current={profile.bio}
-                            onApply={(starter) =>
+                            onApply={(starter: string) =>
                               setP("bio", starter + (profile.bio ?? ""))
                             }
                           />
