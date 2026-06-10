@@ -24,6 +24,7 @@ import appCss from "../styles.css?url";
 import coinPng from "@/assets/coin.webp";
 import { useEffect } from "react";
 import { registerAppServiceWorker } from "@/lib/registerSW";
+import { initNativeShell } from "@/lib/native";
 
 function NotFoundComponent() {
   return (
@@ -177,6 +178,7 @@ function RootComponent() {
 
   useEffect(() => {
     registerAppServiceWorker();
+    initNativeShell();
   }, []);
 
   useEffect(() => {
