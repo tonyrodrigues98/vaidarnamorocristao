@@ -62,13 +62,6 @@ type Partner = {
   equipped_frame_id?: string | null;
   equipped_aura_id?: string | null;
 };
-type ConversationShortcut = {
-  matchId: string;
-  partner: Partner;
-  lastMessage: string | null;
-  lastAt: string;
-  unread: boolean;
-};
 
 export const Route = createFileRoute("/conversas/$matchId")({
   component: () => (
