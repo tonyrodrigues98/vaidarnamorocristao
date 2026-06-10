@@ -4,6 +4,8 @@ import { toast } from "sonner";
 import { Check, ImageIcon, Loader2, Sparkles, X, Lock, Gem } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { ShopSkeleton } from "@/components/ui/AppSkeletons";
+import { AppEmptyState } from "@/components/ui/AppEmptyState";
+import { Gem as GemIcon } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
 import { MobileAppHeader } from "@/components/mobile/MobileAppHeader";
@@ -440,9 +442,12 @@ function LojaPage() {
           <ComingSoon />
         ) : activeTab === "name-gradient" ? (
           nameGradients.length === 0 ? (
-            <p className="py-16 text-center text-sm text-muted-foreground">
-              Em breve novos gradientes de nome.
-            </p>
+            <AppEmptyState
+              icon={<GemIcon className="h-5 w-5" />}
+              title="Nenhum item nesta categoria"
+              description="Novos gradientes de nome podem aparecer em breve."
+              className="my-12"
+            />
           ) : (
             <>
               {equippedNameGradient && (
@@ -541,9 +546,12 @@ function LojaPage() {
           )
         ) : activeTab === "background" ? (
           backgrounds.length === 0 ? (
-            <p className="py-16 text-center text-sm text-muted-foreground">
-              Em breve novos fundos de perfil.
-            </p>
+            <AppEmptyState
+              icon={<GemIcon className="h-5 w-5" />}
+              title="Nenhum item nesta categoria"
+              description="Novos fundos de perfil podem aparecer em breve."
+              className="my-12"
+            />
           ) : (
             <>
               {equippedBackground && (
@@ -672,9 +680,12 @@ function LojaPage() {
             </>
           )
         ) : items.length === 0 ? (
-          <p className="py-16 text-center text-sm text-muted-foreground">
-            Em breve novos itens nessa categoria.
-          </p>
+          <AppEmptyState
+            icon={<GemIcon className="h-5 w-5" />}
+            title="Nenhum item nesta categoria"
+            description="Novos itens de personalização podem aparecer em breve."
+            className="my-12"
+          />
         ) : (
           <>
             {activeCategory.type &&
