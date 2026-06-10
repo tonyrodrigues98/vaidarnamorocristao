@@ -929,57 +929,12 @@ function PerfilPage() {
             </aside>
 
             <div className="min-w-0">
-              <TabsList className="grid h-auto w-full grid-cols-3 items-stretch gap-2 bg-transparent p-0 lg:hidden">
-                {[
-                  { value: "profile", label: "Sobre mim", icon: UserIcon },
-                  { value: "prefs", label: "Preferências", icon: Heart },
-                ].map(({ value, label, icon: Icon }) => (
-                  <TabsTrigger
-                    key={value}
-                    value={value}
-                    className="group flex h-full min-h-[84px] w-full cursor-pointer flex-col items-center justify-center gap-2 overflow-hidden rounded-2xl border border-border/60 bg-card/60 px-1 py-4 text-sm font-medium text-muted-foreground shadow-soft transition active:scale-[0.98] data-[state=active]:border-[var(--rose)]/50 data-[state=active]:bg-[var(--rose-soft)]/40 data-[state=active]:text-[var(--rose)] data-[state=active]:shadow-elegant"
-                  >
-                    <Icon className="h-6 w-6" />
-                    <span className="truncate max-w-full text-[13px] leading-none">{label}</span>
-                  </TabsTrigger>
-                ))}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <button
-                      type="button"
-                      className="group flex h-full min-h-[84px] w-full cursor-pointer flex-col items-center justify-center gap-2 overflow-hidden rounded-2xl border border-border/60 bg-card/60 px-1 py-4 text-sm font-medium text-muted-foreground shadow-soft transition active:scale-[0.98] hover:text-foreground"
-                    >
-                      <MoreHorizontal className="h-6 w-6" />
-                      <span className="truncate max-w-full text-[13px] leading-none">Mais</span>
-                    </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56">
-                    <DropdownMenuLabel>Mais opções</DropdownMenuLabel>
-                    <DropdownMenuItem onSelect={() => setActiveTab("customizacao")}>
-                      <Sparkles className="mr-2 h-4 w-4" />
-                      Customização
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onSelect={() => setActiveTab("saldo")}>
-                      <Wallet className="mr-2 h-4 w-4" />
-                      Saldo
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onSelect={() => setActiveTab("presentes")}>
-                      <GiftIcon className="mr-2 h-4 w-4" />
-                      Presentes
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onSelect={() => setActiveTab("missions")}>
-                      <Trophy className="mr-2 h-4 w-4" />
-                      Conquistas
-                    </DropdownMenuItem>
-                    {isStaff && (
-                      <DropdownMenuItem onSelect={() => setActiveTab("role")}>
-                        <Briefcase className="mr-2 h-4 w-4" />
-                        Cargo
-                      </DropdownMenuItem>
-                    )}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </TabsList>
+              <ProfileActionHub
+                activeTab={activeTab}
+                isStaff={isStaff}
+                onSelect={handleHubSelect}
+                onOpenResource={handleHubResource}
+              />
 
               {/* Profile tab */}
               <TabsContent value="profile" className="mt-6 lg:mt-0">
