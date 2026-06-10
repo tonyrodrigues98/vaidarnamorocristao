@@ -347,6 +347,7 @@ function LojaPage() {
   return (
     <div className="min-h-screen bg-background">
       <Header />
+      <MobileAppHeader title="Loja" subtitle="Personalize sua experiência" />
 
       {/* Hero */}
       <section className="relative overflow-hidden border-b">
