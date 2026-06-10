@@ -5,6 +5,7 @@ import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
+import { MobileAppHeader } from "@/components/mobile/MobileAppHeader";
 import { PhotoImg } from "@/components/PhotoImg";
 import { normalizeImageFile } from "@/lib/imageNormalize";
 import { Button } from "@/components/ui/button";
