@@ -28,6 +28,7 @@ import {
   Loader2,
   Clock,
   AlertCircle,
+  PanelLeft,
 } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { markSeen } from "@/lib/lastSeen";
@@ -55,6 +56,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { spendCoin } from "@/lib/coins";
 import { TypingIndicator, useTypingBroadcaster } from "@/components/TypingIndicator";
 import { GradientName } from "@/components/GradientName";
+import { ConversationDrawer } from "@/components/conversations/ConversationDrawer";
 
 const COOLDOWN_MS = 10_000;
 
