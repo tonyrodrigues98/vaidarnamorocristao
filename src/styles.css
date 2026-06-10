@@ -689,6 +689,20 @@
   }
 }
 
+/* Per-route fade/slide used by MobileRouteTransition. The wrapping element
+   gets a new key on each navigation, replaying the animation. Only opacity
+   and transform are animated to stay cheap on mobile. */
+.app-route-enter {
+  animation: vt-fade-in 160ms var(--ease-ios) both;
+  will-change: opacity, transform;
+}
+@media (prefers-reduced-motion: reduce) {
+  .app-route-enter {
+    animation: none !important;
+    transform: none !important;
+  }
+}
+
 /* -------------------------------------------------------------------------- */
 /* AppSkeletons — premium off-white/rose loading placeholders                 */
 /* -------------------------------------------------------------------------- */
