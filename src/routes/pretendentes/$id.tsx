@@ -9,6 +9,7 @@ import { useAuth } from "@/lib/auth";
 import { getActiveCommitmentByUser } from "@/lib/commitments";
 import { Header } from "@/components/layout/Header";
 import { ProfileSkeleton } from "@/components/ui/AppSkeletons";
+import { AppEmptyState } from "@/components/ui/AppEmptyState";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -359,11 +360,14 @@ function Detail() {
     return (
       <div className="min-h-screen bg-background">
         <Header />
-        <main className="mx-auto max-w-3xl px-4 py-12 text-center">
-          <p>Perfil não encontrado.</p>
-          <Button asChild variant="outline" className="mt-4">
-            <Link to="/pretendentes">Voltar</Link>
-          </Button>
+        <main className="mx-auto max-w-3xl px-4 py-12">
+          <AppEmptyState
+            icon={<UserX className="h-6 w-6" />}
+            title="Perfil não encontrado"
+            description="Esse perfil pode estar indisponível, removido ou fora dos critérios atuais."
+            actionLabel="Voltar para pretendentes"
+            actionTo="/pretendentes"
+          />
         </main>
       </div>
     );
