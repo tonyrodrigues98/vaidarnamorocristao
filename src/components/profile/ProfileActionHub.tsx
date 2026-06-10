@@ -13,6 +13,7 @@ import {
   ShieldCheck,
   LayoutDashboard,
   ChevronDown,
+  Newspaper,
 } from "lucide-react";
 
 export type HubSection =
@@ -147,8 +148,14 @@ export function ProfileActionHub({ activeTab, isStaff, onSelect, onOpenResource 
             <ResourceLink
               Icon={ShieldCheck}
               title="Conta e segurança"
-              desc="Privacidade, ajustes e acesso."
+              desc="Privacidade, tema e acesso."
               to="/conta"
+            />
+            <ResourceLink
+              Icon={Newspaper}
+              title="Notícias da comunidade"
+              desc="Acompanhe atualizações."
+              to="/noticias"
             />
             {isStaff && (
               <ResourceLink
@@ -205,7 +212,7 @@ function ResourceLink({
   Icon: ComponentType<{ className?: string }>;
   title: string;
   desc: string;
-  to: "/conta" | "/admin" | "/loja";
+  to: "/conta" | "/admin" | "/loja" | "/noticias";
 }) {
   return (
     <li className="min-w-0">

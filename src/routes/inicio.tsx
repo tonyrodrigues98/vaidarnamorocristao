@@ -40,6 +40,8 @@ import {
   Users,
   Radar,
   Clock,
+  Newspaper,
+  VenetianMask,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -1156,6 +1158,24 @@ function InicioPage() {
                   label="Notificações"
                   hint={unreadNotifs > 0 ? `${unreadNotifs} novas` : "Ver"}
                   highlight={unreadNotifs > 0}
+                />
+                <ActivityChip
+                  to="/interesses"
+                  icon={<Sparkles className="h-4 w-4" />}
+                  label="Interesses"
+                  hint="Quem te quer"
+                />
+                <ActivityChip
+                  to="/recados"
+                  icon={<VenetianMask className="h-4 w-4" />}
+                  label="Recados"
+                  hint="Mensagens anônimas"
+                />
+                <ActivityChip
+                  to="/noticias"
+                  icon={<Newspaper className="h-4 w-4" />}
+                  label="Notícias"
+                  hint="Da comunidade"
                 />
               </div>
             </section>

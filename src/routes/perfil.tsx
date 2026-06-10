@@ -1563,7 +1563,7 @@ function PerfilPage() {
         </Tabs>
 
         <div className="mt-6 text-center text-xs text-muted-foreground">
-          <Link to="/dashboard" className="hover:text-[var(--rose)]">
+          <Link to="/inicio" className="hover:text-[var(--rose)]">
             ← Voltar ao início
           </Link>
         </div>
