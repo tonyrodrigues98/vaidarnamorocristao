@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { BioPromptChips } from "@/components/profile/BioPromptChips";
 import { BR_STATES } from "@/lib/constants";
 import {
   Camera,
@@ -1119,6 +1120,12 @@ function PerfilPage() {
                         </div>
                         <div className="space-y-2 sm:col-span-2">
                           <Label>Sobre você</Label>
+                          <BioPromptChips
+                            current={profile.bio}
+                            onApply={(starter: string) =>
+                              setP("bio", starter + (profile.bio ?? ""))
+                            }
+                          />
                           <Textarea
                             rows={4}
                             maxLength={600}
@@ -1333,6 +1340,13 @@ function PerfilPage() {
 
                       <div className="space-y-2">
                         <Label>Sobre o que procura</Label>
+                        <BioPromptChips
+                          variant="looking_for"
+                          current={prefs.looking_for_bio}
+                          onApply={(starter: string) =>
+                            setPrefs({ ...prefs, looking_for_bio: starter + (prefs.looking_for_bio ?? "") })
+                          }
+                        />
                         <Textarea
                           rows={4}
                           maxLength={600}
