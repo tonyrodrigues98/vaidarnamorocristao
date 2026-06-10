@@ -775,7 +775,7 @@ function PerfilPage() {
                 })}
               </div>
 
-              <div className="mt-6 hidden gap-3 sm:mt-8 sm:grid sm:grid-cols-2 xl:grid-cols-4">
+              <div className="mt-6 hidden gap-3 sm:mt-8 sm:grid sm:grid-cols-3">
                 <div className="rounded-2xl border border-rose-100 bg-rose-50/70 p-4 dark:border-rose-400/20 dark:bg-rose-400/10">
                   <div className="flex items-center gap-2 text-sm font-medium text-rose-700 dark:text-rose-200">
                     <MapPin className="h-4 w-4" />
@@ -802,19 +802,6 @@ function PerfilPage() {
                   <p className="mt-2 text-sm text-foreground">
                     {profile.years_baptized ? `${profile.years_baptized} ano(s)` : "Nao informado"}
                   </p>
-                </div>
-                <div className="rounded-2xl border border-violet-100 bg-violet-50/70 p-4 dark:border-violet-400/20 dark:bg-violet-400/10">
-                  <div className="flex items-center gap-2 text-sm font-medium text-violet-700 dark:text-violet-200">
-                    <Sparkles className="h-4 w-4" />
-                    Personalizacao
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab("customizacao")}
-                    className="mt-2 text-sm font-medium text-foreground underline-offset-4 hover:underline"
-                  >
-                    Molduras, auras e fundos
-                  </button>
                 </div>
               </div>
 
