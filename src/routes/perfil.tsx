@@ -574,6 +574,35 @@ function PerfilPage() {
 
   const panelClass =
     "rounded-[2rem] border border-border/70 bg-card/85 p-5 shadow-[0_20px_70px_rgba(31,41,55,0.08)] backdrop-blur sm:p-6 dark:bg-card/80 dark:shadow-[0_24px_80px_rgba(0,0,0,0.35)]";
+
+  const scrollToTabs = () => {
+    if (typeof window === "undefined") return;
+    window.setTimeout(() => {
+      document
+        .getElementById("perfil-tabs")
+        ?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 60);
+  };
+
+  const handleHubSelect = (id: HubSection) => {
+    if (id === "preferences") {
+      setActiveTab("prefs");
+    } else if (id === "visual") {
+      setActiveTab("customizacao");
+    } else {
+      setActiveTab("profile");
+      if (id === "identity" || id === "faith" || id === "photos") {
+        setEditingProfile(true);
+      }
+    }
+    scrollToTabs();
+  };
+
+  const handleHubResource = (id: "saldo" | "presentes" | "customizacao" | "role") => {
+    setActiveTab(id);
+    scrollToTabs();
+  };
+
   const tabItems = [
     { value: "profile", label: "Sobre mim", icon: UserIcon, hint: "Dados, fotos e historia" },
     { value: "prefs", label: "Preferencias", icon: Heart, hint: "O que voce busca" },
