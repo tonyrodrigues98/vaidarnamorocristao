@@ -367,6 +367,7 @@ function LojaPage() {
     <div className="min-h-screen bg-background">
       <Header />
       <MobileAppHeader title="Loja" subtitle="Personalize sua experiência" />
+      <PullToRefresh onRefresh={handlePullRefresh} disabled={!user}>
 
       {/* Hero */}
       <section className="relative overflow-hidden border-b">
