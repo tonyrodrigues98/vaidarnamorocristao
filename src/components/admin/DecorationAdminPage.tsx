@@ -21,6 +21,7 @@ import {
 import { toast } from "sonner";
 
 import { Header } from "@/components/layout/Header";
+import { AdminTopNav } from "@/components/admin/AdminTopNav";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -445,6 +446,7 @@ export function DecorationAdminPage({ type }: { type: ManagedType }) {
   return (
     <div className="min-h-screen bg-background">
       <Header />
+      <AdminTopNav compact />
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
         <Button asChild variant="ghost" size="sm" className="mb-4">
           <Link to="/admin">

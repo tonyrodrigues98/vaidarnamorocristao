@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Loader2, Plus, Save, Sparkles, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Header } from "@/components/layout/Header";
+import { AdminTopNav } from "@/components/admin/AdminTopNav";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -93,6 +94,7 @@ function NameGradientsAdminPage() {
   return (
     <div className="min-h-screen bg-background">
       <Header />
+      <AdminTopNav compact />
       <main className="mx-auto max-w-5xl px-4 py-10">
         <section className="overflow-hidden rounded-3xl border bg-gradient-to-br from-slate-950 via-[#111f3f] to-slate-900 p-6 text-white shadow-elegant sm:p-8">
           <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.16em] text-[#ff9aac]">

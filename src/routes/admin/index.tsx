@@ -82,6 +82,7 @@ import { BADGE_META, type BadgeCode } from "@/lib/badges";
 import { Award as AwardIcon } from "lucide-react";
 import { BibleVerseSelector, type BibleSelection } from "@/components/BibleVerseSelector";
 import { InterestsPanel } from "@/components/admin/InterestsPanel";
+import { AdminTopNav } from "@/components/admin/AdminTopNav";
 
 type Row = Database["public"]["Tables"]["profiles"]["Row"];
 type ProfileUpdate = Database["public"]["Tables"]["profiles"]["Update"];
@@ -586,6 +587,7 @@ function Admin() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-muted/40 via-background to-background">
       <Header />
+      <AdminTopNav eyebrow="Administração" />
       <main className="mx-auto max-w-7xl px-4 pb-16 pt-5 sm:px-6 sm:py-10">
         <section className="animate-fade-up overflow-hidden rounded-[2rem] border border-border/70 bg-card/85 p-5 shadow-soft backdrop-blur sm:p-7">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
