@@ -1,7 +1,12 @@
 import { friendlyError } from "@/lib/errors";
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { RequireApproved } from "@/components/RequireApproved";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useInfiniteQuery,
+  useQueryClient,
+  type InfiniteData,
+} from "@tanstack/react-query";
 import { getActiveCommitmentByUser, type RelationshipCommitment } from "@/lib/commitments";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -57,6 +62,27 @@ type LocalMsg = Msg & {
   _tempId?: string;
   _status?: "sending" | "sent" | "failed";
 };
+
+type MessagesPages = InfiniteData<Msg[], string | null>;
+const PAGE_SIZE = 50;
+
+function chatQueryKey(matchId: string, userId: string | undefined) {
+  return ["chat-messages", matchId, userId] as const;
+}
+
+async function fetchMessagesPage(matchId: string, before: string | null): Promise<Msg[]> {
+  let q = supabase
+    .from("messages")
+    .select("*")
+    .eq("match_id", matchId)
+    .order("created_at", { ascending: false })
+    .limit(PAGE_SIZE);
+  if (before) q = q.lt("created_at", before);
+  const { data } = await q;
+  // Return chronological-ascending so concatenated pages render top→bottom oldest→newest.
+  return ((data ?? []) as Msg[]).slice().reverse();
+}
+
 type Partner = {
   id: string;
   full_name: string;
@@ -77,19 +103,17 @@ export const Route = createFileRoute("/conversas/$matchId")({
 function Chat() {
   const { matchId } = Route.useParams();
   const { user, loading } = useAuth();
+  const qc = useQueryClient();
   const [partner, setPartner] = useState<Partner | null>(null);
   const [partnerCommitted, setPartnerCommitted] = useState(false);
   const [partnerCommitmentMatchId, setPartnerCommitmentMatchId] = useState<string | null>(null);
   const [currentCommitment, setCurrentCommitment] = useState<RelationshipCommitment | null>(null);
   const [pausedByCommitment, setPausedByCommitment] = useState(false);
-  const [messages, setMessages] = useState<LocalMsg[]>([]);
-  const [loadingOlder, setLoadingOlder] = useState(false);
-  const [hasMoreOlder, setHasMoreOlder] = useState(true);
+  const [pending, setPending] = useState<LocalMsg[]>([]);
   const [showNewBadge, setShowNewBadge] = useState(false);
   const nearBottomRef = useRef(true);
   const initializedScrollRef = useRef(false);
   const prevLenRef = useRef(0);
-  const PAGE_SIZE = 50;
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const [authorized, setAuthorized] = useState<boolean | null>(null);
@@ -105,8 +129,82 @@ function Chat() {
   const [warning, setWarning] = useState<string | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
+  const queryKey = chatQueryKey(matchId, user?.id);
+  const enableMessagesQuery = !!user && authorized === true && !pausedByCommitment;
+
+  const {
+    data: pagesData,
+    fetchPreviousPage,
+    hasPreviousPage,
+    isFetchingPreviousPage,
+  } = useInfiniteQuery<Msg[], Error, MessagesPages, typeof queryKey, string | null>({
+    queryKey,
+    enabled: enableMessagesQuery,
+    initialPageParam: null,
+    queryFn: ({ pageParam }) => fetchMessagesPage(matchId, pageParam),
+    getPreviousPageParam: (firstPage) =>
+      firstPage.length === PAGE_SIZE ? firstPage[0]?.created_at ?? null : undefined,
+    getNextPageParam: () => undefined,
+    staleTime: 60_000,
+    refetchOnWindowFocus: false,
+  });
+
+  // Flat chronological-ascending view of server messages, then optimistic temps.
+  const serverMessages = useMemo<LocalMsg[]>(
+    () => (pagesData ? pagesData.pages.flat() : []),
+    [pagesData],
+  );
+  const messages = useMemo<LocalMsg[]>(
+    () => (pending.length ? [...serverMessages, ...pending] : serverMessages),
+    [serverMessages, pending],
+  );
+  const loadingOlder = isFetchingPreviousPage;
+  const hasMoreOlder = hasPreviousPage;
+
+  // Cache mutators — used by realtime + send/edit/delete to keep server-truth in Query.
+  const appendToCache = useCallback(
+    (msg: Msg) => {
+      qc.setQueryData<MessagesPages>(queryKey, (old) => {
+        if (!old) return old;
+        const exists = old.pages.some((p) => p.some((m) => m.id === msg.id));
+        if (exists) return old;
+        const lastIdx = old.pages.length - 1;
+        if (lastIdx < 0) return old;
+        const pages = old.pages.map((p, i) => (i === lastIdx ? [...p, msg] : p));
+        return { ...old, pages };
+      });
+    },
+    [qc, queryKey],
+  );
+  const patchInCache = useCallback(
+    (msg: Msg) => {
+      qc.setQueryData<MessagesPages>(queryKey, (old) => {
+        if (!old) return old;
+        const pages = old.pages.map((p) =>
+          p.some((m) => m.id === msg.id) ? p.map((m) => (m.id === msg.id ? { ...m, ...msg } : m)) : p,
+        );
+        return { ...old, pages };
+      });
+    },
+    [qc, queryKey],
+  );
+  const removeFromCache = useCallback(
+    (id: string) => {
+      qc.setQueryData<MessagesPages>(queryKey, (old) => {
+        if (!old) return old;
+        const pages = old.pages.map((p) => p.filter((m) => m.id !== id));
+        return { ...old, pages };
+      });
+    },
+    [qc, queryKey],
+  );
+
   useEffect(() => {
     if (!user) return;
+    // Reset scroll initialization for the new conversation.
+    initializedScrollRef.current = false;
+    nearBottomRef.current = true;
+    setPending([]);
     (async () => {
       const { data: m } = await supabase
         .from("matches")
@@ -132,7 +230,6 @@ function Chat() {
       setCurrentCommitment(myActiveCommitment);
       if (myActiveCommitment && myActiveCommitment.match_id !== matchId) {
         setPausedByCommitment(true);
-        setMessages([]);
         setAuthorized(true);
         return;
       }
@@ -151,22 +248,8 @@ function Chat() {
 
         setPartnerCommitmentMatchId(active?.match_id ?? null);
       }
-      const { data: msgs } = await supabase
-        .from("messages")
-        .select("*")
-        .eq("match_id", matchId)
-        .order("created_at", { ascending: false })
-        .limit(PAGE_SIZE);
-      const initial = ((msgs ?? []) as Msg[]).slice().reverse();
-      setMessages(initial as LocalMsg[]);
-      setHasMoreOlder((msgs?.length ?? 0) === PAGE_SIZE);
-      initializedScrollRef.current = false;
-      nearBottomRef.current = true;
-      // mark received as read via SECURITY DEFINER RPC (only updates read_at)
-      const unread = initial.filter((m: Msg) => m.sender_id !== user.id && !m.read_at);
-      await Promise.all(
-        unread.map((m) => supabase.rpc("mark_message_read", { _message_id: m.id })),
-      );
+      // useInfiniteQuery handles message fetching now; mark-as-read runs in a
+      // dedicated effect below once the first page is in cache.
     })();
 
     const ch = supabase
@@ -175,13 +258,10 @@ function Chat() {
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "messages", filter: `match_id=eq.${matchId}` },
         (payload) => {
-          setMessages((prev) =>
-            prev.some((m) => m.id === (payload.new as Msg).id)
-              ? prev
-              : [...prev, payload.new as Msg],
-          );
-          if ((payload.new as Msg).sender_id !== user.id) {
-            supabase.rpc("mark_message_read", { _message_id: (payload.new as Msg).id });
+          const incoming = payload.new as Msg;
+          appendToCache(incoming);
+          if (incoming.sender_id !== user.id) {
+            supabase.rpc("mark_message_read", { _message_id: incoming.id });
           }
         },
       )
@@ -190,22 +270,34 @@ function Chat() {
         { event: "DELETE", schema: "public", table: "messages", filter: `match_id=eq.${matchId}` },
         (payload) => {
           const removed = payload.old as { id: string };
-          setMessages((prev) => prev.filter((m) => m.id !== removed.id));
+          removeFromCache(removed.id);
         },
       )
       .on(
         "postgres_changes",
         { event: "UPDATE", schema: "public", table: "messages", filter: `match_id=eq.${matchId}` },
         (payload) => {
-          const updated = payload.new as Msg;
-          setMessages((prev) => prev.map((m) => (m.id === updated.id ? { ...m, ...updated } : m)));
+          patchInCache(payload.new as Msg);
         },
       )
       .subscribe();
     return () => {
       supabase.removeChannel(ch);
     };
-  }, [matchId, user]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [matchId, user?.id]);
+
+  // Mark unread received messages as read whenever the page set changes.
+  useEffect(() => {
+    if (!user || !pagesData) return;
+    const unread = pagesData.pages.flat().filter(
+      (m) => m.sender_id !== user.id && !m.read_at,
+    );
+    if (unread.length === 0) return;
+    Promise.all(
+      unread.map((m) => supabase.rpc("mark_message_read", { _message_id: m.id })),
+    );
+  }, [pagesData, user?.id]);
 
   // Smart scroll: instant jump on first load; smooth on own send or when
   // the user was already near the bottom. Otherwise show a "new message" pill.
@@ -235,33 +327,17 @@ function Chat() {
 
   // Track scroll position + trigger older page when near the top.
   const loadOlder = useCallback(async () => {
-    if (loadingOlder || !hasMoreOlder) return;
+    if (isFetchingPreviousPage || !hasPreviousPage) return;
     const el = scrollRef.current;
-    const oldest = messages[0];
-    if (!oldest || !el) return;
-    setLoadingOlder(true);
+    if (!el) return;
     const prevHeight = el.scrollHeight;
     const prevTop = el.scrollTop;
-    const { data } = await supabase
-      .from("messages")
-      .select("*")
-      .eq("match_id", matchId)
-      .lt("created_at", oldest.created_at)
-      .order("created_at", { ascending: false })
-      .limit(PAGE_SIZE);
-    const olds = ((data ?? []) as Msg[]).slice().reverse() as LocalMsg[];
-    setMessages((prev) => {
-      const seen = new Set(prev.map((m) => m.id));
-      const merged = olds.filter((m) => !seen.has(m.id));
-      return [...merged, ...prev];
-    });
-    setHasMoreOlder((data?.length ?? 0) === PAGE_SIZE);
-    setLoadingOlder(false);
+    await fetchPreviousPage();
     requestAnimationFrame(() => {
       if (!el) return;
       el.scrollTop = prevTop + (el.scrollHeight - prevHeight);
     });
-  }, [loadingOlder, hasMoreOlder, messages, matchId]);
+  }, [isFetchingPreviousPage, hasPreviousPage, fetchPreviousPage]);
 
   useEffect(() => {
     const el = scrollRef.current;
@@ -337,7 +413,7 @@ function Chat() {
       read_at: null,
       reply_to_id: replyId,
     };
-    setMessages((prev) => [...prev, optimistic]);
+    setPending((prev) => [...prev, optimistic]);
     setInput("");
     setReplyTo(null);
     if (inputRef.current) inputRef.current.style.height = "auto";
@@ -355,24 +431,21 @@ function Chat() {
       .single();
     setSending(false);
     if (error || !data) {
-      setMessages((prev) =>
+      setPending((prev) =>
         prev.map((m) => (m.id === tempId ? { ...m, _status: "failed" } : m)),
       );
       toast.error(friendlyError(error ?? new Error("Falha ao enviar")));
       return;
     }
     const real = data as Msg;
-    setMessages((prev) => {
-      const hasReal = prev.some((m) => m.id === real.id);
-      if (hasReal) return prev.filter((m) => m.id !== tempId);
-      return prev.map((m) => (m.id === tempId ? { ...real, _status: "sent" } : m));
-    });
+    appendToCache(real);
+    setPending((prev) => prev.filter((m) => m.id !== tempId));
   }
 
   async function retrySend(tempId: string) {
-    const msg = messages.find((m) => m.id === tempId);
+    const msg = pending.find((m) => m.id === tempId);
     if (!msg || !user) return;
-    setMessages((prev) =>
+    setPending((prev) =>
       prev.map((m) => (m.id === tempId ? { ...m, _status: "sending" } : m)),
     );
     const { data, error } = await supabase
@@ -386,27 +459,25 @@ function Chat() {
       .select()
       .single();
     if (error || !data) {
-      setMessages((prev) =>
+      setPending((prev) =>
         prev.map((m) => (m.id === tempId ? { ...m, _status: "failed" } : m)),
       );
       toast.error(friendlyError(error ?? new Error("Falha ao reenviar")));
       return;
     }
     const real = data as Msg;
-    setMessages((prev) => {
-      const hasReal = prev.some((m) => m.id === real.id);
-      if (hasReal) return prev.filter((m) => m.id !== tempId);
-      return prev.map((m) => (m.id === tempId ? { ...real, _status: "sent" } : m));
-    });
+    appendToCache(real);
+    setPending((prev) => prev.filter((m) => m.id !== tempId));
   }
 
   async function handleDelete(messageId: string) {
     if (!confirm("Apagar esta mensagem? Essa ação não pode ser desfeita.")) return;
-    const prev = messages;
-    setMessages((m) => m.filter((x) => x.id !== messageId));
+    // Snapshot the cache so we can restore on failure.
+    const snapshot = qc.getQueryData<MessagesPages>(queryKey);
+    removeFromCache(messageId);
     const { error } = await supabase.from("messages").delete().eq("id", messageId);
     if (error) {
-      setMessages(prev);
+      if (snapshot) qc.setQueryData<MessagesPages>(queryKey, snapshot);
       toast.error("Não foi possível apagar a mensagem.");
     }
   }
