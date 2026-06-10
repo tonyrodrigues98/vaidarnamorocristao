@@ -42,6 +42,7 @@ import {
   Clock,
   Newspaper,
   VenetianMask,
+  TrendingUp,
 } from "lucide-react";
 import { toast } from "sonner";
 
