@@ -396,9 +396,9 @@ function InicioPage() {
       },
       {
         key: "community",
-        label: "Participe da comunidade",
+        label: "Participe das conversas",
         done: activity.community,
-        to: "/comunidade" as const,
+        to: "/conversas" as const,
         manual: true,
       },
       {
