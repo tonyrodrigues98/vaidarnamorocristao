@@ -8,8 +8,18 @@ type ImgProps = Omit<ComponentPropsWithoutRef<"img">, "src"> & {
   fallback?: ReactNode;
 };
 
-/** <img> wrapper that resolves stored profile-photos URLs to signed URLs and retries expired links. */
-export function PhotoImg({ src, fallback, className, onError, ...rest }: ImgProps) {
+/** <img> wrapper that resolves stored profile-photos URLs to signed URLs and retries expired links.
+ *  Defaults: loading="lazy", decoding="async" — pass loading="eager" + fetchPriority="high"
+ *  explicitly for the LCP image of the route. */
+export function PhotoImg({
+  src,
+  fallback,
+  className,
+  onError,
+  loading: loadingAttr,
+  decoding,
+  ...rest
+}: ImgProps) {
   const { url, loading, refresh } = useSignedPhotoUrlResult(src ?? null);
 
   if (!url) {
@@ -23,6 +33,8 @@ export function PhotoImg({ src, fallback, className, onError, ...rest }: ImgProp
     <img
       src={url}
       className={className}
+      loading={loadingAttr ?? "lazy"}
+      decoding={decoding ?? "async"}
       onError={(event) => {
         refresh();
         onError?.(event);
