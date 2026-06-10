@@ -14,7 +14,6 @@ import {
   User as UserIcon,
   Users,
   Newspaper,
-  Globe,
   Ban,
   Share2,
   Gem,
@@ -82,7 +81,6 @@ export function Header() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [newsCount, setNewsCount] = useState(0);
   const [devotionalCount, setDevotionalCount] = useState(0);
-  const [communityCount, setCommunityCount] = useState(0);
   const [anonCount, setAnonCount] = useState(0);
   const [open, setOpen] = useState(false);
   const [profile, setProfile] = useState<{
@@ -112,7 +110,6 @@ export function Header() {
       setUnreadCount(0);
       setNewsCount(0);
       setDevotionalCount(0);
-      setCommunityCount(0);
       setAnonCount(0);
       return;
     }
@@ -164,15 +161,6 @@ export function Header() {
         .gt("published_at", since);
       if (!ignore) setDevotionalCount(count ?? 0);
     };
-    const loadCommunity = async () => {
-      const since = getLastSeen(user.id, "community");
-      const { count } = await supabase
-        .from("global_messages")
-        .select("id", { count: "exact", head: true })
-        .neq("sender_id", user.id)
-        .gt("created_at", since);
-      if (!ignore) setCommunityCount(count ?? 0);
-    };
     const loadAnon = async () => {
       const { count } = await supabase
         .from("anonymous_messages")
@@ -185,7 +173,6 @@ export function Header() {
     loadUnread();
     loadNews();
     loadDevotional();
-    loadCommunity();
     loadAnon();
     const ch = supabase
       .channel("hdr-counters")
@@ -200,11 +187,6 @@ export function Header() {
         loadNews();
         loadDevotional();
       })
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "global_messages" },
-        loadCommunity,
-      )
       .on(
         "postgres_changes",
         {
@@ -222,7 +204,6 @@ export function Header() {
       if (detail.key === "interests") loadInterests();
       if (detail.key === "news") loadNews();
       if (detail.key === "devotional") loadDevotional();
-      if (detail.key === "community") loadCommunity();
     };
     window.addEventListener("lastSeen:update", onSeen);
     return () => {
@@ -329,14 +310,6 @@ export function Header() {
                     </div>
                   </DropdownMenuContent>
                 </DropdownMenu>
-              )}
-              {isApproved && (
-                <Button variant="ghost" size="sm" asChild>
-                  <Link to="/comunidade">
-                    <Globe className="mr-1 h-4 w-4" /> Comunidade
-                    <Badge n={communityCount} />
-                  </Link>
-                </Button>
               )}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
