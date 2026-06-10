@@ -1,6 +1,6 @@
 import { PhotoImg } from "@/components/PhotoImg";
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, lazy, Suspense } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
@@ -22,21 +22,9 @@ import {
   User as UserIcon,
   Gem,
 } from "lucide-react";
-import {
-  ResponsiveContainer,
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  Tooltip,
-  CartesianGrid,
-  BarChart,
-  Bar,
-  PieChart,
-  Pie,
-  Cell,
-  Legend,
-} from "recharts";
+
+// Heavy recharts bundle (~140KB) lazy-loaded only when this route renders.
+const DashboardCharts = lazy(() => import("@/components/dashboard/DashboardCharts"));
 
 type Profile = {
   status: "pending" | "approved" | "rejected" | "banned";
