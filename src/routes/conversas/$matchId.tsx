@@ -1,7 +1,7 @@
 import { friendlyError } from "@/lib/errors";
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { RequireApproved } from "@/components/RequireApproved";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getActiveCommitmentByUser, type RelationshipCommitment } from "@/lib/commitments";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,6 +11,7 @@ import { DecoratedAvatar } from "@/components/DecoratedAvatar";
 import { Button } from "@/components/ui/button";
 import {
   ArrowLeft,
+  ArrowDown,
   Send,
   Trash2,
   Pencil,
@@ -22,6 +23,9 @@ import {
   PanelLeft,
   Search,
   MessageCircle,
+  Clock,
+  AlertCircle,
+  Loader2,
 } from "lucide-react";
 import { useLongPress } from "@/hooks/use-long-press";
 import { useRestrictedWords, findRestrictedWord } from "@/lib/profanity";
@@ -47,6 +51,10 @@ type Msg = {
   read_at: string | null;
   edited_at?: string | null;
   reply_to_id?: string | null;
+};
+type LocalMsg = Msg & {
+  _tempId?: string;
+  _status?: "sending" | "sent" | "failed";
 };
 type Partner = {
   id: string;
