@@ -597,18 +597,18 @@ function PerfilPage() {
 
   const tabItems = [
     { value: "profile", label: "Sobre mim", icon: UserIcon, hint: "Dados, fotos e historia" },
-    { value: "prefs", label: "Preferencias", icon: Heart, hint: "O que voce busca" },
+    { value: "prefs", label: "O que procuro", icon: Heart, hint: "Suas preferencias" },
     {
       value: "customizacao",
-      label: "Customizacao",
+      label: "Visual",
       icon: Sparkles,
       hint: "Molduras, auras e fundos",
     },
-    { value: "saldo", label: "Saldo", icon: Wallet, hint: "Moedas e compras" },
+    { value: "saldo", label: "Minhas moedas", icon: Wallet, hint: "Saldo e compras" },
     { value: "presentes", label: "Presentes", icon: GiftIcon, hint: "Recebidos no perfil" },
-    { value: "missions", label: "Conquistas", icon: Trophy, hint: "Missoes e badges" },
+    { value: "missions", label: "Minhas conquistas", icon: Trophy, hint: "Missoes e badges" },
     ...(isStaff
-      ? [{ value: "role", label: "Cargo", icon: Briefcase, hint: "Badge e visibilidade" }]
+      ? [{ value: "role", label: "Meu papel", icon: Briefcase, hint: "Badge e visibilidade" }]
       : []),
   ];
 
