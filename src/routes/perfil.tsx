@@ -1019,23 +1019,23 @@ function PerfilPage() {
                         </div>
                         <div className="space-y-2">
                           <Label>Idade</Label>
-                          <Input
-                            type="number"
+                          <NumericInput
                             min={18}
                             max={110}
+                            maxLength={3}
                             value={profile.age}
-                            onChange={(e) => setP("age", e.target.value)}
+                            onChange={(v) => setP("age", v)}
                             required
                           />
                         </div>
                         <div className="space-y-2">
                           <Label>Altura (cm)</Label>
-                          <Input
-                            type="number"
+                          <NumericInput
                             min={120}
                             max={230}
+                            maxLength={3}
                             value={profile.height_cm}
-                            onChange={(e) => setP("height_cm", e.target.value)}
+                            onChange={(v) => setP("height_cm", v)}
                           />
                         </div>
                         <div className="space-y-2">
@@ -1101,12 +1101,12 @@ function PerfilPage() {
                         </div>
                         <div className="space-y-2 sm:col-span-2">
                           <Label>Anos de batismo</Label>
-                          <Input
-                            type="number"
+                          <NumericInput
                             min={0}
                             max={100}
+                            maxLength={3}
                             value={profile.years_baptized}
-                            onChange={(e) => setP("years_baptized", e.target.value)}
+                            onChange={(v) => setP("years_baptized", v)}
                             required
                           />
                         </div>
