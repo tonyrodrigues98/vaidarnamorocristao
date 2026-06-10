@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Header } from "@/components/layout/Header";
 import { SocialAuthButtons } from "@/components/SocialAuthButtons";
+import { AuthBrand } from "@/components/auth/AuthBrand";
 import { useAuth } from "@/lib/auth";
 
 const schema = z.object({
@@ -48,6 +49,7 @@ function Login() {
     <div className="min-h-screen">
       <Header />
       <main className="mx-auto flex max-w-md flex-col px-4 py-12">
+        <AuthBrand className="mb-6" />
         <div className="glass animate-fade-up rounded-3xl p-8 shadow-elegant">
           <h1 className="text-3xl font-semibold">Bem-vindo de volta</h1>
           <p className="mt-1 text-sm text-muted-foreground">Entre para continuar sua jornada.</p>
