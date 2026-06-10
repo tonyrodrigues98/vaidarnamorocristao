@@ -434,10 +434,10 @@ function InicioPage() {
   const nextActions: ChecklistAction[] = useMemo(
     () =>
       getProfileStrengthNextActions(profile ?? null, advanced, prefs, photosCount, {
-        freeFrameAvailable: !frameClaimed,
+        freeFrameAvailable: !frameClaimed && !ownsAnyFrame,
         sawSuggestion: !!suggestion,
       }),
-    [profile, advanced, prefs, photosCount, frameClaimed, suggestion],
+    [profile, advanced, prefs, photosCount, frameClaimed, ownsAnyFrame, suggestion],
   );
 
   if (!loading && !user) return <Navigate to="/auth/login" />;
