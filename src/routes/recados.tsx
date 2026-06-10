@@ -657,45 +657,54 @@ function OutboxCard({ m, hints, onChange }: { m: OutboxRow; hints: Hint[]; onCha
   }
 
   return (
-    <div className="glass rounded-2xl p-5 shadow-soft">
-      <div className="mb-2 flex items-center justify-between text-xs text-muted-foreground">
-        <StatusBadge status={m.status} />
+    <div className="rounded-3xl border border-border/60 bg-card/70 p-4 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_-12px_rgba(0,0,0,0.12)] backdrop-blur-md">
+      <div className="mb-3 flex items-center justify-between text-[11px] text-muted-foreground">
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-muted/70 px-2 py-1 font-medium">
+          <StatusBadge status={m.status} />
+        </span>
         <span>{new Date(m.created_at).toLocaleDateString("pt-BR")}</span>
       </div>
-      <p className="whitespace-pre-wrap text-foreground/90">{m.content}</p>
+      <div className="ml-auto max-w-[92%] rounded-2xl bg-primary/10 px-4 py-3">
+        <p className="whitespace-pre-wrap text-[15px] leading-relaxed text-foreground/90">
+          {m.content}
+        </p>
+      </div>
 
       {hints
         .filter((h) => h.sent_at)
         .map((h) => (
-          <div key={h.id} className="mt-3 rounded-xl bg-muted px-3 py-2 text-xs">
-            Dica enviada: <span className="font-medium">{h.hint_text}</span>
+          <div key={h.id} className="mt-2 rounded-xl bg-muted/60 px-3 py-2 text-[12px] text-muted-foreground">
+            Dica enviada: <span className="font-medium text-foreground/80">{h.hint_text}</span>
           </div>
         ))}
 
       {m.reply_text && (
-        <div className="mt-3 rounded-xl border bg-[var(--rose)]/5 px-3 py-2 text-sm">
-          <span className="text-xs text-muted-foreground">Resposta:</span>
-          <p className="mt-1">{m.reply_text}</p>
+        <div className="mt-2 mr-auto max-w-[92%] rounded-2xl bg-[var(--rose)]/10 px-4 py-3 text-[14px]">
+          <span className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+            Resposta
+          </span>
+          <p className="mt-1 text-foreground/90">{m.reply_text}</p>
         </div>
       )}
 
       {m.status === "revealed" && m.match_id ? (
-        <Button asChild size="sm" className="mt-4 w-full shadow-glow">
+        <Button asChild size="sm" className="mt-3 h-10 w-full rounded-full shadow-glow">
           <Link to="/conversas/$matchId" params={{ matchId: m.match_id }}>
             <MessageCircle className="mr-2 h-4 w-4" /> Abrir conversa
           </Link>
         </Button>
       ) : (
-        <div className="mt-4 flex flex-wrap gap-2">
+        <div className="mt-3 flex flex-wrap gap-1.5">
           {pendingHint && (
-            <Button size="sm" variant="default" onClick={openHintDialog}>
-              <Sparkles className="mr-1 h-3 w-3" /> Enviar dica
+            <Button size="sm" className="h-9 rounded-full px-4" onClick={openHintDialog}>
+              <Sparkles className="mr-1.5 h-3.5 w-3.5" /> Enviar dica
             </Button>
           )}
           {canReveal && !myRevealed && (
             <Button
               size="sm"
               variant="outline"
+              className="h-9 rounded-full px-3"
               disabled={busy}
               onClick={async () => {
                 setBusy(true);
@@ -707,11 +716,11 @@ function OutboxCard({ m, hints, onChange }: { m: OutboxRow; hints: Hint[]; onCha
                 else onChange();
               }}
             >
-              <Unlock className="mr-1 h-3 w-3" /> Revelar quem eu sou
+              <Unlock className="mr-1.5 h-3.5 w-3.5" /> Revelar
             </Button>
           )}
           {myRevealed && m.status !== "revealed" && (
-            <span className="text-xs text-muted-foreground">
+            <span className="px-2 py-2 text-xs text-muted-foreground">
               Aguardando o outro lado aceitar revelar…
             </span>
           )}
