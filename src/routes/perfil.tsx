@@ -579,18 +579,16 @@ function PerfilPage() {
   const handleHubSelect = (id: HubSection) => {
     if (id === "preferences") {
       setActiveTab("prefs");
-    } else if (id === "visual") {
-      setActiveTab("customizacao");
     } else {
       setActiveTab("profile");
-      if (id === "identity" || id === "faith" || id === "photos") {
+      if (id === "identity" || id === "faith") {
         setEditingProfile(true);
       }
     }
     scrollToTabs();
   };
 
-  const handleHubResource = (id: "saldo" | "presentes" | "customizacao" | "role") => {
+  const handleHubResource = (id: "missions" | "role") => {
     setActiveTab(id);
     scrollToTabs();
   };
