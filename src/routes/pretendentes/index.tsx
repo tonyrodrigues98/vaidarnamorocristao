@@ -1,6 +1,7 @@
 import { createFileRoute, Link, Navigate, useNavigate } from "@tanstack/react-router";
 import { RequireApproved } from "@/components/RequireApproved";
 import { useEffect, useMemo, useState } from "react";
+import { useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PretendenteCarousel } from "@/components/pretendentes/PretendenteCarousel";
 import { PretendenteFeaturedCard } from "@/components/pretendentes/PretendenteFeaturedCard";
@@ -39,6 +40,7 @@ import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
 import { markHomeChecklistStep } from "@/lib/homeChecklist";
 import { AppEmptyState } from "@/components/ui/AppEmptyState";
+import { PullToRefresh } from "@/components/mobile/PullToRefresh";
 
 type Profile = {
   id: string;
