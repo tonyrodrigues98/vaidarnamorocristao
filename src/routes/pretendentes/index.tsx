@@ -253,18 +253,13 @@ function List() {
         }
       }
       setLoadingList(false);
+      const resolve = refreshResolveRef.current;
+      if (resolve) {
+        refreshResolveRef.current = null;
+        resolve();
+      }
     })();
   }, [user, role, rolesLoaded, refreshKey]);
-
-  // Resolve the active pull-to-refresh promise after the load effect settles.
-  useEffect(() => {
-    if (loadingList) return;
-    const resolve = refreshResolveRef.current;
-    if (resolve) {
-      refreshResolveRef.current = null;
-      resolve();
-    }
-  }, [loadingList, refreshKey]);
 
   // Compute affinity per profile (memoized)
   const affinityByProfile = useMemo(() => {
