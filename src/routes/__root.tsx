@@ -136,9 +136,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
 #app-splash .app-splash-logo{width:min(60vw,200px);height:auto;object-fit:contain;display:block;filter:drop-shadow(0 8px 24px rgba(0,0,0,.08));}
 @media (min-width:768px){#app-splash .app-splash-logo{width:240px;}}
 #app-splash .app-splash-loader{margin-top:32px;width:160px;height:3px;background:rgba(0,0,0,.08);border-radius:999px;overflow:hidden;}
-#app-splash .app-splash-loader-bar{display:block;height:100%;width:0%;background:#000;border-radius:999px;animation:appSplashProgress 2.2s cubic-bezier(.22,.61,.36,1) forwards;}
-@keyframes appSplashProgress{0%{width:0%;}30%{width:35%;}60%{width:65%;}85%{width:88%;}100%{width:100%;}}
-@media (prefers-reduced-motion: reduce){#app-splash .app-splash-loader-bar{animation:none;width:100%;}}
+#app-splash .app-splash-loader-bar{display:block;height:100%;width:0%;background:#000;border-radius:999px;transition:width .35s cubic-bezier(.22,.61,.36,1);}
 `,
           }}
         />
@@ -150,6 +148,11 @@ function RootShell({ children }: { children: React.ReactNode }) {
         </div>
         {children}
         <Scripts />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){var b=document.querySelector('#app-splash .app-splash-loader-bar');if(!b)return;var p=5;b.style.width=p+'%';var tick=setInterval(function(){if(p<90){p+=Math.max(.4,(90-p)*0.04);b.style.width=p+'%';}},120);function set(v){if(v>p){p=v;b.style.width=p+'%';}}window.__splashSet=set;document.addEventListener('DOMContentLoaded',function(){set(35);});window.addEventListener('load',function(){set(70);});window.__splashDone=function(){clearInterval(tick);b.style.width='100%';};})();`,
+          }}
+        />
       </body>
     </html>
   );
@@ -168,11 +171,12 @@ function RootComponent() {
   useEffect(() => {
     const el = document.getElementById("app-splash");
     if (!el) return;
-    const hide = () => {
+    const done = (window as unknown as { __splashDone?: () => void }).__splashDone;
+    if (done) done();
+    const t = window.setTimeout(() => {
       el.classList.add("is-hiding");
       window.setTimeout(() => el.remove(), 400);
-    };
-    const t = window.setTimeout(hide, 250);
+    }, 280);
     return () => window.clearTimeout(t);
   }, []);
 
