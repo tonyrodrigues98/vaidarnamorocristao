@@ -24,6 +24,10 @@ import {
   HandHeart,
   Plus,
   Sticker as StickerIcon,
+  ArrowDown,
+  Loader2,
+  Clock,
+  AlertCircle,
 } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { markSeen } from "@/lib/lastSeen";
@@ -63,6 +67,10 @@ type GMsg = {
   reply_to_id?: string | null;
   pinned_at?: string | null;
   sticker_id?: string | null;
+};
+type LocalGMsg = GMsg & {
+  _tempId?: string;
+  _status?: "sending" | "sent" | "failed";
 };
 type Profile = {
   id: string;
