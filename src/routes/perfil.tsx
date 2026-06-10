@@ -793,6 +793,7 @@ function PerfilPage() {
             </div>
           </div>
         </section>
+        {user && <HomeStarterSection userId={user.id} />}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-8">
           <div className="grid gap-6 lg:grid-cols-[292px_minmax(0,1fr)]">
             <aside className="hidden lg:block">
