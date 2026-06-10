@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Check, ImageIcon, Loader2, Sparkles, X, Lock, Gem } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { ShopSkeleton } from "@/components/ui/AppSkeletons";
 import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
 import { MobileAppHeader } from "@/components/mobile/MobileAppHeader";
