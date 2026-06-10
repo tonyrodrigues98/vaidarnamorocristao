@@ -14,6 +14,8 @@ import { useConversationsList } from "@/hooks/useConversationsList";
 import { ConversationListSkeleton } from "@/components/ui/AppSkeletons";
 import { AppEmptyState } from "@/components/ui/AppEmptyState";
 import { PullToRefresh } from "@/components/mobile/PullToRefresh";
+import { OfflineState } from "@/components/ui/OfflineState";
+import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 
 export const Route = createFileRoute("/conversas/")({
   component: () => (
@@ -28,6 +30,7 @@ function List() {
   const { items, commitment: activeCommitment, loading: loadingList, refetch } =
     useConversationsList(user?.id);
   const [query, setQuery] = useState("");
+  const { isOnline } = useNetworkStatus();
 
   if (!loading && !user) return <Navigate to="/auth/login" />;
 
@@ -42,7 +45,7 @@ function List() {
     <div className="min-h-screen bg-[oklch(0.99_0.005_60)] dark:bg-background">
       <Header />
       <MobileAppHeader title="Conversas" subtitle="Mensagens e comunidade" />
-      <PullToRefresh onRefresh={refetch} disabled={!user}>
+      <PullToRefresh onRefresh={refetch} disabled={!user || !isOnline}>
       <main className="mx-auto max-w-3xl px-4 pb-10 pt-4 sm:pt-8">
         <div className="hidden animate-fade-up sm:block">
           <h1 className="text-3xl font-semibold tracking-tight">Conversas</h1>
@@ -97,6 +100,12 @@ function List() {
             />
           ) : loadingList ? (
             <ConversationListSkeleton rows={6} />
+          ) : items.length === 0 && !isOnline ? (
+            <OfflineState
+              actionLabel="Tentar novamente"
+              onAction={() => refetch()}
+              className="mt-2"
+            />
           ) : items.length === 0 ? (
             <AppEmptyState
               icon={<MessageCircle className="h-5 w-5" />}
