@@ -534,7 +534,7 @@ function Detail() {
                   {profileCommitted && (
                     <div className="inline-flex items-center gap-2 rounded-full border border-emerald-300/60 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-800 dark:border-emerald-400/25 dark:bg-emerald-400/10 dark:text-emerald-200">
                       <Gem className="h-3.5 w-3.5" />
-                      Em Proposito Firmado
+                      Em Propósito Firmado
                     </div>
                   )}
 
@@ -565,11 +565,7 @@ function Detail() {
                     ) : null}
                   </div>
 
-                  {profile.bio && (
-                    <p className="line-clamp-4 rounded-2xl border border-border/60 bg-background/55 p-4 text-sm leading-relaxed text-muted-foreground backdrop-blur dark:bg-background/25">
-                      {profile.bio}
-                    </p>
-                  )}
+                  {/* Bio completa renderizada na seção "Sobre" abaixo */}
                 </div>
               </div>
             </div>
