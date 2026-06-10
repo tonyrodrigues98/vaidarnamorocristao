@@ -425,87 +425,106 @@ function InboxCard({ m, hints, onChange }: { m: InboxRow; hints: Hint[]; onChang
   };
 
   return (
-    <div className="glass rounded-2xl p-5 shadow-soft">
-      <div className="mb-2 flex items-center justify-between text-xs text-muted-foreground">
-        <StatusBadge status={m.status} />
+    <div className="rounded-3xl border border-border/60 bg-card/70 p-4 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_-12px_rgba(0,0,0,0.12)] backdrop-blur-md">
+      <div className="mb-3 flex items-center justify-between text-[11px] text-muted-foreground">
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-muted/70 px-2 py-1 font-medium">
+          <StatusBadge status={m.status} />
+        </span>
         <span>Expira em {new Date(m.expires_at).toLocaleDateString("pt-BR")}</span>
       </div>
-      <p className="whitespace-pre-wrap text-foreground/90">{m.content}</p>
+      <div className="rounded-2xl bg-[var(--rose)]/8 px-4 py-3">
+        <p className="whitespace-pre-wrap text-[15px] leading-relaxed text-foreground/90">
+          {m.content}
+        </p>
+      </div>
 
       {hints
         .filter((h) => h.sent_at)
         .map((h) => (
-          <div key={h.id} className="mt-3 rounded-xl bg-[var(--rose)]/10 px-3 py-2 text-sm">
-            <Sparkles className="mr-1 inline h-3 w-3 text-[var(--rose)]" /> {h.hint_text}
+          <div key={h.id} className="mt-2 flex items-start gap-2 rounded-xl bg-muted/60 px-3 py-2 text-[13px]">
+            <Sparkles className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[var(--rose)]" />
+            <span className="text-foreground/80">{h.hint_text}</span>
           </div>
         ))}
       {hasPending && (
-        <div className="mt-3 rounded-xl bg-muted px-3 py-2 text-xs text-muted-foreground">
+        <div className="mt-2 rounded-xl bg-muted/60 px-3 py-2 text-xs text-muted-foreground">
           Aguardando o remetente escolher uma dica…
         </div>
       )}
       {m.reply_text && (
-        <div className="mt-3 rounded-xl border px-3 py-2 text-sm">
-          <span className="text-xs text-muted-foreground">Você respondeu:</span>
-          <p className="mt-1">{m.reply_text}</p>
+        <div className="mt-2 rounded-2xl border border-border/50 bg-background/60 px-4 py-3 text-[14px]">
+          <span className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+            Você respondeu
+          </span>
+          <p className="mt-1 text-foreground/90">{m.reply_text}</p>
         </div>
       )}
 
       {m.status === "revealed" && m.match_id ? (
-        <Button asChild size="sm" className="mt-4 w-full shadow-glow">
+        <Button asChild size="sm" className="mt-3 h-10 w-full rounded-full shadow-glow">
           <Link to="/conversas/$matchId" params={{ matchId: m.match_id }}>
             <MessageCircle className="mr-2 h-4 w-4" /> Abrir conversa
           </Link>
         </Button>
       ) : (
-        <div className="mt-4 flex flex-wrap gap-2">
+        <div className="mt-3 flex flex-wrap gap-1.5">
           {canReply && (
-            <Button size="sm" variant="default" onClick={() => setReplyOpen(true)}>
-              <Heart className="mr-1 h-3 w-3" /> Responder
+            <Button size="sm" className="h-9 rounded-full px-4" onClick={() => setReplyOpen(true)}>
+              <Heart className="mr-1.5 h-3.5 w-3.5" /> Responder
             </Button>
           )}
           {canHint && (
             <Button
               size="sm"
               variant="outline"
+              className="h-9 rounded-full px-3"
               disabled={busy}
               onClick={() =>
                 action(() => supabase.rpc("request_anonymous_hint", { _message_id: m.id }))
               }
             >
-              <Eye className="mr-1 h-3 w-3" /> Pedir dica ({hints.length}/2)
+              <Eye className="mr-1.5 h-3.5 w-3.5" /> Dica ({hints.length}/2)
             </Button>
           )}
           {canReveal && !myRevealed && (
             <Button
               size="sm"
               variant="outline"
+              className="h-9 rounded-full px-3"
               disabled={busy}
               onClick={() =>
                 action(() => supabase.rpc("request_anonymous_reveal", { _message_id: m.id }))
               }
             >
-              <Unlock className="mr-1 h-3 w-3" /> Revelar quem eu sou
+              <Unlock className="mr-1.5 h-3.5 w-3.5" /> Revelar
             </Button>
           )}
           {myRevealed && m.status !== "revealed" && (
-            <span className="text-xs text-muted-foreground">
+            <span className="px-2 py-2 text-xs text-muted-foreground">
               Aguardando o outro lado aceitar revelar…
             </span>
           )}
-          <Button
-            size="sm"
-            variant="outline"
-            disabled={busy}
-            onClick={() =>
-              action(() => supabase.rpc("ignore_anonymous_message", { _message_id: m.id }))
-            }
-          >
-            <EyeOff className="mr-1 h-3 w-3" /> Ignorar
-          </Button>
-          <Button size="sm" variant="outline" onClick={() => setReportOpen(true)}>
-            <Flag className="mr-1 h-3 w-3" /> Denunciar
-          </Button>
+          <div className="ml-auto flex gap-1">
+            <button
+              type="button"
+              disabled={busy}
+              aria-label="Ignorar"
+              onClick={() =>
+                action(() => supabase.rpc("ignore_anonymous_message", { _message_id: m.id }))
+              }
+              className="grid h-9 w-9 place-items-center rounded-full text-muted-foreground transition hover:bg-muted/70 hover:text-foreground active:scale-95"
+            >
+              <EyeOff className="h-4 w-4" />
+            </button>
+            <button
+              type="button"
+              aria-label="Denunciar"
+              onClick={() => setReportOpen(true)}
+              className="grid h-9 w-9 place-items-center rounded-full text-muted-foreground transition hover:bg-destructive/10 hover:text-destructive active:scale-95"
+            >
+              <Flag className="h-4 w-4" />
+            </button>
+          </div>
         </div>
       )}
 
