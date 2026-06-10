@@ -508,14 +508,14 @@ function InicioPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[var(--petal)]/20 via-background to-background">
+    <div className="min-h-[100dvh] bg-gradient-to-b from-[var(--petal)]/20 via-background to-background">
       <Header />
       <MobileAppHeader title="Início" subtitle="Seu dia no VaiDarNamoro" />
 
-      <main className="relative mx-auto w-full max-w-6xl px-4 pb-20 pt-5 sm:px-6 sm:pt-10">
+      <main className="relative mx-auto w-full max-w-6xl pb-24 pt-0 sm:px-6 sm:pt-10">
         {/* AVISOS SÉRIOS DA EQUIPE */}
         {activeWarnings.length > 0 && (
-          <section className="mb-6 space-y-3">
+          <section className="mb-4 space-y-3 px-4 sm:mb-6 sm:px-0">
             {activeWarnings.map((w) => (
               <div
                 key={w.id}
@@ -550,7 +550,7 @@ function InicioPage() {
           const hero = getHeroTheme();
           return (
             <section
-              className={`relative overflow-hidden rounded-[2rem] border border-border/60 ${hero.sectionClass} px-6 py-10 shadow-soft sm:px-10 sm:py-14`}
+              className={`relative overflow-hidden border border-border/60 ${hero.sectionClass} px-6 pt-10 pb-12 shadow-soft min-h-[58dvh] flex flex-col justify-end rounded-b-[2.25rem] sm:rounded-[2rem] sm:min-h-0 sm:px-10 sm:py-14 sm:flex-none sm:justify-start`}
             >
               {!hero.isNight && (
                 <>
@@ -698,58 +698,95 @@ function InicioPage() {
           );
         })()}
 
+        {/* QUICK SHORTCUTS — mobile only */}
+        {!isBanned && !isRejected && (
+          <section
+            aria-label="Atalhos rápidos"
+            className="md:hidden -mt-6 px-4"
+          >
+            <div className="flex gap-3 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              {[
+                { to: "/pretendentes" as const, label: "Pretendentes", icon: Heart },
+                { to: "/conversas" as const, label: "Conversas", icon: MessageCircle },
+                { to: "/devocional" as const, label: "Devocional", icon: BookHeart },
+                { to: "/loja" as const, label: "Loja", icon: Sparkles },
+                { to: "/perfil" as const, label: "Perfil", icon: Users },
+              ].map((s) => {
+                const SIcon = s.icon;
+                return (
+                  <Link
+                    key={s.to}
+                    to={s.to}
+                    className="app-pressable flex min-w-[78px] shrink-0 flex-col items-center gap-1.5 rounded-2xl border border-border/60 bg-card/85 px-3 py-3 text-center shadow-sm backdrop-blur"
+                  >
+                    <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--petal)] text-[var(--rose)]">
+                      <SIcon className="h-4 w-4" />
+                    </span>
+                    <span className="text-[11px] font-semibold leading-tight text-foreground">
+                      {s.label}
+                    </span>
+                  </Link>
+                );
+              })}
+            </div>
+          </section>
+        )}
+
+        {/* CONTAINER PADDING for the rest of the content */}
+        <div className="px-4 sm:px-0">
+
         {activeCommitment && (
-          <section className="mt-8 animate-fade-up">
+          <section className="mt-6 animate-fade-up sm:mt-8">
             <div
               className="
         overflow-hidden
-        rounded-[2rem]
+        rounded-3xl
         border
         border-emerald-200/60
         bg-gradient-to-br
         from-emerald-50
         via-white
         to-emerald-50
-        p-6
+        p-4 sm:p-6
         shadow-soft
       "
             >
-              <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
+              <div className="flex flex-row items-center gap-4 sm:gap-5">
                 <img
                   src={commitmentRing}
                   alt=""
                   className="
-            h-16
-            w-16
+            h-12 sm:h-16
+            w-12 sm:w-16
             object-contain
             drop-shadow-sm
           "
                 />
 
                 <div className="flex-1">
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-600">
+                  <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-[0.18em] text-emerald-600">
                     Propósito Firmado
                   </p>
 
-                  <h2 className="mt-1 text-2xl font-bold">
+                  <h2 className="mt-0.5 text-base sm:text-2xl font-bold leading-tight">
                     {commitmentPartner
                       ? `Você está em propósito com ${commitmentPartner}`
                       : "Você está em propósito"}
                   </h2>
 
-                  <p className="mt-2 text-sm text-muted-foreground">
+                  <p className="mt-1 text-xs sm:text-sm text-muted-foreground">
                     {commitmentDays} dias juntos em propósito.
                   </p>
                 </div>
 
-                <Button asChild>
+                <Button asChild size="sm" className="shrink-0 rounded-full sm:size-default">
                   <Link
                     to="/proposito/$matchId"
                     params={{
                       matchId: activeCommitment.match_id,
                     }}
                   >
-                    Ver Página do Casal
+                    Página
                   </Link>
                 </Button>
               </div>
@@ -757,15 +794,18 @@ function InicioPage() {
           </section>
         )}
 
-        {/* BANNER STICKERS CHAT GLOBAL */}
-        <div className="mt-8 animate-fade-up" style={{ animationDelay: "300ms" }}>
-          <StickersChatBanner />
-        </div>
-
-        {/* BANNER RECADOS ANÔNIMOS */}
-        <div className="mt-8 animate-fade-up" style={{ animationDelay: "350ms" }}>
-          <AnonymousMessagesBanner />
-        </div>
+        {/* NOVIDADES PARA VOCÊ */}
+        {!isBanned && !isRejected && (
+          <section className="mt-6 animate-fade-up sm:mt-8" style={{ animationDelay: "300ms" }}>
+            <h2 className="mb-3 px-1 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+              Novidades para você
+            </h2>
+            <div className="space-y-3 sm:space-y-4">
+              <StickersChatBanner />
+              <AnonymousMessagesBanner />
+            </div>
+          </section>
+        )}
 
         {/* PAINEL DE BANIMENTO */}
         {isBanned && (
@@ -1151,13 +1191,13 @@ function InicioPage() {
                   </Button>
                 </div>
 
-                <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  {suggestions.slice(0, 3).map((s) => (
+                <div className="mt-5 -mx-4 flex gap-3 overflow-x-auto px-4 pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:grid sm:grid-cols-2 sm:gap-4 sm:overflow-visible sm:px-0 sm:pb-0 lg:grid-cols-3">
+                  {suggestions.slice(0, 6).map((s) => (
                     <Link
                       key={s.id}
                       to="/pretendentes/$id"
                       params={{ id: s.id }}
-                      className="group relative overflow-hidden rounded-3xl border border-border/60 bg-card shadow-soft transition hover:-translate-y-0.5 hover:shadow-elegant"
+                      className="group app-card-interactive relative w-[180px] shrink-0 overflow-hidden rounded-3xl border border-border/60 bg-card shadow-soft transition hover:-translate-y-0.5 hover:shadow-elegant sm:w-auto"
                     >
                       <div className="aspect-[4/5] w-full overflow-hidden bg-muted">
                         {s.photo_url ? (
@@ -1260,6 +1300,7 @@ function InicioPage() {
             </section>
           </>
         )}
+        </div>
       </main>
     </div>
   );
