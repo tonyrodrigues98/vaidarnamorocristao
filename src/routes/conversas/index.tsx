@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
-import { MessageCircle } from "lucide-react";
+import { MobileAppHeader } from "@/components/mobile/MobileAppHeader";
+import { MessageCircle, Search, UsersRound } from "lucide-react";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { OnlineDot } from "@/components/OnlineDot";
 import { UserBadges } from "@/components/UserBadges";
@@ -43,6 +44,7 @@ function List() {
   const [items, setItems] = useState<Item[]>([]);
   const [loadingList, setLoadingList] = useState(true);
   const [activeCommitment, setActiveCommitment] = useState<RelationshipCommitment | null>(null);
+  const [query, setQuery] = useState("");
 
   async function load() {
     if (!user) return;
@@ -154,35 +156,87 @@ function List() {
 
   if (!loading && !user) return <Navigate to="/auth/login" />;
 
+  const q = query.trim().toLowerCase();
+  const filteredItems = q
+    ? items.filter((i) => i.partner.full_name.toLowerCase().includes(q))
+    : items;
+  const COMMUNITY_KEYWORDS = ["comunidade", "geral", "chat", "comunidade geral"];
+  const showCommunity = !q || COMMUNITY_KEYWORDS.some((k) => k.includes(q) || q.includes(k));
+
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-[oklch(0.99_0.005_60)] dark:bg-background">
       <Header />
-      <main className="mx-auto max-w-3xl px-4 py-10">
-        <div className="animate-fade-up">
-          <h1 className="text-4xl font-semibold">Conversas</h1>
-          <p className="mt-1 text-muted-foreground">Suas conexões com interesse mútuo.</p>
+      <MobileAppHeader title="Conversas" subtitle="Mensagens e comunidade" />
+      <main className="mx-auto max-w-3xl px-4 pb-10 pt-4 sm:pt-8">
+        <div className="hidden animate-fade-up sm:block">
+          <h1 className="text-3xl font-semibold tracking-tight">Conversas</h1>
+          <p className="mt-1 text-sm text-muted-foreground">Mensagens e comunidade.</p>
         </div>
 
-        <div className="mt-8 space-y-3">
+        {/* Search */}
+        <div className="mt-4 sm:mt-6">
+          <label className="relative block">
+            <span className="sr-only">Buscar conversas</span>
+            <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <input
+              type="search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Buscar conversas"
+              className="h-11 w-full rounded-2xl border border-border/60 bg-card/80 pl-10 pr-4 text-sm text-foreground shadow-sm outline-none transition placeholder:text-muted-foreground focus:border-[var(--rose)]/50 focus:ring-2 focus:ring-[var(--rose)]/20"
+            />
+          </label>
+        </div>
+
+        <div className="mt-4 space-y-2">
+          {/* Pinned: Comunidade Geral */}
+          {showCommunity && (
+            <Link
+              to="/conversas/comunidade"
+              className="group flex items-center gap-4 rounded-2xl border border-[var(--rose)]/15 bg-gradient-to-br from-[oklch(0.98_0.02_25)] to-[oklch(0.97_0.03_20)] p-4 shadow-sm transition hover:shadow-md dark:from-[oklch(0.22_0.04_20)] dark:to-[oklch(0.18_0.03_20)]"
+            >
+              <div className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[var(--rose)] to-[oklch(0.72_0.15_30)] text-white shadow-sm">
+                <UsersRound className="h-6 w-6" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-baseline justify-between gap-2">
+                  <h3 className="truncate text-[15px] font-semibold tracking-tight text-foreground">
+                    Comunidade Geral
+                  </h3>
+                  <span className="shrink-0 rounded-full bg-[var(--rose)]/12 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[var(--rose)]">
+                    Fixado
+                  </span>
+                </div>
+                <p className="mt-0.5 truncate text-[13px] text-muted-foreground">
+                  Chat global do VaiDarNamoro
+                </p>
+              </div>
+            </Link>
+          )}
+
           {activeCommitment ? (
             <CommitmentPauseCard
               matchId={activeCommitment.match_id}
               description="Você está em um propósito ativo. Por isso, suas outras conversas ficam arquivadas e fora de vista enquanto esse compromisso estiver firmado."
             />
           ) : loadingList ? (
-            <div className="glass h-24 animate-pulse rounded-2xl" />
+            <div className="h-20 animate-pulse rounded-2xl bg-muted/40" />
           ) : items.length === 0 ? (
-            <div className="glass rounded-2xl p-12 text-center text-muted-foreground shadow-soft">
-              <MessageCircle className="mx-auto mb-3 h-8 w-8 text-[var(--rose)]" />
+            <div className="rounded-2xl border border-border/50 bg-card/70 p-10 text-center text-sm text-muted-foreground shadow-sm">
+              <MessageCircle className="mx-auto mb-3 h-7 w-7 text-[var(--rose)]" />
               Quando houver interesse mútuo, suas conversas aparecerão aqui.
             </div>
+          ) : filteredItems.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-border/50 bg-card/40 p-6 text-center text-sm text-muted-foreground">
+              Nenhuma conversa encontrada para "{query}".
+            </div>
           ) : (
-            items.map((i) => (
+            filteredItems.map((i) => (
               <Link
                 key={i.matchId}
                 to="/conversas/$matchId"
                 params={{ matchId: i.matchId }}
-                className="glass hover-lift flex items-center gap-4 rounded-2xl p-4 shadow-soft"
+                className="flex items-center gap-4 rounded-2xl border border-border/40 bg-card/80 p-3.5 shadow-sm transition hover:bg-card hover:shadow-md active:scale-[0.997]"
               >
                 <div className="relative flex shrink-0 items-center justify-center">
                   <DecoratedAvatar
