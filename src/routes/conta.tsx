@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Header } from "@/components/layout/Header";
+import { MobileAppHeader } from "@/components/mobile/MobileAppHeader";
 import { AccountDangerZone } from "@/components/AccountDangerZone";
 import { ChevronLeft } from "lucide-react";
 
@@ -17,6 +18,7 @@ function ContaPage() {
   return (
     <div className="min-h-screen">
       <Header />
+      <MobileAppHeader title="Conta" subtitle="Segurança e preferências" />
       <main className="mx-auto w-full max-w-3xl px-4 py-8 sm:py-12">
         <Link
           to="/perfil"
