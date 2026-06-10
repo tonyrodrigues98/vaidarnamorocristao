@@ -544,15 +544,6 @@ export function Header() {
                   </MobileSection>
                 )}
 
-                {isApproved && (
-                  <MobileItem to="/comunidade" onClick={close}>
-                    <span className="flex items-center gap-2">
-                      <Globe className="h-4 w-4" /> Comunidade
-                    </span>
-                    <Badge n={communityCount} />
-                  </MobileItem>
-                )}
-
                 <MobileSection label="Mais">
                   <MobileItem to="/devocional" onClick={close}>
                     <span className="flex items-center gap-2">
