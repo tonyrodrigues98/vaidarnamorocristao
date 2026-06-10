@@ -735,6 +735,15 @@ function Comunidade() {
           <HandHeart className="h-4 w-4" />
           <span className="hidden sm:inline">Orações</span>
         </Link>
+        <button
+          type="button"
+          onClick={() => setDrawerOpen(true)}
+          aria-label="Abrir outras conversas"
+          className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-border px-3 py-2 text-xs font-medium transition hover:bg-accent"
+        >
+          <PanelLeft className="h-4 w-4" />
+          <span className="hidden sm:inline">Conversas</span>
+        </button>
       </div>
 
       {pinnedMessages.length > 0 && (
