@@ -29,6 +29,49 @@ type SignedResult = {
 
 const cache = new Map<string, CachedSigned>();
 
+const STORAGE_KEY = "vdn:signed-photos:v1";
+const STORAGE_SAFETY_MS = 60 * 1000;
+
+function hydrateFromStorage() {
+  if (typeof window === "undefined") return;
+  try {
+    const raw = window.sessionStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    const parsed = JSON.parse(raw) as Record<string, { url: string; expiresAt: number }>;
+    const now = Date.now();
+    for (const [path, entry] of Object.entries(parsed)) {
+      if (entry?.url && entry.expiresAt - STORAGE_SAFETY_MS > now) {
+        cache.set(path, { url: entry.url, expiresAt: entry.expiresAt });
+      }
+    }
+  } catch {
+    /* ignore corrupt storage */
+  }
+}
+
+let persistTimer: ReturnType<typeof setTimeout> | null = null;
+function persistToStorage() {
+  if (typeof window === "undefined") return;
+  if (persistTimer) return;
+  persistTimer = setTimeout(() => {
+    persistTimer = null;
+    try {
+      const out: Record<string, { url: string; expiresAt: number }> = {};
+      const now = Date.now();
+      cache.forEach((entry, path) => {
+        if (entry.url && entry.expiresAt - STORAGE_SAFETY_MS > now) {
+          out[path] = { url: entry.url, expiresAt: entry.expiresAt };
+        }
+      });
+      window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify(out));
+    } catch {
+      /* quota or disabled — best effort only */
+    }
+  }, 400);
+}
+
+hydrateFromStorage();
+
 function stripQueryAndHash(value: string) {
   return value.split("#")[0].split("?")[0];
 }
@@ -106,6 +149,7 @@ function getSigned(
   const pending = signPath(path).then((url) => {
     if (url) {
       cache.set(path, { url, expiresAt: Date.now() + SIGN_TTL_SECONDS * 1000 });
+      persistToStorage();
     } else if (cached?.url) {
       cache.set(path, { url: cached.url, expiresAt: cached.expiresAt });
     } else {
