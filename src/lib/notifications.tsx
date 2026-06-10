@@ -86,15 +86,7 @@ export function useNotifications(limit = 50) {
               );
             },
           },
-          (prev) => {
-            const next = updater(prev);
-            // Respect each cache entry's limit cap so the Header (20) stays bounded.
-            const cap = typeof (prev as AppNotification[] | undefined)?.length === "number"
-              ? undefined
-              : undefined;
-            void cap;
-            return next;
-          },
+          (prev) => updater(prev),
         );
       },
     );
