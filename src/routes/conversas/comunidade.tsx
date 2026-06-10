@@ -319,23 +319,23 @@ function Comunidade() {
         .from("global_messages")
         .select("*")
         .order("created_at", { ascending: false })
-        .limit(100);
+        .limit(PAGE_SIZE);
       if (error) {
         toast.error(friendlyError(error));
         return;
       }
       if (ignore) return;
-      const list = ((data ?? []) as GMsg[]).slice().reverse();
+      const list = ((data ?? []) as GMsg[]).slice().reverse() as LocalGMsg[];
       setMessages(list);
+      setHasMoreOlder((data?.length ?? 0) === PAGE_SIZE);
+      initializedScrollRef.current = false;
+      nearBottomRef.current = true;
       await loadProfiles(Array.from(new Set(list.map((m) => m.sender_id))));
       const stickerIds = Array.from(
         new Set(list.map((m) => m.sticker_id).filter(Boolean) as string[]),
       );
       if (stickerIds.length) loadStickersByIds(stickerIds);
       markSeen(user.id, "community");
-      requestAnimationFrame(() => {
-        if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-      });
     })();
 
     const ch = supabase
@@ -345,13 +345,26 @@ function Comunidade() {
         { event: "INSERT", schema: "public", table: "global_messages" },
         async (payload) => {
           const m = payload.new as GMsg;
-          setMessages((prev) => [...prev, m]);
+          setMessages((prev) => {
+            if (prev.some((x) => x.id === m.id)) return prev;
+            // Reconcile with an optimistic temp from the same sender + content/sticker.
+            const tempIdx = prev.findIndex(
+              (x) =>
+                x._tempId &&
+                x.sender_id === m.sender_id &&
+                (x.sticker_id ?? null) === (m.sticker_id ?? null) &&
+                (x.content ?? "") === (m.content ?? ""),
+            );
+            if (tempIdx >= 0) {
+              const next = prev.slice();
+              next[tempIdx] = { ...m };
+              return next;
+            }
+            return [...prev, m as LocalGMsg];
+          });
           await loadProfiles([m.sender_id]);
           if (m.sticker_id) loadStickersByIds([m.sticker_id]);
           if (user) markSeen(user.id, "community");
-          requestAnimationFrame(() => {
-            if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-          });
         },
       )
       .on(
