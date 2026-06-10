@@ -1191,13 +1191,13 @@ function InicioPage() {
                   </Button>
                 </div>
 
-                <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  {suggestions.slice(0, 3).map((s) => (
+                <div className="mt-5 -mx-4 flex gap-3 overflow-x-auto px-4 pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:grid sm:grid-cols-2 sm:gap-4 sm:overflow-visible sm:px-0 sm:pb-0 lg:grid-cols-3">
+                  {suggestions.slice(0, 6).map((s) => (
                     <Link
                       key={s.id}
                       to="/pretendentes/$id"
                       params={{ id: s.id }}
-                      className="group relative overflow-hidden rounded-3xl border border-border/60 bg-card shadow-soft transition hover:-translate-y-0.5 hover:shadow-elegant"
+                      className="group app-card-interactive relative w-[180px] shrink-0 overflow-hidden rounded-3xl border border-border/60 bg-card shadow-soft transition hover:-translate-y-0.5 hover:shadow-elegant sm:w-auto"
                     >
                       <div className="aspect-[4/5] w-full overflow-hidden bg-muted">
                         {s.photo_url ? (
