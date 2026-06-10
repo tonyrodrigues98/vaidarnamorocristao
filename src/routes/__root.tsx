@@ -17,6 +17,7 @@ import { PresenceProvider } from "@/lib/presence";
 import { BanGuard } from "@/components/BanGuard";
 import { MobileAppShell } from "@/components/mobile/MobileAppShell";
 import { NetworkStatusBanner } from "@/components/mobile/NetworkStatusBanner";
+import { InstallPromptBanner } from "@/components/InstallPromptBanner";
 import { MobileRouteTransition } from "@/components/mobile/MobileRouteTransition";
 import { isChatRoute, shouldShowFooter } from "@/lib/layoutVisibility";
 
@@ -213,6 +214,7 @@ function RootComponent() {
           <NotificationsBridge />
           <BanGuard />
           <NetworkStatusBanner />
+          <InstallPromptBanner />
           <MobileAppShell>
             {isHome ? (
               <Outlet />
