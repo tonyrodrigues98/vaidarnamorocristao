@@ -417,6 +417,89 @@ function Comunidade() {
     [messages, flaggedIds, isStaffViewer, user],
   );
 
+  // Smart scroll: instant on first load, smooth on own send/near-bottom,
+  // otherwise show a "new message" pill.
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const len = messages.length;
+    const prev = prevLenRef.current;
+    prevLenRef.current = len;
+    if (len === 0) return;
+    if (!initializedScrollRef.current) {
+      el.scrollTop = el.scrollHeight;
+      initializedScrollRef.current = true;
+      nearBottomRef.current = true;
+      return;
+    }
+    if (len <= prev) return;
+    const last = messages[len - 1];
+    const mine = last?.sender_id === user?.id;
+    if (mine || nearBottomRef.current) {
+      el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+      setShowNewBadge(false);
+    } else {
+      setShowNewBadge(true);
+    }
+  }, [messages, user?.id]);
+
+  const loadOlder = useCallback(async () => {
+    if (loadingOlder || !hasMoreOlder) return;
+    const el = scrollRef.current;
+    const oldest = messages[0];
+    if (!oldest || !el) return;
+    setLoadingOlder(true);
+    const prevHeight = el.scrollHeight;
+    const prevTop = el.scrollTop;
+    const { data } = await supabase
+      .from("global_messages")
+      .select("*")
+      .lt("created_at", oldest.created_at)
+      .order("created_at", { ascending: false })
+      .limit(PAGE_SIZE);
+    const olds = ((data ?? []) as GMsg[]).slice().reverse() as LocalGMsg[];
+    setMessages((prev) => {
+      const seen = new Set(prev.map((m) => m.id));
+      const merged = olds.filter((m) => !seen.has(m.id));
+      return [...merged, ...prev];
+    });
+    setHasMoreOlder((data?.length ?? 0) === PAGE_SIZE);
+    if (olds.length) {
+      await loadProfiles(Array.from(new Set(olds.map((m) => m.sender_id))));
+      const sIds = Array.from(
+        new Set(olds.map((m) => m.sticker_id).filter(Boolean) as string[]),
+      );
+      if (sIds.length) loadStickersByIds(sIds);
+    }
+    setLoadingOlder(false);
+    requestAnimationFrame(() => {
+      if (!el) return;
+      el.scrollTop = prevTop + (el.scrollHeight - prevHeight);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loadingOlder, hasMoreOlder, messages, loadStickersByIds]);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const onScroll = () => {
+      const dist = el.scrollHeight - el.scrollTop - el.clientHeight;
+      nearBottomRef.current = dist < 80;
+      if (nearBottomRef.current && showNewBadge) setShowNewBadge(false);
+      if (el.scrollTop < 80) void loadOlder();
+    };
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => el.removeEventListener("scroll", onScroll);
+  }, [loadOlder, showNewBadge]);
+
+  function scrollToBottom() {
+    const el = scrollRef.current;
+    if (!el) return;
+    el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+    nearBottomRef.current = true;
+    setShowNewBadge(false);
+  }
+
   const sendMessage = useCallback(
     async (content: string): Promise<boolean> => {
       if (!content || !user) return false;
@@ -425,16 +508,42 @@ function Comunidade() {
         setWarning(hit);
         return false;
       }
-      const { error } = await supabase.from("global_messages").insert({
+      const replyId = replyTo?.id ?? null;
+      const tempId = `temp-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      const optimistic: LocalGMsg = {
+        id: tempId,
+        _tempId: tempId,
+        _status: "sending",
         sender_id: user.id,
         content,
-        reply_to_id: replyTo?.id ?? null,
-      });
-      if (error) {
-        toast.error(friendlyError(error));
+        created_at: new Date().toISOString(),
+        reply_to_id: replyId,
+      };
+      setMessages((prev) => [...prev, optimistic]);
+      setReplyTo(null);
+      nearBottomRef.current = true;
+      const { data, error } = await supabase
+        .from("global_messages")
+        .insert({
+          sender_id: user.id,
+          content,
+          reply_to_id: replyId,
+        })
+        .select()
+        .single();
+      if (error || !data) {
+        setMessages((prev) =>
+          prev.map((m) => (m.id === tempId ? { ...m, _status: "failed" } : m)),
+        );
+        toast.error(friendlyError(error ?? new Error("Falha ao enviar")));
         return false;
       }
-      setReplyTo(null);
+      const real = data as GMsg;
+      setMessages((prev) => {
+        const hasReal = prev.some((m) => m.id === real.id);
+        if (hasReal) return prev.filter((m) => m.id !== tempId);
+        return prev.map((m) => (m.id === tempId ? { ...real } : m));
+      });
       return true;
     },
     [user, restrictedWords, replyTo],
