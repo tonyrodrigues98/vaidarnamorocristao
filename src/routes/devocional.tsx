@@ -10,6 +10,7 @@ import { MobileAppHeader } from "@/components/mobile/MobileAppHeader";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
+import { AppEmptyState } from "@/components/ui/AppEmptyState";
 import { recomputeMyBadges } from "@/lib/recomputeBadges";
 import { markHomeChecklistStep } from "@/lib/homeChecklist";
 import {
