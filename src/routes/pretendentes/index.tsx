@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PretendenteCarousel } from "@/components/pretendentes/PretendenteCarousel";
 import { PretendenteFeaturedCard } from "@/components/pretendentes/PretendenteFeaturedCard";
+import { ExploreProfileCard } from "@/components/pretendentes/ExploreProfileCard";
 import { useAuth } from "@/lib/auth";
 import { getActiveCommitmentByUser } from "@/lib/commitments";
 import { Header } from "@/components/layout/Header";
@@ -29,6 +30,7 @@ import {
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { ROLE_PRIORITY, type AppRole, type RoleColor } from "@/lib/roles";
 import { computeAffinity, type AffinityChip } from "@/lib/affinity";
 import { LOVE_LANGUAGE, MINISTRY, type AdvancedProfile } from "@/lib/profileAdvanced";
@@ -101,6 +103,9 @@ function List() {
   const [myAdvanced, setMyAdvanced] = useState<AdvancedProfile | null>(null);
   const [advancedMap, setAdvancedMap] = useState<Record<string, AdvancedProfile>>({});
   const [extraPhotos, setExtraPhotos] = useState<Record<string, string[]>>({});
+  const isMobile = useIsMobile();
+  const [mobileMode, setMobileMode] = useState<"explore" | "list">("explore");
+  const [exploreIndex, setExploreIndex] = useState(0);
 
   const [ageMinInput, setAgeMinInput] = useState<string>(
     search.ageMin != null ? String(search.ageMin) : "",
@@ -313,6 +318,11 @@ function List() {
       )
       .slice(0, 10);
   }, [filtered, affinityByProfile]);
+
+  // Reset explore index whenever the visible list changes (filters, data load)
+  useEffect(() => {
+    setExploreIndex(0);
+  }, [filtered.length, search.q, search.state, search.marital, search.ageMin, search.ageMax, search.church, search.ministry, search.loveLang, search.verified, search.sort]);
 
   const nearbyProfiles = useMemo(() => {
     return filtered.filter((p) => p.state === myPrefs.state).slice(0, 10);
@@ -632,6 +642,91 @@ function List() {
             </div>
           ) : (
             <>
+              {/* Mobile-only Explorar com Propósito */}
+              <div className="mt-6 md:hidden">
+                <div className="mb-4 flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="inline-flex items-center gap-1.5 rounded-full bg-rose-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-rose-700 dark:bg-rose-950/40 dark:text-rose-200">
+                      <Sparkles className="h-3 w-3" /> Explorar com propósito
+                    </p>
+                    <p className="mt-1.5 text-sm text-muted-foreground">
+                      Veja perfis com calma e escolha com intenção.
+                    </p>
+                  </div>
+                  <div
+                    role="tablist"
+                    aria-label="Modo de visualização"
+                    className="inline-flex shrink-0 rounded-full border border-border bg-background p-1 text-xs font-semibold"
+                  >
+                    <button
+                      type="button"
+                      role="tab"
+                      aria-selected={mobileMode === "explore"}
+                      onClick={() => setMobileMode("explore")}
+                      className={`app-pressable rounded-full px-3 py-1.5 transition-colors ${
+                        mobileMode === "explore"
+                          ? "bg-foreground text-background"
+                          : "text-muted-foreground"
+                      }`}
+                    >
+                      Explorar
+                    </button>
+                    <button
+                      type="button"
+                      role="tab"
+                      aria-selected={mobileMode === "list"}
+                      onClick={() => setMobileMode("list")}
+                      className={`app-pressable rounded-full px-3 py-1.5 transition-colors ${
+                        mobileMode === "list"
+                          ? "bg-foreground text-background"
+                          : "text-muted-foreground"
+                      }`}
+                    >
+                      Lista
+                    </button>
+                  </div>
+                </div>
+
+                {mobileMode === "explore" &&
+                  (() => {
+                    const idx = Math.min(exploreIndex, filtered.length - 1);
+                    const p = filtered[idx];
+                    if (!p) return null;
+                    const chips = affinityByProfile[p.id] ?? [];
+                    const score =
+                      maxScore > 0 ? Math.min(99, Math.round((chips.length / maxScore) * 100)) : 0;
+                    const showScore = chips.length >= 3 && score >= 50 && !!myAdvanced;
+                    return (
+                      <ExploreProfileCard
+                        key={p.id}
+                        profile={p}
+                        photos={[
+                          ...(p.photo_url ? [p.photo_url] : []),
+                          ...(extraPhotos[p.id] ?? []),
+                        ]}
+                        chips={chips}
+                        score={score}
+                        showScore={showScore}
+                        isSuggestion={isSuggestion(p)}
+                        staff={staffMap[p.id]}
+                        index={idx}
+                        total={filtered.length}
+                        canPrev={idx > 0}
+                        canNext={idx < filtered.length - 1}
+                        onPrev={() => setExploreIndex((i) => Math.max(0, i - 1))}
+                        onNext={() =>
+                          setExploreIndex((i) => Math.min(filtered.length - 1, i + 1))
+                        }
+                      />
+                    );
+                  })()}
+              </div>
+
+              <div
+                className={
+                  isMobile && mobileMode === "explore" ? "hidden md:block" : "block"
+                }
+              >
               <div className="mt-8 overflow-hidden rounded-3xl border border-rose-200/60 bg-gradient-to-r from-rose-500 via-pink-500 to-purple-500 p-8 text-white shadow-elegant dark:border-rose-900/40">
                 <div className="max-w-2xl">
                   <p className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-white/90">
@@ -703,6 +798,7 @@ function List() {
                     />
                   );
                 })}
+              </div>
               </div>
             </>
           ))}
