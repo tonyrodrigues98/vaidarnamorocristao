@@ -32,6 +32,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as SuporteIndexRouteImport } from './routes/suporte/index'
 import { Route as PretendentesIndexRouteImport } from './routes/pretendentes/index'
 import { Route as PresentesIndexRouteImport } from './routes/presentes/index'
+import { Route as OnboardingIndexRouteImport } from './routes/onboarding/index'
 import { Route as NoticiasIndexRouteImport } from './routes/noticias.index'
 import { Route as ConversasIndexRouteImport } from './routes/conversas/index'
 import { Route as BlogIndexRouteImport } from './routes/blog.index'
@@ -175,6 +176,11 @@ const PretendentesIndexRoute = PretendentesIndexRouteImport.update({
 const PresentesIndexRoute = PresentesIndexRouteImport.update({
   id: '/presentes/',
   path: '/presentes/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OnboardingIndexRoute = OnboardingIndexRouteImport.update({
+  id: '/onboarding/',
+  path: '/onboarding/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const NoticiasIndexRoute = NoticiasIndexRouteImport.update({
@@ -373,6 +379,7 @@ export interface FileRoutesByFullPath {
   '/blog/': typeof BlogIndexRoute
   '/conversas/': typeof ConversasIndexRoute
   '/noticias/': typeof NoticiasIndexRoute
+  '/onboarding/': typeof OnboardingIndexRoute
   '/presentes/': typeof PresentesIndexRoute
   '/pretendentes/': typeof PretendentesIndexRoute
   '/suporte/': typeof SuporteIndexRoute
@@ -427,6 +434,7 @@ export interface FileRoutesByTo {
   '/blog': typeof BlogIndexRoute
   '/conversas': typeof ConversasIndexRoute
   '/noticias': typeof NoticiasIndexRoute
+  '/onboarding': typeof OnboardingIndexRoute
   '/presentes': typeof PresentesIndexRoute
   '/pretendentes': typeof PretendentesIndexRoute
   '/suporte': typeof SuporteIndexRoute
@@ -482,6 +490,7 @@ export interface FileRoutesById {
   '/blog/': typeof BlogIndexRoute
   '/conversas/': typeof ConversasIndexRoute
   '/noticias/': typeof NoticiasIndexRoute
+  '/onboarding/': typeof OnboardingIndexRoute
   '/presentes/': typeof PresentesIndexRoute
   '/pretendentes/': typeof PretendentesIndexRoute
   '/suporte/': typeof SuporteIndexRoute
@@ -538,6 +547,7 @@ export interface FileRouteTypes {
     | '/blog/'
     | '/conversas/'
     | '/noticias/'
+    | '/onboarding/'
     | '/presentes/'
     | '/pretendentes/'
     | '/suporte/'
@@ -592,6 +602,7 @@ export interface FileRouteTypes {
     | '/blog'
     | '/conversas'
     | '/noticias'
+    | '/onboarding'
     | '/presentes'
     | '/pretendentes'
     | '/suporte'
@@ -646,6 +657,7 @@ export interface FileRouteTypes {
     | '/blog/'
     | '/conversas/'
     | '/noticias/'
+    | '/onboarding/'
     | '/presentes/'
     | '/pretendentes/'
     | '/suporte/'
@@ -701,6 +713,7 @@ export interface RootRouteChildren {
   BlogIndexRoute: typeof BlogIndexRoute
   ConversasIndexRoute: typeof ConversasIndexRoute
   NoticiasIndexRoute: typeof NoticiasIndexRoute
+  OnboardingIndexRoute: typeof OnboardingIndexRoute
   PresentesIndexRoute: typeof PresentesIndexRoute
   PretendentesIndexRoute: typeof PretendentesIndexRoute
   SuporteIndexRoute: typeof SuporteIndexRoute
@@ -868,6 +881,13 @@ declare module '@tanstack/react-router' {
       path: '/presentes'
       fullPath: '/presentes/'
       preLoaderRoute: typeof PresentesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/onboarding/': {
+      id: '/onboarding/'
+      path: '/onboarding'
+      fullPath: '/onboarding/'
+      preLoaderRoute: typeof OnboardingIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/noticias/': {
@@ -1125,6 +1145,7 @@ const rootRouteChildren: RootRouteChildren = {
   BlogIndexRoute: BlogIndexRoute,
   ConversasIndexRoute: ConversasIndexRoute,
   NoticiasIndexRoute: NoticiasIndexRoute,
+  OnboardingIndexRoute: OnboardingIndexRoute,
   PresentesIndexRoute: PresentesIndexRoute,
   PretendentesIndexRoute: PretendentesIndexRoute,
   SuporteIndexRoute: SuporteIndexRoute,

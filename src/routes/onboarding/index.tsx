@@ -1,4 +1,4 @@
-import { createFileRoute, Link, Navigate, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Navigate, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, Camera, User as UserIcon, Users as UsersIcon } from "lucide-react";
 import { toast } from "sonner";
@@ -598,8 +598,3 @@ function StepWelcome({
     </div>
   );
 }
-
-// Hide top header bar entirely on welcome by leveraging the layout's overflow.
-// (The welcome step renders absolutely positioned over the wrapper.)
-// Avoid unused import warning for Link in case future refactors need it.
-export const __unused__ = Link;
