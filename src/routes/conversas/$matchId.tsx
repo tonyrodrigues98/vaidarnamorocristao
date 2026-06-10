@@ -128,6 +128,9 @@ function Chat() {
   const restrictedWords = useRestrictedWords();
   const [warning, setWarning] = useState<string | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  // IDs already marked as read in this session — prevents duplicate RPC calls
+  // when pagesData changes (older page loaded, realtime UPDATE, etc.).
+  const markedReadRef = useRef<Set<string>>(new Set());
 
   const queryKey = chatQueryKey(matchId, user?.id);
   const enableMessagesQuery = !!user && authorized === true && !pausedByCommitment;
@@ -251,6 +254,8 @@ function Chat() {
       // useInfiniteQuery handles message fetching now; mark-as-read runs in a
       // dedicated effect below once the first page is in cache.
     })();
+    // Reset per-conversation dedupe.
+    markedReadRef.current = new Set();
 
     const ch = supabase
       .channel(`chat-${matchId}`)
@@ -260,9 +265,8 @@ function Chat() {
         (payload) => {
           const incoming = payload.new as Msg;
           appendToCache(incoming);
-          if (incoming.sender_id !== user.id) {
-            supabase.rpc("mark_message_read", { _message_id: incoming.id });
-          }
+          // mark-as-read runs in a dedicated effect — only mark when the user
+          // is actually looking at the bottom of the conversation.
         },
       )
       .on(
@@ -287,17 +291,44 @@ function Chat() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [matchId, user?.id]);
 
-  // Mark unread received messages as read whenever the page set changes.
-  useEffect(() => {
+  // Mark unread received messages as read. Runs only when the document is
+  // visible AND the user is near the bottom (i.e. actually viewing new
+  // messages). Deduped via markedReadRef so loading older pages or realtime
+  // UPDATE events do not re-fire the RPC, and pending optimistic temps are
+  // never touched (they live outside pagesData).
+  const runMarkRead = useCallback(() => {
     if (!user || !pagesData) return;
-    const unread = pagesData.pages.flat().filter(
-      (m) => m.sender_id !== user.id && !m.read_at,
-    );
+    if (typeof document !== "undefined" && document.visibilityState !== "visible") return;
+    if (!nearBottomRef.current && initializedScrollRef.current) return;
+    const seen = markedReadRef.current;
+    const unread = pagesData.pages
+      .flat()
+      .filter((m) => m.sender_id !== user.id && !m.read_at && !seen.has(m.id));
     if (unread.length === 0) return;
+    for (const m of unread) seen.add(m.id);
     Promise.all(
       unread.map((m) => supabase.rpc("mark_message_read", { _message_id: m.id })),
-    );
+    ).catch(() => {
+      // On failure, allow a retry on the next trigger.
+      for (const m of unread) seen.delete(m.id);
+    });
   }, [pagesData, user?.id]);
+
+  // Trigger when pages change (initial load, realtime INSERT appended to cache,
+  // realtime UPDATE patching read_at).
+  useEffect(() => {
+    runMarkRead();
+  }, [runMarkRead]);
+
+  // Trigger when the tab becomes visible again.
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const onVis = () => {
+      if (document.visibilityState === "visible") runMarkRead();
+    };
+    document.addEventListener("visibilitychange", onVis);
+    return () => document.removeEventListener("visibilitychange", onVis);
+  }, [runMarkRead]);
 
   // Smart scroll: instant jump on first load; smooth on own send or when
   // the user was already near the bottom. Otherwise show a "new message" pill.
@@ -344,13 +375,16 @@ function Chat() {
     if (!el) return;
     const onScroll = () => {
       const dist = el.scrollHeight - el.scrollTop - el.clientHeight;
+      const wasNearBottom = nearBottomRef.current;
       nearBottomRef.current = dist < 80;
       if (nearBottomRef.current && showNewBadge) setShowNewBadge(false);
+      // When the user scrolls into the bottom zone, mark visible unread as read.
+      if (nearBottomRef.current && !wasNearBottom) runMarkRead();
       if (el.scrollTop < 80) void loadOlder();
     };
     el.addEventListener("scroll", onScroll, { passive: true });
     return () => el.removeEventListener("scroll", onScroll);
-  }, [loadOlder, showNewBadge]);
+  }, [loadOlder, showNewBadge, runMarkRead]);
 
   function scrollToBottom() {
     const el = scrollRef.current;
