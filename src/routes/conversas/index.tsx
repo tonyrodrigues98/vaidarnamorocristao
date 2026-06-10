@@ -158,6 +158,7 @@ function List() {
           )}
         </div>
       </main>
+      </PullToRefresh>
     </div>
   );
 }
