@@ -577,34 +577,26 @@ function Detail() {
             <div className="space-y-4">
               {!hasHiddenPrimaryActions && (
                 <div className={actionCardClass}>
-                  <div className="mb-4">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                      Acoes principais
-                    </p>
-                    <h2 className="mt-1 text-xl font-semibold text-foreground">
-                      Conectar com cuidado
-                    </h2>
-                  </div>
                   <div className="grid gap-3 sm:grid-cols-2">
                     {profileCommitted ? (
-                      <Button size="lg" className="w-full sm:col-span-2" disabled variant="outline">
+                      <Button size="lg" className="app-pressable w-full sm:col-span-2" disabled variant="outline">
                         <Gem className="mr-2 h-4 w-4" />
                         Usuario em Proposito
                       </Button>
                     ) : matchId ? (
-                      <Button size="lg" className="w-full shadow-glow sm:col-span-2" asChild>
+                      <Button size="lg" className="app-pressable w-full shadow-glow sm:col-span-2" asChild>
                         <Link to="/conversas/$matchId" params={{ matchId }}>
                           <MessageCircle className="mr-2 h-4 w-4" /> Conversar
                         </Link>
                       </Button>
                     ) : interestSent ? (
-                      <Button size="lg" variant="outline" className="w-full sm:col-span-2" disabled>
+                      <Button size="lg" variant="outline" className="app-pressable w-full sm:col-span-2" disabled>
                         <Check className="mr-2 h-4 w-4" /> Interesse enviado
                       </Button>
                     ) : (
                       <Button
                         size="lg"
-                        className="w-full shadow-glow sm:col-span-2"
+                        className="app-pressable w-full shadow-glow sm:col-span-2"
                         disabled={busy}
                         onClick={demonstrarInteresse}
                       >
@@ -625,7 +617,7 @@ function Detail() {
                     {user && user.id !== profile.id && !profileCommitted && (
                       <Button
                         variant="outline"
-                        className="w-full border-pink-400/50 bg-gradient-to-r from-pink-500/10 via-fuchsia-500/10 to-purple-500/10 hover:from-pink-500/20 hover:to-purple-500/20"
+                        className="app-pressable w-full border-pink-400/50 bg-gradient-to-r from-pink-500/10 via-fuchsia-500/10 to-purple-500/10 hover:from-pink-500/20 hover:to-purple-500/20"
                         asChild
                       >
                         <Link to="/presentes" search={{ to: profile.id } as never}>
@@ -637,7 +629,7 @@ function Detail() {
 
                     <Button
                       variant="outline"
-                      className="w-full"
+                      className="app-pressable w-full"
                       onClick={() => toast.success("Oracao registrada com carinho")}
                     >
                       <HandHeart className="mr-2 h-4 w-4" /> Orar por ele(a)
@@ -652,10 +644,7 @@ function Detail() {
 
               {hasHiddenPrimaryActions && (
                 <div className={actionCardClass}>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                    Acoes indisponiveis
-                  </p>
-                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                  <p className="text-sm leading-relaxed text-muted-foreground">
                     Algumas acoes ficam ocultas conforme as regras de seguranca e elegibilidade do
                     Christian Connect.
                   </p>
@@ -666,12 +655,12 @@ function Detail() {
         </section>
 
         <section className={`mt-6 ${surfaceClass}`}>
-          <div className="mb-4">
-            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Galeria
-            </p>
-            <h2 className="mt-1 text-2xl font-semibold text-foreground">Fotos do perfil</h2>
-          </div>
+          <h2 className="mb-3 flex items-center gap-2 text-base font-semibold text-foreground">
+            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[var(--rose)]/10 text-[var(--rose)]">
+              <Sparkles className="h-4 w-4" />
+            </span>
+            Fotos
+          </h2>
           <div className="overflow-hidden rounded-[1.5rem] border border-border/60 bg-muted/45 p-2 dark:bg-background/25">
             <div className="overflow-hidden rounded-[1.15rem]">
               <PhotoCarousel
@@ -750,13 +739,13 @@ function Detail() {
           </section>
         )}
 
-        {/* Avançado (todas as seções visíveis) */}
+        {/* Mais sobre */}
         <div className={`mt-6 ${surfaceClass}`}>
           <div className="mb-4 flex items-center gap-2">
             <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-sky-500/10 text-sky-600 dark:text-sky-300">
               <Sparkles className="h-4 w-4" />
             </span>
-            <h2 className="text-base font-semibold text-foreground">Informacoes avancadas</h2>
+            <h2 className="text-base font-semibold text-foreground">Mais sobre</h2>
           </div>
           <ProfileAdvancedView userId={profile.id} />
         </div>
@@ -823,21 +812,16 @@ function Detail() {
 
         {/* Ações secundárias */}
         <div className={`mt-6 ${surfaceClass}`}>
-          <div className="mb-4 flex items-center gap-2">
+          <div className="mb-3 flex items-center gap-2">
             <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-red-500/10 text-red-600 dark:text-red-300">
               <Flag className="h-4 w-4" />
             </span>
-            <div>
-              <h2 className="text-base font-semibold text-foreground">Seguranca e privacidade</h2>
-              <p className="text-xs text-muted-foreground">
-                Denuncie ou bloqueie este perfil quando necessario.
-              </p>
-            </div>
+            <h2 className="text-base font-semibold text-foreground">Segurança</h2>
           </div>
           <div className="flex gap-2">
             <Dialog open={reportOpen} onOpenChange={setReportOpen}>
               <DialogTrigger asChild>
-                <Button variant="ghost" size="sm" className="flex-1 text-muted-foreground">
+                <Button variant="ghost" size="sm" className="app-pressable flex-1 text-muted-foreground">
                   <Flag className="mr-1 h-4 w-4" /> Denunciar
                 </Button>
               </DialogTrigger>
@@ -878,7 +862,7 @@ function Detail() {
             <Button
               variant="ghost"
               size="sm"
-              className="flex-1 text-muted-foreground"
+              className="app-pressable flex-1 text-muted-foreground"
               disabled={busy || blocked}
               onClick={bloquear}
             >
