@@ -235,6 +235,7 @@ function Etapa1() {
       toast.error(error.message);
       return;
     }
+    clearOnboardingDraft();
     toast.success("Etapa 1 concluída!");
     navigate({ to: "/onboarding/etapa-2" });
   }
