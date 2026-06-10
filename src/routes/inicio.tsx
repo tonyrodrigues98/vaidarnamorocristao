@@ -42,6 +42,7 @@ import {
   Clock,
   Newspaper,
   VenetianMask,
+  TrendingUp,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -1158,6 +1159,12 @@ function InicioPage() {
                   label="Notificações"
                   hint={unreadNotifs > 0 ? `${unreadNotifs} novas` : "Ver"}
                   highlight={unreadNotifs > 0}
+                />
+                <ActivityChip
+                  to="/dashboard"
+                  icon={<TrendingUp className="h-4 w-4" />}
+                  label="Métricas"
+                  hint="Visitas e tendências"
                 />
                 <ActivityChip
                   to="/interesses"
