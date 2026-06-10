@@ -130,6 +130,7 @@ function Comunidade() {
   const [flagBusy, setFlagBusy] = useState(false);
   const [stickerCache, setStickerCache] = useState<Record<string, Sticker>>({});
   const stickerCacheRef = useRef<Record<string, Sticker>>({});
+  const [drawerOpen, setDrawerOpen] = useState(false);
   useEffect(() => {
     stickerCacheRef.current = stickerCache;
   }, [stickerCache]);
