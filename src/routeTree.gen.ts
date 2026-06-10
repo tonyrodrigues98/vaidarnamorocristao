@@ -20,6 +20,7 @@ import { Route as MatchesRouteImport } from './routes/matches'
 import { Route as ManualRouteImport } from './routes/manual'
 import { Route as LojaRouteImport } from './routes/loja'
 import { Route as InteressesRouteImport } from './routes/interesses'
+import { Route as InstalarRouteImport } from './routes/instalar'
 import { Route as InicioRouteImport } from './routes/inicio'
 import { Route as DevocionalRouteImport } from './routes/devocional'
 import { Route as DepoimentosRouteImport } from './routes/depoimentos'
@@ -116,6 +117,11 @@ const LojaRoute = LojaRouteImport.update({
 const InteressesRoute = InteressesRouteImport.update({
   id: '/interesses',
   path: '/interesses',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InstalarRoute = InstalarRouteImport.update({
+  id: '/instalar',
+  path: '/instalar',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InicioRoute = InicioRouteImport.update({
@@ -340,6 +346,7 @@ export interface FileRoutesByFullPath {
   '/depoimentos': typeof DepoimentosRoute
   '/devocional': typeof DevocionalRoute
   '/inicio': typeof InicioRoute
+  '/instalar': typeof InstalarRoute
   '/interesses': typeof InteressesRoute
   '/loja': typeof LojaRoute
   '/manual': typeof ManualRoute
@@ -395,6 +402,7 @@ export interface FileRoutesByTo {
   '/depoimentos': typeof DepoimentosRoute
   '/devocional': typeof DevocionalRoute
   '/inicio': typeof InicioRoute
+  '/instalar': typeof InstalarRoute
   '/interesses': typeof InteressesRoute
   '/loja': typeof LojaRoute
   '/manual': typeof ManualRoute
@@ -451,6 +459,7 @@ export interface FileRoutesById {
   '/depoimentos': typeof DepoimentosRoute
   '/devocional': typeof DevocionalRoute
   '/inicio': typeof InicioRoute
+  '/instalar': typeof InstalarRoute
   '/interesses': typeof InteressesRoute
   '/loja': typeof LojaRoute
   '/manual': typeof ManualRoute
@@ -508,6 +517,7 @@ export interface FileRouteTypes {
     | '/depoimentos'
     | '/devocional'
     | '/inicio'
+    | '/instalar'
     | '/interesses'
     | '/loja'
     | '/manual'
@@ -563,6 +573,7 @@ export interface FileRouteTypes {
     | '/depoimentos'
     | '/devocional'
     | '/inicio'
+    | '/instalar'
     | '/interesses'
     | '/loja'
     | '/manual'
@@ -618,6 +629,7 @@ export interface FileRouteTypes {
     | '/depoimentos'
     | '/devocional'
     | '/inicio'
+    | '/instalar'
     | '/interesses'
     | '/loja'
     | '/manual'
@@ -674,6 +686,7 @@ export interface RootRouteChildren {
   DepoimentosRoute: typeof DepoimentosRoute
   DevocionalRoute: typeof DevocionalRoute
   InicioRoute: typeof InicioRoute
+  InstalarRoute: typeof InstalarRoute
   InteressesRoute: typeof InteressesRoute
   LojaRoute: typeof LojaRoute
   ManualRoute: typeof ManualRoute
@@ -797,6 +810,13 @@ declare module '@tanstack/react-router' {
       path: '/interesses'
       fullPath: '/interesses'
       preLoaderRoute: typeof InteressesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/instalar': {
+      id: '/instalar'
+      path: '/instalar'
+      fullPath: '/instalar'
+      preLoaderRoute: typeof InstalarRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/inicio': {
@@ -1106,6 +1126,7 @@ const rootRouteChildren: RootRouteChildren = {
   DepoimentosRoute: DepoimentosRoute,
   DevocionalRoute: DevocionalRoute,
   InicioRoute: InicioRoute,
+  InstalarRoute: InstalarRoute,
   InteressesRoute: InteressesRoute,
   LojaRoute: LojaRoute,
   ManualRoute: ManualRoute,

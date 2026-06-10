@@ -891,3 +891,42 @@
     transition: none;
   }
 }
+
+/* ============================================================
+ * Native-feel locks (PWA standalone)
+ * ============================================================ */
+html {
+  touch-action: manipulation; /* mata o atraso de 300ms e duplo-toque-zoom */
+}
+
+a,
+button,
+[role="button"] {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}
+
+@media all and (display-mode: standalone) {
+  html,
+  body {
+    overscroll-behavior: none; /* bloqueia pull-to-refresh do Chrome e bounce */
+  }
+  body {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  input,
+  textarea,
+  [contenteditable="true"],
+  .app-selectable {
+    -webkit-user-select: text;
+    user-select: text;
+  }
+}
+
+/* O modo black-translucent faz o conteúdo passar por baixo da barra de
+ * status do iOS. Telas com MobileAppHeader já tratam isso via
+ * env(safe-area-inset-top); telas full-bleed devem usar `.app-safe-top`. */
+.app-safe-top {
+  padding-top: env(safe-area-inset-top, 0px);
+}

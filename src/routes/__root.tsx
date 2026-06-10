@@ -17,6 +17,7 @@ import { PresenceProvider } from "@/lib/presence";
 import { BanGuard } from "@/components/BanGuard";
 import { MobileAppShell } from "@/components/mobile/MobileAppShell";
 import { NetworkStatusBanner } from "@/components/mobile/NetworkStatusBanner";
+import { InstallPromptBanner } from "@/components/InstallPromptBanner";
 import { MobileRouteTransition } from "@/components/mobile/MobileRouteTransition";
 import { isChatRoute, shouldShowFooter } from "@/lib/layoutVisibility";
 
@@ -24,7 +25,6 @@ import appCss from "../styles.css?url";
 import coinPng from "@/assets/coin.webp";
 import { useEffect } from "react";
 import { registerAppServiceWorker } from "@/lib/registerSW";
-import { initNativeShell } from "@/lib/native";
 
 function NotFoundComponent() {
   return (
@@ -53,11 +53,12 @@ export const Route = createRootRouteWithContext<AppRouterContext>()({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
-      { name: "theme-color", content: "#ff4f68" },
+      { name: "theme-color", content: "#fff7f8", media: "(prefers-color-scheme: light)" },
+      { name: "theme-color", content: "#0b0b0d", media: "(prefers-color-scheme: dark)" },
       { name: "format-detection", content: "telephone=no" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
       { name: "mobile-web-app-capable", content: "yes" },
-      { name: "apple-mobile-web-app-status-bar-style", content: "default" },
+      { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
       { name: "apple-mobile-web-app-title", content: "VaiDarNamoro" },
       { name: "application-name", content: "VaiDarNamoro" },
       { name: "msapplication-TileColor", content: "#ff4f68" },
@@ -119,6 +120,19 @@ export const Route = createRootRouteWithContext<AppRouterContext>()({
       { rel: "manifest", href: "/manifest.webmanifest" },
       { rel: "icon", type: "image/png", sizes: "192x192", href: "/icon-192.png" },
       { rel: "icon", type: "image/png", sizes: "512x512", href: "/icon-512.png" },
+      // iOS splash screens (apple-touch-startup-image) — kills the white flash
+      // when launching the installed PWA from the home screen.
+      { rel: "apple-touch-startup-image", href: "/splash/splash-2048x2732.png", media: "(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" },
+      { rel: "apple-touch-startup-image", href: "/splash/splash-1668x2388.png", media: "(device-width: 834px) and (device-height: 1194px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" },
+      { rel: "apple-touch-startup-image", href: "/splash/splash-1536x2048.png", media: "(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" },
+      { rel: "apple-touch-startup-image", href: "/splash/splash-1290x2796.png", media: "(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" },
+      { rel: "apple-touch-startup-image", href: "/splash/splash-1284x2778.png", media: "(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" },
+      { rel: "apple-touch-startup-image", href: "/splash/splash-1179x2556.png", media: "(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" },
+      { rel: "apple-touch-startup-image", href: "/splash/splash-1170x2532.png", media: "(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" },
+      { rel: "apple-touch-startup-image", href: "/splash/splash-1125x2436.png", media: "(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" },
+      { rel: "apple-touch-startup-image", href: "/splash/splash-828x1792.png", media: "(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" },
+      { rel: "apple-touch-startup-image", href: "/splash/splash-750x1334.png", media: "(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" },
+      { rel: "apple-touch-startup-image", href: "/splash/splash-640x1136.png", media: "(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" },
       {
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap",
@@ -178,7 +192,6 @@ function RootComponent() {
 
   useEffect(() => {
     registerAppServiceWorker();
-    initNativeShell();
   }, []);
 
   useEffect(() => {
@@ -201,6 +214,7 @@ function RootComponent() {
           <NotificationsBridge />
           <BanGuard />
           <NetworkStatusBanner />
+          <InstallPromptBanner />
           <MobileAppShell>
             {isHome ? (
               <Outlet />
