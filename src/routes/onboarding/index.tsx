@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { NumericInput } from "@/components/ui/NumericInput";
 import { PhotoImg } from "@/components/PhotoImg";
+import { BioPromptChips } from "@/components/profile/BioPromptChips";
 import { normalizeImageFile } from "@/lib/imageNormalize";
 import { cn } from "@/lib/utils";
 import {
