@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 
 import { Header } from "@/components/layout/Header";
+import { AdminTopNav } from "@/components/admin/AdminTopNav";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -204,6 +205,7 @@ function AdminPresentesPage() {
   return (
     <div className="min-h-screen bg-background">
       <Header />
+      <AdminTopNav compact />
 
       <div className="mx-auto max-w-7xl p-6">
         <div className="mb-8 overflow-hidden rounded-3xl border bg-gradient-to-r from-rose-500 via-pink-500 to-purple-600 p-8 text-white">

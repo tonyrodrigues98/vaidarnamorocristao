@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
+import { AdminTopNav } from "@/components/admin/AdminTopNav";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -467,6 +468,7 @@ function AdminFotos() {
   return (
     <div className="min-h-screen">
       <Header />
+      <AdminTopNav compact />
       <main className="mx-auto max-w-6xl px-4 py-8">
         <div className="mb-6 flex items-center gap-2">
           <Button asChild variant="ghost" size="sm">

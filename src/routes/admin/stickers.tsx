@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
+import { AdminTopNav } from "@/components/admin/AdminTopNav";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
@@ -197,6 +198,7 @@ function StickersAdmin() {
   return (
     <div className="min-h-screen">
       <Header />
+      <AdminTopNav compact />
       <main className="mx-auto w-full max-w-6xl px-4 py-6">
         <div className="mb-6 flex items-center gap-3">
           <Button asChild variant="ghost" size="sm">

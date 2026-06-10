@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
+import { AdminTopNav } from "@/components/admin/AdminTopNav";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -112,6 +113,7 @@ function AdminVerifs() {
     return (
       <div className="min-h-screen">
         <Header />
+      <AdminTopNav compact />
         <main className="mx-auto max-w-md px-4 py-20 text-center">
           <ShieldAlert className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
           <h1 className="text-2xl">Acesso restrito</h1>
@@ -122,6 +124,7 @@ function AdminVerifs() {
   return (
     <div className="min-h-screen">
       <Header />
+      <AdminTopNav compact />
       <main className="mx-auto max-w-5xl px-4 py-10">
         <Link
           to="/admin"
