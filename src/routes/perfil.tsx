@@ -239,6 +239,27 @@ function PerfilPage() {
   const advancedPrefsRef = useRef<ProfileAdvancedFormHandle | null>(null);
   const [editingProfile, setEditingProfile] = useState(false);
   const [editingPrefs, setEditingPrefs] = useState(false);
+
+  // Apply ?tab=...&edit=1 deep-links (e.g. coming from /inicio missions).
+  useEffect(() => {
+    if (search?.tab) {
+      setActiveTab(search.tab);
+    }
+    if (search?.edit === 1) {
+      if (!search.tab || search.tab === "profile") setEditingProfile(true);
+      if (search.tab === "prefs") setEditingPrefs(true);
+    }
+    if (search?.tab || search?.edit) {
+      if (typeof window !== "undefined") {
+        window.setTimeout(() => {
+          document
+            .getElementById("perfil-tabs")
+            ?.scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 80);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search?.tab, search?.edit]);
   const [status, setStatus] = useState<"pending" | "approved" | "rejected" | "banned" | null>(null);
   const [activeCommitment, setActiveCommitment] = useState<RelationshipCommitment | null>(null);
   const [profileNameGradient, setProfileNameGradient] = useState<NameGradient | null>(null);
