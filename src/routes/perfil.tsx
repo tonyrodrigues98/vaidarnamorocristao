@@ -543,6 +543,7 @@ function PerfilPage() {
   return (
     <div className="min-h-screen overflow-x-hidden bg-background">
       <Header />
+      <MobileAppHeader title="Perfil" subtitle="Sua conta e seu visual" />
       <main className="relative mx-auto max-w-[1440px] px-4 py-6 sm:px-6 lg:px-8 lg:py-10">
         <div
           aria-hidden="true"
