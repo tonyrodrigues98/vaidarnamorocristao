@@ -10,6 +10,10 @@ export type OnboardingDraft = {
   sex: "masculino" | "feminino" | "";
   photoFile: File | null;
   photoPreview: string;
+  city: string;
+  state: string; // UF
+  height_cm: number | null;
+  marital: "solteiro" | "divorciado" | "viuvo" | "";
 };
 
 const draft: OnboardingDraft = {
@@ -19,6 +23,10 @@ const draft: OnboardingDraft = {
   sex: "",
   photoFile: null,
   photoPreview: "",
+  city: "",
+  state: "",
+  height_cm: null,
+  marital: "",
 };
 
 export function getOnboardingDraft(): OnboardingDraft {
@@ -36,4 +44,8 @@ export function clearOnboardingDraft() {
   draft.sex = "";
   draft.photoFile = null;
   draft.photoPreview = "";
+  draft.city = "";
+  draft.state = "";
+  draft.height_cm = null;
+  draft.marital = "";
 }
