@@ -744,3 +744,61 @@
     opacity: 0;
   }
 }
+
+/* -------------------------------------------------------------------------- */
+/* Pressable/tap feedback utilities                                            */
+/* -------------------------------------------------------------------------- */
+.app-tap-highlight {
+  -webkit-tap-highlight-color: transparent;
+}
+.app-pressable {
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform 120ms cubic-bezier(0.22, 0.61, 0.36, 1),
+    opacity 120ms ease;
+  will-change: transform;
+}
+.app-pressable:active {
+  transform: scale(0.97);
+  opacity: 0.92;
+}
+.app-card-interactive {
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform 140ms cubic-bezier(0.22, 0.61, 0.36, 1),
+    box-shadow 140ms ease;
+  will-change: transform;
+}
+.app-card-interactive:active {
+  transform: scale(0.985);
+}
+@media (prefers-reduced-motion: reduce) {
+  .app-pressable,
+  .app-card-interactive {
+    transition: none;
+  }
+  .app-pressable:active,
+  .app-card-interactive:active {
+    transform: none;
+  }
+}
+
+/* Network status banner — soft fade-in */
+.app-network-banner {
+  animation: appNetworkBannerIn 180ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+@keyframes appNetworkBannerIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .app-network-banner {
+    animation: none;
+  }
+}
