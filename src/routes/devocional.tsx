@@ -618,9 +618,11 @@ function Devocional() {
 
         <section className="mt-6 space-y-6">
           {sortedPosts.length === 0 && !loadingPosts ? (
-            <div className="glass rounded-3xl p-10 text-center text-muted-foreground shadow-soft">
-              Nenhum devocional publicado ainda.
-            </div>
+            <AppEmptyState
+              icon={<BookOpen className="h-6 w-6" />}
+              title="Nenhum devocional disponível"
+              description="Volte em breve para um novo momento de reflexão e fé."
+            />
           ) : (
             <>
               {featuredPost && (
