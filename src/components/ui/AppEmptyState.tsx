@@ -66,7 +66,7 @@ export function AppEmptyState({
                 size="sm"
                 className="app-pressable rounded-full"
               >
-                <Link to={actionTo}>{actionLabel}</Link>
+                <Link to={actionTo as never}>{actionLabel}</Link>
               </Button>
             ) : (
               <Button
@@ -85,7 +85,7 @@ export function AppEmptyState({
               variant="outline"
               className="app-pressable rounded-full"
             >
-              <Link to={secondaryActionTo!}>{secondaryActionLabel}</Link>
+              <Link to={secondaryActionTo as never}>{secondaryActionLabel}</Link>
             </Button>
           )}
         </div>
