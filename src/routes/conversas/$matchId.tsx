@@ -291,9 +291,82 @@ function Chat() {
     };
   }, [matchId, user]);
 
+  // Smart scroll: instant jump on first load; smooth on own send or when
+  // the user was already near the bottom. Otherwise show a "new message" pill.
   useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
-  }, [messages]);
+    const el = scrollRef.current;
+    if (!el) return;
+    const len = messages.length;
+    const prev = prevLenRef.current;
+    prevLenRef.current = len;
+    if (len === 0) return;
+    if (!initializedScrollRef.current) {
+      el.scrollTop = el.scrollHeight;
+      initializedScrollRef.current = true;
+      nearBottomRef.current = true;
+      return;
+    }
+    if (len <= prev) return;
+    const last = messages[len - 1];
+    const mine = last?.sender_id === user?.id;
+    if (mine || nearBottomRef.current) {
+      el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+      setShowNewBadge(false);
+    } else {
+      setShowNewBadge(true);
+    }
+  }, [messages, user?.id]);
+
+  // Track scroll position + trigger older page when near the top.
+  const loadOlder = useCallback(async () => {
+    if (loadingOlder || !hasMoreOlder) return;
+    const el = scrollRef.current;
+    const oldest = messages[0];
+    if (!oldest || !el) return;
+    setLoadingOlder(true);
+    const prevHeight = el.scrollHeight;
+    const prevTop = el.scrollTop;
+    const { data } = await supabase
+      .from("messages")
+      .select("*")
+      .eq("match_id", matchId)
+      .lt("created_at", oldest.created_at)
+      .order("created_at", { ascending: false })
+      .limit(PAGE_SIZE);
+    const olds = ((data ?? []) as Msg[]).slice().reverse() as LocalMsg[];
+    setMessages((prev) => {
+      const seen = new Set(prev.map((m) => m.id));
+      const merged = olds.filter((m) => !seen.has(m.id));
+      return [...merged, ...prev];
+    });
+    setHasMoreOlder((data?.length ?? 0) === PAGE_SIZE);
+    setLoadingOlder(false);
+    requestAnimationFrame(() => {
+      if (!el) return;
+      el.scrollTop = prevTop + (el.scrollHeight - prevHeight);
+    });
+  }, [loadingOlder, hasMoreOlder, messages, matchId]);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const onScroll = () => {
+      const dist = el.scrollHeight - el.scrollTop - el.clientHeight;
+      nearBottomRef.current = dist < 80;
+      if (nearBottomRef.current && showNewBadge) setShowNewBadge(false);
+      if (el.scrollTop < 80) void loadOlder();
+    };
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => el.removeEventListener("scroll", onScroll);
+  }, [loadOlder, showNewBadge]);
+
+  function scrollToBottom() {
+    const el = scrollRef.current;
+    if (!el) return;
+    el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+    nearBottomRef.current = true;
+    setShowNewBadge(false);
+  }
 
   if (!loading && !user) return <Navigate to="/auth/login" />;
   if (authorized === false)
