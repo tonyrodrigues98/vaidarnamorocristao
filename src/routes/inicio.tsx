@@ -1274,7 +1274,7 @@ function PulseRow({
   icon: React.ReactNode;
   label: string;
   value: number | string;
-  cta?: { to: "/comunidade"; label: string };
+  cta?: { to: "/conversas"; label: string };
 }) {
   return (
     <li className="flex items-center gap-3 rounded-2xl border border-border/50 bg-background/40 px-3 py-2.5 backdrop-blur">
