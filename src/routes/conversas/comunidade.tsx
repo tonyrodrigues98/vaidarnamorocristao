@@ -1122,6 +1122,11 @@ function Comunidade() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      <ConversationDrawer
+        open={drawerOpen}
+        onOpenChange={setDrawerOpen}
+        currentType="community"
+      />
     </div>
   );
 }
