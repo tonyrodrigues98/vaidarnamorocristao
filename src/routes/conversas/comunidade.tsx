@@ -28,6 +28,7 @@ import {
   Loader2,
   Clock,
   AlertCircle,
+  PanelLeft,
 } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { markSeen } from "@/lib/lastSeen";
@@ -55,6 +56,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { spendCoin } from "@/lib/coins";
 import { TypingIndicator, useTypingBroadcaster } from "@/components/TypingIndicator";
 import { GradientName } from "@/components/GradientName";
+import { ConversationDrawer } from "@/components/conversations/ConversationDrawer";
 
 const COOLDOWN_MS = 10_000;
 
@@ -128,6 +130,7 @@ function Comunidade() {
   const [flagBusy, setFlagBusy] = useState(false);
   const [stickerCache, setStickerCache] = useState<Record<string, Sticker>>({});
   const stickerCacheRef = useRef<Record<string, Sticker>>({});
+  const [drawerOpen, setDrawerOpen] = useState(false);
   useEffect(() => {
     stickerCacheRef.current = stickerCache;
   }, [stickerCache]);
@@ -695,14 +698,24 @@ function Comunidade() {
         title="Comunidade"
         subtitle="Chat global em tempo real"
         rightAction={
-          <Link
-            to="/oracoes"
-            aria-label="Orações"
-            className="tap inline-flex h-9 items-center gap-1.5 rounded-full border border-border bg-card/60 px-3 text-xs font-medium text-foreground/80 transition hover:bg-accent"
-          >
-            <HandHeart className="h-4 w-4" />
-            <span>Orações</span>
-          </Link>
+          <>
+            <Link
+              to="/oracoes"
+              aria-label="Orações"
+              className="tap inline-flex h-9 items-center gap-1.5 rounded-full border border-border bg-card/60 px-3 text-xs font-medium text-foreground/80 transition hover:bg-accent"
+            >
+              <HandHeart className="h-4 w-4" />
+              <span>Orações</span>
+            </Link>
+            <button
+              type="button"
+              onClick={() => setDrawerOpen(true)}
+              aria-label="Abrir outras conversas"
+              className="tap inline-flex h-9 w-9 items-center justify-center rounded-full border border-border bg-card/60 text-foreground/80 transition hover:bg-accent"
+            >
+              <PanelLeft className="h-4 w-4" />
+            </button>
+          </>
         }
       />
       <div className="glass mx-auto hidden w-full max-w-3xl items-center gap-3 px-3 py-3 shadow-soft md:flex md:px-4">
@@ -722,6 +735,15 @@ function Comunidade() {
           <HandHeart className="h-4 w-4" />
           <span className="hidden sm:inline">Orações</span>
         </Link>
+        <button
+          type="button"
+          onClick={() => setDrawerOpen(true)}
+          aria-label="Abrir outras conversas"
+          className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-border px-3 py-2 text-xs font-medium transition hover:bg-accent"
+        >
+          <PanelLeft className="h-4 w-4" />
+          <span className="hidden sm:inline">Conversas</span>
+        </button>
       </div>
 
       {pinnedMessages.length > 0 && (
@@ -1109,6 +1131,11 @@ function Comunidade() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      <ConversationDrawer
+        open={drawerOpen}
+        onOpenChange={setDrawerOpen}
+        currentType="community"
+      />
     </div>
   );
 }
