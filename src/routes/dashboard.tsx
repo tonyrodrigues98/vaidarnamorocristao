@@ -613,12 +613,6 @@ function Dashboard() {
               desc="Suas mensagens privadas"
             />
             <DashCard
-              to="/comunidade"
-              Icon={Globe}
-              title="Comunidade"
-              desc="Chat global em tempo real"
-            />
-            <DashCard
               to="/pretendentes"
               Icon={Gem}
               title="Pretendentes"
