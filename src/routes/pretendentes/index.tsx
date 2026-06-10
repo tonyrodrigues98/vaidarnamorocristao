@@ -2,6 +2,7 @@ import { createFileRoute, Link, Navigate, useNavigate } from "@tanstack/react-ro
 import { RequireApproved } from "@/components/RequireApproved";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
 import { PretendenteCarousel } from "@/components/pretendentes/PretendenteCarousel";
 import { PretendenteFeaturedCard } from "@/components/pretendentes/PretendenteFeaturedCard";
 import { ExploreProfileCard } from "@/components/pretendentes/ExploreProfileCard";
@@ -60,6 +61,145 @@ type Profile = {
 type StaffInfo = { role: AppRole; color: RoleColor | null };
 type MyPrefs = { state: string | null; ageMin: number | null; ageMax: number | null };
 
+type PretendentesData = {
+  profiles: Profile[];
+  staffMap: Record<string, StaffInfo>;
+  advancedMap: Record<string, AdvancedProfile>;
+  extraPhotos: Record<string, string[]>;
+  myAdvanced: AdvancedProfile | null;
+  myStatus: string | null;
+  mySex: "masculino" | "feminino" | null;
+  myPrefs: MyPrefs;
+  activeCommitment: any;
+};
+
+const EMPTY_PRETENDENTES: PretendentesData = {
+  profiles: [],
+  staffMap: {},
+  advancedMap: {},
+  extraPhotos: {},
+  myAdvanced: null,
+  myStatus: null,
+  mySex: null,
+  myPrefs: { state: null, ageMin: null, ageMax: null },
+  activeCommitment: null,
+};
+
+async function fetchPretendentes(userId: string, isSuperAdmin: boolean): Promise<PretendentesData> {
+  const commitment = await getActiveCommitmentByUser(userId);
+  const base: PretendentesData = { ...EMPTY_PRETENDENTES, activeCommitment: commitment };
+
+  const { data: me } = await supabase
+    .from("profiles")
+    .select("status, sex, state")
+    .eq("id", userId)
+    .maybeSingle();
+  base.myStatus = me?.status ?? null;
+  base.mySex = (me?.sex as PretendentesData["mySex"]) ?? null;
+
+  const { data: prefs } = await supabase
+    .from("profile_preferences")
+    .select("age_min, age_max")
+    .eq("user_id", userId)
+    .maybeSingle();
+  base.myPrefs = {
+    state: me?.state ?? null,
+    ageMin: prefs?.age_min ?? null,
+    ageMax: prefs?.age_max ?? null,
+  };
+
+  if (commitment && !isSuperAdmin) return base;
+  if (me?.status !== "approved") return base;
+
+  const targetSex = me.sex === "masculino" ? "feminino" : "masculino";
+  const [profsRes, blocksRes, blockedByRes, hiddenRes, rolesRes, myAdvRes, commitmentsRes] =
+    await Promise.all([
+      supabase
+        .from("profiles")
+        .select(
+          "id, full_name, age, city, state, church, bio, photo_url, sex, marital, verified, created_at",
+        )
+        .eq("status", "approved")
+        .eq("sex", targetSex)
+        .neq("id", userId)
+        .order("created_at", { ascending: false }),
+      supabase.from("blocks").select("blocked_id").eq("blocker_id", userId),
+      supabase.from("blocks").select("blocker_id").eq("blocked_id", userId),
+      supabase.rpc("get_hidden_staff_ids"),
+      supabase.from("user_roles").select("user_id, role, badge_color").neq("role", "user"),
+      supabase.from("profile_advanced").select("*").eq("user_id", userId).maybeSingle(),
+      supabase
+        .from("relationship_commitments")
+        .select("user_a,user_b")
+        .eq("status", "active"),
+    ]);
+
+  const hidden = new Set<string>([
+    ...(blocksRes.data ?? []).map((b: any) => b.blocked_id),
+    ...(blockedByRes.data ?? []).map((b: any) => b.blocker_id),
+    ...(((hiddenRes as any).data ?? []) as any[])
+      .map((x: any) =>
+        typeof x === "string" ? x : (x.get_hidden_staff_ids ?? x.user_id ?? ""),
+      )
+      .filter(Boolean),
+  ]);
+
+  const staffMap: Record<string, StaffInfo> = {};
+  for (const row of (rolesRes.data ?? []) as Array<{
+    user_id: string;
+    role: AppRole;
+    badge_color: string | null;
+  }>) {
+    const existing = staffMap[row.user_id];
+    if (!existing || ROLE_PRIORITY.indexOf(row.role) < ROLE_PRIORITY.indexOf(existing.role)) {
+      staffMap[row.user_id] = {
+        role: row.role,
+        color: (row.badge_color as RoleColor | null) ?? null,
+      };
+    }
+  }
+
+  const committedUsers = new Set<string>();
+  for (const row of commitmentsRes.data ?? []) {
+    committedUsers.add(row.user_a);
+    committedUsers.add(row.user_b);
+  }
+
+  const visible = ((profsRes.data ?? []) as Profile[]).filter((p) => {
+    if (hidden.has(p.id)) return false;
+    if (!isSuperAdmin && committedUsers.has(p.id)) return false;
+    return true;
+  });
+
+  const advancedMap: Record<string, AdvancedProfile> = {};
+  const extraPhotos: Record<string, string[]> = {};
+  const ids = visible.map((p) => p.id);
+  if (ids.length > 0) {
+    const [{ data: advs }, { data: extraPhotosData }] = await Promise.all([
+      supabase.from("profile_advanced").select("*").in("user_id", ids),
+      supabase
+        .from("profile_photos")
+        .select("user_id, url, sort_order, created_at")
+        .in("user_id", ids)
+        .order("sort_order", { ascending: true })
+        .order("created_at", { ascending: true }),
+    ]);
+    for (const a of (advs ?? []) as AdvancedProfile[]) advancedMap[a.user_id] = a;
+    for (const r of (extraPhotosData ?? []) as Array<{ user_id: string; url: string }>) {
+      (extraPhotos[r.user_id] ||= []).push(r.url);
+    }
+  }
+
+  return {
+    ...base,
+    profiles: visible,
+    staffMap,
+    advancedMap,
+    extraPhotos,
+    myAdvanced: ((myAdvRes as any)?.data ?? null) as AdvancedProfile | null,
+  };
+}
+
 const searchSchema = z.object({
   q: fallback(z.string(), "").default(""),
   state: fallback(z.string(), "all").default("all"),
@@ -98,28 +238,36 @@ function List() {
     navigate({ search: { sort: search.sort } as any, replace: true });
   }
 
-  const [profiles, setProfiles] = useState<Profile[]>([]);
-  const [loadingList, setLoadingList] = useState(true);
-  const [myStatus, setMyStatus] = useState<string | null>(null);
-  const [activeCommitment, setActiveCommitment] = useState<any>(null);
-  const [mySex, setMySex] = useState<"masculino" | "feminino" | null>(null);
-  const [myPrefs, setMyPrefs] = useState<MyPrefs>({ state: null, ageMin: null, ageMax: null });
+  const isSuperAdmin = role === "super_admin";
+  const queryEnabled = !!user && rolesLoaded;
+  const { data, isPending, refetch } = useQuery({
+    queryKey: ["pretendentes", user?.id, isSuperAdmin],
+    queryFn: () => fetchPretendentes(user!.id, isSuperAdmin),
+    enabled: queryEnabled,
+    staleTime: 60_000,
+  });
+  const profiles = data?.profiles ?? [];
+  const staffMap = data?.staffMap ?? {};
+  const advancedMap = data?.advancedMap ?? {};
+  const extraPhotos = data?.extraPhotos ?? {};
+  const myAdvanced = data?.myAdvanced ?? null;
+  const myStatus = data?.myStatus ?? null;
+  const mySex = data?.mySex ?? null;
+  const myPrefs = data?.myPrefs ?? { state: null, ageMin: null, ageMax: null };
+  const activeCommitment = data?.activeCommitment ?? null;
+  const loadingList = queryEnabled && (isPending || !data);
+
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const [staffMap, setStaffMap] = useState<Record<string, StaffInfo>>({});
-  const [myAdvanced, setMyAdvanced] = useState<AdvancedProfile | null>(null);
-  const [advancedMap, setAdvancedMap] = useState<Record<string, AdvancedProfile>>({});
-  const [extraPhotos, setExtraPhotos] = useState<Record<string, string[]>>({});
   const isMobile = useIsMobile();
   const [mobileMode, setMobileMode] = useState<"explore" | "list">("explore");
   const [exploreIndex, setExploreIndex] = useState(0);
-  const [refreshKey, setRefreshKey] = useState(0);
-  const refreshResolveRef = useRef<(() => void) | null>(null);
-  const handlePullRefresh = useCallback(() => {
-    return new Promise<void>((resolve) => {
-      refreshResolveRef.current = resolve;
-      setRefreshKey((k) => k + 1);
-    });
-  }, []);
+  const handlePullRefresh = useCallback(async () => {
+    await refetch();
+  }, [refetch]);
+
+  useEffect(() => {
+    if (user && rolesLoaded) markHomeChecklistStep(user.id, "explore");
+  }, [user, rolesLoaded]);
 
   const [ageMinInput, setAgeMinInput] = useState<string>(
     search.ageMin != null ? String(search.ageMin) : "",
@@ -141,128 +289,6 @@ function List() {
       update(field, n);
     }
   }
-
-  useEffect(() => {
-    if (!user) return;
-    if (!rolesLoaded) return;
-    markHomeChecklistStep(user.id, "explore");
-    (async () => {
-      const commitment = await getActiveCommitmentByUser(user.id);
-      setActiveCommitment(commitment);
-      const isSuperAdmin = role === "super_admin";
-      if (commitment && !isSuperAdmin) {
-        setProfiles([]);
-        setLoadingList(false);
-        return;
-      }
-      const { data: me } = await supabase
-        .from("profiles")
-        .select("status, sex, state")
-        .eq("id", user.id)
-        .maybeSingle();
-      setMyStatus(me?.status ?? null);
-      setMySex(me?.sex ?? null);
-      const { data: prefs } = await supabase
-        .from("profile_preferences")
-        .select("age_min, age_max")
-        .eq("user_id", user.id)
-        .maybeSingle();
-      setMyPrefs({
-        state: me?.state ?? null,
-        ageMin: prefs?.age_min ?? null,
-        ageMax: prefs?.age_max ?? null,
-      });
-      if (me?.status === "approved") {
-        const targetSex = me.sex === "masculino" ? "feminino" : "masculino";
-        const [profsRes, blocksRes, blockedByRes, hiddenRes, rolesRes, myAdvRes, commitmentsRes] =
-          await Promise.all([
-            supabase
-              .from("profiles")
-              .select(
-                "id, full_name, age, city, state, church, bio, photo_url, sex, marital, verified, created_at",
-              )
-              .eq("status", "approved")
-              .eq("sex", targetSex)
-              .neq("id", user.id)
-              .order("created_at", { ascending: false }),
-            supabase.from("blocks").select("blocked_id").eq("blocker_id", user.id),
-            supabase.from("blocks").select("blocker_id").eq("blocked_id", user.id),
-            supabase.rpc("get_hidden_staff_ids"),
-            supabase.from("user_roles").select("user_id, role, badge_color").neq("role", "user"),
-            supabase.from("profile_advanced").select("*").eq("user_id", user.id).maybeSingle(),
-            supabase
-              .from("relationship_commitments")
-              .select("user_a,user_b")
-              .eq("status", "active"),
-          ]);
-        const hidden = new Set<string>([
-          ...(blocksRes.data ?? []).map((b: any) => b.blocked_id),
-          ...(blockedByRes.data ?? []).map((b: any) => b.blocker_id),
-          ...(((hiddenRes as any).data ?? []) as any[])
-            .map((x: any) =>
-              typeof x === "string" ? x : (x.get_hidden_staff_ids ?? x.user_id ?? ""),
-            )
-            .filter(Boolean),
-        ]);
-        const map: Record<string, StaffInfo> = {};
-        for (const row of (rolesRes.data ?? []) as Array<{
-          user_id: string;
-          role: AppRole;
-          badge_color: string | null;
-        }>) {
-          const existing = map[row.user_id];
-          if (!existing || ROLE_PRIORITY.indexOf(row.role) < ROLE_PRIORITY.indexOf(existing.role)) {
-            map[row.user_id] = {
-              role: row.role,
-              color: (row.badge_color as RoleColor | null) ?? null,
-            };
-          }
-        }
-        setStaffMap(map);
-        const committedUsers = new Set<string>();
-
-        for (const row of commitmentsRes.data ?? []) {
-          committedUsers.add(row.user_a);
-
-          committedUsers.add(row.user_b);
-        }
-
-        const visible = ((profsRes.data ?? []) as Profile[]).filter((p) => {
-          if (hidden.has(p.id)) return false;
-          if (!isSuperAdmin && committedUsers.has(p.id)) return false;
-          return true;
-        });
-        setProfiles(visible);
-        setMyAdvanced(((myAdvRes as any)?.data ?? null) as AdvancedProfile | null);
-        const ids = visible.map((p) => p.id);
-        if (ids.length > 0) {
-          const [{ data: advs }, { data: extraPhotosData }] = await Promise.all([
-            supabase.from("profile_advanced").select("*").in("user_id", ids),
-            supabase
-              .from("profile_photos")
-              .select("user_id, url, sort_order, created_at")
-              .in("user_id", ids)
-              .order("sort_order", { ascending: true })
-              .order("created_at", { ascending: true }),
-          ]);
-          const m: Record<string, AdvancedProfile> = {};
-          for (const a of (advs ?? []) as AdvancedProfile[]) m[a.user_id] = a;
-          setAdvancedMap(m);
-          const ph: Record<string, string[]> = {};
-          for (const r of (extraPhotosData ?? []) as Array<{ user_id: string; url: string }>) {
-            (ph[r.user_id] ||= []).push(r.url);
-          }
-          setExtraPhotos(ph);
-        }
-      }
-      setLoadingList(false);
-      const resolve = refreshResolveRef.current;
-      if (resolve) {
-        refreshResolveRef.current = null;
-        resolve();
-      }
-    })();
-  }, [user, role, rolesLoaded, refreshKey]);
 
   // Compute affinity per profile (memoized)
   const affinityByProfile = useMemo(() => {
@@ -372,7 +398,6 @@ function List() {
     search.loveLang !== "all" ||
     search.verified;
 
-  const isSuperAdmin = role === "super_admin";
   const canBrowsePretendentes = (!activeCommitment || isSuperAdmin) && myStatus === "approved";
   const audienceLabel =
     mySex === "masculino" ? "Mulheres" : mySex === "feminino" ? "Homens" : "Pessoas";
