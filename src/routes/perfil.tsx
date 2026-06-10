@@ -579,36 +579,34 @@ function PerfilPage() {
   const handleHubSelect = (id: HubSection) => {
     if (id === "preferences") {
       setActiveTab("prefs");
-    } else if (id === "visual") {
-      setActiveTab("customizacao");
     } else {
       setActiveTab("profile");
-      if (id === "identity" || id === "faith" || id === "photos") {
+      if (id === "identity" || id === "faith") {
         setEditingProfile(true);
       }
     }
     scrollToTabs();
   };
 
-  const handleHubResource = (id: "saldo" | "presentes" | "customizacao" | "role") => {
+  const handleHubResource = (id: "missions" | "role") => {
     setActiveTab(id);
     scrollToTabs();
   };
 
   const tabItems = [
     { value: "profile", label: "Sobre mim", icon: UserIcon, hint: "Dados, fotos e historia" },
-    { value: "prefs", label: "Preferencias", icon: Heart, hint: "O que voce busca" },
+    { value: "prefs", label: "O que procuro", icon: Heart, hint: "Suas preferencias" },
     {
       value: "customizacao",
-      label: "Customizacao",
+      label: "Visual",
       icon: Sparkles,
       hint: "Molduras, auras e fundos",
     },
-    { value: "saldo", label: "Saldo", icon: Wallet, hint: "Moedas e compras" },
+    { value: "saldo", label: "Minhas moedas", icon: Wallet, hint: "Saldo e compras" },
     { value: "presentes", label: "Presentes", icon: GiftIcon, hint: "Recebidos no perfil" },
-    { value: "missions", label: "Conquistas", icon: Trophy, hint: "Missoes e badges" },
+    { value: "missions", label: "Minhas conquistas", icon: Trophy, hint: "Missoes e badges" },
     ...(isStaff
-      ? [{ value: "role", label: "Cargo", icon: Briefcase, hint: "Badge e visibilidade" }]
+      ? [{ value: "role", label: "Meu papel", icon: Briefcase, hint: "Badge e visibilidade" }]
       : []),
   ];
 
@@ -751,8 +749,7 @@ function PerfilPage() {
               {/* MOBILE: quick actions row */}
               <div className="mt-5 -mx-2 flex gap-2 overflow-x-auto px-2 pb-1 sm:hidden [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                 {[
-                  { label: "Editar", icon: Eye, onClick: () => setActiveTab("profile") },
-                  { label: "Fotos", icon: Camera, onClick: () => setActiveTab("profile") },
+                  { label: "Editar", icon: Eye, onClick: () => { setActiveTab("profile"); setEditingProfile(true); } },
                   { label: "Visual", icon: Sparkles, onClick: () => setActiveTab("customizacao") },
                   { label: "Saldo", icon: Store, onClick: () => setActiveTab("saldo") },
                   { label: "Presentes", icon: Heart, onClick: () => setActiveTab("presentes") },
@@ -776,7 +773,7 @@ function PerfilPage() {
                 })}
               </div>
 
-              <div className="mt-6 hidden gap-3 sm:mt-8 sm:grid sm:grid-cols-2 xl:grid-cols-4">
+              <div className="mt-6 hidden gap-3 sm:mt-8 sm:grid sm:grid-cols-3">
                 <div className="rounded-2xl border border-rose-100 bg-rose-50/70 p-4 dark:border-rose-400/20 dark:bg-rose-400/10">
                   <div className="flex items-center gap-2 text-sm font-medium text-rose-700 dark:text-rose-200">
                     <MapPin className="h-4 w-4" />
@@ -803,19 +800,6 @@ function PerfilPage() {
                   <p className="mt-2 text-sm text-foreground">
                     {profile.years_baptized ? `${profile.years_baptized} ano(s)` : "Nao informado"}
                   </p>
-                </div>
-                <div className="rounded-2xl border border-violet-100 bg-violet-50/70 p-4 dark:border-violet-400/20 dark:bg-violet-400/10">
-                  <div className="flex items-center gap-2 text-sm font-medium text-violet-700 dark:text-violet-200">
-                    <Sparkles className="h-4 w-4" />
-                    Personalizacao
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab("customizacao")}
-                    className="mt-2 text-sm font-medium text-foreground underline-offset-4 hover:underline"
-                  >
-                    Molduras, auras e fundos
-                  </button>
                 </div>
               </div>
 
