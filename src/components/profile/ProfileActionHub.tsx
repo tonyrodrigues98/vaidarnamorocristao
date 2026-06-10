@@ -21,9 +21,7 @@ export type HubSection =
   | "identity"
   | "about"
   | "faith"
-  | "preferences"
-  | "photos"
-  | "visual";
+  | "preferences";
 
 type CardItem = {
   id: HubSection;
@@ -37,15 +35,13 @@ const CARDS: CardItem[] = [
   { id: "about", title: "Sobre mim", desc: "Bio, personalidade e interesses.", Icon: MessageSquareText },
   { id: "faith", title: "Fé e caminhada", desc: "Igreja, batismo e rotina cristã.", Icon: BookOpen },
   { id: "preferences", title: "O que procuro", desc: "Preferências e intenção de relacionamento.", Icon: HeartHandshake },
-  { id: "photos", title: "Fotos", desc: "Foto principal e fotos adicionais.", Icon: Camera },
-  { id: "visual", title: "Visual", desc: "Moldura, aura, fundo e aparência.", Icon: Sparkles },
 ];
 
 export type ProfileActionHubProps = {
   activeTab: string;
   isStaff: boolean;
   onSelect: (id: HubSection) => void;
-  onOpenResource: (id: "saldo" | "presentes" | "customizacao" | "role") => void;
+  onOpenResource: (id: "saldo" | "presentes" | "role") => void;
 };
 
 export function ProfileActionHub({ activeTab, isStaff, onSelect, onOpenResource }: ProfileActionHubProps) {
@@ -54,11 +50,9 @@ export function ProfileActionHub({ activeTab, isStaff, onSelect, onOpenResource 
   const activeId: HubSection | null =
     activeTab === "prefs"
       ? "preferences"
-      : activeTab === "customizacao"
-        ? "visual"
-        : activeTab === "profile"
-          ? "about"
-          : null;
+      : activeTab === "profile"
+        ? "about"
+        : null;
 
   return (
     <div className="w-full min-w-0 lg:hidden">
@@ -133,31 +127,25 @@ export function ProfileActionHub({ activeTab, isStaff, onSelect, onOpenResource 
         {resourcesOpen && (
           <ul className="space-y-1.5 border-t border-border/60 p-2">
             <ResourceButton
-              Icon={Wallet}
-              title="Saldo"
-              desc="Suas moedas e movimentações."
-              onClick={() => onOpenResource("saldo")}
-            />
-            <ResourceButton
-              Icon={Sparkles}
-              title="Customização"
-              desc="Molduras, auras e fundos."
-              onClick={() => onOpenResource("customizacao")}
-            />
-            <ResourceButton
-              Icon={GiftIcon}
-              title="Presentes"
-              desc="Recebidos no seu perfil."
-              onClick={() => onOpenResource("presentes")}
+              Icon={Trophy}
+              title="Minhas conquistas"
+              desc="Missões e badges desbloqueados."
+              onClick={() => onOpenResource("saldo" as never)}
             />
             {isStaff && (
               <ResourceButton
                 Icon={BadgeCheck}
-                title="Cargos"
-                desc="Seu papel na comunidade."
+                title="Meu papel na comunidade"
+                desc="Seu cargo e visibilidade."
                 onClick={() => onOpenResource("role")}
               />
             )}
+            <ResourceLink
+              Icon={Store}
+              title="Loja"
+              desc="Comprar novos itens."
+              to="/loja"
+            />
             <ResourceLink
               Icon={ShieldCheck}
               title="Conta e segurança"
