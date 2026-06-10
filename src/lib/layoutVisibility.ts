@@ -1,6 +1,5 @@
 const FOOTER_HIDDEN_PREFIXES = [
   "/admin",
-  "/comunidade",
   "/conversas",
   "/perfil",
   "/loja",
@@ -34,15 +33,16 @@ export function shouldShowFooter(pathname: string): boolean {
  * (no document scroll, composer pinned to the keyboard).
  */
 export function isChatRoute(pathname: string): boolean {
-  return pathname === "/comunidade" || pathname.startsWith("/conversas/");
+  return pathname.startsWith("/conversas/");
 }
 
 /**
- * /comunidade is a chat that still shows the bottom nav (it's a top-level
- * app destination). Private conversations hide the bottom nav for focus.
+ * Focused 1:1 chats hide the bottom nav. The /conversas list shows it.
+ * Currently no chat-shaped route opts back into the bottom nav.
  */
 export function chatRouteHasBottomNav(pathname: string): boolean {
-  return pathname === "/comunidade";
+  void pathname;
+  return false;
 }
 
 /**
@@ -54,7 +54,7 @@ const MOBILE_APP_HEADER_PREFIXES = [
   "/inicio",
   "/devocional",
   "/pretendentes",
-  "/comunidade",
+  "/conversas",
   "/perfil",
   "/loja",
   "/notificacoes",
