@@ -41,6 +41,8 @@ import {
   ChevronDown,
   ShieldCheck,
   Info,
+  Archive,
+  Undo2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { friendlyError } from "@/lib/errors";
@@ -131,11 +133,12 @@ function StatusPill({ status }: { status: string }) {
 
 function RecadosPage() {
   const { user } = useAuth();
-  const [tab, setTab] = useState<"inbox" | "outbox">("inbox");
+  const [tab, setTab] = useState<"inbox" | "outbox" | "hidden">("inbox");
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [infoOpen, setInfoOpen] = useState(false);
   const [inbox, setInbox] = useState<InboxRow[]>([]);
   const [outbox, setOutbox] = useState<OutboxRow[]>([]);
+  const [hidden, setHidden] = useState<InboxRow[]>([]);
   const [hints, setHints] = useState<Record<string, Hint[]>>({});
   const [accept, setAccept] = useState(true);
   const [reveal, setReveal] = useState<RevealTarget | null>(null);
@@ -152,12 +155,13 @@ function RecadosPage() {
     if (commitment) {
       setInbox([]);
       setOutbox([]);
+      setHidden([]);
       setHints({});
       setLoadingList(false);
       return;
     }
     await supabase.rpc("expire_anonymous_messages");
-    const [{ data: inb }, { data: out }, { data: settings }] = await Promise.all([
+    const [{ data: inb }, { data: out }, { data: hid }, { data: settings }] = await Promise.all([
       supabase
         .from("anonymous_messages_inbox")
         .select("*")
@@ -165,6 +169,17 @@ function RecadosPage() {
       supabase
         .from("anonymous_messages_outbox")
         .select("*")
+        .order("created_at", { ascending: false }),
+      // Ignored ("hidden") messages: query the base table directly. RLS
+      // already restricts to receiver_id = auth.uid(); we mask sender_id
+      // client-side so the receiver still can't see who sent it.
+      supabase
+        .from("anonymous_messages")
+        .select(
+          "id, sender_id, content, status, reply_text, sender_reveal_requested_at, receiver_reveal_requested_at, revealed_at, match_id, created_at, expires_at",
+        )
+        .eq("receiver_id", user.id)
+        .eq("status", "ignored")
         .order("created_at", { ascending: false }),
       supabase
         .from("anonymous_message_settings")
@@ -174,6 +189,13 @@ function RecadosPage() {
     ]);
     setInbox((inb ?? []) as InboxRow[]);
     setOutbox((out ?? []) as OutboxRow[]);
+    setHidden(
+      ((hid ?? []) as any[]).map((r) => ({
+        ...r,
+        // Never expose sender of a hidden/anonymous message.
+        sender_id: null,
+      })) as InboxRow[],
+    );
     setAccept(settings?.accept_anonymous ?? true);
 
     const allRevealed = [
@@ -343,12 +365,25 @@ function RecadosPage() {
                 segments={[
                   { value: "inbox", label: "Recebidos", count: inbox.length },
                   { value: "outbox", label: "Enviados", count: outbox.length },
+                  { value: "hidden", label: "Ocultos", count: hidden.length },
                 ]}
               />
             </div>
 
             <div className="mt-4 space-y-3">
-              {tab === "inbox" ? (
+              {tab === "hidden" ? (
+                hidden.length === 0 ? (
+                  <EmptyState
+                    icon={<Archive className="h-6 w-6" />}
+                    title="Nenhum recado oculto"
+                    subtitle="Recados que você ocultar aparecem aqui. Você pode desocultar a qualquer momento."
+                  />
+                ) : (
+                  hidden.map((m) => (
+                    <HiddenCard key={m.id} m={m} onChange={load} />
+                  ))
+                )
+              ) : tab === "inbox" ? (
                 inbox.length === 0 ? (
                   <EmptyState
                     icon={<Inbox className="h-6 w-6" />}
@@ -536,6 +571,69 @@ function CardShell({ children }: { children: React.ReactNode }) {
     >
       {children}
     </motion.div>
+  );
+}
+
+function HiddenCard({ m, onChange }: { m: InboxRow; onChange: () => void }) {
+  const online = useNetworkStatus();
+  const [busy, setBusy] = useState(false);
+
+  async function action(fn: () => PromiseLike<any>) {
+    if (!online) {
+      toast.error("Você está offline.");
+      return;
+    }
+    setBusy(true);
+    const { error } = await fn();
+    setBusy(false);
+    if (error) {
+      toast.error(friendlyError(error));
+      return;
+    }
+    toast.success("Recado restaurado nos recebidos");
+    onChange();
+  }
+
+  const date = new Date(m.created_at);
+  const dateLabel = date.toLocaleDateString("pt-BR", {
+    day: "2-digit",
+    month: "short",
+  });
+
+  return (
+    <CardShell>
+      <div className="flex items-start gap-3">
+        <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-foreground/[0.05] text-foreground/55">
+          <Archive className="h-4 w-4" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2">
+            <span className="text-[13px] font-medium text-foreground/70">Recado oculto</span>
+            <span className="text-[11px] text-muted-foreground tabular-nums">· {dateLabel}</span>
+          </div>
+          <p className="mt-2 line-clamp-3 rounded-2xl bg-foreground/[0.04] px-3 py-2 text-[14px] leading-relaxed text-foreground/85">
+            {m.content}
+          </p>
+          <p className="mt-2 text-[11px] text-muted-foreground">
+            Você ocultou este recado. O remetente continua anônimo e não é notificado.
+          </p>
+        </div>
+      </div>
+      <div className="mt-3 flex justify-end">
+        <Button
+          size="sm"
+          variant="outline"
+          disabled={busy || !online}
+          onClick={() =>
+            action(() => supabase.rpc("unignore_anonymous_message", { _message_id: m.id }))
+          }
+          className="h-9 gap-1.5 rounded-full px-3.5 text-[13px]"
+        >
+          <Undo2 className="h-3.5 w-3.5" />
+          Desocultar
+        </Button>
+      </div>
+    </CardShell>
   );
 }
 
