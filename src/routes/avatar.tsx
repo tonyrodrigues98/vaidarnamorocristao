@@ -28,6 +28,39 @@ import roomAsset from "@/assets/avatar-room.png.asset.json";
 
 const ROOM_BG = roomAsset.url;
 
+/**
+ * Slot anchors per category slug — defines where each item layer is
+ * rendered on the avatar container (3:4 box). Values are percentages
+ * relative to the avatar wrapper. This lets standalone item PNGs
+ * (shoes, hair, etc.) sit at the anatomically correct spot instead of
+ * being stretched across the whole avatar.
+ */
+type Slot = { top: string; left: string; width: string; height: string };
+const SLOT_BY_SLUG: Record<string, Slot> = {
+  // Body / clothing — covers torso to mid-thigh
+  roupas: { top: "30%", left: "15%", width: "70%", height: "48%" },
+  roupa: { top: "30%", left: "15%", width: "70%", height: "48%" },
+  clothing: { top: "30%", left: "15%", width: "70%", height: "48%" },
+  // Shoes — small box at the feet
+  calcados: { top: "82%", left: "29%", width: "42%", height: "14%" },
+  sapatos: { top: "82%", left: "29%", width: "42%", height: "14%" },
+  shoes: { top: "82%", left: "29%", width: "42%", height: "14%" },
+  // Hair — covers the head
+  cabelos: { top: "-2%", left: "22%", width: "56%", height: "28%" },
+  cabelo: { top: "-2%", left: "22%", width: "56%", height: "28%" },
+  hair: { top: "-2%", left: "22%", width: "56%", height: "28%" },
+  // Accessories — upper torso / face area
+  acessorios: { top: "8%", left: "25%", width: "50%", height: "30%" },
+  acessorio: { top: "8%", left: "25%", width: "50%", height: "30%" },
+  accessories: { top: "8%", left: "25%", width: "50%", height: "30%" },
+  // Specials (wings, auras, halos) — full canvas
+  especiais: { top: "0%", left: "0%", width: "100%", height: "100%" },
+  especial: { top: "0%", left: "0%", width: "100%", height: "100%" },
+  specials: { top: "0%", left: "0%", width: "100%", height: "100%" },
+};
+const FULL_SLOT: Slot = { top: "0%", left: "0%", width: "100%", height: "100%" };
+const slotFor = (slug: string): Slot => SLOT_BY_SLUG[slug?.toLowerCase()] ?? FULL_SLOT;
+
 export const Route = createFileRoute("/avatar")({
   component: AvatarPage,
 });
@@ -192,10 +225,10 @@ function AvatarPage() {
   }, [equipped, items]);
 
   const renderedLayers = useMemo(() => {
-    const list: { item: Item; layer: number }[] = [];
+    const list: { item: Item; layer: number; slug: string }[] = [];
     for (const cat of categories) {
       const it = equippedItems.get(cat.id);
-      if (it) list.push({ item: it, layer: cat.layer_index });
+      if (it) list.push({ item: it, layer: cat.layer_index, slug: cat.slug });
     }
     list.sort((a, b) => a.layer - b.layer);
     return list;
@@ -285,18 +318,41 @@ function AvatarPage() {
         });
 
       const baseImg = await loadImg(base.image_url);
-      // Centraliza mantendo proporção
-      const drawCentered = (img: HTMLImageElement) => {
-        const scale = Math.min(W / img.width, H / img.height);
+      // Mesma lógica do preview: base ocupa ~68% da altura, centralizada,
+      // posicionada como se estivesse no pódio (bottom ~18%).
+      const wrapperH = H * 0.68;
+      const wrapperW = wrapperH * (3 / 4);
+      const wrapperLeft = (W - wrapperW) / 2;
+      // bottom: 18% from canvas bottom
+      const wrapperTop = H - wrapperH - H * 0.18;
+
+      // Fundo do quarto (já existe ROOM_BG carregado via CSS — pulamos no canvas
+      // pra manter a foto do look limpa e leve. Mantemos fundo creme.)
+      const drawInBox = (
+        img: HTMLImageElement,
+        boxX: number,
+        boxY: number,
+        boxW: number,
+        boxH: number,
+      ) => {
+        const scale = Math.min(boxW / img.width, boxH / img.height);
         const w = img.width * scale;
         const h = img.height * scale;
-        ctx.drawImage(img, (W - w) / 2, (H - h) / 2, w, h);
+        ctx.drawImage(img, boxX + (boxW - w) / 2, boxY + (boxH - h) / 2, w, h);
       };
-      drawCentered(baseImg);
 
-      for (const { item } of renderedLayers) {
+      // Base preenche o wrapper inteiro
+      drawInBox(baseImg, wrapperLeft, wrapperTop, wrapperW, wrapperH);
+
+      const pct = (v: string) => parseFloat(v) / 100;
+      for (const { item, slug } of renderedLayers) {
         const img = await loadImg(item.image_url);
-        drawCentered(img);
+        const slot = slotFor(slug);
+        const sx = wrapperLeft + pct(slot.left) * wrapperW;
+        const sy = wrapperTop + pct(slot.top) * wrapperH;
+        const sw = pct(slot.width) * wrapperW;
+        const sh = pct(slot.height) * wrapperH;
+        drawInBox(img, sx, sy, sw, sh);
       }
 
       const blob = await new Promise<Blob | null>((res) => canvas.toBlob(res, "image/png", 0.92));
@@ -468,16 +524,25 @@ function AvatarPage() {
                   className="h-full w-auto object-contain drop-shadow-[0_20px_25px_rgba(0,0,0,0.15)]"
                   draggable={false}
                 />
-                {renderedLayers.map(({ item, layer }) => (
-                  <img
-                    key={item.id}
-                    src={item.image_url}
-                    alt={item.name}
-                    className="absolute inset-0 h-full w-auto object-contain"
-                    style={{ zIndex: layer }}
-                    draggable={false}
-                  />
-                ))}
+                {renderedLayers.map(({ item, layer, slug }) => {
+                  const slot = slotFor(slug);
+                  return (
+                    <img
+                      key={item.id}
+                      src={item.image_url}
+                      alt={item.name}
+                      className="absolute object-contain"
+                      style={{
+                        top: slot.top,
+                        left: slot.left,
+                        width: slot.width,
+                        height: slot.height,
+                        zIndex: layer,
+                      }}
+                      draggable={false}
+                    />
+                  );
+                })}
               </div>
             </div>
           )}
