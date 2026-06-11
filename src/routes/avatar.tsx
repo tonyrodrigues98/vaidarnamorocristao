@@ -451,23 +451,21 @@ function AvatarPage() {
       {/* Avatar stage */}
       <div className="relative">
         <div
-          className="relative mx-auto aspect-[3/4] w-full max-w-md overflow-hidden"
+          className="relative mx-auto aspect-[9/16] w-full max-w-md overflow-hidden"
           style={{
-            background:
-              "radial-gradient(ellipse at center, rgba(255,255,255,0.6) 0%, rgba(255,237,224,0.3) 60%, transparent 100%)",
+            backgroundImage: `url(${ROOM_BG})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
           }}
         >
-          {/* Soft arch backdrop */}
-          <div className="pointer-events-none absolute inset-x-12 top-6 bottom-12 rounded-t-[200px] border border-white/60 bg-white/20 shadow-[0_0_60px_rgba(255,200,180,0.4)]" />
-
-          {/* Base + layers */}
+          {/* Base + layers — avatar standing on the white podium */}
           {base && (
-            <div className="absolute inset-0 flex items-end justify-center pb-6">
-              <div className="relative h-[88%] w-auto">
+            <div className="absolute inset-x-0 bottom-[18%] flex justify-center">
+              <div className="relative h-[68%] w-auto" style={{ aspectRatio: "3 / 4" }}>
                 <img
                   src={base.image_url}
                   alt={base.name}
-                  className="h-full w-auto object-contain"
+                  className="h-full w-auto object-contain drop-shadow-[0_20px_25px_rgba(0,0,0,0.15)]"
                   draggable={false}
                 />
                 {renderedLayers.map(({ item, layer }) => (
@@ -514,11 +512,43 @@ function AvatarPage() {
             </button>
           </div>
 
-          {/* Pedestal */}
-          <div className="absolute inset-x-0 bottom-2 flex justify-center">
-            <div className="h-3 w-44 rounded-full bg-gradient-to-r from-transparent via-amber-200/60 to-transparent" />
-          </div>
         </div>
+      </div>
+
+      {/* Saved looks gallery */}
+      <div className="mx-auto w-full max-w-md px-4 pt-4">
+        <div className="mb-2 flex items-center justify-between">
+          <h2 className="text-sm font-semibold text-foreground">Meus Looks Salvos</h2>
+          <span className="text-xs text-muted-foreground">{looks.length}</span>
+        </div>
+        {looksLoading ? (
+          <div className="flex h-20 items-center justify-center">
+            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+          </div>
+        ) : looks.length === 0 ? (
+          <p className="rounded-2xl bg-white/70 px-3 py-4 text-center text-xs text-muted-foreground">
+            Nenhum look salvo ainda. Monte um visual e toque em "Salvar Look".
+          </p>
+        ) : (
+          <div className="flex gap-2 overflow-x-auto pb-2">
+            {looks.map((l) => (
+              <div
+                key={l.id}
+                className="relative shrink-0 overflow-hidden rounded-xl border border-border bg-white shadow-sm"
+                style={{ width: 96, height: 128 }}
+              >
+                <img src={l.image_url} alt="Look salvo" className="h-full w-full object-cover" />
+                <button
+                  onClick={() => deleteLook(l)}
+                  className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-black/50 text-[10px] text-white"
+                  aria-label="Excluir look"
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Shop drawer */}
