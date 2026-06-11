@@ -574,8 +574,26 @@ export function CustomizacaoTab({ photoUrl }: { photoUrl: string | null }) {
   if (loading) {
     return (
       <div className="rounded-3xl border bg-card/50 p-10 text-center text-sm text-muted-foreground">
-        Carregando customização…
+        Carregando visual…
       </div>
+    );
+  }
+
+  const hasAnyData =
+    catalog.length > 0 ||
+    backgrounds.length > 0 ||
+    nameGradients.length > 0 ||
+    equipped.frame !== null ||
+    equipped.aura !== null ||
+    equippedBackground !== null ||
+    equippedNameGradient !== null;
+
+  if (!isOnline && !hasAnyData) {
+    return (
+      <OfflineState
+        title="Visual indisponível offline"
+        description="Conecte-se para carregar seus itens."
+      />
     );
   }
 
@@ -583,6 +601,9 @@ export function CustomizacaoTab({ photoUrl }: { photoUrl: string | null }) {
 
   return (
     <div className="animate-fade-up space-y-5">
+      {!isOnline && (
+        <StaleDataNotice message="Você está offline. Mostrando visual carregado anteriormente." />
+      )}
       {/* Header */}
       <div className="glass relative overflow-hidden rounded-3xl p-6 shadow-elegant sm:p-8">
         <div
@@ -598,7 +619,7 @@ export function CustomizacaoTab({ photoUrl }: { photoUrl: string | null }) {
             <div className="inline-flex items-center gap-2 rounded-full bg-[var(--rose-soft)]/40 px-3 py-1 text-[11px] font-medium uppercase tracking-wide text-[var(--rose)]">
               <Sparkles className="h-3 w-3" /> Cosméticos
             </div>
-            <h2 className="mt-3 text-2xl font-semibold tracking-tight sm:text-3xl">Customização</h2>
+            <h2 className="mt-3 text-2xl font-semibold tracking-tight sm:text-3xl">Visual</h2>
             <p className="mt-1 max-w-md text-sm text-muted-foreground">
               Personalize a aparência do seu perfil e destaque sua identidade na plataforma.
             </p>
