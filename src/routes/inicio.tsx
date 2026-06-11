@@ -307,6 +307,25 @@ function InicioPage() {
     };
   }, [user]);
 
+  // Hide the free-frame offer for users who have ever spent coins
+  // (i.e. already made any "purchase" inside the app).
+  useEffect(() => {
+    if (!user) return;
+    let cancel = false;
+    (async () => {
+      const { count } = await supabase
+        .from("coin_transactions" as never)
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .eq("direction", "out");
+      if (cancel) return;
+      setHasSpent((count ?? 0) > 0);
+    })();
+    return () => {
+      cancel = true;
+    };
+  }, [user]);
+
   useEffect(() => {
     if (!user) return;
     (async () => {
