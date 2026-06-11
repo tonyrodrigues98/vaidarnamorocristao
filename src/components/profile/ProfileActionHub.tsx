@@ -14,6 +14,9 @@ import {
   LayoutDashboard,
   ChevronDown,
   Newspaper,
+  Sparkles,
+  Shirt,
+  PawPrint,
 } from "lucide-react";
 
 export type HubSection =
@@ -40,7 +43,7 @@ export type ProfileActionHubProps = {
   activeTab: string;
   isStaff: boolean;
   onSelect: (id: HubSection) => void;
-  onOpenResource: (id: "missions" | "role") => void;
+  onOpenResource: (id: "missions" | "role" | "customizacao") => void;
 };
 
 export function ProfileActionHub({ activeTab, isStaff, onSelect, onOpenResource }: ProfileActionHubProps) {
@@ -131,6 +134,24 @@ export function ProfileActionHub({ activeTab, isStaff, onSelect, onOpenResource 
               desc="Missões e badges desbloqueados."
               onClick={() => onOpenResource("missions")}
             />
+            <ResourceButton
+              Icon={Sparkles}
+              title="Visual"
+              desc="Pré-visualize molduras, auras e fundos."
+              onClick={() => onOpenResource("customizacao")}
+            />
+            <ResourceLink
+              Icon={Shirt}
+              title="Meu avatar"
+              desc="Monte e edite seu avatar."
+              to="/avatar"
+            />
+            <ResourceLink
+              Icon={PawPrint}
+              title="Meu pet"
+              desc="Escolha e equipe seu companheiro."
+              to="/meu-pet"
+            />
             {isStaff && (
               <ResourceButton
                 Icon={BadgeCheck}
@@ -212,7 +233,7 @@ function ResourceLink({
   Icon: ComponentType<{ className?: string }>;
   title: string;
   desc: string;
-  to: "/conta" | "/admin" | "/loja" | "/noticias";
+  to: "/conta" | "/admin" | "/loja" | "/noticias" | "/avatar" | "/meu-pet";
 }) {
   return (
     <li className="min-w-0">

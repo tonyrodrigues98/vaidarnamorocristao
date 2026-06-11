@@ -652,7 +652,7 @@ function PerfilPage() {
     scrollToTabs();
   };
 
-  const handleHubResource = (id: "missions" | "role") => {
+  const handleHubResource = (id: "missions" | "role" | "customizacao") => {
     setActiveTab(id);
     scrollToTabs();
   };
