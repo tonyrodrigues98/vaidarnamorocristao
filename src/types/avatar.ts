@@ -29,7 +29,33 @@ export type AvatarCategoryKey =
   | "backgrounds"
   | "pets"
   | "poses"
-  | "expressions";
+  | "expressions"
+  | "eyes"
+  | "eyebrows"
+  | "mouth"
+  | "beard";
+
+/**
+ * Avatar age range. Affects which base is rendered, which overlays apply,
+ * and which hair/eyebrow color variants the shop highlights first.
+ * - "20-35": default base, no aging treatment.
+ * - "36-50": default base + subtle aging overlay; slightly desaturated hair.
+ * - "50+":   dedicated base (slight posture change), grey/white hair variants.
+ */
+export type AvatarAgeRange = "20-35" | "36-50" | "50+";
+
+/**
+ * Where the head sits inside a given base PNG, in normalized 0-1 coords
+ * relative to the rendered stage. Used by AvatarRenderer to align facial
+ * item layers (eyes, eyebrows, mouth) on top of poses where the head shifts.
+ * `scale` is the head's height as a fraction of the stage height, so item
+ * PNGs can be sized proportionally.
+ */
+export type AvatarHeadAnchor = {
+  x: number;
+  y: number;
+  scale: number;
+};
 
 /**
  * Render slot for the layered 2D renderer. Order roughly mirrors paint

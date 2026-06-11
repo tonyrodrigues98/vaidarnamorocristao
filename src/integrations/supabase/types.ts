@@ -222,9 +222,11 @@ export type Database = {
       }
       avatar_bases: {
         Row: {
+          age_range: string
           body_type: string
           created_at: string
           gender: string
+          head_anchor: Json | null
           id: string
           image_url: string
           is_active: boolean
@@ -234,9 +236,11 @@ export type Database = {
           sort_order: number
         }
         Insert: {
+          age_range?: string
           body_type?: string
           created_at?: string
           gender: string
+          head_anchor?: Json | null
           id?: string
           image_url: string
           is_active?: boolean
@@ -246,9 +250,11 @@ export type Database = {
           sort_order?: number
         }
         Update: {
+          age_range?: string
           body_type?: string
           created_at?: string
           gender?: string
+          head_anchor?: Json | null
           id?: string
           image_url?: string
           is_active?: boolean
@@ -2458,18 +2464,21 @@ export type Database = {
       }
       user_avatar_base: {
         Row: {
+          age_range: string
           base_id: string
           skin_tone: string
           updated_at: string
           user_id: string
         }
         Insert: {
+          age_range?: string
           base_id: string
           skin_tone?: string
           updated_at?: string
           user_id: string
         }
         Update: {
+          age_range?: string
           base_id?: string
           skin_tone?: string
           updated_at?: string
