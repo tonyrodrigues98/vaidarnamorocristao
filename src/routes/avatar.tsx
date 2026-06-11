@@ -1,5 +1,5 @@
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Loader2,
   Crown,
@@ -155,6 +155,10 @@ function AvatarPage() {
   const [bodyType, setBodyType] = useState<string>("default");
   const [pose, setPose] = useState<AvatarPoseKey>("standing_default");
   const [skinTone, setSkinTone] = useState<string>("default");
+  // Marca quando a hidratação inicial do user_avatar_base terminou —
+  // antes disso, os auto-saves precisam ficar travados pra não sobrescrever
+  // o que está salvo no banco com o default do useState.
+  const baseHydratedRef = useRef(false);
   const [expression, setExpression] = useState<AvatarExpressionKey>("soft_smile");
   const [poseSheetOpen, setPoseSheetOpen] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
@@ -162,10 +166,9 @@ function AvatarPage() {
   // the user navigates categories or selects another preview.
   const [previewItem, setPreviewItem] = useState<Item | null>(null);
   /**
-   * Mock local — escolha de cor por layer (cabelo, roupa). Persistência
-   * real virá quando o backend ganhar a coluna `color_selections`.
-   * Hoje só afeta a renderização e dispara o `tintable`/`mask_tint` quando
-   * o item informar suporte (itens do DB atual caem em `fixed_asset`).
+   * Escolha de cor por layer (cabelo, roupa). Persistida em
+   * `user_avatar_base.color_selections` (jsonb). Chave = AvatarLayerKey,
+   * valor = id do preset em `src/data/avatarColorPresets.ts`.
    */
   const [colorSelections, setColorSelections] = useState<
     Partial<Record<AvatarLayerKey, string>>
@@ -213,6 +216,31 @@ function AvatarPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
+  // Auto-save (debounced) das escolhas runtime: skinTone + colorSelections.
+  // Só dispara depois que loadAll hidratou o estado, e exige `base` definida
+  // (coluna `base_id` em user_avatar_base é NOT NULL).
+  useEffect(() => {
+    if (!user || !base?.id) return;
+    if (!baseHydratedRef.current) return;
+    const handle = window.setTimeout(() => {
+      void supabase
+        .from("user_avatar_base")
+        .upsert(
+          {
+            user_id: user.id,
+            base_id: base.id,
+            skin_tone: skinTone,
+            color_selections: colorSelections,
+          },
+          { onConflict: "user_id" },
+        )
+        .then(({ error }) => {
+          if (error) console.warn("[avatar] persist falhou", error.message);
+        });
+    }, 400);
+    return () => window.clearTimeout(handle);
+  }, [user, base?.id, skinTone, colorSelections]);
+
   async function loadAll() {
     if (!user) return;
     setLoading(true);
@@ -228,7 +256,7 @@ function AvatarPage() {
       supabase.from("user_coins").select("balance").eq("user_id", user.id).maybeSingle(),
       supabase
         .from("user_avatar_base")
-        .select("base_id, skin_tone")
+        .select("base_id, skin_tone, color_selections")
         .eq("user_id", user.id)
         .maybeSingle(),
     ]);
@@ -243,7 +271,13 @@ function AvatarPage() {
 
     // Hydrate from saved avatar choice if present; otherwise fall back to
     // profile gender default. Onboarding (/avatar/criar) is opt-in for now.
-    const saved = userBaseRes.data as { base_id: string; skin_tone: string | null } | null;
+    const saved = userBaseRes.data as
+      | {
+          base_id: string;
+          skin_tone: string | null;
+          color_selections: Partial<Record<AvatarLayerKey, string>> | null;
+        }
+      | null;
     const profileGender =
       (profileRes.data?.sex as string | undefined) === "f" ? "feminino" : "masculino";
     const matched =
@@ -261,6 +295,11 @@ function AvatarPage() {
     setBodyType(matched?.body_type ?? "default");
     setPose((matched?.pose_key as AvatarPoseKey | undefined) ?? "standing_default");
     setSkinTone(saved?.skin_tone ?? matched?.skin_tone ?? "default");
+    if (saved?.color_selections && typeof saved.color_selections === "object") {
+      setColorSelections((current) => ({ ...current, ...saved.color_selections }));
+    }
+    // Libera os auto-saves só depois que a hidratação terminou.
+    baseHydratedRef.current = true;
 
     const inv = new Set<string>();
     const favs = new Set<string>();

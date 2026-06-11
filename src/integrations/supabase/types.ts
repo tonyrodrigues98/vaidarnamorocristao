@@ -2467,6 +2467,7 @@ export type Database = {
           age_range: string
           avatar_name: string | null
           base_id: string
+          color_selections: Json
           skin_tone: string
           updated_at: string
           user_id: string
@@ -2475,6 +2476,7 @@ export type Database = {
           age_range?: string
           avatar_name?: string | null
           base_id: string
+          color_selections?: Json
           skin_tone?: string
           updated_at?: string
           user_id: string
@@ -2483,6 +2485,7 @@ export type Database = {
           age_range?: string
           avatar_name?: string | null
           base_id?: string
+          color_selections?: Json
           skin_tone?: string
           updated_at?: string
           user_id?: string
