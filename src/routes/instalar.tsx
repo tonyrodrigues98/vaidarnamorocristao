@@ -106,7 +106,7 @@ function InstallPage() {
       {isStandalone ? (
         <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-6 text-center text-emerald-900">
           <CheckCircle2 className="mx-auto mb-2 h-8 w-8" />
-          <p className="font-bold">Você já está usando o app instalado. 🎉</p>
+          <p className="font-bold">Você já está usando o app instalado.</p>
           <Button asChild className="mt-4 rounded-full">
             <Link to="/inicio">Ir para o início</Link>
           </Button>
