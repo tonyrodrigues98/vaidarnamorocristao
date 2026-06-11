@@ -1,13 +1,17 @@
 import { PhotoImg } from "@/components/PhotoImg";
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { RequireApproved } from "@/components/RequireApproved";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { Ban, ShieldOff, ArrowLeft } from "lucide-react";
+import { useNetworkStatus } from "@/hooks/useNetworkStatus";
+import { StaleDataNotice } from "@/components/ui/StaleDataNotice";
+import { OfflineState } from "@/components/ui/OfflineState";
 
 export const Route = createFileRoute("/bloqueados")({
   component: () => (
@@ -31,58 +35,78 @@ type Row = {
 
 function BlockedPage() {
   const { user, loading } = useAuth();
-  const [rows, setRows] = useState<Row[] | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const qc = useQueryClient();
+  const { isOnline } = useNetworkStatus();
 
-  const load = async () => {
-    if (!user) return;
-    const { data: blocks } = await supabase
-      .from("blocks")
-      .select("blocked_id, created_at")
-      .eq("blocker_id", user.id)
-      .order("created_at", { ascending: false });
-    const ids = (blocks ?? []).map((b) => b.blocked_id as string);
-    if (ids.length === 0) {
-      setRows([]);
-      return;
-    }
-    const { data: profs } = await supabase
-      .from("profiles")
-      .select("id, full_name, photo_url, city, state")
-      .in("id", ids);
-    const map = new Map((profs ?? []).map((p: any) => [p.id, p]));
-    setRows(
-      (blocks ?? []).map((b: any) => ({
+  const queryKey = ["blocked-users", user?.id] as const;
+  const blockedQuery = useQuery({
+    queryKey,
+    enabled: !!user,
+    staleTime: 60_000,
+    refetchOnReconnect: true,
+    queryFn: async (): Promise<Row[]> => {
+      if (!user) return [];
+      const { data: blocks, error } = await supabase
+        .from("blocks")
+        .select("blocked_id, created_at")
+        .eq("blocker_id", user.id)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      const ids = (blocks ?? []).map((b) => b.blocked_id as string);
+      if (ids.length === 0) return [];
+      const { data: profs } = await supabase
+        .from("profiles")
+        .select("id, full_name, photo_url, city, state")
+        .in("id", ids);
+      const map = new Map((profs ?? []).map((p: any) => [p.id, p]));
+      return (blocks ?? []).map((b: any) => ({
         blocked_id: b.blocked_id,
         created_at: b.created_at,
         profile: map.get(b.blocked_id) ?? null,
-      })),
-    );
-  };
+      }));
+    },
+  });
 
-  useEffect(() => {
-    load();
-  }, [user]);
+  const rows = blockedQuery.data ?? null;
 
-  async function unblock(id: string) {
-    if (!user) return;
-    setBusyId(id);
-    const { error } = await supabase
-      .from("blocks")
-      .delete()
-      .eq("blocker_id", user.id)
-      .eq("blocked_id", id);
-    setBusyId(null);
-    if (error) {
-      toast.error(error.message);
+  const unblockMutation = useMutation({
+    mutationFn: async (id: string) => {
+      if (!user) throw new Error("not-authenticated");
+      const { error } = await supabase
+        .from("blocks")
+        .delete()
+        .eq("blocker_id", user.id)
+        .eq("blocked_id", id);
+      if (error) throw error;
+      return id;
+    },
+    onMutate: (id) => setBusyId(id),
+    onSettled: () => setBusyId(null),
+    onSuccess: (id) => {
+      toast.success("Perfil desbloqueado");
+      qc.setQueryData<Row[]>(queryKey, (prev) =>
+        (prev ?? []).filter((r) => r.blocked_id !== id),
+      );
+    },
+    onError: (err: Error) => {
+      toast.error(err.message || "Não foi possível desbloquear");
+    },
+  });
+
+  function unblock(id: string) {
+    if (!isOnline) {
+      toast.info("Disponível online. Reconecte-se para desbloquear.");
       return;
     }
-    toast.success("Perfil desbloqueado");
-    setRows((prev) => (prev ?? []).filter((r) => r.blocked_id !== id));
+    unblockMutation.mutate(id);
   }
 
   if (loading) return null;
   if (!user) return <Navigate to="/auth/login" />;
+
+  const showStaleNotice = !isOnline && rows !== null && rows.length > 0;
+  const showOfflineEmpty = !isOnline && (rows === null || rows.length === 0) && !blockedQuery.isLoading;
 
   return (
     <div className="min-h-screen bg-background">
@@ -105,7 +129,17 @@ function BlockedPage() {
           </div>
         </div>
 
-        {rows === null ? (
+        {showStaleNotice ? <StaleDataNotice className="mb-3" /> : null}
+
+        {showOfflineEmpty ? (
+          <OfflineState
+            title="Lista indisponível offline"
+            description="Conecte-se à internet para ver os perfis que você bloqueou."
+            actionLabel="Tentar novamente"
+            onAction={() => blockedQuery.refetch()}
+            compact
+          />
+        ) : rows === null || blockedQuery.isLoading ? (
           <div className="rounded-2xl border border-border bg-card p-6 text-sm text-muted-foreground">
             Carregando…
           </div>
@@ -143,11 +177,12 @@ function BlockedPage() {
                 <Button
                   size="sm"
                   variant="outline"
-                  disabled={busyId === r.blocked_id}
+                  disabled={busyId === r.blocked_id || !isOnline}
+                  title={!isOnline ? "Disponível online." : undefined}
                   onClick={() => unblock(r.blocked_id)}
                 >
                   <ShieldOff className="mr-1 h-4 w-4" />
-                  Desbloquear
+                  {!isOnline ? "Indisponível offline" : "Desbloquear"}
                 </Button>
               </li>
             ))}

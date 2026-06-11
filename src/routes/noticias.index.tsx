@@ -1,5 +1,6 @@
 import { createFileRoute, Navigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
@@ -8,6 +9,9 @@ import { Header } from "@/components/layout/Header";
 import { MobileAppHeader } from "@/components/mobile/MobileAppHeader";
 import { ArrowRight, Newspaper, Calendar } from "lucide-react";
 import { AppEmptyState } from "@/components/ui/AppEmptyState";
+import { useNetworkStatus } from "@/hooks/useNetworkStatus";
+import { StaleDataNotice } from "@/components/ui/StaleDataNotice";
+import { OfflineState } from "@/components/ui/OfflineState";
 
 type Post = {
   id: string;
@@ -39,15 +43,17 @@ export const Route = createFileRoute("/noticias/")({
 
 function Noticias() {
   const { user, loading } = useAuth();
-  const [posts, setPosts] = useState<Post[]>([]);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
-  const [fetching, setFetching] = useState(true);
-  const latestPost = posts[0] ?? null;
-  const olderPosts = useMemo(() => posts.slice(1), [posts]);
+  const { isOnline } = useNetworkStatus();
+  const qc = useQueryClient();
 
-  useEffect(() => {
-    if (!user) return;
-    const load = async () => {
+  const queryKey = ["news-posts", user?.id] as const;
+  const postsQuery = useQuery({
+    queryKey,
+    enabled: !!user,
+    staleTime: 60_000,
+    refetchOnReconnect: true,
+    queryFn: async (): Promise<Post[]> => {
       const { data, error } = await supabase
         .from("daily_posts")
         .select("id, title, content, published_at, author_id")
@@ -55,23 +61,33 @@ function Noticias() {
         .eq("published", true)
         .order("published_at", { ascending: false })
         .limit(50);
-      setFetching(false);
       if (error) {
         toast.error(error.message);
-        return;
+        throw error;
       }
-      setPosts((data ?? []) as Post[]);
-    };
-    load();
+      return (data ?? []) as Post[];
+    },
+  });
+
+  const posts = postsQuery.data ?? [];
+  const fetching = postsQuery.isLoading;
+  const latestPost = posts[0] ?? null;
+  const olderPosts = useMemo(() => posts.slice(1), [posts]);
+
+  useEffect(() => {
+    if (!user) return;
     markSeen(user.id, "news");
     const ch = supabase
       .channel("daily-posts")
-      .on("postgres_changes", { event: "*", schema: "public", table: "daily_posts" }, load)
+      .on("postgres_changes", { event: "*", schema: "public", table: "daily_posts" }, () => {
+        qc.invalidateQueries({ queryKey });
+      })
       .subscribe();
     return () => {
       supabase.removeChannel(ch);
     };
-  }, [user]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, qc]);
 
   if (!loading && !user) return <Navigate to="/auth/login" />;
 
@@ -99,8 +115,17 @@ function Noticias() {
         </div>
 
         <div className="space-y-5 sm:mt-6">
+          {!isOnline && posts.length > 0 ? <StaleDataNotice /> : null}
           {fetching && posts.length === 0 ? (
             <NoticiasSkeleton />
+          ) : !isOnline && posts.length === 0 ? (
+            <OfflineState
+              title="Notícias indisponíveis offline"
+              description="Conecte-se para ver as últimas novidades da comunidade."
+              actionLabel="Tentar novamente"
+              onAction={() => postsQuery.refetch()}
+              compact
+            />
           ) : posts.length === 0 ? (
             <AppEmptyState
               icon={<Newspaper className="h-6 w-6" />}

@@ -83,6 +83,8 @@ import { Award as AwardIcon } from "lucide-react";
 import { BibleVerseSelector, type BibleSelection } from "@/components/BibleVerseSelector";
 import { InterestsPanel } from "@/components/admin/InterestsPanel";
 import { AdminTopNav } from "@/components/admin/AdminTopNav";
+import { useNetworkStatus } from "@/hooks/useNetworkStatus";
+import { WifiOff } from "lucide-react";
 
 type Row = Database["public"]["Tables"]["profiles"]["Row"];
 type ProfileUpdate = Database["public"]["Tables"]["profiles"]["Update"];
@@ -133,6 +135,7 @@ export const Route = createFileRoute("/admin/")({ component: Admin });
 
 function Admin() {
   const { user, isAdmin, role, loading } = useAuth();
+  const { isOnline } = useNetworkStatus();
   const isSuperAdmin = role === "super_admin";
   const isApresentador = role === "apresentador";
   const isModerador = role === "moderador";
@@ -589,6 +592,22 @@ function Admin() {
       <Header />
       <AdminTopNav eyebrow="Administração" />
       <main className="mx-auto max-w-7xl px-4 pb-16 pt-5 sm:px-6 sm:py-10">
+        {!isOnline ? (
+          <div
+            role="status"
+            aria-live="polite"
+            className="mb-4 flex items-start gap-3 rounded-2xl border border-amber-300/70 bg-amber-50/90 px-4 py-3 text-sm text-amber-900 shadow-sm dark:border-amber-500/40 dark:bg-amber-950/60 dark:text-amber-100"
+          >
+            <WifiOff className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
+            <div className="leading-snug">
+              <p className="font-semibold">Painel administrativo em modo leitura</p>
+              <p className="text-xs opacity-90">
+                Você está offline. Ações administrativas (aprovar, banir, moderar, publicar)
+                estão desabilitadas até a conexão voltar.
+              </p>
+            </div>
+          </div>
+        ) : null}
         <section className="animate-fade-up overflow-hidden rounded-[2rem] border border-border/70 bg-card/85 p-5 shadow-soft backdrop-blur sm:p-7">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
             <div>

@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { AppEmptyState } from "@/components/ui/AppEmptyState";
+import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 import { recomputeMyBadges } from "@/lib/recomputeBadges";
 import { markHomeChecklistStep } from "@/lib/homeChecklist";
 import {
@@ -110,6 +111,14 @@ function relTime(iso: string) {
 function Devocional() {
   const { user, isAdmin, role, loading } = useAuth();
   const canModerate = isAdmin || role === "moderador";
+  const { isOnline } = useNetworkStatus();
+  const requireOnline = useCallback((): boolean => {
+    if (!isOnline) {
+      toast.info("Disponível online. Reconecte-se para concluir esta ação.");
+      return false;
+    }
+    return true;
+  }, [isOnline]);
   const [sort, setSort] = useState<SortKey>("recent");
   const [posts, setPosts] = useState<Post[]>([]);
   const [page, setPage] = useState(0);
@@ -338,6 +347,7 @@ function Devocional() {
 
   async function toggleReaction(postId: string, reaction: Reaction) {
     if (!user) return;
+    if (!requireOnline()) return;
     const mine = reactions.find(
       (r) => r.post_id === postId && r.user_id === user.id && r.reaction === reaction,
     );
@@ -375,6 +385,7 @@ function Devocional() {
 
   async function prayToday(postId: string) {
     if (!user) return;
+    if (!requireOnline()) return;
     if (prayedToday) {
       toast.info("Você já marcou que orou hoje");
       return;
@@ -413,6 +424,7 @@ function Devocional() {
   async function submitComment(e: FormEvent, postId: string) {
     e.preventDefault();
     if (!user) return;
+    if (!requireOnline()) return;
     const text = (draft[postId] ?? "").trim();
     if (!text) return;
     const parent = replyTo[postId];
@@ -438,6 +450,7 @@ function Devocional() {
 
   async function saveEdit() {
     if (!editing) return;
+    if (!requireOnline()) return;
     const { error } = await supabase
       .from("devotional_comments")
       .update({ content: editing.text })
@@ -458,6 +471,7 @@ function Devocional() {
 
   async function deleteComment(c: Comment) {
     if (!user) return;
+    if (!requireOnline()) return;
     if (c.user_id === user.id) {
       const { error } = await supabase
         .from("devotional_comments")
@@ -478,6 +492,7 @@ function Devocional() {
   }
 
   async function togglePin(c: Comment) {
+    if (!requireOnline()) return;
     const newPin = c.pinned_at ? null : new Date().toISOString();
     const { error } = await supabase
       .from("devotional_comments")
@@ -489,6 +504,7 @@ function Devocional() {
 
   async function toggleLike(c: Comment) {
     if (!user) return;
+    if (!requireOnline()) return;
     const has = myLikes.has(c.id);
     // optimistic
     setMyLikes((prev) => {
@@ -521,6 +537,7 @@ function Devocional() {
 
   async function submitReport() {
     if (!user || !reportFor || !reportReason.trim()) return;
+    if (!requireOnline()) return;
     const { error } = await supabase.from("devotional_comment_reports").insert({
       comment_id: reportFor.id,
       reporter_id: user.id,
