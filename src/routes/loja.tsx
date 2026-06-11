@@ -125,9 +125,6 @@ const RARITY_WEIGHT: Record<string, number> = {
 function LojaPage() {
   const { user, loading: authLoading } = useAuth();
   const queryClient = useQueryClient();
-  const [owned, setOwned] = useState<Set<string>>(new Set());
-  const [ownedBackgrounds, setOwnedBackgrounds] = useState<Set<string>>(new Set());
-  const [ownedNameGradients, setOwnedNameGradients] = useState<Set<string>>(new Set());
   const [equipped, setEquipped] = useState<EquippedMap>({
     frame: null,
     aura: null,
@@ -151,6 +148,9 @@ function LojaPage() {
       queryClient.invalidateQueries({ queryKey: ["shop-catalog"] });
       if (user?.id) {
         queryClient.invalidateQueries({ queryKey: ["user-balance", user.id] });
+        queryClient.invalidateQueries({ queryKey: ["user-decoration-inventory", user.id] });
+        queryClient.invalidateQueries({ queryKey: ["user-background-inventory", user.id] });
+        queryClient.invalidateQueries({ queryKey: ["user-name-gradient-inventory", user.id] });
       }
     });
   }, [queryClient, user?.id]);
@@ -215,22 +215,71 @@ function LojaPage() {
     [queryClient, user?.id],
   );
 
+  // User inventory — TanStack Query owns cache + offline reuse.
+  const decorationInventoryQuery = useQuery({
+    queryKey: ["user-decoration-inventory", user?.id],
+    queryFn: () => fetchMyOwnedIds(user!.id),
+    enabled: !!user?.id,
+    staleTime: 30_000,
+    gcTime: 5 * 60_000,
+    refetchOnReconnect: true,
+  });
+  const backgroundInventoryQuery = useQuery({
+    queryKey: ["user-background-inventory", user?.id],
+    queryFn: fetchMyOwnedBackgroundIds,
+    enabled: !!user?.id,
+    staleTime: 30_000,
+    gcTime: 5 * 60_000,
+    refetchOnReconnect: true,
+  });
+  const nameGradientInventoryQuery = useQuery({
+    queryKey: ["user-name-gradient-inventory", user?.id],
+    queryFn: fetchMyOwnedNameGradientIds,
+    enabled: !!user?.id,
+    staleTime: 30_000,
+    gcTime: 5 * 60_000,
+    refetchOnReconnect: true,
+  });
+
+  const EMPTY_SET = useMemo(() => new Set<string>(), []);
+  const owned = decorationInventoryQuery.data ?? EMPTY_SET;
+  const ownedBackgrounds = backgroundInventoryQuery.data ?? EMPTY_SET;
+  const ownedNameGradients = nameGradientInventoryQuery.data ?? EMPTY_SET;
+
+  type SetUpdater = Set<string> | ((prev: Set<string>) => Set<string>);
+  const makeInventorySetter = (key: readonly unknown[]) =>
+    (next: SetUpdater) => {
+      if (!user?.id) return;
+      queryClient.setQueryData<Set<string>>(key, (prev) => {
+        const current = prev ?? new Set<string>();
+        return typeof next === "function" ? next(current) : next;
+      });
+    };
+  const setOwned = useCallback(
+    makeInventorySetter(["user-decoration-inventory", user?.id]),
+    [queryClient, user?.id],
+  );
+  const setOwnedBackgrounds = useCallback(
+    makeInventorySetter(["user-background-inventory", user?.id]),
+    [queryClient, user?.id],
+  );
+  const setOwnedNameGradients = useCallback(
+    makeInventorySetter(["user-name-gradient-inventory", user?.id]),
+    [queryClient, user?.id],
+  );
+
   useEffect(() => {
     if (!user) return;
     let alive = true;
     (async () => {
       try {
-        const [o, prof] = await Promise.all([
-          fetchMyOwnedIds(user.id),
-          supabase
+        const prof = await supabase
             .from("profiles")
             .select("photo_url, equipped_frame_id, equipped_aura_id, equipped_sticker_id")
             .eq("id", user.id)
-            .maybeSingle(),
-        ]);
+            .maybeSingle();
 
         if (!alive) return;
-        setOwned(o);
         const p = (prof.data ?? {}) as {
           photo_url?: string | null;
           equipped_frame_id?: string | null;
@@ -250,18 +299,12 @@ function LojaPage() {
       }
 
       try {
-        const [ownedBg, ownedNameGradientIds, bgProf] = await Promise.all([
-          fetchMyOwnedBackgroundIds(),
-          fetchMyOwnedNameGradientIds(),
-          supabase
+        const bgProf = await supabase
             .from("profiles")
             .select("equipped_background_id, equipped_name_gradient_id")
             .eq("id", user.id)
-            .maybeSingle(),
-        ]);
+            .maybeSingle();
         if (!alive) return;
-        setOwnedBackgrounds(ownedBg);
-        setOwnedNameGradients(ownedNameGradientIds);
         setEquippedBackground(
           ((bgProf.data ?? {}) as { equipped_background_id?: string | null })
             .equipped_background_id ?? null,
@@ -272,7 +315,6 @@ function LojaPage() {
         );
       } catch {
         if (!alive) return;
-        setOwnedBackgrounds(new Set());
         setEquippedBackground(null);
       }
       if (alive) {
