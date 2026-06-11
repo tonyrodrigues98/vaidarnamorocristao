@@ -255,3 +255,51 @@ Já praticamente uma central de atividades:
 - `src/routes/notificacoes.tsx`
 - `src/components/ProfilePhotosManager.tsx`
 - `src/routeTree.gen.ts` (auto-gerado pelo plugin)
+
+---
+
+## Mudanças por data
+
+Datas relativas à sessão de trabalho atual (11/06/2026). O projeto usa sincronização bidirecional com GitHub via integração Lovable; commits/PRs individuais não são gerados manualmente pelo agente, portanto **não há URLs diretas de commit/PR para anexar** aqui. Para auditar diffs reais, consultar o histórico do repositório GitHub conectado (aba *Code → History* em cada arquivo abaixo).
+
+| Data | Escopo | Arquivos principais editados |
+|---|---|---|
+| 11/06/2026 | Auditoria offline geral | `src/routes/bloqueados.tsx`, `src/routes/noticias.index.tsx`, `src/routes/devocional.tsx`, `src/routes/admin/index.tsx`, `src/components/ui/StaleDataNotice.tsx` (novo) |
+| 11/06/2026 | Perfil — Parte 1 (dados principais) | `src/routes/perfil.tsx` |
+| 11/06/2026 | Perfil — Parte 2 (fotos e visual) | `src/routes/perfil.tsx`, `src/components/ProfilePhotosManager.tsx`, `src/components/CustomizacaoTab.tsx` |
+| 11/06/2026 | Loja — guards offline | `src/routes/loja.tsx` |
+| 11/06/2026 | Conta — settings offline-aware | `src/routes/conta.tsx` |
+| 11/06/2026 | Notificações — central offline-safe | `src/routes/notificacoes.tsx` |
+| 11/06/2026 | Consolidação documental | `RELATORIO_CONSOLIDADO_OFFLINE.md`, `RELATORIO_OFFLINE_AUDIT.md` |
+
+> **Honestidade:** não há tags Git, números de PR ou SHAs disponíveis para o agente neste ambiente. Se forem necessários links clicáveis, eles devem ser preenchidos manualmente após localizar os commits correspondentes no GitHub conectado.
+
+---
+
+## Checklist de validação
+
+| Item | Resultado | Observação |
+|---|---|---|
+| `bunx tsc --noEmit` após cada parte | ✅ exit 0 | Última execução: agora, exit 0 sem output (sessão atual) |
+| `npm run build` / `bun run build` manual | ❌ não executado | O harness do Lovable roda build automaticamente após cada edição; nenhum build manual foi disparado pelo agente |
+| Análise estática (leitura de cada rota editada) | ✅ feita | Confirmação de imports, hooks, JSX balance |
+| Testes E2E / Vitest para guards offline | ❌ não criados | Nenhum teste novo escrito |
+| Teste em dispositivo real (iPhone/Android) | ❌ não realizado | Apenas verificação via tipos e leitura de código |
+| Lighthouse / PWA audit | ❌ não executado | Fora do escopo desta tarefa |
+| Service Worker regenerado | ❌ não alterado | Nenhuma mudança em `vite.config`/SW |
+| Banco/Supabase/migrations | ❌ não tocado | Nenhuma migration criada ou alterada |
+| Dados fake (saldo, inventário, notificações, permissões) | ❌ não criados | Confirmação por leitura: nenhum mock/seed adicionado |
+| Fila offline de mutações | ❌ não criada | Mutações sensíveis apenas **bloqueadas** offline com toast |
+
+### Como reproduzir a validação localmente
+
+```bash
+bunx tsc --noEmit          # typecheck estrito (esperado: exit 0)
+bun run build              # opcional: build de produção
+```
+
+Para validação manual offline:
+1. Abrir DevTools → Network → Offline.
+2. Navegar para `/perfil`, `/loja`, `/conta`, `/notificacoes`, `/bloqueados`.
+3. Confirmar `StaleDataNotice` quando há cache, `OfflineState` quando não há.
+4. Tentar mutações sensíveis (salvar perfil, comprar, equipar, marcar como lida, excluir conta) e confirmar toast `"Disponível online. Reconecte-se…"`.
