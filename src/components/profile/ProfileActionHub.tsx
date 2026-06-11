@@ -140,18 +140,6 @@ export function ProfileActionHub({ activeTab, isStaff, onSelect, onOpenResource 
               desc="Pré-visualize molduras, auras e fundos."
               onClick={() => onOpenResource("customizacao")}
             />
-            <ResourceLink
-              Icon={Shirt}
-              title="Meu avatar"
-              desc="Monte e edite seu avatar."
-              to="/avatar"
-            />
-            <ResourceLink
-              Icon={PawPrint}
-              title="Meu pet"
-              desc="Escolha e equipe seu companheiro."
-              to="/meu-pet"
-            />
             {isStaff && (
               <ResourceButton
                 Icon={BadgeCheck}
