@@ -683,6 +683,20 @@ function PerfilPage() {
           className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[520px] bg-white dark:bg-[linear-gradient(120deg,rgba(10,16,34,0.98),rgba(17,31,63,0.82)_34%,rgba(18,44,82,0.78)_70%,rgba(42,35,22,0.44))]"
         />
         <AdminWarningBanner />
+        {!isOnline && profileMainQuery.data && (
+          <div className="mb-4">
+            <StaleDataNotice />
+          </div>
+        )}
+        {!isOnline && !profileMainQuery.data && !profileMainQuery.isLoading && (
+          <div className="mb-6">
+            <OfflineState
+              compact
+              title="Perfil indisponível offline"
+              description="Abra esta tela conectado para carregar seus dados."
+            />
+          </div>
+        )}
         <section className="animate-fade-up overflow-hidden rounded-[2.25rem] border border-border/70 bg-card/75 shadow-[0_26px_90px_rgba(31,41,55,0.10)] backdrop-blur dark:bg-card/72 dark:shadow-[0_28px_90px_rgba(0,0,0,0.42)]">
           <div className="grid w-full min-w-0 gap-0 lg:grid-cols-[380px_minmax(0,1fr)]">
             <div className="relative w-full min-w-0 overflow-hidden min-h-[320px] bg-[linear-gradient(145deg,#fff7ed,#fdf2f8_45%,#eff6ff)] p-4 dark:bg-[linear-gradient(145deg,rgba(49,22,38,0.88),rgba(20,20,34,0.94)_46%,rgba(15,35,58,0.88))] sm:p-8">
