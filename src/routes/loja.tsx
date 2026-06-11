@@ -149,8 +149,11 @@ function LojaPage() {
       refreshResolveRef.current = resolve;
       setRefreshKey((k) => k + 1);
       queryClient.invalidateQueries({ queryKey: ["shop-catalog"] });
+      if (user?.id) {
+        queryClient.invalidateQueries({ queryKey: ["user-balance", user.id] });
+      }
     });
-  }, [queryClient]);
+  }, [queryClient, user?.id]);
 
   // Public catalog queries — TanStack Query owns cache + offline reuse.
   const decorationsQuery = useQuery({
@@ -508,8 +511,10 @@ function LojaPage() {
                     Seu saldo
                   </p>
                   <p className="text-lg font-semibold leading-none">
-                    {balance}
-                    <span className="ml-1 text-xs font-normal text-muted-foreground">moedas</span>
+                    {balanceKnown ? balance : "—"}
+                    <span className="ml-1 text-xs font-normal text-muted-foreground">
+                      {balanceKnown ? "moedas" : "saldo indisponível offline"}
+                    </span>
                   </p>
                 </div>
               </div>
@@ -567,8 +572,10 @@ function LojaPage() {
                   Seu saldo
                 </p>
                 <p className="text-lg font-semibold leading-none">
-                  {balance}
-                  <span className="ml-1 text-xs font-normal text-muted-foreground">moedas</span>
+                  {balanceKnown ? balance : "—"}
+                  <span className="ml-1 text-xs font-normal text-muted-foreground">
+                    {balanceKnown ? "moedas" : "saldo indisponível offline"}
+                  </span>
                 </p>
               </div>
             </div>
