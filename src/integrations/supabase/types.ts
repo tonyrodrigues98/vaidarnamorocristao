@@ -220,6 +220,66 @@ export type Database = {
         }
         Relationships: []
       }
+      avatar_bases: {
+        Row: {
+          created_at: string
+          gender: string
+          id: string
+          image_url: string
+          is_active: boolean
+          name: string
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string
+          gender: string
+          id?: string
+          image_url: string
+          is_active?: boolean
+          name: string
+          sort_order?: number
+        }
+        Update: {
+          created_at?: string
+          gender?: string
+          id?: string
+          image_url?: string
+          is_active?: boolean
+          name?: string
+          sort_order?: number
+        }
+        Relationships: []
+      }
+      avatar_categories: {
+        Row: {
+          created_at: string
+          icon: string | null
+          id: string
+          layer_index: number
+          name: string
+          slug: string
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string
+          icon?: string | null
+          id?: string
+          layer_index?: number
+          name: string
+          slug: string
+          sort_order?: number
+        }
+        Update: {
+          created_at?: string
+          icon?: string | null
+          id?: string
+          layer_index?: number
+          name?: string
+          slug?: string
+          sort_order?: number
+        }
+        Relationships: []
+      }
       avatar_decorations: {
         Row: {
           active: boolean
@@ -267,6 +327,68 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      avatar_items: {
+        Row: {
+          category_id: string
+          created_at: string
+          description: string | null
+          gender: string
+          id: string
+          image_url: string
+          is_active: boolean
+          is_premium: boolean
+          metadata: Json
+          name: string
+          price: number
+          rarity: string
+          sort_order: number
+          thumbnail_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          category_id: string
+          created_at?: string
+          description?: string | null
+          gender?: string
+          id?: string
+          image_url: string
+          is_active?: boolean
+          is_premium?: boolean
+          metadata?: Json
+          name: string
+          price?: number
+          rarity?: string
+          sort_order?: number
+          thumbnail_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          category_id?: string
+          created_at?: string
+          description?: string | null
+          gender?: string
+          id?: string
+          image_url?: string
+          is_active?: boolean
+          is_premium?: boolean
+          metadata?: Json
+          name?: string
+          price?: number
+          rarity?: string
+          sort_order?: number
+          thumbnail_url?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "avatar_items_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "avatar_categories"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       badges: {
         Row: {
@@ -2324,6 +2446,113 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      user_avatar_base: {
+        Row: {
+          base_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          base_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          base_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_avatar_base_base_id_fkey"
+            columns: ["base_id"]
+            isOneToOne: false
+            referencedRelation: "avatar_bases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_avatar_equipped: {
+        Row: {
+          base_id: string | null
+          category_id: string
+          id: string
+          item_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          base_id?: string | null
+          category_id: string
+          id?: string
+          item_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          base_id?: string | null
+          category_id?: string
+          id?: string
+          item_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_avatar_equipped_base_id_fkey"
+            columns: ["base_id"]
+            isOneToOne: false
+            referencedRelation: "avatar_bases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_avatar_equipped_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "avatar_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_avatar_equipped_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "avatar_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_avatar_inventory: {
+        Row: {
+          acquired_at: string
+          id: string
+          is_favorite: boolean
+          item_id: string
+          user_id: string
+        }
+        Insert: {
+          acquired_at?: string
+          id?: string
+          is_favorite?: boolean
+          item_id: string
+          user_id: string
+        }
+        Update: {
+          acquired_at?: string
+          id?: string
+          is_favorite?: boolean
+          item_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_avatar_inventory_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "avatar_items"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_badges: {
         Row: {
