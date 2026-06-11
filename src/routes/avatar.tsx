@@ -318,18 +318,41 @@ function AvatarPage() {
         });
 
       const baseImg = await loadImg(base.image_url);
-      // Centraliza mantendo proporção
-      const drawCentered = (img: HTMLImageElement) => {
-        const scale = Math.min(W / img.width, H / img.height);
+      // Mesma lógica do preview: base ocupa ~68% da altura, centralizada,
+      // posicionada como se estivesse no pódio (bottom ~18%).
+      const wrapperH = H * 0.68;
+      const wrapperW = wrapperH * (3 / 4);
+      const wrapperLeft = (W - wrapperW) / 2;
+      // bottom: 18% from canvas bottom
+      const wrapperTop = H - wrapperH - H * 0.18;
+
+      // Fundo do quarto (já existe ROOM_BG carregado via CSS — pulamos no canvas
+      // pra manter a foto do look limpa e leve. Mantemos fundo creme.)
+      const drawInBox = (
+        img: HTMLImageElement,
+        boxX: number,
+        boxY: number,
+        boxW: number,
+        boxH: number,
+      ) => {
+        const scale = Math.min(boxW / img.width, boxH / img.height);
         const w = img.width * scale;
         const h = img.height * scale;
-        ctx.drawImage(img, (W - w) / 2, (H - h) / 2, w, h);
+        ctx.drawImage(img, boxX + (boxW - w) / 2, boxY + (boxH - h) / 2, w, h);
       };
-      drawCentered(baseImg);
 
-      for (const { item } of renderedLayers) {
+      // Base preenche o wrapper inteiro
+      drawInBox(baseImg, wrapperLeft, wrapperTop, wrapperW, wrapperH);
+
+      const pct = (v: string) => parseFloat(v) / 100;
+      for (const { item, slug } of renderedLayers) {
         const img = await loadImg(item.image_url);
-        drawCentered(img);
+        const slot = slotFor(slug);
+        const sx = wrapperLeft + pct(slot.left) * wrapperW;
+        const sy = wrapperTop + pct(slot.top) * wrapperH;
+        const sw = pct(slot.width) * wrapperW;
+        const sh = pct(slot.height) * wrapperH;
+        drawInBox(img, sx, sy, sw, sh);
       }
 
       const blob = await new Promise<Blob | null>((res) => canvas.toBlob(res, "image/png", 0.92));
