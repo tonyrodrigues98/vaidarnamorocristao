@@ -714,8 +714,8 @@ function Detail() {
               {hasHiddenPrimaryActions && (
                 <div className={actionCardClass}>
                   <p className="text-sm leading-relaxed text-muted-foreground">
-                    Algumas acoes ficam ocultas conforme as regras de seguranca e elegibilidade do
-                    Christian Connect.
+                    Algumas ações ficam ocultas conforme as regras de segurança e elegibilidade do
+                    Vai Dar Namoro Cristão.
                   </p>
                 </div>
               )}
