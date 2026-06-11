@@ -197,13 +197,6 @@ function LojaPage() {
   });
   const balanceKnown = balanceQuery.data !== undefined;
   const balance = balanceQuery.data ?? 0;
-  const setBalance = useCallback(
-    (next: number) => {
-      if (!user?.id) return;
-      queryClient.setQueryData(["user-balance", user.id], next);
-    },
-    [queryClient, user?.id],
-  );
 
   // User inventory — TanStack Query owns cache + offline reuse.
   const decorationInventoryQuery = useQuery({
@@ -235,28 +228,6 @@ function LojaPage() {
   const owned = decorationInventoryQuery.data ?? EMPTY_SET;
   const ownedBackgrounds = backgroundInventoryQuery.data ?? EMPTY_SET;
   const ownedNameGradients = nameGradientInventoryQuery.data ?? EMPTY_SET;
-
-  type SetUpdater = Set<string> | ((prev: Set<string>) => Set<string>);
-  const makeInventorySetter = (key: readonly unknown[]) =>
-    (next: SetUpdater) => {
-      if (!user?.id) return;
-      queryClient.setQueryData<Set<string>>(key, (prev) => {
-        const current = prev ?? new Set<string>();
-        return typeof next === "function" ? next(current) : next;
-      });
-    };
-  const setOwned = useCallback(
-    makeInventorySetter(["user-decoration-inventory", user?.id]),
-    [queryClient, user?.id],
-  );
-  const setOwnedBackgrounds = useCallback(
-    makeInventorySetter(["user-background-inventory", user?.id]),
-    [queryClient, user?.id],
-  );
-  const setOwnedNameGradients = useCallback(
-    makeInventorySetter(["user-name-gradient-inventory", user?.id]),
-    [queryClient, user?.id],
-  );
 
   // Equipped items + photo_url — single consolidated read of profiles.
   type EquippedProfile = {
@@ -317,34 +288,6 @@ function LojaPage() {
   const equippedBackground = equippedData.equipped_background_id;
   const equippedNameGradient = equippedData.equipped_name_gradient_id;
   const photoUrl = equippedData.photo_url;
-
-  const patchEquipped = useCallback(
-    (patch: Partial<EquippedProfile>) => {
-      if (!user?.id) return;
-      queryClient.setQueryData<EquippedProfile>(
-        ["shop-equipped-items", user.id],
-        (prev) => ({ ...(prev ?? EQUIPPED_EMPTY), ...patch }),
-      );
-    },
-    [queryClient, user?.id],
-  );
-  const setEquipped = useCallback(
-    (next: EquippedMap) =>
-      patchEquipped({
-        equipped_frame_id: next.frame,
-        equipped_aura_id: next.aura,
-        equipped_sticker_id: next.sticker,
-      }),
-    [patchEquipped],
-  );
-  const setEquippedBackground = useCallback(
-    (id: string | null) => patchEquipped({ equipped_background_id: id }),
-    [patchEquipped],
-  );
-  const setEquippedNameGradient = useCallback(
-    (id: string | null) => patchEquipped({ equipped_name_gradient_id: id }),
-    [patchEquipped],
-  );
 
   // Pull-to-refresh resolver: when all user-scoped queries settle, release the promise.
   useEffect(() => {
