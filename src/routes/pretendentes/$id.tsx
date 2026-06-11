@@ -2,7 +2,7 @@ import { friendlyError } from "@/lib/errors";
 import { PhotoCarousel } from "@/components/PhotoCarousel";
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { RequireApproved } from "@/components/RequireApproved";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
@@ -57,6 +57,12 @@ import { GiftHighlights } from "@/components/gifts/GiftHighlights";
 import type { ProfileBackground } from "@/lib/profileBackgrounds";
 import { GradientName } from "@/components/GradientName";
 import { fetchNameGradientsByIds, type NameGradient } from "@/lib/nameGradients";
+import {
+  getPurposeCompatibility,
+  type CompatPrefs,
+  type CompatProfile,
+} from "@/lib/purposeCompatibility";
+import { Handshake, MessageSquareHeart } from "lucide-react";
 
 type Full = {
   id: string;
@@ -116,6 +122,8 @@ function Detail() {
   const [extraPhotos, setExtraPhotos] = useState<string[]>([]);
   const [equippedBackground, setEquippedBackground] = useState<ProfileBackground | null>(null);
   const [profileNameGradient, setProfileNameGradient] = useState<NameGradient | null>(null);
+  const [myProfile, setMyProfile] = useState<CompatProfile | null>(null);
+  const [myPrefs, setMyPrefs] = useState<CompatPrefs | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -152,6 +160,28 @@ function Detail() {
         .eq("id", user.id)
         .maybeSingle();
       setMySex((data?.sex as string | undefined) ?? null);
+    })();
+  }, [user]);
+
+  // Snapshot do perfil/preferências do usuário logado para a comparação de
+  // "Compatibilidade de Propósito". Campos mínimos, sem mexer em banco.
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      const [{ data: mp }, { data: mpref }] = await Promise.all([
+        supabase
+          .from("profiles")
+          .select("age, city, state, church, years_baptized")
+          .eq("id", user.id)
+          .maybeSingle(),
+        supabase
+          .from("profile_preferences")
+          .select("age_min, age_max, accepts_children")
+          .eq("user_id", user.id)
+          .maybeSingle(),
+      ]);
+      setMyProfile((mp ?? null) as CompatProfile | null);
+      setMyPrefs((mpref ?? null) as CompatPrefs | null);
     })();
   }, [user]);
 
@@ -397,6 +427,39 @@ function Detail() {
     );
 
   const hasPremiumBackground = Boolean(equippedBackground?.image_url);
+
+  const compatibility = useMemo(() => {
+    if (!profile) return null;
+    const targetProfile: CompatProfile = {
+      age: profile.age,
+      city: profile.city,
+      state: profile.state,
+      church: profile.church,
+      years_baptized: profile.years_baptized,
+    };
+    const targetPrefs: CompatPrefs | null = prefs
+      ? {
+          age_min: prefs.age_min,
+          age_max: prefs.age_max,
+          accepts_children: prefs.accepts_children,
+        }
+      : null;
+    return getPurposeCompatibility({
+      currentProfile: myProfile,
+      currentPrefs: myPrefs,
+      targetProfile,
+      targetPrefs,
+    });
+  }, [profile, prefs, myProfile, myPrefs]);
+
+  const showCompatibility =
+    !!user &&
+    !!profile &&
+    user.id !== profile.id &&
+    !!compatibility &&
+    compatibility.hasEnoughData &&
+    (compatibility.commonPoints.length > 0 || compatibility.conversationPoints.length > 0);
+
   const actionCardClass = hasPremiumBackground
     ? "rounded-[2rem] border border-white/60 bg-card/82 p-4 text-foreground shadow-[0_20px_70px_rgba(31,41,55,0.14)] backdrop-blur-xl dark:border-white/10 dark:bg-card/72 dark:shadow-[0_24px_80px_rgba(0,0,0,0.42)]"
     : "rounded-[2rem] border border-border/70 bg-card/85 p-4 shadow-[0_20px_70px_rgba(31,41,55,0.08)] backdrop-blur dark:bg-card/80 dark:shadow-[0_24px_80px_rgba(0,0,0,0.35)]";
@@ -736,6 +799,68 @@ function Detail() {
               Sobre mim
             </h2>
             <p className="mt-3 text-[15px] leading-relaxed text-foreground/85">{profile.bio}</p>
+          </section>
+        )}
+
+        {showCompatibility && compatibility && (
+          <section className={`mt-6 ${surfaceClass}`}>
+            <h2 className="flex items-center gap-2 text-base font-semibold text-foreground">
+              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-300">
+                <Handshake className="h-4 w-4" />
+              </span>
+              Compatibilidade de propósito
+            </h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Alguns pontos reais que podem ajudar vocês a conversarem melhor.
+            </p>
+
+            {compatibility.commonPoints.length > 0 && (
+              <div className="mt-4">
+                <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-300">
+                  Pontos em comum
+                </p>
+                <ul className="grid gap-2 sm:grid-cols-2">
+                  {compatibility.commonPoints.map((item) => (
+                    <li
+                      key={item.key}
+                      className="min-w-0 rounded-xl border border-emerald-200/60 bg-emerald-50/60 p-3 text-sm dark:border-emerald-400/20 dark:bg-emerald-400/5"
+                    >
+                      <p className="font-semibold text-foreground">{item.title}</p>
+                      <p className="mt-0.5 text-xs leading-snug text-muted-foreground">
+                        {item.description}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {compatibility.conversationPoints.length > 0 && (
+              <div className="mt-4">
+                <p className="mb-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-amber-700 dark:text-amber-300">
+                  <MessageSquareHeart className="h-3.5 w-3.5" />
+                  Vale conversar sobre
+                </p>
+                <ul className="grid gap-2 sm:grid-cols-2">
+                  {compatibility.conversationPoints.map((item) => (
+                    <li
+                      key={item.key}
+                      className="min-w-0 rounded-xl border border-amber-200/60 bg-amber-50/60 p-3 text-sm dark:border-amber-400/20 dark:bg-amber-400/5"
+                    >
+                      <p className="font-semibold text-foreground">{item.title}</p>
+                      <p className="mt-0.5 text-xs leading-snug text-muted-foreground">
+                        {item.description}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            <p className="mt-4 text-[11px] leading-snug text-muted-foreground/80">
+              Esta é uma leitura simples baseada nos dados de perfil. Não é uma promessa de
+              compatibilidade — converse com calma e oração.
+            </p>
           </section>
         )}
 
