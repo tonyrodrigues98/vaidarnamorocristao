@@ -576,39 +576,12 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
 
             <div className="sm:col-span-2">
               <Field icon={ImageIcon} label="Imagem">
-                <div className="flex items-center gap-3">
-                  {draft.image_url ? (
-                    <img
-                      src={draft.image_url as string}
-                      alt=""
-                      className="h-16 w-16 rounded-2xl object-cover ring-1 ring-border"
-                    />
-                  ) : (
-                    <div className="grid h-16 w-16 place-items-center rounded-2xl border border-dashed border-border text-muted-foreground">
-                      <ImageIcon className="h-5 w-5" />
-                    </div>
-                  )}
-                  <input
-                    ref={fileRef}
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => {
-                      const f = e.target.files?.[0];
-                      if (f) void uploadImage(f);
-                    }}
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => fileRef.current?.click()}
-                    disabled={busy}
-                    className="rounded-full"
-                  >
-                    <Upload className="mr-1 h-4 w-4" /> Enviar
-                  </Button>
-                </div>
+                <ImagePreview
+                  value={(draft.image_url as string) ?? null}
+                  busy={busy}
+                  onPick={(f) => void uploadImage(f)}
+                  onClear={() => setDraft({ ...draft, image_url: null })}
+                />
               </Field>
             </div>
           </div>
