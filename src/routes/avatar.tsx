@@ -294,32 +294,6 @@ function AvatarPage() {
   }
 
   async function loadLooks() {
-
-  // Auto-save (debounced) das escolhas runtime: skinTone + colorSelections.
-  // Só dispara depois que loadAll hidratou o estado, e exige `base` (a coluna
-  // `base_id` em user_avatar_base é NOT NULL).
-  useEffect(() => {
-    if (!user || !base?.id) return;
-    if (!baseHydratedRef.current) return;
-    const handle = window.setTimeout(() => {
-      void supabase
-        .from("user_avatar_base")
-        .upsert(
-          {
-            user_id: user.id,
-            base_id: base.id,
-            skin_tone: skinTone,
-            color_selections: colorSelections,
-          },
-          { onConflict: "user_id" },
-        )
-        .then(({ error }) => {
-          if (error) console.warn("[avatar] persist falhou", error.message);
-        });
-    }, 400);
-    return () => window.clearTimeout(handle);
-  }, [user, base?.id, skinTone, colorSelections]);
-
     if (!user) return;
     setLooksLoading(true);
     const { data } = await supabase
