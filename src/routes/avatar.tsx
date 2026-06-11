@@ -585,13 +585,26 @@ function AvatarPage() {
   // --- Base swap helpers (Peso / Pose tabs) ---
   const currentGender = base?.gender ?? "masculino";
 
-  function pickBaseFor(nextBodyType: string, nextPose: string): Base | null {
+  function pickBaseFor(
+    nextBodyType: string,
+    nextPose: string,
+    nextSkin: string = skinTone,
+  ): Base | null {
     return (
       bases.find(
         (b) =>
           b.gender === currentGender &&
           b.body_type === nextBodyType &&
-          b.pose_key === nextPose,
+          b.pose_key === nextPose &&
+          b.skin_tone === nextSkin,
+      ) ??
+      // Fallback: same combo, default skin (in case requested tone not generated yet)
+      bases.find(
+        (b) =>
+          b.gender === currentGender &&
+          b.body_type === nextBodyType &&
+          b.pose_key === nextPose &&
+          b.skin_tone === "default",
       ) ?? null
     );
   }
@@ -600,7 +613,7 @@ function AvatarPage() {
     // Poses only exist for the default body. If switching away from default,
     // collapse the pose back to standing_default.
     const targetPose = nextBodyType === "default" ? pose : "standing_default";
-    const next = pickBaseFor(nextBodyType, targetPose);
+    const next = pickBaseFor(nextBodyType, targetPose, skinTone);
     if (!next) {
       toast.error("Variação indisponível.");
       return;
@@ -608,11 +621,12 @@ function AvatarPage() {
     setBase(next);
     setBodyType(nextBodyType);
     setPose(targetPose as AvatarPoseKey);
+    setSkinTone(next.skin_tone ?? "default");
   }
 
   function handlePose(nextPose: string) {
     // Poses only seeded for the default body; force default body when picking a pose.
-    const next = pickBaseFor("default", nextPose);
+    const next = pickBaseFor("default", nextPose, skinTone);
     if (!next) {
       toast.error("Pose indisponível.");
       return;
@@ -620,6 +634,19 @@ function AvatarPage() {
     setBase(next);
     setBodyType("default");
     setPose(nextPose as AvatarPoseKey);
+    setSkinTone(next.skin_tone ?? "default");
+  }
+
+  function handleSkinTone(nextSkin: string) {
+    const next = pickBaseFor(bodyType, pose, nextSkin);
+    if (!next) {
+      toast.error("Tom de pele indisponível para esta combinação.");
+      return;
+    }
+    setBase(next);
+    setBodyType(next.body_type);
+    setPose(next.pose_key as AvatarPoseKey);
+    setSkinTone(next.skin_tone ?? nextSkin);
   }
 
   const weightOptions: AvatarBaseOption[] = useMemo(
