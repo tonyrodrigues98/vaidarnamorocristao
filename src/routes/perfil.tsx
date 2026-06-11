@@ -69,6 +69,7 @@ import { ReceivedGiftsTab } from "@/components/gifts/ReceivedGiftsTab";
 import { GradientName } from "@/components/GradientName";
 import { fetchNameGradientsByIds, type NameGradient } from "@/lib/nameGradients";
 import { ProfileActionHub, type HubSection } from "@/components/profile/ProfileActionHub";
+import { EquippedPetBadge } from "@/components/EquippedPetBadge";
 
 export const Route = createFileRoute("/perfil")({
   component: PerfilPage,
