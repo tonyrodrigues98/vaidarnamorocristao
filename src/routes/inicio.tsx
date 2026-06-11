@@ -68,6 +68,7 @@ type Profile = {
   state: string | null;
   age: number | null;
   sex: "masculino" | "feminino" | null;
+  marital?: string | null;
   marital_status?: string | null;
   church?: string | null;
   years_baptized?: number | null;
