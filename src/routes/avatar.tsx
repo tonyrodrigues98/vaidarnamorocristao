@@ -136,7 +136,6 @@ function AvatarPage() {
   const isSuperAdmin = role === "super_admin";
 
   const [loading, setLoading] = useState(true);
-  const [needsCreate, setNeedsCreate] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
   const [items, setItems] = useState<Item[]>([]);
   const [bases, setBases] = useState<Base[]>([]);
@@ -748,8 +747,6 @@ function AvatarPage() {
     );
   }
   if (!user) return <Navigate to="/auth/login" />;
-  // Dev phase: do not force redirect to /avatar/criar.
-  // if (needsCreate) return <Navigate to="/avatar/criar" />;
   if (!isSuperAdmin) {
     return (
       <div className="flex h-screen flex-col items-center justify-center gap-4 px-6 text-center">
