@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
@@ -22,7 +22,6 @@ import {
 } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  Mail,
   Sparkles,
   Heart,
   Eye,
@@ -39,6 +38,9 @@ import {
   RefreshCw,
   Settings2,
   Inbox,
+  ChevronDown,
+  ShieldCheck,
+  Info,
 } from "lucide-react";
 import { toast } from "sonner";
 import { friendlyError } from "@/lib/errors";
@@ -99,20 +101,30 @@ type Hint = {
   requested_at: string;
 };
 
-function StatusBadge({ status }: { status: string }) {
-  const map: Record<string, { icon: React.ReactNode; label: string }> = {
-    pending: { icon: <Send className="h-3 w-3" />, label: "Aguardando" },
-    hint_requested: { icon: <Eye className="h-3 w-3" />, label: "Dica solicitada" },
-    hint_sent: { icon: <Lightbulb className="h-3 w-3" />, label: "Dica enviada" },
-    replied: { icon: <Reply className="h-3 w-3" />, label: "Respondido" },
-    reveal_requested: { icon: <Unlock className="h-3 w-3" />, label: "Revelação pedida" },
-    revealed: { icon: <HeartHandshake className="h-3 w-3" />, label: "Revelado" },
-    expired: { icon: <Clock className="h-3 w-3" />, label: "Expirado" },
-  };
-  const it = map[status] ?? { icon: <Sparkles className="h-3 w-3" />, label: status };
+const STATUS_MAP: Record<string, { icon: React.ReactNode; label: string; tone: "neutral" | "accent" | "success" | "muted" }> = {
+  pending: { icon: <Send className="h-3 w-3" />, label: "Aguardando", tone: "neutral" },
+  hint_requested: { icon: <Eye className="h-3 w-3" />, label: "Dica solicitada", tone: "neutral" },
+  hint_sent: { icon: <Lightbulb className="h-3 w-3" />, label: "Dica enviada", tone: "accent" },
+  replied: { icon: <Reply className="h-3 w-3" />, label: "Respondido", tone: "accent" },
+  reveal_requested: { icon: <Unlock className="h-3 w-3" />, label: "Revelação pedida", tone: "accent" },
+  revealed: { icon: <HeartHandshake className="h-3 w-3" />, label: "Revelado", tone: "success" },
+  expired: { icon: <Clock className="h-3 w-3" />, label: "Expirado", tone: "muted" },
+};
+
+function StatusPill({ status }: { status: string }) {
+  const it = STATUS_MAP[status] ?? { icon: <Sparkles className="h-3 w-3" />, label: status, tone: "neutral" as const };
+  const toneClass =
+    it.tone === "success"
+      ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 ring-emerald-500/20"
+      : it.tone === "accent"
+      ? "bg-foreground/[0.06] text-foreground ring-foreground/10"
+      : it.tone === "muted"
+      ? "bg-muted/60 text-muted-foreground ring-border/40"
+      : "bg-foreground/[0.04] text-foreground/70 ring-foreground/10";
   return (
-    <span className="inline-flex items-center gap-1">
-      {it.icon} {it.label}
+    <span className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-medium ring-1 ring-inset ${toneClass}`}>
+      {it.icon}
+      {it.label}
     </span>
   );
 }
@@ -121,6 +133,7 @@ function RecadosPage() {
   const { user } = useAuth();
   const [tab, setTab] = useState<"inbox" | "outbox">("inbox");
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [infoOpen, setInfoOpen] = useState(false);
   const [inbox, setInbox] = useState<InboxRow[]>([]);
   const [outbox, setOutbox] = useState<OutboxRow[]>([]);
   const [hints, setHints] = useState<Record<string, Hint[]>>({});
@@ -163,7 +176,6 @@ function RecadosPage() {
     setOutbox((out ?? []) as OutboxRow[]);
     setAccept(settings?.accept_anonymous ?? true);
 
-    // Detect newly revealed messages (skip the first load to avoid retriggering on refresh)
     const allRevealed = [
       ...((inb ?? []) as InboxRow[]).map((r: any) => ({ row: r, side: "inbox" as const })),
       ...((out ?? []) as OutboxRow[]).map((r: any) => ({ row: r, side: "outbox" as const })),
@@ -232,28 +244,84 @@ function RecadosPage() {
     if (error) toast.error(friendlyError(error));
   };
 
+  // Stats derivadas (dados reais)
+  const stats = useMemo(() => {
+    const revealedCount =
+      inbox.filter((m) => m.status === "revealed").length +
+      outbox.filter((m) => m.status === "revealed").length;
+    const repliedCount = inbox.filter((m) => !!m.reply_text).length;
+    const pendingInbox = inbox.filter((m) => ["pending", "hint_sent", "hint_requested"].includes(m.status)).length;
+    return { revealedCount, repliedCount, pendingInbox };
+  }, [inbox, outbox]);
+
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-[var(--background)]">
       <Header />
       <RevealCeremony target={reveal} onClose={() => setReveal(null)} />
-      <main className="mx-auto max-w-2xl px-4 pb-24 pt-6">
-        {/* Large iOS-style title */}
-        <div className="mb-5 flex items-end justify-between">
-          <div>
-            <h1 className="text-[34px] font-bold leading-tight tracking-tight">Recados</h1>
-            <p className="mt-0.5 text-[13px] text-muted-foreground">
-              Mistério leve. Identidade revelada só com consentimento mútuo.
+
+      <main className="mx-auto max-w-2xl px-4 pb-28 pt-4">
+        {/* Apple-style large title */}
+        <div className="flex items-start justify-between pt-2">
+          <div className="min-w-0">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+              Privacidade primeiro
             </p>
+            <h1 className="mt-1 text-[34px] font-semibold leading-[1.05] tracking-tight text-foreground">
+              Recados
+            </h1>
           </div>
-          <button
-            type="button"
-            onClick={() => setSettingsOpen(true)}
-            aria-label="Configurações"
-            className="grid h-10 w-10 place-items-center rounded-full border border-border/60 bg-background/60 backdrop-blur-md transition active:scale-95"
-          >
-            <Settings2 className="h-[18px] w-[18px] text-foreground/70" />
-          </button>
+          <div className="flex shrink-0 items-center gap-2">
+            <IconButton
+              ariaLabel="Como funciona"
+              onClick={() => setInfoOpen((v) => !v)}
+              active={infoOpen}
+            >
+              <Info className="h-[17px] w-[17px]" />
+            </IconButton>
+            <IconButton ariaLabel="Configurações" onClick={() => setSettingsOpen(true)}>
+              <Settings2 className="h-[17px] w-[17px]" />
+            </IconButton>
+          </div>
         </div>
+
+        {/* Info card (toggle) */}
+        <AnimatePresence initial={false}>
+          {infoOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0, marginTop: 0 }}
+              animate={{ opacity: 1, height: "auto", marginTop: 16 }}
+              exit={{ opacity: 0, height: 0, marginTop: 0 }}
+              transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+              className="overflow-hidden"
+            >
+              <div className="rounded-2xl border border-border/60 bg-card/60 p-4 backdrop-blur-xl">
+                <div className="flex items-start gap-3">
+                  <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-foreground/[0.05] text-foreground/70">
+                    <ShieldCheck className="h-[18px] w-[18px]" />
+                  </div>
+                  <div className="min-w-0">
+                    <h2 className="text-[14px] font-semibold tracking-tight">
+                      Como funcionam os recados
+                    </h2>
+                    <p className="mt-1 text-[13px] leading-relaxed text-muted-foreground">
+                      Mensagens 100% anônimas. Você pode pedir até <span className="font-medium text-foreground/80">2 dicas</span> e
+                      responder sem revelar. A identidade só aparece se <span className="font-medium text-foreground/80">ambos aceitarem</span>.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Stats row */}
+        {!activeCommitment && (
+          <div className="mt-5 grid grid-cols-3 gap-2">
+            <StatTile label="Recebidos" value={inbox.length} />
+            <StatTile label="Respondidos" value={stats.repliedCount} />
+            <StatTile label="Revelados" value={stats.revealedCount} accent />
+          </div>
+        )}
 
         {activeCommitment ? (
           <CommitmentPauseCard
@@ -262,27 +330,28 @@ function RecadosPage() {
             description="Você está em um propósito ativo. Por isso, recados anônimos recebidos e enviados ficam arquivados até esse compromisso ser interrompido."
           />
         ) : loadingList ? (
-          <div className="mt-8 space-y-3">
-            <div className="glass h-24 animate-pulse rounded-2xl" />
-            <div className="glass h-24 animate-pulse rounded-2xl" />
+          <div className="mt-6 space-y-3">
+            <div className="h-28 animate-pulse rounded-3xl border border-border/50 bg-card/40" />
+            <div className="h-28 animate-pulse rounded-3xl border border-border/50 bg-card/40" />
           </div>
         ) : (
           <>
-            {/* iOS-style segmented control */}
-            <SegmentedControl
-              value={tab}
-              onChange={setTab}
-              segments={[
-                { value: "inbox", label: "Recebidos", count: inbox.length },
-                { value: "outbox", label: "Enviados", count: outbox.length },
-              ]}
-            />
+            <div className="mt-6">
+              <SegmentedControl
+                value={tab}
+                onChange={setTab}
+                segments={[
+                  { value: "inbox", label: "Recebidos", count: inbox.length },
+                  { value: "outbox", label: "Enviados", count: outbox.length },
+                ]}
+              />
+            </div>
 
-            <div className="mt-5 space-y-3">
+            <div className="mt-4 space-y-3">
               {tab === "inbox" ? (
                 inbox.length === 0 ? (
                   <EmptyState
-                    icon={<Inbox className="h-7 w-7" />}
+                    icon={<Inbox className="h-6 w-6" />}
                     title="Sua caixa está em silêncio"
                     subtitle="Quando alguém te enviar um recado anônimo, ele aparece aqui."
                   />
@@ -293,7 +362,7 @@ function RecadosPage() {
                 )
               ) : outbox.length === 0 ? (
                 <EmptyState
-                  icon={<Send className="h-7 w-7" />}
+                  icon={<Send className="h-6 w-6" />}
                   title="Nada enviado ainda"
                   subtitle="Encontre alguém em Pretendentes e envie um recado anônimo."
                 />
@@ -306,21 +375,25 @@ function RecadosPage() {
           </>
         )}
 
-        {/* Settings Sheet */}
         <Sheet open={settingsOpen} onOpenChange={setSettingsOpen}>
-          <SheetContent side="bottom" className="rounded-t-3xl border-t bg-background/95 backdrop-blur-xl">
+          <SheetContent
+            side="bottom"
+            className="rounded-t-[28px] border-t border-border/50 bg-background/90 backdrop-blur-2xl"
+          >
             <SheetHeader className="text-left">
-              <SheetTitle className="text-xl">Configurações</SheetTitle>
-              <SheetDescription>
+              <SheetTitle className="text-[20px] font-semibold tracking-tight">
+                Configurações
+              </SheetTitle>
+              <SheetDescription className="text-[13px]">
                 Controle como você recebe recados anônimos.
               </SheetDescription>
             </SheetHeader>
             <div className="mt-4 space-y-3">
-              <div className="rounded-2xl border bg-card/50 p-4">
+              <div className="rounded-2xl border border-border/60 bg-card/60 p-4">
                 <label className="flex items-center justify-between gap-3">
                   <div className="min-w-0">
                     <div className="text-[15px] font-medium">Aceitar recados anônimos</div>
-                    <div className="mt-0.5 text-xs text-muted-foreground">
+                    <div className="mt-0.5 text-[12px] text-muted-foreground">
                       Quando desativado, ninguém poderá te enviar recados.
                     </div>
                   </div>
@@ -332,6 +405,53 @@ function RecadosPage() {
           </SheetContent>
         </Sheet>
       </main>
+    </div>
+  );
+}
+
+function IconButton({
+  children,
+  onClick,
+  ariaLabel,
+  active,
+}: {
+  children: React.ReactNode;
+  onClick: () => void;
+  ariaLabel: string;
+  active?: boolean;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={ariaLabel}
+      aria-pressed={active}
+      className={[
+        "grid h-10 w-10 place-items-center rounded-full border transition active:scale-95",
+        active
+          ? "border-foreground/20 bg-foreground/[0.08] text-foreground"
+          : "border-border/60 bg-card/60 text-foreground/70 hover:bg-card/80",
+      ].join(" ")}
+    >
+      {children}
+    </button>
+  );
+}
+
+function StatTile({ label, value, accent }: { label: string; value: number; accent?: boolean }) {
+  return (
+    <div className="rounded-2xl border border-border/60 bg-card/60 px-3 py-3 backdrop-blur-md">
+      <div
+        className={[
+          "text-[22px] font-semibold leading-none tracking-tight tabular-nums",
+          accent ? "text-foreground" : "text-foreground/85",
+        ].join(" ")}
+      >
+        {value}
+      </div>
+      <div className="mt-1 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+        {label}
+      </div>
     </div>
   );
 }
@@ -348,7 +468,7 @@ function SegmentedControl<T extends string>({
   return (
     <div
       role="tablist"
-      className="relative grid w-full gap-1 rounded-2xl bg-muted/60 p-1 backdrop-blur"
+      className="relative grid w-full gap-1 rounded-2xl border border-border/60 bg-foreground/[0.04] p-1"
       style={{ gridTemplateColumns: `repeat(${segments.length}, minmax(0, 1fr))` }}
     >
       {segments.map((s) => {
@@ -360,9 +480,9 @@ function SegmentedControl<T extends string>({
             aria-selected={active}
             onClick={() => onChange(s.value)}
             className={[
-              "relative z-10 flex items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-[14px] font-medium transition-all",
+              "relative z-10 flex items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-[13.5px] font-medium transition-all",
               active
-                ? "bg-background text-foreground shadow-[0_1px_2px_rgba(0,0,0,0.06),0_4px_12px_-4px_rgba(0,0,0,0.12)]"
+                ? "bg-background text-foreground shadow-[0_1px_2px_rgba(0,0,0,0.06),0_4px_12px_-4px_rgba(0,0,0,0.10)]"
                 : "text-muted-foreground hover:text-foreground",
             ].join(" ")}
           >
@@ -370,8 +490,10 @@ function SegmentedControl<T extends string>({
             {typeof s.count === "number" && s.count > 0 && (
               <span
                 className={[
-                  "min-w-[20px] rounded-full px-1.5 text-[11px] font-semibold leading-[18px]",
-                  active ? "bg-[var(--rose)]/15 text-[var(--rose)]" : "bg-foreground/10 text-foreground/70",
+                  "min-w-[20px] rounded-full px-1.5 text-[11px] font-semibold leading-[18px] tabular-nums",
+                  active
+                    ? "bg-foreground/[0.08] text-foreground"
+                    : "bg-foreground/[0.06] text-foreground/60",
                 ].join(" ")}
               >
                 {s.count}
@@ -394,13 +516,26 @@ function EmptyState({
   subtitle: string;
 }) {
   return (
-    <div className="flex flex-col items-center justify-center px-6 py-16 text-center">
-      <div className="mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-muted text-muted-foreground">
+    <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-border/60 bg-card/30 px-6 py-16 text-center">
+      <div className="mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-foreground/[0.05] text-foreground/60">
         {icon}
       </div>
-      <h3 className="text-[17px] font-semibold">{title}</h3>
+      <h3 className="text-[16px] font-semibold tracking-tight">{title}</h3>
       <p className="mt-1 max-w-xs text-[13px] text-muted-foreground">{subtitle}</p>
     </div>
+  );
+}
+
+function CardShell({ children }: { children: React.ReactNode }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
+      className="relative overflow-hidden rounded-3xl border border-border/60 bg-card/70 p-4 backdrop-blur-xl shadow-[0_1px_2px_rgba(0,0,0,0.03),0_8px_28px_-16px_rgba(0,0,0,0.16)]"
+    >
+      {children}
+    </motion.div>
   );
 }
 
@@ -410,6 +545,7 @@ function InboxCard({ m, hints, onChange }: { m: InboxRow; hints: Hint[]; onChang
   const [reportOpen, setReportOpen] = useState(false);
   const [reportReason, setReportReason] = useState("");
   const [busy, setBusy] = useState(false);
+  const [expanded, setExpanded] = useState(true);
   const { isOnline } = useNetworkStatus();
 
   const hasPending = hints.some((h) => !h.sent_at);
@@ -434,14 +570,9 @@ function InboxCard({ m, hints, onChange }: { m: InboxRow; hints: Hint[]; onChang
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-      className="recado-paper relative overflow-hidden rounded-3xl p-4"
-    >
-      {/* Sender header — blurred placeholder until revealed */}
-      <div className="mb-3 flex items-center gap-3">
+    <CardShell>
+      {/* Sender header */}
+      <div className="flex items-center gap-3">
         <div className="relative h-10 w-10 shrink-0">
           <AnimatePresence mode="wait">
             {isRevealed ? (
@@ -450,7 +581,7 @@ function InboxCard({ m, hints, onChange }: { m: InboxRow; hints: Hint[]; onChang
                 initial={{ opacity: 0, filter: "blur(8px)", scale: 0.9 }}
                 animate={{ opacity: 1, filter: "blur(0px)", scale: 1 }}
                 transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                className="grid h-10 w-10 place-items-center rounded-full bg-[var(--rose)]/15 text-[var(--rose)]"
+                className="grid h-10 w-10 place-items-center rounded-full bg-emerald-500/10 text-emerald-600 ring-1 ring-emerald-500/20 dark:text-emerald-300"
               >
                 <HeartHandshake className="h-5 w-5" />
               </motion.div>
@@ -460,34 +591,29 @@ function InboxCard({ m, hints, onChange }: { m: InboxRow; hints: Hint[]; onChang
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="relative grid h-10 w-10 place-items-center overflow-hidden rounded-full bg-gradient-to-br from-[var(--rose)]/25 via-[var(--rose-soft)]/30 to-primary/20"
+                className="relative grid h-10 w-10 place-items-center overflow-hidden rounded-full bg-foreground/[0.06] ring-1 ring-inset ring-border/60"
                 aria-hidden
               >
-                <UserCircle2 className="h-7 w-7 text-foreground/40 blur-[3px]" />
-                <span className="pointer-events-none absolute inset-0 rounded-full ring-1 ring-inset ring-white/30" />
+                <UserCircle2 className="h-7 w-7 text-foreground/30 blur-[2.5px]" />
               </motion.div>
             )}
           </AnimatePresence>
         </div>
         <div className="min-w-0 flex-1">
-          <div className="text-[13px] font-semibold tracking-tight text-foreground/90">
-            {isRevealed ? "Identidade revelada" : "Alguém especial"}
+          <div className="text-[14px] font-semibold tracking-tight text-foreground">
+            {isRevealed ? "Identidade revelada" : "Remetente anônimo"}
           </div>
-          <div className="text-[11px] text-muted-foreground">
+          <div className="text-[11.5px] text-muted-foreground">
             {isRevealed
               ? "Vocês concordaram em se revelar"
-              : "Recado anônimo · identidade protegida"}
+              : `Expira em ${new Date(m.expires_at).toLocaleDateString("pt-BR")}`}
           </div>
         </div>
+        <StatusPill status={m.status} />
       </div>
 
-      <div className="mb-3 flex items-center justify-between text-[11px] text-muted-foreground">
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-muted/70 px-2 py-1 font-medium">
-          <StatusBadge status={m.status} />
-        </span>
-        <span>Expira em {new Date(m.expires_at).toLocaleDateString("pt-BR")}</span>
-      </div>
-      <div className="rounded-2xl bg-background/55 px-4 py-3 ring-1 ring-inset ring-[var(--rose)]/10 backdrop-blur-sm">
+      {/* Message bubble — iMessage-like, neutral */}
+      <div className="mt-3 mr-auto max-w-[94%] rounded-2xl rounded-tl-md bg-foreground/[0.04] px-4 py-3 ring-1 ring-inset ring-border/40">
         <p className="whitespace-pre-wrap text-[15px] leading-relaxed text-foreground/90">
           {m.content}
         </p>
@@ -495,51 +621,78 @@ function InboxCard({ m, hints, onChange }: { m: InboxRow; hints: Hint[]; onChang
 
       {sentHints.length > 0 && (
         <div className="mt-3">
-          <div className="mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+          <button
+            type="button"
+            onClick={() => setExpanded((v) => !v)}
+            className="flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground"
+          >
             Pistas
-          </div>
-          <div className="flex flex-wrap gap-1.5">
-            {sentHints.map((h, i) => (
-              <motion.span
-                key={h.id}
-                initial={{ opacity: 0, y: 4, filter: "blur(4px)" }}
-                animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                transition={{ duration: 0.35, delay: i * 0.06, ease: [0.22, 1, 0.36, 1] }}
-                className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-[var(--rose)]/25 bg-[var(--rose)]/8 px-3 py-1 text-[12px] text-foreground/85"
+            <ChevronDown
+              className={`h-3 w-3 transition-transform ${expanded ? "rotate-180" : ""}`}
+            />
+          </button>
+          <AnimatePresence initial={false}>
+            {expanded && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.25 }}
+                className="overflow-hidden"
               >
-                <Sparkles className="h-3 w-3 shrink-0 text-[var(--rose)]" />
-                <span className="truncate">{h.hint_text}</span>
-              </motion.span>
-            ))}
-          </div>
+                <div className="mt-1.5 flex flex-wrap gap-1.5">
+                  {sentHints.map((h, i) => (
+                    <motion.span
+                      key={h.id}
+                      initial={{ opacity: 0, y: 4, filter: "blur(4px)" }}
+                      animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                      transition={{ duration: 0.35, delay: i * 0.06, ease: [0.22, 1, 0.36, 1] }}
+                      className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-border/60 bg-background/60 px-3 py-1 text-[12px] text-foreground/85"
+                    >
+                      <Sparkles className="h-3 w-3 shrink-0 text-foreground/60" />
+                      <span className="truncate">{h.hint_text}</span>
+                    </motion.span>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       )}
       {hasPending && (
-        <div className="mt-2 rounded-xl bg-muted/60 px-3 py-2 text-xs text-muted-foreground">
+        <div className="mt-2 flex items-center gap-2 rounded-xl bg-foreground/[0.04] px-3 py-2 text-[12px] text-muted-foreground">
+          <span className="relative flex h-1.5 w-1.5">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-foreground/30" />
+            <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-foreground/50" />
+          </span>
           Aguardando o remetente escolher uma dica…
         </div>
       )}
       {m.reply_text && (
-        <div className="mt-2 rounded-2xl border border-border/50 bg-background/60 px-4 py-3 text-[14px]">
-          <span className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+        <div className="mt-2 ml-auto max-w-[94%] rounded-2xl rounded-tr-md bg-foreground px-4 py-3 text-[14px] text-background">
+          <span className="text-[10.5px] font-medium uppercase tracking-wide text-background/60">
             Você respondeu
           </span>
-          <p className="mt-1 text-foreground/90">{m.reply_text}</p>
+          <p className="mt-0.5 whitespace-pre-wrap leading-relaxed">{m.reply_text}</p>
         </div>
       )}
 
       {m.status === "revealed" && m.match_id ? (
-        <Button asChild size="sm" className="mt-3 h-10 w-full rounded-full shadow-glow">
+        <Button
+          asChild
+          size="sm"
+          className="mt-3 h-11 w-full rounded-full bg-foreground text-background hover:bg-foreground/90"
+        >
           <Link to="/conversas/$matchId" params={{ matchId: m.match_id }}>
             <MessageCircle className="mr-2 h-4 w-4" /> Abrir conversa
           </Link>
         </Button>
       ) : (
-        <div className="mt-3 flex flex-wrap gap-1.5">
+        <div className="mt-3 flex flex-wrap items-center gap-1.5">
           {canReply && (
             <Button
               size="sm"
-              className="h-9 rounded-full px-4"
+              className="h-9 rounded-full bg-foreground px-4 text-background hover:bg-foreground/90"
               disabled={!isOnline}
               onClick={() => {
                 if (!isOnline) {
@@ -556,7 +709,7 @@ function InboxCard({ m, hints, onChange }: { m: InboxRow; hints: Hint[]; onChang
             <Button
               size="sm"
               variant="outline"
-              className="h-9 rounded-full px-3"
+              className="h-9 rounded-full border-border/60 bg-background/60 px-3"
               disabled={busy || !isOnline}
               onClick={() =>
                 action(() => supabase.rpc("request_anonymous_hint", { _message_id: m.id }))
@@ -569,7 +722,7 @@ function InboxCard({ m, hints, onChange }: { m: InboxRow; hints: Hint[]; onChang
             <Button
               size="sm"
               variant="outline"
-              className="h-9 rounded-full px-3"
+              className="h-9 rounded-full border-border/60 bg-background/60 px-3"
               disabled={busy || !isOnline}
               onClick={() =>
                 action(() => supabase.rpc("request_anonymous_reveal", { _message_id: m.id }))
@@ -579,7 +732,7 @@ function InboxCard({ m, hints, onChange }: { m: InboxRow; hints: Hint[]; onChang
             </Button>
           )}
           {myRevealed && m.status !== "revealed" && (
-            <span className="px-2 py-2 text-xs text-muted-foreground">
+            <span className="px-2 py-2 text-[12px] text-muted-foreground">
               Aguardando o outro lado aceitar revelar…
             </span>
           )}
@@ -591,7 +744,7 @@ function InboxCard({ m, hints, onChange }: { m: InboxRow; hints: Hint[]; onChang
               onClick={() =>
                 action(() => supabase.rpc("ignore_anonymous_message", { _message_id: m.id }))
               }
-              className="grid h-9 w-9 place-items-center rounded-full text-muted-foreground transition hover:bg-muted/70 hover:text-foreground active:scale-95 disabled:opacity-50"
+              className="grid h-9 w-9 place-items-center rounded-full text-muted-foreground transition hover:bg-foreground/[0.06] hover:text-foreground active:scale-95 disabled:opacity-50"
             >
               <EyeOff className="h-4 w-4" />
             </button>
@@ -615,9 +768,9 @@ function InboxCard({ m, hints, onChange }: { m: InboxRow; hints: Hint[]; onChang
       )}
 
       <Dialog open={replyOpen} onOpenChange={setReplyOpen}>
-        <DialogContent>
+        <DialogContent className="rounded-3xl">
           <DialogHeader>
-            <DialogTitle>Responder anonimamente</DialogTitle>
+            <DialogTitle className="tracking-tight">Responder anonimamente</DialogTitle>
           </DialogHeader>
           <Textarea
             rows={4}
@@ -625,13 +778,17 @@ function InboxCard({ m, hints, onChange }: { m: InboxRow; hints: Hint[]; onChang
             value={reply}
             onChange={(e) => setReply(e.target.value)}
             placeholder="Sua resposta..."
+            className="rounded-2xl"
           />
-          <div className="text-right text-xs text-muted-foreground">{reply.length}/280</div>
+          <div className="text-right text-[11px] tabular-nums text-muted-foreground">
+            {reply.length}/280
+          </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setReplyOpen(false)}>
+            <Button variant="outline" className="rounded-full" onClick={() => setReplyOpen(false)}>
               Cancelar
             </Button>
             <Button
+              className="rounded-full bg-foreground text-background hover:bg-foreground/90"
               disabled={busy || !reply.trim()}
               onClick={async () => {
                 setBusy(true);
@@ -656,9 +813,9 @@ function InboxCard({ m, hints, onChange }: { m: InboxRow; hints: Hint[]; onChang
       </Dialog>
 
       <Dialog open={reportOpen} onOpenChange={setReportOpen}>
-        <DialogContent>
+        <DialogContent className="rounded-3xl">
           <DialogHeader>
-            <DialogTitle>Denunciar recado</DialogTitle>
+            <DialogTitle className="tracking-tight">Denunciar recado</DialogTitle>
           </DialogHeader>
           <Textarea
             rows={4}
@@ -666,12 +823,15 @@ function InboxCard({ m, hints, onChange }: { m: InboxRow; hints: Hint[]; onChang
             value={reportReason}
             onChange={(e) => setReportReason(e.target.value)}
             placeholder="Descreva o motivo..."
+            className="rounded-2xl"
           />
           <DialogFooter>
-            <Button variant="outline" onClick={() => setReportOpen(false)}>
+            <Button variant="outline" className="rounded-full" onClick={() => setReportOpen(false)}>
               Cancelar
             </Button>
             <Button
+              variant="destructive"
+              className="rounded-full"
               disabled={busy || !reportReason.trim()}
               onClick={async () => {
                 setBusy(true);
@@ -694,7 +854,7 @@ function InboxCard({ m, hints, onChange }: { m: InboxRow; hints: Hint[]; onChang
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </motion.div>
+    </CardShell>
   );
 }
 
@@ -737,44 +897,61 @@ function OutboxCard({ m, hints, onChange }: { m: OutboxRow; hints: Hint[]; onCha
     setSelected(null);
     const merged = new Set(usedTexts);
     next.forEach((h) => merged.add(h.text));
-    // Reset cycle once we've exhausted the pool
     if (merged.size >= pool.length) setUsedTexts(new Set(next.map((h) => h.text)));
     else setUsedTexts(merged);
   }
 
   return (
-    <div className="rounded-3xl border border-border/60 bg-card/70 p-4 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_-12px_rgba(0,0,0,0.12)] backdrop-blur-md">
-      <div className="mb-3 flex items-center justify-between text-[11px] text-muted-foreground">
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-muted/70 px-2 py-1 font-medium">
-          <StatusBadge status={m.status} />
-        </span>
-        <span>{new Date(m.created_at).toLocaleDateString("pt-BR")}</span>
+    <CardShell>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div className="grid h-9 w-9 place-items-center rounded-full bg-foreground/[0.05] text-foreground/60">
+            <Send className="h-4 w-4" />
+          </div>
+          <div className="min-w-0">
+            <div className="text-[14px] font-semibold tracking-tight">Enviado</div>
+            <div className="text-[11.5px] text-muted-foreground">
+              {new Date(m.created_at).toLocaleDateString("pt-BR")}
+            </div>
+          </div>
+        </div>
+        <StatusPill status={m.status} />
       </div>
-      <div className="ml-auto max-w-[92%] rounded-2xl bg-primary/10 px-4 py-3">
-        <p className="whitespace-pre-wrap text-[15px] leading-relaxed text-foreground/90">
-          {m.content}
-        </p>
+
+      {/* Outgoing message — dark bubble like iMessage outgoing */}
+      <div className="mt-3 ml-auto max-w-[94%] rounded-2xl rounded-tr-md bg-foreground px-4 py-3 text-background">
+        <p className="whitespace-pre-wrap text-[15px] leading-relaxed">{m.content}</p>
       </div>
 
       {hints
         .filter((h) => h.sent_at)
         .map((h) => (
-          <div key={h.id} className="mt-2 rounded-xl bg-muted/60 px-3 py-2 text-[12px] text-muted-foreground">
-            Dica enviada: <span className="font-medium text-foreground/80">{h.hint_text}</span>
+          <div
+            key={h.id}
+            className="mt-2 ml-auto max-w-[94%] rounded-xl border border-border/60 bg-background/60 px-3 py-2 text-[12px] text-muted-foreground"
+          >
+            <span className="font-medium text-foreground/70">Dica enviada · </span>
+            <span className="text-foreground/85">{h.hint_text}</span>
           </div>
         ))}
 
       {m.reply_text && (
-        <div className="mt-2 mr-auto max-w-[92%] rounded-2xl bg-[var(--rose)]/10 px-4 py-3 text-[14px]">
-          <span className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+        <div className="mt-2 mr-auto max-w-[94%] rounded-2xl rounded-tl-md bg-foreground/[0.04] px-4 py-3 text-[14px] ring-1 ring-inset ring-border/40">
+          <span className="text-[10.5px] font-medium uppercase tracking-wide text-muted-foreground">
             Resposta
           </span>
-          <p className="mt-1 text-foreground/90">{m.reply_text}</p>
+          <p className="mt-0.5 whitespace-pre-wrap leading-relaxed text-foreground/90">
+            {m.reply_text}
+          </p>
         </div>
       )}
 
       {m.status === "revealed" && m.match_id ? (
-        <Button asChild size="sm" className="mt-3 h-10 w-full rounded-full shadow-glow">
+        <Button
+          asChild
+          size="sm"
+          className="mt-3 h-11 w-full rounded-full bg-foreground text-background hover:bg-foreground/90"
+        >
           <Link to="/conversas/$matchId" params={{ matchId: m.match_id }}>
             <MessageCircle className="mr-2 h-4 w-4" /> Abrir conversa
           </Link>
@@ -782,7 +959,11 @@ function OutboxCard({ m, hints, onChange }: { m: OutboxRow; hints: Hint[]; onCha
       ) : (
         <div className="mt-3 flex flex-wrap gap-1.5">
           {pendingHint && (
-            <Button size="sm" className="h-9 rounded-full px-4" onClick={openHintDialog}>
+            <Button
+              size="sm"
+              className="h-9 rounded-full bg-foreground px-4 text-background hover:bg-foreground/90"
+              onClick={openHintDialog}
+            >
               <Sparkles className="mr-1.5 h-3.5 w-3.5" /> Enviar dica
             </Button>
           )}
@@ -790,7 +971,7 @@ function OutboxCard({ m, hints, onChange }: { m: OutboxRow; hints: Hint[]; onCha
             <Button
               size="sm"
               variant="outline"
-              className="h-9 rounded-full px-3"
+              className="h-9 rounded-full border-border/60 bg-background/60 px-3"
               disabled={busy}
               onClick={async () => {
                 setBusy(true);
@@ -806,7 +987,7 @@ function OutboxCard({ m, hints, onChange }: { m: OutboxRow; hints: Hint[]; onCha
             </Button>
           )}
           {myRevealed && m.status !== "revealed" && (
-            <span className="px-2 py-2 text-xs text-muted-foreground">
+            <span className="px-2 py-2 text-[12px] text-muted-foreground">
               Aguardando o outro lado aceitar revelar…
             </span>
           )}
@@ -814,13 +995,13 @@ function OutboxCard({ m, hints, onChange }: { m: OutboxRow; hints: Hint[]; onCha
       )}
 
       <Dialog open={hintOpen} onOpenChange={setHintOpen}>
-        <DialogContent className="sm:max-w-lg">
+        <DialogContent className="rounded-3xl sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Wand2 className="h-4 w-4 text-[var(--rose)]" /> Escolha uma dica
+            <DialogTitle className="flex items-center gap-2 tracking-tight">
+              <Wand2 className="h-4 w-4 text-foreground/70" /> Escolha uma dica
             </DialogTitle>
           </DialogHeader>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-[12px] text-muted-foreground">
             Sugestões geradas com base no seu perfil — sempre amplas, mantendo o mistério.
           </p>
 
@@ -828,11 +1009,11 @@ function OutboxCard({ m, hints, onChange }: { m: OutboxRow; hints: Hint[]; onCha
             {loadingPool ? (
               <div className="flex flex-wrap gap-2">
                 {[0, 1, 2].map((i) => (
-                  <div key={i} className="h-9 w-40 animate-pulse rounded-full bg-muted" />
+                  <div key={i} className="h-9 w-40 animate-pulse rounded-full bg-foreground/[0.06]" />
                 ))}
               </div>
             ) : shown.length === 0 ? (
-              <p className="text-sm text-muted-foreground">
+              <p className="text-[13px] text-muted-foreground">
                 Preencha mais detalhes no seu perfil para receber dicas personalizadas.
               </p>
             ) : (
@@ -842,7 +1023,7 @@ function OutboxCard({ m, hints, onChange }: { m: OutboxRow; hints: Hint[]; onCha
                   initial={{ opacity: 0, y: 8, filter: "blur(6px)" }}
                   animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                   exit={{ opacity: 0, y: -8, filter: "blur(6px)" }}
-                  transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+                  transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
                   className="flex flex-wrap gap-2"
                 >
                   {shown.map((h) => {
@@ -852,17 +1033,15 @@ function OutboxCard({ m, hints, onChange }: { m: OutboxRow; hints: Hint[]; onCha
                         key={h.text}
                         type="button"
                         onClick={() => setSelected(h)}
-                        whileHover={{ scale: 1.03 }}
+                        whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.97 }}
                         className={[
-                          "rounded-full border px-4 py-2 text-sm transition-all",
-                          "backdrop-blur-sm",
+                          "rounded-full border px-4 py-2 text-[13px] transition-all",
                           isSel
-                            ? "border-[var(--rose)] bg-[var(--rose)]/15 text-foreground shadow-[0_0_20px_-4px_var(--rose)]"
-                            : "border-border bg-background/60 text-foreground/85 hover:border-[var(--rose)]/40 hover:bg-[var(--rose)]/5",
+                            ? "border-foreground bg-foreground text-background"
+                            : "border-border/60 bg-background/60 text-foreground/85 hover:border-foreground/40",
                         ].join(" ")}
                       >
-                        <Sparkles className="mr-1 inline h-3 w-3 text-[var(--rose)]" />
                         {h.text}
                       </motion.button>
                     );
@@ -879,17 +1058,18 @@ function OutboxCard({ m, hints, onChange }: { m: OutboxRow; hints: Hint[]; onCha
               size="sm"
               disabled={loadingPool || pool.length === 0}
               onClick={regenerate}
-              className="text-xs text-muted-foreground hover:text-foreground"
+              className="rounded-full text-[12px] text-muted-foreground hover:text-foreground"
             >
               <RefreshCw className="mr-1 h-3 w-3" /> Gerar novas sugestões
             </Button>
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setHintOpen(false)}>
+            <Button variant="outline" className="rounded-full" onClick={() => setHintOpen(false)}>
               Cancelar
             </Button>
             <Button
+              className="rounded-full bg-foreground text-background hover:bg-foreground/90"
               disabled={busy || !selected}
               onClick={async () => {
                 if (!selected) return;
@@ -914,6 +1094,6 @@ function OutboxCard({ m, hints, onChange }: { m: OutboxRow; hints: Hint[]; onCha
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </CardShell>
   );
 }
