@@ -12,6 +12,7 @@ Este documento consolida todas as alterações reais aplicadas no projeto **Chri
 | 4 | Loja — auditoria e guards offline | Concluído |
 | 5 | Conta — settings app-like com offline awareness | Concluído |
 | 6 | Notificações — central de atividades offline-safe | Concluído |
+| 7 | Dashboard — refatoração para Analytics Center app-like | Concluído |
 
 Toda implementação foi feita sem mexer em banco, migrations, RLS, schema, autenticação ou criar dados/permissões/itens/contadores fake. Nenhuma biblioteca foi instalada; nenhum Capacitor/Workbox usado.
 
@@ -46,6 +47,24 @@ Aviso âmbar discreto exibido no topo de páginas quando o usuário está **offl
 - Migrado para `useQuery` com `staleTime: 60s`.
 - Listeners realtime agora chamam `invalidateQueries` em vez de re-fetch manual.
 - Cache compartilhado entre montagens.
+
+---
+
+## 3a. /dashboard (Analytics Center)
+
+**Arquivo:** `src/routes/dashboard.tsx` · **Detalhe:** `RELATORIO_DASHBOARD_ANALYTICS.md`
+
+- Migrado de `useEffect`+`supabase.from` para **três `useQuery`** com chaves estáveis:
+  - `["dashboard-profile", userId]` (staleTime 60s)
+  - `["dashboard-latest-news", userId]` (staleTime 60s)
+  - `["dashboard-metrics", userId, period]` (staleTime 30s)
+- Todas com `refetchOnReconnect: true`.
+- Filtro de período real: chips 7d / 30d / 90d / Tudo (afeta `profile_views.gte("created_at", since)`).
+- KPIs compactos: `grid-cols-2` mobile / `sm:grid-cols-4` desktop. Skeleton por card durante loading.
+- Seção "Atenção necessária" derivada de sinais reais (`unread`, `interests`); fallback "Tudo certo por aqui."
+- Recharts continua **lazy** (`React.lazy` + `Suspense`); charts só montam quando `totalViews > 0` — antes renderizavam com array vazio.
+- Offline com cache → `StaleDataNotice`. Offline sem cache → `OfflineState`. Chips de período `disabled` offline sem cache.
+- Sem métricas/gráficos/contadores fake. Sem mudança em banco/RLS/schema. `/dashboard` não redireciona e `/inicio` não foi tocado.
 
 ---
 
@@ -242,6 +261,7 @@ Já praticamente uma central de atividades:
 - `RELATORIO_LOJA_OFFLINE.md`
 - `RELATORIO_CONTA_SETTINGS.md`
 - `RELATORIO_NOTIFICACOES_OFFLINE.md`
+- `RELATORIO_DASHBOARD_ANALYTICS.md`
 - `RELATORIO_CONSOLIDADO_OFFLINE.md` (este documento)
 
 **Editados:**
@@ -255,6 +275,7 @@ Já praticamente uma central de atividades:
 - `src/routes/notificacoes.tsx`
 - `src/components/ProfilePhotosManager.tsx`
 - `src/routeTree.gen.ts` (auto-gerado pelo plugin)
+- `src/routes/dashboard.tsx`
 
 ---
 
@@ -270,6 +291,7 @@ Datas relativas à sessão de trabalho atual (11/06/2026). O projeto usa sincron
 | 11/06/2026 | Loja — guards offline | `src/routes/loja.tsx` |
 | 11/06/2026 | Conta — settings offline-aware | `src/routes/conta.tsx` |
 | 11/06/2026 | Notificações — central offline-safe | `src/routes/notificacoes.tsx` |
+| 11/06/2026 | Dashboard — Analytics Center (TanStack Query, period chips, KPIs compactos, charts lazy gated, StaleDataNotice/OfflineState) | `src/routes/dashboard.tsx` |
 | 11/06/2026 | Consolidação documental | `RELATORIO_CONSOLIDADO_OFFLINE.md`, `RELATORIO_OFFLINE_AUDIT.md` |
 
 > **Honestidade:** não há tags Git, números de PR ou SHAs disponíveis para o agente neste ambiente. Se forem necessários links clicáveis, eles devem ser preenchidos manualmente após localizar os commits correspondentes no GitHub conectado.
