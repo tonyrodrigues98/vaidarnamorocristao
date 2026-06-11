@@ -190,6 +190,7 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
   const [variants, setVariants] = useState<PetVariant[]>([]);
   const [perkEffects, setPerkEffects] = useState<PetPerkEffect[]>([]);
   const [targets, setTargets] = useState<{ id: string; name: string }[]>([]);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   async function reload() {
     try {
