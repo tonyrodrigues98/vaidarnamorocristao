@@ -28,6 +28,39 @@ import roomAsset from "@/assets/avatar-room.png.asset.json";
 
 const ROOM_BG = roomAsset.url;
 
+/**
+ * Slot anchors per category slug — defines where each item layer is
+ * rendered on the avatar container (3:4 box). Values are percentages
+ * relative to the avatar wrapper. This lets standalone item PNGs
+ * (shoes, hair, etc.) sit at the anatomically correct spot instead of
+ * being stretched across the whole avatar.
+ */
+type Slot = { top: string; left: string; width: string; height: string };
+const SLOT_BY_SLUG: Record<string, Slot> = {
+  // Body / clothing — covers torso to mid-thigh
+  roupas: { top: "30%", left: "15%", width: "70%", height: "48%" },
+  roupa: { top: "30%", left: "15%", width: "70%", height: "48%" },
+  clothing: { top: "30%", left: "15%", width: "70%", height: "48%" },
+  // Shoes — small box at the feet
+  calcados: { top: "82%", left: "29%", width: "42%", height: "14%" },
+  sapatos: { top: "82%", left: "29%", width: "42%", height: "14%" },
+  shoes: { top: "82%", left: "29%", width: "42%", height: "14%" },
+  // Hair — covers the head
+  cabelos: { top: "-2%", left: "22%", width: "56%", height: "28%" },
+  cabelo: { top: "-2%", left: "22%", width: "56%", height: "28%" },
+  hair: { top: "-2%", left: "22%", width: "56%", height: "28%" },
+  // Accessories — upper torso / face area
+  acessorios: { top: "8%", left: "25%", width: "50%", height: "30%" },
+  acessorio: { top: "8%", left: "25%", width: "50%", height: "30%" },
+  accessories: { top: "8%", left: "25%", width: "50%", height: "30%" },
+  // Specials (wings, auras, halos) — full canvas
+  especiais: { top: "0%", left: "0%", width: "100%", height: "100%" },
+  especial: { top: "0%", left: "0%", width: "100%", height: "100%" },
+  specials: { top: "0%", left: "0%", width: "100%", height: "100%" },
+};
+const FULL_SLOT: Slot = { top: "0%", left: "0%", width: "100%", height: "100%" };
+const slotFor = (slug: string): Slot => SLOT_BY_SLUG[slug?.toLowerCase()] ?? FULL_SLOT;
+
 export const Route = createFileRoute("/avatar")({
   component: AvatarPage,
 });
