@@ -12,9 +12,10 @@
 | Loja | `RELATORIO_LOJA_OFFLINE.md` |
 | Conta (settings) | `RELATORIO_CONTA_SETTINGS.md` |
 | Notificações | `RELATORIO_NOTIFICACOES_OFFLINE.md` |
+| Dashboard (Analytics Center) | `RELATORIO_DASHBOARD_ANALYTICS.md` |
 
 ## Resumo executivo
 
-Foram aplicadas melhorias de cache/offline em **8 páginas** (`/bloqueados`, `/noticias`, `/devocional`, `/admin`, `/perfil`, `/loja`, `/conta`, `/notificacoes`) e criado o componente compartilhado `StaleDataNotice`. Padrão final em todas: `StaleDataNotice` discreto quando offline com cache, `OfflineState` de tela cheia quando offline sem cache, guards `!isOnline` em todas as mutations sensíveis, e nenhuma fila/optimistic update offline. Nenhuma alteração em banco, RLS, schema, autenticação, Service Worker ou regras de negócio.
+Foram aplicadas melhorias de cache/offline em **9 páginas** (`/bloqueados`, `/noticias`, `/devocional`, `/admin`, `/perfil`, `/loja`, `/conta`, `/notificacoes`, `/dashboard`) e criado o componente compartilhado `StaleDataNotice`. Padrão final em todas: `StaleDataNotice` discreto quando offline com cache, `OfflineState` de tela cheia quando offline sem cache, guards `!isOnline` em todas as mutations sensíveis, e nenhuma fila/optimistic update offline. `/dashboard` foi adicionalmente refatorado para Analytics Center app-like (TanStack Query com chave por período, KPIs compactos, charts Recharts lazy gated por dados reais). Nenhuma alteração em banco, RLS, schema, autenticação, Service Worker ou regras de negócio.
 
 Para detalhes técnicos completos, consulte `RELATORIO_CONSOLIDADO_OFFLINE.md`.
