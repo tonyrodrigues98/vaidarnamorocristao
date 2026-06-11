@@ -746,6 +746,7 @@ function AvatarPage() {
     );
   }
   if (!user) return <Navigate to="/auth/login" />;
+  if (needsCreate) return <Navigate to="/avatar/criar" />;
   if (!isSuperAdmin) {
     return (
       <div className="flex h-screen flex-col items-center justify-center gap-4 px-6 text-center">
