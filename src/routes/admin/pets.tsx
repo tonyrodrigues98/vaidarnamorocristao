@@ -371,14 +371,25 @@ function PetsAdmin() {
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
                     <h3 className="truncate text-sm font-semibold">{p.name}</h3>
-                    <span
-                      className={cn(
-                        "rounded-full px-2 py-0.5 text-[10px] font-semibold",
-                        PET_RARITY_COLOR[p.rarity],
-                      )}
-                    >
-                      {PET_RARITY_LABEL[p.rarity]}
-                    </span>
+                    {p.is_exclusive ? (
+                      <span
+                        className={cn(
+                          "rounded-full px-2 py-0.5 text-[10px] font-semibold",
+                          PET_RARITY_COLOR[p.rarity],
+                        )}
+                      >
+                        {PET_RARITY_LABEL[p.rarity]}
+                      </span>
+                    ) : (
+                      <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">
+                        Básico
+                      </span>
+                    )}
+                    {p.is_exclusive && (
+                      <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-800">
+                        {p.price_coins} 🪙
+                      </span>
+                    )}
                   </div>
                   <p className="text-xs text-muted-foreground">
                     {p.species} · ordem {p.sort_order}
