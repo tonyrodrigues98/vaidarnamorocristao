@@ -243,6 +243,7 @@ Já praticamente uma central de atividades:
 - `RELATORIO_LOJA_OFFLINE.md`
 - `RELATORIO_CONTA_SETTINGS.md`
 - `RELATORIO_NOTIFICACOES_OFFLINE.md`
+- `RELATORIO_DASHBOARD_ANALYTICS.md`
 - `RELATORIO_CONSOLIDADO_OFFLINE.md` (este documento)
 
 **Editados:**
@@ -272,6 +273,7 @@ Datas relativas à sessão de trabalho atual (11/06/2026). O projeto usa sincron
 | 11/06/2026 | Loja — guards offline | `src/routes/loja.tsx` |
 | 11/06/2026 | Conta — settings offline-aware | `src/routes/conta.tsx` |
 | 11/06/2026 | Notificações — central offline-safe | `src/routes/notificacoes.tsx` |
+| 11/06/2026 | Dashboard — Analytics Center (TanStack Query, period chips, KPIs compactos, charts lazy gated, StaleDataNotice/OfflineState) | `src/routes/dashboard.tsx` |
 | 11/06/2026 | Consolidação documental | `RELATORIO_CONSOLIDADO_OFFLINE.md`, `RELATORIO_OFFLINE_AUDIT.md` |
 
 > **Honestidade:** não há tags Git, números de PR ou SHAs disponíveis para o agente neste ambiente. Se forem necessários links clicáveis, eles devem ser preenchidos manualmente após localizar os commits correspondentes no GitHub conectado.
