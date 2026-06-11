@@ -190,7 +190,10 @@ export function SaldoTab() {
             <p className="text-sm font-semibold">Resgate diário</p>
             <p className="mt-1 text-xs text-muted-foreground">
               {canClaim ? (
-                <>Resgate disponível agora ✨</>
+                <span className="inline-flex items-center gap-1">
+                  <Sparkles className="h-3 w-3 text-[var(--rose)]" aria-hidden />
+                  Resgate disponível agora
+                </span>
               ) : atMax ? (
                 <>Limite máximo atingido</>
               ) : (
