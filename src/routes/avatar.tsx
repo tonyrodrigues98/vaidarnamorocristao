@@ -225,10 +225,10 @@ function AvatarPage() {
   }, [equipped, items]);
 
   const renderedLayers = useMemo(() => {
-    const list: { item: Item; layer: number }[] = [];
+    const list: { item: Item; layer: number; slug: string }[] = [];
     for (const cat of categories) {
       const it = equippedItems.get(cat.id);
-      if (it) list.push({ item: it, layer: cat.layer_index });
+      if (it) list.push({ item: it, layer: cat.layer_index, slug: cat.slug });
     }
     list.sort((a, b) => a.layer - b.layer);
     return list;
@@ -501,16 +501,25 @@ function AvatarPage() {
                   className="h-full w-auto object-contain drop-shadow-[0_20px_25px_rgba(0,0,0,0.15)]"
                   draggable={false}
                 />
-                {renderedLayers.map(({ item, layer }) => (
-                  <img
-                    key={item.id}
-                    src={item.image_url}
-                    alt={item.name}
-                    className="absolute inset-0 h-full w-auto object-contain"
-                    style={{ zIndex: layer }}
-                    draggable={false}
-                  />
-                ))}
+                {renderedLayers.map(({ item, layer, slug }) => {
+                  const slot = slotFor(slug);
+                  return (
+                    <img
+                      key={item.id}
+                      src={item.image_url}
+                      alt={item.name}
+                      className="absolute object-contain"
+                      style={{
+                        top: slot.top,
+                        left: slot.left,
+                        width: slot.width,
+                        height: slot.height,
+                        zIndex: layer,
+                      }}
+                      draggable={false}
+                    />
+                  );
+                })}
               </div>
             </div>
           )}
