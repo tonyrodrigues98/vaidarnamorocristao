@@ -133,11 +133,12 @@ function StatusPill({ status }: { status: string }) {
 
 function RecadosPage() {
   const { user } = useAuth();
-  const [tab, setTab] = useState<"inbox" | "outbox">("inbox");
+  const [tab, setTab] = useState<"inbox" | "outbox" | "hidden">("inbox");
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [infoOpen, setInfoOpen] = useState(false);
   const [inbox, setInbox] = useState<InboxRow[]>([]);
   const [outbox, setOutbox] = useState<OutboxRow[]>([]);
+  const [hidden, setHidden] = useState<InboxRow[]>([]);
   const [hints, setHints] = useState<Record<string, Hint[]>>({});
   const [accept, setAccept] = useState(true);
   const [reveal, setReveal] = useState<RevealTarget | null>(null);
