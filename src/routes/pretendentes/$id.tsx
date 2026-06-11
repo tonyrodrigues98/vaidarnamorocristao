@@ -747,6 +747,51 @@ function Detail() {
             </div>
           </div>
         </section>
+
+        {categorizedPhotos.some((p) => !!p.category) && (
+          <section className={`mt-6 ${surfaceClass}`}>
+            <h2 className="mb-1 flex items-center gap-2 text-base font-semibold text-foreground">
+              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-300">
+                <Sparkles className="h-4 w-4" />
+              </span>
+              Fé e vida
+            </h2>
+            <p className="mb-4 text-sm text-muted-foreground">
+              Um pouco da caminhada e dos momentos dessa pessoa.
+            </p>
+            <div className="space-y-5">
+              {PHOTO_CATEGORIES.map((cat) => {
+                const photosInCat = categorizedPhotos.filter(
+                  (p) => normalizeCategory(p.category) === cat.value,
+                );
+                if (photosInCat.length === 0) return null;
+                return (
+                  <div key={cat.value} className="min-w-0">
+                    <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                      {cat.label}
+                    </p>
+                    <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+                      {photosInCat.map((p) => (
+                        <div
+                          key={p.url}
+                          className="aspect-square overflow-hidden rounded-xl border border-border/60 bg-muted"
+                        >
+                          <img
+                            src={p.url}
+                            alt={cat.label}
+                            loading="lazy"
+                            className="h-full w-full object-cover"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        )}
+
         {profileCommitted && (
           <div
             className="
