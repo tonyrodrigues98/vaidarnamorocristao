@@ -173,6 +173,10 @@ type DraftRecord = Record<string, unknown> & {
   species_id?: string | null;
   scope?: PetBenefitScope;
   scope_id?: string | null;
+  perk_label?: string | null;
+  effect_key?: string | null;
+  effect_param?: number | null;
+  effect_target_id?: string | null;
 };
 
 function CatalogPanel({ table }: { table: PetCatalogTable }) {
@@ -184,7 +188,8 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
   const [categories, setCategories] = useState<PetCategory[]>([]);
   const [species, setSpecies] = useState<PetSpecies[]>([]);
   const [variants, setVariants] = useState<PetVariant[]>([]);
-  const fileRef = useRef<HTMLInputElement>(null);
+  const [perkEffects, setPerkEffects] = useState<PetPerkEffect[]>([]);
+  const [targets, setTargets] = useState<{ id: string; name: string }[]>([]);
 
   async function reload() {
     try {
@@ -197,6 +202,7 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
       }
       if (table === "pet_benefits") {
         setVariants(await listAll<PetVariant>("pet_variants"));
+        setPerkEffects(await listPerkEffects(true));
       }
     } catch (e) {
       toast.error((e as Error).message);
@@ -228,6 +234,10 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
     if (table === "pet_benefits") {
       base.scope = "global";
       base.scope_id = null;
+      base.perk_label = "";
+      base.effect_key = null;
+      base.effect_param = null;
+      base.effect_target_id = null;
     }
     return base;
   }
@@ -260,6 +270,41 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
       setBusy(false);
     }
   }
+
+  const selectedEffect = useMemo(
+    () => perkEffects.find((e) => e.key === (draft?.effect_key ?? "")) ?? null,
+    [perkEffects, draft?.effect_key],
+  );
+
+  // Load target options for unlock_* effects
+  useEffect(() => {
+    let cancel = false;
+    async function load() {
+      if (!selectedEffect?.needs_target) {
+        setTargets([]);
+        return;
+      }
+      try {
+        let list: { id: string; name: string }[] = [];
+        if (selectedEffect.key === "unlock_aura" || selectedEffect.key === "pet_avatar_aura_fx") {
+          list = await listDecorations("aura");
+        } else if (selectedEffect.needs_target === "avatar_decorations") {
+          list = await listDecorations("frame");
+        } else if (selectedEffect.needs_target === "profile_backgrounds") {
+          list = await listBackgrounds();
+        } else if (selectedEffect.needs_target === "badges") {
+          list = await listBadgesCatalog();
+        }
+        if (!cancel) setTargets(list);
+      } catch (e) {
+        if (!cancel) toast.error((e as Error).message);
+      }
+    }
+    void load();
+    return () => {
+      cancel = true;
+    };
+  }, [selectedEffect]);
 
   async function save() {
     if (!draft) return;
@@ -417,6 +462,84 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
 
             {table === "pet_benefits" && (
               <>
+                <div className="sm:col-span-2">
+                  <Field icon={Wand2} label="Vantagem (efeito real)">
+                    <Select
+                      value={(draft.effect_key as string) ?? "__none__"}
+                      onValueChange={(v) =>
+                        setDraft({
+                          ...draft,
+                          effect_key: v === "__none__" ? null : v,
+                          effect_param: null,
+                          effect_target_id: null,
+                        })
+                      }
+                    >
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="__none__">Sem efeito (apenas cosmético)</SelectItem>
+                        {Object.entries(
+                          perkEffects.reduce<Record<string, PetPerkEffect[]>>((acc, e) => {
+                            (acc[e.category] ||= []).push(e);
+                            return acc;
+                          }, {}),
+                        ).map(([cat, items]) => (
+                          <div key={cat}>
+                            <div className="px-2 py-1 text-[11px] font-semibold uppercase text-muted-foreground">
+                              {PERK_CATEGORY_LABEL[cat as PetPerkEffectCategory]}
+                            </div>
+                            {items.map((e) => (
+                              <SelectItem key={e.key} value={e.key}>
+                                {e.label}
+                              </SelectItem>
+                            ))}
+                          </div>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </Field>
+                </div>
+                <Field icon={Tag} label="Rótulo curto (opcional)">
+                  <Input
+                    value={(draft.perk_label as string) ?? ""}
+                    placeholder="Ex.: +2 moedas"
+                    onChange={(e) => setDraft({ ...draft, perk_label: e.target.value })}
+                  />
+                </Field>
+                {selectedEffect?.numeric_param && (
+                  <Field icon={Hash} label="Quantidade">
+                    <Input
+                      type="number"
+                      value={(draft.effect_param as number) ?? selectedEffect.default_param ?? 0}
+                      onChange={(e) =>
+                        setDraft({ ...draft, effect_param: Number(e.target.value) || 0 })
+                      }
+                    />
+                  </Field>
+                )}
+                {selectedEffect?.needs_target && (
+                  <div className="sm:col-span-2">
+                    <Field icon={Star} label="Alvo desbloqueado">
+                      <Select
+                        value={(draft.effect_target_id as string) ?? ""}
+                        onValueChange={(v) => setDraft({ ...draft, effect_target_id: v })}
+                      >
+                        <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                        <SelectContent>
+                          {targets.length === 0 ? (
+                            <SelectItem value="__empty__" disabled>
+                              Nenhum disponível
+                            </SelectItem>
+                          ) : (
+                            targets.map((t) => (
+                              <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
+                            ))
+                          )}
+                        </SelectContent>
+                      </Select>
+                    </Field>
+                  </div>
+                )}
                 <Field icon={Gift} label="Escopo">
                   <Select
                     value={(draft.scope as string) ?? "global"}
