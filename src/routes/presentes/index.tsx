@@ -11,7 +11,7 @@ import { GiftSendAnimation } from "@/components/gifts/GiftSendAnimation";
 import { CoinIcon } from "@/components/icons/CoinIcon";
 import { Button } from "@/components/ui/button";
 import { getMyCoins } from "@/lib/coins";
-import { Gift, HeartHandshake, Sparkles, Receipt } from "lucide-react";
+import { Gift, HeartHandshake, Sparkles, Receipt, Lightbulb } from "lucide-react";
 
 const searchSchema = z.object({
   to: z.string().uuid().optional(),
@@ -169,9 +169,12 @@ border shadow-lg shadow-amber-400/30"
         )}
 
         {!search.to && (
-          <div className="mt-8 rounded-2xl border border-dashed border-purple-400/40 bg-purple-500/5 p-4 text-center text-sm text-muted-foreground">
-            💡 Para enviar um presente, abra o perfil de um pretendente e clique em{" "}
-            <strong>Enviar Presente</strong>.
+          <div className="mt-8 flex items-start justify-center gap-2 rounded-2xl border border-dashed border-purple-400/40 bg-purple-500/5 p-4 text-center text-sm text-muted-foreground">
+            <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-purple-500" aria-hidden />
+            <span>
+              Para enviar um presente, abra o perfil de um pretendente e clique em{" "}
+              <strong>Enviar Presente</strong>.
+            </span>
           </div>
         )}
       </main>
