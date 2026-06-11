@@ -824,14 +824,12 @@ function PerfilPage() {
               </div>
 
               {/* MOBILE: quick actions row */}
-              <div className="mt-5 -mx-2 flex gap-2 overflow-x-auto px-2 pb-1 sm:hidden [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              </div>
               {user && (
                 <div className="mt-4">
                   <EquippedPetBadge userId={user.id} linkToManager />
                 </div>
               )}
-              <div className="hidden">
+              <div className="mt-5 -mx-2 flex gap-2 overflow-x-auto px-2 pb-1 sm:hidden [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                 {[
                   { label: "Editar", icon: Eye, onClick: () => { setActiveTab("profile"); setEditingProfile(true); } },
                   { label: "Visual", icon: Sparkles, onClick: () => setActiveTab("customizacao") },
