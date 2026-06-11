@@ -9,7 +9,6 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import roomAsset from "@/assets/avatar-room.png.asset.json";
 import { AvatarHeader } from "@/components/avatar/AvatarHeader";
 import { AvatarCategoryTabs } from "@/components/avatar/AvatarCategoryTabs";
 import { AvatarStage } from "@/components/avatar/AvatarStage";
@@ -26,8 +25,6 @@ import {
   type AvatarPoseKey,
   type AvatarRendererLayer,
 } from "@/types/avatar";
-
-const ROOM_BG = roomAsset.url;
 
 /**
  * Maps a DB category slug to a renderer layer key + anchor slot. Future:
