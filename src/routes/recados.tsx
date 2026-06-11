@@ -578,22 +578,20 @@ function HiddenCard({ m, onChange }: { m: InboxRow; onChange: () => void }) {
   const online = useNetworkStatus();
   const [busy, setBusy] = useState(false);
 
-  async function action(fn: () => Promise<any>) {
+  async function action(fn: () => PromiseLike<any>) {
     if (!online) {
       toast.error("Você está offline.");
       return;
     }
     setBusy(true);
-    try {
-      const r = await fn();
-      if (r?.error) throw r.error;
-      toast.success("Recado restaurado nos recebidos");
-      onChange();
-    } catch (e: any) {
-      toast.error(friendlyError(e));
-    } finally {
-      setBusy(false);
+    const { error } = await fn();
+    setBusy(false);
+    if (error) {
+      toast.error(friendlyError(error));
+      return;
     }
+    toast.success("Recado restaurado nos recebidos");
+    onChange();
   }
 
   const date = new Date(m.created_at);
