@@ -379,6 +379,30 @@ function Detail() {
     setReportOpen(false);
   }
 
+  const compatibility = useMemo(() => {
+    if (!profile) return null;
+    const targetProfile: CompatProfile = {
+      age: profile.age,
+      city: profile.city,
+      state: profile.state,
+      church: profile.church,
+      years_baptized: profile.years_baptized,
+    };
+    const targetPrefs: CompatPrefs | null = prefs
+      ? {
+          age_min: prefs.age_min,
+          age_max: prefs.age_max,
+          accepts_children: prefs.accepts_children,
+        }
+      : null;
+    return getPurposeCompatibility({
+      currentProfile: myProfile,
+      currentPrefs: myPrefs,
+      targetProfile,
+      targetPrefs,
+    });
+  }, [profile, prefs, myProfile, myPrefs]);
+
   if (!loading && !user) return <Navigate to="/auth/login" />;
   if (profile === undefined)
     return (
