@@ -670,7 +670,7 @@ function LojaPage() {
                           <Button
                             size="sm"
                             className="w-full text-xs"
-                            disabled={busy}
+                            disabled={busy || !isOnline}
                             onClick={() => handleEquipNameGradient(gradient)}
                           >
                             {busy ? <Loader2 className="h-3 w-3 animate-spin" /> : "Equipar"}
@@ -679,7 +679,7 @@ function LojaPage() {
                           <Button
                             size="sm"
                             className="w-full text-xs"
-                            disabled={busy || !canAfford}
+                            disabled={busy || !canAfford || !isOnline}
                             onClick={() => handleBuyNameGradient(gradient)}
                           >
                             {busy ? (
@@ -805,7 +805,7 @@ function LojaPage() {
                             <Button
                               size="sm"
                               className="w-full text-xs"
-                              disabled={busy}
+                              disabled={busy || !isOnline}
                               onClick={() => handleEquipBackground(background)}
                             >
                               {busy ? <Loader2 className="h-3 w-3 animate-spin" /> : "Equipar"}
@@ -814,7 +814,7 @@ function LojaPage() {
                             <Button
                               size="sm"
                               className="w-full text-xs"
-                              disabled={busy || !canAfford}
+                              disabled={busy || !canAfford || !isOnline}
                               onClick={() => setConfirmBackground(background)}
                             >
                               {busy ? (
@@ -939,7 +939,7 @@ function LojaPage() {
                         <Button
                           size="sm"
                           className="w-full text-xs"
-                          disabled={busy}
+                          disabled={busy || !isOnline}
                           onClick={() => handleEquip(d)}
                         >
                           {busy ? <Loader2 className="h-3 w-3 animate-spin" /> : "Equipar"}
@@ -948,7 +948,7 @@ function LojaPage() {
                         <Button
                           size="sm"
                           className="w-full text-xs"
-                          disabled={busy || !canAfford}
+                          disabled={busy || !canAfford || !isOnline}
                           onClick={() => setConfirm(d)}
                         >
                           {busy ? (
@@ -1032,7 +1032,7 @@ function LojaPage() {
             >
               Cancelar
             </Button>
-            <Button onClick={() => confirm && handleBuy(confirm)} disabled={busyId === confirm?.id}>
+            <Button onClick={() => confirm && handleBuy(confirm)} disabled={busyId === confirm?.id || !isOnline}>
               {busyId === confirm?.id ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
@@ -1104,7 +1104,7 @@ function LojaPage() {
             </Button>
             <Button
               onClick={() => confirmBackground && handleBuyBackground(confirmBackground)}
-              disabled={busyId === confirmBackground?.id}
+              disabled={busyId === confirmBackground?.id || !isOnline}
             >
               {busyId === confirmBackground?.id ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
