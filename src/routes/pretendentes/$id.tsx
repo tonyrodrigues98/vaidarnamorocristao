@@ -427,6 +427,39 @@ function Detail() {
     );
 
   const hasPremiumBackground = Boolean(equippedBackground?.image_url);
+
+  const compatibility = useMemo(() => {
+    if (!profile) return null;
+    const targetProfile: CompatProfile = {
+      age: profile.age,
+      city: profile.city,
+      state: profile.state,
+      church: profile.church,
+      years_baptized: profile.years_baptized,
+    };
+    const targetPrefs: CompatPrefs | null = prefs
+      ? {
+          age_min: prefs.age_min,
+          age_max: prefs.age_max,
+          accepts_children: prefs.accepts_children,
+        }
+      : null;
+    return getPurposeCompatibility({
+      currentProfile: myProfile,
+      currentPrefs: myPrefs,
+      targetProfile,
+      targetPrefs,
+    });
+  }, [profile, prefs, myProfile, myPrefs]);
+
+  const showCompatibility =
+    !!user &&
+    !!profile &&
+    user.id !== profile.id &&
+    !!compatibility &&
+    compatibility.hasEnoughData &&
+    (compatibility.commonPoints.length > 0 || compatibility.conversationPoints.length > 0);
+
   const actionCardClass = hasPremiumBackground
     ? "rounded-[2rem] border border-white/60 bg-card/82 p-4 text-foreground shadow-[0_20px_70px_rgba(31,41,55,0.14)] backdrop-blur-xl dark:border-white/10 dark:bg-card/72 dark:shadow-[0_24px_80px_rgba(0,0,0,0.42)]"
     : "rounded-[2rem] border border-border/70 bg-card/85 p-4 shadow-[0_20px_70px_rgba(31,41,55,0.08)] backdrop-blur dark:bg-card/80 dark:shadow-[0_24px_80px_rgba(0,0,0,0.35)]";
