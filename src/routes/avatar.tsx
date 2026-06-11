@@ -1,65 +1,43 @@
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  ArrowLeft,
-  Camera,
-  Heart,
-  Info,
   Loader2,
-  RotateCcw,
-  Shuffle,
-  Shirt,
-  Watch,
-  Scissors,
-  Footprints,
-  Star,
   Crown,
-  Check,
-  SlidersHorizontal,
 } from "lucide-react";
 import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import { CoinIcon } from "@/components/icons/CoinIcon";
 import roomAsset from "@/assets/avatar-room.png.asset.json";
+import { AvatarHeader } from "@/components/avatar/AvatarHeader";
+import { AvatarCategoryTabs } from "@/components/avatar/AvatarCategoryTabs";
+import { AvatarStage } from "@/components/avatar/AvatarStage";
+import { AvatarShopSheet, type ShopTab } from "@/components/avatar/AvatarShopSheet";
+import { AvatarPoseSelector } from "@/components/avatar/AvatarPoseSelector";
+import { AvatarExpressionSelector } from "@/components/avatar/AvatarExpressionSelector";
+import {
+  CATEGORY_SLUG_TO_LAYER,
+  LAYER_SLOTS,
+} from "@/data/avatarMockData";
+import {
+  LAYER_Z_INDEX,
+  type AvatarExpressionKey,
+  type AvatarPoseKey,
+  type AvatarRendererLayer,
+} from "@/types/avatar";
 
 const ROOM_BG = roomAsset.url;
 
 /**
- * Slot anchors per category slug — defines where each item layer is
- * rendered on the avatar container (3:4 box). Values are percentages
- * relative to the avatar wrapper. This lets standalone item PNGs
- * (shoes, hair, etc.) sit at the anatomically correct spot instead of
- * being stretched across the whole avatar.
+ * Maps a DB category slug to a renderer layer key + anchor slot. Future:
+ * `avatar_items.layer_key` will be a real column and this fallback is
+ * dropped.
  */
-type Slot = { top: string; left: string; width: string; height: string };
-const SLOT_BY_SLUG: Record<string, Slot> = {
-  // Body / clothing — covers torso to mid-thigh
-  roupas: { top: "30%", left: "15%", width: "70%", height: "48%" },
-  roupa: { top: "30%", left: "15%", width: "70%", height: "48%" },
-  clothing: { top: "30%", left: "15%", width: "70%", height: "48%" },
-  // Shoes — small box at the feet
-  calcados: { top: "82%", left: "29%", width: "42%", height: "14%" },
-  sapatos: { top: "82%", left: "29%", width: "42%", height: "14%" },
-  shoes: { top: "82%", left: "29%", width: "42%", height: "14%" },
-  // Hair — covers the head
-  cabelos: { top: "-2%", left: "22%", width: "56%", height: "28%" },
-  cabelo: { top: "-2%", left: "22%", width: "56%", height: "28%" },
-  hair: { top: "-2%", left: "22%", width: "56%", height: "28%" },
-  // Accessories — upper torso / face area
-  acessorios: { top: "8%", left: "25%", width: "50%", height: "30%" },
-  acessorio: { top: "8%", left: "25%", width: "50%", height: "30%" },
-  accessories: { top: "8%", left: "25%", width: "50%", height: "30%" },
-  // Specials (wings, auras, halos) — full canvas
-  especiais: { top: "0%", left: "0%", width: "100%", height: "100%" },
-  especial: { top: "0%", left: "0%", width: "100%", height: "100%" },
-  specials: { top: "0%", left: "0%", width: "100%", height: "100%" },
-};
-const FULL_SLOT: Slot = { top: "0%", left: "0%", width: "100%", height: "100%" };
-const slotFor = (slug: string): Slot => SLOT_BY_SLUG[slug?.toLowerCase()] ?? FULL_SLOT;
+function layerForSlug(slug: string) {
+  const key = CATEGORY_SLUG_TO_LAYER[slug?.toLowerCase()] ?? "fullOutfit";
+  return { layerKey: key, slot: LAYER_SLOTS[key], zIndex: LAYER_Z_INDEX[key] };
+}
 
 export const Route = createFileRoute("/avatar")({
   component: AvatarPage,
@@ -107,14 +85,6 @@ type SavedLook = {
   created_at: string;
 };
 
-const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
-  shirt: Shirt,
-  watch: Watch,
-  scissors: Scissors,
-  footprints: Footprints,
-  star: Star,
-};
-
 function AvatarPage() {
   const { user, role, loading: authLoading } = useAuth();
   const isSuperAdmin = role === "super_admin";
@@ -125,13 +95,19 @@ function AvatarPage() {
   const [bases, setBases] = useState<Base[]>([]);
   const [base, setBase] = useState<Base | null>(null);
   const [activeCat, setActiveCat] = useState<string | null>(null);
-  const [tab, setTab] = useState<"loja" | "meus">("loja");
+  const [tab, setTab] = useState<ShopTab>("loja");
   const [inventory, setInventory] = useState<Set<string>>(new Set());
   const [equipped, setEquipped] = useState<Map<string, string>>(new Map());
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [coins, setCoins] = useState<number>(0);
   const [looks, setLooks] = useState<SavedLook[]>([]);
   const [looksLoading, setLooksLoading] = useState(false);
+  // Local-only state — pose & expression aren't persisted yet (no DB
+  // columns). When the schema lands, hydrate from `user_avatar_equipped`.
+  const [pose, setPose] = useState<AvatarPoseKey>("standing_default");
+  const [expression, setExpression] = useState<AvatarExpressionKey>("soft_smile");
+  const [poseSheetOpen, setPoseSheetOpen] = useState(false);
+  const [detailsOpen, setDetailsOpen] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -233,6 +209,21 @@ function AvatarPage() {
     list.sort((a, b) => a.layer - b.layer);
     return list;
   }, [categories, equippedItems]);
+
+  // Adapter: DB-shaped equipped items → generic renderer layers.
+  const rendererLayers = useMemo<AvatarRendererLayer[]>(() => {
+    return renderedLayers.map(({ item, slug }) => {
+      const { layerKey, slot, zIndex } = layerForSlug(slug);
+      return {
+        id: item.id,
+        layerKey,
+        imageUrl: item.image_url,
+        slot,
+        zIndex,
+        alt: item.name,
+      };
+    });
+  }, [renderedLayers]);
 
   const itemsForCat = useMemo(() => {
     if (!activeCat) return [];
@@ -347,7 +338,7 @@ function AvatarPage() {
       const pct = (v: string) => parseFloat(v) / 100;
       for (const { item, slug } of renderedLayers) {
         const img = await loadImg(item.image_url);
-        const slot = slotFor(slug);
+        const { slot } = layerForSlug(slug);
         const sx = wrapperLeft + pct(slot.left) * wrapperW;
         const sy = wrapperTop + pct(slot.top) * wrapperH;
         const sw = pct(slot.width) * wrapperW;
@@ -368,6 +359,8 @@ function AvatarPage() {
       const snapshot = {
         base_id: base.id,
         items: Array.from(equipped.entries()).map(([category_id, item_id]) => ({ category_id, item_id })),
+        pose,
+        expression,
       };
       const ins = await supabase
         .from("user_avatar_looks")
@@ -419,9 +412,14 @@ function AvatarPage() {
 
   function resetLook() {
     setEquipped(new Map());
+    setPose("standing_default");
+    setExpression("soft_smile");
     if (!user) return;
     void supabase.from("user_avatar_equipped").delete().eq("user_id", user.id);
   }
+
+  const handleEquip = useCallback((item: Item) => void equipItem(item), []);
+  const handleToggleFav = useCallback((item: Item) => void toggleFavorite(item), []);
 
   if (authLoading) {
     return (
