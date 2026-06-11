@@ -121,7 +121,9 @@ export function resolveAuraCssRender(cssValue: string | null | undefined): AuraC
   const shadow = withoutSemicolon.replace(/^box(?:-shadow)?\s*:\s*/i, "").trim();
   const isBoxShadow =
     /^box(?:-shadow)?\s*:/i.test(withoutSemicolon) ||
-    (/^-?\d+(?:\.\d+)?(?:px|rem|em)\s+/i.test(withoutSemicolon) &&
+    (/^-?(?:\d+(?:\.\d+)?(?:px|rem|em)|0)\s+-?(?:\d+(?:\.\d+)?(?:px|rem|em)|0)\s+/i.test(
+      withoutSemicolon,
+    ) &&
       /(rgba?|hsla?|oklch|#|var\()/i.test(withoutSemicolon));
 
   if (isBoxShadow && shadow) return { kind: "box-shadow", value: shadow };
