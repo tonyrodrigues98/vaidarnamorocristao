@@ -556,7 +556,11 @@ function Detail() {
                       </Chip>
                     )}
                     <Chip icon={<Sparkles className="h-3.5 w-3.5" />} tone="amber">
-                      {profile.marital === "solteiro" ? "Solteiro(a)" : "Divorciado(a)"}
+                      {profile.marital === "solteiro"
+                        ? "Solteiro(a)"
+                        : profile.marital === "viuvo"
+                          ? "Viúvo(a)"
+                          : "Divorciado(a)"}
                     </Chip>
                     {profile.years_baptized ? (
                       <Chip icon={<CalendarHeart className="h-3.5 w-3.5" />} tone="emerald">
