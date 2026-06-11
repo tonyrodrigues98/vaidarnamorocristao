@@ -125,15 +125,6 @@ const RARITY_WEIGHT: Record<string, number> = {
 function LojaPage() {
   const { user, loading: authLoading } = useAuth();
   const queryClient = useQueryClient();
-  const [equipped, setEquipped] = useState<EquippedMap>({
-    frame: null,
-    aura: null,
-    sticker: null,
-  });
-  const [equippedBackground, setEquippedBackground] = useState<string | null>(null);
-  const [equippedNameGradient, setEquippedNameGradient] = useState<string | null>(null);
-  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
-  const [userDataLoading, setUserDataLoading] = useState(true);
   const { isOnline } = useNetworkStatus();
   const [busyId, setBusyId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<CategoryKey>("all");
@@ -151,6 +142,7 @@ function LojaPage() {
         queryClient.invalidateQueries({ queryKey: ["user-decoration-inventory", user.id] });
         queryClient.invalidateQueries({ queryKey: ["user-background-inventory", user.id] });
         queryClient.invalidateQueries({ queryKey: ["user-name-gradient-inventory", user.id] });
+        queryClient.invalidateQueries({ queryKey: ["shop-equipped-items", user.id] });
       }
     });
   }, [queryClient, user?.id]);
