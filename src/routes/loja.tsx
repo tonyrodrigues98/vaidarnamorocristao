@@ -130,12 +130,10 @@ function LojaPage() {
   const [activeTab, setActiveTab] = useState<CategoryKey>("all");
   const [confirm, setConfirm] = useState<Decoration | null>(null);
   const [confirmBackground, setConfirmBackground] = useState<ProfileBackground | null>(null);
-  const [refreshKey, setRefreshKey] = useState(0);
   const refreshResolveRef = useRef<(() => void) | null>(null);
   const handlePullRefresh = useCallback(() => {
     return new Promise<void>((resolve) => {
       refreshResolveRef.current = resolve;
-      setRefreshKey((k) => k + 1);
       queryClient.invalidateQueries({ queryKey: ["shop-catalog"] });
       if (user?.id) {
         queryClient.invalidateQueries({ queryKey: ["user-balance", user.id] });
