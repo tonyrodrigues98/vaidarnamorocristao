@@ -470,6 +470,10 @@ function PerfilPage() {
   async function saveProfile(e: React.FormEvent) {
     e.preventDefault();
     if (!user) return;
+    if (!isOnline) {
+      toast.error("Disponível online. Reconecte-se para salvar alterações.");
+      return;
+    }
     const parsed = profileSchema.safeParse(profile);
     if (!parsed.success) {
       toast.error(parsed.error.issues[0].message);
