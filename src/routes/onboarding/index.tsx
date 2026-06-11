@@ -249,9 +249,8 @@ function OnboardingFlow() {
         .eq("id", user.id)
         .maybeSingle();
 
-      // marital_status enum now accepts 'solteiro' | 'divorciado' | 'viuvo'.
-      // Cast widens once generated types regenerate after the migration.
-      const maritalDb = marital as "solteiro" | "divorciado";
+      // marital_status enum agora aceita 'solteiro' | 'divorciado' | 'viuvo'.
+      const maritalDb = marital;
 
       const payload = {
         id: user.id,
