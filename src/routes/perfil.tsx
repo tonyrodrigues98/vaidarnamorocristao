@@ -583,6 +583,10 @@ function PerfilPage() {
   async function savePrefs(e: React.FormEvent) {
     e.preventDefault();
     if (!user) return;
+    if (!isOnline) {
+      toast.error("Disponível online. Reconecte-se para salvar alterações.");
+      return;
+    }
     const min = Number(prefs.age_min);
     const max = Number(prefs.age_max);
     if (max < min) {
