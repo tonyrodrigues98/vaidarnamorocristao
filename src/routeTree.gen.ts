@@ -60,7 +60,6 @@ import { Route as AdminVerificacoesRouteImport } from './routes/admin/verificaco
 import { Route as AdminStickersRouteImport } from './routes/admin/stickers'
 import { Route as AdminPresentesRouteImport } from './routes/admin/presentes'
 import { Route as AdminPetsRouteImport } from './routes/admin/pets'
-import { Route as AdminPetRouteImport } from './routes/admin/pet'
 import { Route as AdminMoldurasRouteImport } from './routes/admin/molduras'
 import { Route as AdminGradientesNomeRouteImport } from './routes/admin/gradientes-nome'
 import { Route as AdminFundosRouteImport } from './routes/admin/fundos'
@@ -325,11 +324,6 @@ const AdminPetsRoute = AdminPetsRouteImport.update({
   path: '/admin/pets',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminPetRoute = AdminPetRouteImport.update({
-  id: '/admin/pet',
-  path: '/admin/pet',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AdminMoldurasRoute = AdminMoldurasRouteImport.update({
   id: '/admin/molduras',
   path: '/admin/molduras',
@@ -403,7 +397,6 @@ export interface FileRoutesByFullPath {
   '/admin/fundos': typeof AdminFundosRoute
   '/admin/gradientes-nome': typeof AdminGradientesNomeRoute
   '/admin/molduras': typeof AdminMoldurasRoute
-  '/admin/pet': typeof AdminPetRoute
   '/admin/pets': typeof AdminPetsRoute
   '/admin/presentes': typeof AdminPresentesRoute
   '/admin/stickers': typeof AdminStickersRoute
@@ -465,7 +458,6 @@ export interface FileRoutesByTo {
   '/admin/fundos': typeof AdminFundosRoute
   '/admin/gradientes-nome': typeof AdminGradientesNomeRoute
   '/admin/molduras': typeof AdminMoldurasRoute
-  '/admin/pet': typeof AdminPetRoute
   '/admin/pets': typeof AdminPetsRoute
   '/admin/presentes': typeof AdminPresentesRoute
   '/admin/stickers': typeof AdminStickersRoute
@@ -528,7 +520,6 @@ export interface FileRoutesById {
   '/admin/fundos': typeof AdminFundosRoute
   '/admin/gradientes-nome': typeof AdminGradientesNomeRoute
   '/admin/molduras': typeof AdminMoldurasRoute
-  '/admin/pet': typeof AdminPetRoute
   '/admin/pets': typeof AdminPetsRoute
   '/admin/presentes': typeof AdminPresentesRoute
   '/admin/stickers': typeof AdminStickersRoute
@@ -592,7 +583,6 @@ export interface FileRouteTypes {
     | '/admin/fundos'
     | '/admin/gradientes-nome'
     | '/admin/molduras'
-    | '/admin/pet'
     | '/admin/pets'
     | '/admin/presentes'
     | '/admin/stickers'
@@ -654,7 +644,6 @@ export interface FileRouteTypes {
     | '/admin/fundos'
     | '/admin/gradientes-nome'
     | '/admin/molduras'
-    | '/admin/pet'
     | '/admin/pets'
     | '/admin/presentes'
     | '/admin/stickers'
@@ -716,7 +705,6 @@ export interface FileRouteTypes {
     | '/admin/fundos'
     | '/admin/gradientes-nome'
     | '/admin/molduras'
-    | '/admin/pet'
     | '/admin/pets'
     | '/admin/presentes'
     | '/admin/stickers'
@@ -779,7 +767,6 @@ export interface RootRouteChildren {
   AdminFundosRoute: typeof AdminFundosRoute
   AdminGradientesNomeRoute: typeof AdminGradientesNomeRoute
   AdminMoldurasRoute: typeof AdminMoldurasRoute
-  AdminPetRoute: typeof AdminPetRoute
   AdminPetsRoute: typeof AdminPetsRoute
   AdminPresentesRoute: typeof AdminPresentesRoute
   AdminStickersRoute: typeof AdminStickersRoute
@@ -1169,13 +1156,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminPetsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/pet': {
-      id: '/admin/pet'
-      path: '/admin/pet'
-      fullPath: '/admin/pet'
-      preLoaderRoute: typeof AdminPetRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/admin/molduras': {
       id: '/admin/molduras'
       path: '/admin/molduras'
@@ -1277,7 +1257,6 @@ const rootRouteChildren: RootRouteChildren = {
   AdminFundosRoute: AdminFundosRoute,
   AdminGradientesNomeRoute: AdminGradientesNomeRoute,
   AdminMoldurasRoute: AdminMoldurasRoute,
-  AdminPetRoute: AdminPetRoute,
   AdminPetsRoute: AdminPetsRoute,
   AdminPresentesRoute: AdminPresentesRoute,
   AdminStickersRoute: AdminStickersRoute,
@@ -1310,3 +1289,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
