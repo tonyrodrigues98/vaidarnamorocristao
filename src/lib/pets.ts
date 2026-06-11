@@ -112,6 +112,8 @@ export type PetWritable = {
   is_active?: boolean;
   sort_order?: number;
   image_url?: string | null;
+  is_exclusive?: boolean;
+  price_coins?: number;
 };
 
 export async function uploadPetImage(file: File): Promise<string> {
