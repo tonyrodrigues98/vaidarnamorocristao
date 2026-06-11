@@ -169,7 +169,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
       <body>
         <div id="app-splash" aria-hidden="true">
           <img src="/splash-logo.png" alt="VaiDarNamoro" className="app-splash-logo" />
-          <div className="app-splash-loader"><span className="app-splash-loader-bar" /></div>
+          <div className="app-splash-loader"><span className="app-splash-loader-bar" suppressHydrationWarning /></div>
         </div>
         {children}
         <Scripts />
