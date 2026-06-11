@@ -971,28 +971,12 @@ function LegacyPetsPanel() {
             )}
             <div className="sm:col-span-2">
               <Field icon={ImageIcon} label="Imagem (PNG transparente, 1024×1024)">
-                <div className="mt-1 flex items-center gap-3">
-                  <Button
-                    variant="outline"
-                    onClick={() => fileRef.current?.click()}
-                    disabled={busy}
-                    type="button"
-                    size="sm"
-                    className="rounded-full"
-                  >
-                    <Upload className="mr-1.5 h-4 w-4" />
-                    {draft.image_url ? "Trocar" : "Enviar"} imagem
-                  </Button>
-                  {draft.image_url && (
-                    <span className="text-xs text-muted-foreground">Pronto. Salve para aplicar.</span>
-                  )}
-                </div>
-                <input
-                  ref={fileRef}
-                  type="file"
+                <ImagePreview
+                  value={draft.image_url ?? null}
+                  busy={busy}
+                  onPick={(f) => void onFile(f)}
+                  onClear={() => setDraft({ ...draft, image_url: null })}
                   accept="image/png,image/webp"
-                  className="hidden"
-                  onChange={(e) => void onFile(e.target.files?.[0] ?? null)}
                 />
               </Field>
             </div>
