@@ -230,6 +230,7 @@ export type Database = {
           is_active: boolean
           name: string
           pose_key: string
+          skin_tone: string
           sort_order: number
         }
         Insert: {
@@ -241,6 +242,7 @@ export type Database = {
           is_active?: boolean
           name: string
           pose_key?: string
+          skin_tone?: string
           sort_order?: number
         }
         Update: {
@@ -252,6 +254,7 @@ export type Database = {
           is_active?: boolean
           name?: string
           pose_key?: string
+          skin_tone?: string
           sort_order?: number
         }
         Relationships: []
@@ -2456,16 +2459,19 @@ export type Database = {
       user_avatar_base: {
         Row: {
           base_id: string
+          skin_tone: string
           updated_at: string
           user_id: string
         }
         Insert: {
           base_id: string
+          skin_tone?: string
           updated_at?: string
           user_id: string
         }
         Update: {
           base_id?: string
+          skin_tone?: string
           updated_at?: string
           user_id?: string
         }

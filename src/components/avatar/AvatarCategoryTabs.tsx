@@ -2,6 +2,7 @@ import {
   Dumbbell,
   Footprints,
   PersonStanding,
+  Palette,
   Scissors,
   Shirt,
   Star,
@@ -24,6 +25,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
   star: Star,
   dumbbell: Dumbbell,
   pose: PersonStanding,
+  palette: Palette,
 };
 
 type Props = {
