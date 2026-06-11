@@ -290,6 +290,28 @@ function PetsAdmin() {
                   <Label className="!m-0">Ativo</Label>
                 </div>
               </div>
+              <div className="flex items-end gap-3">
+                <div className="flex items-center gap-2">
+                  <Switch
+                    checked={draft.is_exclusive ?? false}
+                    onCheckedChange={(v) => setDraft({ ...draft, is_exclusive: v })}
+                  />
+                  <Label className="!m-0">Exclusivo (raridade + preço)</Label>
+                </div>
+              </div>
+              {draft.is_exclusive && (
+                <div>
+                  <Label>Preço (moedas)</Label>
+                  <Input
+                    type="number"
+                    min={0}
+                    value={draft.price_coins ?? 0}
+                    onChange={(e) =>
+                      setDraft({ ...draft, price_coins: Math.max(0, Number(e.target.value) || 0) })
+                    }
+                  />
+                </div>
+              )}
               <div className="sm:col-span-2">
                 <Label>Imagem (PNG transparente, 1024×1024)</Label>
                 <div className="mt-1 flex items-center gap-3">
