@@ -1,0 +1,51 @@
+export type PetRarity = "common" | "rare" | "epic" | "legendary";
+
+export type PetDisplaySize = "mini" | "profile" | "showcase";
+
+export type Pet = {
+  id: string;
+  name: string;
+  slug: string;
+  species: string;
+  description: string | null;
+  rarity: PetRarity;
+  price_coins: number;
+  image_url: string | null;
+  preview_url: string | null;
+  is_active: boolean;
+  sort_order: number;
+  // Reservados (não usados na Fase 1)
+  pose: string | null;
+  animation_url: string | null;
+  shadow_url: string | null;
+  sound_url: string | null;
+  event_tag: string | null;
+  limited_until: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type UserPet = {
+  id: string;
+  user_id: string;
+  pet_id: string;
+  custom_name: string | null;
+  acquired_at: string;
+  is_equipped: boolean;
+};
+
+export type UserPetWithPet = UserPet & { pet: Pet };
+
+export const PET_RARITY_LABEL: Record<PetRarity, string> = {
+  common: "Comum",
+  rare: "Raro",
+  epic: "Épico",
+  legendary: "Lendário",
+};
+
+export const PET_RARITY_COLOR: Record<PetRarity, string> = {
+  common: "bg-slate-100 text-slate-700",
+  rare: "bg-sky-100 text-sky-700",
+  epic: "bg-violet-100 text-violet-700",
+  legendary: "bg-amber-100 text-amber-800",
+};
