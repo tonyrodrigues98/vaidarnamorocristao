@@ -44,6 +44,8 @@ import { toast } from "sonner";
 import { friendlyError } from "@/lib/errors";
 import { RevealCeremony, type RevealTarget } from "@/components/anonymous/RevealCeremony";
 import { AnimatePresence, motion } from "framer-motion";
+import { useNetworkStatus } from "@/hooks/useNetworkStatus";
+import { UserCircle2 } from "lucide-react";
 import {
   fetchSenderProfile,
   buildHintPool,
@@ -408,6 +410,7 @@ function InboxCard({ m, hints, onChange }: { m: InboxRow; hints: Hint[]; onChang
   const [reportOpen, setReportOpen] = useState(false);
   const [reportReason, setReportReason] = useState("");
   const [busy, setBusy] = useState(false);
+  const { isOnline } = useNetworkStatus();
 
   const hasPending = hints.some((h) => !h.sent_at);
   const canReply = (m.status === "pending" || m.status === "hint_sent") && !hasPending;
@@ -415,8 +418,14 @@ function InboxCard({ m, hints, onChange }: { m: InboxRow; hints: Hint[]; onChang
     (m.status === "pending" || m.status === "hint_sent") && hints.length < 2 && !hasPending;
   const canReveal = ["replied", "reveal_requested", "hint_sent"].includes(m.status);
   const myRevealed = !!m.receiver_reveal_requested_at;
+  const isRevealed = m.status === "revealed";
+  const sentHints = hints.filter((h) => h.sent_at);
 
   const action = async (fn: () => PromiseLike<any>) => {
+    if (!isOnline) {
+      toast.error("Sem conexão. Volte online para continuar.");
+      return;
+    }
     setBusy(true);
     const { error } = await fn();
     setBusy(false);
@@ -425,27 +434,86 @@ function InboxCard({ m, hints, onChange }: { m: InboxRow; hints: Hint[]; onChang
   };
 
   return (
-    <div className="rounded-3xl border border-border/60 bg-card/70 p-4 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_-12px_rgba(0,0,0,0.12)] backdrop-blur-md">
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+      className="recado-paper relative overflow-hidden rounded-3xl p-4"
+    >
+      {/* Sender header — blurred placeholder until revealed */}
+      <div className="mb-3 flex items-center gap-3">
+        <div className="relative h-10 w-10 shrink-0">
+          <AnimatePresence mode="wait">
+            {isRevealed ? (
+              <motion.div
+                key="revealed-avatar"
+                initial={{ opacity: 0, filter: "blur(8px)", scale: 0.9 }}
+                animate={{ opacity: 1, filter: "blur(0px)", scale: 1 }}
+                transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                className="grid h-10 w-10 place-items-center rounded-full bg-[var(--rose)]/15 text-[var(--rose)]"
+              >
+                <HeartHandshake className="h-5 w-5" />
+              </motion.div>
+            ) : (
+              <motion.div
+                key="masked-avatar"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="relative grid h-10 w-10 place-items-center overflow-hidden rounded-full bg-gradient-to-br from-[var(--rose)]/25 via-[var(--rose-soft)]/30 to-primary/20"
+                aria-hidden
+              >
+                <UserCircle2 className="h-7 w-7 text-foreground/40 blur-[3px]" />
+                <span className="pointer-events-none absolute inset-0 rounded-full ring-1 ring-inset ring-white/30" />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="text-[13px] font-semibold tracking-tight text-foreground/90">
+            {isRevealed ? "Identidade revelada" : "Alguém especial"}
+          </div>
+          <div className="text-[11px] text-muted-foreground">
+            {isRevealed
+              ? "Vocês concordaram em se revelar"
+              : "Recado anônimo · identidade protegida"}
+          </div>
+        </div>
+      </div>
+
       <div className="mb-3 flex items-center justify-between text-[11px] text-muted-foreground">
         <span className="inline-flex items-center gap-1.5 rounded-full bg-muted/70 px-2 py-1 font-medium">
           <StatusBadge status={m.status} />
         </span>
         <span>Expira em {new Date(m.expires_at).toLocaleDateString("pt-BR")}</span>
       </div>
-      <div className="rounded-2xl bg-[var(--rose)]/8 px-4 py-3">
+      <div className="rounded-2xl bg-background/55 px-4 py-3 ring-1 ring-inset ring-[var(--rose)]/10 backdrop-blur-sm">
         <p className="whitespace-pre-wrap text-[15px] leading-relaxed text-foreground/90">
           {m.content}
         </p>
       </div>
 
-      {hints
-        .filter((h) => h.sent_at)
-        .map((h) => (
-          <div key={h.id} className="mt-2 flex items-start gap-2 rounded-xl bg-muted/60 px-3 py-2 text-[13px]">
-            <Sparkles className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[var(--rose)]" />
-            <span className="text-foreground/80">{h.hint_text}</span>
+      {sentHints.length > 0 && (
+        <div className="mt-3">
+          <div className="mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+            Pistas
           </div>
-        ))}
+          <div className="flex flex-wrap gap-1.5">
+            {sentHints.map((h, i) => (
+              <motion.span
+                key={h.id}
+                initial={{ opacity: 0, y: 4, filter: "blur(4px)" }}
+                animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                transition={{ duration: 0.35, delay: i * 0.06, ease: [0.22, 1, 0.36, 1] }}
+                className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-[var(--rose)]/25 bg-[var(--rose)]/8 px-3 py-1 text-[12px] text-foreground/85"
+              >
+                <Sparkles className="h-3 w-3 shrink-0 text-[var(--rose)]" />
+                <span className="truncate">{h.hint_text}</span>
+              </motion.span>
+            ))}
+          </div>
+        </div>
+      )}
       {hasPending && (
         <div className="mt-2 rounded-xl bg-muted/60 px-3 py-2 text-xs text-muted-foreground">
           Aguardando o remetente escolher uma dica…
@@ -469,7 +537,18 @@ function InboxCard({ m, hints, onChange }: { m: InboxRow; hints: Hint[]; onChang
       ) : (
         <div className="mt-3 flex flex-wrap gap-1.5">
           {canReply && (
-            <Button size="sm" className="h-9 rounded-full px-4" onClick={() => setReplyOpen(true)}>
+            <Button
+              size="sm"
+              className="h-9 rounded-full px-4"
+              disabled={!isOnline}
+              onClick={() => {
+                if (!isOnline) {
+                  toast.error("Sem conexão. Volte online para responder.");
+                  return;
+                }
+                setReplyOpen(true);
+              }}
+            >
               <Heart className="mr-1.5 h-3.5 w-3.5" /> Responder
             </Button>
           )}
@@ -478,7 +557,7 @@ function InboxCard({ m, hints, onChange }: { m: InboxRow; hints: Hint[]; onChang
               size="sm"
               variant="outline"
               className="h-9 rounded-full px-3"
-              disabled={busy}
+              disabled={busy || !isOnline}
               onClick={() =>
                 action(() => supabase.rpc("request_anonymous_hint", { _message_id: m.id }))
               }
@@ -491,7 +570,7 @@ function InboxCard({ m, hints, onChange }: { m: InboxRow; hints: Hint[]; onChang
               size="sm"
               variant="outline"
               className="h-9 rounded-full px-3"
-              disabled={busy}
+              disabled={busy || !isOnline}
               onClick={() =>
                 action(() => supabase.rpc("request_anonymous_reveal", { _message_id: m.id }))
               }
@@ -507,20 +586,27 @@ function InboxCard({ m, hints, onChange }: { m: InboxRow; hints: Hint[]; onChang
           <div className="ml-auto flex gap-1">
             <button
               type="button"
-              disabled={busy}
+              disabled={busy || !isOnline}
               aria-label="Ignorar"
               onClick={() =>
                 action(() => supabase.rpc("ignore_anonymous_message", { _message_id: m.id }))
               }
-              className="grid h-9 w-9 place-items-center rounded-full text-muted-foreground transition hover:bg-muted/70 hover:text-foreground active:scale-95"
+              className="grid h-9 w-9 place-items-center rounded-full text-muted-foreground transition hover:bg-muted/70 hover:text-foreground active:scale-95 disabled:opacity-50"
             >
               <EyeOff className="h-4 w-4" />
             </button>
             <button
               type="button"
               aria-label="Denunciar"
-              onClick={() => setReportOpen(true)}
-              className="grid h-9 w-9 place-items-center rounded-full text-muted-foreground transition hover:bg-destructive/10 hover:text-destructive active:scale-95"
+              disabled={!isOnline}
+              onClick={() => {
+                if (!isOnline) {
+                  toast.error("Sem conexão. Denúncias precisam estar online.");
+                  return;
+                }
+                setReportOpen(true);
+              }}
+              className="grid h-9 w-9 place-items-center rounded-full text-muted-foreground transition hover:bg-destructive/10 hover:text-destructive active:scale-95 disabled:opacity-50"
             >
               <Flag className="h-4 w-4" />
             </button>
@@ -608,7 +694,7 @@ function InboxCard({ m, hints, onChange }: { m: InboxRow; hints: Hint[]; onChang
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </motion.div>
   );
 }
 
