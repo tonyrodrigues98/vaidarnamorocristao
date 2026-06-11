@@ -79,6 +79,8 @@ function PetsAdmin() {
       is_active: true,
       sort_order: pets.length * 10,
       image_url: null,
+      is_exclusive: false,
+      price_coins: 0,
     });
   }
 
@@ -94,6 +96,8 @@ function PetsAdmin() {
       is_active: p.is_active,
       sort_order: p.sort_order,
       image_url: null, // só atualiza se reupload
+      is_exclusive: p.is_exclusive,
+      price_coins: p.price_coins ?? 0,
     });
   }
 
@@ -121,6 +125,8 @@ function PetsAdmin() {
           slug,
           species,
           description: draft.description?.trim() || null,
+          is_exclusive: draft.is_exclusive,
+          price_coins: draft.is_exclusive ? draft.price_coins ?? 0 : 0,
         });
         toast.success("Pet criado");
       } else if (editingId) {
@@ -132,6 +138,8 @@ function PetsAdmin() {
           rarity: draft.rarity,
           is_active: draft.is_active,
           sort_order: draft.sort_order,
+          is_exclusive: draft.is_exclusive,
+          price_coins: draft.is_exclusive ? draft.price_coins ?? 0 : 0,
         };
         if (draft.image_url) patch.image_url = draft.image_url;
         await updatePet(editingId, patch);
