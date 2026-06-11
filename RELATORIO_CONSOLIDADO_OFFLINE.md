@@ -12,6 +12,7 @@ Este documento consolida todas as alterações reais aplicadas no projeto **Chri
 | 4 | Loja — auditoria e guards offline | Concluído |
 | 5 | Conta — settings app-like com offline awareness | Concluído |
 | 6 | Notificações — central de atividades offline-safe | Concluído |
+| 7 | Dashboard — refatoração para Analytics Center app-like | Concluído |
 
 Toda implementação foi feita sem mexer em banco, migrations, RLS, schema, autenticação ou criar dados/permissões/itens/contadores fake. Nenhuma biblioteca foi instalada; nenhum Capacitor/Workbox usado.
 
@@ -255,6 +256,7 @@ Já praticamente uma central de atividades:
 - `src/routes/notificacoes.tsx`
 - `src/components/ProfilePhotosManager.tsx`
 - `src/routeTree.gen.ts` (auto-gerado pelo plugin)
+- `src/routes/dashboard.tsx`
 
 ---
 
