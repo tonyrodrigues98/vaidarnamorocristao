@@ -58,6 +58,7 @@ import { Route as ApiPhotoRepairRouteImport } from './routes/api/photo-repair'
 import { Route as AdminVerificacoesRouteImport } from './routes/admin/verificacoes'
 import { Route as AdminStickersRouteImport } from './routes/admin/stickers'
 import { Route as AdminPresentesRouteImport } from './routes/admin/presentes'
+import { Route as AdminPetsRouteImport } from './routes/admin/pets'
 import { Route as AdminMoldurasRouteImport } from './routes/admin/molduras'
 import { Route as AdminGradientesNomeRouteImport } from './routes/admin/gradientes-nome'
 import { Route as AdminFundosRouteImport } from './routes/admin/fundos'
@@ -312,6 +313,11 @@ const AdminPresentesRoute = AdminPresentesRouteImport.update({
   path: '/admin/presentes',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminPetsRoute = AdminPetsRouteImport.update({
+  id: '/admin/pets',
+  path: '/admin/pets',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminMoldurasRoute = AdminMoldurasRouteImport.update({
   id: '/admin/molduras',
   path: '/admin/molduras',
@@ -384,6 +390,7 @@ export interface FileRoutesByFullPath {
   '/admin/fundos': typeof AdminFundosRoute
   '/admin/gradientes-nome': typeof AdminGradientesNomeRoute
   '/admin/molduras': typeof AdminMoldurasRoute
+  '/admin/pets': typeof AdminPetsRoute
   '/admin/presentes': typeof AdminPresentesRoute
   '/admin/stickers': typeof AdminStickersRoute
   '/admin/verificacoes': typeof AdminVerificacoesRoute
@@ -443,6 +450,7 @@ export interface FileRoutesByTo {
   '/admin/fundos': typeof AdminFundosRoute
   '/admin/gradientes-nome': typeof AdminGradientesNomeRoute
   '/admin/molduras': typeof AdminMoldurasRoute
+  '/admin/pets': typeof AdminPetsRoute
   '/admin/presentes': typeof AdminPresentesRoute
   '/admin/stickers': typeof AdminStickersRoute
   '/admin/verificacoes': typeof AdminVerificacoesRoute
@@ -503,6 +511,7 @@ export interface FileRoutesById {
   '/admin/fundos': typeof AdminFundosRoute
   '/admin/gradientes-nome': typeof AdminGradientesNomeRoute
   '/admin/molduras': typeof AdminMoldurasRoute
+  '/admin/pets': typeof AdminPetsRoute
   '/admin/presentes': typeof AdminPresentesRoute
   '/admin/stickers': typeof AdminStickersRoute
   '/admin/verificacoes': typeof AdminVerificacoesRoute
@@ -564,6 +573,7 @@ export interface FileRouteTypes {
     | '/admin/fundos'
     | '/admin/gradientes-nome'
     | '/admin/molduras'
+    | '/admin/pets'
     | '/admin/presentes'
     | '/admin/stickers'
     | '/admin/verificacoes'
@@ -623,6 +633,7 @@ export interface FileRouteTypes {
     | '/admin/fundos'
     | '/admin/gradientes-nome'
     | '/admin/molduras'
+    | '/admin/pets'
     | '/admin/presentes'
     | '/admin/stickers'
     | '/admin/verificacoes'
@@ -682,6 +693,7 @@ export interface FileRouteTypes {
     | '/admin/fundos'
     | '/admin/gradientes-nome'
     | '/admin/molduras'
+    | '/admin/pets'
     | '/admin/presentes'
     | '/admin/stickers'
     | '/admin/verificacoes'
@@ -742,6 +754,7 @@ export interface RootRouteChildren {
   AdminFundosRoute: typeof AdminFundosRoute
   AdminGradientesNomeRoute: typeof AdminGradientesNomeRoute
   AdminMoldurasRoute: typeof AdminMoldurasRoute
+  AdminPetsRoute: typeof AdminPetsRoute
   AdminPresentesRoute: typeof AdminPresentesRoute
   AdminStickersRoute: typeof AdminStickersRoute
   AdminVerificacoesRoute: typeof AdminVerificacoesRoute
@@ -1116,6 +1129,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminPresentesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/pets': {
+      id: '/admin/pets'
+      path: '/admin/pets'
+      fullPath: '/admin/pets'
+      preLoaderRoute: typeof AdminPetsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/molduras': {
       id: '/admin/molduras'
       path: '/admin/molduras'
@@ -1216,6 +1236,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminFundosRoute: AdminFundosRoute,
   AdminGradientesNomeRoute: AdminGradientesNomeRoute,
   AdminMoldurasRoute: AdminMoldurasRoute,
+  AdminPetsRoute: AdminPetsRoute,
   AdminPresentesRoute: AdminPresentesRoute,
   AdminStickersRoute: AdminStickersRoute,
   AdminVerificacoesRoute: AdminVerificacoesRoute,
