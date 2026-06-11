@@ -108,6 +108,32 @@ export function assetFor(d: Pick<Decoration, "image_url"> | null | undefined): s
   return d.image_url;
 }
 
+export type AuraCssRender =
+  | { kind: "box-shadow"; value: string }
+  | { kind: "background"; value: string }
+  | { kind: "color"; value: string };
+
+export function resolveAuraCssRender(cssValue: string | null | undefined): AuraCssRender | null {
+  const raw = cssValue?.trim();
+  if (!raw) return null;
+
+  const withoutSemicolon = raw.replace(/;+\s*$/, "");
+  const shadow = withoutSemicolon.replace(/^box(?:-shadow)?\s*:\s*/i, "").trim();
+  const isBoxShadow =
+    /^box(?:-shadow)?\s*:/i.test(withoutSemicolon) ||
+    (/^-?\d+(?:\.\d+)?(?:px|rem|em)\s+/i.test(withoutSemicolon) &&
+      /(rgba?|hsla?|oklch|#|var\()/i.test(withoutSemicolon));
+
+  if (isBoxShadow && shadow) return { kind: "box-shadow", value: shadow };
+
+  const background = withoutSemicolon.replace(/^background(?:-image)?\s*:\s*/i, "").trim();
+  if (/^(radial|linear|conic)-gradient\(/i.test(background)) {
+    return { kind: "background", value: background };
+  }
+
+  return { kind: "color", value: withoutSemicolon };
+}
+
 let catalogCache: Decoration[] | null = null;
 let catalogPromise: Promise<Decoration[]> | null = null;
 let renderCatalogCache: Decoration[] | null = null;

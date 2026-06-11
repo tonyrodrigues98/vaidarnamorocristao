@@ -1,6 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
-import { fetchDecorationRenderCatalog, assetFor, type Decoration } from "@/lib/decorations";
+import {
+  fetchDecorationRenderCatalog,
+  assetFor,
+  resolveAuraCssRender,
+  type Decoration,
+} from "@/lib/decorations";
 import { useSignedPhotoUrlResult } from "@/lib/photoUrl";
 import commitmentRing from "@/assets/commitment-ring.webp";
 // `size` é o canvas total do componente. A moldura SEMPRE preenche esse
@@ -130,6 +135,7 @@ export function DecoratedAvatar({
   const initial = fallback ?? "?";
   const frameAsset = frame ? assetFor(frame) : null;
   const auraAsset = aura ? assetFor(aura) : null;
+  const auraCss = resolveAuraCssRender(aura?.css_value);
   const placement = frame?.image_url
     ? (FRAME_PLACEMENT[frame.image_url] ?? DEFAULT_FRAME_PLACEMENT)
     : DEFAULT_FRAME_PLACEMENT;
@@ -139,7 +145,7 @@ export function DecoratedAvatar({
   const photoSize = size;
   const frameCanvas = frameAsset ? size / placement.photoScale : 0;
   const needsDecorationSpace = Boolean(
-    frameId || auraId || frameAsset || auraAsset || aura?.css_value || isCommitted,
+    frameId || auraId || frameAsset || auraAsset || auraCss || isCommitted,
   );
   const canvas = needsDecorationSpace
     ? Math.max(frameCanvas, size * DEFAULT_DECORATION_CANVAS_SCALE)
@@ -183,13 +189,9 @@ export function DecoratedAvatar({
             }}
           />
         </div>
-      ) : aura?.css_value ? (
+      ) : auraCss ? (
         (() => {
-          const raw = aura.css_value.trim();
-          const isBoxShadow =
-            /^box-shadow\s*:/i.test(raw) || (/\d+px/.test(raw) && /(rgba?|#)/i.test(raw));
-          if (isBoxShadow) {
-            const shadow = raw.replace(/^box-shadow\s*:\s*/i, "").replace(/;+\s*$/, "");
+          if (auraCss.kind === "box-shadow") {
             return (
               <div
                 aria-hidden
@@ -199,7 +201,24 @@ export function DecoratedAvatar({
                   top: photoCenterY - photoSize / 2,
                   width: photoSize,
                   height: photoSize,
-                  boxShadow: shadow,
+                  boxShadow: auraCss.value,
+                  zIndex: 0,
+                }}
+              />
+            );
+          }
+          if (auraCss.kind === "background") {
+            return (
+              <div
+                aria-hidden
+                className="pointer-events-none absolute rounded-full"
+                style={{
+                  left: photoCenterX - photoSize / 2 - cssAuraPadding,
+                  top: photoCenterY - photoSize / 2 - cssAuraPadding,
+                  width: photoSize + cssAuraPadding * 2,
+                  height: photoSize + cssAuraPadding * 2,
+                  background: auraCss.value,
+                  filter: `blur(${Math.max(8, photoSize * 0.13)}px)`,
                   zIndex: 0,
                 }}
               />
@@ -214,7 +233,7 @@ export function DecoratedAvatar({
                 top: photoCenterY - photoSize / 2 - cssAuraPadding,
                 width: photoSize + cssAuraPadding * 2,
                 height: photoSize + cssAuraPadding * 2,
-                background: `radial-gradient(circle, ${raw}66 0%, ${raw}33 45%, transparent 72%)`,
+                background: `radial-gradient(circle, ${auraCss.value}66 0%, ${auraCss.value}33 45%, transparent 72%)`,
                 filter: `blur(${Math.max(8, photoSize * 0.13)}px)`,
                 zIndex: 0,
               }}
