@@ -585,12 +585,16 @@ export function DecorationAdminPage({ type }: { type: ManagedType }) {
                         {item.price_coins.toLocaleString()}
                       </span>
                       {type === "aura" && item.css_value ? (
-                        <span className="inline-flex items-center gap-2 text-xs text-muted-foreground">
-                          <span
-                            className="h-3 w-3 rounded-full border"
-                            style={{ backgroundColor: item.css_value }}
-                          />
-                          {item.css_value}
+                        <span className="inline-flex items-center gap-2 text-xs text-muted-foreground max-w-[60%] truncate">
+                          {/^#|^rgb/i.test(item.css_value.trim()) ? (
+                            <span
+                              className="h-3 w-3 rounded-full border shrink-0"
+                              style={{ backgroundColor: item.css_value }}
+                            />
+                          ) : (
+                            <span className="text-[10px] uppercase shrink-0 opacity-60">css</span>
+                          )}
+                          <span className="truncate">{item.css_value}</span>
                         </span>
                       ) : null}
                     </div>
@@ -885,15 +889,30 @@ function DecorationPreview({ item, type }: { item: Decoration; type: ManagedType
 
   return (
     <div className="relative h-36 w-36">
-      {type === "aura" && item.css_value && (
-        <div
-          aria-hidden
-          className="absolute inset-2 rounded-full blur-xl"
-          style={{
-            background: `radial-gradient(circle, ${item.css_value}66 0%, ${item.css_value}33 45%, transparent 72%)`,
-          }}
-        />
-      )}
+      {type === "aura" && item.css_value && (() => {
+        const raw = item.css_value.trim();
+        const isBoxShadow =
+          /^box-shadow\s*:/i.test(raw) || (/\d+px/.test(raw) && /(rgba?|#)/i.test(raw));
+        if (isBoxShadow) {
+          const shadow = raw.replace(/^box-shadow\s*:\s*/i, "").replace(/;+\s*$/, "");
+          return (
+            <div
+              aria-hidden
+              className="absolute inset-6 rounded-full"
+              style={{ boxShadow: shadow }}
+            />
+          );
+        }
+        return (
+          <div
+            aria-hidden
+            className="absolute inset-2 rounded-full blur-xl"
+            style={{
+              background: `radial-gradient(circle, ${raw}66 0%, ${raw}33 45%, transparent 72%)`,
+            }}
+          />
+        );
+      })()}
       {type === "aura" && image && (
         <img
           src={image}

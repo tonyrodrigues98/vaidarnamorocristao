@@ -184,19 +184,43 @@ export function DecoratedAvatar({
           />
         </div>
       ) : aura?.css_value ? (
-        <div
-          aria-hidden
-          className="pointer-events-none absolute rounded-full"
-          style={{
-            left: photoCenterX - photoSize / 2 - cssAuraPadding,
-            top: photoCenterY - photoSize / 2 - cssAuraPadding,
-            width: photoSize + cssAuraPadding * 2,
-            height: photoSize + cssAuraPadding * 2,
-            background: `radial-gradient(circle, ${aura.css_value}66 0%, ${aura.css_value}33 45%, transparent 72%)`,
-            filter: `blur(${Math.max(8, photoSize * 0.13)}px)`,
-            zIndex: 0,
-          }}
-        />
+        (() => {
+          const raw = aura.css_value.trim();
+          const isBoxShadow =
+            /^box-shadow\s*:/i.test(raw) || (/\d+px/.test(raw) && /(rgba?|#)/i.test(raw));
+          if (isBoxShadow) {
+            const shadow = raw.replace(/^box-shadow\s*:\s*/i, "").replace(/;+\s*$/, "");
+            return (
+              <div
+                aria-hidden
+                className="pointer-events-none absolute rounded-full"
+                style={{
+                  left: photoCenterX - photoSize / 2,
+                  top: photoCenterY - photoSize / 2,
+                  width: photoSize,
+                  height: photoSize,
+                  boxShadow: shadow,
+                  zIndex: 0,
+                }}
+              />
+            );
+          }
+          return (
+            <div
+              aria-hidden
+              className="pointer-events-none absolute rounded-full"
+              style={{
+                left: photoCenterX - photoSize / 2 - cssAuraPadding,
+                top: photoCenterY - photoSize / 2 - cssAuraPadding,
+                width: photoSize + cssAuraPadding * 2,
+                height: photoSize + cssAuraPadding * 2,
+                background: `radial-gradient(circle, ${raw}66 0%, ${raw}33 45%, transparent 72%)`,
+                filter: `blur(${Math.max(8, photoSize * 0.13)}px)`,
+                zIndex: 0,
+              }}
+            />
+          );
+        })()
       ) : null}
       <div
         className="absolute overflow-hidden rounded-full bg-muted"
