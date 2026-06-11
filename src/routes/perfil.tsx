@@ -549,8 +549,7 @@ function PerfilPage() {
       full_name: parsed.data.full_name,
       age: parsed.data.age,
       sex: parsed.data.sex,
-      // Cast widens once the DB enum migration regenerates types to include 'viuvo'.
-      marital: parsed.data.marital as "solteiro" | "divorciado",
+      marital: parsed.data.marital,
       city: parsed.data.city,
       state: parsed.data.state,
       church: parsed.data.church,
