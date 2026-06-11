@@ -222,30 +222,36 @@ export type Database = {
       }
       avatar_bases: {
         Row: {
+          body_type: string
           created_at: string
           gender: string
           id: string
           image_url: string
           is_active: boolean
           name: string
+          pose_key: string
           sort_order: number
         }
         Insert: {
+          body_type?: string
           created_at?: string
           gender: string
           id?: string
           image_url: string
           is_active?: boolean
           name: string
+          pose_key?: string
           sort_order?: number
         }
         Update: {
+          body_type?: string
           created_at?: string
           gender?: string
           id?: string
           image_url?: string
           is_active?: boolean
           name?: string
+          pose_key?: string
           sort_order?: number
         }
         Relationships: []

@@ -1,4 +1,13 @@
-import { Footprints, Scissors, Shirt, Star, Watch, type LucideIcon } from "lucide-react";
+import {
+  Dumbbell,
+  Footprints,
+  PersonStanding,
+  Scissors,
+  Shirt,
+  Star,
+  Watch,
+  type LucideIcon,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export type AvatarCategoryTab = {
@@ -13,6 +22,8 @@ const ICON_MAP: Record<string, LucideIcon> = {
   scissors: Scissors,
   footprints: Footprints,
   star: Star,
+  dumbbell: Dumbbell,
+  pose: PersonStanding,
 };
 
 type Props = {
