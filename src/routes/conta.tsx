@@ -7,6 +7,8 @@ import { AccountDangerZone } from "@/components/AccountDangerZone";
 import { useAuth } from "@/lib/auth";
 import { useTheme } from "@/lib/theme";
 import { Switch } from "@/components/ui/switch";
+import { useNetworkStatus } from "@/hooks/useNetworkStatus";
+import { StaleDataNotice } from "@/components/ui/StaleDataNotice";
 import {
   ChevronRight,
   User as UserIcon,
@@ -140,6 +142,7 @@ function SettingsItem(props: SettingsItemProps) {
 function ContaPage() {
   const { user, signOut, role } = useAuth();
   const { theme, toggle: toggleTheme } = useTheme();
+  const { isOnline } = useNetworkStatus();
   const isStaff = role !== "user";
   const [signingOut, setSigningOut] = useState(false);
 
@@ -173,6 +176,12 @@ function ContaPage() {
       <Header />
       <MobileAppHeader title="Conta" subtitle="Segurança e preferências" />
       <main className="mx-auto w-full max-w-2xl px-4 py-6 sm:py-10">
+        {!isOnline && (
+          <StaleDataNotice
+            className="mb-4"
+            message="Você está offline. Algumas ações de conta ficam disponíveis somente online."
+          />
+        )}
         {/* Mini profile card */}
         {user ? (
           <Link
@@ -297,7 +306,17 @@ function ContaPage() {
               <AlertTriangle className="h-3.5 w-3.5" /> Zona de perigo
             </h2>
             <div className="rounded-2xl border border-red-200 bg-red-50/40 p-3 dark:border-red-400/40 dark:bg-red-950/30">
-              <AccountDangerZone />
+              {!isOnline && (
+                <p className="mb-2 rounded-lg bg-red-100/60 px-3 py-2 text-[11px] font-medium text-red-800 dark:bg-red-900/40 dark:text-red-200">
+                  Disponível online. Reconecte-se para alterar dados de segurança ou excluir a conta.
+                </p>
+              )}
+              <div
+                aria-disabled={!isOnline}
+                className={!isOnline ? "pointer-events-none opacity-60" : undefined}
+              >
+                <AccountDangerZone />
+              </div>
             </div>
           </section>
 
