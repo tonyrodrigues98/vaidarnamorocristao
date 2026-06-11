@@ -48,6 +48,12 @@ import { OnlineDot } from "@/components/OnlineDot";
 import { CommitmentProgressCard } from "@/components/commitment/CommitmentProgressCard";
 import { CommitmentPauseCard } from "@/components/commitment/CommitmentPauseCard";
 import { ConversationDrawer } from "@/components/conversations/ConversationDrawer";
+import { useNetworkStatus } from "@/hooks/useNetworkStatus";
+import {
+  getFirstMessageSuggestions,
+  type FirstMessagePartnerProfile,
+} from "@/lib/firstMessageSuggestions";
+import { Sparkles } from "lucide-react";
 
 type Msg = {
   id: string;
@@ -90,6 +96,9 @@ type Partner = {
   verified?: boolean | null;
   equipped_frame_id?: string | null;
   equipped_aura_id?: string | null;
+  city?: string | null;
+  church?: string | null;
+  bio?: string | null;
 };
 
 export const Route = createFileRoute("/conversas/$matchId")({
@@ -240,7 +249,9 @@ function Chat() {
       setAuthorized(true);
       const { data: p } = await supabase
         .from("profiles")
-        .select("id,full_name,photo_url,verified,equipped_frame_id,equipped_aura_id")
+        .select(
+          "id,full_name,photo_url,verified,equipped_frame_id,equipped_aura_id,city,church,bio",
+        )
         .eq("id", partnerId)
         .maybeSingle();
       setPartner(p as Partner | null);
