@@ -57,6 +57,13 @@ import { GiftHighlights } from "@/components/gifts/GiftHighlights";
 import type { ProfileBackground } from "@/lib/profileBackgrounds";
 import { GradientName } from "@/components/GradientName";
 import { fetchNameGradientsByIds, type NameGradient } from "@/lib/nameGradients";
+import {
+  getPurposeCompatibility,
+  type CompatPrefs,
+  type CompatProfile,
+} from "@/lib/purposeCompatibility";
+import { useMemo } from "react";
+import { Handshake, MessageSquareHeart } from "lucide-react";
 
 type Full = {
   id: string;
@@ -116,6 +123,8 @@ function Detail() {
   const [extraPhotos, setExtraPhotos] = useState<string[]>([]);
   const [equippedBackground, setEquippedBackground] = useState<ProfileBackground | null>(null);
   const [profileNameGradient, setProfileNameGradient] = useState<NameGradient | null>(null);
+  const [myProfile, setMyProfile] = useState<CompatProfile | null>(null);
+  const [myPrefs, setMyPrefs] = useState<CompatPrefs | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -152,6 +161,28 @@ function Detail() {
         .eq("id", user.id)
         .maybeSingle();
       setMySex((data?.sex as string | undefined) ?? null);
+    })();
+  }, [user]);
+
+  // Snapshot do perfil/preferências do usuário logado para a comparação de
+  // "Compatibilidade de Propósito". Campos mínimos, sem mexer em banco.
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      const [{ data: mp }, { data: mpref }] = await Promise.all([
+        supabase
+          .from("profiles")
+          .select("age, city, state, church, years_baptized")
+          .eq("id", user.id)
+          .maybeSingle(),
+        supabase
+          .from("profile_preferences")
+          .select("age_min, age_max, accepts_children")
+          .eq("user_id", user.id)
+          .maybeSingle(),
+      ]);
+      setMyProfile((mp ?? null) as CompatProfile | null);
+      setMyPrefs((mpref ?? null) as CompatPrefs | null);
     })();
   }, [user]);
 
