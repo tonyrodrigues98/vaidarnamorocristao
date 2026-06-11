@@ -265,7 +265,10 @@ export const ProfileAdvancedForm = forwardRef<ProfileAdvancedFormHandle, Profile
   return (
     <form onSubmit={save} className="space-y-5">
       <div className="rounded-2xl border border-[var(--rose)]/20 bg-[var(--rose)]/5 p-4 text-sm">
-        <p className="font-medium text-foreground">Tudo opcional ✨</p>
+        <p className="flex items-center gap-1.5 font-medium text-foreground">
+          <Sparkles className="h-4 w-4 text-[var(--rose)]" aria-hidden />
+          Tudo opcional
+        </p>
         <p className="mt-1 text-muted-foreground">
           Preencha o que fizer sentido. Seções vazias somem do seu perfil público. Ao completar 8
           das 10 seções você ganha a badge <strong>Perfil Avançado</strong>.

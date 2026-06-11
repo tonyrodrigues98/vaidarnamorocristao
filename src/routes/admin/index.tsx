@@ -2377,8 +2377,9 @@ function PreCadastroCard({
           {matches.map((m) => (
             <div key={m.id} className="flex flex-wrap items-start justify-between gap-2 text-sm">
               <div className="min-w-0 flex-1">
-                <p className="font-semibold">
-                  💕 {m.partner_full_name ?? "(par sem nome)"}
+                <p className="flex items-center gap-1.5 font-semibold">
+                  <Heart className="h-3.5 w-3.5 text-pink-500" aria-hidden />
+                  {m.partner_full_name ?? "(par sem nome)"}
                   {m.partner_age ? `, ${m.partner_age}` : ""}
                 </p>
                 <p className="text-xs text-muted-foreground">
