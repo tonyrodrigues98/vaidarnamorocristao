@@ -1,10 +1,14 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
-import { Plus, Trash2, Loader2 } from "lucide-react";
+import { Plus, Trash2, Loader2, WifiOff } from "lucide-react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { PhotoImg } from "@/components/PhotoImg";
 import { normalizeImageFile } from "@/lib/imageNormalize";
 import { extractProfilePhotoPath } from "@/lib/photoUrl";
+import { useNetworkStatus } from "@/hooks/useNetworkStatus";
+import { StaleDataNotice } from "@/components/ui/StaleDataNotice";
+import { OfflineState } from "@/components/ui/OfflineState";
 
 interface Photo {
   id: string;
@@ -15,30 +19,40 @@ interface Photo {
 const MAX = 6;
 
 export function ProfilePhotosManager({ userId }: { userId: string }) {
-  const [photos, setPhotos] = useState<Photo[]>([]);
+  const { isOnline } = useNetworkStatus();
+  const qc = useQueryClient();
   const [uploading, setUploading] = useState(false);
-  const [loading, setLoading] = useState(true);
 
-  const load = async () => {
-    const { data } = await supabase
-      .from("profile_photos")
-      .select("id, url, sort_order")
-      .eq("user_id", userId)
-      .order("sort_order", { ascending: true })
-      .order("created_at", { ascending: true });
-    setPhotos((data ?? []) as Photo[]);
-    setLoading(false);
-  };
+  const photosQuery = useQuery({
+    queryKey: ["profile-photos", userId],
+    enabled: !!userId,
+    staleTime: 60_000,
+    gcTime: 30 * 60_000,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("profile_photos")
+        .select("id, url, sort_order")
+        .eq("user_id", userId)
+        .order("sort_order", { ascending: true })
+        .order("created_at", { ascending: true });
+      if (error) throw error;
+      return (data ?? []) as Photo[];
+    },
+  });
 
-  useEffect(() => {
-    void load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userId]);
+  const photos: Photo[] = photosQuery.data ?? [];
+  const loading = photosQuery.isLoading;
+  const refetchPhotos = () =>
+    qc.invalidateQueries({ queryKey: ["profile-photos", userId] });
 
   const onUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     e.target.value = "";
     if (!file) return;
+    if (!isOnline) {
+      toast.error("Disponível online. Reconecte-se para enviar fotos.");
+      return;
+    }
     if (photos.length >= MAX) {
       toast.error(`Máximo de ${MAX} fotos adicionais`);
       return;
@@ -143,10 +157,14 @@ export function ProfilePhotosManager({ userId }: { userId: string }) {
       toast.message("Foto enviada para análise rápida da equipe.");
     }
     toast.success("Foto adicionada");
-    void load();
+    void refetchPhotos();
   };
 
   const remove = async (photo: Photo) => {
+    if (!isOnline) {
+      toast.error("Disponível online. Reconecte-se para remover fotos.");
+      return;
+    }
     const { error } = await supabase.from("profile_photos").delete().eq("id", photo.id);
     if (error) {
       toast.error("Não foi possível remover");
@@ -157,7 +175,7 @@ export function ProfilePhotosManager({ userId }: { userId: string }) {
     if (path) {
       void supabase.storage.from("profile-photos").remove([path]);
     }
-    setPhotos((prev) => prev.filter((p) => p.id !== photo.id));
+    void refetchPhotos();
     toast.success("Foto removida");
   };
 
@@ -174,6 +192,16 @@ export function ProfilePhotosManager({ userId }: { userId: string }) {
           {photos.length}/{MAX}
         </span>
       </div>
+      {!isOnline && photos.length > 0 && (
+        <StaleDataNotice message="Você está offline. Mostrando fotos carregadas anteriormente." />
+      )}
+      {!isOnline && photos.length === 0 && !loading && (
+        <OfflineState
+          compact
+          title="Fotos indisponíveis offline"
+          description="Conecte-se para carregar suas fotos."
+        />
+      )}
       <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
         {photos.map((p) => (
           <div
@@ -184,7 +212,9 @@ export function ProfilePhotosManager({ userId }: { userId: string }) {
             <button
               type="button"
               onClick={() => remove(p)}
-              className="absolute right-1 top-1 inline-flex h-7 w-7 items-center justify-center rounded-full bg-black/55 text-white opacity-0 transition group-hover:opacity-100 active:scale-95"
+              disabled={!isOnline}
+              title={!isOnline ? "Disponível online. Reconecte-se para remover fotos." : undefined}
+              className="absolute right-1 top-1 inline-flex h-7 w-7 items-center justify-center rounded-full bg-black/55 text-white opacity-0 transition group-hover:opacity-100 active:scale-95 disabled:opacity-40"
               aria-label="Remover foto"
             >
               <Trash2 className="h-3.5 w-3.5" />
@@ -192,9 +222,22 @@ export function ProfilePhotosManager({ userId }: { userId: string }) {
           </div>
         ))}
         {photos.length < MAX && !loading && (
-          <label className="flex aspect-square cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-[var(--rose-soft)] bg-card/60 text-muted-foreground transition hover:border-[var(--rose)] hover:text-[var(--rose)]">
+          <label
+            aria-disabled={!isOnline}
+            title={!isOnline ? "Disponível online. Reconecte-se para enviar fotos." : undefined}
+            className={`flex aspect-square flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-[var(--rose-soft)] bg-card/60 text-muted-foreground transition ${
+              !isOnline
+                ? "cursor-not-allowed opacity-50"
+                : "cursor-pointer hover:border-[var(--rose)] hover:text-[var(--rose)]"
+            }`}
+          >
             {uploading ? (
               <Loader2 className="h-5 w-5 animate-spin" />
+            ) : !isOnline ? (
+              <>
+                <WifiOff className="h-5 w-5" />
+                <span className="text-[11px]">Offline</span>
+              </>
             ) : (
               <>
                 <Plus className="h-5 w-5" />
@@ -206,7 +249,7 @@ export function ProfilePhotosManager({ userId }: { userId: string }) {
               accept="image/*"
               className="hidden"
               onChange={onUpload}
-              disabled={uploading}
+              disabled={uploading || !isOnline}
             />
           </label>
         )}

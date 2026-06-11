@@ -7,6 +7,9 @@ import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { CoinIcon } from "@/components/icons/CoinIcon";
 import { DecoratedAvatar } from "@/components/DecoratedAvatar";
+import { useNetworkStatus } from "@/hooks/useNetworkStatus";
+import { StaleDataNotice } from "@/components/ui/StaleDataNotice";
+import { OfflineState } from "@/components/ui/OfflineState";
 import { getMyCoins } from "@/lib/coins";
 import {
   fetchDecorationCatalog,
@@ -55,6 +58,8 @@ const CATEGORIES: Category[] = [
 
 export function CustomizacaoTab({ photoUrl }: { photoUrl: string | null }) {
   const { user } = useAuth();
+  const { isOnline } = useNetworkStatus();
+  const offlineEquipMsg = "Disponível online. Reconecte-se para alterar seu visual.";
   const [catalog, setCatalog] = useState<Decoration[]>([]);
   const [backgrounds, setBackgrounds] = useState<ProfileBackground[]>([]);
   const [owned, setOwned] = useState<Set<string>>(new Set());
@@ -169,6 +174,10 @@ export function CustomizacaoTab({ photoUrl }: { photoUrl: string | null }) {
 
   const handleEquip = async (d: Decoration) => {
     if (!user) return;
+    if (!isOnline) {
+      toast.error(offlineEquipMsg);
+      return;
+    }
 
     setBusyId(d.id);
 
@@ -194,6 +203,10 @@ export function CustomizacaoTab({ photoUrl }: { photoUrl: string | null }) {
 
   const handleUnequip = async (type: DecorationType) => {
     if (!user) return;
+    if (!isOnline) {
+      toast.error(offlineEquipMsg);
+      return;
+    }
 
     setBusyId(`unequip-${type}`);
 
@@ -211,6 +224,10 @@ export function CustomizacaoTab({ photoUrl }: { photoUrl: string | null }) {
   };
 
   const handleEquipBackground = async (background: ProfileBackground) => {
+    if (!isOnline) {
+      toast.error(offlineEquipMsg);
+      return;
+    }
     setBusyId(background.id);
     try {
       await equipProfileBackground(background.id);
@@ -225,6 +242,10 @@ export function CustomizacaoTab({ photoUrl }: { photoUrl: string | null }) {
   };
 
   const handleUnequipBackground = async () => {
+    if (!isOnline) {
+      toast.error(offlineEquipMsg);
+      return;
+    }
     setBusyId("unequip-background");
     try {
       await unequipProfileBackground();
@@ -238,6 +259,10 @@ export function CustomizacaoTab({ photoUrl }: { photoUrl: string | null }) {
   };
 
   const handleEquipNameGradient = async (gradient: NameGradient) => {
+    if (!isOnline) {
+      toast.error(offlineEquipMsg);
+      return;
+    }
     setBusyId(gradient.id);
     try {
       await equipNameGradient(gradient.id);
@@ -251,6 +276,10 @@ export function CustomizacaoTab({ photoUrl }: { photoUrl: string | null }) {
   };
 
   const handleUnequipNameGradient = async () => {
+    if (!isOnline) {
+      toast.error(offlineEquipMsg);
+      return;
+    }
     setBusyId("unequip-name-gradient");
     try {
       await unequipNameGradient();
@@ -333,7 +362,8 @@ export function CustomizacaoTab({ photoUrl }: { photoUrl: string | null }) {
                     variant="outline"
                     size="sm"
                     className="w-full text-xs"
-                    disabled={busyId === `unequip-${type}`}
+                    disabled={busyId === `unequip-${type}` || !isOnline}
+                    title={!isOnline ? offlineEquipMsg : undefined}
                     onClick={() => handleUnequip(type)}
                   >
                     {busyId === `unequip-${type}` ? (
@@ -346,7 +376,8 @@ export function CustomizacaoTab({ photoUrl }: { photoUrl: string | null }) {
                   <Button
                     size="sm"
                     className="w-full text-xs"
-                    disabled={busy}
+                    disabled={busy || !isOnline}
+                    title={!isOnline ? offlineEquipMsg : undefined}
                     onClick={() => handleEquip(d)}
                   >
                     {busy ? <Loader2 className="h-3 w-3 animate-spin" /> : "Equipar"}
@@ -448,7 +479,8 @@ export function CustomizacaoTab({ photoUrl }: { photoUrl: string | null }) {
                       variant="outline"
                       size="sm"
                       className="w-full text-xs"
-                      disabled={busyId === "unequip-background"}
+                      disabled={busyId === "unequip-background" || !isOnline}
+                      title={!isOnline ? offlineEquipMsg : undefined}
                       onClick={handleUnequipBackground}
                     >
                       {busyId === "unequip-background" ? (
@@ -461,7 +493,8 @@ export function CustomizacaoTab({ photoUrl }: { photoUrl: string | null }) {
                     <Button
                       size="sm"
                       className="w-full text-xs"
-                      disabled={busy}
+                      disabled={busy || !isOnline}
+                      title={!isOnline ? offlineEquipMsg : undefined}
                       onClick={() => handleEquipBackground(background)}
                     >
                       {busy ? <Loader2 className="h-3 w-3 animate-spin" /> : "Equipar"}
@@ -519,7 +552,8 @@ export function CustomizacaoTab({ photoUrl }: { photoUrl: string | null }) {
                     variant="outline"
                     size="sm"
                     className="w-full text-xs"
-                    disabled={busyId === "unequip-name-gradient"}
+                    disabled={busyId === "unequip-name-gradient" || !isOnline}
+                    title={!isOnline ? offlineEquipMsg : undefined}
                     onClick={handleUnequipNameGradient}
                   >
                     Remover
@@ -528,7 +562,8 @@ export function CustomizacaoTab({ photoUrl }: { photoUrl: string | null }) {
                   <Button
                     size="sm"
                     className="w-full text-xs"
-                    disabled={busy}
+                    disabled={busy || !isOnline}
+                    title={!isOnline ? offlineEquipMsg : undefined}
                     onClick={() => handleEquipNameGradient(gradient)}
                   >
                     {busy ? <Loader2 className="h-3 w-3 animate-spin" /> : "Equipar"}
@@ -545,8 +580,26 @@ export function CustomizacaoTab({ photoUrl }: { photoUrl: string | null }) {
   if (loading) {
     return (
       <div className="rounded-3xl border bg-card/50 p-10 text-center text-sm text-muted-foreground">
-        Carregando customização…
+        Carregando visual…
       </div>
+    );
+  }
+
+  const hasAnyData =
+    catalog.length > 0 ||
+    backgrounds.length > 0 ||
+    nameGradients.length > 0 ||
+    equipped.frame !== null ||
+    equipped.aura !== null ||
+    equippedBackground !== null ||
+    equippedNameGradient !== null;
+
+  if (!isOnline && !hasAnyData) {
+    return (
+      <OfflineState
+        title="Visual indisponível offline"
+        description="Conecte-se para carregar seus itens."
+      />
     );
   }
 
@@ -554,6 +607,9 @@ export function CustomizacaoTab({ photoUrl }: { photoUrl: string | null }) {
 
   return (
     <div className="animate-fade-up space-y-5">
+      {!isOnline && (
+        <StaleDataNotice message="Você está offline. Mostrando visual carregado anteriormente." />
+      )}
       {/* Header */}
       <div className="glass relative overflow-hidden rounded-3xl p-6 shadow-elegant sm:p-8">
         <div
@@ -569,7 +625,7 @@ export function CustomizacaoTab({ photoUrl }: { photoUrl: string | null }) {
             <div className="inline-flex items-center gap-2 rounded-full bg-[var(--rose-soft)]/40 px-3 py-1 text-[11px] font-medium uppercase tracking-wide text-[var(--rose)]">
               <Sparkles className="h-3 w-3" /> Cosméticos
             </div>
-            <h2 className="mt-3 text-2xl font-semibold tracking-tight sm:text-3xl">Customização</h2>
+            <h2 className="mt-3 text-2xl font-semibold tracking-tight sm:text-3xl">Visual</h2>
             <p className="mt-1 max-w-md text-sm text-muted-foreground">
               Personalize a aparência do seu perfil e destaque sua identidade na plataforma.
             </p>
