@@ -49,6 +49,7 @@ import { RoleBadge } from "@/components/RoleBadge";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { OnlineDot } from "@/components/OnlineDot";
 import { UserBadges } from "@/components/UserBadges";
+import { EquippedPetBadge } from "@/components/EquippedPetBadge";
 import { ProfileAdvancedView } from "@/components/ProfileAdvancedView";
 import { DecoratedAvatar } from "@/components/DecoratedAvatar";
 import { ROLE_PRIORITY, type AppRole, type RoleColor } from "@/lib/roles";
