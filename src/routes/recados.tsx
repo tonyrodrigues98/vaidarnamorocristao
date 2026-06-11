@@ -41,6 +41,9 @@ import {
   ChevronDown,
   ShieldCheck,
   Info,
+  EyeIcon,
+  Archive,
+  Undo2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { friendlyError } from "@/lib/errors";
