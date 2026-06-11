@@ -574,6 +574,71 @@ function CardShell({ children }: { children: React.ReactNode }) {
   );
 }
 
+function HiddenCard({ m, onChange }: { m: InboxRow; onChange: () => void }) {
+  const online = useNetworkStatus();
+  const [busy, setBusy] = useState(false);
+
+  async function action(fn: () => Promise<any>) {
+    if (!online) {
+      toast.error("Você está offline.");
+      return;
+    }
+    setBusy(true);
+    try {
+      const r = await fn();
+      if (r?.error) throw r.error;
+      toast.success("Recado restaurado nos recebidos");
+      onChange();
+    } catch (e: any) {
+      toast.error(friendlyError(e));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const date = new Date(m.created_at);
+  const dateLabel = date.toLocaleDateString("pt-BR", {
+    day: "2-digit",
+    month: "short",
+  });
+
+  return (
+    <CardShell>
+      <div className="flex items-start gap-3">
+        <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-foreground/[0.05] text-foreground/55">
+          <Archive className="h-4 w-4" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2">
+            <span className="text-[13px] font-medium text-foreground/70">Recado oculto</span>
+            <span className="text-[11px] text-muted-foreground tabular-nums">· {dateLabel}</span>
+          </div>
+          <p className="mt-2 line-clamp-3 rounded-2xl bg-foreground/[0.04] px-3 py-2 text-[14px] leading-relaxed text-foreground/85">
+            {m.content}
+          </p>
+          <p className="mt-2 text-[11px] text-muted-foreground">
+            Você ocultou este recado. O remetente continua anônimo e não é notificado.
+          </p>
+        </div>
+      </div>
+      <div className="mt-3 flex justify-end">
+        <Button
+          size="sm"
+          variant="outline"
+          disabled={busy || !online}
+          onClick={() =>
+            action(() => supabase.rpc("unignore_anonymous_message", { _message_id: m.id }))
+          }
+          className="h-9 gap-1.5 rounded-full px-3.5 text-[13px]"
+        >
+          <Undo2 className="h-3.5 w-3.5" />
+          Desocultar
+        </Button>
+      </div>
+    </CardShell>
+  );
+}
+
 function InboxCard({ m, hints, onChange }: { m: InboxRow; hints: Hint[]; onChange: () => void }) {
   const [replyOpen, setReplyOpen] = useState(false);
   const [reply, setReply] = useState("");
