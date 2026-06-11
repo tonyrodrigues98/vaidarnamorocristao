@@ -29,6 +29,7 @@ import { Route as ContaRouteImport } from './routes/conta'
 import { Route as ComunidadeRouteImport } from './routes/comunidade'
 import { Route as ComoFuncionaRouteImport } from './routes/como-funciona'
 import { Route as BloqueadosRouteImport } from './routes/bloqueados'
+import { Route as AvatarRouteImport } from './routes/avatar'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SuporteIndexRouteImport } from './routes/suporte/index'
 import { Route as PretendentesIndexRouteImport } from './routes/pretendentes/index'
@@ -162,6 +163,11 @@ const ComoFuncionaRoute = ComoFuncionaRouteImport.update({
 const BloqueadosRoute = BloqueadosRouteImport.update({
   id: '/bloqueados',
   path: '/bloqueados',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AvatarRoute = AvatarRouteImport.update({
+  id: '/avatar',
+  path: '/avatar',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -338,6 +344,7 @@ const ApiPublicHooksPushDispatchRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/avatar': typeof AvatarRoute
   '/bloqueados': typeof BloqueadosRoute
   '/como-funciona': typeof ComoFuncionaRoute
   '/comunidade': typeof ComunidadeRoute
@@ -394,6 +401,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/avatar': typeof AvatarRoute
   '/bloqueados': typeof BloqueadosRoute
   '/como-funciona': typeof ComoFuncionaRoute
   '/comunidade': typeof ComunidadeRoute
@@ -451,6 +459,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/avatar': typeof AvatarRoute
   '/bloqueados': typeof BloqueadosRoute
   '/como-funciona': typeof ComoFuncionaRoute
   '/comunidade': typeof ComunidadeRoute
@@ -509,6 +518,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/avatar'
     | '/bloqueados'
     | '/como-funciona'
     | '/comunidade'
@@ -565,6 +575,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/avatar'
     | '/bloqueados'
     | '/como-funciona'
     | '/comunidade'
@@ -621,6 +632,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/avatar'
     | '/bloqueados'
     | '/como-funciona'
     | '/comunidade'
@@ -678,6 +690,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AvatarRoute: typeof AvatarRoute
   BloqueadosRoute: typeof BloqueadosRoute
   ComoFuncionaRoute: typeof ComoFuncionaRoute
   ComunidadeRoute: typeof ComunidadeRoute
@@ -873,6 +886,13 @@ declare module '@tanstack/react-router' {
       path: '/bloqueados'
       fullPath: '/bloqueados'
       preLoaderRoute: typeof BloqueadosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/avatar': {
+      id: '/avatar'
+      path: '/avatar'
+      fullPath: '/avatar'
+      preLoaderRoute: typeof AvatarRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -1118,6 +1138,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AvatarRoute: AvatarRoute,
   BloqueadosRoute: BloqueadosRoute,
   ComoFuncionaRoute: ComoFuncionaRoute,
   ComunidadeRoute: ComunidadeRoute,
