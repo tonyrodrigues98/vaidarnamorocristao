@@ -231,7 +231,7 @@ function AvatarPage() {
       supabase.from("user_coins").select("balance").eq("user_id", user.id).maybeSingle(),
       supabase
         .from("user_avatar_base")
-        .select("base_id, skin_tone")
+        .select("base_id, skin_tone, color_selections")
         .eq("user_id", user.id)
         .maybeSingle(),
     ]);
@@ -246,7 +246,13 @@ function AvatarPage() {
 
     // Hydrate from saved avatar choice if present; otherwise fall back to
     // profile gender default. Onboarding (/avatar/criar) is opt-in for now.
-    const saved = userBaseRes.data as { base_id: string; skin_tone: string | null } | null;
+    const saved = userBaseRes.data as
+      | {
+          base_id: string;
+          skin_tone: string | null;
+          color_selections: Partial<Record<AvatarLayerKey, string>> | null;
+        }
+      | null;
     const profileGender =
       (profileRes.data?.sex as string | undefined) === "f" ? "feminino" : "masculino";
     const matched =
@@ -264,6 +270,11 @@ function AvatarPage() {
     setBodyType(matched?.body_type ?? "default");
     setPose((matched?.pose_key as AvatarPoseKey | undefined) ?? "standing_default");
     setSkinTone(saved?.skin_tone ?? matched?.skin_tone ?? "default");
+    if (saved?.color_selections && typeof saved.color_selections === "object") {
+      setColorSelections((current) => ({ ...current, ...saved.color_selections }));
+    }
+    // Libera os auto-saves só depois que a hidratação terminou.
+    baseHydratedRef.current = true;
 
     const inv = new Set<string>();
     const favs = new Set<string>();
