@@ -677,7 +677,14 @@ function AvatarPage() {
           (b) =>
             b.gender === currentGender &&
             b.body_type === "default" &&
-            b.pose_key === pk,
+            b.pose_key === pk &&
+            b.skin_tone === skinTone,
+        ) ?? bases.find(
+          (b) =>
+            b.gender === currentGender &&
+            b.body_type === "default" &&
+            b.pose_key === pk &&
+            b.skin_tone === "default",
         );
         if (!row) return null;
         return {
@@ -688,6 +695,31 @@ function AvatarPage() {
           label: POSE_LABELS[pk] ?? pk,
         };
       }).filter(Boolean) as AvatarBaseOption[],
+    [bases, currentGender, skinTone],
+  );
+
+  const skinOptions: AvatarBaseOption[] = useMemo(
+    () =>
+      SKIN_ORDER.map((tone) => {
+        const row =
+          bases.find(
+            (b) =>
+              b.gender === currentGender &&
+              b.body_type === "default" &&
+              b.pose_key === "standing_default" &&
+              b.skin_tone === tone,
+          ) ?? null;
+        // Show the swatch even if no asset yet, so the user sees the full palette.
+        return {
+          id: row?.id ?? `tone-${tone}`,
+          name: SKIN_LABELS[tone] ?? tone,
+          image_url: row?.image_url ?? "",
+          key: tone,
+          label: SKIN_LABELS[tone] ?? tone,
+          swatch: SKIN_SWATCH[tone],
+          disabled: !row,
+        } as AvatarBaseOption;
+      }),
     [bases, currentGender],
   );
 
