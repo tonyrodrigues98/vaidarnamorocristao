@@ -1151,6 +1151,260 @@ export type Database = {
         }
         Relationships: []
       }
+      pet_benefits: {
+        Row: {
+          active: boolean
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          name: string
+          scope: string
+          scope_id: string | null
+          slug: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          name: string
+          scope?: string
+          scope_id?: string | null
+          slug: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          name?: string
+          scope?: string
+          scope_id?: string | null
+          slug?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      pet_categories: {
+        Row: {
+          active: boolean
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          name: string
+          slug: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          name: string
+          slug: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          name?: string
+          slug?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      pet_life_stages: {
+        Row: {
+          active: boolean
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          name: string
+          slug: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          name: string
+          slug: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          name?: string
+          slug?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      pet_personalities: {
+        Row: {
+          active: boolean
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          name: string
+          slug: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          name: string
+          slug: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          name?: string
+          slug?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      pet_species: {
+        Row: {
+          active: boolean
+          category_id: string
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          name: string
+          slug: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          category_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          name: string
+          slug: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          category_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          name?: string
+          slug?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pet_species_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "pet_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pet_variants: {
+        Row: {
+          active: boolean
+          category_id: string | null
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          name: string
+          slug: string
+          sort_order: number
+          species_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          category_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          name: string
+          slug: string
+          sort_order?: number
+          species_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          category_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          name?: string
+          slug?: string
+          sort_order?: number
+          species_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pet_variants_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "pet_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pet_variants_species_id_fkey"
+            columns: ["species_id"]
+            isOneToOne: false
+            referencedRelation: "pet_species"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pets: {
         Row: {
           animation_url: string | null
@@ -2904,6 +3158,97 @@ export type Database = {
           },
         ]
       }
+      user_pets_v2: {
+        Row: {
+          benefit_id: string | null
+          category_id: string
+          created_at: string
+          custom_name: string
+          id: string
+          is_equipped: boolean
+          life_stage_id: string
+          personality_id: string
+          species_id: string | null
+          updated_at: string
+          user_id: string
+          variant_id: string | null
+          visibility: string
+        }
+        Insert: {
+          benefit_id?: string | null
+          category_id: string
+          created_at?: string
+          custom_name: string
+          id?: string
+          is_equipped?: boolean
+          life_stage_id: string
+          personality_id: string
+          species_id?: string | null
+          updated_at?: string
+          user_id: string
+          variant_id?: string | null
+          visibility?: string
+        }
+        Update: {
+          benefit_id?: string | null
+          category_id?: string
+          created_at?: string
+          custom_name?: string
+          id?: string
+          is_equipped?: boolean
+          life_stage_id?: string
+          personality_id?: string
+          species_id?: string | null
+          updated_at?: string
+          user_id?: string
+          variant_id?: string | null
+          visibility?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_pets_v2_benefit_id_fkey"
+            columns: ["benefit_id"]
+            isOneToOne: false
+            referencedRelation: "pet_benefits"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_pets_v2_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "pet_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_pets_v2_life_stage_id_fkey"
+            columns: ["life_stage_id"]
+            isOneToOne: false
+            referencedRelation: "pet_life_stages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_pets_v2_personality_id_fkey"
+            columns: ["personality_id"]
+            isOneToOne: false
+            referencedRelation: "pet_personalities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_pets_v2_species_id_fkey"
+            columns: ["species_id"]
+            isOneToOne: false
+            referencedRelation: "pet_species"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_pets_v2_variant_id_fkey"
+            columns: ["variant_id"]
+            isOneToOne: false
+            referencedRelation: "pet_variants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_profile_backgrounds: {
         Row: {
           background_id: string
@@ -3240,6 +3585,7 @@ export type Database = {
         Args: { _background_id: string }
         Returns: undefined
       }
+      equip_user_pet_v2: { Args: { _user_pet_id: string }; Returns: undefined }
       expire_anonymous_messages: { Args: never; Returns: number }
       get_active_streak: {
         Args: { _user_id: string }
@@ -3348,6 +3694,7 @@ export type Database = {
       }
       increment_article_views: { Args: { _slug: string }; Returns: undefined }
       is_match_participant: { Args: { _match_id: string }; Returns: boolean }
+      is_pet_catalog_admin: { Args: never; Returns: boolean }
       is_staff: { Args: { _user_id: string }; Returns: boolean }
       is_support_staff: { Args: { _user_id: string }; Returns: boolean }
       log_coin_tx: {
