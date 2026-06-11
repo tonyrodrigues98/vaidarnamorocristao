@@ -446,137 +446,57 @@ function AvatarPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#FFF7F3] via-[#FFF1EC] to-[#FFE9E2]">
-      {/* Header */}
-      <div className="sticky top-0 z-20 flex items-center justify-between gap-3 bg-[#FFF7F3]/80 px-4 pt-4 pb-3 backdrop-blur-md">
-        <Link
-          to="/inicio"
-          className="flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-sm transition hover:scale-105"
-        >
-          <ArrowLeft className="h-5 w-5 text-foreground" />
-        </Link>
-        <h1 className="flex items-center gap-1.5 font-serif text-xl font-semibold text-primary">
-          <span className="text-primary">♥+</span>
-          VaiDarNamoro
-        </h1>
-        <div className="flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 shadow-sm">
-          <CoinIcon className="h-5 w-5" />
-          <span className="text-sm font-semibold text-foreground">{coins.toLocaleString("pt-BR")}</span>
-          <button className="ml-1 flex h-5 w-5 items-center justify-center rounded-full border border-primary/30 text-primary">
-            +
-          </button>
-        </div>
-      </div>
+      <AvatarHeader coins={coins} />
 
-      {/* Category tabs */}
-      <div className="border-b border-border/30 bg-white">
-        <div className="flex gap-1 overflow-x-auto px-2">
-          {categories.map((cat) => {
-            const Icon = ICON_MAP[cat.icon] ?? Shirt;
-            const isActive = activeCat === cat.id;
-            return (
-              <button
-                key={cat.id}
-                onClick={() => setActiveCat(cat.id)}
-                className={cn(
-                  "flex shrink-0 flex-col items-center gap-1 px-3 py-3 transition",
-                  "relative",
-                )}
-              >
-                <div className="flex items-center gap-1.5">
-                  <Icon className={cn("h-5 w-5", isActive ? "text-primary" : "text-muted-foreground")} />
-                  <span
-                    className={cn(
-                      "text-sm font-medium",
-                      isActive ? "text-primary" : "text-muted-foreground",
-                    )}
-                  >
-                    {cat.name}
-                  </span>
-                </div>
-                {isActive && (
-                  <span className="absolute bottom-0 left-1/2 h-0.5 w-8 -translate-x-1/2 rounded-full bg-primary" />
-                )}
-              </button>
-            );
-          })}
-        </div>
-      </div>
+      <AvatarCategoryTabs
+        categories={categories}
+        activeId={activeCat}
+        onChange={setActiveCat}
+      />
 
-      {/* Avatar stage */}
-      <div className="relative">
-        <div
-          className="relative mx-auto aspect-[9/16] w-full max-w-md overflow-hidden"
-          style={{
-            backgroundImage: `url(${ROOM_BG})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }}
-        >
-          {/* Base + layers — avatar standing on the white podium */}
-          {base && (
-            <div className="absolute inset-x-0 bottom-[18%] flex justify-center">
-              <div className="relative h-[68%] w-auto" style={{ aspectRatio: "3 / 4" }}>
-                <img
-                  src={base.image_url}
-                  alt={base.name}
-                  className="h-full w-auto object-contain drop-shadow-[0_20px_25px_rgba(0,0,0,0.15)]"
-                  draggable={false}
-                />
-                {renderedLayers.map(({ item, layer, slug }) => {
-                  const slot = slotFor(slug);
-                  return (
-                    <img
-                      key={item.id}
-                      src={item.image_url}
-                      alt={item.name}
-                      className="absolute object-contain"
-                      style={{
-                        top: slot.top,
-                        left: slot.left,
-                        width: slot.width,
-                        height: slot.height,
-                        zIndex: layer,
-                      }}
-                      draggable={false}
-                    />
-                  );
-                })}
-              </div>
-            </div>
+      <AvatarStage
+        baseUrl={base?.image_url ?? null}
+        baseAlt={base?.name ?? "Avatar"}
+        layers={rendererLayers}
+        pose={pose}
+        expression={expression}
+        onShuffle={shuffleLook}
+        onReset={resetLook}
+        onOpenPoseExpression={() => setPoseSheetOpen((v) => !v)}
+        onOpenDetails={() => setDetailsOpen((v) => !v)}
+        onSaveLook={saveLook}
+      />
+
+      {poseSheetOpen && (
+        <div className="mx-auto mt-3 w-full max-w-md rounded-2xl border border-border bg-white p-4 shadow-sm sm:px-4">
+          <h3 className="mb-2 text-sm font-semibold text-foreground">Pose</h3>
+          <AvatarPoseSelector value={pose} onChange={setPose} />
+          <h3 className="mb-2 mt-4 text-sm font-semibold text-foreground">Expressão</h3>
+          <AvatarExpressionSelector value={expression} onChange={setExpression} />
+          <p className="mt-3 text-[11px] text-muted-foreground">
+            Pose e expressão são locais por enquanto — serão persistidas quando o
+            backend de poses/expressões estiver pronto.
+          </p>
+        </div>
+      )}
+
+      {detailsOpen && (
+        <div className="mx-auto mt-3 w-full max-w-md rounded-2xl border border-border bg-white p-4 shadow-sm">
+          <h3 className="mb-2 text-sm font-semibold text-foreground">Detalhes do visual</h3>
+          {renderedLayers.length === 0 ? (
+            <p className="text-xs text-muted-foreground">Nenhum item equipado.</p>
+          ) : (
+            <ul className="space-y-1 text-xs text-foreground">
+              {renderedLayers.map(({ item }) => (
+                <li key={item.id} className="flex items-center justify-between gap-2">
+                  <span className="truncate">{item.name}</span>
+                  {item.is_premium && <Crown className="h-3 w-3 text-amber-500" />}
+                </li>
+              ))}
+            </ul>
           )}
-
-          {/* Left action rail */}
-          <div className="absolute left-3 top-1/2 flex -translate-y-1/2 flex-col gap-3">
-            <ActionBubble icon={<Shuffle className="h-4 w-4" />} onClick={shuffleLook} />
-            <ActionBubble icon={<RotateCcw className="h-4 w-4" />} onClick={resetLook} />
-            <ActionBubble icon={<Heart className="h-4 w-4 fill-primary text-primary" />} label="Favorito" />
-          </div>
-
-          {/* Right side */}
-          <div className="absolute right-3 top-6 flex flex-col items-end gap-3">
-            <div className="flex flex-col items-center rounded-2xl border border-amber-200 bg-white px-3 py-2 shadow-sm">
-              <Crown className="h-5 w-5 text-amber-500" />
-              <span className="mt-0.5 text-xs font-semibold leading-tight text-amber-700">Visual</span>
-              <span className="text-xs font-semibold leading-tight text-amber-700">Premium</span>
-            </div>
-          </div>
-
-          <div className="absolute right-3 bottom-24 flex flex-col items-end gap-2">
-            <button className="flex items-center gap-2 rounded-full bg-white/95 px-4 py-2 text-sm font-medium text-foreground shadow-sm">
-              <Info className="h-4 w-4" />
-              Detalhes
-            </button>
-            <button
-              onClick={saveLook}
-              className="flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-md transition hover:bg-primary/90"
-            >
-              <Camera className="h-4 w-4" />
-              Salvar Look
-            </button>
-          </div>
-
         </div>
-      </div>
+      )}
 
       {/* Saved looks gallery */}
       <div className="mx-auto w-full max-w-md px-4 pt-4">
@@ -614,158 +534,18 @@ function AvatarPage() {
         )}
       </div>
 
-      {/* Shop drawer */}
-      <div className="rounded-t-3xl bg-white px-4 pt-4 pb-24 shadow-[0_-8px_30px_rgba(0,0,0,0.06)]">
-        <div className="mb-3 flex items-center justify-between">
-          <div className="flex gap-6">
-            <button
-              onClick={() => setTab("loja")}
-              className={cn(
-                "relative flex items-center gap-1.5 pb-2 text-sm font-medium",
-                tab === "loja" ? "text-primary" : "text-muted-foreground",
-              )}
-            >
-              <span>🛍️</span> Loja
-              {tab === "loja" && (
-                <span className="absolute -bottom-0.5 left-0 right-0 h-0.5 rounded-full bg-primary" />
-              )}
-            </button>
-            <button
-              onClick={() => setTab("meus")}
-              className={cn(
-                "relative flex items-center gap-1.5 pb-2 text-sm font-medium",
-                tab === "meus" ? "text-primary" : "text-muted-foreground",
-              )}
-            >
-              <span>👗</span> Meus Itens
-              {tab === "meus" && (
-                <span className="absolute -bottom-0.5 left-0 right-0 h-0.5 rounded-full bg-primary" />
-              )}
-            </button>
-          </div>
-          <button className="flex h-9 w-9 items-center justify-center rounded-xl border border-border bg-white">
-            <SlidersHorizontal className="h-4 w-4 text-muted-foreground" />
-          </button>
-        </div>
-
-        {loading ? (
-          <div className="flex h-32 items-center justify-center">
-            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-          </div>
-        ) : itemsForCat.length === 0 ? (
-          <div className="flex h-40 flex-col items-center justify-center gap-2 text-center">
-            <p className="text-sm text-muted-foreground">
-              {tab === "meus"
-                ? "Você ainda não tem itens desta categoria."
-                : "Nenhum item cadastrado nesta categoria ainda."}
-            </p>
-            <p className="text-xs text-muted-foreground">
-              Adicione itens via admin para popular a loja.
-            </p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            {itemsForCat.map((item) => {
-              const isEquipped = equipped.get(item.category_id) === item.id;
-              const owned = inventory.has(item.id);
-              const isFav = favorites.has(item.id);
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => equipItem(item)}
-                  className={cn(
-                    "group relative flex flex-col rounded-2xl border bg-white p-2 text-left transition",
-                    isEquipped
-                      ? "border-primary shadow-md ring-1 ring-primary"
-                      : "border-border hover:border-primary/40",
-                  )}
-                >
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      void toggleFavorite(item);
-                    }}
-                    className="absolute right-2 top-2 z-10"
-                  >
-                    {isEquipped ? (
-                      <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                        <Check className="h-3.5 w-3.5" />
-                      </span>
-                    ) : (
-                      <Heart
-                        className={cn(
-                          "h-5 w-5",
-                          isFav ? "fill-primary text-primary" : "text-muted-foreground",
-                        )}
-                      />
-                    )}
-                  </button>
-                  <div className="flex aspect-square items-center justify-center overflow-hidden rounded-xl bg-gradient-to-b from-[#FFF7F3] to-[#FFEEE6]">
-                    <img
-                      src={item.thumbnail_url ?? item.image_url}
-                      alt={item.name}
-                      className="h-full w-full object-contain p-2"
-                      loading="lazy"
-                    />
-                  </div>
-                  <div className="mt-2 px-1">
-                    <p className="truncate text-sm font-medium text-foreground">{item.name}</p>
-                    {item.is_premium && (
-                      <div className="mt-0.5 flex items-center gap-1 text-xs text-amber-600">
-                        <Crown className="h-3 w-3" />
-                        Premium
-                      </div>
-                    )}
-                    <div className="mt-1.5">
-                      {isEquipped ? (
-                        <div className="rounded-full bg-primary px-3 py-1 text-center text-xs font-semibold text-primary-foreground">
-                          Equipado
-                        </div>
-                      ) : owned ? (
-                        <div className="rounded-full bg-secondary px-3 py-1 text-center text-xs font-medium text-foreground">
-                          Equipar
-                        </div>
-                      ) : (
-                        <div
-                          className={cn(
-                            "flex items-center justify-center gap-1 rounded-full px-3 py-1 text-xs font-semibold",
-                            coins >= item.price
-                              ? "bg-amber-100 text-amber-900"
-                              : "bg-muted text-muted-foreground",
-                          )}
-                        >
-                          <CoinIcon className="h-3.5 w-3.5" />
-                          <span>{item.price.toLocaleString("pt-BR")}</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        )}
-      </div>
+      <AvatarShopSheet
+        tab={tab}
+        onTabChange={setTab}
+        loading={loading}
+        items={itemsForCat}
+        equippedByCategory={equipped}
+        inventory={inventory}
+        favorites={favorites}
+        coins={coins}
+        onEquip={handleEquip}
+        onToggleFavorite={handleToggleFav}
+      />
     </div>
-  );
-}
-
-function ActionBubble({
-  icon,
-  label,
-  onClick,
-}: {
-  icon: React.ReactNode;
-  label?: string;
-  onClick?: () => void;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className="flex h-12 w-12 flex-col items-center justify-center gap-0.5 rounded-full bg-white shadow-md transition hover:scale-105"
-    >
-      {icon}
-      {label && <span className="text-[9px] font-medium text-muted-foreground">{label}</span>}
-    </button>
   );
 }
