@@ -289,10 +289,10 @@ export async function listBackgrounds(): Promise<{ id: string; name: string }[]>
 export async function listBadgesCatalog(): Promise<{ id: string; name: string }[]> {
   const { data, error } = await supabase
     .from("badges" as any)
-    .select("id, label, code")
-    .order("label");
+    .select("id, name, code")
+    .order("name");
   if (error) throw error;
-  return ((data ?? []) as any[]).map((d) => ({ id: d.id, name: d.label ?? d.code }));
+  return ((data ?? []) as any[]).map((d) => ({ id: d.id, name: d.name ?? d.code }));
 }
 
 // ---------- User-facing perks ----------
