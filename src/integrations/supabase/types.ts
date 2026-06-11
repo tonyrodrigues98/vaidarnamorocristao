@@ -2465,6 +2465,7 @@ export type Database = {
       user_avatar_base: {
         Row: {
           age_range: string
+          avatar_name: string | null
           base_id: string
           skin_tone: string
           updated_at: string
@@ -2472,6 +2473,7 @@ export type Database = {
         }
         Insert: {
           age_range?: string
+          avatar_name?: string | null
           base_id: string
           skin_tone?: string
           updated_at?: string
@@ -2479,6 +2481,7 @@ export type Database = {
         }
         Update: {
           age_range?: string
+          avatar_name?: string | null
           base_id?: string
           skin_tone?: string
           updated_at?: string
