@@ -1216,7 +1216,7 @@ function InicioPage() {
           )}
 
           {/* MOLDURA GRÁTIS */}
-          {isApproved && !frameClaimed && !ownsAnyFrame && (
+          {isApproved && !frameClaimed && !ownsAnyFrame && !hasSpent && (
             <section>
               <Link
                 to="/perfil"
