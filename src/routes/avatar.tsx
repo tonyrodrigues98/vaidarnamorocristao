@@ -137,6 +137,29 @@ function AvatarPage() {
   // the user navigates categories or selects another preview.
   const [previewItem, setPreviewItem] = useState<Item | null>(null);
 
+  function toggleGender() {
+    const nextGender = currentGender === "feminino" ? "masculino" : "feminino";
+    const next =
+      bases.find(
+        (b) => b.gender === nextGender && b.body_type === bodyType && b.pose_key === pose,
+      ) ??
+      bases.find(
+        (b) =>
+          b.gender === nextGender &&
+          b.body_type === "default" &&
+          b.pose_key === "standing_default",
+      ) ??
+      bases.find((b) => b.gender === nextGender) ??
+      null;
+    if (!next) {
+      toast.error("Variação indisponível para este gênero.");
+      return;
+    }
+    setBase(next);
+    setBodyType(next.body_type);
+    setPose(next.pose_key as AvatarPoseKey);
+  }
+
   useEffect(() => {
     if (!user) return;
     void loadAll();
