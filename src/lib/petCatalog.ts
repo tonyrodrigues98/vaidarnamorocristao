@@ -153,7 +153,7 @@ export async function getMyPetV2(userId: string): Promise<UserPetV2Full | null> 
     .maybeSingle();
   if (error) throw error;
   if (!data) return null;
-  const row = data as any as UserPetV2Full;
+  const row = data as unknown as UserPetV2Full;
   const hydrate = async <T extends { image_url: string | null } | null>(r: T): Promise<T> =>
     r ? ({ ...r, image_url: await resolvePetImage(r.image_url) } as T) : r;
   return {
@@ -188,7 +188,7 @@ export async function createMyPetV2(input: {
     .select("*")
     .single();
   if (error) throw error;
-  return data as UserPetV2;
+  return data as unknown as UserPetV2;
 }
 
 export async function updateMyPetV2(
