@@ -555,6 +555,12 @@ function LojaPage() {
 
       {/* Content */}
       <main className="mx-auto max-w-5xl px-4 pb-24 pt-6">
+        {!isOnline && !loading && catalog.length > 0 && (
+          <StaleDataNotice
+            className="mb-4"
+            message="Você está offline. Mostrando itens carregados anteriormente. Compras e mudanças de visual estão indisponíveis."
+          />
+        )}
         {loading ? (
           <ShopSkeleton cards={8} />
         ) : !isOnline && catalog.length === 0 ? (
