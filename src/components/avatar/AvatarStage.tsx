@@ -40,15 +40,15 @@ export function AvatarStage({
   return (
     <div className="relative">
       <div
-        className="relative mx-auto aspect-[9/16] w-full max-w-md overflow-hidden"
+        className="relative mx-auto aspect-[3/4] w-full max-w-md overflow-hidden"
         style={{
           backgroundImage: `url(${ROOM_BG})`,
           backgroundSize: "cover",
-          backgroundPosition: "center",
+          backgroundPosition: "center top",
         }}
       >
         {baseUrl && (
-          <div className="absolute inset-x-0 bottom-[18%] flex justify-center">
+          <div className="absolute inset-x-0 bottom-[10%] flex justify-center">
             <AvatarRenderer baseUrl={baseUrl} baseAlt={baseAlt} layers={layers} />
           </div>
         )}
