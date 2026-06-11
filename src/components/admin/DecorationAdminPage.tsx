@@ -585,12 +585,16 @@ export function DecorationAdminPage({ type }: { type: ManagedType }) {
                         {item.price_coins.toLocaleString()}
                       </span>
                       {type === "aura" && item.css_value ? (
-                        <span className="inline-flex items-center gap-2 text-xs text-muted-foreground">
-                          <span
-                            className="h-3 w-3 rounded-full border"
-                            style={{ backgroundColor: item.css_value }}
-                          />
-                          {item.css_value}
+                        <span className="inline-flex items-center gap-2 text-xs text-muted-foreground max-w-[60%] truncate">
+                          {/^#|^rgb/i.test(item.css_value.trim()) ? (
+                            <span
+                              className="h-3 w-3 rounded-full border shrink-0"
+                              style={{ backgroundColor: item.css_value }}
+                            />
+                          ) : (
+                            <span className="text-[10px] uppercase shrink-0 opacity-60">css</span>
+                          )}
+                          <span className="truncate">{item.css_value}</span>
                         </span>
                       ) : null}
                     </div>
