@@ -136,7 +136,6 @@ function LojaPage() {
   const [equippedBackground, setEquippedBackground] = useState<string | null>(null);
   const [equippedNameGradient, setEquippedNameGradient] = useState<string | null>(null);
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
-  const [balance, setBalance] = useState(0);
   const [userDataLoading, setUserDataLoading] = useState(true);
   const { isOnline } = useNetworkStatus();
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -150,8 +149,11 @@ function LojaPage() {
       refreshResolveRef.current = resolve;
       setRefreshKey((k) => k + 1);
       queryClient.invalidateQueries({ queryKey: ["shop-catalog"] });
+      if (user?.id) {
+        queryClient.invalidateQueries({ queryKey: ["user-balance", user.id] });
+      }
     });
-  }, [queryClient]);
+  }, [queryClient, user?.id]);
 
   // Public catalog queries — TanStack Query owns cache + offline reuse.
   const decorationsQuery = useQuery({
@@ -194,14 +196,32 @@ function LojaPage() {
   const hasCatalogCache = catalog.length > 0 || backgrounds.length > 0 || nameGradients.length > 0;
   const loading = catalogLoading || userDataLoading;
 
+  // User balance — TanStack Query owns cache + offline reuse.
+  const balanceQuery = useQuery({
+    queryKey: ["user-balance", user?.id],
+    queryFn: async () => (await getMyCoins()).balance,
+    enabled: !!user?.id,
+    staleTime: 30_000,
+    gcTime: 5 * 60_000,
+    refetchOnReconnect: true,
+  });
+  const balanceKnown = balanceQuery.data !== undefined;
+  const balance = balanceQuery.data ?? 0;
+  const setBalance = useCallback(
+    (next: number) => {
+      if (!user?.id) return;
+      queryClient.setQueryData(["user-balance", user.id], next);
+    },
+    [queryClient, user?.id],
+  );
+
   useEffect(() => {
     if (!user) return;
     let alive = true;
     (async () => {
       try {
-        const [o, coins, prof] = await Promise.all([
+        const [o, prof] = await Promise.all([
           fetchMyOwnedIds(user.id),
-          getMyCoins(),
           supabase
             .from("profiles")
             .select("photo_url, equipped_frame_id, equipped_aura_id, equipped_sticker_id")
@@ -211,7 +231,6 @@ function LojaPage() {
 
         if (!alive) return;
         setOwned(o);
-        setBalance(coins.balance);
         const p = (prof.data ?? {}) as {
           photo_url?: string | null;
           equipped_frame_id?: string | null;
@@ -492,8 +511,10 @@ function LojaPage() {
                     Seu saldo
                   </p>
                   <p className="text-lg font-semibold leading-none">
-                    {balance}
-                    <span className="ml-1 text-xs font-normal text-muted-foreground">moedas</span>
+                    {balanceKnown ? balance : "—"}
+                    <span className="ml-1 text-xs font-normal text-muted-foreground">
+                      {balanceKnown ? "moedas" : "saldo indisponível offline"}
+                    </span>
                   </p>
                 </div>
               </div>
@@ -551,8 +572,10 @@ function LojaPage() {
                   Seu saldo
                 </p>
                 <p className="text-lg font-semibold leading-none">
-                  {balance}
-                  <span className="ml-1 text-xs font-normal text-muted-foreground">moedas</span>
+                  {balanceKnown ? balance : "—"}
+                  <span className="ml-1 text-xs font-normal text-muted-foreground">
+                    {balanceKnown ? "moedas" : "saldo indisponível offline"}
+                  </span>
                 </p>
               </div>
             </div>
