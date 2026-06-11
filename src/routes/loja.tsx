@@ -42,7 +42,6 @@ import { getMyCoins } from "@/lib/coins";
 import {
   fetchDecorationCatalog,
   fetchMyOwnedIds,
-  fetchMyEquippedDecorations,
   purchaseDecoration,
   equipDecoration,
   unequipDecoration,
