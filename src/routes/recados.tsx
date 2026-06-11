@@ -41,7 +41,6 @@ import {
   ChevronDown,
   ShieldCheck,
   Info,
-  EyeIcon,
   Archive,
   Undo2,
 } from "lucide-react";
