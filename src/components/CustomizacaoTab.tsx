@@ -7,6 +7,9 @@ import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { CoinIcon } from "@/components/icons/CoinIcon";
 import { DecoratedAvatar } from "@/components/DecoratedAvatar";
+import { useNetworkStatus } from "@/hooks/useNetworkStatus";
+import { StaleDataNotice } from "@/components/ui/StaleDataNotice";
+import { OfflineState } from "@/components/ui/OfflineState";
 import { getMyCoins } from "@/lib/coins";
 import {
   fetchDecorationCatalog,
@@ -55,6 +58,8 @@ const CATEGORIES: Category[] = [
 
 export function CustomizacaoTab({ photoUrl }: { photoUrl: string | null }) {
   const { user } = useAuth();
+  const { isOnline } = useNetworkStatus();
+  const offlineEquipMsg = "Disponível online. Reconecte-se para alterar seu visual.";
   const [catalog, setCatalog] = useState<Decoration[]>([]);
   const [backgrounds, setBackgrounds] = useState<ProfileBackground[]>([]);
   const [owned, setOwned] = useState<Set<string>>(new Set());
@@ -169,6 +174,10 @@ export function CustomizacaoTab({ photoUrl }: { photoUrl: string | null }) {
 
   const handleEquip = async (d: Decoration) => {
     if (!user) return;
+    if (!isOnline) {
+      toast.error(offlineEquipMsg);
+      return;
+    }
 
     setBusyId(d.id);
 
@@ -194,6 +203,10 @@ export function CustomizacaoTab({ photoUrl }: { photoUrl: string | null }) {
 
   const handleUnequip = async (type: DecorationType) => {
     if (!user) return;
+    if (!isOnline) {
+      toast.error(offlineEquipMsg);
+      return;
+    }
 
     setBusyId(`unequip-${type}`);
 
@@ -211,6 +224,10 @@ export function CustomizacaoTab({ photoUrl }: { photoUrl: string | null }) {
   };
 
   const handleEquipBackground = async (background: ProfileBackground) => {
+    if (!isOnline) {
+      toast.error(offlineEquipMsg);
+      return;
+    }
     setBusyId(background.id);
     try {
       await equipProfileBackground(background.id);
@@ -225,6 +242,10 @@ export function CustomizacaoTab({ photoUrl }: { photoUrl: string | null }) {
   };
 
   const handleUnequipBackground = async () => {
+    if (!isOnline) {
+      toast.error(offlineEquipMsg);
+      return;
+    }
     setBusyId("unequip-background");
     try {
       await unequipProfileBackground();
@@ -238,6 +259,10 @@ export function CustomizacaoTab({ photoUrl }: { photoUrl: string | null }) {
   };
 
   const handleEquipNameGradient = async (gradient: NameGradient) => {
+    if (!isOnline) {
+      toast.error(offlineEquipMsg);
+      return;
+    }
     setBusyId(gradient.id);
     try {
       await equipNameGradient(gradient.id);
@@ -251,6 +276,10 @@ export function CustomizacaoTab({ photoUrl }: { photoUrl: string | null }) {
   };
 
   const handleUnequipNameGradient = async () => {
+    if (!isOnline) {
+      toast.error(offlineEquipMsg);
+      return;
+    }
     setBusyId("unequip-name-gradient");
     try {
       await unequipNameGradient();
