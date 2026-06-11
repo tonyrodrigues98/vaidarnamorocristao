@@ -1,13 +1,21 @@
 import { ShoppingBag, Sparkles } from "lucide-react";
 
+import { AvatarAppearanceControls } from "@/components/avatar/AvatarAppearanceControls";
 import { AvatarItemCard } from "@/components/avatar/AvatarItemCard";
-import { avatarFilters, type AvatarFilterId, type AvatarItem } from "@/data/avatarMockData";
+import {
+  avatarFilters,
+  type AvatarAppearance,
+  type AvatarFilterId,
+  type AvatarItem,
+} from "@/data/avatarMockData";
 
 type AvatarShopSheetProps = {
   tab: "shop" | "inventory";
   onTabChange: (tab: "shop" | "inventory") => void;
   activeFilter: AvatarFilterId;
+  appearance: AvatarAppearance;
   onFilterChange: (filter: AvatarFilterId) => void;
+  onAppearanceChange: (appearance: AvatarAppearance) => void;
   items: AvatarItem[];
   selectedItemId: string | null;
   favorites: Set<string>;
@@ -19,7 +27,9 @@ export function AvatarShopSheet({
   tab,
   onTabChange,
   activeFilter,
+  appearance,
   onFilterChange,
+  onAppearanceChange,
   items,
   selectedItemId,
   favorites,
@@ -29,6 +39,8 @@ export function AvatarShopSheet({
   return (
     <section className="relative z-20 mx-auto -mt-2 max-w-md rounded-t-[34px] border border-white bg-white/95 px-4 pb-[calc(env(safe-area-inset-bottom)+96px)] pt-3 shadow-[0_-24px_70px_rgba(15,23,42,0.12)] backdrop-blur-2xl">
       <div className="mx-auto mb-3 h-1.5 w-12 rounded-full bg-stone-200" />
+
+      <AvatarAppearanceControls appearance={appearance} onChange={onAppearanceChange} />
 
       <div className="mb-4 grid grid-cols-2 rounded-full bg-stone-100 p-1">
         <button

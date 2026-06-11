@@ -8,7 +8,9 @@ import { AvatarShopSheet } from "@/components/avatar/AvatarShopSheet";
 import { AvatarStage } from "@/components/avatar/AvatarStage";
 import {
   avatarBottomNavItems,
+  defaultAvatarAppearance,
   avatarItems,
+  type AvatarAppearance,
   type AvatarCategoryId,
   type AvatarFilterId,
   type AvatarGender,
@@ -84,6 +86,7 @@ export function AvatarPage({ coins, canAccess }: AvatarPageProps) {
   const [activeFilter, setActiveFilter] = useState<AvatarFilterId>("destaques");
   const [tab, setTab] = useState<"shop" | "inventory">("shop");
   const [selectedItem, setSelectedItem] = useState<AvatarItem | null>(defaultItem);
+  const [appearance, setAppearance] = useState<AvatarAppearance>(defaultAvatarAppearance);
   const [favorites, setFavorites] = useState(
     () => new Set(avatarItems.filter((item) => item.favorite).map((item) => item.id)),
   );
@@ -161,6 +164,7 @@ export function AvatarPage({ coins, canAccess }: AvatarPageProps) {
         <AvatarStage
           gender={gender}
           equippedItem={selectedItem}
+          appearance={appearance}
           isFavorite={Boolean(selectedItem && favorites.has(selectedItem.id))}
           onRandomize={handleRandomize}
           onReset={handleReset}
@@ -192,7 +196,9 @@ export function AvatarPage({ coins, canAccess }: AvatarPageProps) {
           tab={tab}
           onTabChange={setTab}
           activeFilter={activeFilter}
+          appearance={appearance}
           onFilterChange={setActiveFilter}
+          onAppearanceChange={setAppearance}
           items={visibleItems}
           selectedItemId={selectedItem?.id ?? null}
           favorites={favorites}

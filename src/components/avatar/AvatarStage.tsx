@@ -2,11 +2,12 @@ import { Crown, Share2, Sparkles } from "lucide-react";
 
 import { AvatarActionRail } from "@/components/avatar/AvatarActionRail";
 import { AvatarRenderer } from "@/components/avatar/AvatarRenderer";
-import type { AvatarGender, AvatarItem } from "@/data/avatarMockData";
+import type { AvatarAppearance, AvatarGender, AvatarItem } from "@/data/avatarMockData";
 
 type AvatarStageProps = {
   gender: AvatarGender;
   equippedItem: AvatarItem | null;
+  appearance: AvatarAppearance;
   isFavorite: boolean;
   onRandomize: () => void;
   onReset: () => void;
@@ -17,6 +18,7 @@ type AvatarStageProps = {
 export function AvatarStage({
   gender,
   equippedItem,
+  appearance,
   isFavorite,
   onRandomize,
   onReset,
@@ -56,7 +58,7 @@ export function AvatarStage({
         />
 
         <div className="relative z-10 flex h-[350px] items-end justify-center px-14 pt-20">
-          <AvatarRenderer gender={gender} equippedItem={equippedItem} />
+          <AvatarRenderer gender={gender} equippedItem={equippedItem} appearance={appearance} />
         </div>
 
         <div className="relative z-20 mx-4 mb-4 grid grid-cols-[1fr_auto] gap-2">

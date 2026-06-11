@@ -36,6 +36,17 @@ export type AvatarLayerKey =
   | "pet"
   | "effects";
 
+export type AvatarSkinToneId = "claro" | "medio" | "bronze" | "escuro";
+
+export type AvatarHairColorId = "castanho" | "preto" | "loiro" | "ruivo";
+
+export type AvatarAppearance = {
+  skinTone: AvatarSkinToneId;
+  hairColor: AvatarHairColorId;
+  height: number;
+  weight: number;
+};
+
 export type AvatarItem = {
   id: string;
   gender: AvatarGender;
@@ -48,6 +59,13 @@ export type AvatarItem = {
   favorite?: boolean;
   rarity: "classico" | "premium" | "especial";
   previewTone: string;
+};
+
+export type AvatarToneOption<T extends string> = {
+  id: T;
+  label: string;
+  color: string;
+  filter: string;
 };
 
 export type AvatarCategory = {
@@ -95,6 +113,27 @@ export const avatarLayerZIndex: Record<AvatarLayerKey, number> = {
   hairFront: 34,
   pet: 38,
   effects: 42,
+};
+
+export const avatarSkinTones: AvatarToneOption<AvatarSkinToneId>[] = [
+  { id: "claro", label: "Claro", color: "#f3c5aa", filter: "brightness(1.04) saturate(0.96)" },
+  { id: "medio", label: "Medio", color: "#d99a72", filter: "brightness(0.99) saturate(1.04)" },
+  { id: "bronze", label: "Bronze", color: "#b8754f", filter: "brightness(0.94) saturate(1.1)" },
+  { id: "escuro", label: "Escuro", color: "#7a4a34", filter: "brightness(0.88) saturate(1.14)" },
+];
+
+export const avatarHairColors: AvatarToneOption<AvatarHairColorId>[] = [
+  { id: "castanho", label: "Castanho", color: "#5a3425", filter: "sepia(0.12)" },
+  { id: "preto", label: "Preto", color: "#1f1a17", filter: "brightness(0.88) saturate(0.92)" },
+  { id: "loiro", label: "Loiro", color: "#d2a85e", filter: "brightness(1.08) sepia(0.18)" },
+  { id: "ruivo", label: "Ruivo", color: "#9a4728", filter: "sepia(0.22) saturate(1.12)" },
+];
+
+export const defaultAvatarAppearance: AvatarAppearance = {
+  skinTone: "medio",
+  hairColor: "castanho",
+  height: 50,
+  weight: 50,
 };
 
 export const avatarItems: AvatarItem[] = [
