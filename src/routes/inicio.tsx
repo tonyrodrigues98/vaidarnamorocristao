@@ -262,6 +262,7 @@ function InicioPage() {
   const [commitmentDays, setCommitmentDays] = useState(0);
   const [frameClaimed, setFrameClaimed] = useState(false);
   const [ownsAnyFrame, setOwnsAnyFrame] = useState(false);
+  const [hasSpent, setHasSpent] = useState(false);
 
   // Live clock — updates every 60s and on visibility change so the
   // greeting/theme transitions naturally from afternoon to night, etc.
@@ -300,6 +301,25 @@ function InicioPage() {
         .eq("avatar_decorations.type", "frame");
       if (cancel) return;
       setOwnsAnyFrame((count ?? 0) > 0);
+    })();
+    return () => {
+      cancel = true;
+    };
+  }, [user]);
+
+  // Hide the free-frame offer for users who have ever spent coins
+  // (i.e. already made any "purchase" inside the app).
+  useEffect(() => {
+    if (!user) return;
+    let cancel = false;
+    (async () => {
+      const { count } = await supabase
+        .from("coin_transactions" as never)
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .eq("direction", "out");
+      if (cancel) return;
+      setHasSpent((count ?? 0) > 0);
     })();
     return () => {
       cancel = true;
@@ -460,10 +480,10 @@ function InicioPage() {
   const nextActions: ChecklistAction[] = useMemo(
     () =>
       getProfileStrengthNextActions(profile ?? null, advanced, prefs, photosCount, {
-        freeFrameAvailable: !frameClaimed && !ownsAnyFrame,
+        freeFrameAvailable: !frameClaimed && !ownsAnyFrame && !hasSpent,
         sawSuggestion: !!suggestion,
       }),
-    [profile, advanced, prefs, photosCount, frameClaimed, ownsAnyFrame, suggestion],
+    [profile, advanced, prefs, photosCount, frameClaimed, ownsAnyFrame, hasSpent, suggestion],
   );
 
   if (!loading && !user) return <Navigate to="/auth/login" />;
@@ -1196,7 +1216,7 @@ function InicioPage() {
           )}
 
           {/* MOLDURA GRÁTIS */}
-          {isApproved && !frameClaimed && !ownsAnyFrame && (
+          {isApproved && !frameClaimed && !ownsAnyFrame && !hasSpent && (
             <section>
               <Link
                 to="/perfil"
