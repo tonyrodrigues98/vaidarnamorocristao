@@ -2554,6 +2554,33 @@ export type Database = {
           },
         ]
       }
+      user_avatar_looks: {
+        Row: {
+          created_at: string
+          id: string
+          image_path: string
+          name: string | null
+          snapshot: Json
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          image_path: string
+          name?: string | null
+          snapshot?: Json
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          image_path?: string
+          name?: string | null
+          snapshot?: Json
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_badges: {
         Row: {
           active: boolean
@@ -3201,6 +3228,7 @@ export type Database = {
       }
       mark_all_notifications_read: { Args: never; Returns: number }
       mark_message_read: { Args: { _message_id: string }; Returns: undefined }
+      purchase_avatar_item: { Args: { _item_id: string }; Returns: Json }
       purchase_decoration: { Args: { _decoration_id: string }; Returns: Json }
       purchase_name_gradient: { Args: { _gradient_id: string }; Returns: Json }
       purchase_profile_background: {

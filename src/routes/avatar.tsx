@@ -169,8 +169,7 @@ function AvatarPage() {
   async function equipItem(item: Item) {
     if (!user) return;
     if (!inventory.has(item.id)) {
-      toast.info("Você ainda não possui este item.");
-      return;
+      return buyItem(item);
     }
     const { error } = await supabase
       .from("user_avatar_equipped")
@@ -183,6 +182,105 @@ function AvatarPage() {
       return;
     }
     setEquipped((m) => new Map(m).set(item.category_id, item.id));
+  }
+
+  async function buyItem(item: Item) {
+    if (!user) return;
+    if (coins < item.price) {
+      toast.error(`Saldo insuficiente. Você tem ${coins} moedas.`);
+      return;
+    }
+    const ok = confirm(`Comprar "${item.name}" por ${item.price} moedas?`);
+    if (!ok) return;
+    const { data, error } = await supabase.rpc("purchase_avatar_item", { _item_id: item.id });
+    if (error) {
+      const msg = error.message ?? "";
+      if (msg.includes("insufficient")) toast.error("Saldo insuficiente.");
+      else if (msg.includes("already owned")) toast.info("Você já possui este item.");
+      else toast.error("Erro na compra: " + msg);
+      return;
+    }
+    const newBalance = (data as { new_balance?: number } | null)?.new_balance;
+    if (typeof newBalance === "number") setCoins(newBalance);
+    setInventory((s) => new Set(s).add(item.id));
+    toast.success(`"${item.name}" adquirido!`);
+    // Auto-equipa
+    await supabase
+      .from("user_avatar_equipped")
+      .upsert(
+        { user_id: user.id, category_id: item.category_id, item_id: item.id, base_id: base?.id },
+        { onConflict: "user_id,category_id" },
+      );
+    setEquipped((m) => new Map(m).set(item.category_id, item.id));
+  }
+
+  async function saveLook() {
+    if (!user || !base) return;
+    if (renderedLayers.length === 0) {
+      toast.info("Equipe ao menos 1 item para salvar o look.");
+      return;
+    }
+    const toastId = toast.loading("Salvando look...");
+    try {
+      const canvas = document.createElement("canvas");
+      const W = 768;
+      const H = 1024;
+      canvas.width = W;
+      canvas.height = H;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) throw new Error("Canvas indisponível");
+
+      ctx.fillStyle = "#FFF7F3";
+      ctx.fillRect(0, 0, W, H);
+
+      const loadImg = (src: string) =>
+        new Promise<HTMLImageElement>((resolve, reject) => {
+          const img = new Image();
+          img.crossOrigin = "anonymous";
+          img.onload = () => resolve(img);
+          img.onerror = () => reject(new Error("Falha ao carregar " + src));
+          img.src = src;
+        });
+
+      const baseImg = await loadImg(base.image_url);
+      // Centraliza mantendo proporção
+      const drawCentered = (img: HTMLImageElement) => {
+        const scale = Math.min(W / img.width, H / img.height);
+        const w = img.width * scale;
+        const h = img.height * scale;
+        ctx.drawImage(img, (W - w) / 2, (H - h) / 2, w, h);
+      };
+      drawCentered(baseImg);
+
+      for (const { item } of renderedLayers) {
+        const img = await loadImg(item.image_url);
+        drawCentered(img);
+      }
+
+      const blob = await new Promise<Blob | null>((res) => canvas.toBlob(res, "image/png", 0.92));
+      if (!blob) throw new Error("Erro ao gerar imagem");
+
+      const path = `${user.id}/${Date.now()}.png`;
+      const up = await supabase.storage.from("avatar-looks").upload(path, blob, {
+        contentType: "image/png",
+        cacheControl: "31536000",
+      });
+      if (up.error) throw up.error;
+
+      const snapshot = {
+        base_id: base.id,
+        items: Array.from(equipped.entries()).map(([category_id, item_id]) => ({ category_id, item_id })),
+      };
+      const ins = await supabase
+        .from("user_avatar_looks")
+        .insert({ user_id: user.id, image_path: path, snapshot });
+      if (ins.error) throw ins.error;
+
+      toast.success("Look salvo!", { id: toastId });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Erro ao salvar";
+      toast.error(msg, { id: toastId });
+    }
   }
 
   async function toggleFavorite(item: Item) {
@@ -364,7 +462,10 @@ function AvatarPage() {
               <Info className="h-4 w-4" />
               Detalhes
             </button>
-            <button className="flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-md">
+            <button
+              onClick={saveLook}
+              className="flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-md transition hover:bg-primary/90"
+            >
               <Camera className="h-4 w-4" />
               Salvar Look
             </button>
@@ -489,9 +590,16 @@ function AvatarPage() {
                           Equipar
                         </div>
                       ) : (
-                        <div className="flex items-center justify-center gap-1 text-xs">
+                        <div
+                          className={cn(
+                            "flex items-center justify-center gap-1 rounded-full px-3 py-1 text-xs font-semibold",
+                            coins >= item.price
+                              ? "bg-amber-100 text-amber-900"
+                              : "bg-muted text-muted-foreground",
+                          )}
+                        >
                           <CoinIcon className="h-3.5 w-3.5" />
-                          <span className="font-medium">{item.price.toLocaleString("pt-BR")}</span>
+                          <span>{item.price.toLocaleString("pt-BR")}</span>
                         </div>
                       )}
                     </div>
