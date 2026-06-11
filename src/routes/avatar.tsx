@@ -418,8 +418,20 @@ function AvatarPage() {
     void supabase.from("user_avatar_equipped").delete().eq("user_id", user.id);
   }
 
-  const handleEquip = useCallback((item: Item) => void equipItem(item), []);
-  const handleToggleFav = useCallback((item: Item) => void toggleFavorite(item), []);
+  const handleEquip = useCallback(
+    (item: { id: string }) => {
+      const full = items.find((i) => i.id === item.id);
+      if (full) void equipItem(full);
+    },
+    [items],
+  );
+  const handleToggleFav = useCallback(
+    (item: { id: string }) => {
+      const full = items.find((i) => i.id === item.id);
+      if (full) void toggleFavorite(full);
+    },
+    [items],
+  );
 
   if (authLoading) {
     return (
