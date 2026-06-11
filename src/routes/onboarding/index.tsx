@@ -250,7 +250,8 @@ function OnboardingFlow() {
         .maybeSingle();
 
       // marital_status enum agora aceita 'solteiro' | 'divorciado' | 'viuvo'.
-      const maritalDb = marital;
+      // goNext() já garantiu que marital nao e "" antes de chamar finalize().
+      const maritalDb = marital as "solteiro" | "divorciado" | "viuvo";
 
       const payload = {
         id: user.id,
