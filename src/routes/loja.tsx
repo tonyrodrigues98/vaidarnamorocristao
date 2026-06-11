@@ -1,5 +1,6 @@
 import { createFileRoute, Navigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
   Check,
@@ -123,11 +124,9 @@ const RARITY_WEIGHT: Record<string, number> = {
 
 function LojaPage() {
   const { user, loading: authLoading } = useAuth();
-  const [catalog, setCatalog] = useState<Decoration[]>([]);
-  const [backgrounds, setBackgrounds] = useState<ProfileBackground[]>([]);
+  const queryClient = useQueryClient();
   const [owned, setOwned] = useState<Set<string>>(new Set());
   const [ownedBackgrounds, setOwnedBackgrounds] = useState<Set<string>>(new Set());
-  const [nameGradients, setNameGradients] = useState<NameGradient[]>([]);
   const [ownedNameGradients, setOwnedNameGradients] = useState<Set<string>>(new Set());
   const [equipped, setEquipped] = useState<EquippedMap>({
     frame: null,
@@ -138,7 +137,7 @@ function LojaPage() {
   const [equippedNameGradient, setEquippedNameGradient] = useState<string | null>(null);
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [balance, setBalance] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const [userDataLoading, setUserDataLoading] = useState(true);
   const { isOnline } = useNetworkStatus();
   const [busyId, setBusyId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<CategoryKey>("all");
@@ -150,16 +149,57 @@ function LojaPage() {
     return new Promise<void>((resolve) => {
       refreshResolveRef.current = resolve;
       setRefreshKey((k) => k + 1);
+      queryClient.invalidateQueries({ queryKey: ["shop-catalog"] });
     });
-  }, []);
+  }, [queryClient]);
+
+  // Public catalog queries — TanStack Query owns cache + offline reuse.
+  const decorationsQuery = useQuery({
+    queryKey: ["shop-catalog", "decorations"],
+    queryFn: fetchDecorationCatalog,
+    staleTime: 5 * 60_000,
+    gcTime: 30 * 60_000,
+    refetchOnReconnect: true,
+  });
+  const backgroundsQuery = useQuery({
+    queryKey: ["shop-catalog", "backgrounds"],
+    queryFn: fetchProfileBackgroundCatalog,
+    staleTime: 5 * 60_000,
+    gcTime: 30 * 60_000,
+    refetchOnReconnect: true,
+  });
+  const nameGradientsQuery = useQuery({
+    queryKey: ["shop-catalog", "name-gradients"],
+    queryFn: fetchNameGradientCatalog,
+    staleTime: 5 * 60_000,
+    gcTime: 30 * 60_000,
+    refetchOnReconnect: true,
+  });
+
+  const catalog = useMemo<Decoration[]>(
+    () => decorationsQuery.data ?? [],
+    [decorationsQuery.data],
+  );
+  const backgrounds = useMemo<ProfileBackground[]>(
+    () => backgroundsQuery.data ?? [],
+    [backgroundsQuery.data],
+  );
+  const nameGradients = useMemo<NameGradient[]>(
+    () => nameGradientsQuery.data ?? [],
+    [nameGradientsQuery.data],
+  );
+
+  const catalogLoading =
+    decorationsQuery.isLoading || backgroundsQuery.isLoading || nameGradientsQuery.isLoading;
+  const hasCatalogCache = catalog.length > 0 || backgrounds.length > 0 || nameGradients.length > 0;
+  const loading = catalogLoading || userDataLoading;
 
   useEffect(() => {
     if (!user) return;
     let alive = true;
     (async () => {
       try {
-        const [c, o, coins, prof] = await Promise.all([
-          fetchDecorationCatalog(),
+        const [o, coins, prof] = await Promise.all([
           fetchMyOwnedIds(user.id),
           getMyCoins(),
           supabase
@@ -170,7 +210,6 @@ function LojaPage() {
         ]);
 
         if (!alive) return;
-        setCatalog(c);
         setOwned(o);
         setBalance(coins.balance);
         const p = (prof.data ?? {}) as {
@@ -188,14 +227,12 @@ function LojaPage() {
       } catch {
         toast.error("Não foi possível carregar a loja");
       } finally {
-        if (alive) setLoading(false);
+        if (alive) setUserDataLoading(false);
       }
 
       try {
-        const [bg, ownedBg, nameGradientCatalog, ownedNameGradientIds, bgProf] = await Promise.all([
-          fetchProfileBackgroundCatalog(),
+        const [ownedBg, ownedNameGradientIds, bgProf] = await Promise.all([
           fetchMyOwnedBackgroundIds(),
-          fetchNameGradientCatalog(),
           fetchMyOwnedNameGradientIds(),
           supabase
             .from("profiles")
@@ -204,9 +241,7 @@ function LojaPage() {
             .maybeSingle(),
         ]);
         if (!alive) return;
-        setBackgrounds(bg);
         setOwnedBackgrounds(ownedBg);
-        setNameGradients(nameGradientCatalog);
         setOwnedNameGradients(ownedNameGradientIds);
         setEquippedBackground(
           ((bgProf.data ?? {}) as { equipped_background_id?: string | null })
@@ -218,7 +253,6 @@ function LojaPage() {
         );
       } catch {
         if (!alive) return;
-        setBackgrounds([]);
         setOwnedBackgrounds(new Set());
         setEquippedBackground(null);
       }
@@ -555,7 +589,7 @@ function LojaPage() {
 
       {/* Content */}
       <main className="mx-auto max-w-5xl px-4 pb-24 pt-6">
-        {!isOnline && !loading && catalog.length > 0 && (
+        {!isOnline && !loading && hasCatalogCache && (
           <StaleDataNotice
             className="mb-4"
             message="Você está offline. Mostrando itens carregados anteriormente. Compras e mudanças de visual estão indisponíveis."
@@ -563,7 +597,7 @@ function LojaPage() {
         )}
         {loading ? (
           <ShopSkeleton cards={8} />
-        ) : !isOnline && catalog.length === 0 ? (
+        ) : !isOnline && !hasCatalogCache ? (
           <OfflineState className="my-12" />
         ) : activeTab === "all" ? (
           <HighlightsView
