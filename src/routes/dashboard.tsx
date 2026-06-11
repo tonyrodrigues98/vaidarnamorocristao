@@ -1,6 +1,7 @@
 import { PhotoImg } from "@/components/PhotoImg";
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState, lazy, Suspense } from "react";
+import { useMemo, useState, lazy, Suspense } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
@@ -8,6 +9,9 @@ import { Button } from "@/components/ui/button";
 import { ProfileCompletenessAlert } from "@/components/ProfileCompletenessAlert";
 import { GradientName } from "@/components/GradientName";
 import { fetchNameGradientsByIds, type NameGradient } from "@/lib/nameGradients";
+import { useNetworkStatus } from "@/hooks/useNetworkStatus";
+import { StaleDataNotice } from "@/components/ui/StaleDataNotice";
+import { OfflineState } from "@/components/ui/OfflineState";
 import {
   Clock,
   CheckCircle2,
@@ -21,9 +25,12 @@ import {
   TrendingUp,
   User as UserIcon,
   Gem,
+  AlertTriangle,
+  ShieldCheck,
 } from "lucide-react";
 
-// Heavy recharts bundle (~140KB) lazy-loaded only when this route renders.
+// Heavy recharts bundle (~140KB) lazy-loaded only when this route renders
+// AND only when there is real data to plot (see render below).
 const DashboardCharts = lazy(() => import("@/components/dashboard/DashboardCharts"));
 
 type Profile = {
@@ -54,7 +61,13 @@ type LatestNews = { id: string; title: string; content: string; published_at: st
 
 export const Route = createFileRoute("/dashboard")({ component: Dashboard });
 
-const PERIOD_DAYS = 30;
+type Period = "7d" | "30d" | "90d" | "all";
+const PERIOD_OPTIONS: { id: Period; label: string; days: number | null }[] = [
+  { id: "7d", label: "7 dias", days: 7 },
+  { id: "30d", label: "30 dias", days: 30 },
+  { id: "90d", label: "90 dias", days: 90 },
+  { id: "all", label: "Tudo", days: null },
+];
 const AGE_BUCKETS: { label: string; min: number; max: number }[] = [
   { label: "18-24", min: 18, max: 24 },
   { label: "25-29", min: 25, max: 29 },
@@ -64,74 +77,83 @@ const AGE_BUCKETS: { label: string; min: number; max: number }[] = [
   { label: "50+", min: 50, max: 200 },
 ];
 
-
 function Dashboard() {
   const { user, loading } = useAuth();
-  const [profile, setProfile] = useState<Profile | null | undefined>(undefined);
-  const [views, setViews] = useState<ViewRow[]>([]);
-  const [visitorsMap, setVisitorsMap] = useState<Record<string, Visitor>>({});
-  const [stats, setStats] = useState({ interests: 0, matches: 0, unread: 0 });
-  const [latestNews, setLatestNews] = useState<LatestNews | null>(null);
-  const [profileNameGradient, setProfileNameGradient] = useState<NameGradient | null>(null);
+  const { isOnline } = useNetworkStatus();
+  const [period, setPeriod] = useState<Period>("30d");
+  const periodConf = PERIOD_OPTIONS.find((p) => p.id === period)!;
+  const periodDays = periodConf.days;
+  const periodLabel = periodConf.label;
 
-  useEffect(() => {
-    if (!user) return;
-    supabase
-      .from("daily_posts")
-      .select("id, title, content, published_at")
-      .eq("kind", "news")
-      .eq("published", true)
-      .order("published_at", { ascending: false })
-      .limit(1)
-      .maybeSingle()
-      .then(({ data }) => setLatestNews((data as LatestNews | null) ?? null));
-  }, [user]);
+  // Profile + equipped name gradient
+  const profileQuery = useQuery({
+    queryKey: ["dashboard-profile", user?.id],
+    enabled: !!user,
+    staleTime: 60_000,
+    refetchOnReconnect: true,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("status, full_name, rejection_reason, equipped_name_gradient_id")
+        .eq("id", user!.id)
+        .maybeSingle();
+      if (error) throw error;
+      const prof = (data as Profile | null) ?? null;
+      const gradients = await fetchNameGradientsByIds([prof?.equipped_name_gradient_id]);
+      const nameGradient = prof?.equipped_name_gradient_id
+        ? (gradients[prof.equipped_name_gradient_id] ?? null)
+        : null;
+      return { profile: prof, nameGradient };
+    },
+  });
+  const profile = profileQuery.data?.profile;
+  const profileNameGradient = profileQuery.data?.nameGradient ?? null;
 
-  useEffect(() => {
-    if (!user) return;
-    (async () => {
-      try {
-        const { data } = await supabase
-          .from("profiles")
-          .select("status, full_name, rejection_reason, equipped_name_gradient_id")
-          .eq("id", user.id)
-          .maybeSingle();
-        const next = data as Profile | null;
-        setProfile(next);
-        const gradients = await fetchNameGradientsByIds([next?.equipped_name_gradient_id]);
-        setProfileNameGradient(
-          next?.equipped_name_gradient_id
-            ? (gradients[next.equipped_name_gradient_id] ?? null)
-            : null,
-        );
-      } catch {
-        setProfileNameGradient(null);
+  // Latest news (small payload, independent of period)
+  const newsQuery = useQuery({
+    queryKey: ["dashboard-latest-news", user?.id],
+    enabled: !!user,
+    staleTime: 60_000,
+    refetchOnReconnect: true,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("daily_posts")
+        .select("id, title, content, published_at")
+        .eq("kind", "news")
+        .eq("published", true)
+        .order("published_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      return (data as LatestNews | null) ?? null;
+    },
+  });
+  const latestNews = newsQuery.data ?? null;
+
+  // Main metrics — depends on userId + period (period only affects views series)
+  const metricsQuery = useQuery({
+    queryKey: ["dashboard-metrics", user?.id, period],
+    enabled: !!user && profile?.status === "approved",
+    staleTime: 30_000,
+    refetchOnReconnect: true,
+    queryFn: async () => {
+      let viewsBuilder = supabase
+        .from("profile_views")
+        .select("id, viewer_id, viewer_age, viewer_city, viewer_state, created_at")
+        .eq("viewed_id", user!.id)
+        .order("created_at", { ascending: false });
+      if (periodDays !== null) {
+        const sinceIso = new Date(Date.now() - periodDays * 24 * 60 * 60 * 1000).toISOString();
+        viewsBuilder = viewsBuilder.gte("created_at", sinceIso);
       }
-    })();
-  }, [user]);
-
-  useEffect(() => {
-    if (!user || profile?.status !== "approved") return;
-    const sinceIso = new Date(Date.now() - PERIOD_DAYS * 24 * 60 * 60 * 1000).toISOString();
-
-    (async () => {
       const [{ data: vw }, intRes, mtsRes] = await Promise.all([
-        supabase
-          .from("profile_views")
-          .select("id, viewer_id, viewer_age, viewer_city, viewer_state, created_at")
-          .eq("viewed_id", user.id)
-          .gte("created_at", sinceIso)
-          .order("created_at", { ascending: false }),
+        viewsBuilder,
         supabase
           .from("interests")
           .select("id", { count: "exact", head: true })
-          .eq("receiver_id", user.id),
-        supabase.from("matches").select("id").or(`user_a.eq.${user.id},user_b.eq.${user.id}`),
+          .eq("receiver_id", user!.id),
+        supabase.from("matches").select("id").or(`user_a.eq.${user!.id},user_b.eq.${user!.id}`),
       ]);
       const list = (vw ?? []) as ViewRow[];
-      setViews(list);
-
-      // Unread messages
       const matchIds = (mtsRes.data ?? []).map((m) => m.id);
       let unread = 0;
       if (matchIds.length) {
@@ -139,18 +161,12 @@ function Dashboard() {
           .from("messages")
           .select("id", { count: "exact", head: true })
           .in("match_id", matchIds)
-          .neq("sender_id", user.id)
+          .neq("sender_id", user!.id)
           .is("read_at", null);
         unread = count ?? 0;
       }
-      setStats({
-        interests: intRes.count ?? 0,
-        matches: matchIds.length,
-        unread,
-      });
-
-      // Load visitor profiles (unique ids)
       const uniqIds = Array.from(new Set(list.map((v) => v.viewer_id)));
+      const visitorsMap: Record<string, Visitor> = {};
       if (uniqIds.length) {
         const { data: profs } = await supabase
           .from("profiles")
@@ -159,44 +175,56 @@ function Dashboard() {
         const gradients = await fetchNameGradientsByIds(
           ((profs ?? []) as Visitor[]).map((p) => p.equipped_name_gradient_id),
         );
-        const map: Record<string, Visitor> = {};
         for (const p of (profs ?? []) as Visitor[]) {
-          map[p.id] = {
+          visitorsMap[p.id] = {
             ...p,
             name_gradient: p.equipped_name_gradient_id
               ? (gradients[p.equipped_name_gradient_id] ?? null)
               : null,
           };
         }
-        setVisitorsMap(map);
-      } else {
-        setVisitorsMap({});
       }
-    })();
-  }, [user, profile?.status]);
+      return {
+        views: list,
+        visitorsMap,
+        interests: intRes.count ?? 0,
+        matches: matchIds.length,
+        unread,
+      };
+    },
+  });
+
+  const views = useMemo(() => metricsQuery.data?.views ?? [], [metricsQuery.data]);
+  const visitorsMap = metricsQuery.data?.visitorsMap ?? {};
+  const stats = {
+    interests: metricsQuery.data?.interests ?? 0,
+    matches: metricsQuery.data?.matches ?? 0,
+    unread: metricsQuery.data?.unread ?? 0,
+  };
 
   // Aggregations
   const dailySeries = useMemo(() => {
-    const days: { date: string; label: string; views: number }[] = [];
-    for (let i = PERIOD_DAYS - 1; i >= 0; i--) {
+    const days = periodDays ?? 30;
+    const out: { date: string; label: string; views: number }[] = [];
+    for (let i = days - 1; i >= 0; i--) {
       const d = new Date();
       d.setHours(0, 0, 0, 0);
       d.setDate(d.getDate() - i);
       const key = d.toISOString().slice(0, 10);
-      days.push({
+      out.push({
         date: key,
         label: d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }),
         views: 0,
       });
     }
-    const idx = new Map(days.map((d, i) => [d.date, i]));
+    const idx = new Map(out.map((d, i) => [d.date, i]));
     for (const v of views) {
       const k = v.created_at.slice(0, 10);
       const i = idx.get(k);
-      if (i !== undefined) days[i].views += 1;
+      if (i !== undefined) out[i].views += 1;
     }
-    return days;
-  }, [views]);
+    return out;
+  }, [views, periodDays]);
 
   const ageBucketSeries = useMemo(() => {
     const counts = AGE_BUCKETS.map((b) => ({ label: b.label, count: 0 }));
@@ -250,13 +278,36 @@ function Dashboard() {
   }, [views, visitorsMap]);
 
   if (!loading && !user) return <Navigate to="/auth/login" />;
-  if (profile === undefined)
+  if (profileQuery.isLoading || profile === undefined)
     return (
       <div className="min-h-screen bg-gradient-to-b from-[var(--petal)]/20 via-background to-background">
         <Header />
+        <main className="mx-auto max-w-6xl px-4 pt-5 sm:py-10">
+          <div className="h-20 animate-pulse rounded-2xl bg-muted/40" />
+          <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {[0, 1, 2, 3].map((i) => (
+              <div key={i} className="glass h-24 animate-pulse rounded-2xl shadow-soft" />
+            ))}
+          </div>
+        </main>
       </div>
     );
-  if (!profile) return <Navigate to="/onboarding" />;
+  if (!profile) {
+    if (!isOnline) {
+      return (
+        <div className="min-h-screen bg-gradient-to-b from-[var(--petal)]/20 via-background to-background">
+          <Header />
+          <main className="mx-auto max-w-6xl px-4 pt-10">
+            <OfflineState
+              title="Dashboard indisponível offline"
+              description="Conecte-se para carregar suas métricas e status do app."
+            />
+          </main>
+        </div>
+      );
+    }
+    return <Navigate to="/onboarding" />;
+  }
 
   const statusInfo = {
     pending: {
@@ -270,7 +321,7 @@ function Dashboard() {
       icon: CheckCircle2,
       color: "text-emerald-600",
       bg: "bg-emerald-50",
-      title: "Perfil aprovado!",
+      title: "Perfil aprovado",
       text: "Bem-vindo(a) à comunidade. Conheça os pretendentes.",
     },
     rejected: {
@@ -290,30 +341,92 @@ function Dashboard() {
   }[profile.status];
 
   const Icon = statusInfo.icon;
+  const approved = profile.status === "approved";
+  const metricsHasCache = !!metricsQuery.data;
+  const showOfflineEmpty = !isOnline && approved && !metricsHasCache && !metricsQuery.isLoading;
+
+  // Attention items — only from real signals
+  const attention: { id: string; label: string; to: "/conversas" | "/interesses" }[] = [];
+  if (approved) {
+    if (stats.unread > 0) {
+      attention.push({
+        id: "unread",
+        label: `${stats.unread} ${stats.unread === 1 ? "mensagem não lida" : "mensagens não lidas"}`,
+        to: "/conversas",
+      });
+    }
+    if (stats.interests > 0) {
+      attention.push({
+        id: "interests",
+        label: `${stats.interests} ${stats.interests === 1 ? "interesse recebido" : "interesses recebidos"}`,
+        to: "/interesses",
+      });
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[var(--petal)]/20 via-background to-background">
       <Header />
-      <main className="mx-auto max-w-6xl px-4 pb-20 pt-5 sm:py-10">
-        <div className="animate-fade-up">
-          <p className="text-sm text-muted-foreground">Olá,</p>
-          <h1 className="text-4xl font-black tracking-tight">
-            <GradientName
-              name={profile.full_name?.split(" ")[0]}
-              gradient={profileNameGradient}
-              fallback="Bem-vindo(a)"
-            />
-          </h1>
-        </div>
+      <main className="mx-auto max-w-6xl px-4 pb-24 pt-5 sm:py-10">
+        <header className="animate-fade-up grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3">
+          <div className="min-w-0">
+            <p className="text-xs uppercase tracking-wide text-muted-foreground">Dashboard</p>
+            <h1 className="truncate text-2xl font-black tracking-tight sm:text-3xl">
+              Sua atividade e evolução
+            </h1>
+            <p className="mt-1 truncate text-sm text-muted-foreground">
+              <GradientName
+                name={profile.full_name?.split(" ")[0]}
+                gradient={profileNameGradient}
+                fallback="Bem-vindo(a)"
+              />
+              {" "}· métricas dos {periodLabel.toLowerCase()}
+            </p>
+          </div>
+        </header>
 
-        <div className="glass animate-fade-up mt-6 flex items-start gap-4 rounded-[1.75rem] p-5 shadow-soft sm:rounded-3xl sm:p-6">
+        {!isOnline && metricsHasCache && (
+          <StaleDataNotice
+            className="mt-4"
+            message="Você está offline. Mostrando métricas carregadas anteriormente."
+          />
+        )}
+
+        {approved && (
+          <nav
+            aria-label="Período"
+            className="-mx-1 mt-4 flex gap-2 overflow-x-auto px-1 pb-1"
+          >
+            {PERIOD_OPTIONS.map((opt) => {
+              const active = opt.id === period;
+              return (
+                <button
+                  key={opt.id}
+                  type="button"
+                  onClick={() => setPeriod(opt.id)}
+                  aria-pressed={active}
+                  disabled={!isOnline && !metricsHasCache}
+                  className={`shrink-0 rounded-full border px-3 py-1.5 text-xs font-medium transition disabled:opacity-50 ${
+                    active
+                      ? "border-[var(--rose)] bg-[var(--rose)] text-white shadow-soft"
+                      : "border-border bg-card/60 text-muted-foreground hover:bg-accent"
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              );
+            })}
+          </nav>
+        )}
+
+        <div className="glass animate-fade-up mt-4 flex items-start gap-4 rounded-[1.75rem] p-5 shadow-soft sm:rounded-3xl sm:p-6">
           <div
             className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ${statusInfo.bg}`}
           >
             <Icon className={`h-6 w-6 ${statusInfo.color}`} />
           </div>
-          <div className="flex-1">
-            <h2 className="text-xl font-semibold">{statusInfo.title}</h2>
+          <div className="min-w-0 flex-1">
+            <h2 className="truncate text-base font-semibold sm:text-lg">{statusInfo.title}</h2>
             <p className="mt-1 text-sm text-muted-foreground">{statusInfo.text}</p>
             {profile.status === "rejected" && (
               <Button asChild variant="outline" className="mt-4">
@@ -323,60 +436,121 @@ function Dashboard() {
           </div>
         </div>
 
-        {profile.status === "approved" && (
+        {approved && (
           <>
-            <div className="mt-6">
+            <div className="mt-4">
               <ProfileCompletenessAlert />
             </div>
-            {/* Resumo */}
-            <section className="mt-8">
-              <h2 className="text-xl font-semibold">Resumo dos últimos {PERIOD_DAYS} dias</h2>
-              <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+
+            {showOfflineEmpty && (
+              <div className="mt-6">
+                <OfflineState
+                  title="Métricas indisponíveis offline"
+                  description="Conecte-se para atualizar visitas, interesses e matches."
+                />
+              </div>
+            )}
+
+            {/* KPIs */}
+            <section className="mt-6" aria-labelledby="kpis-heading">
+              <h2
+                id="kpis-heading"
+                className="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
+              >
+                Indicadores principais
+              </h2>
+              <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
                 <StatCard
                   Icon={Eye}
-                  label="Visitas ao perfil"
+                  label="Visitas"
                   value={totalViews}
-                  hint={`${uniqueViewers} pessoas únicas`}
+                  hint={`${uniqueViewers} únicas`}
+                  loading={metricsQuery.isLoading}
                 />
                 <StatCard
                   Icon={TrendingUp}
-                  label="Tendência (7d)"
+                  label="Tendência 7d"
                   value={`${trend > 0 ? "+" : ""}${trend}%`}
-                  hint={`${last7} vs ${prev7} visitas`}
+                  hint={`${last7} vs ${prev7}`}
+                  loading={metricsQuery.isLoading}
                 />
                 <StatCard
                   Icon={Sparkles}
-                  label="Interesses recebidos"
+                  label="Interesses"
                   value={stats.interests}
-                  hint="Total acumulado"
+                  hint="Total"
+                  loading={metricsQuery.isLoading}
                 />
                 <StatCard
                   Icon={Heart}
                   label="Matches"
                   value={stats.matches}
-                  hint={`${stats.unread} mensagens não lidas`}
+                  hint={`${stats.unread} não lidas`}
+                  loading={metricsQuery.isLoading}
                 />
               </div>
             </section>
 
-            <Suspense
-              fallback={
-                <div className="glass mt-8 h-64 animate-pulse rounded-3xl shadow-soft" />
-              }
-            >
-              <DashboardCharts
-                dailySeries={dailySeries}
-                totalViews={totalViews}
-                ageBucketSeries={ageBucketSeries}
-                topCities={topCities}
-              />
-            </Suspense>
+            {/* Atenção necessária */}
+            <section className="mt-6" aria-labelledby="attention-heading">
+              <h2
+                id="attention-heading"
+                className="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
+              >
+                Atenção necessária
+              </h2>
+              {!metricsQuery.isLoading && attention.length === 0 ? (
+                <div className="glass mt-3 flex items-center gap-3 rounded-2xl p-4 shadow-soft">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-300">
+                    <ShieldCheck className="h-5 w-5" />
+                  </div>
+                  <p className="text-sm text-muted-foreground">Tudo certo por aqui.</p>
+                </div>
+              ) : (
+                <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                  {attention.map((a) => (
+                    <Link
+                      key={a.id}
+                      to={a.to}
+                      className="glass flex items-center gap-3 rounded-2xl p-4 shadow-soft transition hover:bg-accent"
+                    >
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-300">
+                        <AlertTriangle className="h-5 w-5" />
+                      </div>
+                      <p className="min-w-0 flex-1 truncate text-sm font-medium">{a.label}</p>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </section>
+
+            {/* Tendências (charts lazy) — só quando há dados reais */}
+            {totalViews > 0 ? (
+              <Suspense
+                fallback={
+                  <div className="glass mt-6 h-64 animate-pulse rounded-3xl shadow-soft" />
+                }
+              >
+                <DashboardCharts
+                  dailySeries={dailySeries}
+                  totalViews={totalViews}
+                  ageBucketSeries={ageBucketSeries}
+                  topCities={topCities}
+                />
+              </Suspense>
+            ) : !metricsQuery.isLoading && !showOfflineEmpty ? (
+              <section className="glass mt-6 rounded-3xl p-6 text-center shadow-soft">
+                <p className="text-sm text-muted-foreground">
+                  Dados insuficientes para exibir tendência. Continue ativo — assim que houver visitas, os gráficos aparecem aqui.
+                </p>
+              </section>
+            ) : null}
 
             {/* Visitantes recentes */}
             <section className="glass mt-6 rounded-3xl p-6 shadow-soft">
               <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-lg font-semibold">Visitantes recentes</h3>
+                <div className="min-w-0">
+                  <h3 className="text-base font-semibold sm:text-lg">Visitantes recentes</h3>
                   <p className="text-sm text-muted-foreground">
                     Últimas pessoas únicas que viram seu perfil
                   </p>
@@ -435,13 +609,15 @@ function Dashboard() {
         )}
 
         {/* Atalhos */}
-        <section className="mt-10">
+        <section className="mt-8">
           {latestNews && (
             <div className="mb-6">
-              <h2 className="text-xl font-semibold">Última notícia</h2>
+              <h2 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                Última notícia
+              </h2>
               <Link
                 to="/noticias"
-                className="glass mt-4 flex items-start gap-4 rounded-3xl p-6 shadow-soft transition hover:bg-accent"
+                className="glass mt-3 flex items-start gap-4 rounded-3xl p-5 shadow-soft transition hover:bg-accent sm:p-6"
               >
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[var(--petal)]">
                   <Newspaper className="h-6 w-6 text-[var(--rose)]" />
@@ -453,7 +629,7 @@ function Dashboard() {
                       month: "long",
                     })}
                   </p>
-                  <h3 className="mt-1 truncate text-lg font-semibold">{latestNews.title}</h3>
+                  <h3 className="mt-1 truncate text-base font-semibold sm:text-lg">{latestNews.title}</h3>
                   <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
                     {latestNews.content}
                   </p>
@@ -461,46 +637,16 @@ function Dashboard() {
               </Link>
             </div>
           )}
-          <h2 className="text-xl font-semibold">Atalhos</h2>
-          <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <DashCard
-              to="/perfil"
-              Icon={UserIcon}
-              title="Meu perfil"
-              desc="Edite seus dados e preferências"
-            />
-            <DashCard
-              to="/conversas"
-              Icon={MessageCircle}
-              title="Conversas"
-              desc="Suas mensagens privadas"
-            />
-            <DashCard
-              to="/pretendentes"
-              Icon={Gem}
-              title="Pretendentes"
-              desc="Conheça pessoas com a mesma fé"
-            />
-          </div>
-          <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <DashCard
-              to="/interesses"
-              Icon={Sparkles}
-              title="Interesses"
-              desc="Quem demonstrou interesse"
-            />
-            <DashCard
-              to="/matches"
-              Icon={Users}
-              title="Matches"
-              desc="Conexões com reciprocidade"
-            />
-            <DashCard
-              to="/noticias"
-              Icon={Newspaper}
-              title="Notícias & Devocional"
-              desc="Reflexões e avisos"
-            />
+          <h2 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            Atalhos
+          </h2>
+          <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+            <DashCard to="/perfil" Icon={UserIcon} title="Meu perfil" desc="Edite seus dados" />
+            <DashCard to="/conversas" Icon={MessageCircle} title="Conversas" desc="Mensagens" />
+            <DashCard to="/pretendentes" Icon={Gem} title="Pretendentes" desc="Descobrir" />
+            <DashCard to="/interesses" Icon={Sparkles} title="Interesses" desc="Quem demonstrou" />
+            <DashCard to="/matches" Icon={Users} title="Matches" desc="Reciprocidade" />
+            <DashCard to="/noticias" Icon={Newspaper} title="Notícias" desc="Reflexões e avisos" />
           </div>
         </section>
       </main>
@@ -513,20 +659,28 @@ function StatCard({
   label,
   value,
   hint,
+  loading,
 }: {
   Icon: typeof Users;
   label: string;
   value: number | string;
   hint?: string;
+  loading?: boolean;
 }) {
   return (
-    <div className="glass animate-fade-up rounded-2xl p-5 shadow-soft">
-      <div className="flex items-center justify-between">
-        <p className="text-xs uppercase tracking-wide text-muted-foreground">{label}</p>
-        <Icon className="h-4 w-4 text-[var(--rose)]" />
+    <div className="glass animate-fade-up min-w-0 rounded-2xl p-4 shadow-soft">
+      <div className="flex items-center justify-between gap-2">
+        <p className="truncate text-[11px] uppercase tracking-wide text-muted-foreground">
+          {label}
+        </p>
+        <Icon className="h-3.5 w-3.5 shrink-0 text-[var(--rose)]" />
       </div>
-      <p className="mt-2 text-3xl font-semibold">{value}</p>
-      {hint && <p className="mt-1 text-xs text-muted-foreground">{hint}</p>}
+      {loading ? (
+        <div className="mt-2 h-7 w-16 animate-pulse rounded-md bg-muted" />
+      ) : (
+        <p className="mt-1 truncate text-2xl font-bold tabular-nums sm:text-3xl">{value}</p>
+      )}
+      {hint && <p className="mt-1 truncate text-[11px] text-muted-foreground">{hint}</p>}
     </div>
   );
 }
@@ -545,11 +699,11 @@ function DashCard({
   return (
     <Link
       to={to}
-      className="glass group animate-fade-up rounded-2xl p-6 shadow-soft transition hover:shadow-elegant"
+      className="glass group animate-fade-up min-w-0 rounded-2xl p-4 shadow-soft transition hover:shadow-elegant"
     >
-      <Icon className="mb-3 h-6 w-6 text-[var(--rose)]" />
-      <h3 className="text-lg font-semibold">{title}</h3>
-      <p className="text-sm text-muted-foreground">{desc}</p>
+      <Icon className="mb-2 h-5 w-5 text-[var(--rose)]" />
+      <h3 className="truncate text-sm font-semibold sm:text-base">{title}</h3>
+      <p className="truncate text-xs text-muted-foreground">{desc}</p>
     </Link>
   );
 }
