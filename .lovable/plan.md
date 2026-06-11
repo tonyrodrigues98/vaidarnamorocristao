@@ -1,142 +1,127 @@
 
-# Plano: Avatar em molde + criação por etapas com faixa etária
+# Plano: Avatar Composicional (bases neutras + tonalização em runtime)
 
-## Visão geral
+## Objetivo
 
-Dois movimentos complementares:
+Sair do modelo "renderizar cada combinação como PNG final" (matriz de milhares de assets) e adotar **composição em runtime**: poucas bases neutras em escala de cinza + tonalização/idade/face aplicadas dinamicamente via canvas/SVG.
 
-1. **Transformar as bases atuais em "molde neutro"**: remover olhos, sobrancelhas, boca, cabelo e barba da pintura da base. Esses elementos passam a ser **itens equipáveis** (PNGs com transparência alinhados ao mesmo canvas). Cabelo já é item — só precisa realinhar com a nova cabeça lisa.
+## Princípios
 
-2. **Criar `/avatar/criar` em etapas** (substitui a tela atual `/avatar` para quem ainda não tem avatar; quem já tem cai direto na edição/loja), com uma nova dimensão: **faixa etária**.
+1. **Cada eixo de variação vira uma camada independente**, nunca uma multiplicação na matriz de assets.
+2. **Cor é dado, não pixel**: pele, idade, cabelo etc. são tokens aplicados em runtime sobre máscaras neutras.
+3. **Face é modular**: olhos/boca/sobrancelha são layers compostos sobre um "molde" facial neutro, swappáveis sem tocar na base.
+4. **Renderização pesada só no "Salvar Look"**: o stage usa DOM/CSS; o snapshot final virá de um único canvas compose.
 
-Estratégia de idade escolhida: **híbrido** — `36–50` usa overlay de envelhecimento sobre as bases existentes; `50+` ganha bases próprias (cabelo grisalho como variantes de item, postura levemente curvada nas poses elegantes).
+## Arquitetura proposta
 
----
+### 1. Bases neutras (escala de cinza + máscaras)
 
-## Etapa 1 — Molde neutro (bases sem rosto/cabelo)
+Reduzir de **240 → 40 bases** (gênero × corpo × pose, sem pele).
 
-### O que muda nas bases
+Cada base vira **3 PNGs alinhados pixel-a-pixel** no mesmo canvas:
+- `body-luminance.png` — silhueta em tons de cinza com sombreamento (canal de luminância)
+- `skin-mask.png` — máscara branca/preta marcando apenas a pele visível (rosto, braços, mãos, pernas)
+- `face-anchor.json` — coordenadas normalizadas do centro do rosto, escala da cabeça (para encaixar olhos/boca/sobrancelha de qualquer pose)
 
-Cada base em `avatar_bases` (hoje 96 linhas: 2 gêneros × 3 tons × 16 corpos/poses) é re-renderizada como **molde**:
-- **Sem**: olhos, íris, sobrancelhas, boca, cabelo, barba
-- **Com**: contorno do rosto, orelhas, pescoço, corpo, roupa base (mantida), tom de pele
+```text
+                base neutra                tonalizada em runtime
+                ┌──────────┐               ┌──────────┐
+   luminance →  │  ░▒▓█▓▒░ │  + skin_tone │  🟤🟫🟤  │
+   skin-mask →  │  ◻◼◼◻    │  + age_layer │  ▒░ rugas │
+                └──────────┘               └──────────┘
+```
 
-A geração parte das bases atuais via edição programática (mantém a regra do `mem://features/avatar-consistency` — partir das bases, nunca gerar do zero).
+### 2. Tonalização em runtime (sem regenerar imagem)
 
-### Novas camadas de itens
+Aplicar pele via **SVG `feColorMatrix` + `feComposite`** ou **canvas 2D `globalCompositeOperation: "multiply"`**:
+- Skin tone vira um **token de cor** (`SKIN_PALETTE[skinTone] = { base, shadow, highlight }`)
+- O filtro multiplica a cor no luminance, mascarado pelo `skin-mask`
+- Para roupas/cabelo o mesmo truque permite "recolorir" um item neutro
 
-Aproveitando `LAYER_Z_INDEX` em `src/types/avatar.ts` (já tem `eyes`, `eyebrows`, `mouth`, `hairBack`, `hairFront`, `accessoryFace`):
+Resultado: **adicionar um novo tom de pele = adicionar 1 entrada no objeto de cores**, zero PNG.
 
-| Camada | Z | Categoria nova/existente |
-|---|---|---|
-| `eyes` | 30 | nova categoria `olhos` |
-| `eyebrows` | 31 | nova categoria `sobrancelhas` |
-| `mouth` | 32 | nova categoria `boca` |
-| `hairBack` / `hairFront` | 20 / 60 | categoria `cabelo` já existe — só realinhar |
-| `accessoryFace` (barba) | 50 | nova subcategoria `barba` (masc) |
+### 3. Idade como overlay (não como base nova)
 
-Cada PNG de olho/boca/sobrancelha é gerado num **canvas de referência** do mesmo tamanho da base, com o elemento posicionado no pixel exato onde a face fica. O renderer `AvatarRenderer.tsx` já empilha por `slot` em %, então basta padronizar o slot da cabeça.
+- `age-overlay-36-50.png` e `age-overlay-50plus.png`: PNGs transparentes com rugas/manchas posicionadas pelo `face-anchor` da pose ativa
+- Pose troca? O anchor já existe na base; o overlay re-ancora sozinho
+- Cabelo grisalho/branco para 50+ = **mesmo PNG de cabelo recolorido em runtime** (token de cor por faixa etária)
 
-### Catálogo inicial sugerido
+**Custo**: 6 PNGs (3 faixas × leve/forte) em vez de regerar 240 bases por faixa.
 
-- **Olhos**: 6 variações (formato amendoado/redondo × cor castanho/azul/verde)
-- **Sobrancelhas**: 4 variações (fina/grossa × clara/escura)
-- **Boca**: 4 (sorriso leve, sorriso aberto, neutra, séria)
-- **Barba** (masc): 3 (sem barba/curta/cheia)
+### 4. Face modular (olhos, boca, sobrancelha como itens)
 
-Tudo é "starter pack" gratuito no inventário do usuário ao criar o avatar; variações extras viram itens da loja depois.
+- Manter as categorias `eyes`, `mouth`, `eyebrows` já criadas no banco
+- Cada item facial é **um PNG pequeno em transparência** (não precisa de variação por pose: o `face-anchor` da pose reposiciona)
+- Layer ordering já está pronto em `LAYER_Z_INDEX` (`eyes: 30, eyebrows: 31, mouth: 32`)
+- O "molde" facial atual no body-luminance fica **neutro** (sem traços), e os itens completam por cima
 
-### Risco e mitigação
+**Resultado**: gerar um novo conjunto de olhos = **5 PNGs** (variantes de forma), não 5 × poses × corpos × peles.
 
-- **Risco**: olho/boca não alinham entre poses (a cabeça desloca em `pose-elegant` e `pose-heart`).
-  **Mitigação**: medir o centro do rosto em cada base e armazenar em `avatar_bases.metadata` (`head_anchor: {x, y, scale}`). O renderer aplica esse anchor por base ao posicionar as camadas faciais.
+### 5. Item visual (roupa/sapato/cabelo) com slot universal
 
----
+- Cada item tem **1 PNG canônico** + um manifesto `{ anchor: "torso"|"feet"|"head", scale }`
+- O renderer já tem `LAYER_SLOTS` — estender para indexar por **anchor da pose ativa**, não por slot fixo
+- Itens deformam-se levemente entre poses via escala/translação (não distorção real). Para poses muito diferentes (orando vs em pé), permitir `pose_overrides` opcional só onde realmente quebrar
 
-## Etapa 2 — Faixa etária (híbrido)
+### 6. Snapshot ("Salvar Look")
 
-### Modelo de dados
+- Stage continua em DOM (rápido, interativo)
+- "Salvar Look" compõe em um **único `<canvas>`** aplicando a mesma pipeline (luminance → tint → mask → overlays → itens) e gera o PNG final pra `avatar-looks`
+- Cache: hash do snapshot já está pronto pra deduplicar
 
-Adicionar coluna `age_range` (`'20-35' | '36-50' | '50+'`) em:
-- `avatar_bases` (para variantes 50+ com cabelo/postura próprios)
-- `user_avatar_base` (escolha do usuário)
+## Diagrama de camadas (z-index)
 
-### Como cada faixa é renderizada
+```text
+   80 ┃ effect (auras, brilhos)
+   70 ┃ pet
+   60 ┃ hairFront
+   52 ┃ accessoryHand
+   51 ┃ accessoryNeck
+   50 ┃ accessoryFace
+   45 ┃ shoes
+   42 ┃ fullOutfit / 41 bottom / 40 top
+   32 ┃ mouth        ┐
+   31 ┃ eyebrows     │ ← itens faciais modulares
+   30 ┃ eyes         ┘
+   25 ┃ face-base (molde neutro, no body-luminance)
+   20 ┃ hairBack
+   15 ┃ age-overlay  ← NOVO
+   10 ┃ body (luminance + skin-tint via filter)
+    0 ┃ background (cenário)
+```
 
-- **20–35**: base atual sem alteração.
-- **36–50**: mesma base + **overlay de envelhecimento** (PNG com linhas finas, leve sombra sob olhos) como camada `effect` com z-index baixo, transparência alta. Itens de cabelo recebem **variantes "grisalho leve"** (mesma forma, paleta dessaturada).
-- **50+**: **bases próprias** geradas a partir das bases adultas com tratamento (leve flacidez, postura levemente curvada nas poses elegantes/heart). Cabelos ganham variantes "branco/grisalho pleno". Sobrancelhas em variante clara.
+## Migração faseada (sem quebrar o que existe)
 
-Total de novos assets:
-- ~12 overlays de envelhecimento (1 por gênero × pose, reutilizado entre tons)
-- ~48 novas bases para `50+` (mesma matriz de tons × corpos × poses)
-- Variantes grisalhas dos cabelos existentes (≈ 5 cabelos × 2 paletas = 10 PNGs)
+**Fase 1 — Prova de conceito (1 base)**: criar 1 luminance + skin-mask para `male × default × standing_default`, validar tonalização em runtime no `AvatarRenderer`. Comparar visual com PNG colorido atual.
 
----
+**Fase 2 — Bases neutras completas**: gerar as 40 bases (gênero × corpo × pose) em luminance + mask. Deletar as 240 bases coloridas e os 6 diretórios `avatar-skins/*`. Tabela `avatar_bases` perde a coluna `skin_tone` (vira eixo runtime).
 
-## Etapa 3 — `/avatar/criar` em etapas
+**Fase 3 — Itens faciais**: popular `eyes/mouth/eyebrows` com 5–8 itens cada (PNGs neutros pequenos). Limpar o "molde" facial das bases.
 
-### Fluxo (segue padrão visual de `/onboarding`)
+**Fase 4 — Overlay de idade + cabelo recolorível**: gerar os 2 overlays e fazer cabelo aceitar tinta de cor (cinza/branco para 50+).
 
-1. **Nome do avatar**
-2. **Gênero** (masc/fem)
-3. **Faixa etária** (20–35 / 36–50 / 50+) — explicar como cada faixa afeta visual
-4. **Tom de pele** (porcelana, clara, bronzeada, oliva, marrom, profunda)
-5. **Tipo de corpo** (padrão/magro/musculoso/acima do peso)
-6. **Pose inicial** (5 poses)
-7. **Rosto**: olhos → sobrancelhas → boca (preview ao vivo a cada escolha)
-8. **Cabelo** (filtrado pela faixa etária — 50+ mostra variantes grisalhas primeiro)
-9. **Barba** (só masc, opcional)
-10. **Resumo + confirmação** → cria registros em `user_avatar_base`, `user_avatar_inventory` (com o starter pack) e `user_avatar_equipped`.
-
-### Roteamento
-
-- `/avatar/criar` — novo fluxo (route file `src/routes/avatar.criar.tsx`)
-- `/avatar` — checa se usuário tem `user_avatar_base`. Se não tem, redireciona para `/avatar/criar`. Se tem, mostra a tela atual (edição + loja).
-
----
-
-## Faseamento sugerido (entregas que rodam isoladas)
-
-**Fase A — Molde + itens faciais básicos** *(maior valor, libera customização)*
-- Gerar 96 bases-molde (sem rosto/cabelo)
-- Medir `head_anchor` e gravar em `metadata`
-- Criar categorias `olhos`, `sobrancelhas`, `boca` em `avatar_categories`
-- Gerar catálogo inicial (6+4+4 itens) com alinhamento
-- Atualizar `AvatarRenderer` para usar `head_anchor`
-- Dar starter pack automático para usuários existentes
-- Realinhar cabelos atuais com nova cabeça lisa
-
-**Fase B — Faixa etária**
-- Coluna `age_range` em `avatar_bases` e `user_avatar_base`
-- 48 bases novas para `50+`
-- 12 overlays de envelhecimento para `36–50`
-- Variantes grisalhas de cabelo
-- Filtros por faixa etária na loja
-
-**Fase C — Onboarding `/avatar/criar`**
-- Rota nova com fluxo passo a passo
-- Redirecionamento condicional em `/avatar`
-- Tela final de resumo + criação atômica dos registros
-- Adicionar barba como categoria (masc)
-
----
+**Fase 5 — Limpeza de itens**: itens hoje pré-renderizados por pose passam a usar `anchor` da pose; manter `pose_overrides` só onde necessário.
 
 ## Detalhes técnicos
 
-- **Geração de assets**: pipeline Python já usado nas correções de pele (`edit_image` + máscara por alpha) para "apagar" rosto/cabelo da base e gerar molde. Olhos/boca/sobrancelha gerados com `generate_image` `transparent_background=true` em canvas de referência.
-- **Banco**:
-  - Migração 1: `ALTER TABLE avatar_bases ADD COLUMN age_range text DEFAULT '20-35'; ALTER COLUMN ... ADD COLUMN head_anchor jsonb;`
-  - Migração 2: `ALTER TABLE user_avatar_base ADD COLUMN age_range text;`
-  - Inserts dos itens faciais via `supabase--insert`.
-- **Tipos**: estender `AvatarCategoryKey` em `src/types/avatar.ts` com `"eyes" | "eyebrows" | "mouth" | "beard"`; adicionar `AvatarAgeRange` type.
-- **Renderer**: `AvatarRenderer` passa a aceitar `headAnchor` opcional vindo da base e posiciona camadas faciais relativo a esse ponto.
-- **Memória**: atualizar `mem://features/avatar-consistency` com a regra do molde neutro + `head_anchor` + faixa etária.
+- **Filtro de pele**: SVG inline com `<filter><feColorMatrix .../></filter>` aplicado via CSS `filter: url(#skin-tint)`. Funciona em img/canvas, performático, e o mesmo nó pode ser parametrizado por React state.
+- **Renderer**: estender `AvatarRenderer` para receber `skinTone`, `ageRange`, montar 3 sub-layers (luminance, age-overlay, skin-tint mask) antes dos itens.
+- **Snapshot canvas**: replicar a mesma matemática do filtro em `ctx.filter` / `globalCompositeOperation` para sair pixel-equivalente ao preview.
+- **Storage**: bucket `avatar-bases-v2/` recebe os novos PNGs neutros; bases v1 ficam para rollback.
+- **DB**: nova coluna `avatar_bases.luminance_url` + `mask_url`; manter `image_url` deprecada por 1 release.
 
----
+## O que NÃO muda
 
-## Pontos abertos (podemos decidir agora ou na implementação)
+- Tabelas de inventário, equipped, looks, moedas, RPCs de compra — todas continuam idênticas.
+- UX da página (`/avatar`) — só o pipeline interno do renderer muda.
+- Itens já carregados continuam funcionando enquanto a migração rola (fallback no renderer).
 
-1. **Usuários existentes**: aplicar starter pack automaticamente e equipar olhos/boca/sobrancelha "padrão" para não quebrarem visualmente — ok?
-2. **Loja**: olhos/boca/sobrancelha extras (além do starter pack) entram já agora ou só depois?
-3. **Barba**: entra na Fase A (molde) ou só na Fase C junto com o onboarding?
+## Economia esperada
+
+| Eixo                    | Hoje    | Depois | Redução |
+|-------------------------|---------|--------|---------|
+| Bases                   | 240     | 40     | 83%     |
+| Variantes de pele       | ×6 tudo | token  | 100%    |
+| Faixa etária 36–50/50+  | impossível sem ×3 | 2 overlays | viabilizado |
+| Itens faciais           | bloqueado | 5–8 por categoria | viabilizado |
+| Custo de novo tom de pele | gerar 40 PNGs | 1 entrada JSON | 99% |
