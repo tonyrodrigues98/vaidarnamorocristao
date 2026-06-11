@@ -652,12 +652,21 @@ function AvatarPage() {
   const weightOptions: AvatarBaseOption[] = useMemo(
     () =>
       BODY_TYPE_ORDER.map((bt) => {
-        const row = bases.find(
-          (b) =>
-            b.gender === currentGender &&
-            b.body_type === bt &&
-            b.pose_key === "standing_default",
-        );
+        const row =
+          bases.find(
+            (b) =>
+              b.gender === currentGender &&
+              b.body_type === bt &&
+              b.pose_key === "standing_default" &&
+              b.skin_tone === skinTone,
+          ) ??
+          bases.find(
+            (b) =>
+              b.gender === currentGender &&
+              b.body_type === bt &&
+              b.pose_key === "standing_default" &&
+              b.skin_tone === "default",
+          );
         if (!row) return null;
         return {
           id: row.id,
@@ -667,7 +676,7 @@ function AvatarPage() {
           label: BODY_TYPE_LABELS[bt] ?? bt,
         };
       }).filter(Boolean) as AvatarBaseOption[],
-    [bases, currentGender],
+    [bases, currentGender, skinTone],
   );
 
   const poseOptions: AvatarBaseOption[] = useMemo(
