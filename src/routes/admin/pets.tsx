@@ -1,5 +1,5 @@
 import { createFileRoute, Navigate } from "@tanstack/react-router";
-import { useEffect, useRef, useState, type ComponentType, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ComponentType, type ReactNode } from "react";
 import { toast } from "sonner";
 import {
   Loader2,
@@ -19,6 +19,8 @@ import {
   Pencil,
   Tag,
   Hash,
+  Zap,
+  Wand2,
 } from "lucide-react";
 
 import { useAuth } from "@/lib/auth";
@@ -60,6 +62,13 @@ import {
   slugify,
   updateRow,
   uploadPetCatalogImage,
+  listPerkEffects,
+  upsertPerkEffect,
+  deletePerkEffect,
+  listDecorations,
+  listBackgrounds,
+  listBadgesCatalog,
+  PERK_CATEGORY_LABEL,
 } from "@/lib/petCatalog";
 import type {
   PetBenefit,
@@ -67,6 +76,8 @@ import type {
   PetCatalogEntity,
   PetCatalogTable,
   PetCategory,
+  PetPerkEffect,
+  PetPerkEffectCategory,
   PetSpecies,
   PetVariant,
 } from "@/types/petCatalog";
@@ -74,7 +85,7 @@ import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/admin/pets")({ component: PetsAdmin });
 
-type TabKey = "legacy" | PetCatalogTable;
+type TabKey = "legacy" | "perk_effects" | PetCatalogTable;
 
 const TABS: { key: TabKey; label: string; icon: ComponentType<{ className?: string }> }[] = [
   { key: "pet_categories", label: "Categorias", icon: Layers },
@@ -83,6 +94,7 @@ const TABS: { key: TabKey; label: string; icon: ComponentType<{ className?: stri
   { key: "pet_life_stages", label: "Fases", icon: Baby },
   { key: "pet_personalities", label: "Personalidades", icon: Smile },
   { key: "pet_benefits", label: "Benefícios", icon: Gift },
+  { key: "perk_effects", label: "Tipos de efeito", icon: Zap },
   { key: "legacy", label: "Pets (legado)", icon: Star },
 ];
 
@@ -136,7 +148,13 @@ function PetsAdmin() {
           </div>
         </div>
 
-        {tab === "legacy" ? <LegacyPetsPanel /> : <CatalogPanel table={tab} />}
+        {tab === "legacy" ? (
+          <LegacyPetsPanel />
+        ) : tab === "perk_effects" ? (
+          <PerkEffectsPanel />
+        ) : (
+          <CatalogPanel table={tab} />
+        )}
       </main>
     </div>
   );
