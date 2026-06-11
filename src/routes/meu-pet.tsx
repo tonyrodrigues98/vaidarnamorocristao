@@ -113,14 +113,20 @@ function MeuPetPage() {
               </div>
               <div className="flex flex-1 flex-col justify-center">
                 <div className="flex items-center gap-2">
-                  <span
-                    className={cn(
-                      "rounded-full px-2 py-0.5 text-[11px] font-semibold",
-                      PET_RARITY_COLOR[equipped.pet.rarity],
-                    )}
-                  >
-                    {PET_RARITY_LABEL[equipped.pet.rarity]}
-                  </span>
+                  {equipped.pet.is_exclusive ? (
+                    <span
+                      className={cn(
+                        "rounded-full px-2 py-0.5 text-[11px] font-semibold",
+                        PET_RARITY_COLOR[equipped.pet.rarity],
+                      )}
+                    >
+                      {PET_RARITY_LABEL[equipped.pet.rarity]}
+                    </span>
+                  ) : (
+                    <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-semibold text-emerald-700 dark:bg-emerald-400/15 dark:text-emerald-200">
+                      Básico
+                    </span>
+                  )}
                   <span className="text-xs uppercase tracking-wider text-muted-foreground">
                     {equipped.pet.species}
                   </span>
