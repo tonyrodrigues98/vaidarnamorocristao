@@ -7,6 +7,8 @@ import { AccountDangerZone } from "@/components/AccountDangerZone";
 import { useAuth } from "@/lib/auth";
 import { useTheme } from "@/lib/theme";
 import { Switch } from "@/components/ui/switch";
+import { useNetworkStatus } from "@/hooks/useNetworkStatus";
+import { StaleDataNotice } from "@/components/ui/StaleDataNotice";
 import {
   ChevronRight,
   User as UserIcon,
@@ -140,6 +142,7 @@ function SettingsItem(props: SettingsItemProps) {
 function ContaPage() {
   const { user, signOut, role } = useAuth();
   const { theme, toggle: toggleTheme } = useTheme();
+  const { isOnline } = useNetworkStatus();
   const isStaff = role !== "user";
   const [signingOut, setSigningOut] = useState(false);
 
@@ -173,6 +176,12 @@ function ContaPage() {
       <Header />
       <MobileAppHeader title="Conta" subtitle="Segurança e preferências" />
       <main className="mx-auto w-full max-w-2xl px-4 py-6 sm:py-10">
+        {!isOnline && (
+          <StaleDataNotice
+            className="mb-4"
+            message="Você está offline. Algumas ações de conta ficam disponíveis somente online."
+          />
+        )}
         {/* Mini profile card */}
         {user ? (
           <Link
