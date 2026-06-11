@@ -652,6 +652,346 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
   );
 }
 
+/* ============================== IMAGE PREVIEW ============================== */
+
+function ImagePreview({
+  value,
+  busy,
+  onPick,
+  onClear,
+  accept = "image/*",
+}: {
+  value: string | null;
+  busy?: boolean;
+  onPick: (file: File) => void;
+  onClear: () => void;
+  accept?: string;
+}) {
+  const ref = useRef<HTMLInputElement>(null);
+  const [drag, setDrag] = useState(false);
+  const [meta, setMeta] = useState<{ w: number; h: number } | null>(null);
+  useEffect(() => {
+    if (!value) {
+      setMeta(null);
+      return;
+    }
+    const img = new Image();
+    img.onload = () => setMeta({ w: img.naturalWidth, h: img.naturalHeight });
+    img.src = value;
+  }, [value]);
+
+  return (
+    <div className="space-y-2">
+      <input
+        ref={ref}
+        type="file"
+        accept={accept}
+        className="hidden"
+        onChange={(e) => {
+          const f = e.target.files?.[0];
+          if (f) onPick(f);
+        }}
+      />
+      <div
+        onDragOver={(e) => {
+          e.preventDefault();
+          setDrag(true);
+        }}
+        onDragLeave={() => setDrag(false)}
+        onDrop={(e) => {
+          e.preventDefault();
+          setDrag(false);
+          const f = e.dataTransfer.files?.[0];
+          if (f) onPick(f);
+        }}
+        onClick={() => !value && ref.current?.click()}
+        className={cn(
+          "relative grid place-items-center overflow-hidden rounded-2xl border-2 border-dashed transition-all",
+          "h-72 cursor-pointer",
+          drag ? "border-primary bg-primary/5" : "border-border bg-muted/30 hover:border-foreground/30",
+        )}
+        style={{
+          backgroundImage: value
+            ? undefined
+            : "linear-gradient(45deg,#0001 25%,transparent 25%,transparent 75%,#0001 75%),linear-gradient(45deg,#0001 25%,transparent 25%,transparent 75%,#0001 75%)",
+          backgroundSize: "20px 20px",
+          backgroundPosition: "0 0,10px 10px",
+        }}
+      >
+        {value ? (
+          <img
+            src={value}
+            alt="preview"
+            className="max-h-full max-w-full object-contain p-3"
+          />
+        ) : (
+          <div className="flex flex-col items-center gap-2 text-muted-foreground">
+            <Upload className="h-8 w-8" />
+            <p className="text-sm font-medium">Arraste uma imagem ou clique</p>
+            <p className="text-[11px]">PNG, JPG, WEBP — preview em tamanho real</p>
+          </div>
+        )}
+        {busy && (
+          <div className="absolute inset-0 grid place-items-center bg-background/60 backdrop-blur-sm">
+            <Loader2 className="h-6 w-6 animate-spin text-primary" />
+          </div>
+        )}
+      </div>
+      <div className="flex flex-wrap items-center gap-2">
+        <Button type="button" variant="outline" size="sm" onClick={() => ref.current?.click()} className="rounded-full">
+          <Upload className="mr-1 h-4 w-4" /> {value ? "Trocar" : "Enviar"}
+        </Button>
+        {value && (
+          <Button type="button" variant="ghost" size="sm" onClick={onClear} className="rounded-full text-destructive">
+            <Trash2 className="mr-1 h-4 w-4" /> Remover
+          </Button>
+        )}
+        {meta && (
+          <span className="text-[11px] text-muted-foreground">
+            {meta.w}×{meta.h}px
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ============================== PERK EFFECTS PANEL ============================== */
+
+function PerkEffectsPanel() {
+  const [rows, setRows] = useState<PetPerkEffect[]>([]);
+  const [busy, setBusy] = useState(false);
+  const [editing, setEditing] = useState<PetPerkEffect | null>(null);
+  const [draft, setDraft] = useState<Partial<PetPerkEffect> | null>(null);
+
+  async function reload() {
+    try {
+      setRows(await listPerkEffects(false));
+    } catch (e) {
+      toast.error((e as Error).message);
+    }
+  }
+
+  useEffect(() => {
+    void reload();
+  }, []);
+
+  function startCreate() {
+    setEditing(null);
+    setDraft({
+      key: "",
+      label: "",
+      description: "",
+      category: "cosmetic",
+      numeric_param: false,
+      default_param: null,
+      needs_target: null,
+      active: true,
+      sort_order: rows.length * 10,
+    });
+  }
+
+  function startEdit(r: PetPerkEffect) {
+    setEditing(r);
+    setDraft({ ...r });
+  }
+
+  async function save() {
+    if (!draft?.key || !draft?.label) {
+      toast.error("Chave e rótulo são obrigatórios");
+      return;
+    }
+    setBusy(true);
+    try {
+      await upsertPerkEffect({
+        key: draft.key,
+        label: draft.label,
+        description: draft.description ?? null,
+        category: (draft.category as PetPerkEffectCategory) ?? "cosmetic",
+        numeric_param: !!draft.numeric_param,
+        default_param: draft.default_param ?? null,
+        needs_target: draft.needs_target ?? null,
+        active: draft.active ?? true,
+        sort_order: draft.sort_order ?? 0,
+      } as PetPerkEffect);
+      toast.success(editing ? "Atualizado" : "Criado");
+      setDraft(null);
+      setEditing(null);
+      await reload();
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function remove(r: PetPerkEffect) {
+    if (!confirm(`Excluir "${r.label}"? Vantagens que usam este efeito perderão o vínculo.`)) return;
+    try {
+      await deletePerkEffect(r.key);
+      toast.success("Removido");
+      await reload();
+    } catch (e) {
+      toast.error((e as Error).message);
+    }
+  }
+
+  return (
+    <section className="space-y-4">
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <h2 className="text-base font-semibold tracking-tight">Tipos de efeito</h2>
+          <p className="text-xs text-muted-foreground">
+            Crie regras reutilizáveis. Apenas chaves reconhecidas pelo backend produzem efeito; novas chaves ficam como
+            tags informativas até serem ligadas via código.
+          </p>
+        </div>
+        <Button size="sm" onClick={startCreate} disabled={!!draft} className="rounded-full">
+          <Plus className="mr-1 h-4 w-4" /> Novo
+        </Button>
+      </div>
+
+      {draft && (
+        <div className="rounded-3xl border border-border/70 bg-card/80 p-4 shadow-sm backdrop-blur sm:p-5">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Field icon={Hash} label="Chave técnica (key)">
+              <Input
+                value={draft.key ?? ""}
+                disabled={!!editing}
+                placeholder="ex: daily_coins_plus_5"
+                onChange={(e) =>
+                  setDraft({ ...draft, key: e.target.value.replace(/[^a-z0-9_]/g, "") })
+                }
+              />
+            </Field>
+            <Field icon={Tag} label="Rótulo">
+              <Input
+                value={draft.label ?? ""}
+                onChange={(e) => setDraft({ ...draft, label: e.target.value })}
+              />
+            </Field>
+            <div className="sm:col-span-2">
+              <Field icon={Pencil} label="Descrição">
+                <Textarea
+                  value={draft.description ?? ""}
+                  onChange={(e) => setDraft({ ...draft, description: e.target.value })}
+                />
+              </Field>
+            </div>
+            <Field icon={Layers} label="Categoria">
+              <Select
+                value={draft.category ?? "cosmetic"}
+                onValueChange={(v) => setDraft({ ...draft, category: v as PetPerkEffectCategory })}
+              >
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {Object.entries(PERK_CATEGORY_LABEL).map(([k, v]) => (
+                    <SelectItem key={k} value={k}>{v}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Field>
+            <Field icon={Hash} label="Ordem">
+              <Input
+                type="number"
+                value={draft.sort_order ?? 0}
+                onChange={(e) => setDraft({ ...draft, sort_order: Number(e.target.value) || 0 })}
+              />
+            </Field>
+            <div className="flex items-center gap-2">
+              <Switch
+                checked={!!draft.numeric_param}
+                onCheckedChange={(v) => setDraft({ ...draft, numeric_param: v })}
+              />
+              <Label className="!m-0 text-sm">Aceita valor numérico</Label>
+            </div>
+            {draft.numeric_param && (
+              <Field icon={Hash} label="Valor padrão">
+                <Input
+                  type="number"
+                  value={draft.default_param ?? 0}
+                  onChange={(e) => setDraft({ ...draft, default_param: Number(e.target.value) || 0 })}
+                />
+              </Field>
+            )}
+            <Field icon={Star} label="Alvo (recurso desbloqueado)">
+              <Select
+                value={draft.needs_target ?? "__none__"}
+                onValueChange={(v) =>
+                  setDraft({ ...draft, needs_target: v === "__none__" ? null : (v as PetPerkEffect["needs_target"]) })
+                }
+              >
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__">Nenhum</SelectItem>
+                  <SelectItem value="avatar_decorations">Moldura/Aura</SelectItem>
+                  <SelectItem value="profile_backgrounds">Fundo de perfil</SelectItem>
+                  <SelectItem value="badges">Badge</SelectItem>
+                </SelectContent>
+              </Select>
+            </Field>
+            <div className="flex items-center gap-2">
+              <Switch
+                checked={draft.active ?? true}
+                onCheckedChange={(v) => setDraft({ ...draft, active: v })}
+              />
+              <Label className="!m-0 text-sm">Ativo</Label>
+            </div>
+          </div>
+          <div className="mt-4 flex justify-end gap-2">
+            <Button variant="outline" size="sm" onClick={() => setDraft(null)} className="rounded-full">
+              <X className="mr-1 h-4 w-4" /> Cancelar
+            </Button>
+            <Button size="sm" onClick={() => void save()} disabled={busy} className="rounded-full">
+              {busy ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <Save className="mr-1 h-4 w-4" />}
+              Salvar
+            </Button>
+          </div>
+        </div>
+      )}
+
+      <div className="grid gap-3 sm:grid-cols-2">
+        {rows.map((r) => (
+          <div
+            key={r.key}
+            className={cn(
+              "rounded-2xl border border-border/70 bg-card p-3 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md",
+              !r.active && "opacity-60",
+            )}
+          >
+            <div className="flex items-start gap-3">
+              <div className="grid h-10 w-10 place-items-center rounded-xl bg-primary/10 text-primary">
+                <Zap className="h-4 w-4" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-semibold">{r.label}</p>
+                <p className="truncate font-mono text-[11px] text-muted-foreground">{r.key}</p>
+                <p className="mt-0.5 text-[11px] text-muted-foreground">
+                  {PERK_CATEGORY_LABEL[r.category]} · {r.numeric_param ? `numérico (padrão ${r.default_param ?? "-"})` : "sem parâmetro"}
+                  {r.needs_target ? ` · alvo: ${r.needs_target}` : ""}
+                </p>
+              </div>
+              <div className="flex gap-1">
+                <Button variant="ghost" size="icon" onClick={() => startEdit(r)} className="h-8 w-8 rounded-full">
+                  <Pencil className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => void remove(r)}
+                  className="h-8 w-8 rounded-full text-destructive hover:text-destructive"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 function Field({
   icon: Icon,
   label,
