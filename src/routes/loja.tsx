@@ -1,4 +1,4 @@
-import { createFileRoute, Navigate } from "@tanstack/react-router";
+import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -15,6 +15,8 @@ import {
   Type as TypeIcon,
   Package,
   Star,
+  Shirt,
+  PawPrint,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { ShopSkeleton } from "@/components/ui/AppSkeletons";
@@ -122,7 +124,8 @@ const RARITY_WEIGHT: Record<string, number> = {
 };
 
 function LojaPage() {
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, role } = useAuth();
+  const isAdmin = role === "admin" || role === "super_admin";
   const queryClient = useQueryClient();
   const { isOnline } = useNetworkStatus();
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -592,6 +595,25 @@ function LojaPage() {
       {/* Categorias horizontais */}
       <div className="sticky top-[calc(env(safe-area-inset-top,0px)+3.25rem)] z-20 -mb-2 bg-background/95 backdrop-blur md:static md:top-auto md:z-auto md:mb-0 md:bg-transparent md:backdrop-blur-0">
         <div className="mx-auto max-w-5xl px-4 pt-4 md:pt-6">
+          {isAdmin && (
+            <div className="mb-3 flex flex-wrap items-center gap-2 rounded-2xl border border-dashed border-[var(--rose-soft)]/60 bg-card/60 px-3 py-2">
+              <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                Admin
+              </span>
+              <Link
+                to="/admin/avatar"
+                className="inline-flex items-center gap-1.5 rounded-full bg-foreground px-3 py-1 text-xs font-semibold text-background shadow-sm hover:opacity-90"
+              >
+                <Shirt className="h-3.5 w-3.5" /> Gerenciar avatares
+              </Link>
+              <Link
+                to="/admin/pets"
+                className="inline-flex items-center gap-1.5 rounded-full bg-foreground px-3 py-1 text-xs font-semibold text-background shadow-sm hover:opacity-90"
+              >
+                <PawPrint className="h-3.5 w-3.5" /> Gerenciar pets
+              </Link>
+            </div>
+          )}
           <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-3 md:mx-0 md:flex-wrap md:overflow-visible md:px-0 md:pb-0 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
             {CATEGORIES.map((c) => {
               const active = activeTab === c.key;
