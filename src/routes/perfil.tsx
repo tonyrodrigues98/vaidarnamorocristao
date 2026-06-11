@@ -121,6 +121,7 @@ const profileSchema = z.object({
 
 function PerfilPage() {
   const { user, loading, role, badgeColor, publicListing, refreshRole } = useAuth();
+  const { isOnline } = useNetworkStatus();
   const search = Route.useSearch();
   const [savingRole, setSavingRole] = useState(false);
   const [activeTab, setActiveTab] = useState<string>("profile");
@@ -286,45 +287,95 @@ function PerfilPage() {
     looking_for_bio: "",
   });
 
+  // Main profile data — cached via TanStack Query so revisiting /perfil
+  // shows instantly (no white flash) and works while offline as long as
+  // it was loaded once. Preferences stay in their own effect (out of scope
+  // for this etapa).
+  const profileMainQuery = useQuery({
+    queryKey: ["profile-main", user?.id],
+    enabled: !!user?.id,
+    staleTime: 60_000,
+    gcTime: 30 * 60_000,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user!.id)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Sync query data into the existing local form state. Only run when the
+  // user is NOT currently editing — otherwise a refetch would overwrite
+  // text the user is typing.
+  useEffect(() => {
+    const p = profileMainQuery.data;
+    if (!p) return;
+    if (editingProfile) return;
+    setStatus(p.status);
+    setProfile({
+      full_name: p.full_name ?? "",
+      age: String(p.age ?? ""),
+      height_cm: p.height_cm ? String(p.height_cm) : "",
+      sex: p.sex ?? "",
+      marital: p.marital ?? "",
+      city: p.city ?? "",
+      state: p.state ?? "",
+      church: p.church ?? "",
+      years_baptized: String(p.years_baptized ?? ""),
+      bio: p.bio ?? "",
+    });
+    if (p.photo_url && !photoFile) setPhotoPreview(p.photo_url);
+    // photoFile intentionally not in deps — we only care about the current
+    // value at sync time and re-syncing on every file change is wrong.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profileMainQuery.data, editingProfile]);
+
+  // Gradient lookup is async and depends on the equipped id — keep it as a
+  // separate effect so it can re-run independently.
+  useEffect(() => {
+    const p = profileMainQuery.data;
+    if (!p) return;
+    let alive = true;
+    (async () => {
+      const gradients = await fetchNameGradientsByIds([p.equipped_name_gradient_id]);
+      if (!alive) return;
+      setProfileNameGradient(
+        p.equipped_name_gradient_id ? (gradients[p.equipped_name_gradient_id] ?? null) : null,
+      );
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [profileMainQuery.data]);
+
+  // Preferences — load is unchanged from before; kept out of this etapa's
+  // refactor scope to avoid touching the prefs form behaviour.
   useEffect(() => {
     if (!user) return;
+    let alive = true;
     (async () => {
-      const [{ data: p }, { data: pr }] = await Promise.all([
-        supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
-        supabase.from("profile_preferences").select("*").eq("user_id", user.id).maybeSingle(),
-      ]);
-      if (p) {
-        setStatus(p.status);
-        const gradients = await fetchNameGradientsByIds([p.equipped_name_gradient_id]);
-        setProfileNameGradient(
-          p.equipped_name_gradient_id ? (gradients[p.equipped_name_gradient_id] ?? null) : null,
-        );
-        setProfile({
-          full_name: p.full_name ?? "",
-          age: String(p.age ?? ""),
-          height_cm: p.height_cm ? String(p.height_cm) : "",
-          sex: p.sex ?? "",
-          marital: p.marital ?? "",
-          city: p.city ?? "",
-          state: p.state ?? "",
-          church: p.church ?? "",
-          years_baptized: String(p.years_baptized ?? ""),
-          bio: p.bio ?? "",
-        });
-        if (p.photo_url) setPhotoPreview(p.photo_url);
-      }
-      if (pr) {
-        setPrefs({
-          age_min: String(pr.age_min),
-          age_max: String(pr.age_max),
-          location_scope: pr.location_scope,
-          custom_states: pr.custom_states ?? [],
-          desired_quality: pr.desired_quality ?? "",
-          accepts_children: pr.accepts_children ? "sim" : "nao",
-          looking_for_bio: pr.looking_for_bio ?? "",
-        });
-      }
+      const { data: pr } = await supabase
+        .from("profile_preferences")
+        .select("*")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (!alive || !pr) return;
+      setPrefs({
+        age_min: String(pr.age_min),
+        age_max: String(pr.age_max),
+        location_scope: pr.location_scope,
+        custom_states: pr.custom_states ?? [],
+        desired_quality: pr.desired_quality ?? "",
+        accepts_children: pr.accepts_children ? "sim" : "nao",
+        looking_for_bio: pr.looking_for_bio ?? "",
+      });
     })();
+    return () => {
+      alive = false;
+    };
   }, [user]);
 
   useEffect(() => {
