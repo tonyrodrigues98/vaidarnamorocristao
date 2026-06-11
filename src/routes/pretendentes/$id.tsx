@@ -57,6 +57,7 @@ import { GiftHighlights } from "@/components/gifts/GiftHighlights";
 import type { ProfileBackground } from "@/lib/profileBackgrounds";
 import { GradientName } from "@/components/GradientName";
 import { fetchNameGradientsByIds, type NameGradient } from "@/lib/nameGradients";
+import { PHOTO_CATEGORIES, normalizeCategory } from "@/lib/photoCategories";
 import {
   getPurposeCompatibility,
   type CompatPrefs,
