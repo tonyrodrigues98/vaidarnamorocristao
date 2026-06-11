@@ -2,11 +2,15 @@ import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
 import { MobileAppHeader } from "@/components/mobile/MobileAppHeader";
 import { PhotoImg } from "@/components/PhotoImg";
+import { useNetworkStatus } from "@/hooks/useNetworkStatus";
+import { StaleDataNotice } from "@/components/ui/StaleDataNotice";
+import { OfflineState } from "@/components/ui/OfflineState";
 import { normalizeImageFile } from "@/lib/imageNormalize";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -117,6 +121,7 @@ const profileSchema = z.object({
 
 function PerfilPage() {
   const { user, loading, role, badgeColor, publicListing, refreshRole } = useAuth();
+  const { isOnline } = useNetworkStatus();
   const search = Route.useSearch();
   const [savingRole, setSavingRole] = useState(false);
   const [activeTab, setActiveTab] = useState<string>("profile");
@@ -282,45 +287,95 @@ function PerfilPage() {
     looking_for_bio: "",
   });
 
+  // Main profile data — cached via TanStack Query so revisiting /perfil
+  // shows instantly (no white flash) and works while offline as long as
+  // it was loaded once. Preferences stay in their own effect (out of scope
+  // for this etapa).
+  const profileMainQuery = useQuery({
+    queryKey: ["profile-main", user?.id],
+    enabled: !!user?.id,
+    staleTime: 60_000,
+    gcTime: 30 * 60_000,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user!.id)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Sync query data into the existing local form state. Only run when the
+  // user is NOT currently editing — otherwise a refetch would overwrite
+  // text the user is typing.
+  useEffect(() => {
+    const p = profileMainQuery.data;
+    if (!p) return;
+    if (editingProfile) return;
+    setStatus(p.status);
+    setProfile({
+      full_name: p.full_name ?? "",
+      age: String(p.age ?? ""),
+      height_cm: p.height_cm ? String(p.height_cm) : "",
+      sex: p.sex ?? "",
+      marital: p.marital ?? "",
+      city: p.city ?? "",
+      state: p.state ?? "",
+      church: p.church ?? "",
+      years_baptized: String(p.years_baptized ?? ""),
+      bio: p.bio ?? "",
+    });
+    if (p.photo_url && !photoFile) setPhotoPreview(p.photo_url);
+    // photoFile intentionally not in deps — we only care about the current
+    // value at sync time and re-syncing on every file change is wrong.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profileMainQuery.data, editingProfile]);
+
+  // Gradient lookup is async and depends on the equipped id — keep it as a
+  // separate effect so it can re-run independently.
+  useEffect(() => {
+    const p = profileMainQuery.data;
+    if (!p) return;
+    let alive = true;
+    (async () => {
+      const gradients = await fetchNameGradientsByIds([p.equipped_name_gradient_id]);
+      if (!alive) return;
+      setProfileNameGradient(
+        p.equipped_name_gradient_id ? (gradients[p.equipped_name_gradient_id] ?? null) : null,
+      );
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [profileMainQuery.data]);
+
+  // Preferences — load is unchanged from before; kept out of this etapa's
+  // refactor scope to avoid touching the prefs form behaviour.
   useEffect(() => {
     if (!user) return;
+    let alive = true;
     (async () => {
-      const [{ data: p }, { data: pr }] = await Promise.all([
-        supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
-        supabase.from("profile_preferences").select("*").eq("user_id", user.id).maybeSingle(),
-      ]);
-      if (p) {
-        setStatus(p.status);
-        const gradients = await fetchNameGradientsByIds([p.equipped_name_gradient_id]);
-        setProfileNameGradient(
-          p.equipped_name_gradient_id ? (gradients[p.equipped_name_gradient_id] ?? null) : null,
-        );
-        setProfile({
-          full_name: p.full_name ?? "",
-          age: String(p.age ?? ""),
-          height_cm: p.height_cm ? String(p.height_cm) : "",
-          sex: p.sex ?? "",
-          marital: p.marital ?? "",
-          city: p.city ?? "",
-          state: p.state ?? "",
-          church: p.church ?? "",
-          years_baptized: String(p.years_baptized ?? ""),
-          bio: p.bio ?? "",
-        });
-        if (p.photo_url) setPhotoPreview(p.photo_url);
-      }
-      if (pr) {
-        setPrefs({
-          age_min: String(pr.age_min),
-          age_max: String(pr.age_max),
-          location_scope: pr.location_scope,
-          custom_states: pr.custom_states ?? [],
-          desired_quality: pr.desired_quality ?? "",
-          accepts_children: pr.accepts_children ? "sim" : "nao",
-          looking_for_bio: pr.looking_for_bio ?? "",
-        });
-      }
+      const { data: pr } = await supabase
+        .from("profile_preferences")
+        .select("*")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (!alive || !pr) return;
+      setPrefs({
+        age_min: String(pr.age_min),
+        age_max: String(pr.age_max),
+        location_scope: pr.location_scope,
+        custom_states: pr.custom_states ?? [],
+        desired_quality: pr.desired_quality ?? "",
+        accepts_children: pr.accepts_children ? "sim" : "nao",
+        looking_for_bio: pr.looking_for_bio ?? "",
+      });
     })();
+    return () => {
+      alive = false;
+    };
   }, [user]);
 
   useEffect(() => {
@@ -415,6 +470,10 @@ function PerfilPage() {
   async function saveProfile(e: React.FormEvent) {
     e.preventDefault();
     if (!user) return;
+    if (!isOnline) {
+      toast.error("Disponível online. Reconecte-se para salvar alterações.");
+      return;
+    }
     const parsed = profileSchema.safeParse(profile);
     if (!parsed.success) {
       toast.error(parsed.error.issues[0].message);
@@ -524,6 +583,10 @@ function PerfilPage() {
   async function savePrefs(e: React.FormEvent) {
     e.preventDefault();
     if (!user) return;
+    if (!isOnline) {
+      toast.error("Disponível online. Reconecte-se para salvar alterações.");
+      return;
+    }
     const min = Number(prefs.age_min);
     const max = Number(prefs.age_max);
     if (max < min) {
@@ -620,6 +683,20 @@ function PerfilPage() {
           className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[520px] bg-white dark:bg-[linear-gradient(120deg,rgba(10,16,34,0.98),rgba(17,31,63,0.82)_34%,rgba(18,44,82,0.78)_70%,rgba(42,35,22,0.44))]"
         />
         <AdminWarningBanner />
+        {!isOnline && profileMainQuery.data && (
+          <div className="mb-4">
+            <StaleDataNotice />
+          </div>
+        )}
+        {!isOnline && !profileMainQuery.data && !profileMainQuery.isLoading && (
+          <div className="mb-6">
+            <OfflineState
+              compact
+              title="Perfil indisponível offline"
+              description="Abra esta tela conectado para carregar seus dados."
+            />
+          </div>
+        )}
         <section className="animate-fade-up overflow-hidden rounded-[2.25rem] border border-border/70 bg-card/75 shadow-[0_26px_90px_rgba(31,41,55,0.10)] backdrop-blur dark:bg-card/72 dark:shadow-[0_28px_90px_rgba(0,0,0,0.42)]">
           <div className="grid w-full min-w-0 gap-0 lg:grid-cols-[380px_minmax(0,1fr)]">
             <div className="relative w-full min-w-0 overflow-hidden min-h-[320px] bg-[linear-gradient(145deg,#fff7ed,#fdf2f8_45%,#eff6ff)] p-4 dark:bg-[linear-gradient(145deg,rgba(49,22,38,0.88),rgba(20,20,34,0.94)_46%,rgba(15,35,58,0.88))] sm:p-8">
@@ -1214,9 +1291,19 @@ function PerfilPage() {
                           />
                         </div>
                       )}
-                      <Button type="submit" size="lg" className="w-full" disabled={savingProfile}>
+                      <Button
+                        type="submit"
+                        size="lg"
+                        className="w-full"
+                        disabled={savingProfile || !isOnline}
+                        title={!isOnline ? "Disponível online. Reconecte-se para salvar alterações." : undefined}
+                      >
                         <Save className="mr-2 h-4 w-4" />{" "}
-                        {savingProfile ? "Salvando..." : "Salvar sobre mim"}
+                        {!isOnline
+                          ? "Salvar (offline)"
+                          : savingProfile
+                            ? "Salvando..."
+                            : "Salvar sobre mim"}
                       </Button>
                     </form>
                   </>
@@ -1434,9 +1521,19 @@ function PerfilPage() {
                           />
                         </div>
                       )}
-                      <Button type="submit" size="lg" className="w-full" disabled={savingPrefs}>
+                      <Button
+                        type="submit"
+                        size="lg"
+                        className="w-full"
+                        disabled={savingPrefs || !isOnline}
+                        title={!isOnline ? "Disponível online. Reconecte-se para salvar alterações." : undefined}
+                      >
                         <Save className="mr-2 h-4 w-4" />{" "}
-                        {savingPrefs ? "Salvando..." : "Salvar preferências"}
+                        {!isOnline
+                          ? "Salvar (offline)"
+                          : savingPrefs
+                            ? "Salvando..."
+                            : "Salvar preferências"}
                       </Button>
                     </form>
                   </>
