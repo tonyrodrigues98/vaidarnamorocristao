@@ -136,6 +136,7 @@ function AvatarPage() {
   const isSuperAdmin = role === "super_admin";
 
   const [loading, setLoading] = useState(true);
+  const [needsCreate, setNeedsCreate] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
   const [items, setItems] = useState<Item[]>([]);
   const [bases, setBases] = useState<Base[]>([]);
@@ -202,7 +203,8 @@ function AvatarPage() {
     if (!user) return;
     setLoading(true);
 
-    const [catsRes, itemsRes, basesRes, profileRes, invRes, eqRes, coinsRes] = await Promise.all([
+    const [catsRes, itemsRes, basesRes, profileRes, invRes, eqRes, coinsRes, userBaseRes] =
+      await Promise.all([
       supabase.from("avatar_categories").select("*").order("sort_order"),
       supabase.from("avatar_items").select("*").eq("is_active", true).order("sort_order"),
       supabase.from("avatar_bases").select("*").eq("is_active", true),
@@ -210,7 +212,19 @@ function AvatarPage() {
       supabase.from("user_avatar_inventory").select("item_id, is_favorite").eq("user_id", user.id),
       supabase.from("user_avatar_equipped").select("category_id, item_id").eq("user_id", user.id),
       supabase.from("user_coins").select("balance").eq("user_id", user.id).maybeSingle(),
+      supabase
+        .from("user_avatar_base")
+        .select("base_id, skin_tone")
+        .eq("user_id", user.id)
+        .maybeSingle(),
     ]);
+
+    // Force users without an explicit avatar choice through /avatar/criar.
+    if (!userBaseRes.data) {
+      setNeedsCreate(true);
+      setLoading(false);
+      return;
+    }
 
     const cats = (catsRes.data ?? []) as Category[];
     const its = (itemsRes.data ?? []) as Item[];
@@ -220,25 +234,17 @@ function AvatarPage() {
     setBases(bs);
     if (cats.length && !activeCat) setActiveCat(cats[0].id);
 
-    // Pick base by profile.sex
-    const sex = (profileRes.data?.sex as string | undefined)?.toLowerCase();
-    const wantGender =
-      sex === "f" || sex === "feminino" || sex === "mulher" ? "feminino" : "masculino";
+    // Hydrate from the user's saved avatar choice.
+    const saved = userBaseRes.data as { base_id: string; skin_tone: string | null };
     const matched =
-      bs.find(
-        (b) =>
-          b.gender === wantGender &&
-          b.body_type === "default" &&
-          b.pose_key === "standing_default" &&
-          b.skin_tone === "default",
-      ) ??
-      bs.find((b) => b.gender === wantGender) ??
+      bs.find((b) => b.id === saved.base_id) ??
+      bs.find((b) => b.gender === ((profileRes.data?.sex as string | undefined) === "f" ? "feminino" : "masculino")) ??
       bs[0] ??
       null;
     setBase(matched);
     setBodyType(matched?.body_type ?? "default");
     setPose((matched?.pose_key as AvatarPoseKey | undefined) ?? "standing_default");
-    setSkinTone(matched?.skin_tone ?? "default");
+    setSkinTone(saved.skin_tone ?? matched?.skin_tone ?? "default");
 
     const inv = new Set<string>();
     const favs = new Set<string>();
