@@ -29,6 +29,7 @@ import {
 
 const WEIGHT_TAB_ID = "__weight__";
 const POSE_TAB_ID = "__pose__";
+const SKIN_TAB_ID = "__skin__";
 
 const BODY_TYPE_LABELS: Record<string, string> = {
   default: "Padrão",
@@ -43,6 +44,25 @@ const POSE_LABELS: Record<string, string> = {
   waving: "Acenando",
   holding_heart: "Coração",
 };
+const SKIN_LABELS: Record<string, string> = {
+  default: "Padrão",
+  porcelain: "Porcelana",
+  light: "Clara",
+  tan: "Bronzeada",
+  olive: "Oliva",
+  brown: "Marrom",
+  deep: "Profunda",
+};
+const SKIN_SWATCH: Record<string, string> = {
+  default: "#F2CDA0",
+  porcelain: "#F9E2D0",
+  light: "#EFC9A4",
+  tan: "#C99368",
+  olive: "#B68A5A",
+  brown: "#8A5A3B",
+  deep: "#4E2E1E",
+};
+const SKIN_ORDER = ["default", "porcelain", "light", "tan", "olive", "brown", "deep"];
 const BODY_TYPE_ORDER = ["default", "slim", "overweight", "muscular"];
 const POSE_ORDER = [
   "standing_default",
@@ -96,6 +116,7 @@ type Base = {
   image_url: string;
   body_type: string;
   pose_key: string;
+  skin_tone: string;
 };
 
 type Equipped = {
