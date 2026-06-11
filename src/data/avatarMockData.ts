@@ -42,12 +42,16 @@ export const MOCK_EXPRESSIONS: AvatarExpression[] = [
  */
 export const LAYER_SLOTS: Record<AvatarLayerKey, AvatarSlot> = {
   background: { top: "0%", left: "0%", width: "100%", height: "100%" },
+  body_base: { top: "0%", left: "0%", width: "100%", height: "100%" },
   body: { top: "0%", left: "0%", width: "100%", height: "100%" },
+  skin_mask: { top: "0%", left: "0%", width: "100%", height: "100%" },
   skin: { top: "0%", left: "0%", width: "100%", height: "100%" },
   faceBase: { top: "5%", left: "30%", width: "40%", height: "22%" },
   eyes: { top: "12%", left: "33%", width: "34%", height: "8%" },
   eyebrows: { top: "9%", left: "33%", width: "34%", height: "5%" },
   mouth: { top: "20%", left: "40%", width: "20%", height: "6%" },
+  blush: { top: "17%", left: "32%", width: "36%", height: "6%" },
+  nose: { top: "16%", left: "44%", width: "12%", height: "8%" },
   hairBack: { top: "-4%", left: "18%", width: "64%", height: "34%" },
   hairFront: { top: "-2%", left: "22%", width: "56%", height: "28%" },
   top: { top: "30%", left: "15%", width: "70%", height: "32%" },
@@ -58,6 +62,7 @@ export const LAYER_SLOTS: Record<AvatarLayerKey, AvatarSlot> = {
   accessoryNeck: { top: "26%", left: "35%", width: "30%", height: "10%" },
   accessoryHand: { top: "50%", left: "10%", width: "80%", height: "16%" },
   pet: { top: "70%", left: "60%", width: "30%", height: "28%" },
+  aura: { top: "0%", left: "0%", width: "100%", height: "100%" },
   effect: { top: "0%", left: "0%", width: "100%", height: "100%" },
 };
 
@@ -87,3 +92,92 @@ export const CATEGORY_SLUG_TO_LAYER: Record<string, AvatarLayerKey> = {
   backgrounds: "background",
   pets: "pet",
 };
+
+/**
+ * Catálogo MOCK de variantes/itens já no formato composicional novo
+ * (`AvatarAssetVariant`-ish). Existe apenas como REFERÊNCIA para wiring
+ * do renderer e UX — não substitui o catálogo real lido do Supabase em
+ * `src/routes/avatar.tsx`. Quando o backend migrar para `colorMode`,
+ * basta espelhar essas chaves nas colunas novas.
+ *
+ * Cada entrada documenta um caso CANÔNICO da arquitetura híbrida:
+ *  1. base corporal recolorível por skinTone (mask_tint)
+ *  2. cabelo recolorível simples (tintable)
+ *  3. camiseta básica recolorível (mask_tint)
+ *  4. roupa premium fixed_asset
+ *  5. acessório fixed_asset
+ *  6. fundo fixed_asset
+ */
+export const MOCK_AVATAR_VARIANTS = [
+  {
+    id: "mock-body-standard-male-standing",
+    layerKey: "body_base" as const,
+    gender: "male" as const,
+    bodyType: "standard" as const,
+    pose: "standing_default" as const,
+    colorMode: "mask_tint" as const,
+    note: "Base corporal NEUTRA (luminance) — recebe skinTone via mask_tint",
+  },
+  {
+    id: "mock-hair-short-tintable",
+    layerKey: "hairFront" as const,
+    gender: "unisex" as const,
+    bodyType: "standard" as const,
+    pose: "standing_default" as const,
+    colorMode: "tintable" as const,
+    availableColorPresetIds: [
+      "hair-black",
+      "hair-dark-brown",
+      "hair-light-brown",
+      "hair-blonde",
+      "hair-red",
+      "hair-grey",
+    ],
+    note: "Mesmo PNG, 6 cores possíveis em runtime",
+  },
+  {
+    id: "mock-tshirt-basic",
+    layerKey: "top" as const,
+    gender: "unisex" as const,
+    bodyType: "standard" as const,
+    pose: "standing_default" as const,
+    colorMode: "mask_tint" as const,
+    availableColorPresetIds: [
+      "cloth-white",
+      "cloth-beige",
+      "cloth-navy",
+      "cloth-olive",
+      "cloth-black",
+      "cloth-coral",
+      "cloth-blush",
+    ],
+    note: "Camiseta lisa: 1 baseUrl + 1 maskUrl + 7 cores token",
+  },
+  {
+    id: "mock-dress-premium",
+    layerKey: "fullOutfit" as const,
+    gender: "female" as const,
+    bodyType: "standard" as const,
+    pose: "elegant" as const,
+    colorMode: "fixed_asset" as const,
+    note: "Vestido com estampa/textura — mantém PNG próprio",
+  },
+  {
+    id: "mock-necklace-gold",
+    layerKey: "accessoryNeck" as const,
+    gender: "unisex" as const,
+    bodyType: "standard" as const,
+    pose: "standing_default" as const,
+    colorMode: "fixed_asset" as const,
+    note: "Material metálico — fixed_asset",
+  },
+  {
+    id: "mock-bg-room",
+    layerKey: "background" as const,
+    gender: "unisex" as const,
+    bodyType: "standard" as const,
+    pose: "standing_default" as const,
+    colorMode: "fixed_asset" as const,
+    note: "Fundo do quarto — fixed_asset",
+  },
+];

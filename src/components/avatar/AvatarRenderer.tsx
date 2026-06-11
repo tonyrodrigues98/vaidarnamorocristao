@@ -1,10 +1,18 @@
 import { memo } from "react";
 import type { AvatarRendererLayer } from "@/types/avatar";
+import { getLayerColorStyleForRendererLayer } from "@/lib/avatarColorUtils";
+import { SkinTintFilter } from "./SkinTintFilter";
 
 type Props = {
   baseUrl: string;
   baseAlt: string;
   layers: AvatarRendererLayer[];
+  /**
+   * Renderiza o `<SkinTintFilter />` interno (defs SVG globais). Como o
+   * stage hoje monta UM renderer por vez, é seguro mantê-lo aqui — se
+   * crescermos para múltiplos, mover para o topo da árvore.
+   */
+  withSkinFilter?: boolean;
 };
 
 /**
@@ -15,9 +23,10 @@ type Props = {
  * Future: accepts pose/bodyType-aware slots once items carry that
  * metadata; today the route maps DB items via CATEGORY_SLUG_TO_LAYER.
  */
-function AvatarRendererImpl({ baseUrl, baseAlt, layers }: Props) {
+function AvatarRendererImpl({ baseUrl, baseAlt, layers, withSkinFilter = true }: Props) {
   return (
     <div className="relative h-[68%] w-auto" style={{ aspectRatio: "3 / 4" }}>
+      {withSkinFilter && <SkinTintFilter />}
       <img
         src={baseUrl}
         alt={baseAlt}
@@ -27,23 +36,39 @@ function AvatarRendererImpl({ baseUrl, baseAlt, layers }: Props) {
       {layers
         .filter((l) => l.visible !== false)
         .sort((a, b) => a.zIndex - b.zIndex)
-        .map((layer) => (
-          <img
-            key={layer.id}
-            src={layer.imageUrl}
-            alt={layer.alt ?? ""}
-            className="absolute object-contain"
-            style={{
-              top: layer.slot.top,
-              left: layer.slot.left,
-              width: layer.slot.width,
-              height: layer.slot.height,
-              zIndex: layer.zIndex,
-            }}
-            draggable={false}
-            loading="lazy"
-          />
-        ))}
+        .map((layer) => {
+          const color = getLayerColorStyleForRendererLayer(layer);
+          const isMaskTint = layer.colorMode === "mask_tint" && !!layer.maskUrl;
+          const positionStyle = {
+            top: layer.slot.top,
+            left: layer.slot.left,
+            width: layer.slot.width,
+            height: layer.slot.height,
+            zIndex: layer.zIndex,
+          } as const;
+          // mask_tint pinta um <div> através da máscara (não usa <img>).
+          if (isMaskTint) {
+            return (
+              <div
+                key={layer.id}
+                aria-label={layer.alt ?? ""}
+                className={`absolute ${color.className}`}
+                style={{ ...positionStyle, ...color.style }}
+              />
+            );
+          }
+          return (
+            <img
+              key={layer.id}
+              src={layer.imageUrl}
+              alt={layer.alt ?? ""}
+              className={`absolute object-contain ${color.className}`}
+              style={{ ...positionStyle, ...color.style }}
+              draggable={false}
+              loading="lazy"
+            />
+          );
+        })}
     </div>
   );
 }
