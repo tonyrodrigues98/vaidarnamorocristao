@@ -50,7 +50,7 @@ export function AvatarStage({
         {baseUrl && (
           // Pódio: o topo do disco branco fica próximo a ~6% do bottom do container
           // visível (imagem 9:16 dentro de um quadro 3:4 com background-position top).
-          <div className="absolute inset-x-0 bottom-[6%] flex justify-center">
+          <div className="absolute inset-x-0 bottom-[1%] flex justify-center">
             <AvatarRenderer baseUrl={baseUrl} baseAlt={baseAlt} layers={layers} />
           </div>
         )}
