@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { Check, Crown, Eye, Heart } from "lucide-react";
+import { Check, Crown, Eye, Heart, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CoinIcon } from "@/components/icons/CoinIcon";
 
@@ -22,6 +22,7 @@ type Props = {
   onToggleFavorite: (item: AvatarItemCardItem) => void;
   onPreview: (item: AvatarItemCardItem) => void;
   isPreviewing?: boolean;
+  onRemove?: (item: AvatarItemCardItem) => void;
 };
 
 function AvatarItemCardImpl({
@@ -34,6 +35,7 @@ function AvatarItemCardImpl({
   onToggleFavorite,
   onPreview,
   isPreviewing,
+  onRemove,
 }: Props) {
   return (
     <button
@@ -86,8 +88,23 @@ function AvatarItemCardImpl({
         )}
         <div className="mt-1.5">
           {isEquipped ? (
-            <div className="rounded-full bg-primary px-3 py-1 text-center text-xs font-semibold text-primary-foreground">
-              Equipado
+            <div className="flex items-center gap-1">
+              <div className="flex-1 rounded-full bg-primary px-3 py-1 text-center text-xs font-semibold text-primary-foreground">
+                Equipado
+              </div>
+              {onRemove && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onRemove(item);
+                  }}
+                  aria-label="Remover item"
+                  className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-border bg-white text-muted-foreground transition hover:border-destructive hover:text-destructive"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              )}
             </div>
           ) : owned ? (
             <div className="rounded-full bg-secondary px-3 py-1 text-center text-xs font-medium text-foreground">
