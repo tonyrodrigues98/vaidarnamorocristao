@@ -66,6 +66,7 @@ export function HomeStarterSection({ userId, onAction, topSpacing }: Props) {
   const [ownedIds, setOwnedIds] = useState<Set<string>>(new Set());
   const [claimed, setClaimed] = useState<boolean>(() => hasClaimedFreeFrameLocal(userId));
   const [claiming, setClaiming] = useState<string | null>(null);
+  const [hasSpent, setHasSpent] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -108,6 +109,24 @@ export function HomeStarterSection({ userId, onAction, topSpacing }: Props) {
     };
   }, [userId]);
 
+  // Hide the free-frame action for users who already made any purchase
+  // (any outgoing coin transaction). Free frame is a first-time-only perk.
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      const { count } = await supabase
+        .from("coin_transactions" as never)
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", userId)
+        .eq("direction", "out");
+      if (!active) return;
+      setHasSpent((count ?? 0) > 0);
+    })();
+    return () => {
+      active = false;
+    };
+  }, [userId]);
+
   const percent = useMemo(
     () => calculateProfileStrength(profile, advanced, prefs, photosCount),
     [profile, advanced, prefs, photosCount],
@@ -117,9 +136,9 @@ export function HomeStarterSection({ userId, onAction, topSpacing }: Props) {
   const nextActions = useMemo(
     () =>
       getProfileStrengthNextActions(profile, advanced, prefs, photosCount, {
-        freeFrameAvailable: !claimed,
+        freeFrameAvailable: !claimed && !hasSpent,
       }),
-    [profile, advanced, prefs, photosCount, claimed],
+    [profile, advanced, prefs, photosCount, claimed, hasSpent],
   );
 
   async function openFrameModal() {
