@@ -16,6 +16,8 @@ import { AvatarShopSheet, type ShopTab } from "@/components/avatar/AvatarShopShe
 import { AvatarBaseSelector, type AvatarBaseOption } from "@/components/avatar/AvatarBaseSelector";
 import { AvatarPoseSelector } from "@/components/avatar/AvatarPoseSelector";
 import { AvatarExpressionSelector } from "@/components/avatar/AvatarExpressionSelector";
+import { AvatarColorPicker } from "@/components/avatar/AvatarColorPicker";
+import { getColorPreset } from "@/data/avatarColorPresets";
 import {
   CATEGORY_SLUG_TO_LAYER,
   LAYER_SLOTS,
@@ -23,6 +25,7 @@ import {
 import {
   LAYER_Z_INDEX,
   type AvatarExpressionKey,
+  type AvatarLayerKey,
   type AvatarPoseKey,
   type AvatarRendererLayer,
 } from "@/types/avatar";
@@ -158,6 +161,18 @@ function AvatarPage() {
   // Preview equips an item visually without persisting/buying. Clears when
   // the user navigates categories or selects another preview.
   const [previewItem, setPreviewItem] = useState<Item | null>(null);
+  /**
+   * Mock local — escolha de cor por layer (cabelo, roupa). Persistência
+   * real virá quando o backend ganhar a coluna `color_selections`.
+   * Hoje só afeta a renderização e dispara o `tintable`/`mask_tint` quando
+   * o item informar suporte (itens do DB atual caem em `fixed_asset`).
+   */
+  const [colorSelections, setColorSelections] = useState<
+    Partial<Record<AvatarLayerKey, string>>
+  >({
+    hairFront: "hair-dark-brown",
+    top: "cloth-white",
+  });
 
   function toggleGender() {
     const nextGender = currentGender === "feminino" ? "masculino" : "feminino";
@@ -319,6 +334,11 @@ function AvatarPage() {
   const rendererLayers = useMemo<AvatarRendererLayer[]>(() => {
     return renderedLayers.map(({ item, slug }) => {
       const { layerKey, slot, zIndex } = layerForSlug(slug);
+      // Itens do DB atual NÃO têm metadata de cor — caem em fixed_asset
+      // (comportamento original). Quando a coluna `color_mode` existir,
+      // basta ler dali; o renderer já trata os 4 modos.
+      const presetId = colorSelections[layerKey];
+      const colorPreset = getColorPreset(presetId);
       return {
         id: item.id,
         layerKey,
@@ -326,9 +346,11 @@ function AvatarPage() {
         slot,
         zIndex,
         alt: item.name,
+        colorMode: "fixed_asset" as const,
+        colorPreset: colorPreset ?? undefined,
       };
     });
-  }, [renderedLayers]);
+  }, [renderedLayers, colorSelections]);
 
   const itemsForCat = useMemo(() => {
     if (!activeCat) return [];
@@ -809,9 +831,26 @@ function AvatarPage() {
           <AvatarPoseSelector value={pose} onChange={setPose} />
           <h3 className="mb-2 mt-4 text-sm font-semibold text-foreground">Expressão</h3>
           <AvatarExpressionSelector value={expression} onChange={setExpression} />
+          <div className="mt-4 space-y-3">
+            <AvatarColorPicker
+              category="hair"
+              title="Cor do cabelo"
+              value={colorSelections.hairFront ?? null}
+              onChange={(id) =>
+                setColorSelections((s) => ({ ...s, hairFront: id }))
+              }
+            />
+            <AvatarColorPicker
+              category="clothing"
+              title="Cor da roupa básica"
+              value={colorSelections.top ?? null}
+              onChange={(id) => setColorSelections((s) => ({ ...s, top: id }))}
+            />
+          </div>
           <p className="mt-3 text-[11px] text-muted-foreground">
-            Pose e expressão são locais por enquanto — serão persistidas quando o
-            backend de poses/expressões estiver pronto.
+            Pose, expressão e cores são locais por enquanto. As cores só
+            afetam itens marcados como recoloríveis (`tintable`/`mask_tint`)
+            — itens fixos do catálogo atual ignoram a seleção.
           </p>
         </div>
       )}
