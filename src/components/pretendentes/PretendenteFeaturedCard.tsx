@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Flame, Sparkles } from "lucide-react";
+import { Flame, Sparkles, Gem } from "lucide-react";
 
 import { PhotoCarousel } from "@/components/PhotoCarousel";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
@@ -99,7 +99,10 @@ export function PretendenteFeaturedCard({
       shadow-lg
     "
             >
-              💍 Em Propósito
+              <span className="inline-flex items-center gap-1">
+                <Gem className="h-3 w-3" aria-hidden />
+                Em Propósito
+              </span>
             </div>
           </div>
         )}
