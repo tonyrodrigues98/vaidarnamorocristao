@@ -524,6 +524,31 @@ function AvatarPage() {
     setPreviewItem(null);
   }, []);
 
+  const handleRemove = useCallback(
+    (item: { id: string }) => {
+      const full = items.find((i) => i.id === item.id);
+      if (!full || !user) return;
+      void (async () => {
+        const { error } = await supabase
+          .from("user_avatar_equipped")
+          .delete()
+          .eq("user_id", user.id)
+          .eq("category_id", full.category_id);
+        if (error) {
+          toast.error("Erro ao remover item");
+          return;
+        }
+        setEquipped((m) => {
+          const n = new Map(m);
+          n.delete(full.category_id);
+          return n;
+        });
+        toast.success(`"${full.name}" removido`);
+      })();
+    },
+    [items, user],
+  );
+
   // --- Base swap helpers (Peso / Pose tabs) ---
   const currentGender = base?.gender ?? "masculino";
 
@@ -783,6 +808,7 @@ function AvatarPage() {
           onToggleFavorite={handleToggleFav}
           onPreview={handlePreview}
           previewItemId={previewItem?.id ?? null}
+          onRemove={handleRemove}
         />
       )}
     </div>
