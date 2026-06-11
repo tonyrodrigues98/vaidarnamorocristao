@@ -1,58 +1,142 @@
-## Objetivo
-Fazer o PWA do VaiDarNamoro parecer **100% app nativo** quando instalado no iOS e Android, sem App Store e sem Capacitor. Aproveitar o que já existe (manifest standalone, SW, meta Apple, `InstallAppButton`, `usePwaInstall`) e polir os pontos que ainda denunciam "é um site".
 
-## O que muda
+# Plano: Avatar em molde + criação por etapas com faixa etária
 
-### 1. Remover o Capacitor (não vamos usar)
-- Desinstalar: `@capacitor/core`, `cli`, `ios`, `android`, `haptics`, `status-bar`, `splash-screen`, `push-notifications`, `app`, `keyboard`.
-- Deletar: `capacitor.config.ts`, `public/capacitor-fallback/`, `src/lib/native.ts`, `CAPACITOR.md`.
-- Remover scripts `cap:*` do `package.json`.
-- Remover `initNativeShell()` do `src/routes/__root.tsx`.
+## Visão geral
 
-### 2. Splash screens iOS (acaba a tela branca ao abrir)
-- Gerar splash com o logo centralizado em fundo `#fff7f8` nas resoluções que o iOS exige (iPhone SE até Pro Max, retrato), salvar em `public/splash/`.
-- Adicionar `<link rel="apple-touch-startup-image" media="..." href="...">` no `__root.tsx` com a `media query` correta de cada device.
+Dois movimentos complementares:
 
-### 3. Status bar edge-to-edge no iOS
-- Trocar `apple-mobile-web-app-status-bar-style` de `default` para `black-translucent`.
-- `theme-color` dinâmico: claro `#fff7f8`, escuro `#0b0b0d` via `media="(prefers-color-scheme: ...)"`.
-- Garantir `viewport-fit=cover` (já tem) + `env(safe-area-inset-*)` em header/bottom-nav/composer de chat (verificar `MobileAppHeader`, `MobileBottomNav`, `MobileChatScreen` e ajustar o que faltar).
+1. **Transformar as bases atuais em "molde neutro"**: remover olhos, sobrancelhas, boca, cabelo e barba da pintura da base. Esses elementos passam a ser **itens equipáveis** (PNGs com transparência alinhados ao mesmo canvas). Cabelo já é item — só precisa realinhar com a nova cabeça lisa.
 
-### 4. Travas de UX nativa (CSS global em `src/styles.css`)
-- `touch-action: manipulation` no `html` (mata 300ms / duplo-toque zoom).
-- `-webkit-tap-highlight-color: transparent`, `-webkit-touch-callout: none` em botões/links.
-- `overscroll-behavior-y: none` no `body` em modo standalone (mata o "bounce" que mostra a página por baixo).
-- `user-select: none` por padrão, com `user-select: text` liberado em mensagens, bio, textareas e inputs.
-- Quando `display-mode: standalone`, desabilitar o pull-to-refresh do Chrome via `overscroll-behavior: contain`.
+2. **Criar `/avatar/criar` em etapas** (substitui a tela atual `/avatar` para quem ainda não tem avatar; quem já tem cai direto na edição/loja), com uma nova dimensão: **faixa etária**.
 
-### 5. Banner discreto de instalação + página `/instalar`
-- **Banner**: novo `InstallPromptBanner` que aparece só quando `isInstallAvailable && !isStandalone`, ancorado acima do `MobileBottomNav`, dispensável com X (lembra em `localStorage` por 7 dias). Em Android usa o `beforeinstallprompt`; em iOS abre a página `/instalar`.
-- **Página `/instalar`** (`src/routes/instalar.tsx`): passo-a-passo com abas iOS/Android, prints/ícones (Compartilhar → Adicionar à Tela), benefícios ("notificações, abre como app, sem barra do navegador"), botão "Já instalei". Acessível pelo banner, pelo Perfil e por link direto.
+Estratégia de idade escolhida: **híbrido** — `36–50` usa overlay de envelhecimento sobre as bases existentes; `50+` ganha bases próprias (cabelo grisalho como variantes de item, postura levemente curvada nas poses elegantes).
 
-### 6. Atalhos do app (long-press no ícone)
-Adicionar `shortcuts` no `manifest.webmanifest`:
-- Pretendentes → `/pretendentes`
-- Conversas → `/conversas`
-- Devocional → `/devocional`
-- Notificações → `/notificacoes`
-Cada um com `icons` reutilizando os já existentes.
+---
 
-### 7. Service Worker — manter
-O `sw.js` já está bom e seguro (não cacheia rotas sensíveis, mantém o web push). Sem mudança aqui.
+## Etapa 1 — Molde neutro (bases sem rosto/cabelo)
 
-## Tecnicidades
+### O que muda nas bases
 
-- **Splash gen**: gero os PNGs com o `imagegen` (logo centralizado sobre `#fff7f8`) nos tamanhos 2048×2732, 1668×2388, 1536×2048, 1290×2796, 1179×2556, 1284×2778, 1170×2532, 1125×2436, 828×1792, 750×1334, 640×1136. Aceitável usar 6 principais e cair para o fallback genérico nos demais.
-- **`theme-color` dinâmico**: dois `<meta name="theme-color">` com `media` (light/dark). Já vi suporte iOS 15+ e Chrome Android.
-- **Status bar `black-translucent`**: a área da barra fica *transparente* e o conteúdo passa por baixo dela. Por isso o header mobile precisa ter `padding-top: env(safe-area-inset-top)` — checar `MobileAppHeader` e ajustar se ainda não tiver.
-- **Banner dispensável**: `localStorage["install-banner-dismissed-at"]` com TTL de 7 dias; some definitivamente quando `matchMedia('(display-mode: standalone)').matches`.
-- **`/instalar`**: detecta iOS/Android/desktop via `usePwaInstall` (já existe) e mostra a aba certa por padrão, mas permite alternar.
-- **SEO**: `/instalar` com `head()` próprio (title "Instalar VaiDarNamoro", description curta) e `noindex` (página utilitária).
+Cada base em `avatar_bases` (hoje 96 linhas: 2 gêneros × 3 tons × 16 corpos/poses) é re-renderizada como **molde**:
+- **Sem**: olhos, íris, sobrancelhas, boca, cabelo, barba
+- **Com**: contorno do rosto, orelhas, pescoço, corpo, roupa base (mantida), tom de pele
 
-## Fora do escopo (pra não inflar)
-- Push notifications nativas adicionais (já existe Web Push).
-- Compartilhamento via `share_target` no manifest (posso fazer depois se quiser receber fotos/links de outros apps).
-- Empacotamento real iOS/Android (precisaria Mac + Apple Developer, foi descartado).
+A geração parte das bases atuais via edição programática (mantém a regra do `mem://features/avatar-consistency` — partir das bases, nunca gerar do zero).
 
-## Resultado esperado
-Depois de instalado pela tela inicial: abre direto sem barra do Safari/Chrome, com splash do logo, status bar imersiva, sem bounce, sem zoom acidental, atalhos no long-press do ícone, e novos visitantes recebem um banner discreto explicando como instalar.
+### Novas camadas de itens
+
+Aproveitando `LAYER_Z_INDEX` em `src/types/avatar.ts` (já tem `eyes`, `eyebrows`, `mouth`, `hairBack`, `hairFront`, `accessoryFace`):
+
+| Camada | Z | Categoria nova/existente |
+|---|---|---|
+| `eyes` | 30 | nova categoria `olhos` |
+| `eyebrows` | 31 | nova categoria `sobrancelhas` |
+| `mouth` | 32 | nova categoria `boca` |
+| `hairBack` / `hairFront` | 20 / 60 | categoria `cabelo` já existe — só realinhar |
+| `accessoryFace` (barba) | 50 | nova subcategoria `barba` (masc) |
+
+Cada PNG de olho/boca/sobrancelha é gerado num **canvas de referência** do mesmo tamanho da base, com o elemento posicionado no pixel exato onde a face fica. O renderer `AvatarRenderer.tsx` já empilha por `slot` em %, então basta padronizar o slot da cabeça.
+
+### Catálogo inicial sugerido
+
+- **Olhos**: 6 variações (formato amendoado/redondo × cor castanho/azul/verde)
+- **Sobrancelhas**: 4 variações (fina/grossa × clara/escura)
+- **Boca**: 4 (sorriso leve, sorriso aberto, neutra, séria)
+- **Barba** (masc): 3 (sem barba/curta/cheia)
+
+Tudo é "starter pack" gratuito no inventário do usuário ao criar o avatar; variações extras viram itens da loja depois.
+
+### Risco e mitigação
+
+- **Risco**: olho/boca não alinham entre poses (a cabeça desloca em `pose-elegant` e `pose-heart`).
+  **Mitigação**: medir o centro do rosto em cada base e armazenar em `avatar_bases.metadata` (`head_anchor: {x, y, scale}`). O renderer aplica esse anchor por base ao posicionar as camadas faciais.
+
+---
+
+## Etapa 2 — Faixa etária (híbrido)
+
+### Modelo de dados
+
+Adicionar coluna `age_range` (`'20-35' | '36-50' | '50+'`) em:
+- `avatar_bases` (para variantes 50+ com cabelo/postura próprios)
+- `user_avatar_base` (escolha do usuário)
+
+### Como cada faixa é renderizada
+
+- **20–35**: base atual sem alteração.
+- **36–50**: mesma base + **overlay de envelhecimento** (PNG com linhas finas, leve sombra sob olhos) como camada `effect` com z-index baixo, transparência alta. Itens de cabelo recebem **variantes "grisalho leve"** (mesma forma, paleta dessaturada).
+- **50+**: **bases próprias** geradas a partir das bases adultas com tratamento (leve flacidez, postura levemente curvada nas poses elegantes/heart). Cabelos ganham variantes "branco/grisalho pleno". Sobrancelhas em variante clara.
+
+Total de novos assets:
+- ~12 overlays de envelhecimento (1 por gênero × pose, reutilizado entre tons)
+- ~48 novas bases para `50+` (mesma matriz de tons × corpos × poses)
+- Variantes grisalhas dos cabelos existentes (≈ 5 cabelos × 2 paletas = 10 PNGs)
+
+---
+
+## Etapa 3 — `/avatar/criar` em etapas
+
+### Fluxo (segue padrão visual de `/onboarding`)
+
+1. **Nome do avatar**
+2. **Gênero** (masc/fem)
+3. **Faixa etária** (20–35 / 36–50 / 50+) — explicar como cada faixa afeta visual
+4. **Tom de pele** (porcelana, clara, bronzeada, oliva, marrom, profunda)
+5. **Tipo de corpo** (padrão/magro/musculoso/acima do peso)
+6. **Pose inicial** (5 poses)
+7. **Rosto**: olhos → sobrancelhas → boca (preview ao vivo a cada escolha)
+8. **Cabelo** (filtrado pela faixa etária — 50+ mostra variantes grisalhas primeiro)
+9. **Barba** (só masc, opcional)
+10. **Resumo + confirmação** → cria registros em `user_avatar_base`, `user_avatar_inventory` (com o starter pack) e `user_avatar_equipped`.
+
+### Roteamento
+
+- `/avatar/criar` — novo fluxo (route file `src/routes/avatar.criar.tsx`)
+- `/avatar` — checa se usuário tem `user_avatar_base`. Se não tem, redireciona para `/avatar/criar`. Se tem, mostra a tela atual (edição + loja).
+
+---
+
+## Faseamento sugerido (entregas que rodam isoladas)
+
+**Fase A — Molde + itens faciais básicos** *(maior valor, libera customização)*
+- Gerar 96 bases-molde (sem rosto/cabelo)
+- Medir `head_anchor` e gravar em `metadata`
+- Criar categorias `olhos`, `sobrancelhas`, `boca` em `avatar_categories`
+- Gerar catálogo inicial (6+4+4 itens) com alinhamento
+- Atualizar `AvatarRenderer` para usar `head_anchor`
+- Dar starter pack automático para usuários existentes
+- Realinhar cabelos atuais com nova cabeça lisa
+
+**Fase B — Faixa etária**
+- Coluna `age_range` em `avatar_bases` e `user_avatar_base`
+- 48 bases novas para `50+`
+- 12 overlays de envelhecimento para `36–50`
+- Variantes grisalhas de cabelo
+- Filtros por faixa etária na loja
+
+**Fase C — Onboarding `/avatar/criar`**
+- Rota nova com fluxo passo a passo
+- Redirecionamento condicional em `/avatar`
+- Tela final de resumo + criação atômica dos registros
+- Adicionar barba como categoria (masc)
+
+---
+
+## Detalhes técnicos
+
+- **Geração de assets**: pipeline Python já usado nas correções de pele (`edit_image` + máscara por alpha) para "apagar" rosto/cabelo da base e gerar molde. Olhos/boca/sobrancelha gerados com `generate_image` `transparent_background=true` em canvas de referência.
+- **Banco**:
+  - Migração 1: `ALTER TABLE avatar_bases ADD COLUMN age_range text DEFAULT '20-35'; ALTER COLUMN ... ADD COLUMN head_anchor jsonb;`
+  - Migração 2: `ALTER TABLE user_avatar_base ADD COLUMN age_range text;`
+  - Inserts dos itens faciais via `supabase--insert`.
+- **Tipos**: estender `AvatarCategoryKey` em `src/types/avatar.ts` com `"eyes" | "eyebrows" | "mouth" | "beard"`; adicionar `AvatarAgeRange` type.
+- **Renderer**: `AvatarRenderer` passa a aceitar `headAnchor` opcional vindo da base e posiciona camadas faciais relativo a esse ponto.
+- **Memória**: atualizar `mem://features/avatar-consistency` com a regra do molde neutro + `head_anchor` + faixa etária.
+
+---
+
+## Pontos abertos (podemos decidir agora ou na implementação)
+
+1. **Usuários existentes**: aplicar starter pack automaticamente e equipar olhos/boca/sobrancelha "padrão" para não quebrarem visualmente — ok?
+2. **Loja**: olhos/boca/sobrancelha extras (além do starter pack) entram já agora ou só depois?
+3. **Barba**: entra na Fase A (molde) ou só na Fase C junto com o onboarding?
