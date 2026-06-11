@@ -13,6 +13,7 @@ import { AvatarHeader } from "@/components/avatar/AvatarHeader";
 import { AvatarCategoryTabs } from "@/components/avatar/AvatarCategoryTabs";
 import { AvatarStage } from "@/components/avatar/AvatarStage";
 import { AvatarShopSheet, type ShopTab } from "@/components/avatar/AvatarShopSheet";
+import { AvatarBaseSelector, type AvatarBaseOption } from "@/components/avatar/AvatarBaseSelector";
 import { AvatarPoseSelector } from "@/components/avatar/AvatarPoseSelector";
 import { AvatarExpressionSelector } from "@/components/avatar/AvatarExpressionSelector";
 import {
@@ -25,6 +26,31 @@ import {
   type AvatarPoseKey,
   type AvatarRendererLayer,
 } from "@/types/avatar";
+
+const WEIGHT_TAB_ID = "__weight__";
+const POSE_TAB_ID = "__pose__";
+
+const BODY_TYPE_LABELS: Record<string, string> = {
+  default: "Padrão",
+  slim: "Magro",
+  overweight: "Sobrepeso",
+  muscular: "Musculoso",
+};
+const POSE_LABELS: Record<string, string> = {
+  standing_default: "Padrão",
+  elegant: "Elegante",
+  praying: "Em oração",
+  waving: "Acenando",
+  holding_heart: "Coração",
+};
+const BODY_TYPE_ORDER = ["default", "slim", "overweight", "muscular"];
+const POSE_ORDER = [
+  "standing_default",
+  "elegant",
+  "praying",
+  "waving",
+  "holding_heart",
+];
 
 /**
  * Maps a DB category slug to a renderer layer key + anchor slot. Future:
@@ -68,6 +94,8 @@ type Base = {
   name: string;
   gender: string;
   image_url: string;
+  body_type: string;
+  pose_key: string;
 };
 
 type Equipped = {
@@ -99,8 +127,8 @@ function AvatarPage() {
   const [coins, setCoins] = useState<number>(0);
   const [looks, setLooks] = useState<SavedLook[]>([]);
   const [looksLoading, setLooksLoading] = useState(false);
-  // Local-only state — pose & expression aren't persisted yet (no DB
-  // columns). When the schema lands, hydrate from `user_avatar_equipped`.
+  // Body type + pose drive WHICH base row is shown (real swap, not overlay).
+  const [bodyType, setBodyType] = useState<string>("default");
   const [pose, setPose] = useState<AvatarPoseKey>("standing_default");
   const [expression, setExpression] = useState<AvatarExpressionKey>("soft_smile");
   const [poseSheetOpen, setPoseSheetOpen] = useState(false);
@@ -142,8 +170,19 @@ function AvatarPage() {
     const sex = (profileRes.data?.sex as string | undefined)?.toLowerCase();
     const wantGender =
       sex === "f" || sex === "feminino" || sex === "mulher" ? "feminino" : "masculino";
-    const matched = bs.find((b) => b.gender === wantGender) ?? bs[0] ?? null;
+    const matched =
+      bs.find(
+        (b) =>
+          b.gender === wantGender &&
+          b.body_type === "default" &&
+          b.pose_key === "standing_default",
+      ) ??
+      bs.find((b) => b.gender === wantGender) ??
+      bs[0] ??
+      null;
     setBase(matched);
+    setBodyType(matched?.body_type ?? "default");
+    setPose((matched?.pose_key as AvatarPoseKey | undefined) ?? "standing_default");
 
     const inv = new Set<string>();
     const favs = new Set<string>();
@@ -415,8 +454,20 @@ function AvatarPage() {
 
   function resetLook() {
     setEquipped(new Map());
-    setPose("standing_default");
     setExpression("soft_smile");
+    // Reset base back to default body + standing pose for current gender
+    const g = base?.gender;
+    if (g) {
+      const def =
+        bases.find(
+          (b) => b.gender === g && b.body_type === "default" && b.pose_key === "standing_default",
+        ) ?? null;
+      if (def) {
+        setBase(def);
+        setBodyType("default");
+        setPose("standing_default");
+      }
+    }
     if (!user) return;
     void supabase.from("user_avatar_equipped").delete().eq("user_id", user.id);
   }
@@ -450,6 +501,88 @@ function AvatarPage() {
     setPreviewItem(null);
   }, []);
 
+  // --- Base swap helpers (Peso / Pose tabs) ---
+  const currentGender = base?.gender ?? "masculino";
+
+  function pickBaseFor(nextBodyType: string, nextPose: string): Base | null {
+    return (
+      bases.find(
+        (b) =>
+          b.gender === currentGender &&
+          b.body_type === nextBodyType &&
+          b.pose_key === nextPose,
+      ) ?? null
+    );
+  }
+
+  function handleBodyType(nextBodyType: string) {
+    // Poses only exist for the default body. If switching away from default,
+    // collapse the pose back to standing_default.
+    const targetPose = nextBodyType === "default" ? pose : "standing_default";
+    const next = pickBaseFor(nextBodyType, targetPose);
+    if (!next) {
+      toast.error("Variação indisponível.");
+      return;
+    }
+    setBase(next);
+    setBodyType(nextBodyType);
+    setPose(targetPose as AvatarPoseKey);
+  }
+
+  function handlePose(nextPose: string) {
+    // Poses only seeded for the default body; force default body when picking a pose.
+    const next = pickBaseFor("default", nextPose);
+    if (!next) {
+      toast.error("Pose indisponível.");
+      return;
+    }
+    setBase(next);
+    setBodyType("default");
+    setPose(nextPose as AvatarPoseKey);
+  }
+
+  const weightOptions: AvatarBaseOption[] = useMemo(
+    () =>
+      BODY_TYPE_ORDER.map((bt) => {
+        const row = bases.find(
+          (b) =>
+            b.gender === currentGender &&
+            b.body_type === bt &&
+            b.pose_key === "standing_default",
+        );
+        if (!row) return null;
+        return {
+          id: row.id,
+          name: row.name,
+          image_url: row.image_url,
+          key: bt,
+          label: BODY_TYPE_LABELS[bt] ?? bt,
+        };
+      }).filter(Boolean) as AvatarBaseOption[],
+    [bases, currentGender],
+  );
+
+  const poseOptions: AvatarBaseOption[] = useMemo(
+    () =>
+      POSE_ORDER.map((pk) => {
+        const row = bases.find(
+          (b) =>
+            b.gender === currentGender &&
+            b.body_type === "default" &&
+            b.pose_key === pk,
+        );
+        if (!row) return null;
+        return {
+          id: row.id,
+          name: row.name,
+          image_url: row.image_url,
+          key: pk,
+          label: POSE_LABELS[pk] ?? pk,
+        };
+      }).filter(Boolean) as AvatarBaseOption[],
+    [bases, currentGender],
+  );
+
   if (authLoading) {
     return (
       <div className="flex h-screen items-center justify-center">
@@ -478,7 +611,11 @@ function AvatarPage() {
       <AvatarHeader coins={coins} />
 
       <AvatarCategoryTabs
-        categories={categories}
+        categories={[
+          { id: WEIGHT_TAB_ID, name: "Peso", icon: "dumbbell" },
+          { id: POSE_TAB_ID, name: "Pose", icon: "pose" },
+          ...categories.map((c) => ({ id: c.id, name: c.name, icon: c.icon })),
+        ]}
         activeId={activeCat}
         onChange={handleCategoryChange}
       />
@@ -578,20 +715,40 @@ function AvatarPage() {
         </div>
       )}
 
-      <AvatarShopSheet
-        tab={tab}
-        onTabChange={setTab}
-        loading={loading}
-        items={itemsForCat}
-        equippedByCategory={equipped}
-        inventory={inventory}
-        favorites={favorites}
-        coins={coins}
-        onEquip={handleEquip}
-        onToggleFavorite={handleToggleFav}
-        onPreview={handlePreview}
-        previewItemId={previewItem?.id ?? null}
-      />
+      {activeCat === WEIGHT_TAB_ID ? (
+        <AvatarBaseSelector
+          title="Peso & corpo"
+          description="Todas as variações são gratuitas e substituem o avatar."
+          options={weightOptions}
+          activeKey={bodyType}
+          onPick={(opt) => handleBodyType(opt.key)}
+          emptyHint="Variações ainda não cadastradas para este gênero."
+        />
+      ) : activeCat === POSE_TAB_ID ? (
+        <AvatarBaseSelector
+          title="Pose"
+          description="Trocar de pose volta o corpo para o padrão."
+          options={poseOptions}
+          activeKey={pose}
+          onPick={(opt) => handlePose(opt.key)}
+          emptyHint="Poses ainda não cadastradas para este gênero."
+        />
+      ) : (
+        <AvatarShopSheet
+          tab={tab}
+          onTabChange={setTab}
+          loading={loading}
+          items={itemsForCat}
+          equippedByCategory={equipped}
+          inventory={inventory}
+          favorites={favorites}
+          coins={coins}
+          onEquip={handleEquip}
+          onToggleFavorite={handleToggleFav}
+          onPreview={handlePreview}
+          previewItemId={previewItem?.id ?? null}
+        />
+      )}
     </div>
   );
 }
