@@ -186,7 +186,7 @@ function LojaPage() {
   const catalogLoading =
     decorationsQuery.isLoading || backgroundsQuery.isLoading || nameGradientsQuery.isLoading;
   const hasCatalogCache = catalog.length > 0 || backgrounds.length > 0 || nameGradients.length > 0;
-  const loading = catalogLoading || userDataLoading;
+  const loading = catalogLoading;
 
   // User balance — TanStack Query owns cache + offline reuse.
   const balanceQuery = useQuery({
@@ -260,67 +260,115 @@ function LojaPage() {
     [queryClient, user?.id],
   );
 
+  // Equipped items + photo_url — single consolidated read of profiles.
+  type EquippedProfile = {
+    photo_url: string | null;
+    equipped_frame_id: string | null;
+    equipped_aura_id: string | null;
+    equipped_sticker_id: string | null;
+    equipped_background_id: string | null;
+    equipped_name_gradient_id: string | null;
+  };
+  const EQUIPPED_EMPTY: EquippedProfile = {
+    photo_url: null,
+    equipped_frame_id: null,
+    equipped_aura_id: null,
+    equipped_sticker_id: null,
+    equipped_background_id: null,
+    equipped_name_gradient_id: null,
+  };
+  const equippedQuery = useQuery<EquippedProfile>({
+    queryKey: ["shop-equipped-items", user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select(
+          "photo_url, equipped_frame_id, equipped_aura_id, equipped_sticker_id, equipped_background_id, equipped_name_gradient_id",
+        )
+        .eq("id", user!.id)
+        .maybeSingle();
+      if (error) throw error;
+      const row = (data ?? {}) as Partial<EquippedProfile>;
+      return {
+        photo_url: row.photo_url ?? null,
+        equipped_frame_id: row.equipped_frame_id ?? null,
+        equipped_aura_id: row.equipped_aura_id ?? null,
+        equipped_sticker_id: row.equipped_sticker_id ?? null,
+        equipped_background_id: row.equipped_background_id ?? null,
+        equipped_name_gradient_id: row.equipped_name_gradient_id ?? null,
+      };
+    },
+    enabled: !!user?.id,
+    staleTime: 30_000,
+    gcTime: 5 * 60_000,
+    refetchOnReconnect: true,
+  });
+  const equippedData = equippedQuery.data ?? EQUIPPED_EMPTY;
+  const equipped: EquippedMap = useMemo(
+    () => ({
+      frame: equippedData.equipped_frame_id,
+      aura: equippedData.equipped_aura_id,
+      sticker: equippedData.equipped_sticker_id,
+    }),
+    [
+      equippedData.equipped_frame_id,
+      equippedData.equipped_aura_id,
+      equippedData.equipped_sticker_id,
+    ],
+  );
+  const equippedBackground = equippedData.equipped_background_id;
+  const equippedNameGradient = equippedData.equipped_name_gradient_id;
+  const photoUrl = equippedData.photo_url;
+
+  const patchEquipped = useCallback(
+    (patch: Partial<EquippedProfile>) => {
+      if (!user?.id) return;
+      queryClient.setQueryData<EquippedProfile>(
+        ["shop-equipped-items", user.id],
+        (prev) => ({ ...(prev ?? EQUIPPED_EMPTY), ...patch }),
+      );
+    },
+    [queryClient, user?.id],
+  );
+  const setEquipped = useCallback(
+    (next: EquippedMap) =>
+      patchEquipped({
+        equipped_frame_id: next.frame,
+        equipped_aura_id: next.aura,
+        equipped_sticker_id: next.sticker,
+      }),
+    [patchEquipped],
+  );
+  const setEquippedBackground = useCallback(
+    (id: string | null) => patchEquipped({ equipped_background_id: id }),
+    [patchEquipped],
+  );
+  const setEquippedNameGradient = useCallback(
+    (id: string | null) => patchEquipped({ equipped_name_gradient_id: id }),
+    [patchEquipped],
+  );
+
+  // Pull-to-refresh resolver: when all user-scoped queries settle, release the promise.
   useEffect(() => {
-    if (!user) return;
-    let alive = true;
-    (async () => {
-      try {
-        const prof = await supabase
-            .from("profiles")
-            .select("photo_url, equipped_frame_id, equipped_aura_id, equipped_sticker_id")
-            .eq("id", user.id)
-            .maybeSingle();
-
-        if (!alive) return;
-        const p = (prof.data ?? {}) as {
-          photo_url?: string | null;
-          equipped_frame_id?: string | null;
-          equipped_aura_id?: string | null;
-          equipped_sticker_id?: string | null;
-        };
-        setPhotoUrl(p.photo_url ?? null);
-        setEquipped({
-          frame: p.equipped_frame_id ?? null,
-          aura: p.equipped_aura_id ?? null,
-          sticker: p.equipped_sticker_id ?? null,
-        });
-      } catch {
-        toast.error("Não foi possível carregar a loja");
-      } finally {
-        if (alive) setUserDataLoading(false);
-      }
-
-      try {
-        const bgProf = await supabase
-            .from("profiles")
-            .select("equipped_background_id, equipped_name_gradient_id")
-            .eq("id", user.id)
-            .maybeSingle();
-        if (!alive) return;
-        setEquippedBackground(
-          ((bgProf.data ?? {}) as { equipped_background_id?: string | null })
-            .equipped_background_id ?? null,
-        );
-        setEquippedNameGradient(
-          ((bgProf.data ?? {}) as { equipped_name_gradient_id?: string | null })
-            .equipped_name_gradient_id ?? null,
-        );
-      } catch {
-        if (!alive) return;
-        setEquippedBackground(null);
-      }
-      if (alive) {
-        const resolve = refreshResolveRef.current;
-        if (resolve) {
-          refreshResolveRef.current = null;
-          resolve();
-        }
-      }
-    })();
-    return () => {
-      alive = false;
-    };
-  }, [user?.id, refreshKey]);
+    if (!refreshResolveRef.current) return;
+    const pending =
+      equippedQuery.isFetching ||
+      balanceQuery.isFetching ||
+      decorationInventoryQuery.isFetching ||
+      backgroundInventoryQuery.isFetching ||
+      nameGradientInventoryQuery.isFetching;
+    if (!pending) {
+      const resolve = refreshResolveRef.current;
+      refreshResolveRef.current = null;
+      resolve();
+    }
+  }, [
+    equippedQuery.isFetching,
+    balanceQuery.isFetching,
+    decorationInventoryQuery.isFetching,
+    backgroundInventoryQuery.isFetching,
+    nameGradientInventoryQuery.isFetching,
+  ]);
 
   const grouped = useMemo(() => {
     const g: Record<DecorationType, Decoration[]> = { frame: [], aura: [], sticker: [] };
