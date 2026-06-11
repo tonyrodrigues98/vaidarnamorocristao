@@ -1815,6 +1815,7 @@ function PreCadastrosPanel({
                 <SelectContent>
                   <SelectItem value="solteiro">Solteiro</SelectItem>
                   <SelectItem value="divorciado">Divorciado</SelectItem>
+                  <SelectItem value="viuvo">Viúvo</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -2769,6 +2770,7 @@ function MatchDialog({
               <SelectContent>
                 <SelectItem value="solteiro">Solteiro</SelectItem>
                 <SelectItem value="divorciado">Divorciado</SelectItem>
+                <SelectItem value="viuvo">Viúvo</SelectItem>
               </SelectContent>
             </Select>
           </div>

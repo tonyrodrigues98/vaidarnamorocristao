@@ -68,6 +68,7 @@ type Profile = {
   state: string | null;
   age: number | null;
   sex: "masculino" | "feminino" | null;
+  marital?: string | null;
   marital_status?: string | null;
   church?: string | null;
   years_baptized?: number | null;
@@ -345,7 +346,7 @@ function InicioPage() {
         supabase
           .from("profiles")
           .select(
-            "id, full_name, photo_url, bio, height_cm, status, city, state, age, sex, banned_reason, banned_at, rejection_reason",
+            "id, full_name, photo_url, bio, height_cm, status, city, state, age, sex, marital, church, years_baptized, banned_reason, banned_at, rejection_reason",
           )
           .eq("id", user.id)
           .maybeSingle(),

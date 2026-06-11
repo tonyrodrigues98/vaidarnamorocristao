@@ -3063,7 +3063,7 @@ export type Database = {
       gift_rarity: "common" | "rare" | "epic" | "legendary" | "exclusive"
       gift_tx_status: "held" | "redeemed"
       location_scope: "regiao" | "brasil" | "mundo" | "personalizado"
-      marital_status: "solteiro" | "divorciado"
+      marital_status: "solteiro" | "divorciado" | "viuvo"
       photo_moderation_scope: "avatar" | "extra"
       photo_moderation_status: "pending" | "approved" | "rejected"
       prayer_category:
@@ -3255,7 +3255,7 @@ export const Constants = {
       gift_rarity: ["common", "rare", "epic", "legendary", "exclusive"],
       gift_tx_status: ["held", "redeemed"],
       location_scope: ["regiao", "brasil", "mundo", "personalizado"],
-      marital_status: ["solteiro", "divorciado"],
+      marital_status: ["solteiro", "divorciado", "viuvo"],
       photo_moderation_scope: ["avatar", "extra"],
       photo_moderation_status: ["pending", "approved", "rejected"],
       prayer_category: [

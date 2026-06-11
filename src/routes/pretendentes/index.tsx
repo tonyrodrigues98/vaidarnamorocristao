@@ -54,7 +54,7 @@ type Profile = {
   bio: string | null;
   photo_url: string | null;
   sex: "masculino" | "feminino";
-  marital: "solteiro" | "divorciado";
+  marital: "solteiro" | "divorciado" | "viuvo";
   verified?: boolean;
   created_at?: string;
 };
@@ -203,7 +203,7 @@ async function fetchPretendentes(userId: string, isSuperAdmin: boolean): Promise
 const searchSchema = z.object({
   q: fallback(z.string(), "").default(""),
   state: fallback(z.string(), "all").default("all"),
-  marital: fallback(z.enum(["all", "solteiro", "divorciado"]), "all").default("all"),
+  marital: fallback(z.enum(["all", "solteiro", "divorciado", "viuvo"]), "all").default("all"),
   ageMin: fallback(z.number().int().min(18).max(110).optional(), undefined),
   ageMax: fallback(z.number().int().min(18).max(110).optional(), undefined),
   church: fallback(z.string(), "").default(""),
@@ -570,6 +570,7 @@ function List() {
                       <SelectItem value="all">Todos</SelectItem>
                       <SelectItem value="solteiro">Solteiro(a)</SelectItem>
                       <SelectItem value="divorciado">Divorciado(a)</SelectItem>
+                      <SelectItem value="viuvo">Viúvo(a)</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

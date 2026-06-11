@@ -143,7 +143,7 @@ function OnboardingFlow() {
         if (p.city) setCity(p.city);
         if (p.state) setStateUF(p.state);
         if (p.height_cm) setHeightCm(String(p.height_cm));
-        if (p.marital) setMarital(p.marital as "solteiro" | "divorciado");
+        if (p.marital) setMarital(p.marital as "solteiro" | "divorciado" | "viuvo");
         if (p.photo_url) setPhotoPreview(p.photo_url);
         if (p.bio) setBio(p.bio);
         if (p.church && p.church !== "Não informado") setChurch(p.church);
@@ -249,10 +249,9 @@ function OnboardingFlow() {
         .eq("id", user.id)
         .maybeSingle();
 
-      // The DB enum marital_status only accepts 'solteiro' | 'divorciado'.
-      // Map 'viuvo' to the closest valid value to avoid schema breakage.
-      const maritalDb: "solteiro" | "divorciado" =
-        marital === "divorciado" || marital === "viuvo" ? "divorciado" : "solteiro";
+      // marital_status enum agora aceita 'solteiro' | 'divorciado' | 'viuvo'.
+      // goNext() já garantiu que marital nao e "" antes de chamar finalize().
+      const maritalDb = marital as "solteiro" | "divorciado" | "viuvo";
 
       const payload = {
         id: user.id,
