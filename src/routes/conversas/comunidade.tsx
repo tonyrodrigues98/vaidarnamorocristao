@@ -925,7 +925,7 @@ function Comunidade() {
                             params={{ id: m.sender_id }}
                             className="flex items-center gap-1 text-sm font-semibold text-foreground hover:text-primary hover:underline"
                           >
-                            {name}
+                            <GradientName name={name} gradient={p?.name_gradient} />
                             {p?.verified && <VerifiedBadge size="sm" />}
                             {senderStaff &&
                               (senderIsAdmin ? (
