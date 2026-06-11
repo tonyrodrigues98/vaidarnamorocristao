@@ -16,6 +16,7 @@ import { Route as RecadosRouteImport } from './routes/recados'
 import { Route as PerfilRouteImport } from './routes/perfil'
 import { Route as OracoesRouteImport } from './routes/oracoes'
 import { Route as NotificacoesRouteImport } from './routes/notificacoes'
+import { Route as MeuPetRouteImport } from './routes/meu-pet'
 import { Route as MatchesRouteImport } from './routes/matches'
 import { Route as ManualRouteImport } from './routes/manual'
 import { Route as LojaRouteImport } from './routes/loja'
@@ -101,6 +102,11 @@ const OracoesRoute = OracoesRouteImport.update({
 const NotificacoesRoute = NotificacoesRouteImport.update({
   id: '/notificacoes',
   path: '/notificacoes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MeuPetRoute = MeuPetRouteImport.update({
+  id: '/meu-pet',
+  path: '/meu-pet',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MatchesRoute = MatchesRouteImport.update({
@@ -376,6 +382,7 @@ export interface FileRoutesByFullPath {
   '/loja': typeof LojaRoute
   '/manual': typeof ManualRoute
   '/matches': typeof MatchesRoute
+  '/meu-pet': typeof MeuPetRoute
   '/notificacoes': typeof NotificacoesRoute
   '/oracoes': typeof OracoesRoute
   '/perfil': typeof PerfilRoute
@@ -436,6 +443,7 @@ export interface FileRoutesByTo {
   '/loja': typeof LojaRoute
   '/manual': typeof ManualRoute
   '/matches': typeof MatchesRoute
+  '/meu-pet': typeof MeuPetRoute
   '/notificacoes': typeof NotificacoesRoute
   '/oracoes': typeof OracoesRoute
   '/perfil': typeof PerfilRoute
@@ -497,6 +505,7 @@ export interface FileRoutesById {
   '/loja': typeof LojaRoute
   '/manual': typeof ManualRoute
   '/matches': typeof MatchesRoute
+  '/meu-pet': typeof MeuPetRoute
   '/notificacoes': typeof NotificacoesRoute
   '/oracoes': typeof OracoesRoute
   '/perfil': typeof PerfilRoute
@@ -559,6 +568,7 @@ export interface FileRouteTypes {
     | '/loja'
     | '/manual'
     | '/matches'
+    | '/meu-pet'
     | '/notificacoes'
     | '/oracoes'
     | '/perfil'
@@ -619,6 +629,7 @@ export interface FileRouteTypes {
     | '/loja'
     | '/manual'
     | '/matches'
+    | '/meu-pet'
     | '/notificacoes'
     | '/oracoes'
     | '/perfil'
@@ -679,6 +690,7 @@ export interface FileRouteTypes {
     | '/loja'
     | '/manual'
     | '/matches'
+    | '/meu-pet'
     | '/notificacoes'
     | '/oracoes'
     | '/perfil'
@@ -740,6 +752,7 @@ export interface RootRouteChildren {
   LojaRoute: typeof LojaRoute
   ManualRoute: typeof ManualRoute
   MatchesRoute: typeof MatchesRoute
+  MeuPetRoute: typeof MeuPetRoute
   NotificacoesRoute: typeof NotificacoesRoute
   OracoesRoute: typeof OracoesRoute
   PerfilRoute: typeof PerfilRoute
@@ -833,6 +846,13 @@ declare module '@tanstack/react-router' {
       path: '/notificacoes'
       fullPath: '/notificacoes'
       preLoaderRoute: typeof NotificacoesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/meu-pet': {
+      id: '/meu-pet'
+      path: '/meu-pet'
+      fullPath: '/meu-pet'
+      preLoaderRoute: typeof MeuPetRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/matches': {
@@ -1222,6 +1242,7 @@ const rootRouteChildren: RootRouteChildren = {
   LojaRoute: LojaRoute,
   ManualRoute: ManualRoute,
   MatchesRoute: MatchesRoute,
+  MeuPetRoute: MeuPetRoute,
   NotificacoesRoute: NotificacoesRoute,
   OracoesRoute: OracoesRoute,
   PerfilRoute: PerfilRoute,
