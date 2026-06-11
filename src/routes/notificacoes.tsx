@@ -75,7 +75,7 @@ const stripEmoji = (s: string) => s.replace(EMOJI_RE, "").replace(/\s+/g, " ").t
 // notifications useful after route renames; safe no-op for unknown links.
 function rewriteNotificationLink(link: string | null): string | null {
   if (!link) return link;
-  if (link.startsWith("/dashboard")) return link.replace(/^\/dashboard/, "/inicio");
+  // /dashboard is a valid live route (Analytics Center). Do not rewrite it.
   if (link === "/comunidade" || link.startsWith("/comunidade/")) return "/conversas";
   return link;
 }
