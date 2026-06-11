@@ -262,6 +262,7 @@ function InicioPage() {
   const [commitmentDays, setCommitmentDays] = useState(0);
   const [frameClaimed, setFrameClaimed] = useState(false);
   const [ownsAnyFrame, setOwnsAnyFrame] = useState(false);
+  const [hasSpent, setHasSpent] = useState(false);
 
   // Live clock — updates every 60s and on visibility change so the
   // greeting/theme transitions naturally from afternoon to night, etc.
