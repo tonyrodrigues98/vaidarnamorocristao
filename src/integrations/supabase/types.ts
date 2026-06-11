@@ -1151,6 +1151,72 @@ export type Database = {
         }
         Relationships: []
       }
+      pets: {
+        Row: {
+          animation_url: string | null
+          created_at: string
+          description: string | null
+          event_tag: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean
+          limited_until: string | null
+          name: string
+          pose: string | null
+          preview_url: string | null
+          price_coins: number
+          rarity: Database["public"]["Enums"]["pet_rarity"]
+          shadow_url: string | null
+          slug: string
+          sort_order: number
+          sound_url: string | null
+          species: string
+          updated_at: string
+        }
+        Insert: {
+          animation_url?: string | null
+          created_at?: string
+          description?: string | null
+          event_tag?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          limited_until?: string | null
+          name: string
+          pose?: string | null
+          preview_url?: string | null
+          price_coins?: number
+          rarity?: Database["public"]["Enums"]["pet_rarity"]
+          shadow_url?: string | null
+          slug: string
+          sort_order?: number
+          sound_url?: string | null
+          species: string
+          updated_at?: string
+        }
+        Update: {
+          animation_url?: string | null
+          created_at?: string
+          description?: string | null
+          event_tag?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          limited_until?: string | null
+          name?: string
+          pose?: string | null
+          preview_url?: string | null
+          price_coins?: number
+          rarity?: Database["public"]["Enums"]["pet_rarity"]
+          shadow_url?: string | null
+          slug?: string
+          sort_order?: number
+          sound_url?: string | null
+          species?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       photo_moderation_log: {
         Row: {
           ai_result: Json
@@ -2794,6 +2860,47 @@ export type Database = {
           },
         ]
       }
+      user_pets: {
+        Row: {
+          acquired_at: string
+          created_at: string
+          custom_name: string | null
+          id: string
+          is_equipped: boolean
+          pet_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          acquired_at?: string
+          created_at?: string
+          custom_name?: string | null
+          id?: string
+          is_equipped?: boolean
+          pet_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          acquired_at?: string
+          created_at?: string
+          custom_name?: string | null
+          id?: string
+          is_equipped?: boolean
+          pet_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_pets_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
+            referencedRelation: "pets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_profile_backgrounds: {
         Row: {
           background_id: string
@@ -3125,6 +3232,7 @@ export type Database = {
       }
       equip_decoration: { Args: { _decoration_id: string }; Returns: Json }
       equip_name_gradient: { Args: { _gradient_id: string }; Returns: Json }
+      equip_pet: { Args: { _user_pet_id: string }; Returns: undefined }
       equip_profile_background: {
         Args: { _background_id: string }
         Returns: undefined
@@ -3355,6 +3463,7 @@ export type Database = {
       gift_tx_status: "held" | "redeemed"
       location_scope: "regiao" | "brasil" | "mundo" | "personalizado"
       marital_status: "solteiro" | "divorciado" | "viuvo"
+      pet_rarity: "common" | "rare" | "epic" | "legendary"
       photo_moderation_scope: "avatar" | "extra"
       photo_moderation_status: "pending" | "approved" | "rejected"
       prayer_category:
@@ -3547,6 +3656,7 @@ export const Constants = {
       gift_tx_status: ["held", "redeemed"],
       location_scope: ["regiao", "brasil", "mundo", "personalizado"],
       marital_status: ["solteiro", "divorciado", "viuvo"],
+      pet_rarity: ["common", "rare", "epic", "legendary"],
       photo_moderation_scope: ["avatar", "extra"],
       photo_moderation_status: ["pending", "approved", "rejected"],
       prayer_category: [
