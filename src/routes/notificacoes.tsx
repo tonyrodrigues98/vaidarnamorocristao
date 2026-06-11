@@ -7,6 +7,7 @@ import { NotificationSkeleton } from "@/components/ui/AppSkeletons";
 import { AppEmptyState } from "@/components/ui/AppEmptyState";
 import { PullToRefresh } from "@/components/mobile/PullToRefresh";
 import { OfflineState } from "@/components/ui/OfflineState";
+import { StaleDataNotice } from "@/components/ui/StaleDataNotice";
 import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 import {
   Bell,
@@ -69,6 +70,15 @@ export const Route = createFileRoute("/notificacoes")({
 const EMOJI_RE =
   /\p{Extended_Pictographic}|\u{1F3FB}|\u{1F3FC}|\u{1F3FD}|\u{1F3FE}|\u{1F3FF}|\u{FE0F}|\u200D/gu;
 const stripEmoji = (s: string) => s.replace(EMOJI_RE, "").replace(/\s+/g, " ").trim();
+
+// Rewrite legacy / removed internal routes to current ones. Keeps existing
+// notifications useful after route renames; safe no-op for unknown links.
+function rewriteNotificationLink(link: string | null): string | null {
+  if (!link) return link;
+  if (link.startsWith("/dashboard")) return link.replace(/^\/dashboard/, "/inicio");
+  if (link === "/comunidade" || link.startsWith("/comunidade/")) return "/conversas";
+  return link;
+}
 
 function iconMeta(type: string): { icon: React.ReactNode; bg: string; fg: string } {
   switch (type) {
@@ -180,6 +190,10 @@ function NotificacoesPage() {
 
   const handleMarkAll = async () => {
     if (markingAll || visibleUnread === 0) return;
+    if (!isOnline) {
+      toast.error("Disponível online. Reconecte-se para atualizar suas atividades.");
+      return;
+    }
     setMarkingAll(true);
     try {
       await markAllRead();
@@ -189,6 +203,10 @@ function NotificacoesPage() {
   };
 
   const handleDelete = (n: AppNotification) => {
+    if (!isOnline) {
+      toast.error("Disponível online. Reconecte-se para apagar notificações.");
+      return;
+    }
     setHidden((prev) => {
       const next = new Set(prev);
       next.add(n.id);
@@ -227,12 +245,13 @@ function NotificacoesPage() {
   };
 
   const onClick = async (n: AppNotification) => {
-    if (!n.read_at) await markRead(n.id);
-    if (n.link) {
+    if (!n.read_at && isOnline) await markRead(n.id);
+    const target = rewriteNotificationLink(n.link);
+    if (target) {
       try {
-        router.history.push(n.link);
+        router.history.push(target);
       } catch {
-        window.location.assign(n.link);
+        window.location.assign(target);
       }
     }
   };
@@ -243,6 +262,12 @@ function NotificacoesPage() {
       <MobileAppHeader title="Atividades" subtitle="Suas novidades no VaiDarNamoro" />
       <PullToRefresh onRefresh={reload} disabled={!isOnline}>
       <main className="mx-auto w-full max-w-2xl px-4 py-6 sm:py-8">
+        {!isOnline && visible.length > 0 && (
+          <StaleDataNotice
+            className="mb-4"
+            message="Você está offline. Mostrando atividades carregadas anteriormente."
+          />
+        )}
         {/* Summary panel */}
         <div className="mb-4 rounded-2xl border border-[var(--rose)]/20 bg-gradient-to-br from-[var(--petal)]/60 via-white to-white p-4 shadow-sm">
           <div className="flex items-center gap-3">
@@ -270,7 +295,7 @@ function NotificacoesPage() {
                 variant="outline"
                 size="sm"
                 onClick={handleMarkAll}
-                disabled={markingAll}
+                disabled={markingAll || !isOnline}
                 className="app-pressable shrink-0"
               >
                 <CheckCheck className="mr-1 h-4 w-4" />
