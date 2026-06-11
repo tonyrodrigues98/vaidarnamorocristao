@@ -88,8 +88,14 @@ export function SendAnonymousButton({ receiverId }: Props) {
 
   if (!canSend) {
     return (
-      <Button variant="outline" size="sm" className="w-full" disabled>
-        <Lock className="mr-2 h-4 w-4" /> {reasonLabel(reason)}
+      <Button
+        variant="outline"
+        size="sm"
+        className="h-auto min-h-9 w-full min-w-0 max-w-full items-start whitespace-normal break-words py-2 text-left leading-snug"
+        disabled
+      >
+        <Lock className="mr-2 mt-0.5 h-4 w-4 shrink-0" />
+        <span className="min-w-0 flex-1 break-words">{reasonLabel(reason)}</span>
       </Button>
     );
   }
