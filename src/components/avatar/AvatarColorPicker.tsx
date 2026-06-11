@@ -6,11 +6,11 @@
  */
 
 import { useMemo } from "react";
-import {
-  getColorPresetsByCategory,
-  type AvatarColorPreset,
-} from "@/data/avatarColorPresets";
-import type { AvatarColorPresetCategory } from "@/types/avatar";
+import { getColorPresetsByCategory } from "@/data/avatarColorPresets";
+import type {
+  AvatarColorPreset,
+  AvatarColorPresetCategory,
+} from "@/types/avatar";
 import { cn } from "@/lib/utils";
 import { Check } from "lucide-react";
 
