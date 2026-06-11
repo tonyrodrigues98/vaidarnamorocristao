@@ -317,41 +317,49 @@ function LojaPage() {
     return g;
   }, [catalog]);
 
-  const handleBuy = async (d: Decoration) => {
-    if (!isOnline) {
-      toast.error("Sem conexão. Tente novamente quando estiver online.");
-      return;
-    }
-    setBusyId(d.id);
-    try {
-      const r = await purchaseDecoration(d.id);
-      setBalance(r.new_balance);
-      setOwned((s) => new Set([...s, d.id]));
+  // -------------------- Mutations (Part 5) --------------------
+  const invalidateBalanceAndDecorationInventory = useCallback(() => {
+    if (!user?.id) return;
+    queryClient.invalidateQueries({ queryKey: ["user-balance", user.id] });
+    queryClient.invalidateQueries({ queryKey: ["user-decoration-inventory", user.id] });
+  }, [queryClient, user?.id]);
+  const invalidateBalanceAndBackgroundInventory = useCallback(() => {
+    if (!user?.id) return;
+    queryClient.invalidateQueries({ queryKey: ["user-balance", user.id] });
+    queryClient.invalidateQueries({ queryKey: ["user-background-inventory", user.id] });
+  }, [queryClient, user?.id]);
+  const invalidateBalanceAndNameGradientInventory = useCallback(() => {
+    if (!user?.id) return;
+    queryClient.invalidateQueries({ queryKey: ["user-balance", user.id] });
+    queryClient.invalidateQueries({ queryKey: ["user-name-gradient-inventory", user.id] });
+  }, [queryClient, user?.id]);
+  const invalidateEquipped = useCallback(() => {
+    if (!user?.id) return;
+    queryClient.invalidateQueries({ queryKey: ["shop-equipped-items", user.id] });
+  }, [queryClient, user?.id]);
+
+  const buyDecorationMutation = useMutation({
+    mutationFn: (d: Decoration) => purchaseDecoration(d.id),
+    onSuccess: (_r, d) => {
+      invalidateBalanceAndDecorationInventory();
       toast.success(`✨ ${d.name} desbloqueada com sucesso`);
       setConfirm(null);
-    } catch (e) {
+    },
+    onError: (e) => {
       const msg = e instanceof Error ? e.message : "";
       if (msg.includes("insufficient")) toast.error("Moedas insuficientes");
       else if (msg.includes("already_owned")) toast.error("Você já possui esse item");
       else toast.error("Não foi possível concluir a compra");
-    } finally {
-      setBusyId(null);
-    }
-  };
-
-  const handleBuyBackground = async (background: ProfileBackground) => {
-    if (!isOnline) {
-      toast.error("Sem conexão. Tente novamente quando estiver online.");
-      return;
-    }
-    setBusyId(background.id);
-    try {
-      const r = await purchaseProfileBackground(background.id);
-      setBalance(r.new_balance);
-      setOwnedBackgrounds((s) => new Set([...s, background.id]));
-      toast.success(`${background.name} desbloqueado com sucesso`);
+    },
+  });
+  const buyBackgroundMutation = useMutation({
+    mutationFn: (b: ProfileBackground) => purchaseProfileBackground(b.id),
+    onSuccess: (_r, b) => {
+      invalidateBalanceAndBackgroundInventory();
+      toast.success(`${b.name} desbloqueado com sucesso`);
       setConfirmBackground(null);
-    } catch (e) {
+    },
+    onError: (e) => {
       const msg = e instanceof Error ? e.message : "";
       if (msg.includes("insufficient")) toast.error("Moedas insuficientes");
       else if (msg.includes("already_owned")) toast.error("Voce ja possui esse fundo");
@@ -360,147 +368,123 @@ function LojaPage() {
       } else if (msg.includes("background_not_found"))
         toast.error("Fundo indisponivel para compra");
       else toast.error("Nao foi possivel concluir a compra");
-    } finally {
-      setBusyId(null);
-    }
-  };
-
-  const handleEquip = async (d: Decoration) => {
-    if (!user) return;
-    if (!isOnline) {
-      toast.error("Disponível online. Reconecte-se para alterar seu visual.");
-      return;
-    }
-
-    setBusyId(d.id);
-
-    try {
-      const result = await equipDecoration(d.id);
-
-      if (result.type !== d.type) {
-        throw new Error(`invalid_decoration_type:${result.type}`);
-      }
-
-      const nextEquipped = await fetchMyEquippedDecorations(user.id);
-
-      setEquipped(nextEquipped);
-
-      toast.success(`${d.name} equipada`);
-    } catch (error) {
-      toast.error(decorationErrorMessage(error, "Erro ao equipar"));
-    } finally {
-      setBusyId(null);
-    }
-  };
-
-  const handleUnequip = async (type: DecorationType) => {
-    if (!user) return;
-    if (!isOnline) {
-      toast.error("Disponível online. Reconecte-se para alterar seu visual.");
-      return;
-    }
-
-    setBusyId(`unequip-${type}`);
-
-    try {
-      await unequipDecoration(type);
-
-      const nextEquipped = await fetchMyEquippedDecorations(user.id);
-
-      setEquipped(nextEquipped);
-    } catch (error) {
-      toast.error(decorationErrorMessage(error, "Erro ao remover"));
-    } finally {
-      setBusyId(null);
-    }
-  };
-
-  const handleEquipBackground = async (background: ProfileBackground) => {
-    if (!isOnline) {
-      toast.error("Disponível online. Reconecte-se para alterar seu visual.");
-      return;
-    }
-    setBusyId(background.id);
-    try {
-      await equipProfileBackground(background.id);
-      setEquippedBackground(background.id);
-      toast.success(`${background.name} equipado`);
-    } catch {
-      toast.error("Erro ao equipar fundo");
-    } finally {
-      setBusyId(null);
-    }
-  };
-
-  const handleUnequipBackground = async () => {
-    if (!isOnline) {
-      toast.error("Disponível online. Reconecte-se para alterar seu visual.");
-      return;
-    }
-    setBusyId("unequip-background");
-    try {
-      await unequipProfileBackground();
-      setEquippedBackground(null);
-    } catch {
-      toast.error("Erro ao remover fundo");
-    } finally {
-      setBusyId(null);
-    }
-  };
-
-  const handleBuyNameGradient = async (gradient: NameGradient) => {
-    if (!isOnline) {
-      toast.error("Sem conexão. Tente novamente quando estiver online.");
-      return;
-    }
-    setBusyId(gradient.id);
-    try {
-      const result = await purchaseNameGradient(gradient.id);
-      setBalance(result.new_balance);
-      setOwnedNameGradients((prev) => new Set([...prev, gradient.id]));
-      toast.success(`${gradient.name} desbloqueado`);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "";
-      if (message.includes("insufficient")) toast.error("Moedas insuficientes");
-      else if (message.includes("already_owned")) toast.error("Voce ja possui esse gradiente");
+    },
+  });
+  const buyNameGradientMutation = useMutation({
+    mutationFn: (g: NameGradient) => purchaseNameGradient(g.id),
+    onSuccess: (_r, g) => {
+      invalidateBalanceAndNameGradientInventory();
+      toast.success(`${g.name} desbloqueado`);
+    },
+    onError: (e) => {
+      const msg = e instanceof Error ? e.message : "";
+      if (msg.includes("insufficient")) toast.error("Moedas insuficientes");
+      else if (msg.includes("already_owned")) toast.error("Voce ja possui esse gradiente");
       else toast.error("Nao foi possivel comprar o gradiente");
+    },
+  });
+  const equipDecorationMutation = useMutation({
+    mutationFn: async (d: Decoration) => {
+      const result = await equipDecoration(d.id);
+      if (result.type !== d.type) throw new Error(`invalid_decoration_type:${result.type}`);
+      return result;
+    },
+    onSuccess: (_r, d) => {
+      invalidateEquipped();
+      toast.success(`${d.name} equipada`);
+    },
+    onError: (e) => toast.error(decorationErrorMessage(e, "Erro ao equipar")),
+  });
+  const unequipDecorationMutation = useMutation({
+    mutationFn: (type: DecorationType) => unequipDecoration(type),
+    onSuccess: () => invalidateEquipped(),
+    onError: (e) => toast.error(decorationErrorMessage(e, "Erro ao remover")),
+  });
+  const equipBackgroundMutation = useMutation({
+    mutationFn: (b: ProfileBackground) => equipProfileBackground(b.id),
+    onSuccess: (_r, b) => {
+      invalidateEquipped();
+      toast.success(`${b.name} equipado`);
+    },
+    onError: () => toast.error("Erro ao equipar fundo"),
+  });
+  const unequipBackgroundMutation = useMutation({
+    mutationFn: () => unequipProfileBackground(),
+    onSuccess: () => invalidateEquipped(),
+    onError: () => toast.error("Erro ao remover fundo"),
+  });
+  const equipNameGradientMutation = useMutation({
+    mutationFn: (g: NameGradient) => equipNameGradient(g.id),
+    onSuccess: (_r, g) => {
+      invalidateEquipped();
+      toast.success(`${g.name} equipado`);
+    },
+    onError: () => toast.error("Erro ao equipar gradiente"),
+  });
+  const unequipNameGradientMutation = useMutation({
+    mutationFn: () => unequipNameGradient(),
+    onSuccess: () => invalidateEquipped(),
+    onError: () => toast.error("Erro ao remover gradiente"),
+  });
+
+  const offlineBuyToast = () =>
+    toast.error("Disponível online. Reconecte-se para comprar este item.");
+  const offlineVisualToast = () =>
+    toast.error("Disponível online. Reconecte-se para alterar seu visual.");
+
+  const runMutation = async <T,>(
+    busyKey: string,
+    offlineMessage: () => void,
+    fn: () => Promise<T>,
+  ) => {
+    if (!isOnline) {
+      offlineMessage();
+      return;
+    }
+    setBusyId(busyKey);
+    try {
+      await fn();
+    } catch {
+      // mutation onError already surfaces a toast
     } finally {
       setBusyId(null);
     }
   };
 
-  const handleEquipNameGradient = async (gradient: NameGradient) => {
-    if (!isOnline) {
-      toast.error("Disponível online. Reconecte-se para alterar seu visual.");
-      return;
-    }
-    setBusyId(gradient.id);
-    try {
-      await equipNameGradient(gradient.id);
-      setEquippedNameGradient(gradient.id);
-      toast.success(`${gradient.name} equipado`);
-    } catch {
-      toast.error("Erro ao equipar gradiente");
-    } finally {
-      setBusyId(null);
-    }
+  const handleBuy = (d: Decoration) =>
+    runMutation(d.id, offlineBuyToast, () => buyDecorationMutation.mutateAsync(d));
+  const handleBuyBackground = (b: ProfileBackground) =>
+    runMutation(b.id, offlineBuyToast, () => buyBackgroundMutation.mutateAsync(b));
+  const handleBuyNameGradient = (g: NameGradient) =>
+    runMutation(g.id, offlineBuyToast, () => buyNameGradientMutation.mutateAsync(g));
+  const handleEquip = (d: Decoration) => {
+    if (!user) return Promise.resolve();
+    return runMutation(d.id, offlineVisualToast, () => equipDecorationMutation.mutateAsync(d));
   };
-
-  const handleUnequipNameGradient = async () => {
-    if (!isOnline) {
-      toast.error("Disponível online. Reconecte-se para alterar seu visual.");
-      return;
-    }
-    setBusyId("unequip-name-gradient");
-    try {
-      await unequipNameGradient();
-      setEquippedNameGradient(null);
-    } catch {
-      toast.error("Erro ao remover gradiente");
-    } finally {
-      setBusyId(null);
-    }
+  const handleUnequip = (type: DecorationType) => {
+    if (!user) return Promise.resolve();
+    return runMutation(
+      `unequip-${type}`,
+      offlineVisualToast,
+      () => unequipDecorationMutation.mutateAsync(type),
+    );
   };
+  const handleEquipBackground = (b: ProfileBackground) =>
+    runMutation(b.id, offlineVisualToast, () => equipBackgroundMutation.mutateAsync(b));
+  const handleUnequipBackground = () =>
+    runMutation(
+      "unequip-background",
+      offlineVisualToast,
+      () => unequipBackgroundMutation.mutateAsync(),
+    );
+  const handleEquipNameGradient = (g: NameGradient) =>
+    runMutation(g.id, offlineVisualToast, () => equipNameGradientMutation.mutateAsync(g));
+  const handleUnequipNameGradient = () =>
+    runMutation(
+      "unequip-name-gradient",
+      offlineVisualToast,
+      () => unequipNameGradientMutation.mutateAsync(),
+    );
 
   if (!authLoading && !user) return <Navigate to="/auth/login" />;
 
