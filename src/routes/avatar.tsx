@@ -151,6 +151,7 @@ function AvatarPage() {
   // Body type + pose drive WHICH base row is shown (real swap, not overlay).
   const [bodyType, setBodyType] = useState<string>("default");
   const [pose, setPose] = useState<AvatarPoseKey>("standing_default");
+  const [skinTone, setSkinTone] = useState<string>("default");
   const [expression, setExpression] = useState<AvatarExpressionKey>("soft_smile");
   const [poseSheetOpen, setPoseSheetOpen] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
@@ -162,13 +163,21 @@ function AvatarPage() {
     const nextGender = currentGender === "feminino" ? "masculino" : "feminino";
     const next =
       bases.find(
+        (b) =>
+          b.gender === nextGender &&
+          b.body_type === bodyType &&
+          b.pose_key === pose &&
+          b.skin_tone === skinTone,
+      ) ??
+      bases.find(
         (b) => b.gender === nextGender && b.body_type === bodyType && b.pose_key === pose,
       ) ??
       bases.find(
         (b) =>
           b.gender === nextGender &&
           b.body_type === "default" &&
-          b.pose_key === "standing_default",
+          b.pose_key === "standing_default" &&
+          b.skin_tone === skinTone,
       ) ??
       bases.find((b) => b.gender === nextGender) ??
       null;
@@ -179,6 +188,7 @@ function AvatarPage() {
     setBase(next);
     setBodyType(next.body_type);
     setPose(next.pose_key as AvatarPoseKey);
+    setSkinTone(next.skin_tone ?? "default");
   }
 
   useEffect(() => {
