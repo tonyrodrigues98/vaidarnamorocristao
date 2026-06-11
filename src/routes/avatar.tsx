@@ -633,6 +633,19 @@ function AvatarPage() {
     <div className="min-h-screen bg-gradient-to-b from-[#FFF7F3] via-[#FFF1EC] to-[#FFE9E2]">
       <AvatarHeader coins={coins} />
 
+      <div className="mx-auto mt-2 flex w-full max-w-md items-center justify-between gap-2 rounded-full border border-dashed border-amber-400 bg-amber-50 px-3 py-1.5 text-[11px] text-amber-900">
+        <span>
+          Modo teste · Gênero: <strong>{currentGender === "feminino" ? "Feminino" : "Masculino"}</strong>
+        </span>
+        <button
+          type="button"
+          onClick={toggleGender}
+          className="rounded-full border border-amber-500 bg-white px-3 py-0.5 text-[11px] font-semibold text-amber-900 hover:bg-amber-100"
+        >
+          Trocar para {currentGender === "feminino" ? "Masculino" : "Feminino"}
+        </button>
+      </div>
+
       <AvatarCategoryTabs
         categories={[
           { id: WEIGHT_TAB_ID, name: "Peso", icon: "dumbbell" },
