@@ -365,12 +365,25 @@ function RecadosPage() {
                 segments={[
                   { value: "inbox", label: "Recebidos", count: inbox.length },
                   { value: "outbox", label: "Enviados", count: outbox.length },
+                  { value: "hidden", label: "Ocultos", count: hidden.length },
                 ]}
               />
             </div>
 
             <div className="mt-4 space-y-3">
-              {tab === "inbox" ? (
+              {tab === "hidden" ? (
+                hidden.length === 0 ? (
+                  <EmptyState
+                    icon={<Archive className="h-6 w-6" />}
+                    title="Nenhum recado oculto"
+                    subtitle="Recados que você ocultar aparecem aqui. Você pode desocultar a qualquer momento."
+                  />
+                ) : (
+                  hidden.map((m) => (
+                    <HiddenCard key={m.id} m={m} onChange={load} />
+                  ))
+                )
+              ) : tab === "inbox" ? (
                 inbox.length === 0 ? (
                   <EmptyState
                     icon={<Inbox className="h-6 w-6" />}
