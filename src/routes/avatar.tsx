@@ -776,6 +776,7 @@ function AvatarPage() {
         categories={[
           { id: WEIGHT_TAB_ID, name: "Peso", icon: "dumbbell" },
           { id: POSE_TAB_ID, name: "Pose", icon: "pose" },
+          { id: SKIN_TAB_ID, name: "Pele", icon: "palette" },
           ...categories.map((c) => ({ id: c.id, name: c.name, icon: c.icon })),
         ]}
         activeId={activeCat}
@@ -894,6 +895,15 @@ function AvatarPage() {
           activeKey={pose}
           onPick={(opt) => handlePose(opt.key)}
           emptyHint="Poses ainda não cadastradas para este gênero."
+        />
+      ) : activeCat === SKIN_TAB_ID ? (
+        <AvatarBaseSelector
+          title="Tom de pele"
+          description="Aplica o tom escolhido ao corpo e pose atuais. Tons sem arte ainda voltam ao padrão."
+          options={skinOptions}
+          activeKey={skinTone}
+          onPick={(opt) => handleSkinTone(opt.key)}
+          emptyHint="Tons ainda não cadastrados."
         />
       ) : (
         <AvatarShopSheet
