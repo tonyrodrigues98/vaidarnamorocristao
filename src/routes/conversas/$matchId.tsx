@@ -137,6 +137,7 @@ function Chat() {
   const restrictedWords = useRestrictedWords();
   const [warning, setWarning] = useState<string | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const { isOnline } = useNetworkStatus();
   // IDs already marked as read in this session — prevents duplicate RPC calls
   // when pagesData changes (older page loaded, realtime UPDATE, etc.).
   const markedReadRef = useRef<Set<string>>(new Set());
@@ -170,6 +171,41 @@ function Chat() {
     () => (pending.length ? [...serverMessages, ...pending] : serverMessages),
     [serverMessages, pending],
   );
+  const firstMessageSuggestions = useMemo<string[]>(() => {
+    if (messages.length !== 0) return [];
+    if (!partner) return [];
+    const profile: FirstMessagePartnerProfile = {
+      full_name: partner.full_name,
+      city: partner.city ?? null,
+      church: partner.church ?? null,
+      bio: partner.bio ?? null,
+    };
+    return getFirstMessageSuggestions(profile);
+  }, [messages.length, partner]);
+
+  function applySuggestion(text: string) {
+    setInput((prev) => {
+      if (prev.trim().length === 0) return text;
+      const ok =
+        typeof window !== "undefined" &&
+        window.confirm(
+          "Substituir o texto atual pela sugestão? Você poderá editar antes de enviar.",
+        );
+      return ok ? text : prev;
+    });
+    requestAnimationFrame(() => {
+      const el = inputRef.current;
+      if (el) {
+        el.focus();
+        const len = el.value.length;
+        try {
+          el.setSelectionRange(len, len);
+        } catch {
+          // some browsers throw on certain input types — safe to ignore
+        }
+      }
+    });
+  }
   const loadingOlder = isFetchingPreviousPage;
   const hasMoreOlder = hasPreviousPage;
 
