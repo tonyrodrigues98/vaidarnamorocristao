@@ -229,7 +229,8 @@ function AvatarPage() {
         (b) =>
           b.gender === wantGender &&
           b.body_type === "default" &&
-          b.pose_key === "standing_default",
+          b.pose_key === "standing_default" &&
+          b.skin_tone === "default",
       ) ??
       bs.find((b) => b.gender === wantGender) ??
       bs[0] ??
@@ -237,6 +238,7 @@ function AvatarPage() {
     setBase(matched);
     setBodyType(matched?.body_type ?? "default");
     setPose((matched?.pose_key as AvatarPoseKey | undefined) ?? "standing_default");
+    setSkinTone(matched?.skin_tone ?? "default");
 
     const inv = new Set<string>();
     const favs = new Set<string>();
