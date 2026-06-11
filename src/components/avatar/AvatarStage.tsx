@@ -48,9 +48,9 @@ export function AvatarStage({
         }}
       >
         {baseUrl && (
-          // Pódio: o topo do disco branco fica a ~21% do bottom do container
-          // (imagem 9:16 dentro de um quadro 3:4 com background-position top).
-          <div className="absolute inset-x-0 bottom-[20%] flex justify-center">
+          // Pódio: o topo do disco branco fica próximo a ~8% do bottom do container
+          // visível (imagem 9:16 dentro de um quadro 3:4 com background-position top).
+          <div className="absolute inset-x-0 bottom-[8%] flex justify-center">
             <AvatarRenderer baseUrl={baseUrl} baseAlt={baseAlt} layers={layers} />
           </div>
         )}
