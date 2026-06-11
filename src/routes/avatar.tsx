@@ -105,6 +105,9 @@ function AvatarPage() {
   const [expression, setExpression] = useState<AvatarExpressionKey>("soft_smile");
   const [poseSheetOpen, setPoseSheetOpen] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
+  // Preview equips an item visually without persisting/buying. Clears when
+  // the user navigates categories or selects another preview.
+  const [previewItem, setPreviewItem] = useState<Item | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -199,13 +202,16 @@ function AvatarPage() {
 
   const renderedLayers = useMemo(() => {
     const list: { item: Item; layer: number; slug: string }[] = [];
+    // Apply preview: swap or insert the previewed item in its category
+    const previewCatId = previewItem?.category_id;
     for (const cat of categories) {
-      const it = equippedItems.get(cat.id);
+      const it =
+        previewCatId === cat.id ? previewItem : equippedItems.get(cat.id);
       if (it) list.push({ item: it, layer: cat.layer_index, slug: cat.slug });
     }
     list.sort((a, b) => a.layer - b.layer);
     return list;
-  }, [categories, equippedItems]);
+  }, [categories, equippedItems, previewItem]);
 
   // Adapter: DB-shaped equipped items → generic renderer layers.
   const rendererLayers = useMemo<AvatarRendererLayer[]>(() => {
@@ -429,6 +435,20 @@ function AvatarPage() {
     },
     [items],
   );
+  const handlePreview = useCallback(
+    (item: { id: string }) => {
+      setPreviewItem((curr) => {
+        if (curr?.id === item.id) return null;
+        const full = items.find((i) => i.id === item.id);
+        return full ?? null;
+      });
+    },
+    [items],
+  );
+  const handleCategoryChange = useCallback((id: string) => {
+    setActiveCat(id);
+    setPreviewItem(null);
+  }, []);
 
   if (authLoading) {
     return (
@@ -460,7 +480,7 @@ function AvatarPage() {
       <AvatarCategoryTabs
         categories={categories}
         activeId={activeCat}
-        onChange={setActiveCat}
+        onChange={handleCategoryChange}
       />
 
       <AvatarStage
@@ -543,6 +563,21 @@ function AvatarPage() {
         )}
       </div>
 
+      {previewItem && (
+        <div className="mx-auto mt-3 flex w-full max-w-md items-center justify-between gap-2 rounded-full border border-border bg-white px-4 py-2 text-xs shadow-sm">
+          <span className="truncate text-foreground">
+            Pré-visualizando: <strong>{previewItem.name}</strong>
+          </span>
+          <button
+            type="button"
+            onClick={() => setPreviewItem(null)}
+            className="rounded-full border border-border px-3 py-1 text-[11px] font-medium text-foreground"
+          >
+            Sair
+          </button>
+        </div>
+      )}
+
       <AvatarShopSheet
         tab={tab}
         onTabChange={setTab}
@@ -554,6 +589,8 @@ function AvatarPage() {
         coins={coins}
         onEquip={handleEquip}
         onToggleFavorite={handleToggleFav}
+        onPreview={handlePreview}
+        previewItemId={previewItem?.id ?? null}
       />
     </div>
   );
