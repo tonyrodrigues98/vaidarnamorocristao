@@ -14,6 +14,7 @@ import {
   Type,
   UsersRound,
   Shirt,
+  PawPrint,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -35,6 +36,7 @@ const NAV_ITEMS: AdminNavItem[] = [
   { to: "/admin/auras", label: "Auras", icon: Sparkles },
   { to: "/admin/gradientes-nome", label: "Gradientes", icon: Type },
   { to: "/admin/avatar", label: "Avatar", icon: Shirt },
+  { to: "/admin/pets", label: "Pets", icon: PawPrint },
   { to: "/admin/equipe-live", label: "Equipe live", icon: UsersRound },
 ];
 

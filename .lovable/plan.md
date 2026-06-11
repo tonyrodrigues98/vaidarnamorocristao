@@ -1,127 +1,105 @@
 
-# Plano: Avatar Composicional (bases neutras + tonalização em runtime)
+# Sistema de Pets — Fase 1 (Fundação)
 
-## Objetivo
+Companheiro visual equipável, **1 pet por usuário**, sem preço nesta fase (catálogo livre). Foco em base sólida antes de qualquer UI bonita ou animação.
 
-Sair do modelo "renderizar cada combinação como PNG final" (matriz de milhares de assets) e adotar **composição em runtime**: poucas bases neutras em escala de cinza + tonalização/idade/face aplicadas dinamicamente via canvas/SVG.
+---
 
-## Princípios
+## 1. Banco de dados
 
-1. **Cada eixo de variação vira uma camada independente**, nunca uma multiplicação na matriz de assets.
-2. **Cor é dado, não pixel**: pele, idade, cabelo etc. são tokens aplicados em runtime sobre máscaras neutras.
-3. **Face é modular**: olhos/boca/sobrancelha são layers compostos sobre um "molde" facial neutro, swappáveis sem tocar na base.
-4. **Renderização pesada só no "Salvar Look"**: o stage usa DOM/CSS; o snapshot final virá de um único canvas compose.
+### Tabela `pets` (catálogo, gerenciado por admin)
+Campos: `id`, `name`, `slug` (único), `species`, `description`, `rarity` (`common|rare|epic|legendary`), `price_coins` (default 0, reservado para o futuro), `image_url`, `preview_url`, `is_active`, `sort_order`, `created_at`, `updated_at`.
 
-## Arquitetura proposta
+Campos opcionais já previstos na migration (nullable, ignorados pela UI agora): `pose`, `animation_url`, `shadow_url`, `sound_url`, `event_tag`, `limited_until`. Adicioná-los agora evita migration nova quando entrarem em uso.
 
-### 1. Bases neutras (escala de cinza + máscaras)
+### Tabela `user_pets`
+Campos: `id`, `user_id` (FK `auth.users`), `pet_id` (FK `pets`), `custom_name` (nullable, max 30), `acquired_at`, `is_equipped`.
 
-Reduzir de **240 → 40 bases** (gênero × corpo × pose, sem pele).
+Regra: índice único parcial garantindo **no máximo 1 pet equipado por usuário** (`WHERE is_equipped = true`).
 
-Cada base vira **3 PNGs alinhados pixel-a-pixel** no mesmo canvas:
-- `body-luminance.png` — silhueta em tons de cinza com sombreamento (canal de luminância)
-- `skin-mask.png` — máscara branca/preta marcando apenas a pele visível (rosto, braços, mãos, pernas)
-- `face-anchor.json` — coordenadas normalizadas do centro do rosto, escala da cabeça (para encaixar olhos/boca/sobrancelha de qualquer pose)
+### RLS
+- `pets`: leitura pública apenas de `is_active = true`; admin (via `has_role`) gerencia tudo.
+- `user_pets`: usuário lê/insere/edita/apaga apenas suas próprias linhas; leitura pública dos pets equipados (para mostrar no perfil de terceiros); admin enxerga tudo.
 
-```text
-                base neutra                tonalizada em runtime
-                ┌──────────┐               ┌──────────┐
-   luminance →  │  ░▒▓█▓▒░ │  + skin_tone │  🟤🟫🟤  │
-   skin-mask →  │  ◻◼◼◻    │  + age_layer │  ▒░ rugas │
-                └──────────┘               └──────────┘
-```
+### GRANTs
+`pets`: `SELECT` para `anon` + `authenticated`; `ALL` para `service_role`.
+`user_pets`: `SELECT/INSERT/UPDATE/DELETE` para `authenticated` + `SELECT` para `anon` (limitado pela policy de leitura de equipados); `ALL` para `service_role`.
 
-### 2. Tonalização em runtime (sem regenerar imagem)
+### Função utilitária
+`equip_pet(user_pet_id uuid)` (SECURITY DEFINER) que desequipa os outros pets do usuário e marca o escolhido como `is_equipped = true` em uma transação — evita race e simplifica o client.
 
-Aplicar pele via **SVG `feColorMatrix` + `feComposite`** ou **canvas 2D `globalCompositeOperation: "multiply"`**:
-- Skin tone vira um **token de cor** (`SKIN_PALETTE[skinTone] = { base, shadow, highlight }`)
-- O filtro multiplica a cor no luminance, mascarado pelo `skin-mask`
-- Para roupas/cabelo o mesmo truque permite "recolorir" um item neutro
+### Seed
+3–5 pets iniciais com `image_url` placeholder (gerados na Fase 2 de assets). Slugs ex.: `gato-branco`, `coelho-rosa`, `cachorro-caramelo`, `passarinho-azul`, `raposa-laranja`.
 
-Resultado: **adicionar um novo tom de pele = adicionar 1 entrada no objeto de cores**, zero PNG.
+---
 
-### 3. Idade como overlay (não como base nova)
+## 2. Storage
 
-- `age-overlay-36-50.png` e `age-overlay-50plus.png`: PNGs transparentes com rugas/manchas posicionadas pelo `face-anchor` da pose ativa
-- Pose troca? O anchor já existe na base; o overlay re-ancora sozinho
-- Cabelo grisalho/branco para 50+ = **mesmo PNG de cabelo recolorido em runtime** (token de cor por faixa etária)
+Bucket **público** `pets` (apenas imagens de catálogo, nada sensível).
+- RLS em `storage.objects`: leitura pública; escrita só para admins.
+- Tamanho recomendado: 1024×1024 PNG transparente, pet centralizado, margem interna. Documentado no admin como hint.
 
-**Custo**: 6 PNGs (3 faixas × leve/forte) em vez de regerar 240 bases por faixa.
+---
 
-### 4. Face modular (olhos, boca, sobrancelha como itens)
+## 3. Tipos & libs (frontend)
 
-- Manter as categorias `eyes`, `mouth`, `eyebrows` já criadas no banco
-- Cada item facial é **um PNG pequeno em transparência** (não precisa de variação por pose: o `face-anchor` da pose reposiciona)
-- Layer ordering já está pronto em `LAYER_Z_INDEX` (`eyes: 30, eyebrows: 31, mouth: 32`)
-- O "molde" facial atual no body-luminance fica **neutro** (sem traços), e os itens completam por cima
+- `src/types/pet.ts`: `Pet`, `UserPet`, `PetRarity`, `PetDisplaySize` (`mini | profile | showcase`).
+- `src/lib/pets.ts`: helpers `listActivePets()`, `getMyEquippedPet()`, `equipPet(userPetId)`, `claimPet(petId)`, `renamePet(userPetId, name)` — usando server functions com `requireSupabaseAuth` quando precisa de auth.
 
-**Resultado**: gerar um novo conjunto de olhos = **5 PNGs** (variantes de forma), não 5 × poses × corpos × peles.
+---
 
-### 5. Item visual (roupa/sapato/cabelo) com slot universal
+## 4. Admin
 
-- Cada item tem **1 PNG canônico** + um manifesto `{ anchor: "torso"|"feet"|"head", scale }`
-- O renderer já tem `LAYER_SLOTS` — estender para indexar por **anchor da pose ativa**, não por slot fixo
-- Itens deformam-se levemente entre poses via escala/translação (não distorção real). Para poses muito diferentes (orando vs em pé), permitir `pose_overrides` opcional só onde realmente quebrar
+Nova rota **`/admin/pets`** (gate `has_role('admin')` como as outras rotas admin):
+- Lista com thumbnail, nome, slug, espécie, raridade, ordem, switch ativo.
+- Criar / editar / desativar.
+- Upload de imagem direto no bucket `pets`.
+- Reordenar via `sort_order`.
 
-### 6. Snapshot ("Salvar Look")
+---
 
-- Stage continua em DOM (rápido, interativo)
-- "Salvar Look" compõe em um **único `<canvas>`** aplicando a mesma pipeline (luminance → tint → mask → overlays → itens) e gera o PNG final pra `avatar-looks`
-- Cache: hash do snapshot já está pronto pra deduplicar
+## 5. Página `/meu-pet`
 
-## Diagrama de camadas (z-index)
+Rota autenticada (`_authenticated` ou guard padrão do projeto). Layout moderno, mobile-first, casando com o tom do `/avatar`:
+- **Pet equipado** em destaque (showcase 240–360px) com nome custom, espécie, raridade, descrição e vantagem.
+- Botão **renomear** (inline, max 30 chars).
+- Grid do catálogo (`is_active`) com estados: já tenho / equipado / disponível.
+- Ação **Escolher este pet**: se ainda não está em `user_pets`, faz claim + equip; se já tem, apenas equipa via `equip_pet`.
 
-```text
-   80 ┃ effect (auras, brilhos)
-   70 ┃ pet
-   60 ┃ hairFront
-   52 ┃ accessoryHand
-   51 ┃ accessoryNeck
-   50 ┃ accessoryFace
-   45 ┃ shoes
-   42 ┃ fullOutfit / 41 bottom / 40 top
-   32 ┃ mouth        ┐
-   31 ┃ eyebrows     │ ← itens faciais modulares
-   30 ┃ eyes         ┘
-   25 ┃ face-base (molde neutro, no body-luminance)
-   20 ┃ hairBack
-   15 ┃ age-overlay  ← NOVO
-   10 ┃ body (luminance + skin-tint via filter)
-    0 ┃ background (cenário)
-```
+Sem moedas, sem preço, sem loja nesta fase.
 
-## Migração faseada (sem quebrar o que existe)
+---
 
-**Fase 1 — Prova de conceito (1 base)**: criar 1 luminance + skin-mask para `male × default × standing_default`, validar tonalização em runtime no `AvatarRenderer`. Comparar visual com PNG colorido atual.
+## 6. Exibição em outros lugares (mínimo viável)
 
-**Fase 2 — Bases neutras completas**: gerar as 40 bases (gênero × corpo × pose) em luminance + mask. Deletar as 240 bases coloridas e os 6 diretórios `avatar-skins/*`. Tabela `avatar_bases` perde a coluna `skin_tone` (vira eixo runtime).
+- **Perfil próprio** e **perfil de terceiros**: badge "Pet:" com mini-pet (64–96px) + nome custom, lendo `user_pets` equipado público. Implementação só depois da fundação validada — fica como item final desta fase.
 
-**Fase 3 — Itens faciais**: popular `eyes/mouth/eyebrows` com 5–8 itens cada (PNGs neutros pequenos). Limpar o "molde" facial das bases.
+---
 
-**Fase 4 — Overlay de idade + cabelo recolorível**: gerar os 2 overlays e fazer cabelo aceitar tinta de cor (cinza/branco para 50+).
+## 7. Fora do escopo desta fase
 
-**Fase 5 — Limpeza de itens**: itens hoje pré-renderizados por pose passam a usar `anchor` da pose; manter `pose_overrides` só onde necessário.
+Animações, sombra dinâmica, som, pet andando, alimentação, XP, batalha, marketplace, múltiplos pets equipados, integração com loja/moedas, eventos limitados. Os campos já existem no schema mas ficam dormentes.
 
-## Detalhes técnicos
+---
 
-- **Filtro de pele**: SVG inline com `<filter><feColorMatrix .../></filter>` aplicado via CSS `filter: url(#skin-tint)`. Funciona em img/canvas, performático, e o mesmo nó pode ser parametrizado por React state.
-- **Renderer**: estender `AvatarRenderer` para receber `skinTone`, `ageRange`, montar 3 sub-layers (luminance, age-overlay, skin-tint mask) antes dos itens.
-- **Snapshot canvas**: replicar a mesma matemática do filtro em `ctx.filter` / `globalCompositeOperation` para sair pixel-equivalente ao preview.
-- **Storage**: bucket `avatar-bases-v2/` recebe os novos PNGs neutros; bases v1 ficam para rollback.
-- **DB**: nova coluna `avatar_bases.luminance_url` + `mask_url`; manter `image_url` deprecada por 1 release.
+## Ordem de execução
 
-## O que NÃO muda
+1. Migration (`pets`, `user_pets`, índices, RLS, GRANTs, função `equip_pet`).
+2. Bucket `pets` + policies de storage.
+3. Seed inicial (placeholders).
+4. Tipos + lib client (`pets.ts`, server fns).
+5. `/admin/pets` (CRUD + upload).
+6. `/meu-pet` (showcase + catálogo + claim/equip/rename).
+7. Badge de pet nos cards de perfil.
 
-- Tabelas de inventário, equipped, looks, moedas, RPCs de compra — todas continuam idênticas.
-- UX da página (`/avatar`) — só o pipeline interno do renderer muda.
-- Itens já carregados continuam funcionando enquanto a migração rola (fallback no renderer).
+Cada passo é um commit verificável antes do próximo.
 
-## Economia esperada
+---
 
-| Eixo                    | Hoje    | Depois | Redução |
-|-------------------------|---------|--------|---------|
-| Bases                   | 240     | 40     | 83%     |
-| Variantes de pele       | ×6 tudo | token  | 100%    |
-| Faixa etária 36–50/50+  | impossível sem ×3 | 2 overlays | viabilizado |
-| Itens faciais           | bloqueado | 5–8 por categoria | viabilizado |
-| Custo de novo tom de pele | gerar 40 PNGs | 1 entrada JSON | 99% |
+## Detalhes técnicos (referência)
+
+- Server fns ficam em `src/lib/pets.functions.ts`; chamadas que escrevem usam `requireSupabaseAuth`. Funções admin checam `has_role(auth.uid(),'admin')` no handler antes de carregar `supabaseAdmin`.
+- Constraint de "1 equipado por user": `CREATE UNIQUE INDEX user_pets_one_equipped ON user_pets(user_id) WHERE is_equipped`.
+- Trigger `update_updated_at_column` nas duas tabelas.
+- Slug validado por regex `^[a-z0-9-]+$`.
+- Imagens servidas direto da URL pública do bucket — sem proxy.

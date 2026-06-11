@@ -16,6 +16,7 @@ import { Route as RecadosRouteImport } from './routes/recados'
 import { Route as PerfilRouteImport } from './routes/perfil'
 import { Route as OracoesRouteImport } from './routes/oracoes'
 import { Route as NotificacoesRouteImport } from './routes/notificacoes'
+import { Route as MeuPetRouteImport } from './routes/meu-pet'
 import { Route as MatchesRouteImport } from './routes/matches'
 import { Route as ManualRouteImport } from './routes/manual'
 import { Route as LojaRouteImport } from './routes/loja'
@@ -58,6 +59,7 @@ import { Route as ApiPhotoRepairRouteImport } from './routes/api/photo-repair'
 import { Route as AdminVerificacoesRouteImport } from './routes/admin/verificacoes'
 import { Route as AdminStickersRouteImport } from './routes/admin/stickers'
 import { Route as AdminPresentesRouteImport } from './routes/admin/presentes'
+import { Route as AdminPetsRouteImport } from './routes/admin/pets'
 import { Route as AdminMoldurasRouteImport } from './routes/admin/molduras'
 import { Route as AdminGradientesNomeRouteImport } from './routes/admin/gradientes-nome'
 import { Route as AdminFundosRouteImport } from './routes/admin/fundos'
@@ -100,6 +102,11 @@ const OracoesRoute = OracoesRouteImport.update({
 const NotificacoesRoute = NotificacoesRouteImport.update({
   id: '/notificacoes',
   path: '/notificacoes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MeuPetRoute = MeuPetRouteImport.update({
+  id: '/meu-pet',
+  path: '/meu-pet',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MatchesRoute = MatchesRouteImport.update({
@@ -312,6 +319,11 @@ const AdminPresentesRoute = AdminPresentesRouteImport.update({
   path: '/admin/presentes',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminPetsRoute = AdminPetsRouteImport.update({
+  id: '/admin/pets',
+  path: '/admin/pets',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminMoldurasRoute = AdminMoldurasRouteImport.update({
   id: '/admin/molduras',
   path: '/admin/molduras',
@@ -370,6 +382,7 @@ export interface FileRoutesByFullPath {
   '/loja': typeof LojaRoute
   '/manual': typeof ManualRoute
   '/matches': typeof MatchesRoute
+  '/meu-pet': typeof MeuPetRoute
   '/notificacoes': typeof NotificacoesRoute
   '/oracoes': typeof OracoesRoute
   '/perfil': typeof PerfilRoute
@@ -384,6 +397,7 @@ export interface FileRoutesByFullPath {
   '/admin/fundos': typeof AdminFundosRoute
   '/admin/gradientes-nome': typeof AdminGradientesNomeRoute
   '/admin/molduras': typeof AdminMoldurasRoute
+  '/admin/pets': typeof AdminPetsRoute
   '/admin/presentes': typeof AdminPresentesRoute
   '/admin/stickers': typeof AdminStickersRoute
   '/admin/verificacoes': typeof AdminVerificacoesRoute
@@ -429,6 +443,7 @@ export interface FileRoutesByTo {
   '/loja': typeof LojaRoute
   '/manual': typeof ManualRoute
   '/matches': typeof MatchesRoute
+  '/meu-pet': typeof MeuPetRoute
   '/notificacoes': typeof NotificacoesRoute
   '/oracoes': typeof OracoesRoute
   '/perfil': typeof PerfilRoute
@@ -443,6 +458,7 @@ export interface FileRoutesByTo {
   '/admin/fundos': typeof AdminFundosRoute
   '/admin/gradientes-nome': typeof AdminGradientesNomeRoute
   '/admin/molduras': typeof AdminMoldurasRoute
+  '/admin/pets': typeof AdminPetsRoute
   '/admin/presentes': typeof AdminPresentesRoute
   '/admin/stickers': typeof AdminStickersRoute
   '/admin/verificacoes': typeof AdminVerificacoesRoute
@@ -489,6 +505,7 @@ export interface FileRoutesById {
   '/loja': typeof LojaRoute
   '/manual': typeof ManualRoute
   '/matches': typeof MatchesRoute
+  '/meu-pet': typeof MeuPetRoute
   '/notificacoes': typeof NotificacoesRoute
   '/oracoes': typeof OracoesRoute
   '/perfil': typeof PerfilRoute
@@ -503,6 +520,7 @@ export interface FileRoutesById {
   '/admin/fundos': typeof AdminFundosRoute
   '/admin/gradientes-nome': typeof AdminGradientesNomeRoute
   '/admin/molduras': typeof AdminMoldurasRoute
+  '/admin/pets': typeof AdminPetsRoute
   '/admin/presentes': typeof AdminPresentesRoute
   '/admin/stickers': typeof AdminStickersRoute
   '/admin/verificacoes': typeof AdminVerificacoesRoute
@@ -550,6 +568,7 @@ export interface FileRouteTypes {
     | '/loja'
     | '/manual'
     | '/matches'
+    | '/meu-pet'
     | '/notificacoes'
     | '/oracoes'
     | '/perfil'
@@ -564,6 +583,7 @@ export interface FileRouteTypes {
     | '/admin/fundos'
     | '/admin/gradientes-nome'
     | '/admin/molduras'
+    | '/admin/pets'
     | '/admin/presentes'
     | '/admin/stickers'
     | '/admin/verificacoes'
@@ -609,6 +629,7 @@ export interface FileRouteTypes {
     | '/loja'
     | '/manual'
     | '/matches'
+    | '/meu-pet'
     | '/notificacoes'
     | '/oracoes'
     | '/perfil'
@@ -623,6 +644,7 @@ export interface FileRouteTypes {
     | '/admin/fundos'
     | '/admin/gradientes-nome'
     | '/admin/molduras'
+    | '/admin/pets'
     | '/admin/presentes'
     | '/admin/stickers'
     | '/admin/verificacoes'
@@ -668,6 +690,7 @@ export interface FileRouteTypes {
     | '/loja'
     | '/manual'
     | '/matches'
+    | '/meu-pet'
     | '/notificacoes'
     | '/oracoes'
     | '/perfil'
@@ -682,6 +705,7 @@ export interface FileRouteTypes {
     | '/admin/fundos'
     | '/admin/gradientes-nome'
     | '/admin/molduras'
+    | '/admin/pets'
     | '/admin/presentes'
     | '/admin/stickers'
     | '/admin/verificacoes'
@@ -728,6 +752,7 @@ export interface RootRouteChildren {
   LojaRoute: typeof LojaRoute
   ManualRoute: typeof ManualRoute
   MatchesRoute: typeof MatchesRoute
+  MeuPetRoute: typeof MeuPetRoute
   NotificacoesRoute: typeof NotificacoesRoute
   OracoesRoute: typeof OracoesRoute
   PerfilRoute: typeof PerfilRoute
@@ -742,6 +767,7 @@ export interface RootRouteChildren {
   AdminFundosRoute: typeof AdminFundosRoute
   AdminGradientesNomeRoute: typeof AdminGradientesNomeRoute
   AdminMoldurasRoute: typeof AdminMoldurasRoute
+  AdminPetsRoute: typeof AdminPetsRoute
   AdminPresentesRoute: typeof AdminPresentesRoute
   AdminStickersRoute: typeof AdminStickersRoute
   AdminVerificacoesRoute: typeof AdminVerificacoesRoute
@@ -820,6 +846,13 @@ declare module '@tanstack/react-router' {
       path: '/notificacoes'
       fullPath: '/notificacoes'
       preLoaderRoute: typeof NotificacoesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/meu-pet': {
+      id: '/meu-pet'
+      path: '/meu-pet'
+      fullPath: '/meu-pet'
+      preLoaderRoute: typeof MeuPetRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/matches': {
@@ -1116,6 +1149,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminPresentesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/pets': {
+      id: '/admin/pets'
+      path: '/admin/pets'
+      fullPath: '/admin/pets'
+      preLoaderRoute: typeof AdminPetsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/molduras': {
       id: '/admin/molduras'
       path: '/admin/molduras'
@@ -1202,6 +1242,7 @@ const rootRouteChildren: RootRouteChildren = {
   LojaRoute: LojaRoute,
   ManualRoute: ManualRoute,
   MatchesRoute: MatchesRoute,
+  MeuPetRoute: MeuPetRoute,
   NotificacoesRoute: NotificacoesRoute,
   OracoesRoute: OracoesRoute,
   PerfilRoute: PerfilRoute,
@@ -1216,6 +1257,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminFundosRoute: AdminFundosRoute,
   AdminGradientesNomeRoute: AdminGradientesNomeRoute,
   AdminMoldurasRoute: AdminMoldurasRoute,
+  AdminPetsRoute: AdminPetsRoute,
   AdminPresentesRoute: AdminPresentesRoute,
   AdminStickersRoute: AdminStickersRoute,
   AdminVerificacoesRoute: AdminVerificacoesRoute,
