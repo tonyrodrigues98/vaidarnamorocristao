@@ -80,6 +80,7 @@ import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { UserBadges, invalidateUserBadges } from "@/components/UserBadges";
 import { BADGE_META, type BadgeCode } from "@/lib/badges";
 import { Award as AwardIcon } from "lucide-react";
+import { Shirt, PawPrint } from "lucide-react";
 import { BibleVerseSelector, type BibleSelection } from "@/components/BibleVerseSelector";
 import { InterestsPanel } from "@/components/admin/InterestsPanel";
 import { AdminTopNav } from "@/components/admin/AdminTopNav";
@@ -697,6 +698,18 @@ function Admin() {
                   description="Gerenciar stickers do chat."
                 />
               )}
+              <AdminModuleLink
+                to="/admin/avatar"
+                icon={<Shirt className="h-4 w-4" />}
+                title="Avatar"
+                description="Bases, poses e itens do avatar."
+              />
+              <AdminModuleLink
+                to="/admin/pets"
+                icon={<PawPrint className="h-4 w-4" />}
+                title="Pets"
+                description="Catálogo de pets companheiros."
+              />
             </AdminModuleGroup>
 
             <AdminModuleGroup
@@ -1247,7 +1260,9 @@ type AdminModuleTo =
   | "/admin/fundos"
   | "/admin/equipe-live"
   | "/admin/gradientes-nome"
-  | "/admin/stickers";
+  | "/admin/stickers"
+  | "/admin/avatar"
+  | "/admin/pets";
 
 function AdminMetricPill({ label, value }: { label: string; value: string | number }) {
   return (
