@@ -48,6 +48,12 @@ import { OnlineDot } from "@/components/OnlineDot";
 import { CommitmentProgressCard } from "@/components/commitment/CommitmentProgressCard";
 import { CommitmentPauseCard } from "@/components/commitment/CommitmentPauseCard";
 import { ConversationDrawer } from "@/components/conversations/ConversationDrawer";
+import { useNetworkStatus } from "@/hooks/useNetworkStatus";
+import {
+  getFirstMessageSuggestions,
+  type FirstMessagePartnerProfile,
+} from "@/lib/firstMessageSuggestions";
+import { Sparkles } from "lucide-react";
 
 type Msg = {
   id: string;
@@ -90,6 +96,9 @@ type Partner = {
   verified?: boolean | null;
   equipped_frame_id?: string | null;
   equipped_aura_id?: string | null;
+  city?: string | null;
+  church?: string | null;
+  bio?: string | null;
 };
 
 export const Route = createFileRoute("/conversas/$matchId")({
@@ -128,6 +137,7 @@ function Chat() {
   const restrictedWords = useRestrictedWords();
   const [warning, setWarning] = useState<string | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const { isOnline } = useNetworkStatus();
   // IDs already marked as read in this session — prevents duplicate RPC calls
   // when pagesData changes (older page loaded, realtime UPDATE, etc.).
   const markedReadRef = useRef<Set<string>>(new Set());
@@ -161,6 +171,41 @@ function Chat() {
     () => (pending.length ? [...serverMessages, ...pending] : serverMessages),
     [serverMessages, pending],
   );
+  const firstMessageSuggestions = useMemo<string[]>(() => {
+    if (messages.length !== 0) return [];
+    if (!partner) return [];
+    const profile: FirstMessagePartnerProfile = {
+      full_name: partner.full_name,
+      city: partner.city ?? null,
+      church: partner.church ?? null,
+      bio: partner.bio ?? null,
+    };
+    return getFirstMessageSuggestions(profile);
+  }, [messages.length, partner]);
+
+  function applySuggestion(text: string) {
+    setInput((prev) => {
+      if (prev.trim().length === 0) return text;
+      const ok =
+        typeof window !== "undefined" &&
+        window.confirm(
+          "Substituir o texto atual pela sugestão? Você poderá editar antes de enviar.",
+        );
+      return ok ? text : prev;
+    });
+    requestAnimationFrame(() => {
+      const el = inputRef.current;
+      if (el) {
+        el.focus();
+        const len = el.value.length;
+        try {
+          el.setSelectionRange(len, len);
+        } catch {
+          // some browsers throw on certain input types — safe to ignore
+        }
+      }
+    });
+  }
   const loadingOlder = isFetchingPreviousPage;
   const hasMoreOlder = hasPreviousPage;
 
@@ -240,7 +285,9 @@ function Chat() {
       setAuthorized(true);
       const { data: p } = await supabase
         .from("profiles")
-        .select("id,full_name,photo_url,verified,equipped_frame_id,equipped_aura_id")
+        .select(
+          "id,full_name,photo_url,verified,equipped_frame_id,equipped_aura_id,city,church,bio",
+        )
         .eq("id", partnerId)
         .maybeSingle();
       setPartner(p as Partner | null);
@@ -666,13 +713,42 @@ function Chat() {
           <ChatSkeleton bubbles={8} />
         )}
         {authorized === true && messages.length === 0 && (
-          <div className="mt-10 flex justify-center">
+          <div className="mt-10 flex flex-col items-center gap-5">
             <AppEmptyState
               compact
               icon={<MessageCircle className="h-5 w-5" />}
               title="Comece a conversa com propósito"
               description="Envie uma mensagem respeitosa e verdadeira para iniciar esse diálogo."
             />
+            {firstMessageSuggestions.length > 0 && (
+              <div className="w-full max-w-md rounded-2xl border border-border/60 bg-card/70 p-4 shadow-sm backdrop-blur-sm">
+                <div className="mb-1 flex items-center gap-2 text-sm font-semibold text-foreground">
+                  <Sparkles className="h-4 w-4 text-primary" />
+                  Comece com leveza
+                </div>
+                <p className="mb-3 text-xs text-muted-foreground">
+                  Escolha uma sugestão ou escreva do seu jeito.
+                </p>
+                <div className="flex flex-col gap-2">
+                  {firstMessageSuggestions.map((s) => (
+                    <button
+                      key={s}
+                      type="button"
+                      onClick={() => applySuggestion(s)}
+                      disabled={!isOnline}
+                      className="app-pressable w-full rounded-xl border border-border/60 bg-background px-3 py-2 text-left text-sm leading-snug text-foreground transition hover:border-primary/50 hover:bg-accent/60 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
+                {!isOnline && (
+                  <p className="mt-3 text-[11px] text-muted-foreground">
+                    Conecte-se para enviar a primeira mensagem.
+                  </p>
+                )}
+              </div>
+            )}
           </div>
         )}
         {messages.map((m) => {
