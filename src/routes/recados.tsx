@@ -155,12 +155,13 @@ function RecadosPage() {
     if (commitment) {
       setInbox([]);
       setOutbox([]);
+      setHidden([]);
       setHints({});
       setLoadingList(false);
       return;
     }
     await supabase.rpc("expire_anonymous_messages");
-    const [{ data: inb }, { data: out }, { data: settings }] = await Promise.all([
+    const [{ data: inb }, { data: out }, { data: hid }, { data: settings }] = await Promise.all([
       supabase
         .from("anonymous_messages_inbox")
         .select("*")
@@ -168,6 +169,17 @@ function RecadosPage() {
       supabase
         .from("anonymous_messages_outbox")
         .select("*")
+        .order("created_at", { ascending: false }),
+      // Ignored ("hidden") messages: query the base table directly. RLS
+      // already restricts to receiver_id = auth.uid(); we mask sender_id
+      // client-side so the receiver still can't see who sent it.
+      supabase
+        .from("anonymous_messages")
+        .select(
+          "id, sender_id, content, status, reply_text, sender_reveal_requested_at, receiver_reveal_requested_at, revealed_at, match_id, created_at, expires_at",
+        )
+        .eq("receiver_id", user.id)
+        .eq("status", "ignored")
         .order("created_at", { ascending: false }),
       supabase
         .from("anonymous_message_settings")
@@ -177,6 +189,13 @@ function RecadosPage() {
     ]);
     setInbox((inb ?? []) as InboxRow[]);
     setOutbox((out ?? []) as OutboxRow[]);
+    setHidden(
+      ((hid ?? []) as any[]).map((r) => ({
+        ...r,
+        // Never expose sender of a hidden/anonymous message.
+        sender_id: null,
+      })) as InboxRow[],
+    );
     setAccept(settings?.accept_anonymous ?? true);
 
     const allRevealed = [
