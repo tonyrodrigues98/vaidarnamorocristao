@@ -462,7 +462,10 @@ function AvatarPage() {
               <Info className="h-4 w-4" />
               Detalhes
             </button>
-            <button className="flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-md">
+            <button
+              onClick={saveLook}
+              className="flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-md transition hover:bg-primary/90"
+            >
               <Camera className="h-4 w-4" />
               Salvar Look
             </button>
@@ -587,9 +590,16 @@ function AvatarPage() {
                           Equipar
                         </div>
                       ) : (
-                        <div className="flex items-center justify-center gap-1 text-xs">
+                        <div
+                          className={cn(
+                            "flex items-center justify-center gap-1 rounded-full px-3 py-1 text-xs font-semibold",
+                            coins >= item.price
+                              ? "bg-amber-100 text-amber-900"
+                              : "bg-muted text-muted-foreground",
+                          )}
+                        >
                           <CoinIcon className="h-3.5 w-3.5" />
-                          <span className="font-medium">{item.price.toLocaleString("pt-BR")}</span>
+                          <span>{item.price.toLocaleString("pt-BR")}</span>
                         </div>
                       )}
                     </div>
