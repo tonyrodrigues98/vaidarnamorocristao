@@ -1,5 +1,5 @@
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Loader2,
   Crown,
@@ -155,6 +155,10 @@ function AvatarPage() {
   const [bodyType, setBodyType] = useState<string>("default");
   const [pose, setPose] = useState<AvatarPoseKey>("standing_default");
   const [skinTone, setSkinTone] = useState<string>("default");
+  // Marca quando a hidratação inicial do user_avatar_base terminou —
+  // antes disso, os auto-saves precisam ficar travados pra não sobrescrever
+  // o que está salvo no banco com o default do useState.
+  const baseHydratedRef = useRef(false);
   const [expression, setExpression] = useState<AvatarExpressionKey>("soft_smile");
   const [poseSheetOpen, setPoseSheetOpen] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
@@ -162,10 +166,9 @@ function AvatarPage() {
   // the user navigates categories or selects another preview.
   const [previewItem, setPreviewItem] = useState<Item | null>(null);
   /**
-   * Mock local — escolha de cor por layer (cabelo, roupa). Persistência
-   * real virá quando o backend ganhar a coluna `color_selections`.
-   * Hoje só afeta a renderização e dispara o `tintable`/`mask_tint` quando
-   * o item informar suporte (itens do DB atual caem em `fixed_asset`).
+   * Escolha de cor por layer (cabelo, roupa). Persistida em
+   * `user_avatar_base.color_selections` (jsonb). Chave = AvatarLayerKey,
+   * valor = id do preset em `src/data/avatarColorPresets.ts`.
    */
   const [colorSelections, setColorSelections] = useState<
     Partial<Record<AvatarLayerKey, string>>
