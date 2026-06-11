@@ -1,106 +1,92 @@
 ## Objetivo
 
-Refatorar o sistema de pets para ser totalmente administrável pelo banco. Nada de categoria, espécie, raça, fase, personalidade ou benefício hardcoded no frontend. O onboarding em `/meu-pet` consome o catálogo do banco e monta as etapas dinamicamente, pulando o que não tiver dados.
+Separar descrição de vantagens no catálogo de pets, criar um CRUD admin de Vantagens com **efeitos reais** (chaves de comportamento) aplicados em todo o sistema, e adicionar preview completo da imagem ao subir no admin. Tudo administrável: você pode criar, editar, ativar/desativar e excluir vantagens.
 
 ---
 
-## 1. Banco de dados (migration nova)
+## 1. Banco — vantagens com motor de efeitos
 
-Criar tabelas de catálogo, todas com `id`, `name`, `slug` (único), `description`, `image_url`, `active`, `sort_order`, `created_at`, `updated_at`.
+Migration nova:
 
-- `pet_categories` — Cachorros, Gatos, Aves, Peixes, Roedores, Répteis…
-- `pet_species` — vinculada a `category_id` (Coelho, Hamster, Calopsita, Betta…)
-- `pet_variants` — `category_id` (nullable) + `species_id` (nullable). Golden, Gato preto, Betta azul…
-- `pet_life_stages` — Filhote, Adulto, Sênior…
-- `pet_personalities` — Carinhoso, Brincalhão, Calmo…
-- `pet_benefits` — com escopo: `scope` (`global|category|species|variant`) + `scope_id` (nullable). Bônus de moedas, dica em recado anônimo etc.
+### `pet_perk_effects` (catálogo de efeitos disponíveis — fixo no código, espelhado em tabela só para o admin escolher por nome)
 
-Tabela de uso do usuário:
+Campos: `key` (PK, ex.: `daily_coins_plus_1`), `label`, `description`, `category` (`coins | missions | anonymous | gifts | cosmetic | pet_collect | avatar_fx`), `numeric_param` (boolean — se aceita valor), `default_param`, `active`. Seed com os 22 efeitos listados.
 
-- `user_pets_v2` (nova, para não quebrar a atual): `user_id`, `category_id`, `species_id?`, `variant_id?`, `life_stage_id`, `personality_id`, `benefit_id?`, `custom_name`, `is_equipped`, `visibility` (`public|private`), timestamps. Constraint: 1 equipado por usuário.
+### Refatorar `pet_benefits`
 
-Migration vai:
-1. CREATE TABLE de cada uma + GRANTs (`authenticated` + `service_role`; `anon` SELECT apenas em catálogo ativo).
-2. RLS:
-   - Catálogo: `SELECT` para `authenticated` quando `active = true`; admin/super_admin pode ver/escrever tudo.
-   - `user_pets_v2`: dono faz CRUD; leitura pública apenas quando `is_equipped = true AND visibility = 'public'`.
-3. Função `equip_user_pet(uuid)` (desequipa os outros).
-4. Trigger `updated_at` em todas.
-5. Seed mínimo: categorias, algumas espécies/variações, 2 fases, 4 personalidades, 2 benefícios — só para testes; tudo administrável no admin.
+- Adicionar coluna `effect_key text references pet_perk_effects(key)` (nullable — vantagem pode ser puramente cosmética/explicativa).
+- Adicionar `effect_param int` (ex.: quantas moedas, qual decoration_id).
+- Adicionar `effect_target_id uuid` (para "Moldura X desbloqueada pelo pet" apontar para `avatar_decorations.id` etc.).
+- Renomear conceito: campo `description` continua para texto livre do admin; UI separa "Descrição" de "Vantagem (efeito)".
 
-A tabela atual `pets` / `user_pets` continua existindo (compatibilidade com `EquippedPetBadge`, gifts, etc.) — não é removida nesta entrega.
+### `user_pet_perk_state` (estado por usuário/pet)
+
+`user_id`, `benefit_id`, `last_collected_at`, `accumulated_coins`, etc. — para vantagens coletáveis ("Recompensa diária do pet", "Pet encontra moedas").
+
+GRANTs + RLS padrão (user lê/escreve só o próprio).
 
 ---
 
-## 2. Admin (`/admin/pet`)
+## 2. Motor de efeitos no backend
 
-Rota nova `src/routes/admin/pet.tsx` com abas no mesmo visual do `/admin/index` (pills brancas com bolha rose):
+Função SQL `public.get_active_pet_perks(_user_id uuid)` → retorna `effect_key, effect_param, effect_target_id` das vantagens ativas do pet equipado em `user_pets_v2` (escopo global/categoria/espécie/variante compatível).
 
-- Categorias
-- Espécies/Tipos
-- Variações
-- Fases
-- Personalidades
-- Benefícios (com seletor de escopo + alvo)
+Integrações reais (alteração das funções existentes):
 
-Cada aba: lista (ativos/inativos), criar, editar, ativar/desativar, ordenar, upload de imagem (bucket `pets` existente). Apenas admin/super_admin.
-
-Helpers em `src/lib/petCatalog.ts` (list/create/update/delete por entidade + resolução de imagem signed URL).
-
-A rota antiga `src/routes/admin/pets.tsx` (catálogo legado) permanece intacta.
-
----
-
-## 3. Onboarding `/meu-pet`
-
-Reescrever `src/routes/meu-pet.tsx` como wizard dinâmico:
-
-Etapas (cada uma é pulada se a query retornar vazio):
-1. Categoria — `pet_categories` ativas.
-2. Espécie — `pet_species` ativas onde `category_id = escolhida`.
-3. Variação — `pet_variants` ativas compatíveis (por `species_id` ou `category_id`).
-4. Fase — `pet_life_stages` ativas.
-5. Nome — input com limite.
-6. Personalidade — `pet_personalities` ativas.
-7. Benefício — `pet_benefits` ativos com escopo compatível com as escolhas (`global` + categoria + espécie + variação selecionadas). Pula se vazio.
-8. Confirmação — preview do pet (imagem por prioridade) e botão "Criar meu pet".
-
-Imagem resolvida por prioridade: variante → espécie → categoria → placeholder do banco.
-
-Se o usuário já tem pet em `user_pets_v2`, mostra showcase + botões "Editar nome", "Trocar pet" (reabre wizard), "Visibilidade pública/privada".
-
-Sem nenhum array fixo no componente — tudo via TanStack Query consumindo o banco.
+| Efeito | Onde integra |
+|---|---|
+| `daily_coins_plus_{1,2,3}` | `claim_daily_coins()` — soma extra ao `award` |
+| `mission_coins_plus_1` / `mission_bonus_chance` | nova RPC `claim_mission_reward` consultando perks |
+| `anonymous_hint_plus_1` | `request_anonymous_hint` — limite 2 → 3 |
+| `gift_cashback` / `gift_discount` | RPC de envio de presente (aplicar % no débito ou cashback no `coin_transactions`) |
+| `pet_finds_coins_daily` / `pet_daily_reward` | nova RPC `collect_pet_reward()` — 1×/dia, grava em `user_pet_perk_state` |
+| `unlock_frame/background/aura/badge` | grant automático em `user_decorations` / `user_profile_backgrounds` / `user_badges` ao equipar pet (trigger em `user_pets_v2`) |
+| `pet_message_fx` | flag lida pelo chat para aplicar leve efeito visual nas mensagens do usuário |
+| `pet_accessory_slot_plus_1` / `pet_collectible_slot_plus_1` | metadados consumidos pela UI do pet |
 
 ---
 
-## 4. Integrações
+## 3. Admin `/admin/pets` — aba "Vantagens"
 
-- `/perfil`: mostrar pet equipado (`user_pets_v2`) ao lado do badge atual quando existir; o badge antigo continua para usuários no sistema legado.
-- `/pretendentes/$id`: mostrar pet equipado se `visibility = 'public'`.
-- Nenhuma alteração em molduras, auras, fundos, presentes, moedas, recados.
+Refatorar a aba existente:
+
+- Campo **Descrição** (texto livre, separado).
+- Campo **Efeito**: select com todos os `pet_perk_effects` ativos (agrupados por categoria). Botão "Sem efeito (cosmético)".
+- Campo dinâmico conforme efeito escolhido:
+  - Numéricos → input "Quantidade".
+  - `unlock_*` → select do recurso real (`avatar_decorations` tipo frame/aura, `profile_backgrounds`, `badges`).
+- Escopo (global/categoria/espécie/variante) já existe — mantém.
+- Ativar/desativar, ordenar, excluir.
+- Hook `useBenefitEffects` lista efeitos do banco para popular o select — você pode adicionar/editar/desativar efeitos diretamente em outra mini-aba ("Tipos de efeito"), assim você cria novas regras sem precisar de código (apenas as que tiverem `key` reconhecida pelo backend produzem efeito real; as outras ficam como tags informativas).
+
+### Preview completo da imagem
+
+Em **todas** as abas do admin de pets (categorias/espécies/variantes/fases/personalidades/vantagens), o upload mostra agora:
+
+- Preview grande (até 320px), proporção preservada, fundo xadrez transparência.
+- Nome do arquivo, tamanho, dimensões.
+- Botões "Trocar" e "Remover".
+- Drag & drop além do clique.
 
 ---
 
-## 5. Design
+## 4. Onboarding `/meu-pet` e showcase
 
-Mobile-first, Poppins (já no projeto), cards arredondados, glassmorphism leve no card showcase, ícones Lucide, animações com transitions Tailwind, dark/light via tokens semânticos de `styles.css`. Respeitar safe-area no shell mobile existente.
+- Etapa de vantagens mostra `description` em destaque e o `effect.label` como chip ("⚡ +2 moedas no resgate diário").
+- Showcase do pet equipado em `/perfil` lista todas as vantagens ativas do pet.
 
 ---
 
-## Detalhes técnicos
+## 5. Seed dos 22 efeitos
 
-- Migration única com todas as tabelas + GRANTs + RLS + seed.
-- Schemas Zod nos handlers de upload do admin (não em serverFn — usaremos Supabase client direto, como o resto do admin já faz).
-- `image_url` armazena storage path; resolução para signed URL no helper (mesmo padrão de `src/lib/pets.ts`).
-- Types em `src/types/petCatalog.ts`.
-- Sem mexer em `src/integrations/supabase/*`.
+Migration insere todos com `key` estáveis. Você pode desativar/renomear o label, mas a `key` não muda (é o que o backend reconhece).
 
 ---
 
 ## Fora de escopo desta entrega
 
-- Migrar dados existentes de `user_pets` legado para `user_pets_v2`.
-- Combinações imagem variante+fase (campo previsto, UI fica para depois).
-- Sistema de raridade/preço nesse novo catálogo (mantém apenas no legado por ora).
+- Sistema de moderação de vantagens criadas por terceiros (só admin cria).
+- Animações WebGL no efeito de mensagem — usaremos um glow CSS leve.
+- Reescrita do envio de presentes: vou adicionar uma RPC nova `send_virtual_gift_with_perks` que reaproveita a lógica existente; o componente passa a chamá-la.
 
-Pronto para implementar assim que aprovar.
+Se aprovar, implemento a migration + motor + UI numa sequência só.
