@@ -567,11 +567,21 @@ function LegacyPetsPanel() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [draft, setDraft] = useState<PetWritable | null>(null);
   const [creating, setCreating] = useState(false);
+  const [categories, setCategories] = useState<PetCategory[]>([]);
+  const [speciesList, setSpeciesList] = useState<PetSpecies[]>([]);
+  const [categoryId, setCategoryId] = useState<string>("");
   const fileRef = useRef<HTMLInputElement>(null);
 
   async function reload() {
     try {
-      setPets(await listAllPetsAdmin());
+      const [list, cats, specs] = await Promise.all([
+        listAllPetsAdmin(),
+        listAll<PetCategory>("pet_categories"),
+        listAll<PetSpecies>("pet_species"),
+      ]);
+      setPets(list);
+      setCategories(cats);
+      setSpeciesList(specs);
     } catch (e) {
       toast.error((e as Error).message);
     }
@@ -584,6 +594,7 @@ function LegacyPetsPanel() {
   function startCreate() {
     setCreating(true);
     setEditingId(null);
+    setCategoryId(categories[0]?.id ?? "");
     setDraft({
       name: "",
       slug: "",
@@ -601,6 +612,10 @@ function LegacyPetsPanel() {
   function startEdit(p: Pet) {
     setCreating(false);
     setEditingId(p.id);
+    const matched = speciesList.find(
+      (s) => s.name.toLowerCase() === p.species.toLowerCase() || s.slug === p.species,
+    );
+    setCategoryId(matched?.category_id ?? categories[0]?.id ?? "");
     setDraft({
       name: p.name,
       slug: p.slug,
@@ -738,23 +753,38 @@ function LegacyPetsPanel() {
             <Field icon={Hash} label="Slug">
               <Input value={draft.slug} onChange={(e) => setDraft({ ...draft, slug: slugifyPet(e.target.value) })} />
             </Field>
-            <Field icon={PawPrint} label="Espécie">
-              <Input
-                value={draft.species}
-                onChange={(e) => setDraft({ ...draft, species: e.target.value })}
-                placeholder="gato, cachorro, coelho..."
-              />
-            </Field>
-            <Field icon={Sparkles} label="Raridade">
+            <Field icon={Layers} label="Categoria">
               <Select
-                value={draft.rarity}
-                onValueChange={(v) => setDraft({ ...draft, rarity: v as PetRarity })}
+                value={categoryId}
+                onValueChange={(v) => {
+                  setCategoryId(v);
+                  setDraft({ ...draft, species: "" });
+                }}
               >
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue placeholder={categories.length ? "Selecione" : "Cadastre uma categoria"} />
+                </SelectTrigger>
                 <SelectContent>
-                  {RARITIES.map((r) => (
-                    <SelectItem key={r} value={r}>{PET_RARITY_LABEL[r]}</SelectItem>
+                  {categories.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
                   ))}
+                </SelectContent>
+              </Select>
+            </Field>
+            <Field icon={PawPrint} label="Espécie">
+              <Select
+                value={draft.species}
+                onValueChange={(v) => setDraft({ ...draft, species: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={categoryId ? "Selecione" : "Escolha a categoria"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {speciesList
+                    .filter((s) => !categoryId || s.category_id === categoryId)
+                    .map((s) => (
+                      <SelectItem key={s.id} value={s.name}>{s.name}</SelectItem>
+                    ))}
                 </SelectContent>
               </Select>
             </Field>
@@ -786,22 +816,43 @@ function LegacyPetsPanel() {
               <div className="flex items-center gap-2">
                 <Switch
                   checked={draft.is_exclusive ?? false}
-                  onCheckedChange={(v) => setDraft({ ...draft, is_exclusive: v })}
+                  onCheckedChange={(v) =>
+                    setDraft({
+                      ...draft,
+                      is_exclusive: v,
+                      rarity: v ? draft.rarity || "rare" : "common",
+                    })
+                  }
                 />
                 <Label className="!m-0 text-sm">Exclusivo</Label>
               </div>
             </div>
             {draft.is_exclusive && (
-              <Field icon={Sparkles} label="Preço (moedas)">
-                <Input
-                  type="number"
-                  min={0}
-                  value={draft.price_coins ?? 0}
-                  onChange={(e) =>
-                    setDraft({ ...draft, price_coins: Math.max(0, Number(e.target.value) || 0) })
-                  }
-                />
-              </Field>
+              <>
+                <Field icon={Sparkles} label="Raridade">
+                  <Select
+                    value={draft.rarity}
+                    onValueChange={(v) => setDraft({ ...draft, rarity: v as PetRarity })}
+                  >
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {RARITIES.map((r) => (
+                        <SelectItem key={r} value={r}>{PET_RARITY_LABEL[r]}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </Field>
+                <Field icon={Sparkles} label="Preço (moedas)">
+                  <Input
+                    type="number"
+                    min={0}
+                    value={draft.price_coins ?? 0}
+                    onChange={(e) =>
+                      setDraft({ ...draft, price_coins: Math.max(0, Number(e.target.value) || 0) })
+                    }
+                  />
+                </Field>
+              </>
             )}
             <div className="sm:col-span-2">
               <Field icon={ImageIcon} label="Imagem (PNG transparente, 1024×1024)">
