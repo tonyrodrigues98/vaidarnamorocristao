@@ -50,6 +50,24 @@ Aviso âmbar discreto exibido no topo de páginas quando o usuário está **offl
 
 ---
 
+## 3a. /dashboard (Analytics Center)
+
+**Arquivo:** `src/routes/dashboard.tsx` · **Detalhe:** `RELATORIO_DASHBOARD_ANALYTICS.md`
+
+- Migrado de `useEffect`+`supabase.from` para **três `useQuery`** com chaves estáveis:
+  - `["dashboard-profile", userId]` (staleTime 60s)
+  - `["dashboard-latest-news", userId]` (staleTime 60s)
+  - `["dashboard-metrics", userId, period]` (staleTime 30s)
+- Todas com `refetchOnReconnect: true`.
+- Filtro de período real: chips 7d / 30d / 90d / Tudo (afeta `profile_views.gte("created_at", since)`).
+- KPIs compactos: `grid-cols-2` mobile / `sm:grid-cols-4` desktop. Skeleton por card durante loading.
+- Seção "Atenção necessária" derivada de sinais reais (`unread`, `interests`); fallback "Tudo certo por aqui."
+- Recharts continua **lazy** (`React.lazy` + `Suspense`); charts só montam quando `totalViews > 0` — antes renderizavam com array vazio.
+- Offline com cache → `StaleDataNotice`. Offline sem cache → `OfflineState`. Chips de período `disabled` offline sem cache.
+- Sem métricas/gráficos/contadores fake. Sem mudança em banco/RLS/schema. `/dashboard` não redireciona e `/inicio` não foi tocado.
+
+---
+
 ## 4. /devocional
 
 **Arquivo:** `src/routes/devocional.tsx`
