@@ -306,7 +306,17 @@ function ContaPage() {
               <AlertTriangle className="h-3.5 w-3.5" /> Zona de perigo
             </h2>
             <div className="rounded-2xl border border-red-200 bg-red-50/40 p-3 dark:border-red-400/40 dark:bg-red-950/30">
-              <AccountDangerZone />
+              {!isOnline && (
+                <p className="mb-2 rounded-lg bg-red-100/60 px-3 py-2 text-[11px] font-medium text-red-800 dark:bg-red-900/40 dark:text-red-200">
+                  Disponível online. Reconecte-se para alterar dados de segurança ou excluir a conta.
+                </p>
+              )}
+              <div
+                aria-disabled={!isOnline}
+                className={!isOnline ? "pointer-events-none opacity-60" : undefined}
+              >
+                <AccountDangerZone />
+              </div>
             </div>
           </section>
 
