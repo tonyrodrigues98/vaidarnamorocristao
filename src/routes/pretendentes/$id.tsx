@@ -120,6 +120,9 @@ function Detail() {
     null,
   );
   const [extraPhotos, setExtraPhotos] = useState<string[]>([]);
+  const [categorizedPhotos, setCategorizedPhotos] = useState<
+    Array<{ url: string; category: string | null }>
+  >([]);
   const [equippedBackground, setEquippedBackground] = useState<ProfileBackground | null>(null);
   const [profileNameGradient, setProfileNameGradient] = useState<NameGradient | null>(null);
   const [myProfile, setMyProfile] = useState<CompatProfile | null>(null);
@@ -219,11 +222,13 @@ function Detail() {
       setPrefs((pr ?? null) as Prefs | null);
       const { data: ph } = await supabase
         .from("profile_photos")
-        .select("url, sort_order, created_at")
+        .select("url, sort_order, created_at, category")
         .eq("user_id", id)
         .order("sort_order", { ascending: true })
         .order("created_at", { ascending: true });
-      setExtraPhotos(((ph ?? []) as Array<{ url: string }>).map((r) => r.url));
+      const rows = (ph ?? []) as Array<{ url: string; category: string | null }>;
+      setExtraPhotos(rows.map((r) => r.url));
+      setCategorizedPhotos(rows);
     })();
   }, [id]);
 
