@@ -136,7 +136,6 @@ function AvatarPage() {
   const isSuperAdmin = role === "super_admin";
 
   const [loading, setLoading] = useState(true);
-  const [needsCreate, setNeedsCreate] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
   const [items, setItems] = useState<Item[]>([]);
   const [bases, setBases] = useState<Base[]>([]);
@@ -219,13 +218,6 @@ function AvatarPage() {
         .maybeSingle(),
     ]);
 
-    // Force users without an explicit avatar choice through /avatar/criar.
-    if (!userBaseRes.data) {
-      setNeedsCreate(true);
-      setLoading(false);
-      return;
-    }
-
     const cats = (catsRes.data ?? []) as Category[];
     const its = (itemsRes.data ?? []) as Item[];
     const bs = (basesRes.data ?? []) as Base[];
@@ -234,17 +226,26 @@ function AvatarPage() {
     setBases(bs);
     if (cats.length && !activeCat) setActiveCat(cats[0].id);
 
-    // Hydrate from the user's saved avatar choice.
-    const saved = userBaseRes.data as { base_id: string; skin_tone: string | null };
+    // Hydrate from saved avatar choice if present; otherwise fall back to
+    // profile gender default. Onboarding (/avatar/criar) is opt-in for now.
+    const saved = userBaseRes.data as { base_id: string; skin_tone: string | null } | null;
+    const profileGender =
+      (profileRes.data?.sex as string | undefined) === "f" ? "feminino" : "masculino";
     const matched =
-      bs.find((b) => b.id === saved.base_id) ??
-      bs.find((b) => b.gender === ((profileRes.data?.sex as string | undefined) === "f" ? "feminino" : "masculino")) ??
+      (saved && bs.find((b) => b.id === saved.base_id)) ??
+      bs.find(
+        (b) =>
+          b.gender === profileGender &&
+          b.body_type === "default" &&
+          b.pose_key === "standing_default",
+      ) ??
+      bs.find((b) => b.gender === profileGender) ??
       bs[0] ??
       null;
     setBase(matched);
     setBodyType(matched?.body_type ?? "default");
     setPose((matched?.pose_key as AvatarPoseKey | undefined) ?? "standing_default");
-    setSkinTone(saved.skin_tone ?? matched?.skin_tone ?? "default");
+    setSkinTone(saved?.skin_tone ?? matched?.skin_tone ?? "default");
 
     const inv = new Set<string>();
     const favs = new Set<string>();
@@ -746,8 +747,6 @@ function AvatarPage() {
     );
   }
   if (!user) return <Navigate to="/auth/login" />;
-  // Dev phase: do not force redirect to /avatar/criar.
-  // if (needsCreate) return <Navigate to="/avatar/criar" />;
   if (!isSuperAdmin) {
     return (
       <div className="flex h-screen flex-col items-center justify-center gap-4 px-6 text-center">
