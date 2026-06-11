@@ -713,13 +713,42 @@ function Chat() {
           <ChatSkeleton bubbles={8} />
         )}
         {authorized === true && messages.length === 0 && (
-          <div className="mt-10 flex justify-center">
+          <div className="mt-10 flex flex-col items-center gap-5">
             <AppEmptyState
               compact
               icon={<MessageCircle className="h-5 w-5" />}
               title="Comece a conversa com propósito"
               description="Envie uma mensagem respeitosa e verdadeira para iniciar esse diálogo."
             />
+            {firstMessageSuggestions.length > 0 && (
+              <div className="w-full max-w-md rounded-2xl border border-border/60 bg-card/70 p-4 shadow-sm backdrop-blur-sm">
+                <div className="mb-1 flex items-center gap-2 text-sm font-semibold text-foreground">
+                  <Sparkles className="h-4 w-4 text-primary" />
+                  Comece com leveza
+                </div>
+                <p className="mb-3 text-xs text-muted-foreground">
+                  Escolha uma sugestão ou escreva do seu jeito.
+                </p>
+                <div className="flex flex-col gap-2">
+                  {firstMessageSuggestions.map((s) => (
+                    <button
+                      key={s}
+                      type="button"
+                      onClick={() => applySuggestion(s)}
+                      disabled={!isOnline}
+                      className="app-pressable w-full rounded-xl border border-border/60 bg-background px-3 py-2 text-left text-sm leading-snug text-foreground transition hover:border-primary/50 hover:bg-accent/60 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
+                {!isOnline && (
+                  <p className="mt-3 text-[11px] text-muted-foreground">
+                    Conecte-se para enviar a primeira mensagem.
+                  </p>
+                )}
+              </div>
+            )}
           </div>
         )}
         {messages.map((m) => {
