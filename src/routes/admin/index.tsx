@@ -1316,13 +1316,13 @@ function AdminModuleLink({
   return (
     <Link
       to={to}
-      className="group flex items-center gap-3 rounded-2xl border border-border/70 bg-background/75 p-3 text-left transition hover:-translate-y-0.5 hover:border-[var(--rose)]/40 hover:shadow-soft"
+      className="group flex min-h-14 items-center gap-3 rounded-2xl border border-border/70 bg-white px-5 py-3 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-[var(--rose)]/40 hover:shadow-md"
     >
-      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-muted text-muted-foreground transition group-hover:bg-[var(--rose)] group-hover:text-white">
+      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[var(--petal)] text-[var(--rose)]">
         {icon}
       </span>
       <span className="min-w-0">
-        <span className="block truncate text-sm font-semibold">{title}</span>
+        <span className="block truncate text-sm font-semibold text-black">{title}</span>
         <span className="mt-0.5 line-clamp-1 block text-xs text-muted-foreground">
           {description}
         </span>
