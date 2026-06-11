@@ -9,11 +9,17 @@ import { extractProfilePhotoPath } from "@/lib/photoUrl";
 import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 import { StaleDataNotice } from "@/components/ui/StaleDataNotice";
 import { OfflineState } from "@/components/ui/OfflineState";
+import {
+  PHOTO_CATEGORIES,
+  type PhotoCategory,
+  normalizeCategory,
+} from "@/lib/photoCategories";
 
 interface Photo {
   id: string;
   url: string;
   sort_order: number;
+  category: string | null;
 }
 
 const MAX = 6;
@@ -22,6 +28,7 @@ export function ProfilePhotosManager({ userId }: { userId: string }) {
   const { isOnline } = useNetworkStatus();
   const qc = useQueryClient();
   const [uploading, setUploading] = useState(false);
+  const [activeCategory, setActiveCategory] = useState<PhotoCategory>("dia_a_dia");
 
   const photosQuery = useQuery({
     queryKey: ["profile-photos", userId],
@@ -31,7 +38,7 @@ export function ProfilePhotosManager({ userId }: { userId: string }) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("profile_photos")
-        .select("id, url, sort_order")
+        .select("id, url, sort_order, category")
         .eq("user_id", userId)
         .order("sort_order", { ascending: true })
         .order("created_at", { ascending: true });
@@ -44,6 +51,10 @@ export function ProfilePhotosManager({ userId }: { userId: string }) {
   const loading = photosQuery.isLoading;
   const refetchPhotos = () =>
     qc.invalidateQueries({ queryKey: ["profile-photos", userId] });
+
+  const visiblePhotos = photos.filter(
+    (p) => normalizeCategory(p.category) === activeCategory,
+  );
 
   const onUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -118,6 +129,7 @@ export function ProfilePhotosManager({ userId }: { userId: string }) {
         ai_verified: aiVerified,
         ai_confidence: aiConfidence,
         ai_checked_at: new Date().toISOString(),
+        category: activeCategory,
       })
       .select("id")
       .single();
@@ -160,6 +172,23 @@ export function ProfilePhotosManager({ userId }: { userId: string }) {
     void refetchPhotos();
   };
 
+  const updateCategory = async (photo: Photo, next: PhotoCategory) => {
+    if (!isOnline) {
+      toast.error("Disponível online. Reconecte-se para alterar a categoria.");
+      return;
+    }
+    const { error } = await supabase
+      .from("profile_photos")
+      .update({ category: next })
+      .eq("id", photo.id);
+    if (error) {
+      toast.error("Não foi possível atualizar a categoria");
+      return;
+    }
+    void refetchPhotos();
+    toast.success("Categoria atualizada");
+  };
+
   const remove = async (photo: Photo) => {
     if (!isOnline) {
       toast.error("Disponível online. Reconecte-se para remover fotos.");
@@ -183,14 +212,43 @@ export function ProfilePhotosManager({ userId }: { userId: string }) {
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-sm font-semibold">Fotos adicionais</h3>
+          <h3 className="text-sm font-semibold">Galeria de Fé e Vida</h3>
           <p className="text-xs text-muted-foreground">
-            Até {MAX} fotos opcionais que aparecerão no carrossel do seu card.
+            Até {MAX} fotos organizadas em categorias que contam um pouco da sua história.
           </p>
         </div>
         <span className="text-xs text-muted-foreground">
           {photos.length}/{MAX}
         </span>
+      </div>
+      <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
+        {PHOTO_CATEGORIES.map((c) => {
+          const count = photos.filter(
+            (p) => normalizeCategory(p.category) === c.value,
+          ).length;
+          const active = activeCategory === c.value;
+          return (
+            <button
+              key={c.value}
+              type="button"
+              onClick={() => setActiveCategory(c.value)}
+              className={`app-pressable shrink-0 rounded-full border px-3 py-1.5 text-xs font-medium transition ${
+                active
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-border bg-background text-foreground hover:bg-accent"
+              }`}
+            >
+              {c.label}
+              <span
+                className={`ml-1.5 rounded-full px-1.5 py-0.5 text-[10px] ${
+                  active ? "bg-primary-foreground/20" : "bg-muted text-muted-foreground"
+                }`}
+              >
+                {count}
+              </span>
+            </button>
+          );
+        })}
       </div>
       {!isOnline && photos.length > 0 && (
         <StaleDataNotice message="Você está offline. Mostrando fotos carregadas anteriormente." />
@@ -203,12 +261,25 @@ export function ProfilePhotosManager({ userId }: { userId: string }) {
         />
       )}
       <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
-        {photos.map((p) => (
+        {visiblePhotos.map((p) => (
           <div
             key={p.id}
             className="group relative aspect-square overflow-hidden rounded-xl border bg-muted"
           >
             <PhotoImg src={p.url} alt="" className="h-full w-full object-cover" loading="lazy" />
+            <select
+              aria-label="Categoria da foto"
+              value={normalizeCategory(p.category)}
+              onChange={(e) => updateCategory(p, e.target.value as PhotoCategory)}
+              disabled={!isOnline}
+              className="absolute bottom-1 left-1 right-9 truncate rounded-md bg-black/55 px-1.5 py-0.5 text-[10px] text-white outline-none disabled:opacity-50"
+            >
+              {PHOTO_CATEGORIES.map((c) => (
+                <option key={c.value} value={c.value} className="text-foreground">
+                  {c.label}
+                </option>
+              ))}
+            </select>
             <button
               type="button"
               onClick={() => remove(p)}
@@ -242,6 +313,9 @@ export function ProfilePhotosManager({ userId }: { userId: string }) {
               <>
                 <Plus className="h-5 w-5" />
                 <span className="text-[11px]">Adicionar</span>
+                <span className="text-[10px] text-muted-foreground/80">
+                  {PHOTO_CATEGORIES.find((c) => c.value === activeCategory)?.label}
+                </span>
               </>
             )}
             <input
@@ -252,6 +326,11 @@ export function ProfilePhotosManager({ userId }: { userId: string }) {
               disabled={uploading || !isOnline}
             />
           </label>
+        )}
+        {visiblePhotos.length === 0 && photos.length > 0 && !loading && (
+          <p className="col-span-3 text-xs text-muted-foreground sm:col-span-6">
+            Nenhuma foto nesta categoria ainda.
+          </p>
         )}
       </div>
     </div>

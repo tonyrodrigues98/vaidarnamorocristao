@@ -1591,6 +1591,7 @@ export type Database = {
           ai_checked_at: string | null
           ai_confidence: number | null
           ai_verified: boolean
+          category: string | null
           created_at: string
           id: string
           sort_order: number
@@ -1601,6 +1602,7 @@ export type Database = {
           ai_checked_at?: string | null
           ai_confidence?: number | null
           ai_verified?: boolean
+          category?: string | null
           created_at?: string
           id?: string
           sort_order?: number
@@ -1611,6 +1613,7 @@ export type Database = {
           ai_checked_at?: string | null
           ai_confidence?: number | null
           ai_verified?: boolean
+          category?: string | null
           created_at?: string
           id?: string
           sort_order?: number

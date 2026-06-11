@@ -57,6 +57,7 @@ import { GiftHighlights } from "@/components/gifts/GiftHighlights";
 import type { ProfileBackground } from "@/lib/profileBackgrounds";
 import { GradientName } from "@/components/GradientName";
 import { fetchNameGradientsByIds, type NameGradient } from "@/lib/nameGradients";
+import { PHOTO_CATEGORIES, normalizeCategory } from "@/lib/photoCategories";
 import {
   getPurposeCompatibility,
   type CompatPrefs,
@@ -120,6 +121,9 @@ function Detail() {
     null,
   );
   const [extraPhotos, setExtraPhotos] = useState<string[]>([]);
+  const [categorizedPhotos, setCategorizedPhotos] = useState<
+    Array<{ url: string; category: string | null }>
+  >([]);
   const [equippedBackground, setEquippedBackground] = useState<ProfileBackground | null>(null);
   const [profileNameGradient, setProfileNameGradient] = useState<NameGradient | null>(null);
   const [myProfile, setMyProfile] = useState<CompatProfile | null>(null);
@@ -219,11 +223,13 @@ function Detail() {
       setPrefs((pr ?? null) as Prefs | null);
       const { data: ph } = await supabase
         .from("profile_photos")
-        .select("url, sort_order, created_at")
+        .select("url, sort_order, created_at, category")
         .eq("user_id", id)
         .order("sort_order", { ascending: true })
         .order("created_at", { ascending: true });
-      setExtraPhotos(((ph ?? []) as Array<{ url: string }>).map((r) => r.url));
+      const rows = (ph ?? []) as Array<{ url: string; category: string | null }>;
+      setExtraPhotos(rows.map((r) => r.url));
+      setCategorizedPhotos(rows);
     })();
   }, [id]);
 
@@ -741,6 +747,51 @@ function Detail() {
             </div>
           </div>
         </section>
+
+        {categorizedPhotos.some((p) => !!p.category) && (
+          <section className={`mt-6 ${surfaceClass}`}>
+            <h2 className="mb-1 flex items-center gap-2 text-base font-semibold text-foreground">
+              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-300">
+                <Sparkles className="h-4 w-4" />
+              </span>
+              Fé e vida
+            </h2>
+            <p className="mb-4 text-sm text-muted-foreground">
+              Um pouco da caminhada e dos momentos dessa pessoa.
+            </p>
+            <div className="space-y-5">
+              {PHOTO_CATEGORIES.map((cat) => {
+                const photosInCat = categorizedPhotos.filter(
+                  (p) => normalizeCategory(p.category) === cat.value,
+                );
+                if (photosInCat.length === 0) return null;
+                return (
+                  <div key={cat.value} className="min-w-0">
+                    <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                      {cat.label}
+                    </p>
+                    <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+                      {photosInCat.map((p) => (
+                        <div
+                          key={p.url}
+                          className="aspect-square overflow-hidden rounded-xl border border-border/60 bg-muted"
+                        >
+                          <img
+                            src={p.url}
+                            alt={cat.label}
+                            loading="lazy"
+                            className="h-full w-full object-cover"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        )}
+
         {profileCommitted && (
           <div
             className="
