@@ -362,7 +362,8 @@ export function CustomizacaoTab({ photoUrl }: { photoUrl: string | null }) {
                     variant="outline"
                     size="sm"
                     className="w-full text-xs"
-                    disabled={busyId === `unequip-${type}`}
+                    disabled={busyId === `unequip-${type}` || !isOnline}
+                    title={!isOnline ? offlineEquipMsg : undefined}
                     onClick={() => handleUnequip(type)}
                   >
                     {busyId === `unequip-${type}` ? (
@@ -375,7 +376,8 @@ export function CustomizacaoTab({ photoUrl }: { photoUrl: string | null }) {
                   <Button
                     size="sm"
                     className="w-full text-xs"
-                    disabled={busy}
+                    disabled={busy || !isOnline}
+                    title={!isOnline ? offlineEquipMsg : undefined}
                     onClick={() => handleEquip(d)}
                   >
                     {busy ? <Loader2 className="h-3 w-3 animate-spin" /> : "Equipar"}
@@ -477,7 +479,8 @@ export function CustomizacaoTab({ photoUrl }: { photoUrl: string | null }) {
                       variant="outline"
                       size="sm"
                       className="w-full text-xs"
-                      disabled={busyId === "unequip-background"}
+                      disabled={busyId === "unequip-background" || !isOnline}
+                      title={!isOnline ? offlineEquipMsg : undefined}
                       onClick={handleUnequipBackground}
                     >
                       {busyId === "unequip-background" ? (
@@ -490,7 +493,8 @@ export function CustomizacaoTab({ photoUrl }: { photoUrl: string | null }) {
                     <Button
                       size="sm"
                       className="w-full text-xs"
-                      disabled={busy}
+                      disabled={busy || !isOnline}
+                      title={!isOnline ? offlineEquipMsg : undefined}
                       onClick={() => handleEquipBackground(background)}
                     >
                       {busy ? <Loader2 className="h-3 w-3 animate-spin" /> : "Equipar"}
@@ -548,7 +552,8 @@ export function CustomizacaoTab({ photoUrl }: { photoUrl: string | null }) {
                     variant="outline"
                     size="sm"
                     className="w-full text-xs"
-                    disabled={busyId === "unequip-name-gradient"}
+                    disabled={busyId === "unequip-name-gradient" || !isOnline}
+                    title={!isOnline ? offlineEquipMsg : undefined}
                     onClick={handleUnequipNameGradient}
                   >
                     Remover
@@ -557,7 +562,8 @@ export function CustomizacaoTab({ photoUrl }: { photoUrl: string | null }) {
                   <Button
                     size="sm"
                     className="w-full text-xs"
-                    disabled={busy}
+                    disabled={busy || !isOnline}
+                    title={!isOnline ? offlineEquipMsg : undefined}
                     onClick={() => handleEquipNameGradient(gradient)}
                   >
                     {busy ? <Loader2 className="h-3 w-3 animate-spin" /> : "Equipar"}
