@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
-import { Check, ImageIcon, Loader2, Lock, Sparkles, ShoppingBag, X } from "lucide-react";
+import { Check, ImageIcon, Loader2, Lock, Sparkles, ShoppingBag, X, Shirt, PawPrint } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
@@ -57,7 +57,8 @@ const CATEGORIES: Category[] = [
 ];
 
 export function CustomizacaoTab({ photoUrl }: { photoUrl: string | null }) {
-  const { user } = useAuth();
+  const { user, role } = useAuth();
+  const isAdmin = role === "admin" || role === "super_admin";
   const { isOnline } = useNetworkStatus();
   const offlineEquipMsg = "Disponível online. Reconecte-se para alterar seu visual.";
   const [catalog, setCatalog] = useState<Decoration[]>([]);
