@@ -12,7 +12,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { AppEmptyState } from "@/components/ui/AppEmptyState";
 import { useNetworkStatus } from "@/hooks/useNetworkStatus";
-import { StaleDataNotice } from "@/components/ui/StaleDataNotice";
 import { recomputeMyBadges } from "@/lib/recomputeBadges";
 import { markHomeChecklistStep } from "@/lib/homeChecklist";
 import {
