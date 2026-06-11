@@ -3032,6 +3032,10 @@ export type Database = {
       }
       unequip_name_gradient: { Args: never; Returns: Json }
       unequip_profile_background: { Args: never; Returns: undefined }
+      unignore_anonymous_message: {
+        Args: { _message_id: string }
+        Returns: undefined
+      }
       unmatch: { Args: { _match_id: string }; Returns: undefined }
     }
     Enums: {
