@@ -1521,9 +1521,19 @@ function PerfilPage() {
                           />
                         </div>
                       )}
-                      <Button type="submit" size="lg" className="w-full" disabled={savingPrefs}>
+                      <Button
+                        type="submit"
+                        size="lg"
+                        className="w-full"
+                        disabled={savingPrefs || !isOnline}
+                        title={!isOnline ? "Disponível online. Reconecte-se para salvar alterações." : undefined}
+                      >
                         <Save className="mr-2 h-4 w-4" />{" "}
-                        {savingPrefs ? "Salvando..." : "Salvar preferências"}
+                        {!isOnline
+                          ? "Salvar (offline)"
+                          : savingPrefs
+                            ? "Salvando..."
+                            : "Salvar preferências"}
                       </Button>
                     </form>
                   </>
