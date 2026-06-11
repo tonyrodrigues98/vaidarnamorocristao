@@ -20,6 +20,7 @@ import { ShopSkeleton } from "@/components/ui/AppSkeletons";
 import { AppEmptyState } from "@/components/ui/AppEmptyState";
 import { PullToRefresh } from "@/components/mobile/PullToRefresh";
 import { OfflineState } from "@/components/ui/OfflineState";
+import { StaleDataNotice } from "@/components/ui/StaleDataNotice";
 import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 import { Gem as GemIcon } from "lucide-react";
 import { useAuth } from "@/lib/auth";
@@ -290,6 +291,10 @@ function LojaPage() {
 
   const handleEquip = async (d: Decoration) => {
     if (!user) return;
+    if (!isOnline) {
+      toast.error("Disponível online. Reconecte-se para alterar seu visual.");
+      return;
+    }
 
     setBusyId(d.id);
 
@@ -314,6 +319,10 @@ function LojaPage() {
 
   const handleUnequip = async (type: DecorationType) => {
     if (!user) return;
+    if (!isOnline) {
+      toast.error("Disponível online. Reconecte-se para alterar seu visual.");
+      return;
+    }
 
     setBusyId(`unequip-${type}`);
 
@@ -331,6 +340,10 @@ function LojaPage() {
   };
 
   const handleEquipBackground = async (background: ProfileBackground) => {
+    if (!isOnline) {
+      toast.error("Disponível online. Reconecte-se para alterar seu visual.");
+      return;
+    }
     setBusyId(background.id);
     try {
       await equipProfileBackground(background.id);
@@ -344,6 +357,10 @@ function LojaPage() {
   };
 
   const handleUnequipBackground = async () => {
+    if (!isOnline) {
+      toast.error("Disponível online. Reconecte-se para alterar seu visual.");
+      return;
+    }
     setBusyId("unequip-background");
     try {
       await unequipProfileBackground();
@@ -377,6 +394,10 @@ function LojaPage() {
   };
 
   const handleEquipNameGradient = async (gradient: NameGradient) => {
+    if (!isOnline) {
+      toast.error("Disponível online. Reconecte-se para alterar seu visual.");
+      return;
+    }
     setBusyId(gradient.id);
     try {
       await equipNameGradient(gradient.id);
@@ -390,6 +411,10 @@ function LojaPage() {
   };
 
   const handleUnequipNameGradient = async () => {
+    if (!isOnline) {
+      toast.error("Disponível online. Reconecte-se para alterar seu visual.");
+      return;
+    }
     setBusyId("unequip-name-gradient");
     try {
       await unequipNameGradient();
