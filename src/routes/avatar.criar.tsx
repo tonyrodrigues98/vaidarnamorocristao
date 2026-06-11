@@ -68,7 +68,7 @@ const STEPS = [
   "Pose",
   "Confirmar",
 ] as const;
-type StepIdx = 0 | 1 | 2 | 3 | 4 | 5 | 6;
+const LAST_STEP = STEPS.length - 1;
 
 const nameSchema = z.string().trim().min(2, "Nome muito curto").max(40, "Nome muito longo");
 
@@ -102,7 +102,7 @@ function AvatarCreatePage() {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
 
-  const [step, setStep] = useState<StepIdx>(0);
+  const [step, setStep] = useState<number>(0);
   const [submitting, setSubmitting] = useState(false);
   const [bases, setBases] = useState<Base[]>([]);
   const [loadingBases, setLoadingBases] = useState(true);
@@ -120,7 +120,7 @@ function AvatarCreatePage() {
     (async () => {
       const [basesRes, profileRes, existingRes] = await Promise.all([
         supabase.from("avatar_bases").select("*").eq("is_active", true),
-        supabase.from("profiles").select("sex, name").eq("id", user.id).maybeSingle(),
+        supabase.from("profiles").select("sex, full_name").eq("id", user.id).maybeSingle(),
         supabase.from("user_avatar_base").select("*").eq("user_id", user.id).maybeSingle(),
       ]);
       if (cancelled) return;
@@ -141,7 +141,7 @@ function AvatarCreatePage() {
           }
         | null;
 
-      setName(existing?.avatar_name || profileRes.data?.name || "");
+      setName(existing?.avatar_name || profileRes.data?.full_name || "");
       setSkinTone(existing?.skin_tone ?? "default");
       setAgeRange(((existing?.age_range as AvatarAgeRange) ?? "20-35"));
 
@@ -179,10 +179,10 @@ function AvatarCreatePage() {
         return;
       }
     }
-    setStep((s) => Math.min(6, (s + 1) as StepIdx));
+    setStep((s) => Math.min(LAST_STEP, s + 1));
   }
   function back() {
-    setStep((s) => Math.max(0, (s - 1) as StepIdx));
+    setStep((s) => Math.max(0, s - 1));
   }
 
   async function handleConfirm() {
