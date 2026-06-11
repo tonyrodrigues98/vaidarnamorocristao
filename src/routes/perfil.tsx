@@ -111,7 +111,7 @@ const profileSchema = z.object({
   age: z.coerce.number().int().min(18).max(110),
   height_cm: z.coerce.number().int().min(120).max(230).optional().or(z.literal("")),
   sex: z.enum(["masculino", "feminino"]),
-  marital: z.enum(["solteiro", "divorciado"]),
+  marital: z.enum(["solteiro", "divorciado", "viuvo"]),
   city: z.string().trim().min(2).max(80),
   state: z.string().length(2),
   church: z.string().trim().min(2).max(120),
@@ -269,7 +269,7 @@ function PerfilPage() {
     age: "",
     height_cm: "",
     sex: "" as "" | "masculino" | "feminino",
-    marital: "" as "" | "solteiro" | "divorciado",
+    marital: "" as "" | "solteiro" | "divorciado" | "viuvo",
     city: "",
     state: "",
     church: "",
@@ -1202,13 +1202,16 @@ function PerfilPage() {
                             {[
                               { v: "solteiro", l: "Solteiro(a)" },
                               { v: "divorciado", l: "Divorciado(a)" },
+                              { v: "viuvo", l: "Viúvo(a)" },
                             ].map((o) => {
                               const active = profile.marital === o.v;
                               return (
                                 <button
                                   key={o.v}
                                   type="button"
-                                  onClick={() => setP("marital", o.v as "solteiro" | "divorciado")}
+                                  onClick={() =>
+                                    setP("marital", o.v as "solteiro" | "divorciado" | "viuvo")
+                                  }
                                   className={`app-pressable rounded-full border px-4 py-2 text-sm transition ${
                                     active
                                       ? "border-[var(--rose)] bg-[var(--rose)] text-white"
