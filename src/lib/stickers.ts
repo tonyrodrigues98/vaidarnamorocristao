@@ -45,7 +45,14 @@ export async function fetchStickers(opts?: {
     q = q.eq("category_id", opts.categoryId);
   const { data, error } = await q;
   if (error) throw error;
-  return (data ?? []) as Sticker[];
+  // Always re-derive public_url from storage_path so stale or missing
+  // URLs don't silently break thumbnails in the picker.
+  const rows = (data ?? []) as Sticker[];
+  return rows.map((s) => {
+    if (!s.storage_path) return s;
+    const { data: pub } = supabase.storage.from("stickers").getPublicUrl(s.storage_path);
+    return { ...s, public_url: pub?.publicUrl ?? s.public_url };
+  });
 }
 
 export async function uploadStickerFile(
