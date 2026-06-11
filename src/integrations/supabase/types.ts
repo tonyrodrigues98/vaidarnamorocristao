@@ -1156,9 +1156,13 @@ export type Database = {
           active: boolean
           created_at: string
           description: string | null
+          effect_key: string | null
+          effect_param: number | null
+          effect_target_id: string | null
           id: string
           image_url: string | null
           name: string
+          perk_label: string | null
           scope: string
           scope_id: string | null
           slug: string
@@ -1169,9 +1173,13 @@ export type Database = {
           active?: boolean
           created_at?: string
           description?: string | null
+          effect_key?: string | null
+          effect_param?: number | null
+          effect_target_id?: string | null
           id?: string
           image_url?: string | null
           name: string
+          perk_label?: string | null
           scope?: string
           scope_id?: string | null
           slug: string
@@ -1182,16 +1190,28 @@ export type Database = {
           active?: boolean
           created_at?: string
           description?: string | null
+          effect_key?: string | null
+          effect_param?: number | null
+          effect_target_id?: string | null
           id?: string
           image_url?: string | null
           name?: string
+          perk_label?: string | null
           scope?: string
           scope_id?: string | null
           slug?: string
           sort_order?: number
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "pet_benefits_effect_key_fkey"
+            columns: ["effect_key"]
+            isOneToOne: false
+            referencedRelation: "pet_perk_effects"
+            referencedColumns: ["key"]
+          },
+        ]
       }
       pet_categories: {
         Row: {
@@ -1260,6 +1280,48 @@ export type Database = {
           image_url?: string | null
           name?: string
           slug?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      pet_perk_effects: {
+        Row: {
+          active: boolean
+          category: string
+          created_at: string
+          default_param: number | null
+          description: string | null
+          key: string
+          label: string
+          needs_target: string | null
+          numeric_param: boolean
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          category?: string
+          created_at?: string
+          default_param?: number | null
+          description?: string | null
+          key: string
+          label: string
+          needs_target?: string | null
+          numeric_param?: boolean
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          category?: string
+          created_at?: string
+          default_param?: number | null
+          description?: string | null
+          key?: string
+          label?: string
+          needs_target?: string | null
+          numeric_param?: boolean
           sort_order?: number
           updated_at?: string
         }
@@ -3117,6 +3179,44 @@ export type Database = {
           },
         ]
       }
+      user_pet_perk_state: {
+        Row: {
+          created_at: string
+          effect_key: string
+          id: string
+          last_collected_at: string | null
+          total_collected: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          effect_key: string
+          id?: string
+          last_collected_at?: string | null
+          total_collected?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          effect_key?: string
+          id?: string
+          last_collected_at?: string | null
+          total_collected?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_pet_perk_state_effect_key_fkey"
+            columns: ["effect_key"]
+            isOneToOne: false
+            referencedRelation: "pet_perk_effects"
+            referencedColumns: ["key"]
+          },
+        ]
+      }
       user_pets: {
         Row: {
           acquired_at: string
@@ -3560,6 +3660,14 @@ export type Database = {
       }
       claim_free_frame: { Args: { _decoration_id: string }; Returns: Json }
       cleanup_photo_moderation_rejects: { Args: never; Returns: number }
+      collect_pet_reward: {
+        Args: never
+        Returns: {
+          awarded: number
+          balance: number
+          source: string
+        }[]
+      }
       count_advanced_sections: { Args: { _user_id: string }; Returns: number }
       create_notification: {
         Args: {
@@ -3587,6 +3695,16 @@ export type Database = {
       }
       equip_user_pet_v2: { Args: { _user_pet_id: string }; Returns: undefined }
       expire_anonymous_messages: { Args: never; Returns: number }
+      get_active_pet_perks: {
+        Args: { _user_id: string }
+        Returns: {
+          benefit_id: string
+          effect_key: string
+          effect_param: number
+          effect_target_id: string
+          label: string
+        }[]
+      }
       get_active_streak: {
         Args: { _user_id: string }
         Returns: {
@@ -3713,6 +3831,14 @@ export type Database = {
       }
       mark_all_notifications_read: { Args: never; Returns: number }
       mark_message_read: { Args: { _message_id: string }; Returns: undefined }
+      pet_perk_has: {
+        Args: { _key: string; _user_id: string }
+        Returns: boolean
+      }
+      pet_perk_sum: {
+        Args: { _keys: string[]; _user_id: string }
+        Returns: number
+      }
       purchase_avatar_item: { Args: { _item_id: string }; Returns: Json }
       purchase_decoration: { Args: { _decoration_id: string }; Returns: Json }
       purchase_name_gradient: { Args: { _gradient_id: string }; Returns: Json }
