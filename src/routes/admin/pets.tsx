@@ -1,5 +1,5 @@
 import { createFileRoute, Navigate } from "@tanstack/react-router";
-import { useEffect, useRef, useState, type ComponentType, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ComponentType, type ReactNode } from "react";
 import { toast } from "sonner";
 import {
   Loader2,
@@ -19,6 +19,8 @@ import {
   Pencil,
   Tag,
   Hash,
+  Zap,
+  Wand2,
 } from "lucide-react";
 
 import { useAuth } from "@/lib/auth";
@@ -60,6 +62,13 @@ import {
   slugify,
   updateRow,
   uploadPetCatalogImage,
+  listPerkEffects,
+  upsertPerkEffect,
+  deletePerkEffect,
+  listDecorations,
+  listBackgrounds,
+  listBadgesCatalog,
+  PERK_CATEGORY_LABEL,
 } from "@/lib/petCatalog";
 import type {
   PetBenefit,
@@ -67,6 +76,8 @@ import type {
   PetCatalogEntity,
   PetCatalogTable,
   PetCategory,
+  PetPerkEffect,
+  PetPerkEffectCategory,
   PetSpecies,
   PetVariant,
 } from "@/types/petCatalog";
@@ -74,7 +85,7 @@ import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/admin/pets")({ component: PetsAdmin });
 
-type TabKey = "legacy" | PetCatalogTable;
+type TabKey = "legacy" | "perk_effects" | PetCatalogTable;
 
 const TABS: { key: TabKey; label: string; icon: ComponentType<{ className?: string }> }[] = [
   { key: "pet_categories", label: "Categorias", icon: Layers },
@@ -83,6 +94,7 @@ const TABS: { key: TabKey; label: string; icon: ComponentType<{ className?: stri
   { key: "pet_life_stages", label: "Fases", icon: Baby },
   { key: "pet_personalities", label: "Personalidades", icon: Smile },
   { key: "pet_benefits", label: "Benefícios", icon: Gift },
+  { key: "perk_effects", label: "Tipos de efeito", icon: Zap },
   { key: "legacy", label: "Pets (legado)", icon: Star },
 ];
 
@@ -136,7 +148,13 @@ function PetsAdmin() {
           </div>
         </div>
 
-        {tab === "legacy" ? <LegacyPetsPanel /> : <CatalogPanel table={tab} />}
+        {tab === "legacy" ? (
+          <LegacyPetsPanel />
+        ) : tab === "perk_effects" ? (
+          <PerkEffectsPanel />
+        ) : (
+          <CatalogPanel table={tab} />
+        )}
       </main>
     </div>
   );
@@ -155,6 +173,10 @@ type DraftRecord = Record<string, unknown> & {
   species_id?: string | null;
   scope?: PetBenefitScope;
   scope_id?: string | null;
+  perk_label?: string | null;
+  effect_key?: string | null;
+  effect_param?: number | null;
+  effect_target_id?: string | null;
 };
 
 function CatalogPanel({ table }: { table: PetCatalogTable }) {
@@ -166,6 +188,8 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
   const [categories, setCategories] = useState<PetCategory[]>([]);
   const [species, setSpecies] = useState<PetSpecies[]>([]);
   const [variants, setVariants] = useState<PetVariant[]>([]);
+  const [perkEffects, setPerkEffects] = useState<PetPerkEffect[]>([]);
+  const [targets, setTargets] = useState<{ id: string; name: string }[]>([]);
   const fileRef = useRef<HTMLInputElement>(null);
 
   async function reload() {
@@ -179,6 +203,7 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
       }
       if (table === "pet_benefits") {
         setVariants(await listAll<PetVariant>("pet_variants"));
+        setPerkEffects(await listPerkEffects(true));
       }
     } catch (e) {
       toast.error((e as Error).message);
@@ -210,6 +235,10 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
     if (table === "pet_benefits") {
       base.scope = "global";
       base.scope_id = null;
+      base.perk_label = "";
+      base.effect_key = null;
+      base.effect_param = null;
+      base.effect_target_id = null;
     }
     return base;
   }
@@ -242,6 +271,41 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
       setBusy(false);
     }
   }
+
+  const selectedEffect = useMemo(
+    () => perkEffects.find((e) => e.key === (draft?.effect_key ?? "")) ?? null,
+    [perkEffects, draft?.effect_key],
+  );
+
+  // Load target options for unlock_* effects
+  useEffect(() => {
+    let cancel = false;
+    async function load() {
+      if (!selectedEffect?.needs_target) {
+        setTargets([]);
+        return;
+      }
+      try {
+        let list: { id: string; name: string }[] = [];
+        if (selectedEffect.key === "unlock_aura" || selectedEffect.key === "pet_avatar_aura_fx") {
+          list = await listDecorations("aura");
+        } else if (selectedEffect.needs_target === "avatar_decorations") {
+          list = await listDecorations("frame");
+        } else if (selectedEffect.needs_target === "profile_backgrounds") {
+          list = await listBackgrounds();
+        } else if (selectedEffect.needs_target === "badges") {
+          list = await listBadgesCatalog();
+        }
+        if (!cancel) setTargets(list);
+      } catch (e) {
+        if (!cancel) toast.error((e as Error).message);
+      }
+    }
+    void load();
+    return () => {
+      cancel = true;
+    };
+  }, [selectedEffect]);
 
   async function save() {
     if (!draft) return;
@@ -399,6 +463,84 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
 
             {table === "pet_benefits" && (
               <>
+                <div className="sm:col-span-2">
+                  <Field icon={Wand2} label="Vantagem (efeito real)">
+                    <Select
+                      value={(draft.effect_key as string) ?? "__none__"}
+                      onValueChange={(v) =>
+                        setDraft({
+                          ...draft,
+                          effect_key: v === "__none__" ? null : v,
+                          effect_param: null,
+                          effect_target_id: null,
+                        })
+                      }
+                    >
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="__none__">Sem efeito (apenas cosmético)</SelectItem>
+                        {Object.entries(
+                          perkEffects.reduce<Record<string, PetPerkEffect[]>>((acc, e) => {
+                            (acc[e.category] ||= []).push(e);
+                            return acc;
+                          }, {}),
+                        ).map(([cat, items]) => (
+                          <div key={cat}>
+                            <div className="px-2 py-1 text-[11px] font-semibold uppercase text-muted-foreground">
+                              {PERK_CATEGORY_LABEL[cat as PetPerkEffectCategory]}
+                            </div>
+                            {items.map((e) => (
+                              <SelectItem key={e.key} value={e.key}>
+                                {e.label}
+                              </SelectItem>
+                            ))}
+                          </div>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </Field>
+                </div>
+                <Field icon={Tag} label="Rótulo curto (opcional)">
+                  <Input
+                    value={(draft.perk_label as string) ?? ""}
+                    placeholder="Ex.: +2 moedas"
+                    onChange={(e) => setDraft({ ...draft, perk_label: e.target.value })}
+                  />
+                </Field>
+                {selectedEffect?.numeric_param && (
+                  <Field icon={Hash} label="Quantidade">
+                    <Input
+                      type="number"
+                      value={(draft.effect_param as number) ?? selectedEffect.default_param ?? 0}
+                      onChange={(e) =>
+                        setDraft({ ...draft, effect_param: Number(e.target.value) || 0 })
+                      }
+                    />
+                  </Field>
+                )}
+                {selectedEffect?.needs_target && (
+                  <div className="sm:col-span-2">
+                    <Field icon={Star} label="Alvo desbloqueado">
+                      <Select
+                        value={(draft.effect_target_id as string) ?? ""}
+                        onValueChange={(v) => setDraft({ ...draft, effect_target_id: v })}
+                      >
+                        <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                        <SelectContent>
+                          {targets.length === 0 ? (
+                            <SelectItem value="__empty__" disabled>
+                              Nenhum disponível
+                            </SelectItem>
+                          ) : (
+                            targets.map((t) => (
+                              <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
+                            ))
+                          )}
+                        </SelectContent>
+                      </Select>
+                    </Field>
+                  </div>
+                )}
                 <Field icon={Gift} label="Escopo">
                   <Select
                     value={(draft.scope as string) ?? "global"}
@@ -434,39 +576,12 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
 
             <div className="sm:col-span-2">
               <Field icon={ImageIcon} label="Imagem">
-                <div className="flex items-center gap-3">
-                  {draft.image_url ? (
-                    <img
-                      src={draft.image_url as string}
-                      alt=""
-                      className="h-16 w-16 rounded-2xl object-cover ring-1 ring-border"
-                    />
-                  ) : (
-                    <div className="grid h-16 w-16 place-items-center rounded-2xl border border-dashed border-border text-muted-foreground">
-                      <ImageIcon className="h-5 w-5" />
-                    </div>
-                  )}
-                  <input
-                    ref={fileRef}
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => {
-                      const f = e.target.files?.[0];
-                      if (f) void uploadImage(f);
-                    }}
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => fileRef.current?.click()}
-                    disabled={busy}
-                    className="rounded-full"
-                  >
-                    <Upload className="mr-1 h-4 w-4" /> Enviar
-                  </Button>
-                </div>
+                <ImagePreview
+                  value={(draft.image_url as string) ?? null}
+                  busy={busy}
+                  onPick={(f) => void uploadImage(f)}
+                  onClear={() => setDraft({ ...draft, image_url: null })}
+                />
               </Field>
             </div>
           </div>
@@ -532,6 +647,346 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
             Nenhum registro. Clique em "Novo" para adicionar.
           </div>
         )}
+      </div>
+    </section>
+  );
+}
+
+/* ============================== IMAGE PREVIEW ============================== */
+
+function ImagePreview({
+  value,
+  busy,
+  onPick,
+  onClear,
+  accept = "image/*",
+}: {
+  value: string | null;
+  busy?: boolean;
+  onPick: (file: File) => void;
+  onClear: () => void;
+  accept?: string;
+}) {
+  const ref = useRef<HTMLInputElement>(null);
+  const [drag, setDrag] = useState(false);
+  const [meta, setMeta] = useState<{ w: number; h: number } | null>(null);
+  useEffect(() => {
+    if (!value) {
+      setMeta(null);
+      return;
+    }
+    const img = new Image();
+    img.onload = () => setMeta({ w: img.naturalWidth, h: img.naturalHeight });
+    img.src = value;
+  }, [value]);
+
+  return (
+    <div className="space-y-2">
+      <input
+        ref={ref}
+        type="file"
+        accept={accept}
+        className="hidden"
+        onChange={(e) => {
+          const f = e.target.files?.[0];
+          if (f) onPick(f);
+        }}
+      />
+      <div
+        onDragOver={(e) => {
+          e.preventDefault();
+          setDrag(true);
+        }}
+        onDragLeave={() => setDrag(false)}
+        onDrop={(e) => {
+          e.preventDefault();
+          setDrag(false);
+          const f = e.dataTransfer.files?.[0];
+          if (f) onPick(f);
+        }}
+        onClick={() => !value && ref.current?.click()}
+        className={cn(
+          "relative grid place-items-center overflow-hidden rounded-2xl border-2 border-dashed transition-all",
+          "h-72 cursor-pointer",
+          drag ? "border-primary bg-primary/5" : "border-border bg-muted/30 hover:border-foreground/30",
+        )}
+        style={{
+          backgroundImage: value
+            ? undefined
+            : "linear-gradient(45deg,#0001 25%,transparent 25%,transparent 75%,#0001 75%),linear-gradient(45deg,#0001 25%,transparent 25%,transparent 75%,#0001 75%)",
+          backgroundSize: "20px 20px",
+          backgroundPosition: "0 0,10px 10px",
+        }}
+      >
+        {value ? (
+          <img
+            src={value}
+            alt="preview"
+            className="max-h-full max-w-full object-contain p-3"
+          />
+        ) : (
+          <div className="flex flex-col items-center gap-2 text-muted-foreground">
+            <Upload className="h-8 w-8" />
+            <p className="text-sm font-medium">Arraste uma imagem ou clique</p>
+            <p className="text-[11px]">PNG, JPG, WEBP — preview em tamanho real</p>
+          </div>
+        )}
+        {busy && (
+          <div className="absolute inset-0 grid place-items-center bg-background/60 backdrop-blur-sm">
+            <Loader2 className="h-6 w-6 animate-spin text-primary" />
+          </div>
+        )}
+      </div>
+      <div className="flex flex-wrap items-center gap-2">
+        <Button type="button" variant="outline" size="sm" onClick={() => ref.current?.click()} className="rounded-full">
+          <Upload className="mr-1 h-4 w-4" /> {value ? "Trocar" : "Enviar"}
+        </Button>
+        {value && (
+          <Button type="button" variant="ghost" size="sm" onClick={onClear} className="rounded-full text-destructive">
+            <Trash2 className="mr-1 h-4 w-4" /> Remover
+          </Button>
+        )}
+        {meta && (
+          <span className="text-[11px] text-muted-foreground">
+            {meta.w}×{meta.h}px
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ============================== PERK EFFECTS PANEL ============================== */
+
+function PerkEffectsPanel() {
+  const [rows, setRows] = useState<PetPerkEffect[]>([]);
+  const [busy, setBusy] = useState(false);
+  const [editing, setEditing] = useState<PetPerkEffect | null>(null);
+  const [draft, setDraft] = useState<Partial<PetPerkEffect> | null>(null);
+
+  async function reload() {
+    try {
+      setRows(await listPerkEffects(false));
+    } catch (e) {
+      toast.error((e as Error).message);
+    }
+  }
+
+  useEffect(() => {
+    void reload();
+  }, []);
+
+  function startCreate() {
+    setEditing(null);
+    setDraft({
+      key: "",
+      label: "",
+      description: "",
+      category: "cosmetic",
+      numeric_param: false,
+      default_param: null,
+      needs_target: null,
+      active: true,
+      sort_order: rows.length * 10,
+    });
+  }
+
+  function startEdit(r: PetPerkEffect) {
+    setEditing(r);
+    setDraft({ ...r });
+  }
+
+  async function save() {
+    if (!draft?.key || !draft?.label) {
+      toast.error("Chave e rótulo são obrigatórios");
+      return;
+    }
+    setBusy(true);
+    try {
+      await upsertPerkEffect({
+        key: draft.key,
+        label: draft.label,
+        description: draft.description ?? null,
+        category: (draft.category as PetPerkEffectCategory) ?? "cosmetic",
+        numeric_param: !!draft.numeric_param,
+        default_param: draft.default_param ?? null,
+        needs_target: draft.needs_target ?? null,
+        active: draft.active ?? true,
+        sort_order: draft.sort_order ?? 0,
+      } as PetPerkEffect);
+      toast.success(editing ? "Atualizado" : "Criado");
+      setDraft(null);
+      setEditing(null);
+      await reload();
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function remove(r: PetPerkEffect) {
+    if (!confirm(`Excluir "${r.label}"? Vantagens que usam este efeito perderão o vínculo.`)) return;
+    try {
+      await deletePerkEffect(r.key);
+      toast.success("Removido");
+      await reload();
+    } catch (e) {
+      toast.error((e as Error).message);
+    }
+  }
+
+  return (
+    <section className="space-y-4">
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <h2 className="text-base font-semibold tracking-tight">Tipos de efeito</h2>
+          <p className="text-xs text-muted-foreground">
+            Crie regras reutilizáveis. Apenas chaves reconhecidas pelo backend produzem efeito; novas chaves ficam como
+            tags informativas até serem ligadas via código.
+          </p>
+        </div>
+        <Button size="sm" onClick={startCreate} disabled={!!draft} className="rounded-full">
+          <Plus className="mr-1 h-4 w-4" /> Novo
+        </Button>
+      </div>
+
+      {draft && (
+        <div className="rounded-3xl border border-border/70 bg-card/80 p-4 shadow-sm backdrop-blur sm:p-5">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Field icon={Hash} label="Chave técnica (key)">
+              <Input
+                value={draft.key ?? ""}
+                disabled={!!editing}
+                placeholder="ex: daily_coins_plus_5"
+                onChange={(e) =>
+                  setDraft({ ...draft, key: e.target.value.replace(/[^a-z0-9_]/g, "") })
+                }
+              />
+            </Field>
+            <Field icon={Tag} label="Rótulo">
+              <Input
+                value={draft.label ?? ""}
+                onChange={(e) => setDraft({ ...draft, label: e.target.value })}
+              />
+            </Field>
+            <div className="sm:col-span-2">
+              <Field icon={Pencil} label="Descrição">
+                <Textarea
+                  value={draft.description ?? ""}
+                  onChange={(e) => setDraft({ ...draft, description: e.target.value })}
+                />
+              </Field>
+            </div>
+            <Field icon={Layers} label="Categoria">
+              <Select
+                value={draft.category ?? "cosmetic"}
+                onValueChange={(v) => setDraft({ ...draft, category: v as PetPerkEffectCategory })}
+              >
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {Object.entries(PERK_CATEGORY_LABEL).map(([k, v]) => (
+                    <SelectItem key={k} value={k}>{v}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Field>
+            <Field icon={Hash} label="Ordem">
+              <Input
+                type="number"
+                value={draft.sort_order ?? 0}
+                onChange={(e) => setDraft({ ...draft, sort_order: Number(e.target.value) || 0 })}
+              />
+            </Field>
+            <div className="flex items-center gap-2">
+              <Switch
+                checked={!!draft.numeric_param}
+                onCheckedChange={(v) => setDraft({ ...draft, numeric_param: v })}
+              />
+              <Label className="!m-0 text-sm">Aceita valor numérico</Label>
+            </div>
+            {draft.numeric_param && (
+              <Field icon={Hash} label="Valor padrão">
+                <Input
+                  type="number"
+                  value={draft.default_param ?? 0}
+                  onChange={(e) => setDraft({ ...draft, default_param: Number(e.target.value) || 0 })}
+                />
+              </Field>
+            )}
+            <Field icon={Star} label="Alvo (recurso desbloqueado)">
+              <Select
+                value={draft.needs_target ?? "__none__"}
+                onValueChange={(v) =>
+                  setDraft({ ...draft, needs_target: v === "__none__" ? null : (v as PetPerkEffect["needs_target"]) })
+                }
+              >
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__">Nenhum</SelectItem>
+                  <SelectItem value="avatar_decorations">Moldura/Aura</SelectItem>
+                  <SelectItem value="profile_backgrounds">Fundo de perfil</SelectItem>
+                  <SelectItem value="badges">Badge</SelectItem>
+                </SelectContent>
+              </Select>
+            </Field>
+            <div className="flex items-center gap-2">
+              <Switch
+                checked={draft.active ?? true}
+                onCheckedChange={(v) => setDraft({ ...draft, active: v })}
+              />
+              <Label className="!m-0 text-sm">Ativo</Label>
+            </div>
+          </div>
+          <div className="mt-4 flex justify-end gap-2">
+            <Button variant="outline" size="sm" onClick={() => setDraft(null)} className="rounded-full">
+              <X className="mr-1 h-4 w-4" /> Cancelar
+            </Button>
+            <Button size="sm" onClick={() => void save()} disabled={busy} className="rounded-full">
+              {busy ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <Save className="mr-1 h-4 w-4" />}
+              Salvar
+            </Button>
+          </div>
+        </div>
+      )}
+
+      <div className="grid gap-3 sm:grid-cols-2">
+        {rows.map((r) => (
+          <div
+            key={r.key}
+            className={cn(
+              "rounded-2xl border border-border/70 bg-card p-3 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md",
+              !r.active && "opacity-60",
+            )}
+          >
+            <div className="flex items-start gap-3">
+              <div className="grid h-10 w-10 place-items-center rounded-xl bg-primary/10 text-primary">
+                <Zap className="h-4 w-4" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-semibold">{r.label}</p>
+                <p className="truncate font-mono text-[11px] text-muted-foreground">{r.key}</p>
+                <p className="mt-0.5 text-[11px] text-muted-foreground">
+                  {PERK_CATEGORY_LABEL[r.category]} · {r.numeric_param ? `numérico (padrão ${r.default_param ?? "-"})` : "sem parâmetro"}
+                  {r.needs_target ? ` · alvo: ${r.needs_target}` : ""}
+                </p>
+              </div>
+              <div className="flex gap-1">
+                <Button variant="ghost" size="icon" onClick={() => startEdit(r)} className="h-8 w-8 rounded-full">
+                  <Pencil className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => void remove(r)}
+                  className="h-8 w-8 rounded-full text-destructive hover:text-destructive"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
     </section>
   );
@@ -856,28 +1311,12 @@ function LegacyPetsPanel() {
             )}
             <div className="sm:col-span-2">
               <Field icon={ImageIcon} label="Imagem (PNG transparente, 1024×1024)">
-                <div className="mt-1 flex items-center gap-3">
-                  <Button
-                    variant="outline"
-                    onClick={() => fileRef.current?.click()}
-                    disabled={busy}
-                    type="button"
-                    size="sm"
-                    className="rounded-full"
-                  >
-                    <Upload className="mr-1.5 h-4 w-4" />
-                    {draft.image_url ? "Trocar" : "Enviar"} imagem
-                  </Button>
-                  {draft.image_url && (
-                    <span className="text-xs text-muted-foreground">Pronto. Salve para aplicar.</span>
-                  )}
-                </div>
-                <input
-                  ref={fileRef}
-                  type="file"
+                <ImagePreview
+                  value={draft.image_url ?? null}
+                  busy={busy}
+                  onPick={(f) => void onFile(f)}
+                  onClear={() => setDraft({ ...draft, image_url: null })}
                   accept="image/png,image/webp"
-                  className="hidden"
-                  onChange={(e) => void onFile(e.target.files?.[0] ?? null)}
                 />
               </Field>
             </div>

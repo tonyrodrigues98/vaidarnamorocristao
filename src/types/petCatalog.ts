@@ -27,6 +27,34 @@ export type PetBenefitScope = "global" | "category" | "species" | "variant";
 export type PetBenefit = PetCatalogEntity & {
   scope: PetBenefitScope;
   scope_id: string | null;
+  perk_label: string | null;
+  effect_key: string | null;
+  effect_param: number | null;
+  effect_target_id: string | null;
+};
+
+export type PetPerkEffectCategory =
+  | "coins"
+  | "missions"
+  | "anonymous"
+  | "gifts"
+  | "cosmetic"
+  | "pet_collect"
+  | "avatar_fx"
+  | "pet_meta";
+
+export type PetPerkEffect = {
+  key: string;
+  label: string;
+  description: string | null;
+  category: PetPerkEffectCategory;
+  numeric_param: boolean;
+  default_param: number | null;
+  needs_target: "avatar_decorations" | "profile_backgrounds" | "badges" | null;
+  active: boolean;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
 };
 
 export type UserPetV2 = {

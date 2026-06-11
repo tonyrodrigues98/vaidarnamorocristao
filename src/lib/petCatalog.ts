@@ -7,6 +7,8 @@ import type {
   PetCategory,
   PetLifeStage,
   PetPersonality,
+  PetPerkEffect,
+  PetPerkEffectCategory,
   PetSpecies,
   PetVariant,
   UserPetV2,
@@ -220,8 +222,96 @@ export type {
   PetCategory,
   PetLifeStage,
   PetPersonality,
+  PetPerkEffect,
   PetSpecies,
   PetVariant,
   UserPetV2,
   UserPetV2Full,
 };
+
+// ---------- Perk Effects ----------
+export async function listPerkEffects(onlyActive = false): Promise<PetPerkEffect[]> {
+  let q = supabase.from("pet_perk_effects" as any).select("*").order("sort_order").order("label");
+  if (onlyActive) q = q.eq("active", true);
+  const { data, error } = await q;
+  if (error) throw error;
+  return (data ?? []) as unknown as PetPerkEffect[];
+}
+
+export async function upsertPerkEffect(input: Partial<PetPerkEffect> & { key: string; label: string }): Promise<PetPerkEffect> {
+  const { data, error } = await supabase
+    .from("pet_perk_effects" as any)
+    .upsert(input as any, { onConflict: "key" })
+    .select("*")
+    .single();
+  if (error) throw error;
+  return data as unknown as PetPerkEffect;
+}
+
+export async function deletePerkEffect(key: string): Promise<void> {
+  const { error } = await supabase.from("pet_perk_effects" as any).delete().eq("key", key);
+  if (error) throw error;
+}
+
+export const PERK_CATEGORY_LABEL: Record<PetPerkEffectCategory, string> = {
+  coins: "Moedas",
+  missions: "Missões",
+  anonymous: "Recado anônimo",
+  gifts: "Presentes",
+  cosmetic: "Cosmético",
+  pet_collect: "Coletáveis",
+  avatar_fx: "Efeito no avatar",
+  pet_meta: "Pet (metadados)",
+};
+
+// ---------- Target pickers (for unlock_* effects) ----------
+export async function listDecorations(kind: "frame" | "aura"): Promise<{ id: string; name: string }[]> {
+  const { data, error } = await supabase
+    .from("avatar_decorations" as any)
+    .select("id, name, type, active")
+    .eq("type", kind)
+    .eq("active", true)
+    .order("name");
+  if (error) throw error;
+  return ((data ?? []) as any[]).map((d) => ({ id: d.id, name: d.name }));
+}
+
+export async function listBackgrounds(): Promise<{ id: string; name: string }[]> {
+  const { data, error } = await supabase
+    .from("profile_backgrounds" as any)
+    .select("id, name, is_active")
+    .eq("is_active", true)
+    .order("name");
+  if (error) throw error;
+  return ((data ?? []) as any[]).map((d) => ({ id: d.id, name: d.name }));
+}
+
+export async function listBadgesCatalog(): Promise<{ id: string; name: string }[]> {
+  const { data, error } = await supabase
+    .from("badges" as any)
+    .select("id, name, code")
+    .order("name");
+  if (error) throw error;
+  return ((data ?? []) as any[]).map((d) => ({ id: d.id, name: d.name ?? d.code }));
+}
+
+// ---------- User-facing perks ----------
+export async function getMyActivePerks() {
+  const { data: u } = await supabase.auth.getUser();
+  if (!u.user?.id) return [];
+  const { data, error } = await supabase.rpc("get_active_pet_perks" as any, { _user_id: u.user.id });
+  if (error) throw error;
+  return (data ?? []) as Array<{
+    benefit_id: string;
+    effect_key: string;
+    effect_param: number | null;
+    effect_target_id: string | null;
+    label: string;
+  }>;
+}
+
+export async function collectPetReward() {
+  const { data, error } = await supabase.rpc("collect_pet_reward" as any);
+  if (error) throw error;
+  return data as { awarded: number; balance: number; source: string }[];
+}
