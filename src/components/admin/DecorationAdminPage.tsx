@@ -62,6 +62,7 @@ import {
   fetchAdminDecorations,
   getDecorationUsage,
   reorderDecorations,
+  resolveAuraCssRender,
   updateDecoration,
   type Decoration,
   type DecorationRarity,
@@ -780,9 +781,9 @@ function DecorationDialog({
 
             {type === "aura" && (
               <div className="space-y-2">
-                <Label>Cor CSS do brilho opcional</Label>
+                <Label>CSS da aura opcional</Label>
                 <Input
-                  placeholder="#a855f7"
+                  placeholder="#a855f7 ou box-shadow: 0 0 28px rgba(168,85,247,.8)"
                   value={form.css_value}
                   onChange={(e) => onFormChange({ ...form, css_value: e.target.value })}
                 />
@@ -879,6 +880,7 @@ function DecorationDialog({
 
 function DecorationPreview({ item, type }: { item: Decoration; type: ManagedType }) {
   const image = assetFor(item);
+  const auraCss = resolveAuraCssRender(item.css_value);
   const photo = (
     <div className="absolute left-1/2 top-1/2 z-10 h-[72px] w-[72px] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-full bg-gradient-love shadow-lg">
       <div className="flex h-full w-full items-center justify-center text-2xl font-semibold text-white">
@@ -889,26 +891,25 @@ function DecorationPreview({ item, type }: { item: Decoration; type: ManagedType
 
   return (
     <div className="relative h-36 w-36">
-      {type === "aura" && item.css_value && (() => {
-        const raw = item.css_value.trim();
-        const isBoxShadow =
-          /^box-shadow\s*:/i.test(raw) || (/\d+px/.test(raw) && /(rgba?|#)/i.test(raw));
-        if (isBoxShadow) {
-          const shadow = raw.replace(/^box-shadow\s*:\s*/i, "").replace(/;+\s*$/, "");
+      {type === "aura" && auraCss && (() => {
+        if (auraCss.kind === "box-shadow") {
           return (
             <div
               aria-hidden
               className="absolute inset-6 rounded-full"
-              style={{ boxShadow: shadow }}
+              style={{ boxShadow: auraCss.value }}
             />
           );
+        }
+        if (auraCss.kind === "background") {
+          return <div aria-hidden className="absolute inset-2 rounded-full blur-xl" style={{ background: auraCss.value }} />;
         }
         return (
           <div
             aria-hidden
             className="absolute inset-2 rounded-full blur-xl"
             style={{
-              background: `radial-gradient(circle, ${raw}66 0%, ${raw}33 45%, transparent 72%)`,
+              background: `radial-gradient(circle, ${auraCss.value}66 0%, ${auraCss.value}33 45%, transparent 72%)`,
             }}
           />
         );
