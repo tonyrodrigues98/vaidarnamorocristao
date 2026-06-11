@@ -14,6 +14,7 @@ export type Pet = {
   preview_url: string | null;
   is_active: boolean;
   sort_order: number;
+  is_exclusive: boolean;
   // Reservados (não usados na Fase 1)
   pose: string | null;
   animation_url: string | null;

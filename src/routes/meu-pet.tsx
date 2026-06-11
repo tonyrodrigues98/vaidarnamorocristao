@@ -113,14 +113,20 @@ function MeuPetPage() {
               </div>
               <div className="flex flex-1 flex-col justify-center">
                 <div className="flex items-center gap-2">
-                  <span
-                    className={cn(
-                      "rounded-full px-2 py-0.5 text-[11px] font-semibold",
-                      PET_RARITY_COLOR[equipped.pet.rarity],
-                    )}
-                  >
-                    {PET_RARITY_LABEL[equipped.pet.rarity]}
-                  </span>
+                  {equipped.pet.is_exclusive ? (
+                    <span
+                      className={cn(
+                        "rounded-full px-2 py-0.5 text-[11px] font-semibold",
+                        PET_RARITY_COLOR[equipped.pet.rarity],
+                      )}
+                    >
+                      {PET_RARITY_LABEL[equipped.pet.rarity]}
+                    </span>
+                  ) : (
+                    <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-semibold text-emerald-700 dark:bg-emerald-400/15 dark:text-emerald-200">
+                      Básico
+                    </span>
+                  )}
                   <span className="text-xs uppercase tracking-wider text-muted-foreground">
                     {equipped.pet.species}
                   </span>
@@ -207,15 +213,22 @@ function MeuPetPage() {
                     </div>
                     <div className="mt-3 flex items-center justify-between gap-2">
                       <p className="truncate text-sm font-semibold">{pet.name}</p>
-                      <span
-                        className={cn(
-                          "rounded-full px-1.5 py-0.5 text-[10px] font-semibold",
-                          PET_RARITY_COLOR[pet.rarity],
-                        )}
-                      >
-                        {PET_RARITY_LABEL[pet.rarity]}
-                      </span>
+                      {pet.is_exclusive ? (
+                        <span
+                          className={cn(
+                            "rounded-full px-1.5 py-0.5 text-[10px] font-semibold",
+                            PET_RARITY_COLOR[pet.rarity],
+                          )}
+                        >
+                          {PET_RARITY_LABEL[pet.rarity]}
+                        </span>
+                      ) : null}
                     </div>
+                    {pet.is_exclusive && (pet.price_coins ?? 0) > 0 && (
+                      <p className="mt-1 text-[11px] font-semibold text-amber-700 dark:text-amber-300">
+                        {pet.price_coins} 🪙
+                      </p>
+                    )}
                     <p className="line-clamp-2 mt-1 text-xs text-muted-foreground">
                       {pet.description ?? pet.species}
                     </p>

@@ -1160,6 +1160,7 @@ export type Database = {
           id: string
           image_url: string | null
           is_active: boolean
+          is_exclusive: boolean
           limited_until: string | null
           name: string
           pose: string | null
@@ -1181,6 +1182,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_active?: boolean
+          is_exclusive?: boolean
           limited_until?: string | null
           name: string
           pose?: string | null
@@ -1202,6 +1204,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_active?: boolean
+          is_exclusive?: boolean
           limited_until?: string | null
           name?: string
           pose?: string | null

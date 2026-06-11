@@ -79,6 +79,8 @@ function PetsAdmin() {
       is_active: true,
       sort_order: pets.length * 10,
       image_url: null,
+      is_exclusive: false,
+      price_coins: 0,
     });
   }
 
@@ -94,6 +96,8 @@ function PetsAdmin() {
       is_active: p.is_active,
       sort_order: p.sort_order,
       image_url: null, // só atualiza se reupload
+      is_exclusive: p.is_exclusive,
+      price_coins: p.price_coins ?? 0,
     });
   }
 
@@ -121,6 +125,8 @@ function PetsAdmin() {
           slug,
           species,
           description: draft.description?.trim() || null,
+          is_exclusive: draft.is_exclusive,
+          price_coins: draft.is_exclusive ? draft.price_coins ?? 0 : 0,
         });
         toast.success("Pet criado");
       } else if (editingId) {
@@ -132,6 +138,8 @@ function PetsAdmin() {
           rarity: draft.rarity,
           is_active: draft.is_active,
           sort_order: draft.sort_order,
+          is_exclusive: draft.is_exclusive,
+          price_coins: draft.is_exclusive ? draft.price_coins ?? 0 : 0,
         };
         if (draft.image_url) patch.image_url = draft.image_url;
         await updatePet(editingId, patch);
@@ -282,6 +290,28 @@ function PetsAdmin() {
                   <Label className="!m-0">Ativo</Label>
                 </div>
               </div>
+              <div className="flex items-end gap-3">
+                <div className="flex items-center gap-2">
+                  <Switch
+                    checked={draft.is_exclusive ?? false}
+                    onCheckedChange={(v) => setDraft({ ...draft, is_exclusive: v })}
+                  />
+                  <Label className="!m-0">Exclusivo (raridade + preço)</Label>
+                </div>
+              </div>
+              {draft.is_exclusive && (
+                <div>
+                  <Label>Preço (moedas)</Label>
+                  <Input
+                    type="number"
+                    min={0}
+                    value={draft.price_coins ?? 0}
+                    onChange={(e) =>
+                      setDraft({ ...draft, price_coins: Math.max(0, Number(e.target.value) || 0) })
+                    }
+                  />
+                </div>
+              )}
               <div className="sm:col-span-2">
                 <Label>Imagem (PNG transparente, 1024×1024)</Label>
                 <div className="mt-1 flex items-center gap-3">
@@ -341,14 +371,25 @@ function PetsAdmin() {
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
                     <h3 className="truncate text-sm font-semibold">{p.name}</h3>
-                    <span
-                      className={cn(
-                        "rounded-full px-2 py-0.5 text-[10px] font-semibold",
-                        PET_RARITY_COLOR[p.rarity],
-                      )}
-                    >
-                      {PET_RARITY_LABEL[p.rarity]}
-                    </span>
+                    {p.is_exclusive ? (
+                      <span
+                        className={cn(
+                          "rounded-full px-2 py-0.5 text-[10px] font-semibold",
+                          PET_RARITY_COLOR[p.rarity],
+                        )}
+                      >
+                        {PET_RARITY_LABEL[p.rarity]}
+                      </span>
+                    ) : (
+                      <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">
+                        Básico
+                      </span>
+                    )}
+                    {p.is_exclusive && (
+                      <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-800">
+                        {p.price_coins} 🪙
+                      </span>
+                    )}
                   </div>
                   <p className="text-xs text-muted-foreground">
                     {p.species} · ordem {p.sort_order}
