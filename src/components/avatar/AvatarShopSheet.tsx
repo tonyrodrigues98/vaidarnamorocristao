@@ -21,6 +21,7 @@ type Props = {
   onToggleFavorite: (item: ShopItem) => void;
   onPreview: (item: ShopItem) => void;
   previewItemId?: string | null;
+  onRemove?: (item: ShopItem) => void;
 };
 
 export function AvatarShopSheet({
@@ -36,6 +37,7 @@ export function AvatarShopSheet({
   onToggleFavorite,
   onPreview,
   previewItemId,
+  onRemove,
 }: Props) {
   return (
     <div className="rounded-t-3xl bg-white px-4 pt-4 pb-24 shadow-[0_-8px_30px_rgba(0,0,0,0.06)]">
@@ -86,6 +88,7 @@ export function AvatarShopSheet({
               onToggleFavorite={() => onToggleFavorite(item)}
               onPreview={() => onPreview(item)}
               isPreviewing={previewItemId === item.id}
+              onRemove={onRemove ? () => onRemove(item) : undefined}
             />
           ))}
         </div>

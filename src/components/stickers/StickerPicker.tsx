@@ -80,10 +80,14 @@ export function StickerPicker({ open, onClose, onPick }: Props) {
                 <img
                   src={s.public_url}
                   alt={`Figurinha ${s.name}`}
-                  loading="lazy"
+                  loading="eager"
                   decoding="async"
                   draggable={false}
-                  className="h-full w-full object-contain"
+                  referrerPolicy="no-referrer"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).style.opacity = "0.2";
+                  }}
+                  className="absolute inset-0 h-full w-full object-contain p-3"
                 />
                 <span className="pointer-events-none absolute -bottom-2.5 left-1/2 flex -translate-x-1/2 items-center gap-0.5 rounded-full bg-black/70 px-1.5 py-0.5 text-[10px] font-semibold text-amber-200 shadow-md backdrop-blur-sm">
                   <CoinIcon className="h-3 w-3" />
