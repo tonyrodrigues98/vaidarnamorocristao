@@ -760,6 +760,75 @@
 }
 
 /* -------------------------------------------------------------------------- */
+/* Recado com Estilo — paper-like card for anonymous messages                 */
+/* -------------------------------------------------------------------------- */
+.recado-paper {
+  position: relative;
+  isolation: isolate;
+  background:
+    radial-gradient(
+      120% 80% at 0% 0%,
+      color-mix(in oklab, var(--rose) 6%, transparent) 0%,
+      transparent 55%
+    ),
+    radial-gradient(
+      120% 80% at 100% 100%,
+      color-mix(in oklab, var(--rose-soft) 7%, transparent) 0%,
+      transparent 60%
+    ),
+    linear-gradient(
+      180deg,
+      color-mix(in oklab, white 92%, var(--rose) 2%) 0%,
+      color-mix(in oklab, white 96%, var(--rose-soft) 2%) 100%
+    );
+  border: 1px solid color-mix(in oklab, var(--rose) 14%, transparent);
+  box-shadow:
+    0 1px 2px color-mix(in oklab, var(--rose) 8%, transparent),
+    0 12px 30px -18px color-mix(in oklab, var(--rose) 28%, transparent);
+}
+.dark .recado-paper {
+  background:
+    radial-gradient(
+      120% 80% at 0% 0%,
+      color-mix(in oklab, var(--rose) 10%, transparent) 0%,
+      transparent 55%
+    ),
+    radial-gradient(
+      120% 80% at 100% 100%,
+      color-mix(in oklab, var(--rose-soft) 8%, transparent) 0%,
+      transparent 60%
+    ),
+    linear-gradient(
+      180deg,
+      color-mix(in oklab, var(--rose) 4%, oklch(0.22 0.01 30)) 0%,
+      color-mix(in oklab, var(--rose) 6%, oklch(0.18 0.01 30)) 100%
+    );
+  border: 1px solid color-mix(in oklab, var(--rose) 22%, transparent);
+}
+.recado-paper::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0.35;
+  background-image: radial-gradient(
+    color-mix(in oklab, var(--rose) 22%, transparent) 0.6px,
+    transparent 0.6px
+  );
+  background-size: 14px 14px;
+  mix-blend-mode: overlay;
+}
+.dark .recado-paper::before {
+  opacity: 0.18;
+}
+@media (prefers-reduced-motion: reduce) {
+  .recado-paper::before {
+    opacity: 0;
+  }
+}
+
+/* -------------------------------------------------------------------------- */
 /* Pressable/tap feedback utilities                                            */
 /* -------------------------------------------------------------------------- */
 .app-tap-highlight {
