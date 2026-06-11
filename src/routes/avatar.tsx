@@ -24,6 +24,9 @@ import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { CoinIcon } from "@/components/icons/CoinIcon";
+import roomAsset from "@/assets/avatar-room.png.asset.json";
+
+const ROOM_BG = roomAsset.url;
 
 export const Route = createFileRoute("/avatar")({
   component: AvatarPage,
@@ -64,6 +67,13 @@ type Equipped = {
   item_id: string;
 };
 
+type SavedLook = {
+  id: string;
+  image_path: string;
+  image_url: string;
+  created_at: string;
+};
+
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   shirt: Shirt,
   watch: Watch,
@@ -87,10 +97,13 @@ function AvatarPage() {
   const [equipped, setEquipped] = useState<Map<string, string>>(new Map());
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [coins, setCoins] = useState<number>(0);
+  const [looks, setLooks] = useState<SavedLook[]>([]);
+  const [looksLoading, setLooksLoading] = useState(false);
 
   useEffect(() => {
     if (!user) return;
     void loadAll();
+    void loadLooks();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
@@ -138,6 +151,35 @@ function AvatarPage() {
 
     setCoins((coinsRes.data?.balance as number | undefined) ?? 0);
     setLoading(false);
+  }
+
+  async function loadLooks() {
+    if (!user) return;
+    setLooksLoading(true);
+    const { data } = await supabase
+      .from("user_avatar_looks")
+      .select("id, image_path, created_at")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(24);
+    const rows = (data ?? []) as { id: string; image_path: string; created_at: string }[];
+    const withUrls: SavedLook[] = rows.map((r) => {
+      const { data: pub } = supabase.storage.from("avatar-looks").getPublicUrl(r.image_path);
+      return { ...r, image_url: pub.publicUrl };
+    });
+    setLooks(withUrls);
+    setLooksLoading(false);
+  }
+
+  async function deleteLook(look: SavedLook) {
+    if (!user) return;
+    const ok = confirm("Excluir este look salvo?");
+    if (!ok) return;
+    await supabase.storage.from("avatar-looks").remove([look.image_path]);
+    const { error } = await supabase.from("user_avatar_looks").delete().eq("id", look.id);
+    if (error) return toast.error("Erro ao excluir");
+    setLooks((ls) => ls.filter((l) => l.id !== look.id));
+    toast.success("Look excluído");
   }
 
   const equippedItems = useMemo(() => {
@@ -277,6 +319,7 @@ function AvatarPage() {
       if (ins.error) throw ins.error;
 
       toast.success("Look salvo!", { id: toastId });
+      void loadLooks();
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Erro ao salvar";
       toast.error(msg, { id: toastId });
