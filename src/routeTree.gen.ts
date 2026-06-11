@@ -48,6 +48,7 @@ import { Route as OnboardingEtapa1RouteImport } from './routes/onboarding/etapa-
 import { Route as ConversasComunidadeRouteImport } from './routes/conversas/comunidade'
 import { Route as ConversasMatchIdRouteImport } from './routes/conversas/$matchId'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
+import { Route as AvatarCriarRouteImport } from './routes/avatar.criar'
 import { Route as AuthSignupRouteImport } from './routes/auth/signup'
 import { Route as AuthResetPasswordRouteImport } from './routes/auth/reset-password'
 import { Route as AuthLoginRouteImport } from './routes/auth/login'
@@ -261,6 +262,11 @@ const BlogSlugRoute = BlogSlugRouteImport.update({
   path: '/blog/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AvatarCriarRoute = AvatarCriarRouteImport.update({
+  id: '/criar',
+  path: '/criar',
+  getParentRoute: () => AvatarRoute,
+} as any)
 const AuthSignupRoute = AuthSignupRouteImport.update({
   id: '/auth/signup',
   path: '/auth/signup',
@@ -350,7 +356,7 @@ const ApiPublicHooksPushDispatchRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/avatar': typeof AvatarRoute
+  '/avatar': typeof AvatarRouteWithChildren
   '/bloqueados': typeof BloqueadosRoute
   '/como-funciona': typeof ComoFuncionaRoute
   '/comunidade': typeof ComunidadeRoute
@@ -387,6 +393,7 @@ export interface FileRoutesByFullPath {
   '/auth/login': typeof AuthLoginRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/auth/signup': typeof AuthSignupRoute
+  '/avatar/criar': typeof AvatarCriarRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/conversas/$matchId': typeof ConversasMatchIdRoute
   '/conversas/comunidade': typeof ConversasComunidadeRoute
@@ -408,7 +415,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/avatar': typeof AvatarRoute
+  '/avatar': typeof AvatarRouteWithChildren
   '/bloqueados': typeof BloqueadosRoute
   '/como-funciona': typeof ComoFuncionaRoute
   '/comunidade': typeof ComunidadeRoute
@@ -445,6 +452,7 @@ export interface FileRoutesByTo {
   '/auth/login': typeof AuthLoginRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/auth/signup': typeof AuthSignupRoute
+  '/avatar/criar': typeof AvatarCriarRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/conversas/$matchId': typeof ConversasMatchIdRoute
   '/conversas/comunidade': typeof ConversasComunidadeRoute
@@ -467,7 +475,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/avatar': typeof AvatarRoute
+  '/avatar': typeof AvatarRouteWithChildren
   '/bloqueados': typeof BloqueadosRoute
   '/como-funciona': typeof ComoFuncionaRoute
   '/comunidade': typeof ComunidadeRoute
@@ -504,6 +512,7 @@ export interface FileRoutesById {
   '/auth/login': typeof AuthLoginRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/auth/signup': typeof AuthSignupRoute
+  '/avatar/criar': typeof AvatarCriarRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/conversas/$matchId': typeof ConversasMatchIdRoute
   '/conversas/comunidade': typeof ConversasComunidadeRoute
@@ -564,6 +573,7 @@ export interface FileRouteTypes {
     | '/auth/login'
     | '/auth/reset-password'
     | '/auth/signup'
+    | '/avatar/criar'
     | '/blog/$slug'
     | '/conversas/$matchId'
     | '/conversas/comunidade'
@@ -622,6 +632,7 @@ export interface FileRouteTypes {
     | '/auth/login'
     | '/auth/reset-password'
     | '/auth/signup'
+    | '/avatar/criar'
     | '/blog/$slug'
     | '/conversas/$matchId'
     | '/conversas/comunidade'
@@ -680,6 +691,7 @@ export interface FileRouteTypes {
     | '/auth/login'
     | '/auth/reset-password'
     | '/auth/signup'
+    | '/avatar/criar'
     | '/blog/$slug'
     | '/conversas/$matchId'
     | '/conversas/comunidade'
@@ -702,7 +714,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AvatarRoute: typeof AvatarRoute
+  AvatarRoute: typeof AvatarRouteWithChildren
   BloqueadosRoute: typeof BloqueadosRoute
   ComoFuncionaRoute: typeof ComoFuncionaRoute
   ComunidadeRoute: typeof ComunidadeRoute
@@ -1034,6 +1046,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BlogSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/avatar/criar': {
+      id: '/avatar/criar'
+      path: '/criar'
+      fullPath: '/avatar/criar'
+      preLoaderRoute: typeof AvatarCriarRouteImport
+      parentRoute: typeof AvatarRoute
+    }
     '/auth/signup': {
       id: '/auth/signup'
       path: '/auth/signup'
@@ -1156,9 +1175,20 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AvatarRouteChildren {
+  AvatarCriarRoute: typeof AvatarCriarRoute
+}
+
+const AvatarRouteChildren: AvatarRouteChildren = {
+  AvatarCriarRoute: AvatarCriarRoute,
+}
+
+const AvatarRouteWithChildren =
+  AvatarRoute._addFileChildren(AvatarRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AvatarRoute: AvatarRoute,
+  AvatarRoute: AvatarRouteWithChildren,
   BloqueadosRoute: BloqueadosRoute,
   ComoFuncionaRoute: ComoFuncionaRoute,
   ComunidadeRoute: ComunidadeRoute,
