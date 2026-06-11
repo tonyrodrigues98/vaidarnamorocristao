@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { Check, Crown, Heart } from "lucide-react";
+import { Check, Crown, Eye, Heart } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CoinIcon } from "@/components/icons/CoinIcon";
 
@@ -20,6 +20,8 @@ type Props = {
   canAfford: boolean;
   onEquip: (item: AvatarItemCardItem) => void;
   onToggleFavorite: (item: AvatarItemCardItem) => void;
+  onPreview: (item: AvatarItemCardItem) => void;
+  isPreviewing?: boolean;
 };
 
 function AvatarItemCardImpl({
@@ -30,6 +32,8 @@ function AvatarItemCardImpl({
   canAfford,
   onEquip,
   onToggleFavorite,
+  onPreview,
+  isPreviewing,
 }: Props) {
   return (
     <button
@@ -92,16 +96,30 @@ function AvatarItemCardImpl({
           ) : (
             <div
               className={cn(
-                "flex items-center justify-center gap-1 rounded-full px-3 py-1 text-xs font-semibold",
-                canAfford
-                  ? "bg-amber-100 text-amber-900"
-                  : "bg-muted text-muted-foreground",
+                "flex items-center justify-center gap-1 rounded-full border border-black bg-white px-3 py-1 text-xs font-semibold text-foreground",
+                !canAfford && "opacity-60",
               )}
             >
               <CoinIcon className="h-3.5 w-3.5" />
               <span>{item.price.toLocaleString("pt-BR")}</span>
             </div>
           )}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onPreview(item);
+            }}
+            className={cn(
+              "mt-1.5 flex w-full items-center justify-center gap-1 rounded-full border px-3 py-1 text-[11px] font-medium transition",
+              isPreviewing
+                ? "border-primary bg-primary/10 text-primary"
+                : "border-border bg-white text-muted-foreground hover:border-primary/40 hover:text-foreground",
+            )}
+          >
+            <Eye className="h-3 w-3" />
+            {isPreviewing ? "Pré-visualizando" : "Pré Visualizar"}
+          </button>
         </div>
       </div>
     </button>
