@@ -189,26 +189,68 @@ function Admin() {
     return [];
   }, [isAdmin, isSuperAdmin, isApresentador]);
 
-  const tabNavItems = useMemo(
-    () =>
-      [
-        { value: "pending", label: "Pendentes", icon: ClipboardList },
-        { value: "approved", label: "Aprovados", icon: BadgeCheck },
-        { value: "rejected", label: "Rejeitados", icon: X },
-        { value: "banned", label: "Banidos", icon: Ban },
-        { value: "deactivated", label: "Desativados", icon: ShieldX },
-        { value: "reports", label: "Denúncias", icon: Flag },
-        { value: "posts", label: "Texto diário", icon: Newspaper },
-        { value: "users", label: "Usuários", icon: UsersIcon },
-        { value: "pre_cadastros", label: "Pré-cadastros", icon: UserPlus },
-        { value: "restricted_words", label: "Palavras restritas", icon: ShieldAlert },
-        { value: "flags", label: "Sinalizações", icon: MessageSquareWarning },
-        { value: "interests", label: "Interesses & Matches", icon: Heart },
-      ].filter((item): item is { value: TabKey; label: string; icon: typeof ClipboardList } =>
-        availableTabs.includes(item.value as TabKey),
-      ),
-    [availableTabs],
-  );
+  const tabGroups = useMemo(() => {
+    const groups: Array<{
+      key: string;
+      title: string;
+      description: string;
+      icon: ReactNode;
+      items: Array<{
+        value: TabKey;
+        label: string;
+        description: string;
+        icon: typeof ClipboardList;
+      }>;
+    }> = [
+      {
+        key: "perfis",
+        title: "Moderação de perfis",
+        description: "Fluxo de aprovação e status dos cadastros.",
+        icon: <BadgeCheck className="h-5 w-5" />,
+        items: [
+          { value: "pending", label: "Pendentes", description: "Aguardando análise.", icon: ClipboardList },
+          { value: "approved", label: "Aprovados", description: "Perfis liberados.", icon: BadgeCheck },
+          { value: "rejected", label: "Rejeitados", description: "Cadastros recusados.", icon: X },
+          { value: "banned", label: "Banidos", description: "Contas banidas.", icon: Ban },
+          { value: "deactivated", label: "Desativados", description: "Contas inativas ou em exclusão.", icon: ShieldX },
+        ],
+      },
+      {
+        key: "seguranca",
+        title: "Comunidade & segurança",
+        description: "Denúncias, sinalizações e filtros.",
+        icon: <ShieldAlert className="h-5 w-5" />,
+        items: [
+          { value: "reports", label: "Denúncias", description: "Reportes feitos pela comunidade.", icon: Flag },
+          { value: "flags", label: "Sinalizações", description: "Alertas internos do sistema.", icon: MessageSquareWarning },
+          { value: "restricted_words", label: "Palavras restritas", description: "Lista de termos bloqueados.", icon: ShieldAlert },
+        ],
+      },
+      {
+        key: "conteudo",
+        title: "Conteúdo",
+        description: "Publicações e mensagens do app.",
+        icon: <Newspaper className="h-5 w-5" />,
+        items: [
+          { value: "posts", label: "Texto diário", description: "Notícias e devocionais.", icon: Newspaper },
+        ],
+      },
+      {
+        key: "pessoas",
+        title: "Pessoas & dados",
+        description: "Usuários, pré-cadastros e relacionamentos.",
+        icon: <UsersIcon className="h-5 w-5" />,
+        items: [
+          { value: "users", label: "Usuários", description: "Gestão de papéis e verificações.", icon: UsersIcon },
+          { value: "pre_cadastros", label: "Pré-cadastros", description: "Cadastros da live e parceiros.", icon: UserPlus },
+          { value: "interests", label: "Interesses & Matches", description: "Interesses cruzados e matches.", icon: Heart },
+        ],
+      },
+    ];
+    return groups
+      .map((g) => ({ ...g, items: g.items.filter((i) => availableTabs.includes(i.value)) }))
+      .filter((g) => g.items.length > 0);
+  }, [availableTabs]);
 
   const [rows, setRows] = useState<Row[]>([]);
   const [tab, setTab] = useState<TabKey>("pending");
@@ -728,23 +770,47 @@ function Admin() {
         )}
 
         <Tabs value={tab} onValueChange={(v) => setTab(v as TabKey)} className="mt-8">
-          <TabsList className="grid h-auto w-full grid-cols-1 gap-3 rounded-3xl border bg-background/70 p-3 shadow-soft backdrop-blur sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {tabNavItems.map((item) => {
-              const Icon = item.icon;
-
-              return (
-                <TabsTrigger
-                  key={item.value}
-                  value={item.value}
-                  className="min-h-14 justify-start gap-3 rounded-2xl border border-border/70 bg-white px-5 py-3 text-left text-sm font-semibold text-black shadow-sm transition-all hover:-translate-y-0.5 hover:border-[var(--rose)]/40 hover:shadow-md data-[state=active]:border-[var(--rose)] data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-glow"
-                >
-                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[var(--petal)] text-[var(--rose)]">
-                    <Icon className="h-4 w-4" />
-                  </span>
-                  <span className="truncate">{item.label}</span>
-                </TabsTrigger>
-              );
-            })}
+          <TabsList className="mt-6 grid h-auto w-full gap-4 bg-transparent p-0 lg:grid-cols-2 xl:grid-cols-3">
+            {tabGroups.map((group) => (
+              <div
+                key={group.key}
+                className="rounded-[1.75rem] border border-border/70 bg-card/85 p-4 shadow-soft backdrop-blur sm:rounded-3xl sm:p-5"
+              >
+                <div className="flex items-start gap-3">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[var(--petal)] text-[var(--rose)]">
+                    {group.icon}
+                  </div>
+                  <div>
+                    <h2 className="text-base font-semibold">{group.title}</h2>
+                    <p className="mt-1 text-xs text-muted-foreground">{group.description}</p>
+                  </div>
+                </div>
+                <div className="mt-4 grid gap-2">
+                  {group.items.map((item) => {
+                    const Icon = item.icon;
+                    return (
+                      <TabsTrigger
+                        key={item.value}
+                        value={item.value}
+                        className="group flex min-h-14 items-center justify-start gap-3 rounded-2xl border border-border/70 bg-white px-5 py-3 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-[var(--rose)]/40 hover:shadow-md data-[state=active]:border-[var(--rose)] data-[state=active]:shadow-glow"
+                      >
+                        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[var(--petal)] text-[var(--rose)]">
+                          <Icon className="h-4 w-4" />
+                        </span>
+                        <span className="min-w-0">
+                          <span className="block truncate text-sm font-semibold text-black">
+                            {item.label}
+                          </span>
+                          <span className="mt-0.5 line-clamp-1 block text-xs text-muted-foreground">
+                            {item.description}
+                          </span>
+                        </span>
+                      </TabsTrigger>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
           </TabsList>
 
           <TabsContent value={tab} className="mt-6">
