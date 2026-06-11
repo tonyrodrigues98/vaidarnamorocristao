@@ -1260,7 +1260,9 @@ type AdminModuleTo =
   | "/admin/fundos"
   | "/admin/equipe-live"
   | "/admin/gradientes-nome"
-  | "/admin/stickers";
+  | "/admin/stickers"
+  | "/admin/avatar"
+  | "/admin/pets";
 
 function AdminMetricPill({ label, value }: { label: string; value: string | number }) {
   return (
