@@ -614,30 +614,6 @@ function Wizard({ onCancel, onDone }: { onCancel?: () => void; onDone: () => voi
           }}
         />
       )}
-      {step === "benefit" && (
-        <div className="space-y-3">
-          <Grid
-            items={benefits}
-            selectedId={sel.benefit?.id}
-            onPick={(b) => {
-              const next = { ...sel, benefit: b };
-              setSel(next);
-              go("confirm");
-            }}
-          />
-          {benefits.length > 0 && (
-            <div className="flex justify-end">
-              <button
-                type="button"
-                onClick={() => go("confirm")}
-                className="text-xs font-medium text-neutral-500 transition hover:text-neutral-900"
-              >
-                Pular esta etapa
-              </button>
-            </div>
-          )}
-        </div>
-      )}
       {step === "confirm" && (
         <div className="space-y-5">
           <div className="grid gap-0 overflow-hidden rounded-2xl border border-neutral-200 bg-white sm:grid-cols-[160px_1fr]">
