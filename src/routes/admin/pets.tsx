@@ -1081,7 +1081,7 @@ function RowCard({
         </div>
       ) : row.image_url ? (
         <div className="group/thumb relative h-14 w-14 shrink-0">
-          <img src={row.image_url} alt="" className="h-14 w-14 rounded-xl object-cover ring-1 ring-border" />
+          <NonProductThumb src={row.image_url} />
           <button
             type="button"
             onClick={(e) => {
