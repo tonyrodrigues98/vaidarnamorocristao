@@ -468,6 +468,41 @@ function Wizard({ onCancel, onDone }: { onCancel?: () => void; onDone: () => voi
     );
   }
 
+  function StageAwareGrid<
+    T extends {
+      id: string;
+      name: string;
+      description: string | null;
+      image_url: string | null;
+      image_url_baby?: string | null;
+      image_url_adult?: string | null;
+    },
+  >({
+    items,
+    stageKind,
+    selectedId,
+    onPick,
+  }: {
+    items: T[];
+    stageKind: PetLifeStageKind;
+    selectedId?: string | null;
+    onPick: (item: T) => void;
+  }) {
+    const mapped = items.map((it) => ({
+      ...it,
+      image_url:
+        (stageKind === "baby" ? it.image_url_baby : it.image_url_adult) ??
+        it.image_url_adult ??
+        it.image_url_baby ??
+        it.image_url,
+    }));
+    return <Grid items={mapped} selectedId={selectedId} onPick={(picked) => {
+      // find original (with both image fields preserved)
+      const orig = items.find((x) => x.id === picked.id) ?? picked;
+      onPick(orig);
+    }} />;
+  }
+
   const stepTitles: Record<StepKey, string> = {
     category: "Escolha a categoria",
     species: "Escolha a espécie",
