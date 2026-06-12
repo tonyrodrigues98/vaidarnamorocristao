@@ -43,8 +43,7 @@ export const Route = createFileRoute("/meu-pet")({ component: MeuPetPage });
 
 type StepKey =
   | "category"
-  | "species"
-  | "variant"
+  | "type"
   | "stage"
   | "name"
   | "personality"
@@ -347,7 +346,7 @@ function Wizard({ onCancel, onDone }: { onCancel?: () => void; onDone: () => voi
   }, [step, sel.category, sel.species, sel.variant]);
 
   const order: StepKey[] = useMemo(
-    () => ["category", "stage", "personality", "benefit", "name", "species", "variant", "confirm"],
+    () => ["category", "stage", "personality", "benefit", "name", "type", "confirm"],
     [],
   );
 
@@ -356,11 +355,9 @@ function Wizard({ onCancel, onDone }: { onCancel?: () => void; onDone: () => voi
     const idx = order.indexOf(current);
     for (let i = idx + 1; i < order.length; i++) {
       const k = order[i];
-      // Skip species/variant when there are no options for the current category.
-      // Species/variant are now at the end of the flow (after category was chosen),
-      // so lists are guaranteed to be loaded by then.
-      if (k === "species" && species.length === 0) continue;
-      if (k === "variant" && variants.length === 0) continue;
+      // "type" step shows variants if available for the category, else species.
+      // Skip only when both lists are empty for this category.
+      if (k === "type" && variants.length === 0 && species.length === 0) continue;
       if (k === "benefit" && benefits.length === 0 && current === "personality") continue;
       return k;
     }
@@ -375,8 +372,7 @@ function Wizard({ onCancel, onDone }: { onCancel?: () => void; onDone: () => voi
     const idx = order.indexOf(step);
     for (let i = idx - 1; i >= 0; i--) {
       const k = order[i];
-      if (k === "species" && species.length === 0) continue;
-      if (k === "variant" && variants.length === 0) continue;
+      if (k === "type" && variants.length === 0 && species.length === 0) continue;
       if (k === "benefit" && benefits.length === 0) continue;
       setStep(k);
       return;
@@ -506,8 +502,7 @@ function Wizard({ onCancel, onDone }: { onCancel?: () => void; onDone: () => voi
 
   const stepTitles: Record<StepKey, string> = {
     category: "Escolha a categoria",
-    species: "Escolha a espécie",
-    variant: "Escolha a variação",
+    type: "Escolha o tipo",
     stage: "Em que fase está?",
     name: "Dê um nome",
     personality: "Qual a personalidade?",
@@ -571,36 +566,30 @@ function Wizard({ onCancel, onDone }: { onCancel?: () => void; onDone: () => voi
           }}
         />
       )}
-      {step === "species" && (
-        <StageAwareGrid
-          items={species}
-          stageKind={sel.stage?.kind ?? null}
-          selectedId={sel.species?.id}
-          onPick={async (s) => {
-            const next = { ...sel, species: s, variant: null };
-            setSel(next);
-            try {
-              const va = await listVariantsFor(sel.category!.id, s.id);
-              setVariants(va);
-              if (va.length > 0) go("variant");
-              else go("confirm");
-            } catch (e) {
-              toast.error((e as Error).message);
-            }
-          }}
-        />
-      )}
-      {step === "variant" && (
-        <StageAwareGrid
-          items={variants}
-          stageKind={sel.stage?.kind ?? null}
-          selectedId={sel.variant?.id}
-          onPick={(v) => {
-            const next = { ...sel, variant: v };
-            setSel(next);
-            go("confirm");
-          }}
-        />
+      {step === "type" && (
+        variants.length > 0 ? (
+          <StageAwareGrid
+            items={variants}
+            stageKind={sel.stage?.kind ?? null}
+            selectedId={sel.variant?.id}
+            onPick={(v) => {
+              const next = { ...sel, variant: v, species: null };
+              setSel(next);
+              go("confirm");
+            }}
+          />
+        ) : (
+          <StageAwareGrid
+            items={species}
+            stageKind={sel.stage?.kind ?? null}
+            selectedId={sel.species?.id}
+            onPick={(s) => {
+              const next = { ...sel, species: s, variant: null };
+              setSel(next);
+              go("confirm");
+            }}
+          />
+        )
       )}
       {step === "stage" && (
         <Grid
