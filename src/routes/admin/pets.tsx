@@ -1154,6 +1154,19 @@ function RowCard({
         <Button
           size="icon"
           variant="ghost"
+          onClick={() => onToggleActive(row, !row.active)}
+          title={row.active ? "Ocultar de /meu-pet" : "Mostrar em /meu-pet"}
+          className="h-8 w-8 rounded-full"
+        >
+          {row.active ? (
+            <Eye className="h-4 w-4" />
+          ) : (
+            <EyeOff className="h-4 w-4 text-muted-foreground" />
+          )}
+        </Button>
+        <Button
+          size="icon"
+          variant="ghost"
           onClick={() => onRemove(row)}
           className="h-8 w-8 rounded-full text-destructive hover:text-destructive"
         >
