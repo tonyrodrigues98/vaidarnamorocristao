@@ -617,41 +617,48 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
 
             {(table === "pet_species" || table === "pet_variants") && (
               <>
-                <Field icon={Sparkles} label="Raridade">
-                  <Select
-                    value={(draft.rarity as string) ?? "common"}
-                    onValueChange={(v) => setDraft({ ...draft, rarity: v as PetRarity })}
-                  >
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      {RARITIES.map((r) => (
-                        <SelectItem key={r} value={r}>{PET_RARITY_LABEL[r]}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </Field>
                 <div className="flex items-end gap-4">
                   <div className="flex items-center gap-2">
                     <Switch
                       checked={Boolean(draft.is_exclusive)}
                       onCheckedChange={(v) =>
-                        setDraft({ ...draft, is_exclusive: v, price_coins: v ? draft.price_coins ?? 0 : 0 })
+                        setDraft({
+                          ...draft,
+                          is_exclusive: v,
+                          rarity: v ? (draft.rarity as PetRarity) || "rare" : "common",
+                          price_coins: v ? draft.price_coins ?? 0 : 0,
+                        })
                       }
                     />
                     <Label className="!m-0 text-sm">Exclusivo (loja)</Label>
                   </div>
                 </div>
                 {draft.is_exclusive && (
-                  <Field icon={Sparkles} label="Preço (moedas)">
-                    <Input
-                      type="number"
-                      min={0}
-                      value={(draft.price_coins as number) ?? 0}
-                      onChange={(e) =>
-                        setDraft({ ...draft, price_coins: Math.max(0, Number(e.target.value) || 0) })
-                      }
-                    />
-                  </Field>
+                  <>
+                    <Field icon={Sparkles} label="Raridade">
+                      <Select
+                        value={(draft.rarity as string) ?? "rare"}
+                        onValueChange={(v) => setDraft({ ...draft, rarity: v as PetRarity })}
+                      >
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          {RARITIES.map((r) => (
+                            <SelectItem key={r} value={r}>{PET_RARITY_LABEL[r]}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </Field>
+                    <Field icon={Sparkles} label="Preço (moedas)">
+                      <Input
+                        type="number"
+                        min={0}
+                        value={(draft.price_coins as number) ?? 0}
+                        onChange={(e) =>
+                          setDraft({ ...draft, price_coins: Math.max(0, Number(e.target.value) || 0) })
+                        }
+                      />
+                    </Field>
+                  </>
                 )}
                 <div className="sm:col-span-2 grid gap-3 sm:grid-cols-2">
                   <Field icon={Baby} label="Imagem — Filhote (PNG transparente)">
