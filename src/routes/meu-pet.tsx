@@ -293,7 +293,6 @@ function Wizard({ onCancel, onDone }: { onCancel?: () => void; onDone: () => voi
   // Catalog data per step
   const [categories, setCategories] = useState<PetCategory[]>([]);
   const [species, setSpecies] = useState<PetSpecies[]>([]);
-  const [speciesByCategory, setSpeciesByCategory] = useState<Record<string, PetSpecies[]>>({});
   const [variants, setVariants] = useState<PetVariant[]>([]);
   const [stages, setStages] = useState<PetLifeStage[]>([]);
   const [personalities, setPersonalities] = useState<PetPersonality[]>([]);
@@ -311,11 +310,6 @@ function Wizard({ onCancel, onDone }: { onCancel?: () => void; onDone: () => voi
         setCategories(c);
         setStages(st);
         setPersonalities(pe);
-        // Pré-carrega espécies de todas as categorias para agrupar na 1ª tela.
-        const grouped = await Promise.all(
-          c.map(async (cat) => [cat.id, await listSpeciesByCategory(cat.id)] as const),
-        );
-        setSpeciesByCategory(Object.fromEntries(grouped));
       } catch (e) {
         toast.error((e as Error).message);
       }
@@ -349,7 +343,7 @@ function Wizard({ onCancel, onDone }: { onCancel?: () => void; onDone: () => voi
   }, [step, sel.category, sel.species, sel.variant]);
 
   const order: StepKey[] = useMemo(
-    () => ["category", "variant", "stage", "name", "personality", "benefit", "confirm"],
+    () => ["category", "species", "variant", "stage", "name", "personality", "benefit", "confirm"],
     [],
   );
 
@@ -479,7 +473,7 @@ function Wizard({ onCancel, onDone }: { onCancel?: () => void; onDone: () => voi
   }
 
   const stepTitles: Record<StepKey, string> = {
-    category: "Escolha seu pet",
+    category: "Escolha a categoria",
     species: "Escolha a espécie",
     variant: "Escolha a variação",
     stage: "Em que fase está?",
