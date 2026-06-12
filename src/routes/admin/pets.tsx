@@ -1288,6 +1288,7 @@ function ImagePreview({
   const ref = useRef<HTMLInputElement>(null);
   const [drag, setDrag] = useState(false);
   const [meta, setMeta] = useState<{ w: number; h: number } | null>(null);
+  const [lightbox, setLightbox] = useState(false);
   useEffect(() => {
     if (!value) {
       setMeta(null);
