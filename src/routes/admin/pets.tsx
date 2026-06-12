@@ -1148,6 +1148,19 @@ function RowCard({
 }
 
 function ThumbWithLabel({
+
+function NonProductThumb({ src }: { src: string | null }) {
+  const resolved = useSignedPetUrl(src);
+  return (
+    <img
+      src={resolved ?? undefined}
+      alt=""
+      className="h-14 w-14 rounded-xl object-cover ring-1 ring-border"
+    />
+  );
+}
+
+function ThumbWithLabelInner({
   label,
   src,
   onClear,
