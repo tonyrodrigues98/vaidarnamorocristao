@@ -7,6 +7,10 @@ export type GeneratePetImageInput = {
   subject: string;
   animals?: string[];
   scope?: string;
+  /** "fast" (default, ~15-25s) ou "pro" (gemini-3-pro, ~60-90s — pode estourar timeout). */
+  quality?: "fast" | "pro";
+  /** Roda revisão por IA de visão (mais lento). Default false. */
+  vision?: boolean;
 };
 
 export async function generatePetImage(input: GeneratePetImageInput): Promise<string> {

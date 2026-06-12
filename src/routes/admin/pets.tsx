@@ -199,6 +199,10 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
   const [benefits, setBenefits] = useState<PetBenefit[]>([]);
   const [targets, setTargets] = useState<{ id: string; name: string }[]>([]);
   const fileRef = useRef<HTMLInputElement>(null);
+  // Controles de geração por IA. "fast" cabe folgado no timeout (~20s).
+  // "pro" só se a aba estiver explicitamente selecionada — é lento (60-90s) e pode dar 504.
+  const [aiQuality, setAiQuality] = useState<"fast" | "pro">("fast");
+  const [aiVision, setAiVision] = useState(false);
 
   async function reload() {
     try {
@@ -340,7 +344,7 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
     setBusy(true);
     const tId = toast.loading(`Gerando imagem (${kind})... pode levar 30–60s`);
     try {
-      const path = await generatePetImage({ kind, subject, animals, scope: table });
+      const path = await generatePetImage({ kind, subject, animals, scope: table, quality: aiQuality, vision: aiVision });
       setDraft({ ...draft, [field]: path });
       toast.success("Imagem gerada e validada", { id: tId });
     } catch (e) {
@@ -387,7 +391,7 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
     for (const t of targets) {
       const tId = toast.loading(`Gerando: ${t.subject} (${t.kind})... [${ok + fail + 1}/${targets.length}]`);
       try {
-        const path = await generatePetImage({ kind: t.kind, subject: t.subject, animals: t.animals, scope: table });
+        const path = await generatePetImage({ kind: t.kind, subject: t.subject, animals: t.animals, scope: table, quality: aiQuality, vision: aiVision });
         await updateRow(table, t.rowId, { [t.field]: path });
         ok++;
         toast.success(`${t.subject}: ok`, { id: tId });
@@ -539,7 +543,29 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
         <h2 className="text-base font-semibold tracking-tight">{PET_TABLE_LABEL[table]}</h2>
         <div className="flex items-center gap-2">
           {(table === "pet_categories" || table === "pet_species" || table === "pet_variants") && (
-            <Button
+            <>
+              <label className="flex items-center gap-1 text-xs text-muted-foreground">
+                <select
+                  value={aiQuality}
+                  onChange={(e) => setAiQuality(e.target.value as "fast" | "pro")}
+                  disabled={busy}
+                  className="rounded-full border border-border/70 bg-background px-2 py-1 text-xs"
+                  title="Pro é mais lento (60-90s) e pode estourar timeout. Fast roda em ~20s."
+                >
+                  <option value="fast">IA rápida (flash)</option>
+                  <option value="pro">IA pro (lenta)</option>
+                </select>
+              </label>
+              <label className="flex items-center gap-1 text-xs text-muted-foreground">
+                <input
+                  type="checkbox"
+                  checked={aiVision}
+                  onChange={(e) => setAiVision(e.target.checked)}
+                  disabled={busy}
+                />
+                Revisão IA
+              </label>
+              <Button
               size="sm"
               variant="outline"
               onClick={() => void bulkGenerateMissing()}
@@ -549,6 +575,7 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
             >
               <Wand2 className="mr-1 h-4 w-4" /> Gerar faltantes (IA)
             </Button>
+            </>
           )}
           <Button size="sm" onClick={startCreate} disabled={creating || editingId !== null} className="rounded-full">
             <Plus className="mr-1 h-4 w-4" /> Novo
