@@ -1216,6 +1216,7 @@ function ImagePreview({
   const [drag, setDrag] = useState(false);
   const [meta, setMeta] = useState<{ w: number; h: number } | null>(null);
   const [lightbox, setLightbox] = useState(false);
+  const resolvedValue = useSignedPetUrl(value);
   useEffect(() => {
     if (!value) {
       setMeta(null);
