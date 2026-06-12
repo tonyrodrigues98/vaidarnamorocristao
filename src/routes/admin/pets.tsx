@@ -183,6 +183,7 @@ type DraftRecord = Record<string, unknown> & {
   effect_key?: string | null;
   effect_param?: number | null;
   effect_target_id?: string | null;
+  benefit_id?: string | null;
 };
 
 function CatalogPanel({ table }: { table: PetCatalogTable }) {
@@ -195,6 +196,7 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
   const [species, setSpecies] = useState<PetSpecies[]>([]);
   const [variants, setVariants] = useState<PetVariant[]>([]);
   const [perkEffects, setPerkEffects] = useState<PetPerkEffect[]>([]);
+  const [benefits, setBenefits] = useState<PetBenefit[]>([]);
   const [targets, setTargets] = useState<{ id: string; name: string }[]>([]);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -210,6 +212,9 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
       if (table === "pet_benefits") {
         setVariants(await listAll<PetVariant>("pet_variants"));
         setPerkEffects(await listPerkEffects(true));
+      }
+      if (table === "pet_species" || table === "pet_variants") {
+        setBenefits(await listAll<PetBenefit>("pet_benefits"));
       }
     } catch (e) {
       toast.error((e as Error).message);
