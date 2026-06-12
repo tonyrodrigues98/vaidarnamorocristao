@@ -558,24 +558,6 @@ function Wizard({ onCancel, onDone }: { onCancel?: () => void; onDone: () => voi
           }}
         />
       )}
-      {step === "species" && (
-        <Grid
-          items={species}
-          selectedId={sel.species?.id}
-          onPick={async (s) => {
-            const next = { ...sel, species: s, variant: null };
-            setSel(next);
-            try {
-              const va = await listVariantsFor(sel.category!.id, s.id);
-              setVariants(va);
-              if (va.length > 0) go("variant");
-              else go("stage");
-            } catch (e) {
-              toast.error((e as Error).message);
-            }
-          }}
-        />
-      )}
       {step === "variant" && (
         <Grid
           items={variants}
