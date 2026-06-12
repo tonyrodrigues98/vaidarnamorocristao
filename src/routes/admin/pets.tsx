@@ -199,6 +199,10 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
   const [benefits, setBenefits] = useState<PetBenefit[]>([]);
   const [targets, setTargets] = useState<{ id: string; name: string }[]>([]);
   const fileRef = useRef<HTMLInputElement>(null);
+  // Controles de geração por IA. "fast" cabe folgado no timeout (~20s).
+  // "pro" só se a aba estiver explicitamente selecionada — é lento (60-90s) e pode dar 504.
+  const [aiQuality, setAiQuality] = useState<"fast" | "pro">("fast");
+  const [aiVision, setAiVision] = useState(false);
 
   async function reload() {
     try {
@@ -340,7 +344,7 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
     setBusy(true);
     const tId = toast.loading(`Gerando imagem (${kind})... pode levar 30–60s`);
     try {
-      const path = await generatePetImage({ kind, subject, animals, scope: table });
+      const path = await generatePetImage({ kind, subject, animals, scope: table, quality: aiQuality, vision: aiVision });
       setDraft({ ...draft, [field]: path });
       toast.success("Imagem gerada e validada", { id: tId });
     } catch (e) {
@@ -387,7 +391,7 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
     for (const t of targets) {
       const tId = toast.loading(`Gerando: ${t.subject} (${t.kind})... [${ok + fail + 1}/${targets.length}]`);
       try {
-        const path = await generatePetImage({ kind: t.kind, subject: t.subject, animals: t.animals, scope: table });
+        const path = await generatePetImage({ kind: t.kind, subject: t.subject, animals: t.animals, scope: table, quality: aiQuality, vision: aiVision });
         await updateRow(table, t.rowId, { [t.field]: path });
         ok++;
         toast.success(`${t.subject}: ok`, { id: tId });
