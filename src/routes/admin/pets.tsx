@@ -877,6 +877,17 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
         species={species}
         onEdit={startEdit}
         onRemove={(r) => void remove(r)}
+        onToggleActive={async (row, next) => {
+          try {
+            await updateRow(table, row.id, { active: next });
+            setRows((prev) =>
+              prev.map((r) => (r.id === row.id ? ({ ...r, active: next } as PetCatalogEntity) : r)),
+            );
+            toast.success(next ? "Visível em /meu-pet" : "Ocultado de /meu-pet");
+          } catch (e) {
+            toast.error((e as Error).message);
+          }
+        }}
         onClearImage={async (row, field) => {
           try {
             await updateRow(table, row.id, { [field]: null });
