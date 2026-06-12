@@ -156,9 +156,10 @@ function Showcase({
 }) {
   const [renaming, setRenaming] = useState(false);
   const [name, setName] = useState(pet.custom_name);
+  const stageKind = pet.life_stage?.kind ?? null;
   const image =
-    pet.variant?.image_url ||
-    pet.species?.image_url ||
+    resolvePetDisplayImage(pet.variant, stageKind) ||
+    resolvePetDisplayImage(pet.species, stageKind) ||
     pet.category?.image_url ||
     null;
 
