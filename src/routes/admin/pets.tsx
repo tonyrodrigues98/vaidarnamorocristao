@@ -275,7 +275,15 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
   function startEdit(row: PetCatalogEntity) {
     setCreating(false);
     setEditingId(row.id);
-    setDraft({ ...(row as unknown as DraftRecord) });
+    const base = { ...(row as unknown as DraftRecord) };
+    if (table === "pet_species" || table === "pet_variants") {
+      const linked = benefits.find((b) => b.id === (base.benefit_id ?? ""));
+      base.effect_key = linked?.effect_key ?? null;
+      base.perk_label = linked?.perk_label ?? "";
+      base.effect_param = linked?.effect_param ?? null;
+      base.effect_target_id = linked?.effect_target_id ?? null;
+    }
+    setDraft(base);
   }
   function cancel() {
     setEditingId(null);
