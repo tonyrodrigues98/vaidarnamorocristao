@@ -352,8 +352,18 @@ function Wizard({ onCancel, onDone }: { onCancel?: () => void; onDone: () => voi
     const idx = order.indexOf(current);
     for (let i = idx + 1; i < order.length; i++) {
       const k = order[i];
-      if (k === "species" && species.length === 0 && merged.category) continue;
-      if (k === "variant" && variants.length === 0) continue;
+      // Only skip species/variant when we've already chosen the category AND
+      // confirmed (after load) that there are no options. Don't skip just
+      // because the async list hasn't arrived yet — that would race the user
+      // past valid steps right after picking a category.
+      if (k === "species" && current !== "category" && species.length === 0) continue;
+      if (
+        k === "variant" &&
+        current !== "category" &&
+        current !== "species" &&
+        variants.length === 0
+      )
+        continue;
       if (k === "benefit" && benefits.length === 0 && current === "personality") continue;
       return k;
     }
