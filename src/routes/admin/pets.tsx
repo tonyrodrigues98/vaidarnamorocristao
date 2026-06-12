@@ -595,16 +595,107 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
               </>
             )}
 
-            <div className="sm:col-span-2">
-              <Field icon={ImageIcon} label="Imagem">
-                <ImagePreview
-                  value={(draft.image_url as string) ?? null}
-                  busy={busy}
-                  onPick={(f) => void uploadImage(f)}
-                  onClear={() => setDraft({ ...draft, image_url: null })}
-                />
-              </Field>
-            </div>
+            {table === "pet_life_stages" && (
+              <div className="sm:col-span-2">
+                <Field icon={Baby} label="Tipo da fase (decide qual imagem do pet aparece)">
+                  <Select
+                    value={(draft.kind as string) ?? "__none__"}
+                    onValueChange={(v) =>
+                      setDraft({ ...draft, kind: v === "__none__" ? null : (v as "baby" | "adult") })
+                    }
+                  >
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__none__">Sem distinção (usa imagem padrão)</SelectItem>
+                      <SelectItem value="baby">Filhote</SelectItem>
+                      <SelectItem value="adult">Adulto</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </Field>
+              </div>
+            )}
+
+            {(table === "pet_species" || table === "pet_variants") && (
+              <>
+                <Field icon={Sparkles} label="Raridade">
+                  <Select
+                    value={(draft.rarity as string) ?? "common"}
+                    onValueChange={(v) => setDraft({ ...draft, rarity: v as PetRarity })}
+                  >
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {RARITIES.map((r) => (
+                        <SelectItem key={r} value={r}>{PET_RARITY_LABEL[r]}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </Field>
+                <div className="flex items-end gap-4">
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={Boolean(draft.is_exclusive)}
+                      onCheckedChange={(v) =>
+                        setDraft({ ...draft, is_exclusive: v, price_coins: v ? draft.price_coins ?? 0 : 0 })
+                      }
+                    />
+                    <Label className="!m-0 text-sm">Exclusivo (loja)</Label>
+                  </div>
+                </div>
+                {draft.is_exclusive && (
+                  <Field icon={Sparkles} label="Preço (moedas)">
+                    <Input
+                      type="number"
+                      min={0}
+                      value={(draft.price_coins as number) ?? 0}
+                      onChange={(e) =>
+                        setDraft({ ...draft, price_coins: Math.max(0, Number(e.target.value) || 0) })
+                      }
+                    />
+                  </Field>
+                )}
+                <div className="sm:col-span-2 grid gap-3 sm:grid-cols-2">
+                  <Field icon={Baby} label="Imagem — Filhote (PNG transparente)">
+                    <ImagePreview
+                      value={(draft.image_url_baby as string) ?? null}
+                      busy={busy}
+                      onPick={(f) => void uploadImage(f, "image_url_baby")}
+                      onClear={() => setDraft({ ...draft, image_url_baby: null })}
+                    />
+                  </Field>
+                  <Field icon={PawPrint} label="Imagem — Adulto (PNG transparente)">
+                    <ImagePreview
+                      value={(draft.image_url_adult as string) ?? null}
+                      busy={busy}
+                      onPick={(f) => void uploadImage(f, "image_url_adult")}
+                      onClear={() => setDraft({ ...draft, image_url_adult: null })}
+                    />
+                  </Field>
+                </div>
+                <div className="sm:col-span-2">
+                  <Field icon={ImageIcon} label="Imagem padrão (fallback opcional)">
+                    <ImagePreview
+                      value={(draft.image_url as string) ?? null}
+                      busy={busy}
+                      onPick={(f) => void uploadImage(f, "image_url")}
+                      onClear={() => setDraft({ ...draft, image_url: null })}
+                    />
+                  </Field>
+                </div>
+              </>
+            )}
+
+            {table !== "pet_species" && table !== "pet_variants" && (
+              <div className="sm:col-span-2">
+                <Field icon={ImageIcon} label="Imagem">
+                  <ImagePreview
+                    value={(draft.image_url as string) ?? null}
+                    busy={busy}
+                    onPick={(f) => void uploadImage(f)}
+                    onClear={() => setDraft({ ...draft, image_url: null })}
+                  />
+                </Field>
+              </div>
+            )}
           </div>
 
           <div className="mt-4 flex justify-end gap-2">
