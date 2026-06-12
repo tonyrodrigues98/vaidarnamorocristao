@@ -83,6 +83,7 @@ import type {
   PetVariant,
 } from "@/types/petCatalog";
 import { cn } from "@/lib/utils";
+import { useSignedPetUrl } from "@/lib/petImageUrl";
 
 export const Route = createFileRoute("/admin/pets")({ component: PetsAdmin });
 
@@ -1080,7 +1081,7 @@ function RowCard({
         </div>
       ) : row.image_url ? (
         <div className="group/thumb relative h-14 w-14 shrink-0">
-          <img src={row.image_url} alt="" className="h-14 w-14 rounded-xl object-cover ring-1 ring-border" />
+          <NonProductThumb src={row.image_url} />
           <button
             type="button"
             onClick={(e) => {
@@ -1146,6 +1147,17 @@ function RowCard({
   );
 }
 
+function NonProductThumb({ src }: { src: string | null }) {
+  const resolved = useSignedPetUrl(src);
+  return (
+    <img
+      src={resolved ?? undefined}
+      alt=""
+      className="h-14 w-14 rounded-xl object-cover ring-1 ring-border"
+    />
+  );
+}
+
 function ThumbWithLabel({
   label,
   src,
@@ -1155,11 +1167,12 @@ function ThumbWithLabel({
   src: string | null;
   onClear?: () => void;
 }) {
+  const resolved = useSignedPetUrl(src);
   return (
     <div className="flex flex-col items-center gap-0.5">
-      {src ? (
+      {resolved ? (
         <div className="group/thumb relative h-14 w-14">
-          <img src={src} alt={label} className="h-14 w-14 rounded-xl object-contain bg-muted/50 ring-1 ring-border" />
+          <img src={resolved} alt={label} className="h-14 w-14 rounded-xl object-contain bg-muted/50 ring-1 ring-border" />
           {onClear && (
             <button
               type="button"
@@ -1203,6 +1216,7 @@ function ImagePreview({
   const [drag, setDrag] = useState(false);
   const [meta, setMeta] = useState<{ w: number; h: number } | null>(null);
   const [lightbox, setLightbox] = useState(false);
+  const resolvedValue = useSignedPetUrl(value);
   useEffect(() => {
     if (!value) {
       setMeta(null);
@@ -1253,7 +1267,7 @@ function ImagePreview({
       >
         {value ? (
           <img
-            src={value}
+            src={resolvedValue ?? value}
             alt="preview"
             className="max-h-full max-w-full cursor-zoom-in object-contain p-3"
             onClick={(e) => {
@@ -1304,7 +1318,7 @@ function ImagePreview({
                 backgroundColor: "white",
               }}
             >
-              <img src={value} alt="preview ampliado" className="max-h-[90vh] max-w-full object-contain" />
+              <img src={resolvedValue ?? value} alt="preview ampliado" className="max-h-[90vh] max-w-full object-contain" />
             </div>
           )}
           {meta && (
