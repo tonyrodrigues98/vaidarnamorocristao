@@ -602,53 +602,201 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
         </div>
       )}
 
+      <CatalogRowsView
+        table={table}
+        rows={rows}
+        categories={categories}
+        species={species}
+        onEdit={startEdit}
+        onRemove={(r) => void remove(r)}
+      />
+    </section>
+  );
+}
+
+/* ============================== ROWS VIEW (grouped) ============================== */
+
+function CatalogRowsView({
+  table,
+  rows,
+  categories,
+  species,
+  onEdit,
+  onRemove,
+}: {
+  table: PetCatalogTable;
+  rows: PetCatalogEntity[];
+  categories: PetCategory[];
+  species: PetSpecies[];
+  onEdit: (row: PetCatalogEntity) => void;
+  onRemove: (row: PetCatalogEntity) => void;
+}) {
+  if (rows.length === 0) {
+    return (
+      <div className="rounded-2xl border border-dashed border-border bg-card/50 p-8 text-center text-sm text-muted-foreground">
+        Nenhum registro. Clique em "Novo" para adicionar.
+      </div>
+    );
+  }
+
+  // Plain (flat) listing for tables that don't need grouping
+  if (table !== "pet_species" && table !== "pet_variants") {
+    return (
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {rows.map((row) => (
-          <div
-            key={row.id}
-            className={cn(
-              "group flex items-center gap-3 rounded-2xl border border-border/70 bg-card p-3 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md",
-              !row.active && "opacity-60",
-            )}
-          >
-            {row.image_url ? (
-              <img src={row.image_url} alt="" className="h-14 w-14 rounded-xl object-cover ring-1 ring-border" />
-            ) : (
-              <div className="grid h-14 w-14 place-items-center rounded-xl bg-muted text-muted-foreground">
-                <ImageIcon className="h-5 w-5" />
-              </div>
-            )}
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-semibold">{row.name}</p>
-              <p className="truncate text-xs text-muted-foreground">{row.slug}</p>
-              {table === "pet_benefits" && (
-                <p className="text-[11px] text-muted-foreground">
-                  Escopo: {BENEFIT_SCOPE_LABEL[(row as PetBenefit).scope]}
-                </p>
-              )}
-            </div>
-            <div className="flex items-center gap-1">
-              <Button size="icon" variant="ghost" onClick={() => startEdit(row)} className="h-8 w-8 rounded-full">
-                <Pencil className="h-4 w-4" />
-              </Button>
-              <Button
-                size="icon"
-                variant="ghost"
-                onClick={() => void remove(row)}
-                className="h-8 w-8 rounded-full text-destructive hover:text-destructive"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
+          <RowCard key={row.id} row={row} table={table} onEdit={onEdit} onRemove={onRemove} />
         ))}
-        {rows.length === 0 && (
-          <div className="col-span-full rounded-2xl border border-dashed border-border bg-card/50 p-8 text-center text-sm text-muted-foreground">
-            Nenhum registro. Clique em "Novo" para adicionar.
+      </div>
+    );
+  }
+
+  // Grouped views
+  const groups: { key: string; title: string; subtitle?: string; rows: PetCatalogEntity[] }[] = [];
+  const orphan: PetCatalogEntity[] = [];
+
+  if (table === "pet_species") {
+    // Group species by category
+    const byCat = new Map<string, PetCatalogEntity[]>();
+    for (const r of rows) {
+      const cid = (r as PetSpecies).category_id ?? "__none__";
+      if (!byCat.has(cid)) byCat.set(cid, []);
+      byCat.get(cid)!.push(r);
+    }
+    for (const c of categories) {
+      const list = byCat.get(c.id);
+      if (list && list.length) {
+        groups.push({ key: c.id, title: c.name, subtitle: `${list.length} ${list.length === 1 ? "espécie" : "espécies"}`, rows: list });
+      }
+    }
+    if (byCat.get("__none__")?.length) orphan.push(...byCat.get("__none__")!);
+  } else if (table === "pet_variants") {
+    // Group variants by species; variants without species go under their category
+    const bySpecies = new Map<string, PetCatalogEntity[]>();
+    const byCatNoSpecies = new Map<string, PetCatalogEntity[]>();
+    for (const r of rows) {
+      const v = r as PetVariant;
+      if (v.species_id) {
+        if (!bySpecies.has(v.species_id)) bySpecies.set(v.species_id, []);
+        bySpecies.get(v.species_id)!.push(r);
+      } else {
+        const cid = v.category_id ?? "__none__";
+        if (!byCatNoSpecies.has(cid)) byCatNoSpecies.set(cid, []);
+        byCatNoSpecies.get(cid)!.push(r);
+      }
+    }
+    // Iterate categories in order; inside each, species then "geral" (sem espécie)
+    for (const c of categories) {
+      const speciesOfCat = species.filter((s) => s.category_id === c.id);
+      for (const s of speciesOfCat) {
+        const list = bySpecies.get(s.id);
+        if (list && list.length) {
+          groups.push({
+            key: `s-${s.id}`,
+            title: s.name,
+            subtitle: `${c.name} · ${list.length} ${list.length === 1 ? "variação" : "variações"}`,
+            rows: list,
+          });
+        }
+      }
+      const noSpeciesList = byCatNoSpecies.get(c.id);
+      if (noSpeciesList && noSpeciesList.length) {
+        groups.push({
+          key: `c-${c.id}`,
+          title: `${c.name} · geral`,
+          subtitle: `${noSpeciesList.length} ${noSpeciesList.length === 1 ? "variação" : "variações"} sem espécie`,
+          rows: noSpeciesList,
+        });
+      }
+    }
+    if (byCatNoSpecies.get("__none__")?.length) orphan.push(...byCatNoSpecies.get("__none__")!);
+  }
+
+  return (
+    <div className="space-y-6">
+      {groups.map((g) => (
+        <section key={g.key}>
+          <header className="mb-2 flex items-baseline justify-between gap-3 border-b border-border/60 pb-1.5">
+            <h3 className="text-sm font-semibold tracking-tight">{g.title}</h3>
+            {g.subtitle && (
+              <span className="text-[11px] uppercase tracking-wider text-muted-foreground">
+                {g.subtitle}
+              </span>
+            )}
+          </header>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {g.rows.map((row) => (
+              <RowCard key={row.id} row={row} table={table} onEdit={onEdit} onRemove={onRemove} />
+            ))}
           </div>
+        </section>
+      ))}
+      {orphan.length > 0 && (
+        <section>
+          <header className="mb-2 flex items-baseline justify-between gap-3 border-b border-dashed border-border/60 pb-1.5">
+            <h3 className="text-sm font-semibold tracking-tight text-destructive">Sem categoria</h3>
+            <span className="text-[11px] uppercase tracking-wider text-muted-foreground">
+              {orphan.length} item(s)
+            </span>
+          </header>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {orphan.map((row) => (
+              <RowCard key={row.id} row={row} table={table} onEdit={onEdit} onRemove={onRemove} />
+            ))}
+          </div>
+        </section>
+      )}
+    </div>
+  );
+}
+
+function RowCard({
+  row,
+  table,
+  onEdit,
+  onRemove,
+}: {
+  row: PetCatalogEntity;
+  table: PetCatalogTable;
+  onEdit: (row: PetCatalogEntity) => void;
+  onRemove: (row: PetCatalogEntity) => void;
+}) {
+  return (
+    <div
+      className={cn(
+        "group flex items-center gap-3 rounded-2xl border border-border/70 bg-card p-3 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md",
+        !row.active && "opacity-60",
+      )}
+    >
+      {row.image_url ? (
+        <img src={row.image_url} alt="" className="h-14 w-14 rounded-xl object-cover ring-1 ring-border" />
+      ) : (
+        <div className="grid h-14 w-14 place-items-center rounded-xl bg-muted text-muted-foreground">
+          <ImageIcon className="h-5 w-5" />
+        </div>
+      )}
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm font-semibold">{row.name}</p>
+        <p className="truncate text-xs text-muted-foreground">{row.slug}</p>
+        {table === "pet_benefits" && (
+          <p className="text-[11px] text-muted-foreground">
+            Escopo: {BENEFIT_SCOPE_LABEL[(row as PetBenefit).scope]}
+          </p>
         )}
       </div>
-    </section>
+      <div className="flex items-center gap-1">
+        <Button size="icon" variant="ghost" onClick={() => onEdit(row)} className="h-8 w-8 rounded-full">
+          <Pencil className="h-4 w-4" />
+        </Button>
+        <Button
+          size="icon"
+          variant="ghost"
+          onClick={() => onRemove(row)}
+          className="h-8 w-8 rounded-full text-destructive hover:text-destructive"
+        >
+          <Trash2 className="h-4 w-4" />
+        </Button>
+      </div>
+    </div>
   );
 }
 
