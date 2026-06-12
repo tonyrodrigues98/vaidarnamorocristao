@@ -233,10 +233,25 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
       active: true,
       sort_order: rows.length * 10,
     };
-    if (table === "pet_species") base.category_id = categories[0]?.id ?? null;
+    if (table === "pet_species") {
+      base.category_id = categories[0]?.id ?? null;
+      base.image_url_baby = null;
+      base.image_url_adult = null;
+      base.rarity = "common";
+      base.is_exclusive = false;
+      base.price_coins = 0;
+    }
     if (table === "pet_variants") {
       base.category_id = categories[0]?.id ?? null;
       base.species_id = null;
+      base.image_url_baby = null;
+      base.image_url_adult = null;
+      base.rarity = "common";
+      base.is_exclusive = false;
+      base.price_coins = 0;
+    }
+    if (table === "pet_life_stages") {
+      base.kind = null;
     }
     if (table === "pet_benefits") {
       base.scope = "global";
@@ -265,12 +280,12 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
     setDraft(null);
   }
 
-  async function uploadImage(file: File) {
+  async function uploadImage(file: File, field: "image_url" | "image_url_baby" | "image_url_adult" = "image_url") {
     if (!draft) return;
     setBusy(true);
     try {
-      const path = await uploadPetCatalogImage(file, table);
-      setDraft({ ...draft, image_url: path });
+      const path = await uploadPetCatalogImage(file, `${table}/${field}`);
+      setDraft({ ...draft, [field]: path });
     } catch (e) {
       toast.error((e as Error).message);
     } finally {
