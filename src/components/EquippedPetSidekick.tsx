@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Heart } from "lucide-react";
 
-import { getMyPetV2 } from "@/lib/petCatalog";
+import { getMyPetV2, resolvePetDisplayImage } from "@/lib/petCatalog";
 import type { UserPetV2Full } from "@/types/petCatalog";
 import { cn } from "@/lib/utils";
 
@@ -40,9 +40,10 @@ export function EquippedPetSidekick({
     };
   }, [userId]);
 
+  const stageKind = pet?.life_stage?.kind ?? null;
   const image =
-    pet?.variant?.image_url ??
-    pet?.species?.image_url ??
+    resolvePetDisplayImage(pet?.variant, stageKind) ??
+    resolvePetDisplayImage(pet?.species, stageKind) ??
     pet?.category?.image_url ??
     null;
 
