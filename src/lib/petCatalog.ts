@@ -6,6 +6,7 @@ import type {
   PetCatalogTable,
   PetCategory,
   PetLifeStage,
+  PetLifeStageKind,
   PetPersonality,
   PetPerkEffect,
   PetPerkEffectCategory,
@@ -51,10 +52,42 @@ export function slugify(value: string): string {
 }
 
 async function hydrateImage<T extends { image_url: string | null }>(row: T): Promise<T> {
-  return { ...row, image_url: await resolvePetImage(row.image_url) };
+  const r = row as T & {
+    image_url_baby?: string | null;
+    image_url_adult?: string | null;
+  };
+  const [main, baby, adult] = await Promise.all([
+    resolvePetImage(r.image_url),
+    r.image_url_baby !== undefined ? resolvePetImage(r.image_url_baby) : Promise.resolve(undefined),
+    r.image_url_adult !== undefined ? resolvePetImage(r.image_url_adult) : Promise.resolve(undefined),
+  ]);
+  const out: typeof r = { ...r, image_url: main };
+  if (r.image_url_baby !== undefined) out.image_url_baby = baby ?? null;
+  if (r.image_url_adult !== undefined) out.image_url_adult = adult ?? null;
+  return out as T;
 }
 async function hydrateAll<T extends { image_url: string | null }>(rows: T[]): Promise<T[]> {
   return Promise.all(rows.map(hydrateImage));
+}
+
+/**
+ * Picks the best image URL for a species/variant given the chosen life-stage
+ * kind. Falls back to the opposite stage, then to the legacy `image_url`.
+ */
+export function resolvePetDisplayImage(
+  entity:
+    | (Partial<PetSpecies> & { image_url?: string | null })
+    | (Partial<PetVariant> & { image_url?: string | null })
+    | null
+    | undefined,
+  stageKind: PetLifeStageKind | undefined,
+): string | null {
+  if (!entity) return null;
+  const baby = (entity as { image_url_baby?: string | null }).image_url_baby ?? null;
+  const adult = (entity as { image_url_adult?: string | null }).image_url_adult ?? null;
+  if (stageKind === "baby") return baby ?? adult ?? entity.image_url ?? null;
+  if (stageKind === "adult") return adult ?? baby ?? entity.image_url ?? null;
+  return adult ?? baby ?? entity.image_url ?? null;
 }
 
 // ---------- Generic admin CRUD ----------
