@@ -205,14 +205,11 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
       if (table === "pet_species" || table === "pet_variants" || table === "pet_benefits") {
         setCategories(await listAll<PetCategory>("pet_categories"));
       }
-      if (table === "pet_variants" || table === "pet_benefits") {
+      if (table === "pet_variants") {
         setSpecies(await listAll<PetSpecies>("pet_species"));
       }
-      if (table === "pet_benefits") {
-        setVariants(await listAll<PetVariant>("pet_variants"));
-        setPerkEffects(await listPerkEffects(true));
-      }
       if (table === "pet_species" || table === "pet_variants") {
+        setPerkEffects(await listPerkEffects(true));
         setBenefits(await listAll<PetBenefit>("pet_benefits"));
       }
     } catch (e) {
