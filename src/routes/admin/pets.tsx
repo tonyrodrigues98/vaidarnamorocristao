@@ -199,10 +199,6 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
   const [benefits, setBenefits] = useState<PetBenefit[]>([]);
   const [targets, setTargets] = useState<{ id: string; name: string }[]>([]);
   const fileRef = useRef<HTMLInputElement>(null);
-  // Controles de geração por IA. "fast" cabe folgado no timeout (~20s).
-  // "pro" só se a aba estiver explicitamente selecionada — é lento (60-90s) e pode dar 504.
-  const [aiQuality, setAiQuality] = useState<"fast" | "pro">("fast");
-  const [aiVision, setAiVision] = useState(false);
 
   async function reload() {
     try {
