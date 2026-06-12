@@ -537,9 +537,23 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
     <section className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-base font-semibold tracking-tight">{PET_TABLE_LABEL[table]}</h2>
-        <Button size="sm" onClick={startCreate} disabled={creating || editingId !== null} className="rounded-full">
-          <Plus className="mr-1 h-4 w-4" /> Novo
-        </Button>
+        <div className="flex items-center gap-2">
+          {(table === "pet_categories" || table === "pet_species" || table === "pet_variants") && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => void bulkGenerateMissing()}
+              disabled={busy || creating || editingId !== null}
+              className="rounded-full"
+              title="Gera com IA as imagens ainda vazias (filhote/adulto ou capa de categoria)"
+            >
+              <Wand2 className="mr-1 h-4 w-4" /> Gerar faltantes (IA)
+            </Button>
+          )}
+          <Button size="sm" onClick={startCreate} disabled={creating || editingId !== null} className="rounded-full">
+            <Plus className="mr-1 h-4 w-4" /> Novo
+          </Button>
+        </div>
       </div>
 
       {(creating || editingId) && draft && (
