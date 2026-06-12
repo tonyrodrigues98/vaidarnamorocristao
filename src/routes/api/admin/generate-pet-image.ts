@@ -22,8 +22,10 @@ type Body = {
 };
 
 const BUCKET = "pets";
-const MODEL_IMAGE_PRO = "google/gemini-3-pro-image-preview";
-const MODEL_IMAGE_FAST = "google/gemini-3.1-flash-image-preview";
+// OpenAI gpt-image-* aceita `background: "transparent"` e devolve PNG com
+// canal alfa REAL (não desenha checkerboard). Gemini ignora e pinta xadrez.
+const MODEL_IMAGE_PRO = "openai/gpt-image-2";
+const MODEL_IMAGE_FAST = "openai/gpt-image-1-mini";
 const MODEL_VISION = "google/gemini-2.5-flash";
 // Apenas 1 tentativa por requisição — modelos de imagem são lentos e o gateway
 // CloudFlare corta em ~100s. Retry deve ser disparado pelo cliente.
@@ -83,14 +85,26 @@ function base64ToBytes(b64: string): Uint8Array {
 }
 
 async function generateOnce(apiKey: string, prompt: string, model: string): Promise<Uint8Array | null> {
+  const isOpenAI = model.startsWith("openai/");
+  const body = isOpenAI
+    ? {
+        model,
+        prompt,
+        size: "1024x1024",
+        n: 1,
+        // CRÍTICO: gera PNG com canal alfa real em vez de fundo xadrez.
+        background: "transparent",
+        quality: "low",
+      }
+    : {
+        model,
+        messages: [{ role: "user", content: prompt }],
+        modalities: ["image", "text"],
+      };
   const resp = await fetch("https://ai.gateway.lovable.dev/v1/images/generations", {
     method: "POST",
     headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-    body: JSON.stringify({
-      model,
-      messages: [{ role: "user", content: prompt }],
-      modalities: ["image", "text"],
-    }),
+    body: JSON.stringify(body),
   });
   if (!resp.ok) {
     const txt = await resp.text().catch(() => "");
