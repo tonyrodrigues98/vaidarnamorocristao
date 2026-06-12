@@ -21,14 +21,12 @@ import {
   createMyPetV2,
   getMyPetV2,
   listActive,
-  listBenefitsFor,
   resolvePetDisplayImage,
   listSpeciesByCategory,
   listVariantsFor,
   updateMyPetV2,
 } from "@/lib/petCatalog";
 import type {
-  PetBenefit,
   PetCategory,
   PetLifeStage,
   PetLifeStageKind,
