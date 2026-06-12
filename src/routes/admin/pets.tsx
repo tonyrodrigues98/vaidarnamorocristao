@@ -245,6 +245,7 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
       base.rarity = "common";
       base.is_exclusive = false;
       base.price_coins = 0;
+      base.benefit_id = null;
     }
     if (table === "pet_variants") {
       base.category_id = categories[0]?.id ?? null;
@@ -254,6 +255,7 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
       base.rarity = "common";
       base.is_exclusive = false;
       base.price_coins = 0;
+      base.benefit_id = null;
     }
     if (table === "pet_life_stages") {
       base.kind = null;
