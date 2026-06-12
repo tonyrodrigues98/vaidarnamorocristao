@@ -15,20 +15,25 @@ type Body = {
   subject: string; // ex.: "Golden Retriever", "Periquito-australiano", "Roedores e pequenos pets"
   animals?: string[]; // só para kind=category
   scope?: "pet_species" | "pet_variants" | "pet_categories" | string;
+  /** "pro" usa gemini-3-pro-image-preview (mais lento, ~60-90s). "fast" usa flash (default, ~15-25s). */
+  quality?: "fast" | "pro";
+  /** Quando true, roda revisão por visão. Custa ~10-20s extras. Default false p/ caber no gateway. */
+  vision?: boolean;
 };
 
 const BUCKET = "pets";
-const MODEL_IMAGE = "google/gemini-3-pro-image-preview";
+const MODEL_IMAGE_PRO = "google/gemini-3-pro-image-preview";
+const MODEL_IMAGE_FAST = "google/gemini-3.1-flash-image-preview";
 const MODEL_VISION = "google/gemini-2.5-flash";
-const MAX_ATTEMPTS = 3;
+// Apenas 1 tentativa por requisição — modelos de imagem são lentos e o gateway
+// CloudFlare corta em ~100s. Retry deve ser disparado pelo cliente.
+const MAX_ATTEMPTS = 1;
 
 function buildPrompt(body: Body, attempt: number): string {
   const stricter =
     attempt === 0
       ? ""
-      : attempt === 1
-        ? " RESPEITE rigorosamente: fundo 100% TRANSPARENTE real, sem cor de fundo, sem checker, nenhum elemento tocando bordas, sem texto/letras/rótulos."
-        : " ÚLTIMA TENTATIVA: gere SOMENTE o assunto pedido, ocupando no MÁXIMO 60% do canvas, centralizado, margem transparente uniforme generosa, fundo totalmente transparente, sem texto algum, sem animais extras.";
+      : " RESPEITE rigorosamente: fundo 100% TRANSPARENTE real, sem cor de fundo, sem checker, nenhum elemento tocando bordas, sem texto/letras/rótulos.";
 
   if (body.kind === "baby") {
     return `Imagem quadrada 1024x1024, fundo 100% transparente real, PNG, asset premium para aplicativo. Criar ${body.subject} filhote/bebê, com aparência claramente jovem, proporções delicadas, cabeça levemente maior, corpo pequeno, olhos expressivos e doces, pose fofa e amigável. Estilo ilustração premium semi-realista fofa, textura suave, sombreamento macio, acabamento de alta qualidade, não realista demais, não fotográfico. Composição centralizada real, ocupando no máximo 65% da largura e 65% da altura do canvas, com margem transparente uniforme em todos os lados. Nenhuma parte do animal ou detalhe decorativo pode tocar ou ultrapassar as bordas. Sem texto, sem letras, sem fundo falso, sem overflow horizontal, sem overflow vertical, sem recortes.${stricter}`;
@@ -77,12 +82,12 @@ function base64ToBytes(b64: string): Uint8Array {
   return out;
 }
 
-async function generateOnce(apiKey: string, prompt: string): Promise<Uint8Array | null> {
+async function generateOnce(apiKey: string, prompt: string, model: string): Promise<Uint8Array | null> {
   const resp = await fetch("https://ai.gateway.lovable.dev/v1/images/generations", {
     method: "POST",
     headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
     body: JSON.stringify({
-      model: MODEL_IMAGE,
+      model,
       messages: [{ role: "user", content: prompt }],
       modalities: ["image", "text"],
     }),
@@ -201,11 +206,13 @@ export const Route = createFileRoute("/api/admin/generate-pet-image")({
           if (!["baby", "adult", "category"].includes(body.kind)) {
             return new Response(JSON.stringify({ error: "invalid_kind" }), { status: 400 });
           }
+          const model = body.quality === "pro" ? MODEL_IMAGE_PRO : MODEL_IMAGE_FAST;
+          const doVision = body.vision === true;
 
           let lastReason = "";
           for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
             const prompt = buildPrompt(body, attempt);
-            const bytes = await generateOnce(apiKey, prompt);
+            const bytes = await generateOnce(apiKey, prompt, model);
             if (!bytes) {
               lastReason = "generation_failed";
               continue;
@@ -227,11 +234,15 @@ export const Route = createFileRoute("/api/admin/generate-pet-image")({
               continue;
             }
 
-            // Revisão por IA.
-            const review = await visionReview(apiKey, bytes, body);
-            if (!review.ok) {
-              lastReason = `vision_rejected:${review.reason}`;
-              continue;
+            // Revisão por IA — opcional (custa tempo, pode estourar o gateway).
+            let visionReason = "skipped";
+            if (doVision) {
+              const review = await visionReview(apiKey, bytes, body);
+              if (!review.ok) {
+                lastReason = `vision_rejected:${review.reason}`;
+                continue;
+              }
+              visionReason = review.reason;
             }
 
             // Upload (admin client — bypassa RLS do bucket).
@@ -252,7 +263,7 @@ export const Route = createFileRoute("/api/admin/generate-pet-image")({
               );
             }
             return new Response(
-              JSON.stringify({ path, attempts: attempt + 1, vision_reason: review.reason }),
+              JSON.stringify({ path, attempts: attempt + 1, vision_reason: visionReason, model }),
               { status: 200, headers: { "Content-Type": "application/json" } },
             );
           }
