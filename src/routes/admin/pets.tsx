@@ -442,41 +442,6 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
       <div className="flex items-center justify-between">
         <h2 className="text-base font-semibold tracking-tight">{PET_TABLE_LABEL[table]}</h2>
         <div className="flex items-center gap-2">
-          {(table === "pet_categories" || table === "pet_species" || table === "pet_variants") && (
-            <>
-              <label className="flex items-center gap-1 text-xs text-muted-foreground">
-                <select
-                  value={aiQuality}
-                  onChange={(e) => setAiQuality(e.target.value as "fast" | "pro")}
-                  disabled={busy}
-                  className="rounded-full border border-border/70 bg-background px-2 py-1 text-xs"
-                  title="Pro é mais lento (60-90s) e pode estourar timeout. Fast roda em ~20s."
-                >
-                  <option value="fast">IA rápida (flash)</option>
-                  <option value="pro">IA pro (lenta)</option>
-                </select>
-              </label>
-              <label className="flex items-center gap-1 text-xs text-muted-foreground">
-                <input
-                  type="checkbox"
-                  checked={aiVision}
-                  onChange={(e) => setAiVision(e.target.checked)}
-                  disabled={busy}
-                />
-                Revisão IA
-              </label>
-              <Button
-              size="sm"
-              variant="outline"
-              onClick={() => void bulkGenerateMissing()}
-              disabled={busy || creating || editingId !== null}
-              className="rounded-full"
-              title="Gera com IA as imagens ainda vazias (filhote/adulto ou capa de categoria)"
-            >
-              <Wand2 className="mr-1 h-4 w-4" /> Gerar faltantes (IA)
-            </Button>
-            </>
-          )}
           <Button size="sm" onClick={startCreate} disabled={creating || editingId !== null} className="rounded-full">
             <Plus className="mr-1 h-4 w-4" /> Novo
           </Button>
