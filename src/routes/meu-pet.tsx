@@ -21,14 +21,12 @@ import {
   createMyPetV2,
   getMyPetV2,
   listActive,
-  listBenefitsFor,
   resolvePetDisplayImage,
   listSpeciesByCategory,
   listVariantsFor,
   updateMyPetV2,
 } from "@/lib/petCatalog";
 import type {
-  PetBenefit,
   PetCategory,
   PetLifeStage,
   PetLifeStageKind,
@@ -47,7 +45,6 @@ type StepKey =
   | "stage"
   | "name"
   | "personality"
-  | "benefit"
   | "confirm";
 
 type Selection = {
@@ -56,7 +53,6 @@ type Selection = {
   variant: PetVariant | null;
   stage: PetLifeStage | null;
   personality: PetPersonality | null;
-  benefit: PetBenefit | null;
   name: string;
 };
 
@@ -66,7 +62,6 @@ const EMPTY: Selection = {
   variant: null,
   stage: null,
   personality: null,
-  benefit: null,
   name: "",
 };
 
@@ -299,8 +294,6 @@ function Wizard({ onCancel, onDone }: { onCancel?: () => void; onDone: () => voi
   const [variants, setVariants] = useState<PetVariant[]>([]);
   const [stages, setStages] = useState<PetLifeStage[]>([]);
   const [personalities, setPersonalities] = useState<PetPersonality[]>([]);
-  const [benefits, setBenefits] = useState<PetBenefit[]>([]);
-
   // Initial load
   useEffect(() => {
     (async () => {
@@ -333,21 +326,8 @@ function Wizard({ onCancel, onDone }: { onCancel?: () => void; onDone: () => voi
       .catch((e) => toast.error(e.message));
   }, [sel.category, sel.species]);
 
-  // Pré-carrega benefícios assim que houver categoria (e refina se species/variant mudarem).
-  // Sem isso o nextOf "achava" que não tinha benefício e pulava a etapa.
-  useEffect(() => {
-    if (!sel.category) return;
-    listBenefitsFor({
-      categoryId: sel.category.id,
-      speciesId: sel.species?.id ?? null,
-      variantId: sel.variant?.id ?? null,
-    })
-      .then(setBenefits)
-      .catch((e) => toast.error(e.message));
-  }, [sel.category, sel.species, sel.variant]);
-
   const order: StepKey[] = useMemo(
-    () => ["category", "stage", "personality", "benefit", "name", "type", "confirm"],
+    () => ["category", "stage", "personality", "name", "type", "confirm"],
     [],
   );
 
@@ -356,10 +336,7 @@ function Wizard({ onCancel, onDone }: { onCancel?: () => void; onDone: () => voi
     const idx = order.indexOf(current);
     for (let i = idx + 1; i < order.length; i++) {
       const k = order[i];
-      // "type" step shows variants if available for the category, else species.
-      // Skip only when both lists are empty for this category.
       if (k === "type" && variants.length === 0 && species.length === 0) continue;
-      if (k === "benefit" && benefits.length === 0) continue;
       return k;
     }
     return "confirm";
@@ -374,7 +351,6 @@ function Wizard({ onCancel, onDone }: { onCancel?: () => void; onDone: () => voi
     for (let i = idx - 1; i >= 0; i--) {
       const k = order[i];
       if (k === "type" && variants.length === 0 && species.length === 0) continue;
-      if (k === "benefit" && benefits.length === 0) continue;
       setStep(k);
       return;
     }
@@ -393,7 +369,9 @@ function Wizard({ onCancel, onDone }: { onCancel?: () => void; onDone: () => voi
         variant_id: sel.variant?.id ?? null,
         life_stage_id: sel.stage.id,
         personality_id: sel.personality.id,
-        benefit_id: sel.benefit?.id ?? null,
+        // Benefício é atrelado à espécie/variação no admin — derivado automaticamente.
+        benefit_id:
+          sel.variant?.benefit_id ?? sel.species?.benefit_id ?? null,
         custom_name: sel.name.trim().slice(0, 30),
         visibility: "public",
       });
@@ -507,7 +485,6 @@ function Wizard({ onCancel, onDone }: { onCancel?: () => void; onDone: () => voi
     stage: "Em que fase está?",
     name: "Dê um nome",
     personality: "Qual a personalidade?",
-    benefit: "Escolha um benefício",
     confirm: "Confirme seu pet",
   };
 
@@ -637,30 +614,6 @@ function Wizard({ onCancel, onDone }: { onCancel?: () => void; onDone: () => voi
           }}
         />
       )}
-      {step === "benefit" && (
-        <div className="space-y-3">
-          <Grid
-            items={benefits}
-            selectedId={sel.benefit?.id}
-            onPick={(b) => {
-              const next = { ...sel, benefit: b };
-              setSel(next);
-              go("confirm");
-            }}
-          />
-          {benefits.length > 0 && (
-            <div className="flex justify-end">
-              <button
-                type="button"
-                onClick={() => go("confirm")}
-                className="text-xs font-medium text-neutral-500 transition hover:text-neutral-900"
-              >
-                Pular esta etapa
-              </button>
-            </div>
-          )}
-        </div>
-      )}
       {step === "confirm" && (
         <div className="space-y-5">
           <div className="grid gap-0 overflow-hidden rounded-2xl border border-neutral-200 bg-white sm:grid-cols-[160px_1fr]">
@@ -697,11 +650,6 @@ function Wizard({ onCancel, onDone }: { onCancel?: () => void; onDone: () => voi
                 {sel.personality && (
                   <span className="rounded-full border border-neutral-200 px-2.5 py-1 font-medium text-neutral-600">
                     {sel.personality.name}
-                  </span>
-                )}
-                {sel.benefit && (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-neutral-900 px-2.5 py-1 font-medium text-white">
-                    <Sparkles className="h-3 w-3" /> {sel.benefit.name}
                   </span>
                 )}
               </div>

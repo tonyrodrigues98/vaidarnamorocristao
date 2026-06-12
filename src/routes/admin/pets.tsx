@@ -183,6 +183,7 @@ type DraftRecord = Record<string, unknown> & {
   effect_key?: string | null;
   effect_param?: number | null;
   effect_target_id?: string | null;
+  benefit_id?: string | null;
 };
 
 function CatalogPanel({ table }: { table: PetCatalogTable }) {
@@ -195,6 +196,7 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
   const [species, setSpecies] = useState<PetSpecies[]>([]);
   const [variants, setVariants] = useState<PetVariant[]>([]);
   const [perkEffects, setPerkEffects] = useState<PetPerkEffect[]>([]);
+  const [benefits, setBenefits] = useState<PetBenefit[]>([]);
   const [targets, setTargets] = useState<{ id: string; name: string }[]>([]);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -210,6 +212,9 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
       if (table === "pet_benefits") {
         setVariants(await listAll<PetVariant>("pet_variants"));
         setPerkEffects(await listPerkEffects(true));
+      }
+      if (table === "pet_species" || table === "pet_variants") {
+        setBenefits(await listAll<PetBenefit>("pet_benefits"));
       }
     } catch (e) {
       toast.error((e as Error).message);
@@ -240,6 +245,7 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
       base.rarity = "common";
       base.is_exclusive = false;
       base.price_coins = 0;
+      base.benefit_id = null;
     }
     if (table === "pet_variants") {
       base.category_id = categories[0]?.id ?? null;
@@ -249,6 +255,7 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
       base.rarity = "common";
       base.is_exclusive = false;
       base.price_coins = 0;
+      base.benefit_id = null;
     }
     if (table === "pet_life_stages") {
       base.kind = null;
@@ -617,6 +624,27 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
 
             {(table === "pet_species" || table === "pet_variants") && (
               <>
+                <div className="sm:col-span-2">
+                  <Field icon={Gift} label="Benefício exclusivo deste pet">
+                    <Select
+                      value={(draft.benefit_id as string) ?? "__none__"}
+                      onValueChange={(v) =>
+                        setDraft({ ...draft, benefit_id: v === "__none__" ? null : v })
+                      }
+                    >
+                      <SelectTrigger><SelectValue placeholder="Sem benefício" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="__none__">Sem benefício</SelectItem>
+                        {benefits.map((b) => (
+                          <SelectItem key={b.id} value={b.id}>
+                            {b.name}
+                            {b.perk_label ? ` — ${b.perk_label}` : ""}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </Field>
+                </div>
                 <div className="flex items-end gap-4">
                   <div className="flex items-center gap-2">
                     <Switch

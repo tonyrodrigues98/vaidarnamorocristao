@@ -1369,6 +1369,7 @@ export type Database = {
       pet_species: {
         Row: {
           active: boolean
+          benefit_id: string | null
           category_id: string
           created_at: string
           description: string | null
@@ -1386,6 +1387,7 @@ export type Database = {
         }
         Insert: {
           active?: boolean
+          benefit_id?: string | null
           category_id: string
           created_at?: string
           description?: string | null
@@ -1403,6 +1405,7 @@ export type Database = {
         }
         Update: {
           active?: boolean
+          benefit_id?: string | null
           category_id?: string
           created_at?: string
           description?: string | null
@@ -1420,6 +1423,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "pet_species_benefit_id_fkey"
+            columns: ["benefit_id"]
+            isOneToOne: false
+            referencedRelation: "pet_benefits"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "pet_species_category_id_fkey"
             columns: ["category_id"]
             isOneToOne: false
@@ -1431,6 +1441,7 @@ export type Database = {
       pet_variants: {
         Row: {
           active: boolean
+          benefit_id: string | null
           category_id: string | null
           created_at: string
           description: string | null
@@ -1449,6 +1460,7 @@ export type Database = {
         }
         Insert: {
           active?: boolean
+          benefit_id?: string | null
           category_id?: string | null
           created_at?: string
           description?: string | null
@@ -1467,6 +1479,7 @@ export type Database = {
         }
         Update: {
           active?: boolean
+          benefit_id?: string | null
           category_id?: string | null
           created_at?: string
           description?: string | null
@@ -1484,6 +1497,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "pet_variants_benefit_id_fkey"
+            columns: ["benefit_id"]
+            isOneToOne: false
+            referencedRelation: "pet_benefits"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "pet_variants_category_id_fkey"
             columns: ["category_id"]
