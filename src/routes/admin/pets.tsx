@@ -20,7 +20,6 @@ import {
   Tag,
   Hash,
   Zap,
-  Wand2,
 } from "lucide-react";
 
 import { useAuth } from "@/lib/auth";
@@ -71,7 +70,6 @@ import {
   listBadgesCatalog,
   PERK_CATEGORY_LABEL,
 } from "@/lib/petCatalog";
-import { generatePetImage, type PetImageKind } from "@/lib/petImageGen";
 import type {
   PetBenefit,
   PetBenefitScope,
