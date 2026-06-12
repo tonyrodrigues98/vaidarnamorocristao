@@ -45,7 +45,6 @@ type StepKey =
   | "stage"
   | "name"
   | "personality"
-  | "benefit"
   | "confirm";
 
 type Selection = {
@@ -54,7 +53,6 @@ type Selection = {
   variant: PetVariant | null;
   stage: PetLifeStage | null;
   personality: PetPersonality | null;
-  benefit: PetBenefit | null;
   name: string;
 };
 
@@ -64,7 +62,6 @@ const EMPTY: Selection = {
   variant: null,
   stage: null,
   personality: null,
-  benefit: null,
   name: "",
 };
 
