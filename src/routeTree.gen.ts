@@ -67,6 +67,7 @@ import { Route as AdminFotosRouteImport } from './routes/admin/fotos'
 import { Route as AdminEquipeLiveRouteImport } from './routes/admin/equipe-live'
 import { Route as AdminAvatarRouteImport } from './routes/admin/avatar'
 import { Route as AdminAurasRouteImport } from './routes/admin/auras'
+import { Route as ApiAdminGeneratePetImageRouteImport } from './routes/api/admin/generate-pet-image'
 import { Route as ApiPublicHooksPushDispatchRouteImport } from './routes/api/public/hooks/push-dispatch'
 
 const VerificacaoRoute = VerificacaoRouteImport.update({
@@ -359,6 +360,12 @@ const AdminAurasRoute = AdminAurasRouteImport.update({
   path: '/admin/auras',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAdminGeneratePetImageRoute =
+  ApiAdminGeneratePetImageRouteImport.update({
+    id: '/api/admin/generate-pet-image',
+    path: '/api/admin/generate-pet-image',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksPushDispatchRoute =
   ApiPublicHooksPushDispatchRouteImport.update({
     id: '/api/public/hooks/push-dispatch',
@@ -425,6 +432,7 @@ export interface FileRoutesByFullPath {
   '/presentes/': typeof PresentesIndexRoute
   '/pretendentes/': typeof PretendentesIndexRoute
   '/suporte/': typeof SuporteIndexRoute
+  '/api/admin/generate-pet-image': typeof ApiAdminGeneratePetImageRoute
   '/api/public/hooks/push-dispatch': typeof ApiPublicHooksPushDispatchRoute
 }
 export interface FileRoutesByTo {
@@ -486,6 +494,7 @@ export interface FileRoutesByTo {
   '/presentes': typeof PresentesIndexRoute
   '/pretendentes': typeof PretendentesIndexRoute
   '/suporte': typeof SuporteIndexRoute
+  '/api/admin/generate-pet-image': typeof ApiAdminGeneratePetImageRoute
   '/api/public/hooks/push-dispatch': typeof ApiPublicHooksPushDispatchRoute
 }
 export interface FileRoutesById {
@@ -548,6 +557,7 @@ export interface FileRoutesById {
   '/presentes/': typeof PresentesIndexRoute
   '/pretendentes/': typeof PretendentesIndexRoute
   '/suporte/': typeof SuporteIndexRoute
+  '/api/admin/generate-pet-image': typeof ApiAdminGeneratePetImageRoute
   '/api/public/hooks/push-dispatch': typeof ApiPublicHooksPushDispatchRoute
 }
 export interface FileRouteTypes {
@@ -611,6 +621,7 @@ export interface FileRouteTypes {
     | '/presentes/'
     | '/pretendentes/'
     | '/suporte/'
+    | '/api/admin/generate-pet-image'
     | '/api/public/hooks/push-dispatch'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -672,6 +683,7 @@ export interface FileRouteTypes {
     | '/presentes'
     | '/pretendentes'
     | '/suporte'
+    | '/api/admin/generate-pet-image'
     | '/api/public/hooks/push-dispatch'
   id:
     | '__root__'
@@ -733,6 +745,7 @@ export interface FileRouteTypes {
     | '/presentes/'
     | '/pretendentes/'
     | '/suporte/'
+    | '/api/admin/generate-pet-image'
     | '/api/public/hooks/push-dispatch'
   fileRoutesById: FileRoutesById
 }
@@ -794,6 +807,7 @@ export interface RootRouteChildren {
   PresentesIndexRoute: typeof PresentesIndexRoute
   PretendentesIndexRoute: typeof PretendentesIndexRoute
   SuporteIndexRoute: typeof SuporteIndexRoute
+  ApiAdminGeneratePetImageRoute: typeof ApiAdminGeneratePetImageRoute
   ApiPublicHooksPushDispatchRoute: typeof ApiPublicHooksPushDispatchRoute
 }
 
@@ -1205,6 +1219,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAurasRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/admin/generate-pet-image': {
+      id: '/api/admin/generate-pet-image'
+      path: '/api/admin/generate-pet-image'
+      fullPath: '/api/admin/generate-pet-image'
+      preLoaderRoute: typeof ApiAdminGeneratePetImageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/push-dispatch': {
       id: '/api/public/hooks/push-dispatch'
       path: '/api/public/hooks/push-dispatch'
@@ -1284,6 +1305,7 @@ const rootRouteChildren: RootRouteChildren = {
   PresentesIndexRoute: PresentesIndexRoute,
   PretendentesIndexRoute: PretendentesIndexRoute,
   SuporteIndexRoute: SuporteIndexRoute,
+  ApiAdminGeneratePetImageRoute: ApiAdminGeneratePetImageRoute,
   ApiPublicHooksPushDispatchRoute: ApiPublicHooksPushDispatchRoute,
 }
 export const routeTree = rootRouteImport
