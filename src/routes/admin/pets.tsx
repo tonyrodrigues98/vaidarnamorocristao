@@ -874,6 +874,17 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
         species={species}
         onEdit={startEdit}
         onRemove={(r) => void remove(r)}
+        onClearImage={async (row, field) => {
+          try {
+            await updateRow(table, row.id, { [field]: null });
+            setRows((prev) =>
+              prev.map((r) => (r.id === row.id ? ({ ...r, [field]: null } as PetCatalogEntity) : r)),
+            );
+            toast.success("Imagem removida");
+          } catch (e) {
+            toast.error((e as Error).message);
+          }
+        }}
       />
     </section>
   );
