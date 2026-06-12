@@ -31,6 +31,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
@@ -1339,7 +1340,12 @@ function ImagePreview({
           <img
             src={value}
             alt="preview"
-            className="max-h-full max-w-full object-contain p-3"
+            className="max-h-full max-w-full cursor-zoom-in object-contain p-3"
+            onClick={(e) => {
+              e.stopPropagation();
+              setLightbox(true);
+            }}
+            title="Clique para abrir em tela cheia"
           />
         ) : (
           <div className="flex flex-col items-center gap-2 text-muted-foreground">
