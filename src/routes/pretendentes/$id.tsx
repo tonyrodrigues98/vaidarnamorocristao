@@ -540,10 +540,11 @@ function Detail() {
             <div className="relative -mt-20 overflow-visible rounded-[2rem] p-0 sm:-mt-24 lg:-mt-28">
               <div className="relative overflow-visible rounded-[1.65rem] p-0">
                 <div className="relative z-10 flex min-h-[170px] items-center justify-center overflow-visible py-0 sm:min-h-[220px] lg:min-h-[245px]">
+                  <div className="relative inline-block">
                   <EquippedPetSidekick
                     userId={profile.id}
-                    size={96}
-                    className="right-[-12px] bottom-2 sm:right-[-20px] sm:bottom-4 lg:right-[-28px]"
+                    size={78}
+                    className="-right-6 -bottom-1 sm:-right-8 sm:bottom-0 lg:-right-10"
                   />
                   <div className="sm:hidden">
                     <DecoratedAvatar
@@ -577,6 +578,7 @@ function Detail() {
                       auraId={profile.equipped_aura_id ?? null}
                       isCommitted={profileCommitted}
                     />
+                  </div>
                   </div>
                 </div>
               </div>
