@@ -31,6 +31,7 @@ import type {
   PetBenefit,
   PetCategory,
   PetLifeStage,
+  PetLifeStageKind,
   PetPersonality,
   PetSpecies,
   PetVariant,
