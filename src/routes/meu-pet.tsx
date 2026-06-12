@@ -1,7 +1,17 @@
 import { createFileRoute, Navigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { ArrowLeft, ArrowRight, Check, Eye, EyeOff, Loader2, PawPrint, Pencil, Sparkles } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Check,
+  Eye,
+  EyeOff,
+  Loader2,
+  PawPrint,
+  Pencil,
+  Sparkles,
+} from "lucide-react";
 
 import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
@@ -95,17 +105,25 @@ function MeuPetPage() {
   if (!user) return <Navigate to="/auth/login" />;
 
   return (
-    <div className="min-h-screen bg-[#FFF7F3]">
+    <div className="min-h-screen bg-white text-neutral-900 antialiased [font-feature-settings:'ss01','cv11']">
       <Header />
-      <main className="mx-auto max-w-3xl px-4 py-6 sm:px-6">
-        <div className="mb-6 flex items-center gap-2">
-          <PawPrint className="h-5 w-5 text-primary" />
-          <h1 className="font-serif text-2xl font-semibold text-foreground">Meu pet</h1>
-        </div>
+      <main className="mx-auto max-w-3xl px-5 py-10 sm:px-8 sm:py-14">
+        <header className="mb-10">
+          <div className="mb-2 flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.18em] text-neutral-400">
+            <span className="inline-block h-px w-6 bg-neutral-300" />
+            Pet
+          </div>
+          <h1 className="text-3xl font-semibold tracking-tight text-neutral-950 sm:text-4xl">
+            Meu pet
+          </h1>
+          <p className="mt-2 max-w-lg text-sm text-neutral-500">
+            Um companheiro que aparece no seu perfil — escolha, dê um nome e ele cresce com você.
+          </p>
+        </header>
 
         {reloading ? (
-          <div className="flex justify-center py-16">
-            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+          <div className="flex justify-center py-24">
+            <Loader2 className="h-5 w-5 animate-spin text-neutral-300" />
           </div>
         ) : wizard ? (
           <Wizard
@@ -164,19 +182,34 @@ function Showcase({
   }
 
   return (
-    <section className="overflow-hidden rounded-3xl border border-border bg-white/80 p-6 shadow-sm backdrop-blur">
-      <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-stretch">
-        <div className="flex h-56 w-56 shrink-0 items-center justify-center rounded-2xl bg-[#FFEFE7]">
+    <section className="overflow-hidden rounded-3xl border border-neutral-200/80 bg-white shadow-[0_1px_0_rgba(0,0,0,0.02),0_24px_60px_-30px_rgba(0,0,0,0.12)]">
+      <div className="grid gap-0 sm:grid-cols-[260px_1fr]">
+        {/* Visual */}
+        <div className="relative flex items-center justify-center border-b border-neutral-100 bg-gradient-to-b from-neutral-50 to-white p-8 sm:border-b-0 sm:border-r">
+          <div
+            aria-hidden
+            className="absolute inset-x-10 bottom-10 h-2 rounded-full bg-neutral-900/10 blur-2xl"
+          />
           {image ? (
-            <img src={image} alt={pet.custom_name} className="max-h-full max-w-full object-contain" />
+            <img
+              src={image}
+              alt={pet.custom_name}
+              className="relative h-44 w-44 object-contain drop-shadow-[0_12px_18px_rgba(0,0,0,0.12)]"
+            />
           ) : (
-            <PawPrint className="h-20 w-20 text-muted-foreground" />
+            <PawPrint className="h-20 w-20 text-neutral-300" />
           )}
         </div>
-        <div className="flex flex-1 flex-col justify-center gap-2">
-          <span className="text-xs uppercase tracking-wider text-muted-foreground">
-            {[pet.category?.name, pet.species?.name, pet.variant?.name].filter(Boolean).join(" • ")}
-          </span>
+
+        {/* Info */}
+        <div className="flex flex-col justify-center gap-4 p-6 sm:p-8">
+          <div className="flex items-center gap-2 text-[10px] font-medium uppercase tracking-[0.18em] text-neutral-400">
+            <PawPrint className="h-3 w-3" aria-hidden />
+            {[pet.category?.name, pet.species?.name, pet.variant?.name]
+              .filter(Boolean)
+              .join(" · ")}
+          </div>
+
           {renaming ? (
             <div className="flex items-center gap-2">
               <Input
@@ -184,8 +217,13 @@ function Showcase({
                 maxLength={30}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
+                className="h-10 rounded-xl border-neutral-200 bg-white text-lg font-semibold focus-visible:ring-neutral-900/10"
               />
-              <Button size="sm" onClick={() => void saveName()}>
+              <Button
+                size="sm"
+                onClick={() => void saveName()}
+                className="h-10 rounded-xl bg-neutral-900 px-3 text-white hover:bg-neutral-800"
+              >
                 <Check className="h-4 w-4" />
               </Button>
             </div>
@@ -195,34 +233,51 @@ function Showcase({
               onClick={() => setRenaming(true)}
               className="group inline-flex items-center gap-2 text-left"
             >
-              <h2 className="font-serif text-2xl font-semibold">{pet.custom_name}</h2>
-              <Pencil className="h-4 w-4 text-muted-foreground opacity-0 transition group-hover:opacity-100" />
+              <h2 className="text-3xl font-semibold tracking-tight text-neutral-950">
+                {pet.custom_name}
+              </h2>
+              <Pencil className="h-4 w-4 text-neutral-400 opacity-0 transition group-hover:opacity-100" />
             </button>
           )}
-          <div className="flex flex-wrap gap-2 text-xs">
+
+          <div className="flex flex-wrap gap-1.5 text-[11px]">
             {pet.life_stage && (
-              <span className="rounded-full bg-muted px-2 py-0.5">{pet.life_stage.name}</span>
+              <span className="rounded-full border border-neutral-200 bg-white px-2.5 py-1 font-medium text-neutral-600">
+                {pet.life_stage.name}
+              </span>
             )}
             {pet.personality && (
-              <span className="rounded-full bg-muted px-2 py-0.5">{pet.personality.name}</span>
+              <span className="rounded-full border border-neutral-200 bg-white px-2.5 py-1 font-medium text-neutral-600">
+                {pet.personality.name}
+              </span>
             )}
             {pet.benefit && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-primary">
+              <span className="inline-flex items-center gap-1 rounded-full border border-neutral-900/10 bg-neutral-900 px-2.5 py-1 font-medium text-white">
                 <Sparkles className="h-3 w-3" /> {pet.benefit.name}
               </span>
             )}
           </div>
-          <div className="mt-3 flex flex-wrap gap-2">
-            <Button size="sm" variant="outline" onClick={() => void toggleVisibility()}>
+
+          <div className="mt-2 flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => void toggleVisibility()}
+              className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-3.5 py-1.5 text-xs font-medium text-neutral-700 transition hover:border-neutral-300 hover:bg-neutral-50"
+            >
               {pet.visibility === "public" ? (
-                <><Eye className="mr-1 h-4 w-4" /> Público</>
+                <><Eye className="h-3.5 w-3.5" /> Público</>
               ) : (
-                <><EyeOff className="mr-1 h-4 w-4" /> Privado</>
+                <><EyeOff className="h-3.5 w-3.5" /> Privado</>
               )}
-            </Button>
-            <Button size="sm" onClick={onChange}>
+            </button>
+            <button
+              type="button"
+              onClick={onChange}
+              className="inline-flex items-center gap-1.5 rounded-full bg-neutral-900 px-3.5 py-1.5 text-xs font-medium text-white transition hover:bg-neutral-800"
+            >
               Trocar pet
-            </Button>
+              <ArrowRight className="h-3.5 w-3.5" />
+            </button>
           </div>
         </div>
       </div>
@@ -408,19 +463,36 @@ function Wizard({ onCancel, onDone }: { onCancel?: () => void; onDone: () => voi
   const previewImage = resolvePetImage(sel);
 
   return (
-    <section className="rounded-3xl border border-border bg-white/80 p-5 shadow-sm backdrop-blur">
-      <div className="mb-4 flex items-center justify-between">
-        <div>
-          <p className="text-xs uppercase tracking-wider text-muted-foreground">
-            Etapa {order.indexOf(step) + 1} de {order.length}
-          </p>
-          <h2 className="font-serif text-xl font-semibold">{stepTitles[step]}</h2>
+    <section className="overflow-hidden rounded-3xl border border-neutral-200/80 bg-white p-6 shadow-[0_1px_0_rgba(0,0,0,0.02),0_24px_60px_-30px_rgba(0,0,0,0.12)] sm:p-8">
+      {/* Progress */}
+      <div className="mb-6">
+        <div className="flex items-end justify-between gap-4">
+          <div>
+            <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-neutral-400">
+              Etapa {order.indexOf(step) + 1} de {order.length}
+            </p>
+            <h2 className="mt-1 text-2xl font-semibold tracking-tight text-neutral-950">
+              {stepTitles[step]}
+            </h2>
+          </div>
+          {onCancel && (
+            <button
+              type="button"
+              onClick={onCancel}
+              className="text-xs font-medium text-neutral-500 transition hover:text-neutral-900"
+            >
+              Cancelar
+            </button>
+          )}
         </div>
-        {onCancel && (
-          <Button variant="ghost" size="sm" onClick={onCancel}>
-            Cancelar
-          </Button>
-        )}
+        <div className="mt-4 h-px w-full overflow-hidden bg-neutral-100">
+          <div
+            className="h-full bg-neutral-900 transition-all duration-500"
+            style={{
+              width: `${((order.indexOf(step) + 1) / order.length) * 100}%`,
+            }}
+          />
+        </div>
       </div>
 
       {step === "category" && (
@@ -468,21 +540,25 @@ function Wizard({ onCancel, onDone }: { onCancel?: () => void; onDone: () => voi
         />
       )}
       {step === "name" && (
-        <div className="space-y-3">
+        <div className="space-y-4">
           <Input
             autoFocus
             maxLength={30}
             placeholder="Como ele(a) se chama?"
             value={sel.name}
             onChange={(e) => setSel({ ...sel, name: e.target.value })}
+            className="h-14 rounded-2xl border-neutral-200 bg-neutral-50 px-5 text-lg font-medium placeholder:text-neutral-400 focus-visible:bg-white focus-visible:ring-neutral-900/10"
           />
-          <div className="flex justify-end">
-            <Button
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-neutral-400">{sel.name.length}/30</span>
+            <button
+              type="button"
               disabled={!sel.name.trim()}
               onClick={() => go(nextOf("name"))}
+              className="inline-flex items-center gap-1.5 rounded-full bg-neutral-900 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-neutral-800 disabled:bg-neutral-200 disabled:text-neutral-400"
             >
-              Continuar <ArrowRight className="ml-1 h-4 w-4" />
-            </Button>
+              Continuar <ArrowRight className="h-4 w-4" />
+            </button>
           </div>
         </div>
       )}
@@ -510,51 +586,88 @@ function Wizard({ onCancel, onDone }: { onCancel?: () => void; onDone: () => voi
           />
           {benefits.length > 0 && (
             <div className="flex justify-end">
-              <Button variant="ghost" onClick={() => go("confirm")}>
-                Pular
-              </Button>
+              <button
+                type="button"
+                onClick={() => go("confirm")}
+                className="text-xs font-medium text-neutral-500 transition hover:text-neutral-900"
+              >
+                Pular esta etapa
+              </button>
             </div>
           )}
         </div>
       )}
       {step === "confirm" && (
-        <div className="space-y-4">
-          <div className="flex flex-col items-center gap-3 rounded-2xl bg-[#FFEFE7] p-4 sm:flex-row">
-            <div className="flex h-32 w-32 items-center justify-center rounded-2xl bg-white">
+        <div className="space-y-5">
+          <div className="grid gap-0 overflow-hidden rounded-2xl border border-neutral-200 bg-white sm:grid-cols-[160px_1fr]">
+            <div className="relative flex items-center justify-center border-b border-neutral-100 bg-gradient-to-b from-neutral-50 to-white p-6 sm:border-b-0 sm:border-r">
+              <div
+                aria-hidden
+                className="absolute inset-x-6 bottom-6 h-2 rounded-full bg-neutral-900/10 blur-xl"
+              />
               {previewImage ? (
-                <img src={previewImage} alt="" className="max-h-full max-w-full object-contain" />
+                <img
+                  src={previewImage}
+                  alt=""
+                  className="relative h-28 w-28 object-contain drop-shadow-[0_8px_14px_rgba(0,0,0,0.12)]"
+                />
               ) : (
-                <PawPrint className="h-12 w-12 text-muted-foreground" />
+                <PawPrint className="h-12 w-12 text-neutral-300" />
               )}
             </div>
-            <div className="flex-1 text-sm">
-              <p className="font-serif text-xl font-semibold">{sel.name || "Sem nome"}</p>
-              <p className="text-xs uppercase tracking-wider text-muted-foreground">
-                {[sel.category?.name, sel.species?.name, sel.variant?.name].filter(Boolean).join(" • ")}
+            <div className="flex flex-col justify-center gap-2 p-5 text-sm">
+              <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-neutral-400">
+                {[sel.category?.name, sel.species?.name, sel.variant?.name]
+                  .filter(Boolean)
+                  .join(" · ")}
               </p>
-              <div className="mt-2 flex flex-wrap gap-1 text-xs">
-                {sel.stage && <span className="rounded-full bg-white px-2 py-0.5">{sel.stage.name}</span>}
-                {sel.personality && <span className="rounded-full bg-white px-2 py-0.5">{sel.personality.name}</span>}
+              <p className="text-2xl font-semibold tracking-tight text-neutral-950">
+                {sel.name || "Sem nome"}
+              </p>
+              <div className="mt-1 flex flex-wrap gap-1.5 text-[11px]">
+                {sel.stage && (
+                  <span className="rounded-full border border-neutral-200 px-2.5 py-1 font-medium text-neutral-600">
+                    {sel.stage.name}
+                  </span>
+                )}
+                {sel.personality && (
+                  <span className="rounded-full border border-neutral-200 px-2.5 py-1 font-medium text-neutral-600">
+                    {sel.personality.name}
+                  </span>
+                )}
                 {sel.benefit && (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-primary">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-neutral-900 px-2.5 py-1 font-medium text-white">
                     <Sparkles className="h-3 w-3" /> {sel.benefit.name}
                   </span>
                 )}
               </div>
             </div>
           </div>
-          <Button className="w-full" disabled={busy} onClick={() => void finish()}>
-            {busy ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <Check className="mr-1 h-4 w-4" />}
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => void finish()}
+            className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-neutral-900 px-6 py-4 text-sm font-semibold text-white transition hover:bg-neutral-800 disabled:bg-neutral-300"
+          >
+            {busy ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Check className="h-4 w-4" />
+            )}
             Criar meu pet
-          </Button>
+          </button>
         </div>
       )}
 
       {step !== "category" && (
-        <div className="mt-4">
-          <Button variant="ghost" size="sm" onClick={back}>
-            <ArrowLeft className="mr-1 h-4 w-4" /> Voltar
-          </Button>
+        <div className="mt-6 border-t border-neutral-100 pt-4">
+          <button
+            type="button"
+            onClick={back}
+            className="inline-flex items-center gap-1.5 text-xs font-medium text-neutral-500 transition hover:text-neutral-900"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" /> Voltar
+          </button>
         </div>
       )}
     </section>
