@@ -874,6 +874,17 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
         species={species}
         onEdit={startEdit}
         onRemove={(r) => void remove(r)}
+        onClearImage={async (row, field) => {
+          try {
+            await updateRow(table, row.id, { [field]: null });
+            setRows((prev) =>
+              prev.map((r) => (r.id === row.id ? ({ ...r, [field]: null } as PetCatalogEntity) : r)),
+            );
+            toast.success("Imagem removida");
+          } catch (e) {
+            toast.error((e as Error).message);
+          }
+        }}
       />
     </section>
   );
@@ -888,6 +899,7 @@ function CatalogRowsView({
   species,
   onEdit,
   onRemove,
+  onClearImage,
 }: {
   table: PetCatalogTable;
   rows: PetCatalogEntity[];
@@ -895,6 +907,7 @@ function CatalogRowsView({
   species: PetSpecies[];
   onEdit: (row: PetCatalogEntity) => void;
   onRemove: (row: PetCatalogEntity) => void;
+  onClearImage: (row: PetCatalogEntity, field: "image_url" | "image_url_baby" | "image_url_adult") => void;
 }) {
   if (rows.length === 0) {
     return (
@@ -909,7 +922,7 @@ function CatalogRowsView({
     return (
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {rows.map((row) => (
-          <RowCard key={row.id} row={row} table={table} onEdit={onEdit} onRemove={onRemove} />
+          <RowCard key={row.id} row={row} table={table} onEdit={onEdit} onRemove={onRemove} onClearImage={onClearImage} />
         ))}
       </div>
     );
@@ -990,7 +1003,7 @@ function CatalogRowsView({
           </header>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {g.rows.map((row) => (
-              <RowCard key={row.id} row={row} table={table} onEdit={onEdit} onRemove={onRemove} />
+              <RowCard key={row.id} row={row} table={table} onEdit={onEdit} onRemove={onRemove} onClearImage={onClearImage} />
             ))}
           </div>
         </section>
@@ -1005,7 +1018,7 @@ function CatalogRowsView({
           </header>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {orphan.map((row) => (
-              <RowCard key={row.id} row={row} table={table} onEdit={onEdit} onRemove={onRemove} />
+              <RowCard key={row.id} row={row} table={table} onEdit={onEdit} onRemove={onRemove} onClearImage={onClearImage} />
             ))}
           </div>
         </section>
@@ -1019,11 +1032,13 @@ function RowCard({
   table,
   onEdit,
   onRemove,
+  onClearImage,
 }: {
   row: PetCatalogEntity;
   table: PetCatalogTable;
   onEdit: (row: PetCatalogEntity) => void;
   onRemove: (row: PetCatalogEntity) => void;
+  onClearImage: (row: PetCatalogEntity, field: "image_url" | "image_url_baby" | "image_url_adult") => void;
 }) {
   const isProduct = table === "pet_species" || table === "pet_variants";
   const prod = row as PetCatalogEntity & {
@@ -1052,11 +1067,32 @@ function RowCard({
     >
       {isProduct ? (
         <div className="flex shrink-0 items-center gap-1">
-          <ThumbWithLabel label="Filhote" src={baby ?? row.image_url} />
-          <ThumbWithLabel label="Adulto" src={adult ?? row.image_url} />
+          <ThumbWithLabel
+            label="Filhote"
+            src={baby ?? row.image_url}
+            onClear={baby ? () => onClearImage(row, "image_url_baby") : undefined}
+          />
+          <ThumbWithLabel
+            label="Adulto"
+            src={adult ?? row.image_url}
+            onClear={adult ? () => onClearImage(row, "image_url_adult") : undefined}
+          />
         </div>
       ) : row.image_url ? (
-        <img src={row.image_url} alt="" className="h-14 w-14 rounded-xl object-cover ring-1 ring-border" />
+        <div className="group/thumb relative h-14 w-14 shrink-0">
+          <img src={row.image_url} alt="" className="h-14 w-14 rounded-xl object-cover ring-1 ring-border" />
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onClearImage(row, "image_url");
+            }}
+            title="Excluir imagem"
+            className="absolute inset-0 grid place-items-center rounded-xl bg-destructive/80 text-destructive-foreground opacity-0 transition-opacity group-hover/thumb:opacity-100"
+          >
+            <Trash2 className="h-5 w-5" />
+          </button>
+        </div>
       ) : (
         <div className="grid h-14 w-14 place-items-center rounded-xl bg-muted text-muted-foreground">
           <ImageIcon className="h-5 w-5" />
@@ -1110,11 +1146,34 @@ function RowCard({
   );
 }
 
-function ThumbWithLabel({ label, src }: { label: string; src: string | null }) {
+function ThumbWithLabel({
+  label,
+  src,
+  onClear,
+}: {
+  label: string;
+  src: string | null;
+  onClear?: () => void;
+}) {
   return (
     <div className="flex flex-col items-center gap-0.5">
       {src ? (
-        <img src={src} alt={label} className="h-14 w-14 rounded-xl object-contain bg-muted/50 ring-1 ring-border" />
+        <div className="group/thumb relative h-14 w-14">
+          <img src={src} alt={label} className="h-14 w-14 rounded-xl object-contain bg-muted/50 ring-1 ring-border" />
+          {onClear && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onClear();
+              }}
+              title={`Excluir imagem (${label})`}
+              className="absolute inset-0 grid place-items-center rounded-xl bg-destructive/80 text-destructive-foreground opacity-0 transition-opacity group-hover/thumb:opacity-100"
+            >
+              <Trash2 className="h-5 w-5" />
+            </button>
+          )}
+        </div>
       ) : (
         <div className="grid h-14 w-14 place-items-center rounded-xl bg-muted text-muted-foreground">
           <ImageIcon className="h-4 w-4" />
