@@ -71,7 +71,6 @@ import {
   listBadgesCatalog,
   PERK_CATEGORY_LABEL,
 } from "@/lib/petCatalog";
-import { generatePetImage, type PetImageKind } from "@/lib/petImageGen";
 import type {
   PetBenefit,
   PetBenefitScope,
@@ -200,10 +199,6 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
   const [benefits, setBenefits] = useState<PetBenefit[]>([]);
   const [targets, setTargets] = useState<{ id: string; name: string }[]>([]);
   const fileRef = useRef<HTMLInputElement>(null);
-  // Controles de geração por IA. "fast" cabe folgado no timeout (~20s).
-  // "pro" só se a aba estiver explicitamente selecionada — é lento (60-90s) e pode dar 504.
-  const [aiQuality, setAiQuality] = useState<"fast" | "pro">("fast");
-  const [aiVision, setAiVision] = useState(false);
 
   async function reload() {
     try {
@@ -308,102 +303,6 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
     } finally {
       setBusy(false);
     }
-  }
-
-  /** Mapeia o campo de imagem do form para o `kind` do gerador. */
-  function fieldToKind(field: "image_url" | "image_url_baby" | "image_url_adult"): PetImageKind {
-    if (table === "pet_categories") return "category";
-    if (field === "image_url_baby") return "baby";
-    if (field === "image_url_adult") return "adult";
-    // fallback (image_url genérico em species/variants) — usa adulto.
-    return "adult";
-  }
-
-  /** Lista representativa para categorias (apenas usada quando kind=category). */
-  function categoryAnimalsFor(name: string): string[] {
-    const n = name.toLowerCase();
-    if (n.includes("cachorr") || n.includes("cão") || n.includes("cao")) return ["SRD/Vira-lata", "Golden Retriever", "Shih Tzu", "Labrador", "Poodle", "Bulldog Francês"];
-    if (n.includes("gato")) return ["SRD/Vira-lata", "Siamês", "Persa", "Maine Coon", "Sphynx", "Ragdoll"];
-    if (n.includes("ave") || n.includes("pássaro") || n.includes("passar")) return ["Canário", "Calopsita", "Periquito", "Papagaio", "Agapornis", "Cacatua"];
-    if (n.includes("peixe")) return ["Peixe Betta", "Kinguio", "Carpa Koi", "Acará-disco", "Neon tetra", "Molinésia"];
-    if (n.includes("réptil") || n.includes("reptil")) return ["Camaleão", "Jabuti", "Tartaruga", "Gecko", "Iguana", "Dragão-barbudo"];
-    if (n.includes("roedor") || n.includes("pequeno")) return ["Hamster dourado", "Porquinho-da-índia", "Coelho branco", "Chinchila", "Rato doméstico", "Esquilo"];
-    if (n.includes("exótic") || n.includes("exotic")) return ["Furão", "Ouriço pigmeu", "Axolote", "Mini porco", "Sugar Glider", "Chinchila"];
-    if (n.includes("sítio") || n.includes("sitio") || n.includes("fazenda")) return ["Cavalo", "Vaca", "Porco", "Ovelha", "Cabra", "Galinha", "Pato", "Pônei"];
-    return [];
-  }
-
-  async function generateForField(field: "image_url" | "image_url_baby" | "image_url_adult") {
-    if (!draft) return;
-    const subject = (draft.name || "").trim();
-    if (!subject) {
-      toast.error("Informe o nome antes de gerar.");
-      return;
-    }
-    const kind = fieldToKind(field);
-    const animals = kind === "category" ? categoryAnimalsFor(subject) : undefined;
-    setBusy(true);
-    const tId = toast.loading(`Gerando imagem (${kind})... pode levar 30–60s`);
-    try {
-      const path = await generatePetImage({ kind, subject, animals, scope: table, quality: aiQuality, vision: aiVision });
-      setDraft({ ...draft, [field]: path });
-      toast.success("Imagem gerada e validada", { id: tId });
-    } catch (e) {
-      toast.error(`Geração falhou: ${(e as Error).message}`, { id: tId });
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  /** Gera em lote para todas as linhas sem imagem. Só para tabelas que têm imagens. */
-  async function bulkGenerateMissing() {
-    if (table !== "pet_categories" && table !== "pet_species" && table !== "pet_variants") return;
-    type BulkTarget = {
-      rowId: string;
-      field: "image_url" | "image_url_baby" | "image_url_adult";
-      kind: PetImageKind;
-      subject: string;
-      animals?: string[];
-    };
-    const targets: BulkTarget[] = [];
-    for (const row of rows as Array<PetCatalogEntity & {
-      image_url?: string | null;
-      image_url_baby?: string | null;
-      image_url_adult?: string | null;
-    }>) {
-      const subject = row.name;
-      if (table === "pet_categories") {
-        if (!row.image_url) {
-          targets.push({ rowId: row.id, field: "image_url", kind: "category", subject, animals: categoryAnimalsFor(subject) });
-        }
-      } else {
-        if (!row.image_url_baby) targets.push({ rowId: row.id, field: "image_url_baby", kind: "baby", subject });
-        if (!row.image_url_adult) targets.push({ rowId: row.id, field: "image_url_adult", kind: "adult", subject });
-      }
-    }
-    if (targets.length === 0) {
-      toast.info("Nenhuma imagem faltando nesta aba.");
-      return;
-    }
-    if (!confirm(`Gerar ${targets.length} imagem(ns) faltante(s)? Isso pode levar vários minutos e consumir créditos de IA.`)) return;
-    setBusy(true);
-    let ok = 0;
-    let fail = 0;
-    for (const t of targets) {
-      const tId = toast.loading(`Gerando: ${t.subject} (${t.kind})... [${ok + fail + 1}/${targets.length}]`);
-      try {
-        const path = await generatePetImage({ kind: t.kind, subject: t.subject, animals: t.animals, scope: table, quality: aiQuality, vision: aiVision });
-        await updateRow(table, t.rowId, { [t.field]: path });
-        ok++;
-        toast.success(`${t.subject}: ok`, { id: tId });
-      } catch (e) {
-        fail++;
-        toast.error(`${t.subject}: ${(e as Error).message}`, { id: tId });
-      }
-    }
-    setBusy(false);
-    await reload();
-    toast.success(`Lote concluído — ${ok} ok / ${fail} falhas`);
   }
 
   const selectedEffect = useMemo(
@@ -543,41 +442,6 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
       <div className="flex items-center justify-between">
         <h2 className="text-base font-semibold tracking-tight">{PET_TABLE_LABEL[table]}</h2>
         <div className="flex items-center gap-2">
-          {(table === "pet_categories" || table === "pet_species" || table === "pet_variants") && (
-            <>
-              <label className="flex items-center gap-1 text-xs text-muted-foreground">
-                <select
-                  value={aiQuality}
-                  onChange={(e) => setAiQuality(e.target.value as "fast" | "pro")}
-                  disabled={busy}
-                  className="rounded-full border border-border/70 bg-background px-2 py-1 text-xs"
-                  title="Pro é mais lento (60-90s) e pode estourar timeout. Fast roda em ~20s."
-                >
-                  <option value="fast">IA rápida (flash)</option>
-                  <option value="pro">IA pro (lenta)</option>
-                </select>
-              </label>
-              <label className="flex items-center gap-1 text-xs text-muted-foreground">
-                <input
-                  type="checkbox"
-                  checked={aiVision}
-                  onChange={(e) => setAiVision(e.target.checked)}
-                  disabled={busy}
-                />
-                Revisão IA
-              </label>
-              <Button
-              size="sm"
-              variant="outline"
-              onClick={() => void bulkGenerateMissing()}
-              disabled={busy || creating || editingId !== null}
-              className="rounded-full"
-              title="Gera com IA as imagens ainda vazias (filhote/adulto ou capa de categoria)"
-            >
-              <Wand2 className="mr-1 h-4 w-4" /> Gerar faltantes (IA)
-            </Button>
-            </>
-          )}
           <Button size="sm" onClick={startCreate} disabled={creating || editingId !== null} className="rounded-full">
             <Plus className="mr-1 h-4 w-4" /> Novo
           </Button>
@@ -949,7 +813,6 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
                       busy={busy}
                       onPick={(f) => void uploadImage(f, "image_url_baby")}
                       onClear={() => setDraft({ ...draft, image_url_baby: null })}
-                      onGenerate={() => void generateForField("image_url_baby")}
                     />
                   </Field>
                   <Field icon={PawPrint} label="Imagem — Adulto (PNG transparente)">
@@ -958,7 +821,6 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
                       busy={busy}
                       onPick={(f) => void uploadImage(f, "image_url_adult")}
                       onClear={() => setDraft({ ...draft, image_url_adult: null })}
-                      onGenerate={() => void generateForField("image_url_adult")}
                     />
                   </Field>
                 </div>
@@ -983,11 +845,6 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
                     busy={busy}
                     onPick={(f) => void uploadImage(f)}
                     onClear={() => setDraft({ ...draft, image_url: null })}
-                    onGenerate={
-                      table === "pet_categories"
-                        ? () => void generateForField("image_url")
-                        : undefined
-                    }
                   />
                 </Field>
               </div>
@@ -1276,14 +1133,12 @@ function ImagePreview({
   onPick,
   onClear,
   accept = "image/*",
-  onGenerate,
 }: {
   value: string | null;
   busy?: boolean;
   onPick: (file: File) => void;
   onClear: () => void;
   accept?: string;
-  onGenerate?: () => void;
 }) {
   const ref = useRef<HTMLInputElement>(null);
   const [drag, setDrag] = useState(false);
@@ -1365,19 +1220,6 @@ function ImagePreview({
         <Button type="button" variant="outline" size="sm" onClick={() => ref.current?.click()} className="rounded-full">
           <Upload className="mr-1 h-4 w-4" /> {value ? "Trocar" : "Enviar"}
         </Button>
-        {onGenerate && (
-          <Button
-            type="button"
-            variant="secondary"
-            size="sm"
-            onClick={onGenerate}
-            disabled={busy}
-            className="rounded-full"
-            title="Gerar com IA respeitando as regras do app"
-          >
-            <Wand2 className="mr-1 h-4 w-4" /> Gerar com IA
-          </Button>
-        )}
         {value && (
           <Button type="button" variant="ghost" size="sm" onClick={onClear} className="rounded-full text-destructive">
             <Trash2 className="mr-1 h-4 w-4" /> Remover
