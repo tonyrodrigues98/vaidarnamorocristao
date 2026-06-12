@@ -293,6 +293,7 @@ function Wizard({ onCancel, onDone }: { onCancel?: () => void; onDone: () => voi
   // Catalog data per step
   const [categories, setCategories] = useState<PetCategory[]>([]);
   const [species, setSpecies] = useState<PetSpecies[]>([]);
+  const [speciesByCategory, setSpeciesByCategory] = useState<Record<string, PetSpecies[]>>({});
   const [variants, setVariants] = useState<PetVariant[]>([]);
   const [stages, setStages] = useState<PetLifeStage[]>([]);
   const [personalities, setPersonalities] = useState<PetPersonality[]>([]);
@@ -310,6 +311,11 @@ function Wizard({ onCancel, onDone }: { onCancel?: () => void; onDone: () => voi
         setCategories(c);
         setStages(st);
         setPersonalities(pe);
+        // Pré-carrega espécies de todas as categorias para agrupar na 1ª tela.
+        const grouped = await Promise.all(
+          c.map(async (cat) => [cat.id, await listSpeciesByCategory(cat.id)] as const),
+        );
+        setSpeciesByCategory(Object.fromEntries(grouped));
       } catch (e) {
         toast.error((e as Error).message);
       }
@@ -519,21 +525,32 @@ function Wizard({ onCancel, onDone }: { onCancel?: () => void; onDone: () => voi
       </div>
 
       {step === "category" && (
-        <Grid
-          items={categories}
-          selectedId={sel.category?.id}
-          onPick={async (c) => {
-            const next = { ...sel, category: c, species: null, variant: null };
+        <GroupedSpeciesPicker
+          categories={categories}
+          speciesByCategory={speciesByCategory}
+          selectedSpeciesId={sel.species?.id ?? null}
+          selectedCategoryId={sel.category?.id ?? null}
+          onPickSpecies={async (cat, s) => {
+            const next = { ...sel, category: cat, species: s, variant: null };
             setSel(next);
+            setSpecies(speciesByCategory[cat.id] ?? []);
             try {
-              const [sp, va] = await Promise.all([
-                listSpeciesByCategory(c.id),
-                listVariantsFor(c.id, null),
-              ]);
-              setSpecies(sp);
+              const va = await listVariantsFor(cat.id, s.id);
               setVariants(va);
-              if (sp.length > 0) go("species");
-              else if (va.length > 0) go("variant");
+              if (va.length > 0) go("variant");
+              else go("stage");
+            } catch (e) {
+              toast.error((e as Error).message);
+            }
+          }}
+          onPickCategoryOnly={async (cat) => {
+            const next = { ...sel, category: cat, species: null, variant: null };
+            setSel(next);
+            setSpecies([]);
+            try {
+              const va = await listVariantsFor(cat.id, null);
+              setVariants(va);
+              if (va.length > 0) go("variant");
               else go("stage");
             } catch (e) {
               toast.error((e as Error).message);
