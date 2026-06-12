@@ -49,7 +49,7 @@ import { RoleBadge } from "@/components/RoleBadge";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { OnlineDot } from "@/components/OnlineDot";
 import { UserBadges } from "@/components/UserBadges";
-import { EquippedPetBadge } from "@/components/EquippedPetBadge";
+import { PetProfileCard } from "@/components/PetProfileCard";
 import { ProfileAdvancedView } from "@/components/ProfileAdvancedView";
 import { DecoratedAvatar } from "@/components/DecoratedAvatar";
 import { ROLE_PRIORITY, type AppRole, type RoleColor } from "@/lib/roles";
@@ -600,7 +600,7 @@ function Detail() {
                     <OnlineDot userId={profile.id} size="sm" showLabel />
                   </div>
                   <UserBadges userId={profile.id} size="sm" max={6} />
-                  <EquippedPetBadge userId={profile.id} />
+                  <PetProfileCard userId={profile.id} />
 
                   {profileCommitted && (
                     <div className="inline-flex items-center gap-2 rounded-full border border-emerald-300/60 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-800 dark:border-emerald-400/25 dark:bg-emerald-400/10 dark:text-emerald-200">
