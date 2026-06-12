@@ -1147,8 +1147,6 @@ function RowCard({
   );
 }
 
-function ThumbWithLabel({
-
 function NonProductThumb({ src }: { src: string | null }) {
   const resolved = useSignedPetUrl(src);
   return (
@@ -1160,7 +1158,7 @@ function NonProductThumb({ src }: { src: string | null }) {
   );
 }
 
-function ThumbWithLabelInner({
+function ThumbWithLabel({
   label,
   src,
   onClear,
