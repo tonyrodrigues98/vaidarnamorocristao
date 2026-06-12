@@ -628,26 +628,93 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
 
             {(table === "pet_species" || table === "pet_variants") && (
               <>
-                <div className="sm:col-span-2">
-                  <Field icon={Gift} label="Benefício exclusivo deste pet">
-                    <Select
-                      value={(draft.benefit_id as string) ?? "__none__"}
-                      onValueChange={(v) =>
-                        setDraft({ ...draft, benefit_id: v === "__none__" ? null : v })
-                      }
-                    >
-                      <SelectTrigger><SelectValue placeholder="Sem benefício" /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="__none__">Sem benefício</SelectItem>
-                        {benefits.map((b) => (
-                          <SelectItem key={b.id} value={b.id}>
-                            {b.name}
-                            {b.perk_label ? ` — ${b.perk_label}` : ""}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </Field>
+                <div className="sm:col-span-2 rounded-2xl border border-dashed border-border/60 bg-muted/30 p-3">
+                  <div className="mb-2 flex items-center gap-2 text-sm font-semibold">
+                    <Wand2 className="h-4 w-4 text-primary" />
+                    Vantagem exclusiva deste pet
+                  </div>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <div className="sm:col-span-2">
+                      <Field icon={Wand2} label="Efeito real">
+                        <Select
+                          value={(draft.effect_key as string) ?? "__none__"}
+                          onValueChange={(v) =>
+                            setDraft({
+                              ...draft,
+                              effect_key: v === "__none__" ? null : v,
+                              effect_param: null,
+                              effect_target_id: null,
+                            })
+                          }
+                        >
+                          <SelectTrigger><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="__none__">Sem vantagem (apenas cosmético)</SelectItem>
+                            {Object.entries(
+                              perkEffects.reduce<Record<string, PetPerkEffect[]>>((acc, e) => {
+                                (acc[e.category] ||= []).push(e);
+                                return acc;
+                              }, {}),
+                            ).map(([cat, items]) => (
+                              <div key={cat}>
+                                <div className="px-2 py-1 text-[11px] font-semibold uppercase text-muted-foreground">
+                                  {PERK_CATEGORY_LABEL[cat as PetPerkEffectCategory]}
+                                </div>
+                                {items.map((e) => (
+                                  <SelectItem key={e.key} value={e.key}>{e.label}</SelectItem>
+                                ))}
+                              </div>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </Field>
+                    </div>
+                    {draft.effect_key && (
+                      <>
+                        <Field icon={Tag} label="Rótulo curto (opcional)">
+                          <Input
+                            value={(draft.perk_label as string) ?? ""}
+                            placeholder="Ex.: +2 moedas"
+                            onChange={(e) => setDraft({ ...draft, perk_label: e.target.value })}
+                          />
+                        </Field>
+                        {selectedEffect?.numeric_param && (
+                          <Field icon={Hash} label="Quantidade">
+                            <Input
+                              type="number"
+                              value={(draft.effect_param as number) ?? selectedEffect.default_param ?? 0}
+                              onChange={(e) =>
+                                setDraft({ ...draft, effect_param: Number(e.target.value) || 0 })
+                              }
+                            />
+                          </Field>
+                        )}
+                        {selectedEffect?.needs_target && (
+                          <div className="sm:col-span-2">
+                            <Field icon={Star} label="Alvo desbloqueado">
+                              <Select
+                                value={(draft.effect_target_id as string) ?? ""}
+                                onValueChange={(v) => setDraft({ ...draft, effect_target_id: v })}
+                              >
+                                <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                                <SelectContent>
+                                  {targets.length === 0 ? (
+                                    <SelectItem value="__empty__" disabled>
+                                      Nenhum disponível
+                                    </SelectItem>
+                                  ) : (
+                                    targets.map((t) => (
+                                      <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
+                                    ))
+                                  )}
+                                </SelectContent>
+                              </Select>
+                            </Field>
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
                 </div>
                 <div className="flex items-end gap-4">
                   <div className="flex items-center gap-2">
