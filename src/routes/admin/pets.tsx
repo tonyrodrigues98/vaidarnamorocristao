@@ -20,6 +20,7 @@ import {
   Tag,
   Hash,
   Zap,
+  Wand2,
 } from "lucide-react";
 
 import { useAuth } from "@/lib/auth";
