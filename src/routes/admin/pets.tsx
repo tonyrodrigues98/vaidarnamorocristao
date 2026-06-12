@@ -93,7 +93,6 @@ const TABS: { key: TabKey; label: string; icon: ComponentType<{ className?: stri
   { key: "pet_variants", label: "Variações", icon: Sparkles },
   { key: "pet_life_stages", label: "Fases", icon: Baby },
   { key: "pet_personalities", label: "Personalidades", icon: Smile },
-  { key: "pet_benefits", label: "Benefícios", icon: Gift },
   { key: "perk_effects", label: "Tipos de efeito", icon: Zap },
   { key: "legacy", label: "Pets (legado)", icon: Star },
 ];
@@ -206,14 +205,11 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
       if (table === "pet_species" || table === "pet_variants" || table === "pet_benefits") {
         setCategories(await listAll<PetCategory>("pet_categories"));
       }
-      if (table === "pet_variants" || table === "pet_benefits") {
+      if (table === "pet_variants") {
         setSpecies(await listAll<PetSpecies>("pet_species"));
       }
-      if (table === "pet_benefits") {
-        setVariants(await listAll<PetVariant>("pet_variants"));
-        setPerkEffects(await listPerkEffects(true));
-      }
       if (table === "pet_species" || table === "pet_variants") {
+        setPerkEffects(await listPerkEffects(true));
         setBenefits(await listAll<PetBenefit>("pet_benefits"));
       }
     } catch (e) {
@@ -279,7 +275,15 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
   function startEdit(row: PetCatalogEntity) {
     setCreating(false);
     setEditingId(row.id);
-    setDraft({ ...(row as unknown as DraftRecord) });
+    const base = { ...(row as unknown as DraftRecord) };
+    if (table === "pet_species" || table === "pet_variants") {
+      const linked = benefits.find((b) => b.id === (base.benefit_id ?? ""));
+      base.effect_key = linked?.effect_key ?? null;
+      base.perk_label = linked?.perk_label ?? "";
+      base.effect_param = linked?.effect_param ?? null;
+      base.effect_target_id = linked?.effect_target_id ?? null;
+    }
+    setDraft(base);
   }
   function cancel() {
     setEditingId(null);
@@ -344,6 +348,18 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
     }
     const slug = (draft.slug || "").trim() || slugify(name);
     const payload: Record<string, unknown> = { ...draft, name, slug };
+    const isPetForm = table === "pet_species" || table === "pet_variants";
+    // Extract virtual perk fields — not columns on species/variants
+    const perkEffectKey = isPetForm ? ((draft.effect_key as string | null) ?? null) : null;
+    const perkLabel = isPetForm ? ((draft.perk_label as string | null) ?? null) : null;
+    const perkParam = isPetForm ? ((draft.effect_param as number | null) ?? null) : null;
+    const perkTargetId = isPetForm ? ((draft.effect_target_id as string | null) ?? null) : null;
+    if (isPetForm) {
+      delete payload.effect_key;
+      delete payload.perk_label;
+      delete payload.effect_param;
+      delete payload.effect_target_id;
+    }
     if (table === "pet_benefits") {
       if (payload.scope === "global") payload.scope_id = null;
       if (payload.scope !== "global" && !payload.scope_id) {
@@ -353,6 +369,38 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
     }
     setBusy(true);
     try {
+      // Manage attached benefit for species/variants
+      if (isPetForm) {
+        const existingBenefitId = (draft.benefit_id as string | null) ?? null;
+        if (perkEffectKey) {
+          const benefitPayload = {
+            name,
+            slug: `${table}-${slug}`,
+            description: null,
+            image_url: null,
+            scope: "global" as PetBenefitScope,
+            scope_id: null,
+            perk_label: perkLabel || null,
+            effect_key: perkEffectKey,
+            effect_param: perkParam,
+            effect_target_id: perkTargetId,
+            active: true,
+            sort_order: 0,
+          };
+          if (existingBenefitId) {
+            await updateRow("pet_benefits", existingBenefitId, benefitPayload);
+            payload.benefit_id = existingBenefitId;
+          } else {
+            const created = await createRow<PetBenefit>("pet_benefits", benefitPayload);
+            payload.benefit_id = created.id;
+          }
+        } else {
+          payload.benefit_id = null;
+          if (existingBenefitId) {
+            try { await deleteRow("pet_benefits", existingBenefitId); } catch { /* ignore */ }
+          }
+        }
+      }
       if (editingId) {
         await updateRow(table, editingId, payload);
         toast.success("Atualizado");
@@ -624,26 +672,93 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
 
             {(table === "pet_species" || table === "pet_variants") && (
               <>
-                <div className="sm:col-span-2">
-                  <Field icon={Gift} label="Benefício exclusivo deste pet">
-                    <Select
-                      value={(draft.benefit_id as string) ?? "__none__"}
-                      onValueChange={(v) =>
-                        setDraft({ ...draft, benefit_id: v === "__none__" ? null : v })
-                      }
-                    >
-                      <SelectTrigger><SelectValue placeholder="Sem benefício" /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="__none__">Sem benefício</SelectItem>
-                        {benefits.map((b) => (
-                          <SelectItem key={b.id} value={b.id}>
-                            {b.name}
-                            {b.perk_label ? ` — ${b.perk_label}` : ""}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </Field>
+                <div className="sm:col-span-2 rounded-2xl border border-dashed border-border/60 bg-muted/30 p-3">
+                  <div className="mb-2 flex items-center gap-2 text-sm font-semibold">
+                    <Wand2 className="h-4 w-4 text-primary" />
+                    Vantagem exclusiva deste pet
+                  </div>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <div className="sm:col-span-2">
+                      <Field icon={Wand2} label="Efeito real">
+                        <Select
+                          value={(draft.effect_key as string) ?? "__none__"}
+                          onValueChange={(v) =>
+                            setDraft({
+                              ...draft,
+                              effect_key: v === "__none__" ? null : v,
+                              effect_param: null,
+                              effect_target_id: null,
+                            })
+                          }
+                        >
+                          <SelectTrigger><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="__none__">Sem vantagem (apenas cosmético)</SelectItem>
+                            {Object.entries(
+                              perkEffects.reduce<Record<string, PetPerkEffect[]>>((acc, e) => {
+                                (acc[e.category] ||= []).push(e);
+                                return acc;
+                              }, {}),
+                            ).map(([cat, items]) => (
+                              <div key={cat}>
+                                <div className="px-2 py-1 text-[11px] font-semibold uppercase text-muted-foreground">
+                                  {PERK_CATEGORY_LABEL[cat as PetPerkEffectCategory]}
+                                </div>
+                                {items.map((e) => (
+                                  <SelectItem key={e.key} value={e.key}>{e.label}</SelectItem>
+                                ))}
+                              </div>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </Field>
+                    </div>
+                    {draft.effect_key && (
+                      <>
+                        <Field icon={Tag} label="Rótulo curto (opcional)">
+                          <Input
+                            value={(draft.perk_label as string) ?? ""}
+                            placeholder="Ex.: +2 moedas"
+                            onChange={(e) => setDraft({ ...draft, perk_label: e.target.value })}
+                          />
+                        </Field>
+                        {selectedEffect?.numeric_param && (
+                          <Field icon={Hash} label="Quantidade">
+                            <Input
+                              type="number"
+                              value={(draft.effect_param as number) ?? selectedEffect.default_param ?? 0}
+                              onChange={(e) =>
+                                setDraft({ ...draft, effect_param: Number(e.target.value) || 0 })
+                              }
+                            />
+                          </Field>
+                        )}
+                        {selectedEffect?.needs_target && (
+                          <div className="sm:col-span-2">
+                            <Field icon={Star} label="Alvo desbloqueado">
+                              <Select
+                                value={(draft.effect_target_id as string) ?? ""}
+                                onValueChange={(v) => setDraft({ ...draft, effect_target_id: v })}
+                              >
+                                <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                                <SelectContent>
+                                  {targets.length === 0 ? (
+                                    <SelectItem value="__empty__" disabled>
+                                      Nenhum disponível
+                                    </SelectItem>
+                                  ) : (
+                                    targets.map((t) => (
+                                      <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
+                                    ))
+                                  )}
+                                </SelectContent>
+                              </Select>
+                            </Field>
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
                 </div>
                 <div className="flex items-end gap-4">
                   <div className="flex items-center gap-2">
