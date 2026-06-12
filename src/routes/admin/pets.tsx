@@ -872,6 +872,24 @@ function RowCard({
   onEdit: (row: PetCatalogEntity) => void;
   onRemove: (row: PetCatalogEntity) => void;
 }) {
+  const isProduct = table === "pet_species" || table === "pet_variants";
+  const prod = row as PetCatalogEntity & {
+    image_url_baby?: string | null;
+    image_url_adult?: string | null;
+    rarity?: PetRarity;
+    is_exclusive?: boolean;
+    price_coins?: number;
+  };
+  const baby = prod.image_url_baby ?? null;
+  const adult = prod.image_url_adult ?? null;
+  const stageLabel =
+    table === "pet_life_stages"
+      ? ((row as unknown as { kind?: string | null }).kind === "baby"
+          ? "Filhote"
+          : (row as unknown as { kind?: string | null }).kind === "adult"
+            ? "Adulto"
+            : null)
+      : null;
   return (
     <div
       className={cn(
@@ -879,7 +897,12 @@ function RowCard({
         !row.active && "opacity-60",
       )}
     >
-      {row.image_url ? (
+      {isProduct ? (
+        <div className="flex shrink-0 items-center gap-1">
+          <ThumbWithLabel label="Filhote" src={baby ?? row.image_url} />
+          <ThumbWithLabel label="Adulto" src={adult ?? row.image_url} />
+        </div>
+      ) : row.image_url ? (
         <img src={row.image_url} alt="" className="h-14 w-14 rounded-xl object-cover ring-1 ring-border" />
       ) : (
         <div className="grid h-14 w-14 place-items-center rounded-xl bg-muted text-muted-foreground">
@@ -889,6 +912,28 @@ function RowCard({
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-semibold">{row.name}</p>
         <p className="truncate text-xs text-muted-foreground">{row.slug}</p>
+        {isProduct && (
+          <div className="mt-1 flex flex-wrap items-center gap-1">
+            <span
+              className={cn(
+                "rounded-full px-2 py-0.5 text-[10px] font-semibold",
+                PET_RARITY_COLOR[prod.rarity ?? "common"],
+              )}
+            >
+              {PET_RARITY_LABEL[prod.rarity ?? "common"]}
+            </span>
+            {prod.is_exclusive && (
+              <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-800">
+                {prod.price_coins ?? 0} 🪙
+              </span>
+            )}
+          </div>
+        )}
+        {stageLabel && (
+          <span className="mt-1 inline-flex rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
+            {stageLabel}
+          </span>
+        )}
         {table === "pet_benefits" && (
           <p className="text-[11px] text-muted-foreground">
             Escopo: {BENEFIT_SCOPE_LABEL[(row as PetBenefit).scope]}
@@ -908,6 +953,21 @@ function RowCard({
           <Trash2 className="h-4 w-4" />
         </Button>
       </div>
+    </div>
+  );
+}
+
+function ThumbWithLabel({ label, src }: { label: string; src: string | null }) {
+  return (
+    <div className="flex flex-col items-center gap-0.5">
+      {src ? (
+        <img src={src} alt={label} className="h-14 w-14 rounded-xl object-contain bg-muted/50 ring-1 ring-border" />
+      ) : (
+        <div className="grid h-14 w-14 place-items-center rounded-xl bg-muted text-muted-foreground">
+          <ImageIcon className="h-4 w-4" />
+        </div>
+      )}
+      <span className="text-[9px] uppercase tracking-wider text-muted-foreground">{label}</span>
     </div>
   );
 }
