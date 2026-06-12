@@ -913,6 +913,7 @@ function CatalogRowsView({
   species,
   onEdit,
   onRemove,
+  onToggleActive,
   onClearImage,
 }: {
   table: PetCatalogTable;
@@ -921,6 +922,7 @@ function CatalogRowsView({
   species: PetSpecies[];
   onEdit: (row: PetCatalogEntity) => void;
   onRemove: (row: PetCatalogEntity) => void;
+  onToggleActive: (row: PetCatalogEntity, next: boolean) => void;
   onClearImage: (row: PetCatalogEntity, field: "image_url" | "image_url_baby" | "image_url_adult") => void;
 }) {
   if (rows.length === 0) {
