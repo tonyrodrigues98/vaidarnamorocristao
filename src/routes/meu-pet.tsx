@@ -714,3 +714,123 @@ function Wizard({ onCancel, onDone }: { onCancel?: () => void; onDone: () => voi
     </section>
   );
 }
+
+function GroupedSpeciesPicker({
+  categories,
+  speciesByCategory,
+  selectedSpeciesId,
+  selectedCategoryId,
+  onPickSpecies,
+  onPickCategoryOnly,
+}: {
+  categories: PetCategory[];
+  speciesByCategory: Record<string, PetSpecies[]>;
+  selectedSpeciesId: string | null;
+  selectedCategoryId: string | null;
+  onPickSpecies: (cat: PetCategory, species: PetSpecies) => void;
+  onPickCategoryOnly: (cat: PetCategory) => void;
+}) {
+  if (categories.length === 0) {
+    return (
+      <p className="rounded-2xl border border-dashed border-neutral-200 p-8 text-center text-sm text-neutral-400">
+        Nada disponível por aqui ainda.
+      </p>
+    );
+  }
+  return (
+    <div className="space-y-8">
+      {categories.map((cat) => {
+        const sp = speciesByCategory[cat.id] ?? [];
+        const hasSpecies = sp.length > 0;
+        const isCatSelected = !hasSpecies && selectedCategoryId === cat.id;
+        return (
+          <section key={cat.id}>
+            <header className="mb-3 flex items-baseline justify-between gap-3">
+              <div className="flex items-baseline gap-2.5">
+                <h3 className="text-sm font-semibold tracking-tight text-neutral-900">
+                  {cat.name}
+                </h3>
+                {cat.description && (
+                  <p className="hidden text-xs text-neutral-400 sm:block">
+                    {cat.description}
+                  </p>
+                )}
+              </div>
+              <span className="text-[10px] font-medium uppercase tracking-[0.18em] text-neutral-300">
+                {hasSpecies ? `${sp.length} ${sp.length === 1 ? "tipo" : "tipos"}` : "Categoria"}
+              </span>
+            </header>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+              {hasSpecies
+                ? sp.map((s) => (
+                    <PickCard
+                      key={s.id}
+                      name={s.name}
+                      description={s.description}
+                      imageUrl={s.image_url}
+                      selected={selectedSpeciesId === s.id}
+                      onClick={() => onPickSpecies(cat, s)}
+                    />
+                  ))
+                : (
+                    <PickCard
+                      name={cat.name}
+                      description={cat.description}
+                      imageUrl={cat.image_url}
+                      selected={isCatSelected}
+                      onClick={() => onPickCategoryOnly(cat)}
+                    />
+                  )}
+            </div>
+          </section>
+        );
+      })}
+    </div>
+  );
+}
+
+function PickCard({
+  name,
+  description,
+  imageUrl,
+  selected,
+  onClick,
+}: {
+  name: string;
+  description: string | null;
+  imageUrl: string | null;
+  selected: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        "group relative flex flex-col items-center gap-2.5 rounded-2xl border bg-white p-3.5 text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-neutral-300 hover:shadow-[0_12px_30px_-18px_rgba(0,0,0,0.25)]",
+        selected ? "border-neutral-900 ring-2 ring-neutral-900/10" : "border-neutral-200",
+      )}
+    >
+      {selected && (
+        <span className="absolute right-2 top-2 z-10 flex h-5 w-5 items-center justify-center rounded-full bg-neutral-900 text-white shadow-sm ring-2 ring-white">
+          <Check className="h-3 w-3" />
+        </span>
+      )}
+      <div className="relative flex h-32 w-full items-center justify-center overflow-hidden rounded-xl bg-gradient-to-b from-neutral-50 to-white">
+        {imageUrl ? (
+          <img
+            src={imageUrl}
+            alt={name}
+            className="h-[150%] w-[150%] object-contain object-center transition-transform duration-300 group-hover:scale-[1.08]"
+          />
+        ) : (
+          <PawPrint className="h-10 w-10 text-neutral-300" />
+        )}
+      </div>
+      <p className="w-full truncate text-center text-sm font-semibold text-neutral-900">{name}</p>
+      {description && (
+        <p className="line-clamp-2 w-full text-center text-[11px] text-neutral-500">{description}</p>
+      )}
+    </button>
+  );
+}
