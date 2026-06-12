@@ -21,6 +21,8 @@ import {
   Hash,
   Zap,
   Wand2,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 
 import { useAuth } from "@/lib/auth";
@@ -875,6 +877,17 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
         species={species}
         onEdit={startEdit}
         onRemove={(r) => void remove(r)}
+        onToggleActive={async (row, next) => {
+          try {
+            await updateRow(table, row.id, { active: next });
+            setRows((prev) =>
+              prev.map((r) => (r.id === row.id ? ({ ...r, active: next } as PetCatalogEntity) : r)),
+            );
+            toast.success(next ? "Visível em /meu-pet" : "Ocultado de /meu-pet");
+          } catch (e) {
+            toast.error((e as Error).message);
+          }
+        }}
         onClearImage={async (row, field) => {
           try {
             await updateRow(table, row.id, { [field]: null });
@@ -900,6 +913,7 @@ function CatalogRowsView({
   species,
   onEdit,
   onRemove,
+  onToggleActive,
   onClearImage,
 }: {
   table: PetCatalogTable;
@@ -908,6 +922,7 @@ function CatalogRowsView({
   species: PetSpecies[];
   onEdit: (row: PetCatalogEntity) => void;
   onRemove: (row: PetCatalogEntity) => void;
+  onToggleActive: (row: PetCatalogEntity, next: boolean) => void;
   onClearImage: (row: PetCatalogEntity, field: "image_url" | "image_url_baby" | "image_url_adult") => void;
 }) {
   if (rows.length === 0) {
@@ -923,7 +938,7 @@ function CatalogRowsView({
     return (
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {rows.map((row) => (
-          <RowCard key={row.id} row={row} table={table} onEdit={onEdit} onRemove={onRemove} onClearImage={onClearImage} />
+          <RowCard key={row.id} row={row} table={table} onEdit={onEdit} onRemove={onRemove} onToggleActive={onToggleActive} onClearImage={onClearImage} />
         ))}
       </div>
     );
@@ -1004,7 +1019,7 @@ function CatalogRowsView({
           </header>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {g.rows.map((row) => (
-              <RowCard key={row.id} row={row} table={table} onEdit={onEdit} onRemove={onRemove} onClearImage={onClearImage} />
+              <RowCard key={row.id} row={row} table={table} onEdit={onEdit} onRemove={onRemove} onToggleActive={onToggleActive} onClearImage={onClearImage} />
             ))}
           </div>
         </section>
@@ -1019,7 +1034,7 @@ function CatalogRowsView({
           </header>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {orphan.map((row) => (
-              <RowCard key={row.id} row={row} table={table} onEdit={onEdit} onRemove={onRemove} onClearImage={onClearImage} />
+              <RowCard key={row.id} row={row} table={table} onEdit={onEdit} onRemove={onRemove} onToggleActive={onToggleActive} onClearImage={onClearImage} />
             ))}
           </div>
         </section>
@@ -1033,12 +1048,14 @@ function RowCard({
   table,
   onEdit,
   onRemove,
+  onToggleActive,
   onClearImage,
 }: {
   row: PetCatalogEntity;
   table: PetCatalogTable;
   onEdit: (row: PetCatalogEntity) => void;
   onRemove: (row: PetCatalogEntity) => void;
+  onToggleActive: (row: PetCatalogEntity, next: boolean) => void;
   onClearImage: (row: PetCatalogEntity, field: "image_url" | "image_url_baby" | "image_url_adult") => void;
 }) {
   const isProduct = table === "pet_species" || table === "pet_variants";
@@ -1133,6 +1150,19 @@ function RowCard({
       <div className="flex items-center gap-1">
         <Button size="icon" variant="ghost" onClick={() => onEdit(row)} className="h-8 w-8 rounded-full">
           <Pencil className="h-4 w-4" />
+        </Button>
+        <Button
+          size="icon"
+          variant="ghost"
+          onClick={() => onToggleActive(row, !row.active)}
+          title={row.active ? "Ocultar de /meu-pet" : "Mostrar em /meu-pet"}
+          className="h-8 w-8 rounded-full"
+        >
+          {row.active ? (
+            <Eye className="h-4 w-4" />
+          ) : (
+            <EyeOff className="h-4 w-4 text-muted-foreground" />
+          )}
         </Button>
         <Button
           size="icon"
