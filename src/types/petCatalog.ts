@@ -1,3 +1,5 @@
+import type { PetRarity } from "./pet";
+
 export type PetCatalogEntity = {
   id: string;
   name: string;
@@ -12,14 +14,23 @@ export type PetCatalogEntity = {
 
 export type PetCategory = PetCatalogEntity;
 
-export type PetSpecies = PetCatalogEntity & { category_id: string };
+export type PetSpeciesProductFields = {
+  image_url_baby: string | null;
+  image_url_adult: string | null;
+  rarity: PetRarity;
+  is_exclusive: boolean;
+  price_coins: number;
+};
+
+export type PetSpecies = PetCatalogEntity & { category_id: string } & PetSpeciesProductFields;
 
 export type PetVariant = PetCatalogEntity & {
   category_id: string | null;
   species_id: string | null;
-};
+} & PetSpeciesProductFields;
 
-export type PetLifeStage = PetCatalogEntity;
+export type PetLifeStageKind = "baby" | "adult" | null;
+export type PetLifeStage = PetCatalogEntity & { kind: PetLifeStageKind };
 export type PetPersonality = PetCatalogEntity;
 
 export type PetBenefitScope = "global" | "category" | "species" | "variant";
