@@ -83,6 +83,7 @@ import type {
   PetVariant,
 } from "@/types/petCatalog";
 import { cn } from "@/lib/utils";
+import { useSignedPetUrl } from "@/lib/petImageUrl";
 
 export const Route = createFileRoute("/admin/pets")({ component: PetsAdmin });
 
