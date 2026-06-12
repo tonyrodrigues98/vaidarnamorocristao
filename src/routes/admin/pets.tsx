@@ -813,7 +813,6 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
                       busy={busy}
                       onPick={(f) => void uploadImage(f, "image_url_baby")}
                       onClear={() => setDraft({ ...draft, image_url_baby: null })}
-                      onGenerate={() => void generateForField("image_url_baby")}
                     />
                   </Field>
                   <Field icon={PawPrint} label="Imagem — Adulto (PNG transparente)">
@@ -822,7 +821,6 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
                       busy={busy}
                       onPick={(f) => void uploadImage(f, "image_url_adult")}
                       onClear={() => setDraft({ ...draft, image_url_adult: null })}
-                      onGenerate={() => void generateForField("image_url_adult")}
                     />
                   </Field>
                 </div>
@@ -847,11 +845,6 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
                     busy={busy}
                     onPick={(f) => void uploadImage(f)}
                     onClear={() => setDraft({ ...draft, image_url: null })}
-                    onGenerate={
-                      table === "pet_categories"
-                        ? () => void generateForField("image_url")
-                        : undefined
-                    }
                   />
                 </Field>
               </div>
