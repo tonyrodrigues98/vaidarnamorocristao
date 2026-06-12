@@ -938,7 +938,7 @@ function CatalogRowsView({
     return (
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {rows.map((row) => (
-          <RowCard key={row.id} row={row} table={table} onEdit={onEdit} onRemove={onRemove} onClearImage={onClearImage} />
+          <RowCard key={row.id} row={row} table={table} onEdit={onEdit} onRemove={onRemove} onToggleActive={onToggleActive} onClearImage={onClearImage} />
         ))}
       </div>
     );
@@ -1019,7 +1019,7 @@ function CatalogRowsView({
           </header>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {g.rows.map((row) => (
-              <RowCard key={row.id} row={row} table={table} onEdit={onEdit} onRemove={onRemove} onClearImage={onClearImage} />
+              <RowCard key={row.id} row={row} table={table} onEdit={onEdit} onRemove={onRemove} onToggleActive={onToggleActive} onClearImage={onClearImage} />
             ))}
           </div>
         </section>
@@ -1034,7 +1034,7 @@ function CatalogRowsView({
           </header>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {orphan.map((row) => (
-              <RowCard key={row.id} row={row} table={table} onEdit={onEdit} onRemove={onRemove} onClearImage={onClearImage} />
+              <RowCard key={row.id} row={row} table={table} onEdit={onEdit} onRemove={onRemove} onToggleActive={onToggleActive} onClearImage={onClearImage} />
             ))}
           </div>
         </section>
