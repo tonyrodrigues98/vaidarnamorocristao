@@ -443,7 +443,7 @@ function Wizard({ onCancel, onDone }: { onCancel?: () => void; onDone: () => voi
             )}
           >
             {selectedId === it.id && (
-              <span className="absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded-full bg-neutral-900 text-white">
+              <span className="absolute right-2 top-2 z-10 flex h-5 w-5 items-center justify-center rounded-full bg-neutral-900 text-white shadow-sm ring-2 ring-white">
                 <Check className="h-3 w-3" />
               </span>
             )}
