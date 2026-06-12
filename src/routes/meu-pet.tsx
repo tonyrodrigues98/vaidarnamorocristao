@@ -652,11 +652,6 @@ function Wizard({ onCancel, onDone }: { onCancel?: () => void; onDone: () => voi
                     {sel.personality.name}
                   </span>
                 )}
-                {sel.benefit && (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-neutral-900 px-2.5 py-1 font-medium text-white">
-                    <Sparkles className="h-3 w-3" /> {sel.benefit.name}
-                  </span>
-                )}
               </div>
             </div>
           </div>
