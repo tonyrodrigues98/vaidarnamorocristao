@@ -1155,11 +1155,12 @@ function ThumbWithLabel({
   src: string | null;
   onClear?: () => void;
 }) {
+  const resolved = useSignedPetUrl(src);
   return (
     <div className="flex flex-col items-center gap-0.5">
-      {src ? (
+      {resolved ? (
         <div className="group/thumb relative h-14 w-14">
-          <img src={src} alt={label} className="h-14 w-14 rounded-xl object-contain bg-muted/50 ring-1 ring-border" />
+          <img src={resolved} alt={label} className="h-14 w-14 rounded-xl object-contain bg-muted/50 ring-1 ring-border" />
           {onClear && (
             <button
               type="button"
