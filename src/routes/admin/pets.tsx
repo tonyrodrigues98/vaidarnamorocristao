@@ -21,6 +21,8 @@ import {
   Hash,
   Zap,
   Wand2,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 
 import { useAuth } from "@/lib/auth";
