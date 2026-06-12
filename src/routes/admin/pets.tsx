@@ -1146,11 +1146,34 @@ function RowCard({
   );
 }
 
-function ThumbWithLabel({ label, src }: { label: string; src: string | null }) {
+function ThumbWithLabel({
+  label,
+  src,
+  onClear,
+}: {
+  label: string;
+  src: string | null;
+  onClear?: () => void;
+}) {
   return (
     <div className="flex flex-col items-center gap-0.5">
       {src ? (
-        <img src={src} alt={label} className="h-14 w-14 rounded-xl object-contain bg-muted/50 ring-1 ring-border" />
+        <div className="group/thumb relative h-14 w-14">
+          <img src={src} alt={label} className="h-14 w-14 rounded-xl object-contain bg-muted/50 ring-1 ring-border" />
+          {onClear && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onClear();
+              }}
+              title={`Excluir imagem (${label})`}
+              className="absolute inset-0 grid place-items-center rounded-xl bg-destructive/80 text-destructive-foreground opacity-0 transition-opacity group-hover/thumb:opacity-100"
+            >
+              <Trash2 className="h-5 w-5" />
+            </button>
+          )}
+        </div>
       ) : (
         <div className="grid h-14 w-14 place-items-center rounded-xl bg-muted text-muted-foreground">
           <ImageIcon className="h-4 w-4" />
