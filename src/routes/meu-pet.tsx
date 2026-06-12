@@ -352,8 +352,18 @@ function Wizard({ onCancel, onDone }: { onCancel?: () => void; onDone: () => voi
     const idx = order.indexOf(current);
     for (let i = idx + 1; i < order.length; i++) {
       const k = order[i];
-      if (k === "species" && species.length === 0 && merged.category) continue;
-      if (k === "variant" && variants.length === 0) continue;
+      // Only skip species/variant when we've already chosen the category AND
+      // confirmed (after load) that there are no options. Don't skip just
+      // because the async list hasn't arrived yet — that would race the user
+      // past valid steps right after picking a category.
+      if (k === "species" && current !== "category" && species.length === 0) continue;
+      if (
+        k === "variant" &&
+        current !== "category" &&
+        current !== "species" &&
+        variants.length === 0
+      )
+        continue;
       if (k === "benefit" && benefits.length === 0 && current === "personality") continue;
       return k;
     }
@@ -433,7 +443,7 @@ function Wizard({ onCancel, onDone }: { onCancel?: () => void; onDone: () => voi
             )}
           >
             {selectedId === it.id && (
-              <span className="absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded-full bg-neutral-900 text-white">
+              <span className="absolute right-2 top-2 z-10 flex h-5 w-5 items-center justify-center rounded-full bg-neutral-900 text-white shadow-sm ring-2 ring-white">
                 <Check className="h-3 w-3" />
               </span>
             )}
@@ -512,10 +522,22 @@ function Wizard({ onCancel, onDone }: { onCancel?: () => void; onDone: () => voi
         <Grid
           items={categories}
           selectedId={sel.category?.id}
-          onPick={(c) => {
+          onPick={async (c) => {
             const next = { ...sel, category: c, species: null, variant: null };
             setSel(next);
-            go(nextOf("category", next));
+            try {
+              const [sp, va] = await Promise.all([
+                listSpeciesByCategory(c.id),
+                listVariantsFor(c.id, null),
+              ]);
+              setSpecies(sp);
+              setVariants(va);
+              if (sp.length > 0) go("species");
+              else if (va.length > 0) go("variant");
+              else go("stage");
+            } catch (e) {
+              toast.error((e as Error).message);
+            }
           }}
         />
       )}
@@ -523,10 +545,17 @@ function Wizard({ onCancel, onDone }: { onCancel?: () => void; onDone: () => voi
         <Grid
           items={species}
           selectedId={sel.species?.id}
-          onPick={(s) => {
+          onPick={async (s) => {
             const next = { ...sel, species: s, variant: null };
             setSel(next);
-            go(nextOf("species", next));
+            try {
+              const va = await listVariantsFor(sel.category!.id, s.id);
+              setVariants(va);
+              if (va.length > 0) go("variant");
+              else go("stage");
+            } catch (e) {
+              toast.error((e as Error).message);
+            }
           }}
         />
       )}
