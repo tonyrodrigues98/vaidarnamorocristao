@@ -124,6 +124,7 @@ async function visionReview(
   apiKey: string,
   bytes: Uint8Array,
   body: Body,
+  hasRealAlpha: boolean,
 ): Promise<{ ok: boolean; reason: string }> {
   const dataUrl = `data:image/png;base64,${bytesToBase64(bytes)}`;
   const expected =
@@ -131,11 +132,16 @@ async function visionReview(
       ? `Categoria "${body.subject}" mostrando: ${(body.animals ?? []).join(", ")}`
       : `${body.subject} ${body.kind === "baby" ? "filhote/bebê (aparência claramente jovem)" : "adulto (aparência claramente madura, sem cara de filhote)"}`;
 
+  const bgRule = hasRealAlpha
+    ? "IGNORE o fundo nessa validação — o PNG já tem canal alfa real (qualquer xadrez visto é apenas o visualizador, NÃO conta como problema)."
+    : "Fundo precisa ser transparente real (não cor sólida nem checkerboard desenhado).";
+
   const prompt = `Você está validando um asset de aplicativo. Esperado: ${expected}.
+${bgRule}
 Devolva SOMENTE JSON neste formato:
 {"ok": boolean, "has_text": boolean, "wrong_subject": boolean, "wrong_age": boolean, "extra_animals": boolean, "touches_edges": boolean, "fake_background": boolean, "reason": "curto em pt-br"}
 
-ok=true SOMENTE se: não há nenhum texto/letra/rótulo, o assunto está correto, ${body.kind !== "category" ? "a fase de vida está correta," : ""} nenhum elemento toca as bordas, fundo é transparente (não cor sólida nem checker), e ${body.kind === "category" ? "apenas os animais pedidos aparecem" : "apenas o animal pedido aparece"}.`;
+ok=true SOMENTE se: não há nenhum texto/letra/rótulo, o assunto está correto, ${body.kind !== "category" ? "a fase de vida está correta," : ""} nenhum elemento toca as bordas, ${hasRealAlpha ? "" : "fundo é transparente (não cor sólida nem checker), "}e ${body.kind === "category" ? "apenas os animais pedidos aparecem" : "apenas o animal pedido aparece"}.`;
 
   const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
     method: "POST",
