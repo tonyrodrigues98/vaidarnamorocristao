@@ -519,30 +519,37 @@ function Wizard({ onCancel, onDone }: { onCancel?: () => void; onDone: () => voi
       </div>
 
       {step === "category" && (
-        <GroupedSpeciesPicker
-          categories={categories}
-          speciesByCategory={speciesByCategory}
-          selectedSpeciesId={sel.species?.id ?? null}
-          selectedCategoryId={sel.category?.id ?? null}
-          onPickSpecies={async (cat, s) => {
-            const next = { ...sel, category: cat, species: s, variant: null };
+        <Grid
+          items={categories}
+          selectedId={sel.category?.id}
+          onPick={async (c) => {
+            const next = { ...sel, category: c, species: null, variant: null };
             setSel(next);
-            setSpecies(speciesByCategory[cat.id] ?? []);
             try {
-              const va = await listVariantsFor(cat.id, s.id);
+              const [sp, va] = await Promise.all([
+                listSpeciesByCategory(c.id),
+                listVariantsFor(c.id, null),
+              ]);
+              setSpecies(sp);
               setVariants(va);
-              if (va.length > 0) go("variant");
+              if (sp.length > 0) go("species");
+              else if (va.length > 0) go("variant");
               else go("stage");
             } catch (e) {
               toast.error((e as Error).message);
             }
           }}
-          onPickCategoryOnly={async (cat) => {
-            const next = { ...sel, category: cat, species: null, variant: null };
+        />
+      )}
+      {step === "species" && (
+        <Grid
+          items={species}
+          selectedId={sel.species?.id}
+          onPick={async (s) => {
+            const next = { ...sel, species: s, variant: null };
             setSel(next);
-            setSpecies([]);
             try {
-              const va = await listVariantsFor(cat.id, null);
+              const va = await listVariantsFor(sel.category!.id, s.id);
               setVariants(va);
               if (va.length > 0) go("variant");
               else go("stage");
