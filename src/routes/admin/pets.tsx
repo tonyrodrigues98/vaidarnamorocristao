@@ -1048,12 +1048,14 @@ function RowCard({
   table,
   onEdit,
   onRemove,
+  onToggleActive,
   onClearImage,
 }: {
   row: PetCatalogEntity;
   table: PetCatalogTable;
   onEdit: (row: PetCatalogEntity) => void;
   onRemove: (row: PetCatalogEntity) => void;
+  onToggleActive: (row: PetCatalogEntity, next: boolean) => void;
   onClearImage: (row: PetCatalogEntity, field: "image_url" | "image_url_baby" | "image_url_adult") => void;
 }) {
   const isProduct = table === "pet_species" || table === "pet_variants";
