@@ -711,14 +711,8 @@ function PerfilPage() {
                   <StatusPill status={status} />
                 </div>
 
-                <div className="relative flex w-full min-w-0 flex-col items-center text-center">
-                  {user && (
-                    <EquippedPetSidekick
-                      userId={user.id}
-                      size={108}
-                      className="right-[-8px] top-2 sm:right-2 sm:top-4"
-                    />
-                  )}
+                <div className="flex w-full min-w-0 flex-col items-center text-center">
+                  <div className="relative inline-block">
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
@@ -743,6 +737,14 @@ function PerfilPage() {
                       <Camera className="h-5 w-5" />
                     </span>
                   </button>
+                  {user && (
+                    <EquippedPetSidekick
+                      userId={user.id}
+                      size={84}
+                      className="-right-6 -bottom-2 sm:-right-8 sm:-bottom-3"
+                    />
+                  )}
+                  </div>
                   <input
                     ref={fileInputRef}
                     type="file"
