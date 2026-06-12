@@ -1267,7 +1267,7 @@ function ImagePreview({
       >
         {value ? (
           <img
-            src={value}
+            src={resolvedValue ?? value}
             alt="preview"
             className="max-h-full max-w-full cursor-zoom-in object-contain p-3"
             onClick={(e) => {
@@ -1318,7 +1318,7 @@ function ImagePreview({
                 backgroundColor: "white",
               }}
             >
-              <img src={value} alt="preview ampliado" className="max-h-[90vh] max-w-full object-contain" />
+              <img src={resolvedValue ?? value} alt="preview ampliado" className="max-h-[90vh] max-w-full object-contain" />
             </div>
           )}
           {meta && (
