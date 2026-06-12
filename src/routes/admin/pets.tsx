@@ -1227,12 +1227,14 @@ function ImagePreview({
   onPick,
   onClear,
   accept = "image/*",
+  onGenerate,
 }: {
   value: string | null;
   busy?: boolean;
   onPick: (file: File) => void;
   onClear: () => void;
   accept?: string;
+  onGenerate?: () => void;
 }) {
   const ref = useRef<HTMLInputElement>(null);
   const [drag, setDrag] = useState(false);
@@ -1308,6 +1310,19 @@ function ImagePreview({
         <Button type="button" variant="outline" size="sm" onClick={() => ref.current?.click()} className="rounded-full">
           <Upload className="mr-1 h-4 w-4" /> {value ? "Trocar" : "Enviar"}
         </Button>
+        {onGenerate && (
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            onClick={onGenerate}
+            disabled={busy}
+            className="rounded-full"
+            title="Gerar com IA respeitando as regras do app"
+          >
+            <Wand2 className="mr-1 h-4 w-4" /> Gerar com IA
+          </Button>
+        )}
         {value && (
           <Button type="button" variant="ghost" size="sm" onClick={onClear} className="rounded-full text-destructive">
             <Trash2 className="mr-1 h-4 w-4" /> Remover
