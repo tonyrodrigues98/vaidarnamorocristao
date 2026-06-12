@@ -22,10 +22,14 @@ type Body = {
 };
 
 const BUCKET = "pets";
-// OpenAI gpt-image-* aceita `background: "transparent"` e devolve PNG com
-// canal alfa REAL (não desenha checkerboard). Gemini ignora e pinta xadrez.
-const MODEL_IMAGE_PRO = "openai/gpt-image-2";
-const MODEL_IMAGE_FAST = "openai/gpt-image-1-mini";
+// Modelos Gemini de imagem entregam ilustração premium muito superior à
+// dos modelos OpenAI para pets/categorias. Não geram alpha real (pintam
+// checkerboard de "fundo transparente"), mas o admin pode pós-processar
+// se precisar — qualidade visual é prioridade máxima aqui.
+// - PRO: gemini-3-pro-image-preview (mais lento, máxima qualidade)
+// - FAST: gemini-3.1-flash-image-preview ("Nano Banana 2", qualidade pro com latência baixa)
+const MODEL_IMAGE_PRO = "google/gemini-3-pro-image-preview";
+const MODEL_IMAGE_FAST = "google/gemini-3.1-flash-image-preview";
 const MODEL_VISION = "google/gemini-2.5-flash";
 // Apenas 1 tentativa por requisição — modelos de imagem são lentos e o gateway
 // CloudFlare corta em ~100s. Retry deve ser disparado pelo cliente.
@@ -92,7 +96,6 @@ async function generateOnce(apiKey: string, prompt: string, model: string): Prom
         prompt,
         size: "1024x1024",
         n: 1,
-        // CRÍTICO: gera PNG com canal alfa real em vez de fundo xadrez.
         background: "transparent",
         quality: "low",
       }
