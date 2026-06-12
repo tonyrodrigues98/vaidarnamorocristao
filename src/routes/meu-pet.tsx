@@ -349,7 +349,7 @@ function Wizard({ onCancel, onDone }: { onCancel?: () => void; onDone: () => voi
   }, [step, sel.category, sel.species, sel.variant]);
 
   const order: StepKey[] = useMemo(
-    () => ["category", "species", "variant", "stage", "name", "personality", "benefit", "confirm"],
+    () => ["category", "variant", "stage", "name", "personality", "benefit", "confirm"],
     [],
   );
 
@@ -479,7 +479,7 @@ function Wizard({ onCancel, onDone }: { onCancel?: () => void; onDone: () => voi
   }
 
   const stepTitles: Record<StepKey, string> = {
-    category: "Escolha a categoria",
+    category: "Escolha seu pet",
     species: "Escolha a espécie",
     variant: "Escolha a variação",
     stage: "Em que fase está?",
