@@ -263,7 +263,7 @@ export const Route = createFileRoute("/api/admin/generate-pet-image")({
               );
             }
             return new Response(
-              JSON.stringify({ path, attempts: attempt + 1, vision_reason: visionReason, model }),
+              JSON.stringify({ path, attempts: attempt + 1, vision_reason: visionReason, model, has_alpha: hasAlpha }),
               { status: 200, headers: { "Content-Type": "application/json" } },
             );
           }
