@@ -22,8 +22,10 @@ type Body = {
 };
 
 const BUCKET = "pets";
-const MODEL_IMAGE_PRO = "google/gemini-3-pro-image-preview";
-const MODEL_IMAGE_FAST = "google/gemini-3.1-flash-image-preview";
+// OpenAI gpt-image-* aceita `background: "transparent"` e devolve PNG com
+// canal alfa REAL (não desenha checkerboard). Gemini ignora e pinta xadrez.
+const MODEL_IMAGE_PRO = "openai/gpt-image-2";
+const MODEL_IMAGE_FAST = "openai/gpt-image-1-mini";
 const MODEL_VISION = "google/gemini-2.5-flash";
 // Apenas 1 tentativa por requisição — modelos de imagem são lentos e o gateway
 // CloudFlare corta em ~100s. Retry deve ser disparado pelo cliente.
@@ -83,14 +85,26 @@ function base64ToBytes(b64: string): Uint8Array {
 }
 
 async function generateOnce(apiKey: string, prompt: string, model: string): Promise<Uint8Array | null> {
+  const isOpenAI = model.startsWith("openai/");
+  const body = isOpenAI
+    ? {
+        model,
+        prompt,
+        size: "1024x1024",
+        n: 1,
+        // CRÍTICO: gera PNG com canal alfa real em vez de fundo xadrez.
+        background: "transparent",
+        quality: "low",
+      }
+    : {
+        model,
+        messages: [{ role: "user", content: prompt }],
+        modalities: ["image", "text"],
+      };
   const resp = await fetch("https://ai.gateway.lovable.dev/v1/images/generations", {
     method: "POST",
     headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-    body: JSON.stringify({
-      model,
-      messages: [{ role: "user", content: prompt }],
-      modalities: ["image", "text"],
-    }),
+    body: JSON.stringify(body),
   });
   if (!resp.ok) {
     const txt = await resp.text().catch(() => "");
@@ -110,6 +124,7 @@ async function visionReview(
   apiKey: string,
   bytes: Uint8Array,
   body: Body,
+  hasRealAlpha: boolean,
 ): Promise<{ ok: boolean; reason: string }> {
   const dataUrl = `data:image/png;base64,${bytesToBase64(bytes)}`;
   const expected =
@@ -117,11 +132,16 @@ async function visionReview(
       ? `Categoria "${body.subject}" mostrando: ${(body.animals ?? []).join(", ")}`
       : `${body.subject} ${body.kind === "baby" ? "filhote/bebê (aparência claramente jovem)" : "adulto (aparência claramente madura, sem cara de filhote)"}`;
 
+  const bgRule = hasRealAlpha
+    ? "IGNORE o fundo nessa validação — o PNG já tem canal alfa real (qualquer xadrez visto é apenas o visualizador, NÃO conta como problema)."
+    : "Fundo precisa ser transparente real (não cor sólida nem checkerboard desenhado).";
+
   const prompt = `Você está validando um asset de aplicativo. Esperado: ${expected}.
+${bgRule}
 Devolva SOMENTE JSON neste formato:
 {"ok": boolean, "has_text": boolean, "wrong_subject": boolean, "wrong_age": boolean, "extra_animals": boolean, "touches_edges": boolean, "fake_background": boolean, "reason": "curto em pt-br"}
 
-ok=true SOMENTE se: não há nenhum texto/letra/rótulo, o assunto está correto, ${body.kind !== "category" ? "a fase de vida está correta," : ""} nenhum elemento toca as bordas, fundo é transparente (não cor sólida nem checker), e ${body.kind === "category" ? "apenas os animais pedidos aparecem" : "apenas o animal pedido aparece"}.`;
+ok=true SOMENTE se: não há nenhum texto/letra/rótulo, o assunto está correto, ${body.kind !== "category" ? "a fase de vida está correta," : ""} nenhum elemento toca as bordas, ${hasRealAlpha ? "" : "fundo é transparente (não cor sólida nem checker), "}e ${body.kind === "category" ? "apenas os animais pedidos aparecem" : "apenas o animal pedido aparece"}.`;
 
   const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
     method: "POST",
@@ -235,9 +255,12 @@ export const Route = createFileRoute("/api/admin/generate-pet-image")({
             const hasAlpha = info.colorType === 4 || info.colorType === 6;
 
             // Revisão por IA — opcional (custa tempo, pode estourar o gateway).
+            // Pulamos a verificação de "fundo transparente" quando o PNG já tem
+            // canal alfa real (OpenAI com background:transparent). A IA de visão
+            // não consegue distinguir alfa real de checkerboard renderizado.
             let visionReason = "skipped";
             if (doVision) {
-              const review = await visionReview(apiKey, bytes, body);
+              const review = await visionReview(apiKey, bytes, body, hasAlpha);
               if (!review.ok) {
                 lastReason = `vision_rejected:${review.reason}`;
                 continue;
