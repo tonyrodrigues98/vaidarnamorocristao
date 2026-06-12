@@ -540,6 +540,11 @@ function Detail() {
             <div className="relative -mt-20 overflow-visible rounded-[2rem] p-0 sm:-mt-24 lg:-mt-28">
               <div className="relative overflow-visible rounded-[1.65rem] p-0">
                 <div className="relative z-10 flex min-h-[170px] items-center justify-center overflow-visible py-0 sm:min-h-[220px] lg:min-h-[245px]">
+                  <EquippedPetSidekick
+                    userId={profile.id}
+                    size={96}
+                    className="right-[-12px] bottom-2 sm:right-[-20px] sm:bottom-4 lg:right-[-28px]"
+                  />
                   <div className="sm:hidden">
                     <DecoratedAvatar
                       photoUrl={profile.photo_url}
