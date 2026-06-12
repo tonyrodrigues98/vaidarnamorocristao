@@ -413,7 +413,7 @@ function Wizard({ onCancel, onDone }: { onCancel?: () => void; onDone: () => voi
   }) {
     if (items.length === 0) {
       return (
-        <p className="rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
+        <p className="rounded-2xl border border-dashed border-neutral-200 p-8 text-center text-sm text-neutral-400">
           Nada disponível por aqui ainda.
         </p>
       );
@@ -426,20 +426,33 @@ function Wizard({ onCancel, onDone }: { onCancel?: () => void; onDone: () => voi
             type="button"
             onClick={() => onPick(it)}
             className={cn(
-              "flex flex-col items-center gap-2 rounded-2xl border bg-white p-3 text-left shadow-sm transition hover:shadow-md",
-              selectedId === it.id ? "border-primary ring-2 ring-primary/30" : "border-border",
+              "group relative flex flex-col items-center gap-2.5 rounded-2xl border bg-white p-3.5 text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-neutral-300 hover:shadow-[0_12px_30px_-18px_rgba(0,0,0,0.25)]",
+              selectedId === it.id
+                ? "border-neutral-900 ring-2 ring-neutral-900/10"
+                : "border-neutral-200",
             )}
           >
-            <div className="flex h-24 w-full items-center justify-center rounded-xl bg-[#FFEFE7]">
+            {selectedId === it.id && (
+              <span className="absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded-full bg-neutral-900 text-white">
+                <Check className="h-3 w-3" />
+              </span>
+            )}
+            <div className="flex h-24 w-full items-center justify-center rounded-xl bg-gradient-to-b from-neutral-50 to-white">
               {it.image_url ? (
-                <img src={it.image_url} alt={it.name} className="max-h-full max-w-full object-contain" />
+                <img
+                  src={it.image_url}
+                  alt={it.name}
+                  className="max-h-full max-w-full object-contain transition-transform duration-300 group-hover:scale-105"
+                />
               ) : (
-                <PawPrint className="h-8 w-8 text-muted-foreground" />
+                <PawPrint className="h-8 w-8 text-neutral-300" />
               )}
             </div>
-            <p className="w-full truncate text-center text-sm font-semibold">{it.name}</p>
+            <p className="w-full truncate text-center text-sm font-semibold text-neutral-900">
+              {it.name}
+            </p>
             {it.description && (
-              <p className="line-clamp-2 w-full text-center text-[11px] text-muted-foreground">
+              <p className="line-clamp-2 w-full text-center text-[11px] text-neutral-500">
                 {it.description}
               </p>
             )}
