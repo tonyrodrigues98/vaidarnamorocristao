@@ -1,92 +1,61 @@
 ## Objetivo
 
-Separar descrição de vantagens no catálogo de pets, criar um CRUD admin de Vantagens com **efeitos reais** (chaves de comportamento) aplicados em todo o sistema, e adicionar preview completo da imagem ao subir no admin. Tudo administrável: você pode criar, editar, ativar/desativar e excluir vantagens.
+Tratar `pet_species` e `pet_variants` como "produto final": cada um carrega imagem filhote + adulto, raridade, exclusividade e preço em moedas. A imagem exibida no perfil do usuário é escolhida a partir da fase de vida (filhote/adulto) selecionada no onboarding. No onboarding, mover a escolha de espécie/tipo para o final.
 
----
+## Mudanças no banco (migration)
 
-## 1. Banco — vantagens com motor de efeitos
+Adicionar colunas em `pet_species` e `pet_variants`:
+- `image_url_baby text` (imagem filhote)
+- `image_url_adult text` (imagem adulto — copia do `image_url` atual na migration)
+- `rarity pet_rarity` (enum reaproveitado de `pets`: common/rare/epic/legendary; default 'common')
+- `is_exclusive boolean default false`
+- `price_coins integer default 0`
 
-Migration nova:
+Manter `image_url` como fallback. Backfill: `image_url_adult = image_url` para registros existentes.
 
-### `pet_perk_effects` (catálogo de efeitos disponíveis — fixo no código, espelhado em tabela só para o admin escolher por nome)
+Adicionar coluna em `pet_life_stages`:
+- `kind text` com check `kind in ('baby','adult')` (nullable; admin marca quais stages são filhote vs adulto). Usado para decidir qual imagem renderizar.
 
-Campos: `key` (PK, ex.: `daily_coins_plus_1`), `label`, `description`, `category` (`coins | missions | anonymous | gifts | cosmetic | pet_collect | avatar_fx`), `numeric_param` (boolean — se aceita valor), `default_param`, `active`. Seed com os 22 efeitos listados.
+## `src/routes/admin/pets.tsx`
 
-### Refatorar `pet_benefits`
+- Na aba **Espécies/Tipos** e **Variações/Estilos**, agrupar visualmente por categoria (já existe `CatalogRowsView`). Em cada linha mostrar miniatura filhote + adulto lado a lado, badge de raridade, badge de exclusivo, preço.
+- No formulário de criar/editar species e variants, adicionar:
+  - Upload separado para `image_url_baby` e `image_url_adult`
+  - Select de raridade (common/rare/epic/legendary)
+  - Switch `is_exclusive`
+  - Input numérico `price_coins`
+- Na aba **Fases**, adicionar select `kind` (filhote/adulto/nenhum) para cada life stage.
 
-- Adicionar coluna `effect_key text references pet_perk_effects(key)` (nullable — vantagem pode ser puramente cosmética/explicativa).
-- Adicionar `effect_param int` (ex.: quantas moedas, qual decoration_id).
-- Adicionar `effect_target_id uuid` (para "Moldura X desbloqueada pelo pet" apontar para `avatar_decorations.id` etc.).
-- Renomear conceito: campo `description` continua para texto livre do admin; UI separa "Descrição" de "Vantagem (efeito)".
+## `src/lib/petCatalog.ts`
 
-### `user_pet_perk_state` (estado por usuário/pet)
+- Estender tipos `PetSpecies` e `PetVariant` com os novos campos.
+- Estender `PetLifeStage` com `kind`.
+- `hydrateImage` agora resolve `image_url`, `image_url_baby`, `image_url_adult`.
+- Novo helper `resolvePetDisplayImage(entity, lifeStageKind)` que retorna a URL adequada (baby/adult com fallback para `image_url`).
 
-`user_id`, `benefit_id`, `last_collected_at`, `accumulated_coins`, etc. — para vantagens coletáveis ("Recompensa diária do pet", "Pet encontra moedas").
+## `src/routes/meu-pet.tsx` (onboarding)
 
-GRANTs + RLS padrão (user lê/escreve só o próprio).
+Reordenar `order` para: `category → variant → stage → personality → benefit → species → name → review`.
 
----
+Justificativa: a espécie/tipo define a imagem final → escolher por último permite preview correto já mostrando filhote/adulto conforme a fase escolhida.
 
-## 2. Motor de efeitos no backend
+Na etapa species, exibir cada card usando a imagem correspondente à `life_stage.kind` selecionado.
 
-Função SQL `public.get_active_pet_perks(_user_id uuid)` → retorna `effect_key, effect_param, effect_target_id` das vantagens ativas do pet equipado em `user_pets_v2` (escopo global/categoria/espécie/variante compatível).
+No card final do perfil (`PetProfileCard` / `EquippedPetSidekick` / `EquippedPetBadge`), exibir a imagem do species ou variant escolhido conforme o `life_stage.kind`.
 
-Integrações reais (alteração das funções existentes):
+## Componentes de perfil
 
-| Efeito | Onde integra |
-|---|---|
-| `daily_coins_plus_{1,2,3}` | `claim_daily_coins()` — soma extra ao `award` |
-| `mission_coins_plus_1` / `mission_bonus_chance` | nova RPC `claim_mission_reward` consultando perks |
-| `anonymous_hint_plus_1` | `request_anonymous_hint` — limite 2 → 3 |
-| `gift_cashback` / `gift_discount` | RPC de envio de presente (aplicar % no débito ou cashback no `coin_transactions`) |
-| `pet_finds_coins_daily` / `pet_daily_reward` | nova RPC `collect_pet_reward()` — 1×/dia, grava em `user_pet_perk_state` |
-| `unlock_frame/background/aura/badge` | grant automático em `user_decorations` / `user_profile_backgrounds` / `user_badges` ao equipar pet (trigger em `user_pets_v2`) |
-| `pet_message_fx` | flag lida pelo chat para aplicar leve efeito visual nas mensagens do usuário |
-| `pet_accessory_slot_plus_1` / `pet_collectible_slot_plus_1` | metadados consumidos pela UI do pet |
+Atualizar `PetProfileCard.tsx`, `EquippedPetSidekick.tsx`, `EquippedPetBadge.tsx` para usar `resolvePetDisplayImage` em vez de `pet.image_url` direto, lendo `life_stage.kind`.
 
----
+## Detalhes técnicos
 
-## 3. Admin `/admin/pets` — aba "Vantagens"
+- Enum `pet_rarity` já existe (usado por `pets`). Reaproveitar.
+- Storage: continuar usando bucket `pets`, prefixos `catalog/species-baby/`, `catalog/species-adult/`, idem para variants.
+- Sem breaking change: `image_url` continua existindo como fallback enquanto admin não preenche os novos campos.
+- RLS/GRANTs das tabelas não mudam — apenas `ALTER TABLE ADD COLUMN`.
 
-Refatorar a aba existente:
+## Fora de escopo
 
-- Campo **Descrição** (texto livre, separado).
-- Campo **Efeito**: select com todos os `pet_perk_effects` ativos (agrupados por categoria). Botão "Sem efeito (cosmético)".
-- Campo dinâmico conforme efeito escolhido:
-  - Numéricos → input "Quantidade".
-  - `unlock_*` → select do recurso real (`avatar_decorations` tipo frame/aura, `profile_backgrounds`, `badges`).
-- Escopo (global/categoria/espécie/variante) já existe — mantém.
-- Ativar/desativar, ordenar, excluir.
-- Hook `useBenefitEffects` lista efeitos do banco para popular o select — você pode adicionar/editar/desativar efeitos diretamente em outra mini-aba ("Tipos de efeito"), assim você cria novas regras sem precisar de código (apenas as que tiverem `key` reconhecida pelo backend produzem efeito real; as outras ficam como tags informativas).
-
-### Preview completo da imagem
-
-Em **todas** as abas do admin de pets (categorias/espécies/variantes/fases/personalidades/vantagens), o upload mostra agora:
-
-- Preview grande (até 320px), proporção preservada, fundo xadrez transparência.
-- Nome do arquivo, tamanho, dimensões.
-- Botões "Trocar" e "Remover".
-- Drag & drop além do clique.
-
----
-
-## 4. Onboarding `/meu-pet` e showcase
-
-- Etapa de vantagens mostra `description` em destaque e o `effect.label` como chip ("⚡ +2 moedas no resgate diário").
-- Showcase do pet equipado em `/perfil` lista todas as vantagens ativas do pet.
-
----
-
-## 5. Seed dos 22 efeitos
-
-Migration insere todos com `key` estáveis. Você pode desativar/renomear o label, mas a `key` não muda (é o que o backend reconhece).
-
----
-
-## Fora de escopo desta entrega
-
-- Sistema de moderação de vantagens criadas por terceiros (só admin cria).
-- Animações WebGL no efeito de mensagem — usaremos um glow CSS leve.
-- Reescrita do envio de presentes: vou adicionar uma RPC nova `send_virtual_gift_with_perks` que reaproveita a lógica existente; o componente passa a chamá-la.
-
-Se aprovar, implemento a migration + motor + UI numa sequência só.
+- Não mexer em `pet_categories`, `pet_personalities`, `pet_benefits`, `pet_perk_effects`.
+- Não alterar fluxo de coins/perks.
+- Não tocar em `src/integrations/supabase/*` autogerados.

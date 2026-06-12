@@ -1256,6 +1256,7 @@ export type Database = {
           description: string | null
           id: string
           image_url: string | null
+          kind: string | null
           name: string
           slug: string
           sort_order: number
@@ -1267,6 +1268,7 @@ export type Database = {
           description?: string | null
           id?: string
           image_url?: string | null
+          kind?: string | null
           name: string
           slug: string
           sort_order?: number
@@ -1278,6 +1280,7 @@ export type Database = {
           description?: string | null
           id?: string
           image_url?: string | null
+          kind?: string | null
           name?: string
           slug?: string
           sort_order?: number
@@ -1371,7 +1374,12 @@ export type Database = {
           description: string | null
           id: string
           image_url: string | null
+          image_url_adult: string | null
+          image_url_baby: string | null
+          is_exclusive: boolean
           name: string
+          price_coins: number
+          rarity: Database["public"]["Enums"]["pet_rarity"]
           slug: string
           sort_order: number
           updated_at: string
@@ -1383,7 +1391,12 @@ export type Database = {
           description?: string | null
           id?: string
           image_url?: string | null
+          image_url_adult?: string | null
+          image_url_baby?: string | null
+          is_exclusive?: boolean
           name: string
+          price_coins?: number
+          rarity?: Database["public"]["Enums"]["pet_rarity"]
           slug: string
           sort_order?: number
           updated_at?: string
@@ -1395,7 +1408,12 @@ export type Database = {
           description?: string | null
           id?: string
           image_url?: string | null
+          image_url_adult?: string | null
+          image_url_baby?: string | null
+          is_exclusive?: boolean
           name?: string
+          price_coins?: number
+          rarity?: Database["public"]["Enums"]["pet_rarity"]
           slug?: string
           sort_order?: number
           updated_at?: string
@@ -1418,7 +1436,12 @@ export type Database = {
           description: string | null
           id: string
           image_url: string | null
+          image_url_adult: string | null
+          image_url_baby: string | null
+          is_exclusive: boolean
           name: string
+          price_coins: number
+          rarity: Database["public"]["Enums"]["pet_rarity"]
           slug: string
           sort_order: number
           species_id: string | null
@@ -1431,7 +1454,12 @@ export type Database = {
           description?: string | null
           id?: string
           image_url?: string | null
+          image_url_adult?: string | null
+          image_url_baby?: string | null
+          is_exclusive?: boolean
           name: string
+          price_coins?: number
+          rarity?: Database["public"]["Enums"]["pet_rarity"]
           slug: string
           sort_order?: number
           species_id?: string | null
@@ -1444,7 +1472,12 @@ export type Database = {
           description?: string | null
           id?: string
           image_url?: string | null
+          image_url_adult?: string | null
+          image_url_baby?: string | null
+          is_exclusive?: boolean
           name?: string
+          price_coins?: number
+          rarity?: Database["public"]["Enums"]["pet_rarity"]
           slug?: string
           sort_order?: number
           species_id?: string | null
