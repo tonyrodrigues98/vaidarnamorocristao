@@ -167,6 +167,12 @@ type DraftRecord = Record<string, unknown> & {
   slug: string;
   description?: string | null;
   image_url?: string | null;
+  image_url_baby?: string | null;
+  image_url_adult?: string | null;
+  rarity?: PetRarity;
+  is_exclusive?: boolean;
+  price_coins?: number;
+  kind?: "baby" | "adult" | null;
   active?: boolean;
   sort_order?: number;
   category_id?: string | null;
