@@ -1389,6 +1389,30 @@ function ImagePreview({
           </span>
         )}
       </div>
+      <Dialog open={lightbox} onOpenChange={setLightbox}>
+        <DialogContent className="max-w-[95vw] border-none bg-transparent p-0 shadow-none sm:max-w-[90vw]">
+          <DialogTitle className="sr-only">Pré-visualização da imagem</DialogTitle>
+          {value && (
+            <div
+              className="grid max-h-[90vh] min-h-[60vh] place-items-center overflow-auto rounded-2xl"
+              style={{
+                backgroundImage:
+                  "linear-gradient(45deg,#0002 25%,transparent 25%,transparent 75%,#0002 75%),linear-gradient(45deg,#0002 25%,transparent 25%,transparent 75%,#0002 75%)",
+                backgroundSize: "24px 24px",
+                backgroundPosition: "0 0,12px 12px",
+                backgroundColor: "white",
+              }}
+            >
+              <img src={value} alt="preview ampliado" className="max-h-[90vh] max-w-full object-contain" />
+            </div>
+          )}
+          {meta && (
+            <p className="mt-2 text-center text-xs text-white/90">
+              {meta.w}×{meta.h}px — clique fora para fechar
+            </p>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
