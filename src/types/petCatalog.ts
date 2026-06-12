@@ -22,15 +22,15 @@ export type PetSpeciesProductFields = {
   price_coins: number;
 };
 
-export type PetSpecies = PetCatalogEntity & { category_id: string } & PetSpeciesProductFields;
+export type PetSpecies = PetCatalogEntity &
+  PetSpeciesProductFields & { category_id: string; benefit_id: string | null };
 
-export type PetVariant = PetCatalogEntity & {
-  category_id: string | null;
-  species_id: string | null;
-} & PetSpeciesProductFields & { benefit_id: string | null };
-
-// Add benefit_id to species too (separately, to keep the spread above readable).
-// Using a module augmentation-ish trick is not necessary — just redeclare here:
+export type PetVariant = PetCatalogEntity &
+  PetSpeciesProductFields & {
+    category_id: string | null;
+    species_id: string | null;
+    benefit_id: string | null;
+  };
 
 export type PetLifeStageKind = "baby" | "adult" | null;
 export type PetLifeStage = PetCatalogEntity & { kind: PetLifeStageKind };
