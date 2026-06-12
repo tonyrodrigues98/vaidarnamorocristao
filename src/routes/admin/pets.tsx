@@ -348,6 +348,18 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
     }
     const slug = (draft.slug || "").trim() || slugify(name);
     const payload: Record<string, unknown> = { ...draft, name, slug };
+    const isPetForm = table === "pet_species" || table === "pet_variants";
+    // Extract virtual perk fields — not columns on species/variants
+    const perkEffectKey = isPetForm ? ((draft.effect_key as string | null) ?? null) : null;
+    const perkLabel = isPetForm ? ((draft.perk_label as string | null) ?? null) : null;
+    const perkParam = isPetForm ? ((draft.effect_param as number | null) ?? null) : null;
+    const perkTargetId = isPetForm ? ((draft.effect_target_id as string | null) ?? null) : null;
+    if (isPetForm) {
+      delete payload.effect_key;
+      delete payload.perk_label;
+      delete payload.effect_param;
+      delete payload.effect_target_id;
+    }
     if (table === "pet_benefits") {
       if (payload.scope === "global") payload.scope_id = null;
       if (payload.scope !== "global" && !payload.scope_id) {
@@ -357,6 +369,38 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
     }
     setBusy(true);
     try {
+      // Manage attached benefit for species/variants
+      if (isPetForm) {
+        const existingBenefitId = (draft.benefit_id as string | null) ?? null;
+        if (perkEffectKey) {
+          const benefitPayload = {
+            name,
+            slug: `${table}-${slug}`,
+            description: null,
+            image_url: null,
+            scope: "global" as PetBenefitScope,
+            scope_id: null,
+            perk_label: perkLabel || null,
+            effect_key: perkEffectKey,
+            effect_param: perkParam,
+            effect_target_id: perkTargetId,
+            active: true,
+            sort_order: 0,
+          };
+          if (existingBenefitId) {
+            await updateRow("pet_benefits", existingBenefitId, benefitPayload);
+            payload.benefit_id = existingBenefitId;
+          } else {
+            const created = await createRow<PetBenefit>("pet_benefits", benefitPayload);
+            payload.benefit_id = created.id;
+          }
+        } else {
+          payload.benefit_id = null;
+          if (existingBenefitId) {
+            try { await deleteRow("pet_benefits", existingBenefitId); } catch { /* ignore */ }
+          }
+        }
+      }
       if (editingId) {
         await updateRow(table, editingId, payload);
         toast.success("Atualizado");
