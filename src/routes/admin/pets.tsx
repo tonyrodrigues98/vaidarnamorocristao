@@ -93,7 +93,6 @@ const TABS: { key: TabKey; label: string; icon: ComponentType<{ className?: stri
   { key: "pet_variants", label: "Variações", icon: Sparkles },
   { key: "pet_life_stages", label: "Fases", icon: Baby },
   { key: "pet_personalities", label: "Personalidades", icon: Smile },
-  { key: "pet_benefits", label: "Benefícios", icon: Gift },
   { key: "perk_effects", label: "Tipos de efeito", icon: Zap },
   { key: "legacy", label: "Pets (legado)", icon: Star },
 ];
