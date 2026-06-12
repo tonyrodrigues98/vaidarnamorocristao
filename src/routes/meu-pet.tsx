@@ -22,6 +22,7 @@ import {
   getMyPetV2,
   listActive,
   listBenefitsFor,
+  resolvePetDisplayImage,
   listSpeciesByCategory,
   listVariantsFor,
   updateMyPetV2,
@@ -70,9 +71,10 @@ const EMPTY: Selection = {
 };
 
 function resolvePetImage(sel: Selection): string | null {
+  const stageKind = sel.stage?.kind ?? null;
   return (
-    sel.variant?.image_url ||
-    sel.species?.image_url ||
+    resolvePetDisplayImage(sel.variant, stageKind) ||
+    resolvePetDisplayImage(sel.species, stageKind) ||
     sel.category?.image_url ||
     null
   );
