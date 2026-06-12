@@ -31,6 +31,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
@@ -1287,6 +1288,7 @@ function ImagePreview({
   const ref = useRef<HTMLInputElement>(null);
   const [drag, setDrag] = useState(false);
   const [meta, setMeta] = useState<{ w: number; h: number } | null>(null);
+  const [lightbox, setLightbox] = useState(false);
   useEffect(() => {
     if (!value) {
       setMeta(null);
@@ -1339,7 +1341,12 @@ function ImagePreview({
           <img
             src={value}
             alt="preview"
-            className="max-h-full max-w-full object-contain p-3"
+            className="max-h-full max-w-full cursor-zoom-in object-contain p-3"
+            onClick={(e) => {
+              e.stopPropagation();
+              setLightbox(true);
+            }}
+            title="Clique para abrir em tela cheia"
           />
         ) : (
           <div className="flex flex-col items-center gap-2 text-muted-foreground">
@@ -1382,6 +1389,30 @@ function ImagePreview({
           </span>
         )}
       </div>
+      <Dialog open={lightbox} onOpenChange={setLightbox}>
+        <DialogContent className="max-w-[95vw] border-none bg-transparent p-0 shadow-none sm:max-w-[90vw]">
+          <DialogTitle className="sr-only">Pré-visualização da imagem</DialogTitle>
+          {value && (
+            <div
+              className="grid max-h-[90vh] min-h-[60vh] place-items-center overflow-auto rounded-2xl"
+              style={{
+                backgroundImage:
+                  "linear-gradient(45deg,#0002 25%,transparent 25%,transparent 75%,#0002 75%),linear-gradient(45deg,#0002 25%,transparent 25%,transparent 75%,#0002 75%)",
+                backgroundSize: "24px 24px",
+                backgroundPosition: "0 0,12px 12px",
+                backgroundColor: "white",
+              }}
+            >
+              <img src={value} alt="preview ampliado" className="max-h-[90vh] max-w-full object-contain" />
+            </div>
+          )}
+          {meta && (
+            <p className="mt-2 text-center text-xs text-white/90">
+              {meta.w}×{meta.h}px — clique fora para fechar
+            </p>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
