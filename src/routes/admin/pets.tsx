@@ -624,6 +624,27 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
 
             {(table === "pet_species" || table === "pet_variants") && (
               <>
+                <div className="sm:col-span-2">
+                  <Field icon={Gift} label="Benefício exclusivo deste pet">
+                    <Select
+                      value={(draft.benefit_id as string) ?? "__none__"}
+                      onValueChange={(v) =>
+                        setDraft({ ...draft, benefit_id: v === "__none__" ? null : v })
+                      }
+                    >
+                      <SelectTrigger><SelectValue placeholder="Sem benefício" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="__none__">Sem benefício</SelectItem>
+                        {benefits.map((b) => (
+                          <SelectItem key={b.id} value={b.id}>
+                            {b.name}
+                            {b.perk_label ? ` — ${b.perk_label}` : ""}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </Field>
+                </div>
                 <div className="flex items-end gap-4">
                   <div className="flex items-center gap-2">
                     <Switch
