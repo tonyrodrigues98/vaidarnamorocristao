@@ -249,9 +249,12 @@ export const Route = createFileRoute("/api/admin/generate-pet-image")({
             const hasAlpha = info.colorType === 4 || info.colorType === 6;
 
             // Revisão por IA — opcional (custa tempo, pode estourar o gateway).
+            // Pulamos a verificação de "fundo transparente" quando o PNG já tem
+            // canal alfa real (OpenAI com background:transparent). A IA de visão
+            // não consegue distinguir alfa real de checkerboard renderizado.
             let visionReason = "skipped";
             if (doVision) {
-              const review = await visionReview(apiKey, bytes, body);
+              const review = await visionReview(apiKey, bytes, body, hasAlpha);
               if (!review.ok) {
                 lastReason = `vision_rejected:${review.reason}`;
                 continue;
