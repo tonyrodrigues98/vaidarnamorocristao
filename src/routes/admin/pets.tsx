@@ -1133,14 +1133,12 @@ function ImagePreview({
   onPick,
   onClear,
   accept = "image/*",
-  onGenerate,
 }: {
   value: string | null;
   busy?: boolean;
   onPick: (file: File) => void;
   onClear: () => void;
   accept?: string;
-  onGenerate?: () => void;
 }) {
   const ref = useRef<HTMLInputElement>(null);
   const [drag, setDrag] = useState(false);
