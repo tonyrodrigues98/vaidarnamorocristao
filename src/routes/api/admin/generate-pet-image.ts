@@ -263,7 +263,10 @@ export const Route = createFileRoute("/api/admin/generate-pet-image")({
             // não consegue distinguir alfa real de checkerboard renderizado.
             let visionReason = "skipped";
             if (doVision) {
-              const review = await visionReview(apiKey, bytes, body, hasAlpha);
+              // Modelos Gemini não produzem alpha real — pedimos à visão para
+              // IGNORAR o fundo, evitando rejeições por "checker desenhado".
+              // O foco da revisão fica em texto, sujeito, idade e bordas.
+              const review = await visionReview(apiKey, bytes, body, true);
               if (!review.ok) {
                 lastReason = `vision_rejected:${review.reason}`;
                 continue;
