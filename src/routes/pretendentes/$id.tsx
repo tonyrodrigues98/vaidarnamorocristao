@@ -50,6 +50,7 @@ import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { OnlineDot } from "@/components/OnlineDot";
 import { UserBadges } from "@/components/UserBadges";
 import { PetProfileCard } from "@/components/PetProfileCard";
+import { EquippedPetSidekick } from "@/components/EquippedPetSidekick";
 import { ProfileAdvancedView } from "@/components/ProfileAdvancedView";
 import { DecoratedAvatar } from "@/components/DecoratedAvatar";
 import { ROLE_PRIORITY, type AppRole, type RoleColor } from "@/lib/roles";
