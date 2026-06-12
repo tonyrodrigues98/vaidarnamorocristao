@@ -228,11 +228,11 @@ export const Route = createFileRoute("/api/admin/generate-pet-image")({
               lastReason = `wrong_size_${info.width}x${info.height}`;
               continue;
             }
-            // colorType 4 = grayscale+alpha, 6 = RGBA. Outros = sem alpha.
-            if (info.colorType !== 4 && info.colorType !== 6) {
-              lastReason = `no_alpha_channel_${info.colorType}`;
-              continue;
-            }
+            // Aceita qualquer PNG válido. Modelos de imagem (Gemini/OpenAI sem flag
+            // `background: transparent`) frequentemente devolvem RGB sem alpha mesmo
+            // quando o prompt pede fundo transparente. Não bloqueia upload por isso —
+            // o admin pode regenerar ou substituir manualmente se o fundo ficou ruim.
+            const hasAlpha = info.colorType === 4 || info.colorType === 6;
 
             // Revisão por IA — opcional (custa tempo, pode estourar o gateway).
             let visionReason = "skipped";
@@ -263,7 +263,7 @@ export const Route = createFileRoute("/api/admin/generate-pet-image")({
               );
             }
             return new Response(
-              JSON.stringify({ path, attempts: attempt + 1, vision_reason: visionReason, model }),
+              JSON.stringify({ path, attempts: attempt + 1, vision_reason: visionReason, model, has_alpha: hasAlpha }),
               { status: 200, headers: { "Content-Type": "application/json" } },
             );
           }
