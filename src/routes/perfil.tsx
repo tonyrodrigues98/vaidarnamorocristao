@@ -70,6 +70,7 @@ import { GradientName } from "@/components/GradientName";
 import { fetchNameGradientsByIds, type NameGradient } from "@/lib/nameGradients";
 import { ProfileActionHub, type HubSection } from "@/components/profile/ProfileActionHub";
 import { PetProfileCard } from "@/components/PetProfileCard";
+import { EquippedPetSidekick } from "@/components/EquippedPetSidekick";
 
 export const Route = createFileRoute("/perfil")({
   component: PerfilPage,
