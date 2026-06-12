@@ -1032,11 +1032,13 @@ function RowCard({
   table,
   onEdit,
   onRemove,
+  onClearImage,
 }: {
   row: PetCatalogEntity;
   table: PetCatalogTable;
   onEdit: (row: PetCatalogEntity) => void;
   onRemove: (row: PetCatalogEntity) => void;
+  onClearImage: (row: PetCatalogEntity, field: "image_url" | "image_url_baby" | "image_url_adult") => void;
 }) {
   const isProduct = table === "pet_species" || table === "pet_variants";
   const prod = row as PetCatalogEntity & {
@@ -1065,11 +1067,32 @@ function RowCard({
     >
       {isProduct ? (
         <div className="flex shrink-0 items-center gap-1">
-          <ThumbWithLabel label="Filhote" src={baby ?? row.image_url} />
-          <ThumbWithLabel label="Adulto" src={adult ?? row.image_url} />
+          <ThumbWithLabel
+            label="Filhote"
+            src={baby ?? row.image_url}
+            onClear={baby ? () => onClearImage(row, "image_url_baby") : undefined}
+          />
+          <ThumbWithLabel
+            label="Adulto"
+            src={adult ?? row.image_url}
+            onClear={adult ? () => onClearImage(row, "image_url_adult") : undefined}
+          />
         </div>
       ) : row.image_url ? (
-        <img src={row.image_url} alt="" className="h-14 w-14 rounded-xl object-cover ring-1 ring-border" />
+        <div className="group/thumb relative h-14 w-14 shrink-0">
+          <img src={row.image_url} alt="" className="h-14 w-14 rounded-xl object-cover ring-1 ring-border" />
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onClearImage(row, "image_url");
+            }}
+            title="Excluir imagem"
+            className="absolute inset-0 grid place-items-center rounded-xl bg-destructive/80 text-destructive-foreground opacity-0 transition-opacity group-hover/thumb:opacity-100"
+          >
+            <Trash2 className="h-5 w-5" />
+          </button>
+        </div>
       ) : (
         <div className="grid h-14 w-14 place-items-center rounded-xl bg-muted text-muted-foreground">
           <ImageIcon className="h-5 w-5" />
