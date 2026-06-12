@@ -333,9 +333,10 @@ function Wizard({ onCancel, onDone }: { onCancel?: () => void; onDone: () => voi
       .catch((e) => toast.error(e.message));
   }, [sel.category, sel.species]);
 
-  // Load benefits when reaching benefit step
+  // Pré-carrega benefícios assim que houver categoria (e refina se species/variant mudarem).
+  // Sem isso o nextOf "achava" que não tinha benefício e pulava a etapa.
   useEffect(() => {
-    if (step !== "benefit" || !sel.category) return;
+    if (!sel.category) return;
     listBenefitsFor({
       categoryId: sel.category.id,
       speciesId: sel.species?.id ?? null,
@@ -343,7 +344,7 @@ function Wizard({ onCancel, onDone }: { onCancel?: () => void; onDone: () => voi
     })
       .then(setBenefits)
       .catch((e) => toast.error(e.message));
-  }, [step, sel.category, sel.species, sel.variant]);
+  }, [sel.category, sel.species, sel.variant]);
 
   const order: StepKey[] = useMemo(
     () => ["category", "stage", "personality", "benefit", "name", "type", "confirm"],
@@ -358,7 +359,7 @@ function Wizard({ onCancel, onDone }: { onCancel?: () => void; onDone: () => voi
       // "type" step shows variants if available for the category, else species.
       // Skip only when both lists are empty for this category.
       if (k === "type" && variants.length === 0 && species.length === 0) continue;
-      if (k === "benefit" && benefits.length === 0 && current === "personality") continue;
+      if (k === "benefit" && benefits.length === 0) continue;
       return k;
     }
     return "confirm";
