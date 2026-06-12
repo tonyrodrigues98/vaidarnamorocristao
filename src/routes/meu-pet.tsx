@@ -22,6 +22,7 @@ import {
   getMyPetV2,
   listActive,
   listBenefitsFor,
+  resolvePetDisplayImage,
   listSpeciesByCategory,
   listVariantsFor,
   updateMyPetV2,
@@ -30,6 +31,7 @@ import type {
   PetBenefit,
   PetCategory,
   PetLifeStage,
+  PetLifeStageKind,
   PetPersonality,
   PetSpecies,
   PetVariant,
@@ -70,9 +72,10 @@ const EMPTY: Selection = {
 };
 
 function resolvePetImage(sel: Selection): string | null {
+  const stageKind = sel.stage?.kind ?? null;
   return (
-    sel.variant?.image_url ||
-    sel.species?.image_url ||
+    resolvePetDisplayImage(sel.variant, stageKind) ||
+    resolvePetDisplayImage(sel.species, stageKind) ||
     sel.category?.image_url ||
     null
   );
@@ -153,9 +156,10 @@ function Showcase({
 }) {
   const [renaming, setRenaming] = useState(false);
   const [name, setName] = useState(pet.custom_name);
+  const stageKind = pet.life_stage?.kind ?? null;
   const image =
-    pet.variant?.image_url ||
-    pet.species?.image_url ||
+    resolvePetDisplayImage(pet.variant, stageKind) ||
+    resolvePetDisplayImage(pet.species, stageKind) ||
     pet.category?.image_url ||
     null;
 
@@ -343,7 +347,7 @@ function Wizard({ onCancel, onDone }: { onCancel?: () => void; onDone: () => voi
   }, [step, sel.category, sel.species, sel.variant]);
 
   const order: StepKey[] = useMemo(
-    () => ["category", "species", "variant", "stage", "name", "personality", "benefit", "confirm"],
+    () => ["category", "stage", "personality", "benefit", "name", "species", "variant", "confirm"],
     [],
   );
 
@@ -352,18 +356,11 @@ function Wizard({ onCancel, onDone }: { onCancel?: () => void; onDone: () => voi
     const idx = order.indexOf(current);
     for (let i = idx + 1; i < order.length; i++) {
       const k = order[i];
-      // Only skip species/variant when we've already chosen the category AND
-      // confirmed (after load) that there are no options. Don't skip just
-      // because the async list hasn't arrived yet — that would race the user
-      // past valid steps right after picking a category.
-      if (k === "species" && current !== "category" && species.length === 0) continue;
-      if (
-        k === "variant" &&
-        current !== "category" &&
-        current !== "species" &&
-        variants.length === 0
-      )
-        continue;
+      // Skip species/variant when there are no options for the current category.
+      // Species/variant are now at the end of the flow (after category was chosen),
+      // so lists are guaranteed to be loaded by then.
+      if (k === "species" && species.length === 0) continue;
+      if (k === "variant" && variants.length === 0) continue;
       if (k === "benefit" && benefits.length === 0 && current === "personality") continue;
       return k;
     }
@@ -472,6 +469,41 @@ function Wizard({ onCancel, onDone }: { onCancel?: () => void; onDone: () => voi
     );
   }
 
+  function StageAwareGrid<
+    T extends {
+      id: string;
+      name: string;
+      description: string | null;
+      image_url: string | null;
+      image_url_baby?: string | null;
+      image_url_adult?: string | null;
+    },
+  >({
+    items,
+    stageKind,
+    selectedId,
+    onPick,
+  }: {
+    items: T[];
+    stageKind: PetLifeStageKind;
+    selectedId?: string | null;
+    onPick: (item: T) => void;
+  }) {
+    const mapped = items.map((it) => ({
+      ...it,
+      image_url:
+        (stageKind === "baby" ? it.image_url_baby : it.image_url_adult) ??
+        it.image_url_adult ??
+        it.image_url_baby ??
+        it.image_url,
+    }));
+    return <Grid items={mapped} selectedId={selectedId} onPick={(picked) => {
+      // find original (with both image fields preserved)
+      const orig = items.find((x) => x.id === picked.id) ?? picked;
+      onPick(orig);
+    }} />;
+  }
+
   const stepTitles: Record<StepKey, string> = {
     category: "Escolha a categoria",
     species: "Escolha a espécie",
@@ -532,9 +564,7 @@ function Wizard({ onCancel, onDone }: { onCancel?: () => void; onDone: () => voi
               ]);
               setSpecies(sp);
               setVariants(va);
-              if (sp.length > 0) go("species");
-              else if (va.length > 0) go("variant");
-              else go("stage");
+              go("stage");
             } catch (e) {
               toast.error((e as Error).message);
             }
@@ -542,8 +572,9 @@ function Wizard({ onCancel, onDone }: { onCancel?: () => void; onDone: () => voi
         />
       )}
       {step === "species" && (
-        <Grid
+        <StageAwareGrid
           items={species}
+          stageKind={sel.stage?.kind ?? null}
           selectedId={sel.species?.id}
           onPick={async (s) => {
             const next = { ...sel, species: s, variant: null };
@@ -552,7 +583,7 @@ function Wizard({ onCancel, onDone }: { onCancel?: () => void; onDone: () => voi
               const va = await listVariantsFor(sel.category!.id, s.id);
               setVariants(va);
               if (va.length > 0) go("variant");
-              else go("stage");
+              else go("confirm");
             } catch (e) {
               toast.error((e as Error).message);
             }
@@ -560,13 +591,14 @@ function Wizard({ onCancel, onDone }: { onCancel?: () => void; onDone: () => voi
         />
       )}
       {step === "variant" && (
-        <Grid
+        <StageAwareGrid
           items={variants}
+          stageKind={sel.stage?.kind ?? null}
           selectedId={sel.variant?.id}
           onPick={(v) => {
             const next = { ...sel, variant: v };
             setSel(next);
-            go(nextOf("variant", next));
+            go("confirm");
           }}
         />
       )}
