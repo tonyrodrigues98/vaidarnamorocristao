@@ -353,19 +353,29 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
   /** Gera em lote para todas as linhas sem imagem. Só para tabelas que têm imagens. */
   async function bulkGenerateMissing() {
     if (table !== "pet_categories" && table !== "pet_species" && table !== "pet_variants") return;
-    const targets = (rows as Array<PetCatalogEntity & { image_url?: string | null; image_url_baby?: string | null; image_url_adult?: string | null }>)
-      .flatMap((row) => {
-        const subject = row.name;
-        if (table === "pet_categories") {
-          if (row.image_url) return [];
-          const animals = categoryAnimalsFor(subject);
-          return [{ row, field: "image_url" as const, kind: "category" as PetImageKind, subject, animals }];
+    type BulkTarget = {
+      rowId: string;
+      field: "image_url" | "image_url_baby" | "image_url_adult";
+      kind: PetImageKind;
+      subject: string;
+      animals?: string[];
+    };
+    const targets: BulkTarget[] = [];
+    for (const row of rows as Array<PetCatalogEntity & {
+      image_url?: string | null;
+      image_url_baby?: string | null;
+      image_url_adult?: string | null;
+    }>) {
+      const subject = row.name;
+      if (table === "pet_categories") {
+        if (!row.image_url) {
+          targets.push({ rowId: row.id, field: "image_url", kind: "category", subject, animals: categoryAnimalsFor(subject) });
         }
-        const items: { row: typeof row; field: "image_url_baby" | "image_url_adult"; kind: PetImageKind; subject: string }[] = [];
-        if (!row.image_url_baby) items.push({ row, field: "image_url_baby", kind: "baby", subject });
-        if (!row.image_url_adult) items.push({ row, field: "image_url_adult", kind: "adult", subject });
-        return items;
-      });
+      } else {
+        if (!row.image_url_baby) targets.push({ rowId: row.id, field: "image_url_baby", kind: "baby", subject });
+        if (!row.image_url_adult) targets.push({ rowId: row.id, field: "image_url_adult", kind: "adult", subject });
+      }
+    }
     if (targets.length === 0) {
       toast.info("Nenhuma imagem faltando nesta aba.");
       return;
@@ -377,13 +387,8 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
     for (const t of targets) {
       const tId = toast.loading(`Gerando: ${t.subject} (${t.kind})... [${ok + fail + 1}/${targets.length}]`);
       try {
-        const path = await generatePetImage({
-          kind: t.kind,
-          subject: t.subject,
-          animals: "animals" in t ? (t as { animals: string[] }).animals : undefined,
-          scope: table,
-        });
-        await updateRow(table, t.row.id, { [t.field]: path });
+        const path = await generatePetImage({ kind: t.kind, subject: t.subject, animals: t.animals, scope: table });
+        await updateRow(table, t.rowId, { [t.field]: path });
         ok++;
         toast.success(`${t.subject}: ok`, { id: tId });
       } catch (e) {
