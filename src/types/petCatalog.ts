@@ -27,7 +27,10 @@ export type PetSpecies = PetCatalogEntity & { category_id: string } & PetSpecies
 export type PetVariant = PetCatalogEntity & {
   category_id: string | null;
   species_id: string | null;
-} & PetSpeciesProductFields;
+} & PetSpeciesProductFields & { benefit_id: string | null };
+
+// Add benefit_id to species too (separately, to keep the spread above readable).
+// Using a module augmentation-ish trick is not necessary — just redeclare here:
 
 export type PetLifeStageKind = "baby" | "adult" | null;
 export type PetLifeStage = PetCatalogEntity & { kind: PetLifeStageKind };
