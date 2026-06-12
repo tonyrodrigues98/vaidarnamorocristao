@@ -437,15 +437,15 @@ function Wizard({ onCancel, onDone }: { onCancel?: () => void; onDone: () => voi
                 <Check className="h-3 w-3" />
               </span>
             )}
-            <div className="flex h-24 w-full items-center justify-center rounded-xl bg-gradient-to-b from-neutral-50 to-white">
+            <div className="relative flex h-32 w-full items-center justify-center overflow-hidden rounded-xl bg-gradient-to-b from-neutral-50 to-white">
               {it.image_url ? (
                 <img
                   src={it.image_url}
                   alt={it.name}
-                  className="max-h-full max-w-full object-contain transition-transform duration-300 group-hover:scale-105"
+                  className="h-[150%] w-[150%] object-contain object-center transition-transform duration-300 group-hover:scale-[1.08]"
                 />
               ) : (
-                <PawPrint className="h-8 w-8 text-neutral-300" />
+                <PawPrint className="h-10 w-10 text-neutral-300" />
               )}
             </div>
             <p className="w-full truncate text-center text-sm font-semibold text-neutral-900">
