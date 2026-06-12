@@ -70,6 +70,7 @@ import { GradientName } from "@/components/GradientName";
 import { fetchNameGradientsByIds, type NameGradient } from "@/lib/nameGradients";
 import { ProfileActionHub, type HubSection } from "@/components/profile/ProfileActionHub";
 import { PetProfileCard } from "@/components/PetProfileCard";
+import { EquippedPetSidekick } from "@/components/EquippedPetSidekick";
 
 export const Route = createFileRoute("/perfil")({
   component: PerfilPage,
@@ -710,7 +711,14 @@ function PerfilPage() {
                   <StatusPill status={status} />
                 </div>
 
-                <div className="flex w-full min-w-0 flex-col items-center text-center">
+                <div className="relative flex w-full min-w-0 flex-col items-center text-center">
+                  {user && (
+                    <EquippedPetSidekick
+                      userId={user.id}
+                      size={108}
+                      className="right-[-8px] top-2 sm:right-2 sm:top-4"
+                    />
+                  )}
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
