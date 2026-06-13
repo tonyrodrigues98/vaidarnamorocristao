@@ -543,8 +543,8 @@ function Detail() {
                   <div className="relative inline-block">
                   <EquippedPetSidekick
                     userId={profile.id}
-                    size={110}
-                    className="-right-7 -bottom-2 sm:-right-9 sm:-bottom-2 lg:-right-11 lg:-bottom-3"
+                    size={140}
+                    className="-right-3 -bottom-1 sm:-right-4 sm:-bottom-1 lg:-right-5 lg:-bottom-1"
                   />
                   <div className="sm:hidden">
                     <DecoratedAvatar
