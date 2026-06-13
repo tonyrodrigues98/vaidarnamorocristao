@@ -541,11 +541,27 @@ function Detail() {
               <div className="relative overflow-visible rounded-[1.65rem] p-0">
                 <div className="relative z-10 flex min-h-[170px] items-center justify-center overflow-visible py-0 sm:min-h-[220px] lg:min-h-[245px]">
                   <div className="relative inline-block">
-                  <EquippedPetSidekick
-                    userId={profile.id}
-                    size={140}
-                    className="-right-3 -bottom-1 sm:-right-4 sm:-bottom-1 lg:-right-5 lg:-bottom-1"
-                  />
+                  <div className="sm:hidden">
+                    <EquippedPetSidekick
+                      userId={profile.id}
+                      size={120}
+                      className="-right-3 -bottom-1"
+                    />
+                  </div>
+                  <div className="hidden sm:block lg:hidden">
+                    <EquippedPetSidekick
+                      userId={profile.id}
+                      size={150}
+                      className="-right-4 -bottom-1"
+                    />
+                  </div>
+                  <div className="hidden lg:block">
+                    <EquippedPetSidekick
+                      userId={profile.id}
+                      size={160}
+                      className="-right-5 -bottom-1"
+                    />
+                  </div>
                   <div className="sm:hidden">
                     <DecoratedAvatar
                       photoUrl={profile.photo_url}
