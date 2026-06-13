@@ -189,8 +189,22 @@ export async function getMyPetV2(userId: string): Promise<UserPetV2Full | null> 
   if (error) throw error;
   if (!data) return null;
   const row = data as unknown as UserPetV2Full;
-  const hydrate = async <T extends { image_url: string | null } | null>(r: T): Promise<T> =>
-    r ? ({ ...r, image_url: await resolvePetImage(r.image_url) } as T) : r;
+  const hydrate = async <T extends { image_url: string | null } | null>(r: T): Promise<T> => {
+    if (!r) return r;
+    const rr = r as T & {
+      image_url_baby?: string | null;
+      image_url_adult?: string | null;
+    };
+    const [main, baby, adult] = await Promise.all([
+      resolvePetImage(rr.image_url),
+      rr.image_url_baby !== undefined ? resolvePetImage(rr.image_url_baby) : Promise.resolve(undefined),
+      rr.image_url_adult !== undefined ? resolvePetImage(rr.image_url_adult) : Promise.resolve(undefined),
+    ]);
+    const out: typeof rr = { ...rr, image_url: main };
+    if (rr.image_url_baby !== undefined) out.image_url_baby = baby ?? null;
+    if (rr.image_url_adult !== undefined) out.image_url_adult = adult ?? null;
+    return out as T;
+  };
   return {
     ...row,
     category: await hydrate(row.category),
