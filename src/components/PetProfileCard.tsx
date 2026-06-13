@@ -67,39 +67,39 @@ export function PetProfileCard({ userId, linkToManager = false, className }: Pro
   const inner = (
     <div
       className={cn(
-        "group relative overflow-hidden rounded-2xl border border-rose-200/70 bg-gradient-to-br from-rose-50/80 via-card to-card p-3 shadow-[0_8px_30px_-12px_rgba(244,63,94,0.35)] dark:border-rose-400/30 dark:from-rose-500/10 dark:via-card dark:to-card",
+        "group relative overflow-hidden rounded-2xl border border-neutral-200/80 bg-gradient-to-br from-neutral-50 via-card to-card p-3 shadow-[0_8px_30px_-18px_rgba(0,0,0,0.25)] dark:border-neutral-700/60 dark:from-neutral-800/40 dark:via-card dark:to-card",
         className,
       )}
     >
       <div className="flex items-stretch gap-3">
         {/* Pet artwork with neon disc */}
         <div className="relative flex h-[110px] w-[110px] shrink-0 items-end justify-center">
-          {/* radial glow disc */}
+          {/* ground shadow disc — cinza, sutil */}
           <div
             aria-hidden
-            className="absolute inset-x-2 bottom-1 h-4 rounded-full bg-rose-400/60 blur-xl"
+            className="absolute inset-x-3 bottom-1 h-3 rounded-[50%] bg-neutral-900/25 blur-lg"
           />
           <div
             aria-hidden
-            className="absolute inset-x-4 bottom-2 h-1.5 rounded-full bg-rose-500/80 blur-[2px]"
+            className="absolute inset-x-5 bottom-2 h-1 rounded-[50%] bg-neutral-900/30 blur-[2px]"
           />
           {image ? (
             <img
               src={image}
               alt={pet.custom_name || pet.variant?.name || "Pet"}
-              className="relative h-[100px] w-auto object-contain drop-shadow-[0_6px_10px_rgba(244,63,94,0.45)] transition-transform duration-300 group-hover:-translate-y-0.5"
+              className="relative h-[100px] w-auto object-contain drop-shadow-[0_6px_8px_rgba(0,0,0,0.22)] transition-transform duration-300 group-hover:-translate-y-0.5"
               draggable={false}
               loading="lazy"
             />
           ) : (
-            <PawPrint className="relative h-12 w-12 text-rose-400" aria-hidden />
+            <PawPrint className="relative h-12 w-12 text-neutral-400" aria-hidden />
           )}
         </div>
 
         {/* Info */}
         <div className="flex min-w-0 flex-1 flex-col gap-1.5">
           <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-rose-500">
+            <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-neutral-500">
               <PawPrint className="h-3 w-3" aria-hidden />
               Meu Pet
             </div>
@@ -112,7 +112,7 @@ export function PetProfileCard({ userId, linkToManager = false, className }: Pro
             <span className="truncate text-base font-bold text-foreground">
               {pet.custom_name || pet.variant?.name || "Pet"}
             </span>
-            <span className="text-rose-500">♥</span>
+            <span className="text-neutral-400">♥</span>
           </div>
 
           {subtitle && (
@@ -120,7 +120,7 @@ export function PetProfileCard({ userId, linkToManager = false, className }: Pro
           )}
 
           {pet.personality && (
-            <span className="mt-0.5 inline-flex w-fit items-center gap-1 rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-semibold text-rose-700 dark:bg-rose-500/15 dark:text-rose-200">
+            <span className="mt-0.5 inline-flex w-fit items-center gap-1 rounded-full bg-neutral-100 px-2 py-0.5 text-[10px] font-semibold text-neutral-700 dark:bg-neutral-700/40 dark:text-neutral-200">
               <Sparkles className="h-3 w-3" aria-hidden />
               {pet.personality.name}
             </span>
@@ -129,7 +129,7 @@ export function PetProfileCard({ userId, linkToManager = false, className }: Pro
       </div>
 
       {benefits.length > 0 && (
-        <div className="mt-3 border-t border-rose-200/60 pt-2.5 dark:border-rose-400/15">
+        <div className="mt-3 border-t border-neutral-200/70 pt-2.5 dark:border-neutral-700/40">
           <p className="mb-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
             Benefícios ativos
           </p>
@@ -139,7 +139,7 @@ export function PetProfileCard({ userId, linkToManager = false, className }: Pro
                 key={b.id}
                 className="flex items-center gap-1.5 text-[11px] text-foreground"
               >
-                <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-rose-500/15 text-rose-500">
+                <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-neutral-500/15 text-neutral-600 dark:text-neutral-300">
                   <Sparkles className="h-2.5 w-2.5" aria-hidden />
                 </span>
                 <span className="truncate">{b.perk_label || b.name}</span>
