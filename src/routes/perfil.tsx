@@ -740,7 +740,7 @@ function PerfilPage() {
                   {user && (
                     <EquippedPetSidekick
                       userId={user.id}
-                      size={84}
+                      size={105}
                       className="-right-6 -bottom-2 sm:-right-8 sm:-bottom-3"
                     />
                   )}
