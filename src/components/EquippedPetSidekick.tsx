@@ -22,7 +22,7 @@ type Props = {
  */
 export function EquippedPetSidekick({
   userId,
-  size = 110,
+  size = 138,
   showHeartBubble = true,
   className,
 }: Props) {
@@ -54,25 +54,25 @@ export function EquippedPetSidekick({
 
   return (
     <div
-      className={cn("pointer-events-none absolute", className)}
+      className={cn("pointer-events-none absolute z-30", className)}
       style={{ width: size, height: size }}
       aria-hidden
     >
-      {/* Neon disc */}
+      {/* Subtle ground shadow (cinza escuro) */}
       <div
-        className="absolute left-1/2 -translate-x-1/2 rounded-full bg-rose-500/70 blur-md"
-        style={{ width: discWidth, height: 10, bottom: -2 }}
+        className="absolute left-1/2 -translate-x-1/2 rounded-[50%] bg-neutral-900/35 blur-md"
+        style={{ width: discWidth, height: 8, bottom: 0 }}
       />
       <div
-        className="absolute left-1/2 -translate-x-1/2 rounded-full bg-rose-400/40 blur-xl"
-        style={{ width: discWidth + 8, height: 18, bottom: -6 }}
+        className="absolute left-1/2 -translate-x-1/2 rounded-[50%] bg-neutral-900/20 blur-lg"
+        style={{ width: discWidth + 10, height: 14, bottom: -3 }}
       />
 
       {/* Pet artwork */}
       <img
         src={image}
         alt={name}
-        className="relative h-full w-full select-none object-contain drop-shadow-[0_6px_12px_rgba(244,63,94,0.45)] animate-[pet-bob_4s_ease-in-out_infinite]"
+        className="relative h-full w-full select-none object-contain drop-shadow-[0_8px_10px_rgba(0,0,0,0.28)] animate-[pet-bob_4s_ease-in-out_infinite]"
         draggable={false}
       />
 
