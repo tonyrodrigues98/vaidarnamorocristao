@@ -20,6 +20,7 @@ import type { PetCareItem } from "@/types/petCare";
 import {
   applyPetCare,
   getCareConfig,
+  getItemUsesToday,
   listCareItemsForPet,
 } from "@/lib/petCare";
 import { cn } from "@/lib/utils";
@@ -50,6 +51,7 @@ export function PetCareActionSheet({
   const [loading, setLoading] = useState(false);
   const [pending, setPending] = useState<string | null>(null);
   const [regenMin, setRegenMin] = useState(6);
+  const [usesToday, setUsesToday] = useState<Record<string, number>>({});
 
   useEffect(() => {
     if (!open || !kind) return;
@@ -60,10 +62,16 @@ export function PetCareActionSheet({
     }
     setLoading(true);
     listCareItemsForPet({ kind, categoryId, speciesId })
-      .then(setItems)
+      .then(async (its) => {
+        setItems(its);
+        const entries = await Promise.all(
+          its.filter((i) => i.daily_uses > 0).map(async (i) => [i.id, await getItemUsesToday(userPetId, i.id)] as const),
+        );
+        setUsesToday(Object.fromEntries(entries));
+      })
       .catch((e) => toast.error((e as Error).message))
       .finally(() => setLoading(false));
-  }, [open, kind, categoryId, speciesId]);
+  }, [open, kind, categoryId, speciesId, userPetId]);
 
   async function pick(item: PetCareItem) {
     setPending(item.id);
@@ -76,6 +84,8 @@ export function PetCareActionSheet({
       const msg = (e as Error).message;
       toast.error(
         msg.includes("insufficient_coins") ? "Moedas insuficientes" :
+        msg.includes("energia_insuficiente") ? "Seu pet está sem energia para essa ação" :
+        msg.includes("limite_diario_atingido") ? "Limite diário atingido (reseta às 00:00)" :
         msg.includes("incompativel") ? "Esse item não é compatível com seu pet" :
         msg,
       );
@@ -125,16 +135,20 @@ export function PetCareActionSheet({
             <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3">
               {items.map((it) => {
                 const busy = pending === it.id;
+                const used = usesToday[it.id] ?? 0;
+                const remaining = it.daily_uses > 0 ? Math.max(0, it.daily_uses - used) : null;
+                const exhausted = remaining !== null && remaining <= 0;
                 return (
                   <li key={it.id}>
                     <button
                       type="button"
                       onClick={() => void pick(it)}
-                      disabled={!!pending}
+                      disabled={!!pending || exhausted}
                       className={cn(
                         "group flex h-full w-full flex-col items-center gap-2 rounded-2xl border border-neutral-200 bg-white p-3 text-center transition",
                         "hover:-translate-y-0.5 hover:border-neutral-300 hover:shadow-sm",
                         busy && "opacity-60",
+                        exhausted && "opacity-50 cursor-not-allowed",
                       )}
                     >
                       <div className="grid h-16 w-16 place-items-center overflow-hidden rounded-xl bg-neutral-50">
@@ -148,7 +162,17 @@ export function PetCareActionSheet({
                         <div className="truncate text-xs font-semibold">{it.name}</div>
                         <div className="mt-0.5 flex items-center justify-center gap-1 text-[10px] text-neutral-500">
                           <Sparkles className="h-3 w-3" />+{it.restore_amount}
+                          {it.energy_cost > 0 && kind !== "sleep" && (
+                            <span className="ml-1 inline-flex items-center gap-0.5 text-yellow-600">
+                              <Zap className="h-3 w-3" />-{it.energy_cost}
+                            </span>
+                          )}
                         </div>
+                        {remaining !== null && (
+                          <div className={cn("mt-0.5 text-[10px]", exhausted ? "text-red-500" : "text-neutral-400")}>
+                            {exhausted ? "Esgotado hoje" : `${remaining}/${it.daily_uses} hoje`}
+                          </div>
+                        )}
                       </div>
                       <div className="flex items-center gap-1 text-[11px] font-semibold text-neutral-700">
                         {it.cost_coins > 0 ? (

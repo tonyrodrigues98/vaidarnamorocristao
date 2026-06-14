@@ -79,6 +79,9 @@ export type CareItemWritable = {
   image_url: string | null;
   cost_coins: number;
   restore_amount: number;
+  energy_cost: number;
+  sleep_hours: number;
+  daily_uses: number;
   active: boolean;
   sort_order: number;
 };
@@ -225,4 +228,14 @@ export async function applyPetCare(userPetId: string, itemId: string): Promise<n
   });
   if (error) throw error;
   return data as number;
+}
+
+/** Quantas vezes este item foi usado hoje (TZ America/Sao_Paulo). */
+export async function getItemUsesToday(userPetId: string, itemId: string): Promise<number> {
+  const { data, error } = await supabase.rpc("pet_care_uses_today" as any, {
+    _user_pet_id: userPetId,
+    _item_id: itemId,
+  });
+  if (error) throw error;
+  return (data as number) ?? 0;
 }

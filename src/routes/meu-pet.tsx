@@ -249,8 +249,8 @@ function Showcase({
 
   useEffect(() => {
     void reloadCare();
-    // re-render a cada 30s pra suavizar barras/energia
-    const t = setInterval(() => setTick((n) => n + 1), 30_000);
+    // re-render a cada 1s para decaimento em tempo real
+    const t = setInterval(() => setTick((n) => n + 1), 1000);
     return () => clearInterval(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pet.id]);

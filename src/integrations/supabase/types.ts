@@ -1424,12 +1424,15 @@ export type Database = {
           active: boolean
           cost_coins: number
           created_at: string
+          daily_uses: number
           description: string | null
+          energy_cost: number
           id: string
           image_url: string | null
           kind: Database["public"]["Enums"]["pet_care_kind"]
           name: string
           restore_amount: number
+          sleep_hours: number
           slug: string
           sort_order: number
           updated_at: string
@@ -1438,12 +1441,15 @@ export type Database = {
           active?: boolean
           cost_coins?: number
           created_at?: string
+          daily_uses?: number
           description?: string | null
+          energy_cost?: number
           id?: string
           image_url?: string | null
           kind: Database["public"]["Enums"]["pet_care_kind"]
           name: string
           restore_amount?: number
+          sleep_hours?: number
           slug: string
           sort_order?: number
           updated_at?: string
@@ -1452,12 +1458,15 @@ export type Database = {
           active?: boolean
           cost_coins?: number
           created_at?: string
+          daily_uses?: number
           description?: string | null
+          energy_cost?: number
           id?: string
           image_url?: string | null
           kind?: Database["public"]["Enums"]["pet_care_kind"]
           name?: string
           restore_amount?: number
+          sleep_hours?: number
           slug?: string
           sort_order?: number
           updated_at?: string
@@ -4210,6 +4219,10 @@ export type Database = {
       }
       mark_all_notifications_read: { Args: never; Returns: number }
       mark_message_read: { Args: { _message_id: string }; Returns: undefined }
+      pet_care_uses_today: {
+        Args: { _item_id: string; _user_pet_id: string }
+        Returns: number
+      }
       pet_perk_has: {
         Args: { _key: string; _user_id: string }
         Returns: boolean
