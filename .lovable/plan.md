@@ -1,149 +1,92 @@
-# Central de Ações do Pet
 
-Reestruturar `/meu-pet` para suportar um **menu radial** acionado por long-press no pet, com 6 barras de necessidades e ações configuráveis no admin.
+# Personalidades com efeitos no cuidado
 
-## 1. Barras de necessidades (stats)
+Objetivo: cada uma das 5 personalidades vira um conjunto de **modificadores sutis (10–30%)** aplicados em runtime sobre o sistema atual (`pet_care_items`, `pet_care_state`, `apply_pet_care`), com eventos aleatórios configuráveis e integração com o ciclo dia/noite que já existe.
 
-Seis barras 0–100 por `user_pets_v2.id`:
+## 1. Modelo de dados (admin-editável, nada hardcoded)
 
-| Barra      | Diminui com  | Recupera com                    | Ícone Lucide  |
-|------------|--------------|---------------------------------|---------------|
-| Fome       | tempo        | **Alimentar** (itens)           | `Utensils`    |
-| Energia    | uso/tempo    | **apenas tempo** (regen passivo)| `Zap`         |
-| Humor      | tempo        | **Brincar** (brinquedos)        | `Smile`       |
-| Higiene    | tempo        | **Banho** (ações)               | `Droplet`     |
-| Sono       | tempo        | **Ninar** (caminhas)            | `Moon`        |
-| Carência   | tempo        | **Carinho** (ações de afeto)    | `Heart`       |
+Nova tabela `pet_personality_effects` ligando `pet_personalities` a regras:
 
-Decaimento padrão: -1 por hora (configurável por estado global ou pet category).
-Energia regenera passivamente (+1 a cada X minutos, X configurável).
-
-Cálculo é **derivado em runtime** a partir de `last_action_at` + `value_at_last_action` — sem cron, sem trigger.
-
-## 2. Menu radial (UI)
-
-- Long-press de 400ms no pet abre o radial centralizado no pet.
-- 6 setores (um por barra). Tap em um setor abre um **sub-painel** com as ações/itens daquele cuidado.
-- Cada item mostra: ícone/imagem, nome, custo em moedas, ganho da barra (+N).
-- Confirmar consome moedas, aplica delta na barra (clamp 100), registra `pet_care_events`.
-- Mobile-first: radial usa `position: absolute` dentro do palco do pet, `max-w-full`, `overflow-visible` no palco e `overflow-hidden` no contêiner externo. Sub-painel é um `Sheet` (bottom sheet) pra caber em 320px+.
-- HUD com as 6 barras fica no topo do palco, em grid 3×2 no mobile (`grid-cols-3 sm:grid-cols-6`), cada barra com `min-w-0 truncate`.
-
-## 3. Admin (/admin/pets)
-
-Nova aba **"Cuidados"** com sub-abas por barra. Cada sub-aba lista os itens daquela barra e permite criar/editar:
-
-- **Alimentar**: nome, imagem (upload), `cost_coins`, `restore_amount` (+fome)
-- **Humor**: nome, imagem, custo, +humor (brinquedos/ações tipo "pega-pega")
-- **Higiene**: nome, imagem, custo, +higiene (banho, tosa, mangueira…)
-- **Sono**: nome, imagem, custo, +sono (caminhas)
-- **Carência**: nome, imagem, custo, +carência (carinho, colo…)
-- **Energia**: sem itens — apenas campo global `energy_regen_minutes_per_point`
-
-Cada item tem **compatibilidade** (igual ao padrão de `pet_background_compat`):
-- linha em `pet_care_item_compat` (category_id, species_id NULL = categoria inteira, species_id preenchido = restringe à espécie)
-- na criação do item, multi-select de categorias + multi-select opcional de espécies dentro delas
-
-Exemplo: "Ração" → categorias `cachorros` + `gatos` (todas espécies); "Carne crua" → categoria `exoticos` apenas espécies `cobra`, `jacare`.
-
-## 4. Schema (migration)
-
-```sql
--- enum dos tipos de cuidado
-create type public.pet_care_kind as enum
-  ('feed','play','hygiene','sleep','affection');
--- (energia não tem itens)
-
--- itens configuráveis pelo admin
-create table public.pet_care_items (
-  id uuid pk default gen_random_uuid(),
-  kind pet_care_kind not null,
-  name text not null,
-  slug text not null,
-  image_url text,
-  cost_coins int not null default 0,
-  restore_amount int not null default 10, -- 1..100
-  active bool default true,
-  sort_order int default 0,
-  created_at/updated_at
-);
-
--- compat por categoria/espécie
-create table public.pet_care_item_compat (
-  id uuid pk,
-  item_id uuid references pet_care_items on delete cascade,
-  category_id uuid references pet_categories on delete cascade,
-  species_id uuid references pet_species on delete cascade, -- NULL = categoria inteira
-  unique(item_id, category_id, species_id)
-);
-
--- estado por pet (uma linha por pet × barra)
-create table public.pet_care_state (
-  id uuid pk,
-  user_pet_id uuid references user_pets_v2 on delete cascade,
-  kind text not null, -- inclui 'energy'
-  value_at_anchor int not null default 80,
-  anchor_at timestamptz not null default now(),
-  unique(user_pet_id, kind)
-);
-
--- log de eventos (auditoria + replay)
-create table public.pet_care_events (
-  id uuid pk,
-  user_pet_id uuid references user_pets_v2 on delete cascade,
-  user_id uuid not null,
-  kind text not null,
-  item_id uuid references pet_care_items,
-  delta int not null,
-  cost_coins int not null default 0,
-  created_at timestamptz default now()
-);
-
--- config global (decay, regen energia)
-create table public.pet_care_config (
-  id int pk default 1 check (id=1),
-  decay_per_hour int default 1,
-  energy_regen_minutes_per_point int default 6
-);
+```text
+personality_id  | kind (feed|play|hygiene|sleep|affection|energy|all)
+restore_mult    | 1.20  → multiplica restore_amount
+energy_cost_mult| 0.50  → multiplica energy_cost
+decay_mult      | 0.70  → afeta decay daquela barra (config global × mult)
+cap_max         | 70    → barra não passa desse valor após restauração
+daypart         | any | day | night   → bônus só vale na janela
+condition_kind  | play  → condicional (ex.: humor>70)
+condition_op    | gt | lt
+condition_value | 70
 ```
 
-Tudo com GRANT + RLS:
-- `pet_care_items`/`compat`/`config`: select `authenticated` + `anon`; admin escreve via has_role.
-- `pet_care_state`/`events`: usuário só vê/escreve as próprias linhas (via `user_pets_v2.user_id = auth.uid()`).
+Uma personalidade pode ter N linhas (ex.: Carinhoso tem 3 regras). O admin edita tudo no painel de personalidades.
 
-## 5. RPC para aplicar uma ação
+Tabelas auxiliares:
+- `pet_random_events` — `item_id` ou `kind`, `chance` (0–1), `payload` JSON (`{type:'coins', min:1, max:5}` | `{type:'buff', kind:'play', mult:1.5, duration_min:30}`), `personality_id` opcional (chance × 2 quando bate).
+- `user_pet_buffs` — buffs temporários ativos por pet (kind, mult, expires_at). Aplicados em runtime junto com `restore_mult`.
 
-`apply_pet_care(_user_pet_id uuid, _item_id uuid)` — SECURITY DEFINER:
-1. Valida ownership do pet
-2. Valida compat (categoria/espécie do pet × item)
-3. Debita moedas (reusa fn de coins existente)
-4. Atualiza `pet_care_state` (clamp 0..100, computando valor atual via decay antes de somar)
-5. Insere `pet_care_events`
+## 2. Mapeamento das personalidades (valores propostos, ajustáveis no admin)
 
-## 6. Arquivos
+**Calmo**
+- ✅ Energia regenera 25% mais rápido (`kind=energy, restore_mult=1.25`, mexe no `energy_regen_minutes_per_point` via fator)
+- ✅ Decay de humor 20% mais lento (`kind=play, decay_mult=0.80`)
+- ✅ Bônus de +15% noturno em todas restaurações (`kind=all, restore_mult=1.15, daypart=night`)
+- ❌ Sono restaura no máximo 70% (`kind=sleep, cap_max=70`)
 
-**Novos:**
-- `src/types/petCare.ts`
-- `src/lib/petCare.ts` (queries + decay derivation client-side)
-- `src/components/pet/PetNeedsHud.tsx` (6 barras)
-- `src/components/pet/PetRadialMenu.tsx` (radial + long-press)
-- `src/components/pet/PetCareActionSheet.tsx` (bottom-sheet com itens)
-- `src/components/admin/PetCareItemsPanel.tsx` (CRUD + compat)
-- `supabase/migrations/<ts>_pet_care.sql`
+**Brincalhão**
+- ✅ Brincar restaura +30% humor (`kind=play, restore_mult=1.30`)
+- ✅ +15% diurno em brincar (`kind=play, daypart=day, restore_mult=1.15`)
+- ❌ Decay de humor 25% mais rápido (`kind=play, decay_mult=1.25`)
+- ❌ Banho restaura 80% (`kind=hygiene, restore_mult=0.80`)
 
-**Editados:**
-- `src/routes/meu-pet.tsx`: monta HUD + ativa long-press no `PetArtwork`
-- `src/routes/admin/pets.tsx`: adiciona aba "Cuidados"
+**Curioso**
+- ✅ Evento aleatório: 12% de chance ao brincar de ganhar 1–5 moedas (`pet_random_events` com `personality_id=curioso` dobra a chance base)
+- ✅ 5% de chance ao explorar (qualquer ação) de buff temporário "petisco" (+15% próxima restauração de fome por 1h)
+- ❌ Higiene decai 20% mais rápido
+- ❌ Todas ações custam +10% energia
 
-## 7. Responsividade
+**Energético**
+- ✅ Todas ações custam 30% menos energia (`kind=all, energy_cost_mult=0.70`) — ajustado de 50% pra ficar dentro da faixa sutil
+- ✅ Brincar restaura +20% humor diurno
+- ❌ Fome decai 25% mais rápido
+- ❌ Sono restaura 80%
 
-- HUD: `grid-cols-3 sm:grid-cols-6 gap-1.5`, cada barra com label de 1 ícone + número, sem texto longo no mobile
-- Radial: raio responsivo `clamp(96px, 28vw, 144px)`, ícones 20px no mobile / 24px desktop
-- Sub-painel: `Sheet side="bottom"`, lista vertical de itens, scroll interno
-- Stage do pet: `overflow-visible` para o radial não cortar, container externo segura overflow
+**Carinhoso — modelo "termômetro emocional"**
+- ✅ Carinho restaura +30% (afeição) e +15% humor na mesma ação
+- ✅ Decay de carência 30% mais lento **quando humor ≥ 70** (`kind=affection, decay_mult=0.70, condition_kind=play, condition_op=gt, condition_value=70`)
+- ❌ Decay de carência 50% mais rápido **quando humor < 30** (`condition_op=lt, condition_value=30, decay_mult=1.50`)
+- ❌ Sem carinho por 24h: buff negativo `-10% restore_mult global` até receber carinho (gerado por job/heurística no cálculo runtime)
 
-## 8. Fora de escopo desta entrega
+## 3. Onde os modificadores entram
 
-- Notificações push de fome/sono baixos
-- Mini-jogos de verdade (apenas botão "brincar" que aplica delta)
-- Animações elaboradas no pet ao executar ação (placeholder de pulse)
+- **`apply_pet_care` (RPC)**: lê regras da personalidade do pet equipado, aplica `restore_mult` no `restore_amount`, `energy_cost_mult` no consumo, e respeita `cap_max` antes de gravar. Avalia `condition_*` consultando `pet_care_state` no momento. Rola dados de `pet_random_events` e grava resultado (moedas via `coin_transactions`, buff via `user_pet_buffs`).
+- **`deriveCurrentValue` (client + futura função SQL)**: aplica `decay_mult` por kind, considerando condicionais e janela dia/noite usando o helper existente `petDayNight.ts`. Inclui buffs ativos de `user_pet_buffs`.
+- **`getCareConfig`**: passa a retornar também os modificadores resolvidos do pet equipado pra o tick de 1s já existente em `meu-pet.tsx` calcular tudo localmente sem refresh.
+
+## 4. Feedback ao jogador
+
+- Toast da ação mostra os modificadores aplicados: "✨ Brincalhão: +30% humor" / "🌙 Calmo (noite): +15%".
+- `PetNeedsHud` ganha um ícone discreto sobre a barra quando há buff ativo ou condicional ativo (ex.: coração pulsando na barra de carência do Carinhoso quando humor alto/baixo).
+- Quando o evento aleatório dispara, animação curta + toast ("🪙 +3 moedas encontradas!" / "🍪 Petisco encontrado").
+
+## 5. Admin
+
+- Painel **Personalidades** ganha aba "Efeitos" — CRUD das regras (kind, mult, cap, daypart, condition).
+- Painel **Itens de cuidado** ganha aba "Eventos aleatórios" pra configurar chance/payload por item ou por kind.
+- Tudo respeita a regra de inputs (`type="text" inputMode="decimal"`).
+
+## 6. Etapas de implementação (ordem sugerida)
+
+1. Migration: `pet_personality_effects`, `pet_random_events`, `user_pet_buffs` + GRANTs + RLS + seeds com os valores acima.
+2. Reescrita do `apply_pet_care` aplicando mult/cap/condicional + rolagem de eventos + persistência de buffs/moedas.
+3. `petCare.ts` (client): carregar efeitos da personalidade do pet equipado, aplicar em `deriveCurrentValue` e expor toasts ricos.
+4. Integração `petDayNight` no cálculo.
+5. UI HUD: indicadores de buff/condicional + animação de evento aleatório.
+6. Admin: telas de regras e eventos.
+7. Seed inicial dos 5 perfis e teste manual de cada bônus/maléfico.
+
+## Pontos abertos pra fechar antes de codar
+
+- Buff negativo do Carinhoso após 24h sem carinho: aplicar via job (cron) ou calcular puramente em runtime a partir do `last_affection_at`? (Recomendo runtime, evita cron.)
+- Eventos aleatórios devem ter cooldown por pet (ex.: máximo 3 moedas/dia) pra não virar farm?
+- Mostrar os efeitos da personalidade na ficha do pet (transparência total) ou manter como descoberta pelo jogador?
