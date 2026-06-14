@@ -36,6 +36,7 @@ import type {
   UserPetV2Full,
 } from "@/types/petCatalog";
 import { cn } from "@/lib/utils";
+import { PetBackgroundLayer, PetSceneryPanel, usePetScenery } from "@/components/pet/PetSceneryPanel";
 
 export const Route = createFileRoute("/meu-pet")({ component: MeuPetPage });
 
@@ -156,6 +157,10 @@ function Showcase({
     resolvePetDisplayImage(pet.species, stageKind) ||
     pet.category?.image_url ||
     null;
+  const scenery = usePetScenery({
+    categoryId: pet.category?.id ?? "",
+    speciesId: pet.species?.id ?? null,
+  });
 
   async function saveName() {
     try {
@@ -180,10 +185,12 @@ function Showcase({
   }
 
   return (
+    <>
     <section className="overflow-hidden rounded-3xl border border-neutral-200/80 bg-white shadow-[0_1px_0_rgba(0,0,0,0.02),0_24px_60px_-30px_rgba(0,0,0,0.12)]">
       <div className="grid gap-0 sm:grid-cols-[260px_1fr]">
         {/* Visual */}
-        <div className="relative flex items-center justify-center border-b border-neutral-100 bg-gradient-to-b from-neutral-50 to-white p-8 sm:border-b-0 sm:border-r">
+        <div className="relative flex items-center justify-center overflow-hidden border-b border-neutral-100 bg-gradient-to-b from-neutral-50 to-white p-8 sm:border-b-0 sm:border-r">
+          <PetBackgroundLayer background={scenery.equipped} />
           <div
             aria-hidden
             className="absolute inset-x-10 bottom-10 h-2 rounded-full bg-neutral-900/10 blur-2xl"
@@ -280,6 +287,18 @@ function Showcase({
         </div>
       </div>
     </section>
+    {pet.category?.id && (
+      <PetSceneryPanel
+        categoryId={pet.category.id}
+        speciesId={pet.species?.id ?? null}
+        list={scenery.list}
+        unlocks={scenery.unlocks}
+        equipped={scenery.equipped}
+        loading={scenery.loading}
+        onChanged={scenery.reload}
+      />
+    )}
+    </>
   );
 }
 

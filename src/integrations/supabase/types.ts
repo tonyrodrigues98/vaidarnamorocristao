@@ -1151,6 +1151,100 @@ export type Database = {
         }
         Relationships: []
       }
+      pet_background_compat: {
+        Row: {
+          background_id: string
+          category_id: string
+          created_at: string
+          id: string
+          species_id: string | null
+        }
+        Insert: {
+          background_id: string
+          category_id: string
+          created_at?: string
+          id?: string
+          species_id?: string | null
+        }
+        Update: {
+          background_id?: string
+          category_id?: string
+          created_at?: string
+          id?: string
+          species_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pet_background_compat_background_id_fkey"
+            columns: ["background_id"]
+            isOneToOne: false
+            referencedRelation: "pet_backgrounds"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pet_background_compat_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "pet_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pet_background_compat_species_id_fkey"
+            columns: ["species_id"]
+            isOneToOne: false
+            referencedRelation: "pet_species"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pet_backgrounds: {
+        Row: {
+          active: boolean
+          created_at: string
+          description: string | null
+          id: string
+          image_url_day: string | null
+          image_url_night: string | null
+          is_exclusive: boolean
+          name: string
+          price_coins: number
+          rarity: string
+          slug: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url_day?: string | null
+          image_url_night?: string | null
+          is_exclusive?: boolean
+          name: string
+          price_coins?: number
+          rarity?: string
+          slug: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url_day?: string | null
+          image_url_night?: string | null
+          is_exclusive?: boolean
+          name?: string
+          price_coins?: number
+          rarity?: string
+          slug?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       pet_benefits: {
         Row: {
           active: boolean
@@ -3232,6 +3326,38 @@ export type Database = {
           },
         ]
       }
+      user_pet_backgrounds: {
+        Row: {
+          acquired_at: string
+          background_id: string
+          id: string
+          is_equipped: boolean
+          user_id: string
+        }
+        Insert: {
+          acquired_at?: string
+          background_id: string
+          id?: string
+          is_equipped?: boolean
+          user_id: string
+        }
+        Update: {
+          acquired_at?: string
+          background_id?: string
+          id?: string
+          is_equipped?: boolean
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_pet_backgrounds_background_id_fkey"
+            columns: ["background_id"]
+            isOneToOne: false
+            referencedRelation: "pet_backgrounds"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_pet_perk_state: {
         Row: {
           created_at: string
@@ -3742,6 +3868,10 @@ export type Database = {
       equip_decoration: { Args: { _decoration_id: string }; Returns: Json }
       equip_name_gradient: { Args: { _gradient_id: string }; Returns: Json }
       equip_pet: { Args: { _user_pet_id: string }; Returns: undefined }
+      equip_pet_background: {
+        Args: { _background_id: string }
+        Returns: undefined
+      }
       equip_profile_background: {
         Args: { _background_id: string }
         Returns: undefined
@@ -3956,6 +4086,10 @@ export type Database = {
       unignore_anonymous_message: {
         Args: { _message_id: string }
         Returns: undefined
+      }
+      unlock_pet_background: {
+        Args: { _background_id: string }
+        Returns: string
       }
       unmatch: { Args: { _match_id: string }; Returns: undefined }
     }
