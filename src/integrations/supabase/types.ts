@@ -1151,6 +1151,54 @@ export type Database = {
         }
         Relationships: []
       }
+      pet_achievements: {
+        Row: {
+          active: boolean
+          category: string
+          coin_reward: number
+          created_at: string
+          description: string | null
+          goal: number
+          icon: string
+          id: string
+          name: string
+          slug: string
+          sort_order: number
+          updated_at: string
+          xp_reward: number
+        }
+        Insert: {
+          active?: boolean
+          category?: string
+          coin_reward?: number
+          created_at?: string
+          description?: string | null
+          goal?: number
+          icon?: string
+          id?: string
+          name: string
+          slug: string
+          sort_order?: number
+          updated_at?: string
+          xp_reward?: number
+        }
+        Update: {
+          active?: boolean
+          category?: string
+          coin_reward?: number
+          created_at?: string
+          description?: string | null
+          goal?: number
+          icon?: string
+          id?: string
+          name?: string
+          slug?: string
+          sort_order?: number
+          updated_at?: string
+          xp_reward?: number
+        }
+        Relationships: []
+      }
       pet_background_compat: {
         Row: {
           background_id: string
@@ -3245,6 +3293,44 @@ export type Database = {
         }
         Relationships: []
       }
+      user_achievements: {
+        Row: {
+          achievement_id: string
+          created_at: string
+          id: string
+          progress: number
+          unlocked_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          achievement_id: string
+          created_at?: string
+          id?: string
+          progress?: number
+          unlocked_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          achievement_id?: string
+          created_at?: string
+          id?: string
+          progress?: number
+          unlocked_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_achievements_achievement_id_fkey"
+            columns: ["achievement_id"]
+            isOneToOne: false
+            referencedRelation: "pet_achievements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_activity: {
         Row: {
           day: string
@@ -4005,6 +4091,27 @@ export type Database = {
         }
         Relationships: []
       }
+      user_xp: {
+        Row: {
+          level: number
+          updated_at: string
+          user_id: string
+          xp_total: number
+        }
+        Insert: {
+          level?: number
+          updated_at?: string
+          user_id: string
+          xp_total?: number
+        }
+        Update: {
+          level?: number
+          updated_at?: string
+          user_id?: string
+          xp_total?: number
+        }
+        Relationships: []
+      }
       verification_requests: {
         Row: {
           admin_notes: string | null
@@ -4092,6 +4199,33 @@ export type Database = {
           slug?: string
           sort_order?: number
           updated_at?: string
+        }
+        Relationships: []
+      }
+      xp_events: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          meta: Json | null
+          source: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          meta?: Json | null
+          source: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          meta?: Json | null
+          source?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -4239,6 +4373,15 @@ export type Database = {
         Args: { _amount?: number; _note?: string; _user_id: string }
         Returns: undefined
       }
+      award_xp: {
+        Args: {
+          _amount: number
+          _daily_cap?: number
+          _meta?: Json
+          _source: string
+        }
+        Returns: Json
+      }
       buy_anonymous_extra: {
         Args: never
         Returns: {
@@ -4373,6 +4516,7 @@ export type Database = {
           current_version: string
         }[]
       }
+      get_my_xp_state: { Args: never; Returns: Json }
       get_prayer_streak: {
         Args: { _user_id: string }
         Returns: {
@@ -4424,6 +4568,7 @@ export type Database = {
       is_pet_catalog_admin: { Args: never; Returns: boolean }
       is_staff: { Args: { _user_id: string }; Returns: boolean }
       is_support_staff: { Args: { _user_id: string }; Returns: boolean }
+      level_from_xp: { Args: { _xp: number }; Returns: number }
       log_coin_tx: {
         Args: {
           _amount: number
@@ -4538,6 +4683,7 @@ export type Database = {
         Returns: string
       }
       unmatch: { Args: { _match_id: string }; Returns: undefined }
+      xp_for_level: { Args: { _level: number }; Returns: number }
     }
     Enums: {
       anonymous_hint_category:
