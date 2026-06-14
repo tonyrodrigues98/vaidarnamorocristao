@@ -58,9 +58,10 @@ import {
 import { getPetMood } from "@/lib/petMood";
 import { PetXpBar } from "@/components/pet/PetXpBar";
 import { PetEffectsLayer } from "@/components/pet/PetEffectsLayer";
+import { PetConfessionBubble } from "@/components/pet/PetConfessionBubble";
 import { MissionsTodayCard } from "@/components/pet/MissionsTodayCard";
 import { Link as RouterLink } from "@tanstack/react-router";
-import { BookOpen } from "lucide-react";
+import { BookOpen, MessageCircle } from "lucide-react";
 
 export const Route = createFileRoute("/meu-pet")({ component: MeuPetPage });
 
@@ -246,6 +247,7 @@ function Showcase({
   const [tick, setTick] = useState(0);
   const [radialOpen, setRadialOpen] = useState(false);
   const [actionKind, setActionKind] = useState<PetCareKind | null>(null);
+  const [confessionTrigger, setConfessionTrigger] = useState(0);
   const [xpRefresh, setXpRefresh] = useState(0);
 
   async function reloadCare() {
@@ -365,10 +367,22 @@ function Showcase({
             affection={careValues.affection ?? 100}
             nocturnal={(pet.species as { nocturnal?: boolean } | null)?.nocturnal ?? false}
           />
+          <PetConfessionBubble triggerKey={confessionTrigger} />
           </div>
-          <p className="relative z-10 mt-2 px-4 pb-4 text-center text-[10px] uppercase tracking-wider text-neutral-400 sm:pb-6">
-            Segure no pet para abrir as ações
-          </p>
+          <div className="relative z-10 mt-2 flex items-center justify-center gap-3 px-4 pb-4 sm:pb-6">
+            <p className="text-[10px] uppercase tracking-wider text-neutral-400">
+              Segure no pet para abrir as ações
+            </p>
+            <button
+              type="button"
+              onClick={() => setConfessionTrigger((n) => n + 1)}
+              className="inline-flex items-center gap-1 rounded-full border border-neutral-200 bg-white px-2 py-1 text-[10px] font-medium text-neutral-500 transition hover:border-sky-300 hover:text-sky-600"
+              aria-label="O que meu pet está pensando?"
+            >
+              <MessageCircle className="size-3" />
+              Pensamento
+            </button>
+          </div>
         </div>
 
         {/* Info */}

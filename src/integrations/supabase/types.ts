@@ -1634,6 +1634,36 @@ export type Database = {
         }
         Relationships: []
       }
+      pet_confessions: {
+        Row: {
+          active: boolean
+          category: string
+          created_at: string
+          effect_delta: number
+          effect_kind: string | null
+          id: string
+          text: string
+        }
+        Insert: {
+          active?: boolean
+          category?: string
+          created_at?: string
+          effect_delta?: number
+          effect_kind?: string | null
+          id?: string
+          text: string
+        }
+        Update: {
+          active?: boolean
+          category?: string
+          created_at?: string
+          effect_delta?: number
+          effect_kind?: string | null
+          id?: string
+          text?: string
+        }
+        Relationships: []
+      }
       pet_life_stages: {
         Row: {
           active: boolean
@@ -3954,6 +3984,35 @@ export type Database = {
           },
         ]
       }
+      user_pet_confession_log: {
+        Row: {
+          confession_id: string
+          id: string
+          shown_at: string
+          user_id: string
+        }
+        Insert: {
+          confession_id: string
+          id?: string
+          shown_at?: string
+          user_id: string
+        }
+        Update: {
+          confession_id?: string
+          id?: string
+          shown_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_pet_confession_log_confession_id_fkey"
+            columns: ["confession_id"]
+            isOneToOne: false
+            referencedRelation: "pet_confessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_pet_perk_state: {
         Row: {
           created_at: string
@@ -4698,6 +4757,27 @@ export type Database = {
         }[]
       }
       get_my_xp_state: { Args: never; Returns: Json }
+      get_next_pet_confession: {
+        Args: never
+        Returns: {
+          category: string
+          effect_delta: number
+          effect_kind: string
+          id: string
+          text: string
+        }[]
+      }
+      get_pet_dream_match: {
+        Args: never
+        Returns: {
+          age: number
+          city: string
+          full_name: string
+          id: string
+          photo_url: string
+          state: string
+        }[]
+      }
       get_prayer_streak: {
         Args: { _user_id: string }
         Returns: {
