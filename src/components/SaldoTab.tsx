@@ -320,9 +320,13 @@ function TxRow({ tx }: { tx: CoinTx }) {
           ? Gift
           : tx.kind === "anonymous_extra"
             ? VenetianMask
-            : isIn
-              ? ArrowDownLeft
-              : ArrowUpRight;
+            : tx.kind === "pet_random_event"
+              ? PawPrint
+              : tx.kind === "pet_care_spend"
+                ? petCareIconFromSubtitle(tx.subtitle, tx.title)
+                : isIn
+                  ? ArrowDownLeft
+                  : ArrowUpRight;
   return (
     <li className="group flex items-center gap-3 rounded-2xl border border-border/60 bg-card/50 p-3 shadow-soft backdrop-blur transition hover:border-border hover:bg-card/80">
       <div className="relative shrink-0">
