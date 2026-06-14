@@ -19,15 +19,38 @@ import type {
 const BUCKET = "pets";
 const SIGNED_TTL = 60 * 60 * 24 * 365;
 
-function isStoragePath(value: string | null | undefined) {
-  return !!value && !/^https?:\/\//i.test(value);
+const STORAGE_MARKERS = [
+  `/storage/v1/object/public/${BUCKET}/`,
+  `/storage/v1/object/sign/${BUCKET}/`,
+  `/storage/v1/object/authenticated/${BUCKET}/`,
+];
+
+/** Extract the bucket-relative storage path from any stored value (path, public URL, signed URL). */
+function extractStoragePath(value: string | null | undefined): string | null {
+  if (!value) return null;
+  for (const m of STORAGE_MARKERS) {
+    const i = value.indexOf(m);
+    if (i >= 0) return value.slice(i + m.length).split("?")[0];
+  }
+  if (/^https?:\/\//i.test(value)) return null;
+  return value.split("?")[0];
 }
+
+// In-memory cache: avoid re-signing the same path on every render.
+const signedCache = new Map<string, { url: string; expiresAt: number }>();
+const SIGN_TTL_MS = (SIGNED_TTL - 60 * 60) * 1000; // refresh 1h before expiry
 
 export async function resolvePetImage(value: string | null): Promise<string | null> {
   if (!value) return null;
-  if (!isStoragePath(value)) return value;
-  const { data } = await supabase.storage.from(BUCKET).createSignedUrl(value, SIGNED_TTL);
-  return data?.signedUrl ?? null;
+  const path = extractStoragePath(value);
+  if (!path) return value; // external https URL we don't own — return as-is
+  const now = Date.now();
+  const hit = signedCache.get(path);
+  if (hit && hit.expiresAt > now) return hit.url;
+  const { data } = await supabase.storage.from(BUCKET).createSignedUrl(path, SIGNED_TTL);
+  const url = data?.signedUrl ?? null;
+  if (url) signedCache.set(path, { url, expiresAt: now + SIGN_TTL_MS });
+  return url;
 }
 
 export async function uploadPetCatalogImage(file: File, prefix: string): Promise<string> {
