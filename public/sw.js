@@ -1,5 +1,6 @@
-const CACHE_VERSION = "vaidarnamoro-pwa-v2";
+const CACHE_VERSION = "vaidarnamoro-pwa-v3";
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
+const PET_IMG_CACHE = `${CACHE_VERSION}-pet-images`;
 
 const STATIC_ASSETS = [
   "/offline.html",
@@ -44,7 +45,11 @@ self.addEventListener("activate", (event) => {
     caches
       .keys()
       .then((keys) =>
-        Promise.all(keys.filter((key) => key !== STATIC_CACHE).map((key) => caches.delete(key))),
+        Promise.all(
+          keys
+            .filter((key) => key !== STATIC_CACHE && key !== PET_IMG_CACHE)
+            .map((key) => caches.delete(key)),
+        ),
       )
       .then(() => self.clients.claim()),
   );
@@ -64,6 +69,38 @@ function isSafeStaticRequest(request, url) {
   }
 
   return STATIC_EXTENSIONS.some((extension) => url.pathname.endsWith(extension));
+}
+
+function isPetStorageRequest(request, url) {
+  if (request.method !== "GET") return false;
+  if (!/\.supabase\.co$/.test(url.hostname)) return false;
+  return /\/storage\/v1\/object\/(sign|public|authenticated)\/pets\//.test(url.pathname);
+}
+
+// Cache key strips the query (signed-URL token) so refreshed signatures hit the same entry.
+function petCacheKey(url) {
+  return new Request(`${url.origin}${url.pathname}`, { method: "GET" });
+}
+
+async function petImageStaleWhileRevalidate(request, url) {
+  const cache = await caches.open(PET_IMG_CACHE);
+  const key = petCacheKey(url);
+  const cached = await cache.match(key);
+  const network = fetch(request)
+    .then((response) => {
+      if (response && response.ok) {
+        cache.put(key, response.clone()).catch(() => {});
+      }
+      return response;
+    })
+    .catch(() => null);
+  if (cached) {
+    network.catch(() => {});
+    return cached;
+  }
+  const fresh = await network;
+  if (fresh) return fresh;
+  return new Response("", { status: 504 });
 }
 
 async function cacheFirst(request) {
@@ -91,6 +128,11 @@ self.addEventListener("fetch", (event) => {
   }
 
   const url = new URL(request.url);
+
+  if (isPetStorageRequest(request, url)) {
+    event.respondWith(petImageStaleWhileRevalidate(request, url));
+    return;
+  }
 
   if (url.origin !== self.location.origin) {
     return;

@@ -2,18 +2,8 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Pet, PetRarity, UserPet, UserPetWithPet } from "@/types/pet";
 
 const BUCKET = "pets";
-const SIGNED_TTL = 60 * 60 * 24 * 365; // 1 ano
 
-function isStoragePath(value: string | null | undefined) {
-  return !!value && !/^https?:\/\//i.test(value);
-}
-
-async function resolveImageUrl(value: string | null): Promise<string | null> {
-  if (!value) return null;
-  if (!isStoragePath(value)) return value;
-  const { data } = await supabase.storage.from(BUCKET).createSignedUrl(value, SIGNED_TTL);
-  return data?.signedUrl ?? null;
-}
+import { resolvePetImage as resolveImageUrl } from "@/lib/petCatalog";
 
 async function hydratePet<T extends Pet>(pet: T): Promise<T> {
   const [image_url, preview_url] = await Promise.all([
