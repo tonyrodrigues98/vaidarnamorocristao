@@ -1,23 +1,42 @@
 import type { PetCareKind } from "@/types/petCare";
+import {
+  Utensils,
+  Cookie,
+  BatteryLow,
+  BatteryWarning,
+  Frown,
+  Meh,
+  Bath,
+  Droplets,
+  Moon,
+  CloudMoon,
+  Heart,
+  HeartHandshake,
+  Smile,
+  Sparkles,
+  HeartPulse,
+  type LucideIcon,
+} from "lucide-react";
 
-export type PetMood = { emoji: string; label: string; tone: "good" | "ok" | "low" | "critical" };
+export type PetMoodTone = "good" | "ok" | "low" | "critical";
+export type PetMood = { Icon: LucideIcon; label: string; tone: PetMoodTone };
 
-const CRITICAL: Record<PetCareKind, { emoji: string; label: string }> = {
-  feed: { emoji: "🍽️", label: "morrendo de fome" },
-  energy: { emoji: "🥱", label: "completamente sem energia" },
-  play: { emoji: "😔", label: "muito triste e entediado" },
-  hygiene: { emoji: "🛁", label: "precisando muito de um banho" },
-  sleep: { emoji: "💤", label: "exausto, precisa dormir" },
-  affection: { emoji: "🥺", label: "carente, querendo colo" },
+const CRITICAL: Record<PetCareKind, { Icon: LucideIcon; label: string }> = {
+  feed: { Icon: Utensils, label: "morrendo de fome" },
+  energy: { Icon: BatteryWarning, label: "completamente sem energia" },
+  play: { Icon: Frown, label: "muito triste e entediado" },
+  hygiene: { Icon: Bath, label: "precisando muito de um banho" },
+  sleep: { Icon: Moon, label: "exausto, precisa dormir" },
+  affection: { Icon: HeartHandshake, label: "carente, querendo colo" },
 };
 
-const LOW: Record<PetCareKind, { emoji: string; label: string }> = {
-  feed: { emoji: "🍪", label: "com fominha" },
-  energy: { emoji: "😮‍💨", label: "meio cansado" },
-  play: { emoji: "🙃", label: "entediadinho" },
-  hygiene: { emoji: "🧼", label: "começando a precisar de banho" },
-  sleep: { emoji: "🌙", label: "com soninho" },
-  affection: { emoji: "🤍", label: "querendo um carinho" },
+const LOW: Record<PetCareKind, { Icon: LucideIcon; label: string }> = {
+  feed: { Icon: Cookie, label: "com fominha" },
+  energy: { Icon: BatteryLow, label: "meio cansado" },
+  play: { Icon: Meh, label: "entediadinho" },
+  hygiene: { Icon: Droplets, label: "começando a precisar de banho" },
+  sleep: { Icon: CloudMoon, label: "com soninho" },
+  affection: { Icon: Heart, label: "querendo um carinho" },
 };
 
 const POSITIVE_HIGH = [
@@ -56,17 +75,17 @@ export function getPetMood(values: Record<PetCareKind, number>, petId = ""): Pet
   }
   if (worst && worst.v <= 15) {
     const c = CRITICAL[worst.kind];
-    return { emoji: c.emoji, label: c.label, tone: "critical" };
+    return { Icon: c.Icon, label: c.label, tone: "critical" };
   }
   if (worst && worst.v <= 35) {
     const l = LOW[worst.kind];
-    return { emoji: l.emoji, label: l.label, tone: "low" };
+    return { Icon: l.Icon, label: l.label, tone: "low" };
   }
   // 2) Média ponderada (ignora energia pra não dominar)
   const careKinds: PetCareKind[] = ["feed", "play", "hygiene", "sleep", "affection"];
   const avg = careKinds.reduce((s, k) => s + values[k], 0) / careKinds.length;
-  if (avg >= 80) return { emoji: "😍", label: pickByPet(petId, POSITIVE_HIGH), tone: "good" };
-  if (avg >= 55) return { emoji: "😊", label: pickByPet(petId, POSITIVE_MID), tone: "good" };
-  if (avg >= 40) return { emoji: "🙂", label: pickByPet(petId, NEUTRAL), tone: "ok" };
-  return { emoji: "😕", label: "precisando de mais atenção sua", tone: "low" };
+  if (avg >= 80) return { Icon: Sparkles, label: pickByPet(petId, POSITIVE_HIGH), tone: "good" };
+  if (avg >= 55) return { Icon: HeartPulse, label: pickByPet(petId, POSITIVE_MID), tone: "good" };
+  if (avg >= 40) return { Icon: Smile, label: pickByPet(petId, NEUTRAL), tone: "ok" };
+  return { Icon: Meh, label: "precisando de mais atenção sua", tone: "low" };
 }
