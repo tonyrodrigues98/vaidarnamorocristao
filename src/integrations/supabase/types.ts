@@ -1661,6 +1661,134 @@ export type Database = {
         }
         Relationships: []
       }
+      pet_personality_effects: {
+        Row: {
+          active: boolean
+          cap_max: number | null
+          condition_kind: string | null
+          condition_op: string | null
+          condition_value: number | null
+          created_at: string
+          daypart: string
+          decay_mult: number
+          energy_cost_mult: number
+          id: string
+          kind: string
+          note: string | null
+          personality_id: string
+          restore_mult: number
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          cap_max?: number | null
+          condition_kind?: string | null
+          condition_op?: string | null
+          condition_value?: number | null
+          created_at?: string
+          daypart?: string
+          decay_mult?: number
+          energy_cost_mult?: number
+          id?: string
+          kind: string
+          note?: string | null
+          personality_id: string
+          restore_mult?: number
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          cap_max?: number | null
+          condition_kind?: string | null
+          condition_op?: string | null
+          condition_value?: number | null
+          created_at?: string
+          daypart?: string
+          decay_mult?: number
+          energy_cost_mult?: number
+          id?: string
+          kind?: string
+          note?: string | null
+          personality_id?: string
+          restore_mult?: number
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pet_personality_effects_personality_id_fkey"
+            columns: ["personality_id"]
+            isOneToOne: false
+            referencedRelation: "pet_personalities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pet_random_events: {
+        Row: {
+          active: boolean
+          base_chance: number
+          created_at: string
+          daily_cap: number
+          id: string
+          item_id: string | null
+          kind: string | null
+          payload: Json
+          personality_chance_mult: number
+          personality_id: string | null
+          scope: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          base_chance?: number
+          created_at?: string
+          daily_cap?: number
+          id?: string
+          item_id?: string | null
+          kind?: string | null
+          payload?: Json
+          personality_chance_mult?: number
+          personality_id?: string | null
+          scope: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          base_chance?: number
+          created_at?: string
+          daily_cap?: number
+          id?: string
+          item_id?: string | null
+          kind?: string | null
+          payload?: Json
+          personality_chance_mult?: number
+          personality_id?: string | null
+          scope?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pet_random_events_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "pet_care_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pet_random_events_personality_id_fkey"
+            columns: ["personality_id"]
+            isOneToOne: false
+            referencedRelation: "pet_personalities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pet_species: {
         Row: {
           active: boolean
@@ -3559,6 +3687,53 @@ export type Database = {
           },
         ]
       }
+      user_pet_buffs: {
+        Row: {
+          created_at: string
+          decay_mult: number
+          expires_at: string
+          id: string
+          kind: string
+          label: string | null
+          restore_mult: number
+          source: string
+          user_id: string
+          user_pet_id: string
+        }
+        Insert: {
+          created_at?: string
+          decay_mult?: number
+          expires_at: string
+          id?: string
+          kind: string
+          label?: string | null
+          restore_mult?: number
+          source?: string
+          user_id: string
+          user_pet_id: string
+        }
+        Update: {
+          created_at?: string
+          decay_mult?: number
+          expires_at?: string
+          id?: string
+          kind?: string
+          label?: string | null
+          restore_mult?: number
+          source?: string
+          user_id?: string
+          user_pet_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_pet_buffs_user_pet_id_fkey"
+            columns: ["user_pet_id"]
+            isOneToOne: false
+            referencedRelation: "user_pets_v2"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_pet_perk_state: {
         Row: {
           created_at: string
@@ -3594,6 +3769,48 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "pet_perk_effects"
             referencedColumns: ["key"]
+          },
+        ]
+      }
+      user_pet_random_event_log: {
+        Row: {
+          created_at: string
+          event_id: string | null
+          id: string
+          payload: Json | null
+          user_id: string
+          user_pet_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_id?: string | null
+          id?: string
+          payload?: Json | null
+          user_id: string
+          user_pet_id: string
+        }
+        Update: {
+          created_at?: string
+          event_id?: string | null
+          id?: string
+          payload?: Json | null
+          user_id?: string
+          user_pet_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_pet_random_event_log_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "pet_random_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_pet_random_event_log_user_pet_id_fkey"
+            columns: ["user_pet_id"]
+            isOneToOne: false
+            referencedRelation: "user_pets_v2"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -4016,7 +4233,7 @@ export type Database = {
       anon_check_restricted: { Args: { _text: string }; Returns: undefined }
       apply_pet_care: {
         Args: { _item_id: string; _user_pet_id: string }
-        Returns: number
+        Returns: Json
       }
       award_contributor_badge: {
         Args: { _amount?: number; _note?: string; _user_id: string }
@@ -4183,6 +4400,10 @@ export type Database = {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
       }
+      grant_coin_event: {
+        Args: { _amount: number; _ref: string; _user: string }
+        Returns: undefined
+      }
       has_accepted_current_terms: {
         Args: { _user_id: string }
         Returns: boolean
@@ -4223,6 +4444,16 @@ export type Database = {
         Args: { _item_id: string; _user_pet_id: string }
         Returns: number
       }
+      pet_daypart_sp: { Args: { _now?: string }; Returns: string }
+      pet_effect_condition_passes: {
+        Args: {
+          _condition_kind: string
+          _condition_op: string
+          _condition_value: number
+          _values: Json
+        }
+        Returns: boolean
+      }
       pet_perk_has: {
         Args: { _key: string; _user_id: string }
         Returns: boolean
@@ -4231,6 +4462,8 @@ export type Database = {
         Args: { _keys: string[]; _user_id: string }
         Returns: number
       }
+      pet_runtime_modifiers: { Args: { _user_pet_id: string }; Returns: Json }
+      pet_state_snapshot: { Args: { _user_pet_id: string }; Returns: Json }
       purchase_avatar_item: { Args: { _item_id: string }; Returns: Json }
       purchase_decoration: { Args: { _decoration_id: string }; Returns: Json }
       purchase_name_gradient: { Args: { _gradient_id: string }; Returns: Json }
