@@ -8,6 +8,8 @@ import type {
   PetCareKind,
   PetCareKindWithItems,
   PetCareState,
+  PetRuntimeModifiers,
+  ApplyCareResult,
 } from "@/types/petCare";
 
 /* -------------------- config -------------------- */
@@ -179,17 +181,42 @@ export function deriveCurrentValue(
   state: PetCareState | undefined,
   cfg: PetCareConfig,
   kind: PetCareKind,
+  mods?: PetRuntimeModifiers | null,
   now: Date = new Date(),
 ): number {
   if (!state) return kind === "energy" ? 100 : 80;
   const elapsedMin = Math.max(0, (now.getTime() - new Date(state.anchor_at).getTime()) / 60_000);
+  const restoreMult = aggregateMult(mods, kind, "restore_mult");
+  const decayMult = aggregateMult(mods, kind, "decay_mult");
   if (kind === "energy") {
-    // regenera: +1 a cada N minutos
-    const gain = Math.floor(elapsedMin / Math.max(1, cfg.energy_regen_minutes_per_point));
+    // regenera: +1 a cada N minutos (acelerado pelo restore_mult de energia)
+    const gain = Math.floor((elapsedMin * restoreMult) / Math.max(1, cfg.energy_regen_minutes_per_point));
     return Math.max(0, Math.min(100, state.value_at_anchor + gain));
   }
-  const decay = (cfg.decay_per_hour * elapsedMin) / 60;
+  const decay = (cfg.decay_per_hour * elapsedMin * decayMult) / 60;
   return Math.max(0, Math.min(100, Math.floor(state.value_at_anchor - decay)));
+}
+
+function aggregateMult(
+  mods: PetRuntimeModifiers | null | undefined,
+  kind: PetCareKind,
+  field: "restore_mult" | "decay_mult",
+): number {
+  if (!mods) return 1;
+  let m = 1;
+  for (const r of mods.rules) {
+    if (r.kind === kind || r.kind === "all") m *= Number(r[field] ?? 1);
+  }
+  for (const b of mods.buffs) {
+    if (b.kind === kind || b.kind === "all") m *= Number(b[field] ?? 1);
+  }
+  return m;
+}
+
+export async function getPetRuntimeModifiers(userPetId: string): Promise<PetRuntimeModifiers | null> {
+  const { data, error } = await supabase.rpc("pet_runtime_modifiers" as any, { _user_pet_id: userPetId });
+  if (error) return null;
+  return (data as PetRuntimeModifiers) ?? null;
 }
 
 /** Manually drain energy (called locally when user performs an action). */
@@ -221,13 +248,17 @@ export async function consumeEnergyLocally(
 
 /* -------------------- apply action -------------------- */
 
-export async function applyPetCare(userPetId: string, itemId: string): Promise<number> {
+export async function applyPetCare(userPetId: string, itemId: string): Promise<ApplyCareResult> {
   const { data, error } = await supabase.rpc("apply_pet_care" as any, {
     _user_pet_id: userPetId,
     _item_id: itemId,
   });
   if (error) throw error;
-  return data as number;
+  // Compat: pode vir como número (RPC antigo) ou objeto (novo)
+  if (typeof data === "number") {
+    return { new_value: data, restore: 0, energy: 0, energy_delta: 0, multiplier: 1, notes: [], random_event: null };
+  }
+  return data as ApplyCareResult;
 }
 
 /** Quantas vezes este item foi usado hoje (TZ America/Sao_Paulo). */
