@@ -19,8 +19,10 @@ export type TodayMission = {
 
 /** Sorteia (se ainda não houver) e retorna as 3 missões do dia. */
 export async function rollAndGetTodayMissions(): Promise<TodayMission[]> {
-  // 1) garante sorteio idempotente
-  await supabase.rpc("roll_daily_missions" as never).then(() => null).catch(() => null);
+  // 1) garante sorteio idempotente (ignora falha silenciosamente)
+  try {
+    await supabase.rpc("roll_daily_missions" as never);
+  } catch {}
   // 2) lista com progresso
   const { data, error } = await supabase.rpc("get_today_missions" as never);
   if (error) return [];
