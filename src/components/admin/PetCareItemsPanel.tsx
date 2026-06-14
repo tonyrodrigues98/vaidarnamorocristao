@@ -483,6 +483,41 @@ function DraftForm({
         <Label className="m-0">Ativo</Label>
       </div>
 
+      <div className="grid gap-3 sm:grid-cols-2">
+        {draft.kind === "sleep" ? (
+          <div className="space-y-1.5">
+            <Label className="flex items-center gap-1.5"><Moon className="h-3.5 w-3.5" /> Horas de sono desta caminha</Label>
+            <Input
+              type="text" inputMode="decimal"
+              value={draft.sleep_hours}
+              onChange={(e) => onChange({ ...draft, sleep_hours: Number(e.target.value.replace(",", ".")) || 0 })}
+            />
+            <p className="text-[11px] text-muted-foreground">
+              8h ≈ restaura 100 de sono e 100 de energia. (Ex.: 4h ≈ 50)
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-1.5">
+            <Label className="flex items-center gap-1.5"><Zap className="h-3.5 w-3.5 text-yellow-500" /> Custo de energia por uso</Label>
+            <Input
+              type="text" inputMode="numeric"
+              value={draft.energy_cost}
+              onChange={(e) => onChange({ ...draft, energy_cost: Number(e.target.value) || 0 })}
+            />
+            <p className="text-[11px] text-muted-foreground">Se a energia for menor, o pet não consegue realizar a ação.</p>
+          </div>
+        )}
+        <div className="space-y-1.5">
+          <Label>Usos por dia (0 = ilimitado)</Label>
+          <Input
+            type="text" inputMode="numeric"
+            value={draft.daily_uses}
+            onChange={(e) => onChange({ ...draft, daily_uses: Number(e.target.value) || 0 })}
+          />
+          <p className="text-[11px] text-muted-foreground">Reseta às 00:00 (horário de Brasília).</p>
+        </div>
+      </div>
+
       <div className="space-y-2">
         <Label>Compatibilidade</Label>
         <p className="text-xs text-muted-foreground">
