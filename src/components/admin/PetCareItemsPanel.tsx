@@ -445,6 +445,17 @@ function DraftForm({
           <Button type="button" size="sm" variant="outline" onClick={() => fileRef.current?.click()}>
             <Upload className="mr-1 h-3.5 w-3.5" /> Enviar imagem
           </Button>
+          {draft.image_url && (
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              className="text-destructive hover:text-destructive"
+              onClick={() => onChange({ ...draft, image_url: null })}
+            >
+              Remover
+            </Button>
+          )}
         </div>
       </div>
 
