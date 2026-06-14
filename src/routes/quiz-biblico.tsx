@@ -48,7 +48,10 @@ function QuizPage() {
 
   async function answer(q: Question, idx: number) {
     setSubmitting(q.id);
-    const { data, error } = await supabase.rpc("answer_quiz" as never, {
+    const { data, error } = await (supabase.rpc as unknown as (
+      fn: string,
+      args: Record<string, unknown>,
+    ) => Promise<{ data: unknown; error: unknown }>)("answer_quiz", {
       _question_id: q.id,
       _chosen: idx,
     });
