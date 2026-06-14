@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { MessageCircle, Sparkles, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { usePetDayNight } from "@/lib/petDayNight";
 import { cn } from "@/lib/utils";
 
 type Confession = {
@@ -37,13 +38,13 @@ const DREAM_CHANCE_AT_NIGHT = 0.15;
  * - À noite, com chance baixa, troca por "sonho com pretendente".
  */
 export function PetConfessionBubble({
-  isNight,
   triggerKey,
 }: {
-  isNight: boolean;
   /** Incrementar este valor força exibir uma nova confissão (botão manual). */
   triggerKey?: number;
 }) {
+  const { phase } = usePetDayNight();
+  const isNight = phase === "night";
   const [active, setActive] = useState<Active | null>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const hideRef = useRef<ReturnType<typeof setTimeout> | null>(null);
