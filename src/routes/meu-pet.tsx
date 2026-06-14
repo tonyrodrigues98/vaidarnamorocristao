@@ -44,6 +44,7 @@ import { PetCareActionSheet } from "@/components/pet/PetCareActionSheet";
 import {
   deriveCurrentValue,
   getCareConfig,
+  getPetRuntimeModifiers,
   listCareState,
 } from "@/lib/petCare";
 import {
@@ -51,7 +52,9 @@ import {
   type PetCareConfig,
   type PetCareKind,
   type PetCareState,
+  type PetRuntimeModifiers,
 } from "@/types/petCare";
+import { getPetMood } from "@/lib/petMood";
 
 export const Route = createFileRoute("/meu-pet")({ component: MeuPetPage });
 
@@ -233,15 +236,21 @@ function Showcase({
   // ----- Central de Ações: estado + valores derivados -----
   const [careConfig, setCareConfig] = useState<PetCareConfig | null>(null);
   const [careStates, setCareStates] = useState<PetCareState[]>([]);
+  const [runtimeMods, setRuntimeMods] = useState<PetRuntimeModifiers | null>(null);
   const [tick, setTick] = useState(0);
   const [radialOpen, setRadialOpen] = useState(false);
   const [actionKind, setActionKind] = useState<PetCareKind | null>(null);
 
   async function reloadCare() {
     try {
-      const [cfg, rows] = await Promise.all([getCareConfig(), listCareState(pet.id)]);
+      const [cfg, rows, mods] = await Promise.all([
+        getCareConfig(),
+        listCareState(pet.id),
+        getPetRuntimeModifiers(pet.id),
+      ]);
       setCareConfig(cfg);
       setCareStates(rows);
+      setRuntimeMods(mods);
     } catch (e) {
       // silencioso — UI degrada para valores padrão
     }
@@ -251,7 +260,9 @@ function Showcase({
     void reloadCare();
     // re-render a cada 1s para decaimento em tempo real
     const t = setInterval(() => setTick((n) => n + 1), 1000);
-    return () => clearInterval(t);
+    // a cada 30s, recarrega modificadores (buffs expiram, condicionais mudam)
+    const m = setInterval(() => void getPetRuntimeModifiers(pet.id).then((mm) => mm && setRuntimeMods(mm)), 30_000);
+    return () => { clearInterval(t); clearInterval(m); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pet.id]);
 
@@ -260,12 +271,14 @@ function Showcase({
     const map = {} as Record<PetCareKind, number>;
     const byKind = new Map(careStates.map((s) => [s.kind, s]));
     for (const k of PET_CARE_ORDER) {
-      map[k] = deriveCurrentValue(byKind.get(k), cfg, k);
+      map[k] = deriveCurrentValue(byKind.get(k), cfg, k, runtimeMods);
     }
     return map;
     // tick força recálculo
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [careStates, careConfig, tick]);
+  }, [careStates, careConfig, runtimeMods, tick]);
+
+  const mood = useMemo(() => getPetMood(careValues, pet.id), [careValues, pet.id]);
 
   const longPress = useLongPress(() => setRadialOpen(true), 350);
 
@@ -296,6 +309,7 @@ function Showcase({
     <section className="overflow-hidden rounded-3xl border border-neutral-200/80 bg-white shadow-[0_1px_0_rgba(0,0,0,0.02),0_24px_60px_-30px_rgba(0,0,0,0.12)]">
       {/* HUD full-width no desktop para barras legíveis */}
       <div className="hidden border-b border-neutral-100 bg-neutral-50/60 p-4 sm:block">
+        <PetMoodLine name={pet.custom_name} mood={mood} />
         <PetNeedsHud values={careValues} onPick={(k) => setActionKind(k)} />
       </div>
       <div className="grid gap-0 sm:grid-cols-[260px_1fr]">
@@ -303,6 +317,7 @@ function Showcase({
         <div className="relative flex flex-col items-stretch justify-center overflow-hidden border-b border-neutral-100 bg-gradient-to-b from-neutral-50 to-white pt-4 sm:border-b-0 sm:border-r sm:pt-6">
           {/* HUD compacto apenas no mobile */}
           <div className="relative z-20 mb-3 px-4 sm:hidden">
+            <PetMoodLine name={pet.custom_name} mood={mood} className="mb-2" />
             <PetNeedsHud values={careValues} onPick={(k) => setActionKind(k)} />
           </div>
           <div className="relative flex min-h-[240px] flex-1 items-center justify-center">
