@@ -1307,6 +1307,198 @@ export type Database = {
           },
         ]
       }
+      pet_care_config: {
+        Row: {
+          decay_per_hour: number
+          energy_regen_minutes_per_point: number
+          id: number
+          updated_at: string
+        }
+        Insert: {
+          decay_per_hour?: number
+          energy_regen_minutes_per_point?: number
+          id?: number
+          updated_at?: string
+        }
+        Update: {
+          decay_per_hour?: number
+          energy_regen_minutes_per_point?: number
+          id?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      pet_care_events: {
+        Row: {
+          cost_coins: number
+          created_at: string
+          delta: number
+          id: string
+          item_id: string | null
+          kind: string
+          user_id: string
+          user_pet_id: string
+        }
+        Insert: {
+          cost_coins?: number
+          created_at?: string
+          delta: number
+          id?: string
+          item_id?: string | null
+          kind: string
+          user_id: string
+          user_pet_id: string
+        }
+        Update: {
+          cost_coins?: number
+          created_at?: string
+          delta?: number
+          id?: string
+          item_id?: string | null
+          kind?: string
+          user_id?: string
+          user_pet_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pet_care_events_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "pet_care_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pet_care_events_user_pet_id_fkey"
+            columns: ["user_pet_id"]
+            isOneToOne: false
+            referencedRelation: "user_pets_v2"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pet_care_item_compat: {
+        Row: {
+          category_id: string
+          id: string
+          item_id: string
+          species_id: string | null
+        }
+        Insert: {
+          category_id: string
+          id?: string
+          item_id: string
+          species_id?: string | null
+        }
+        Update: {
+          category_id?: string
+          id?: string
+          item_id?: string
+          species_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pet_care_item_compat_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "pet_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pet_care_item_compat_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "pet_care_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pet_care_item_compat_species_id_fkey"
+            columns: ["species_id"]
+            isOneToOne: false
+            referencedRelation: "pet_species"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pet_care_items: {
+        Row: {
+          active: boolean
+          cost_coins: number
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          kind: Database["public"]["Enums"]["pet_care_kind"]
+          name: string
+          restore_amount: number
+          slug: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          cost_coins?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          kind: Database["public"]["Enums"]["pet_care_kind"]
+          name: string
+          restore_amount?: number
+          slug: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          cost_coins?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          kind?: Database["public"]["Enums"]["pet_care_kind"]
+          name?: string
+          restore_amount?: number
+          slug?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      pet_care_state: {
+        Row: {
+          anchor_at: string
+          id: string
+          kind: string
+          updated_at: string
+          user_pet_id: string
+          value_at_anchor: number
+        }
+        Insert: {
+          anchor_at?: string
+          id?: string
+          kind: string
+          updated_at?: string
+          user_pet_id: string
+          value_at_anchor?: number
+        }
+        Update: {
+          anchor_at?: string
+          id?: string
+          kind?: string
+          updated_at?: string
+          user_pet_id?: string
+          value_at_anchor?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pet_care_state_user_pet_id_fkey"
+            columns: ["user_pet_id"]
+            isOneToOne: false
+            referencedRelation: "user_pets_v2"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pet_categories: {
         Row: {
           active: boolean
@@ -3813,6 +4005,10 @@ export type Database = {
       }
       admin_unban_user: { Args: { _user_id: string }; Returns: undefined }
       anon_check_restricted: { Args: { _text: string }; Returns: undefined }
+      apply_pet_care: {
+        Args: { _item_id: string; _user_pet_id: string }
+        Returns: number
+      }
       award_contributor_badge: {
         Args: { _amount?: number; _note?: string; _user_id: string }
         Returns: undefined
@@ -4126,6 +4322,7 @@ export type Database = {
       gift_tx_status: "held" | "redeemed"
       location_scope: "regiao" | "brasil" | "mundo" | "personalizado"
       marital_status: "solteiro" | "divorciado" | "viuvo"
+      pet_care_kind: "feed" | "play" | "hygiene" | "sleep" | "affection"
       pet_rarity: "common" | "rare" | "epic" | "legendary"
       photo_moderation_scope: "avatar" | "extra"
       photo_moderation_status: "pending" | "approved" | "rejected"
@@ -4319,6 +4516,7 @@ export const Constants = {
       gift_tx_status: ["held", "redeemed"],
       location_scope: ["regiao", "brasil", "mundo", "personalizado"],
       marital_status: ["solteiro", "divorciado", "viuvo"],
+      pet_care_kind: ["feed", "play", "hygiene", "sleep", "affection"],
       pet_rarity: ["common", "rare", "epic", "legendary"],
       photo_moderation_scope: ["avatar", "extra"],
       photo_moderation_status: ["pending", "approved", "rejected"],

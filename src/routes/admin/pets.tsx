@@ -24,6 +24,7 @@ import {
   Eye,
   EyeOff,
   Image as ImageLucide,
+  Heart,
 } from "lucide-react";
 
 import { useAuth } from "@/lib/auth";
@@ -88,10 +89,11 @@ import type {
 import { cn } from "@/lib/utils";
 import { useSignedPetUrl } from "@/lib/petImageUrl";
 import { PetBackgroundsPanel } from "@/components/admin/PetBackgroundsPanel";
+import { PetCareItemsPanel } from "@/components/admin/PetCareItemsPanel";
 
 export const Route = createFileRoute("/admin/pets")({ component: PetsAdmin });
 
-type TabKey = "legacy" | "perk_effects" | "backgrounds" | PetCatalogTable;
+type TabKey = "legacy" | "perk_effects" | "backgrounds" | "care" | PetCatalogTable;
 
 const TABS: { key: TabKey; label: string; icon: ComponentType<{ className?: string }> }[] = [
   { key: "pet_categories", label: "Categorias", icon: Layers },
@@ -101,6 +103,7 @@ const TABS: { key: TabKey; label: string; icon: ComponentType<{ className?: stri
   { key: "pet_personalities", label: "Personalidades", icon: Smile },
   { key: "perk_effects", label: "Tipos de efeito", icon: Zap },
   { key: "backgrounds", label: "Backgrounds", icon: ImageLucide },
+  { key: "care", label: "Cuidados", icon: Heart },
   { key: "legacy", label: "Pets (legado)", icon: Star },
 ];
 
@@ -160,6 +163,8 @@ function PetsAdmin() {
           <PerkEffectsPanel />
         ) : tab === "backgrounds" ? (
           <PetBackgroundsPanel />
+        ) : tab === "care" ? (
+          <PetCareItemsPanel />
         ) : (
           <CatalogPanel table={tab} />
         )}

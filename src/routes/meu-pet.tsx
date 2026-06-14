@@ -38,6 +38,20 @@ import type {
 import { cn } from "@/lib/utils";
 import { PetBackgroundLayer, PetSceneryPanel, usePetScenery } from "@/components/pet/PetSceneryPanel";
 import { usePetDayNight } from "@/lib/petDayNight";
+import { PetNeedsHud } from "@/components/pet/PetNeedsHud";
+import { PetRadialMenu, useLongPress } from "@/components/pet/PetRadialMenu";
+import { PetCareActionSheet } from "@/components/pet/PetCareActionSheet";
+import {
+  deriveCurrentValue,
+  getCareConfig,
+  listCareState,
+} from "@/lib/petCare";
+import {
+  PET_CARE_ORDER,
+  type PetCareConfig,
+  type PetCareKind,
+  type PetCareState,
+} from "@/types/petCare";
 
 export const Route = createFileRoute("/meu-pet")({ component: MeuPetPage });
 
@@ -216,6 +230,45 @@ function Showcase({
     speciesId: pet.species?.id ?? null,
   });
 
+  // ----- Central de Ações: estado + valores derivados -----
+  const [careConfig, setCareConfig] = useState<PetCareConfig | null>(null);
+  const [careStates, setCareStates] = useState<PetCareState[]>([]);
+  const [tick, setTick] = useState(0);
+  const [radialOpen, setRadialOpen] = useState(false);
+  const [actionKind, setActionKind] = useState<PetCareKind | null>(null);
+
+  async function reloadCare() {
+    try {
+      const [cfg, rows] = await Promise.all([getCareConfig(), listCareState(pet.id)]);
+      setCareConfig(cfg);
+      setCareStates(rows);
+    } catch (e) {
+      // silencioso — UI degrada para valores padrão
+    }
+  }
+
+  useEffect(() => {
+    void reloadCare();
+    // re-render a cada 30s pra suavizar barras/energia
+    const t = setInterval(() => setTick((n) => n + 1), 30_000);
+    return () => clearInterval(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pet.id]);
+
+  const careValues = useMemo(() => {
+    const cfg = careConfig ?? { id: 1, decay_per_hour: 2, energy_regen_minutes_per_point: 6 };
+    const map = {} as Record<PetCareKind, number>;
+    const byKind = new Map(careStates.map((s) => [s.kind, s]));
+    for (const k of PET_CARE_ORDER) {
+      map[k] = deriveCurrentValue(byKind.get(k), cfg, k);
+    }
+    return map;
+    // tick força recálculo
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [careStates, careConfig, tick]);
+
+  const longPress = useLongPress(() => setRadialOpen(true), 350);
+
   async function saveName() {
     try {
       await updateMyPetV2(pet.id, { custom_name: name.trim().slice(0, 30) || pet.custom_name });
@@ -243,17 +296,46 @@ function Showcase({
     <section className="overflow-hidden rounded-3xl border border-neutral-200/80 bg-white shadow-[0_1px_0_rgba(0,0,0,0.02),0_24px_60px_-30px_rgba(0,0,0,0.12)]">
       <div className="grid gap-0 sm:grid-cols-[260px_1fr]">
         {/* Visual */}
-        <div className="relative flex items-center justify-center overflow-hidden border-b border-neutral-100 bg-gradient-to-b from-neutral-50 to-white p-8 sm:border-b-0 sm:border-r">
+        <div className="relative flex flex-col items-stretch justify-center overflow-hidden border-b border-neutral-100 bg-gradient-to-b from-neutral-50 to-white p-4 sm:border-b-0 sm:border-r sm:p-6">
+          <div className="relative z-20 mb-3">
+            <PetNeedsHud values={careValues} onPick={(k) => setActionKind(k)} />
+          </div>
+          <div className="relative flex min-h-[240px] flex-1 items-center justify-center">
           <PetBackgroundLayer background={scenery.equipped} />
           <div
             aria-hidden
             className="absolute inset-x-10 bottom-10 h-2 rounded-full bg-neutral-900/10 blur-2xl"
           />
-          {image ? (
-            <PetArtwork src={image} alt={pet.custom_name} hasBackground={!!scenery.equipped} />
-          ) : (
-            <PawPrint className="h-20 w-20 text-neutral-300" />
-          )}
+          <button
+            type="button"
+            {...longPress}
+            onContextMenu={(e) => {
+              e.preventDefault();
+              setRadialOpen(true);
+            }}
+            onDoubleClick={() => setRadialOpen(true)}
+            className="relative z-10 cursor-pointer select-none touch-none rounded-3xl outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
+            aria-label="Segure para abrir a central de ações"
+          >
+            {image ? (
+              <PetArtwork src={image} alt={pet.custom_name} hasBackground={!!scenery.equipped} />
+            ) : (
+              <PawPrint className="h-20 w-20 text-neutral-300" />
+            )}
+          </button>
+          <PetRadialMenu
+            open={radialOpen}
+            values={careValues}
+            onClose={() => setRadialOpen(false)}
+            onPick={(k) => {
+              setRadialOpen(false);
+              setActionKind(k);
+            }}
+          />
+          </div>
+          <p className="relative z-10 mt-2 text-center text-[10px] uppercase tracking-wider text-neutral-400">
+            Segure no pet para abrir as ações
+          </p>
         </div>
 
         {/* Info */}
@@ -346,6 +428,18 @@ function Showcase({
         equipped={scenery.equipped}
         loading={scenery.loading}
         onChanged={scenery.reload}
+      />
+    )}
+    {pet.category?.id && (
+      <PetCareActionSheet
+        open={actionKind !== null}
+        kind={actionKind}
+        userPetId={pet.id}
+        categoryId={pet.category.id}
+        speciesId={pet.species?.id ?? null}
+        currentValue={actionKind ? careValues[actionKind] ?? 0 : 0}
+        onClose={() => setActionKind(null)}
+        onApplied={() => void reloadCare()}
       />
     )}
     </>
