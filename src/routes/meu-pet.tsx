@@ -59,6 +59,8 @@ import { getPetMood } from "@/lib/petMood";
 import { PetXpBar } from "@/components/pet/PetXpBar";
 import { PetEffectsLayer } from "@/components/pet/PetEffectsLayer";
 import { MissionsTodayCard } from "@/components/pet/MissionsTodayCard";
+import { Link as RouterLink } from "@tanstack/react-router";
+import { BookOpen } from "lucide-react";
 
 export const Route = createFileRoute("/meu-pet")({ component: MeuPetPage });
 
@@ -455,6 +457,21 @@ function Showcase({
       </div>
     </section>
     <MissionsTodayCard refreshKey={xpRefresh} />
+    <RouterLink
+      to="/quiz-biblico"
+      className="group flex items-center gap-3 rounded-2xl border border-neutral-200 bg-white p-4 transition hover:border-sky-300 hover:shadow-sm"
+    >
+      <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-sky-50 text-sky-600">
+        <BookOpen className="size-5" />
+      </div>
+      <div className="min-w-0 flex-1">
+        <div className="text-sm font-semibold text-neutral-900">Quiz Bíblico do dia</div>
+        <div className="text-[12px] text-neutral-500">
+          3 perguntas · até +30 XP e +40 moedas
+        </div>
+      </div>
+      <ArrowRight className="size-4 text-neutral-300 transition group-hover:text-sky-500" />
+    </RouterLink>
     {pet.category?.id && (
       <PetSceneryPanel
         categoryId={pet.category.id}

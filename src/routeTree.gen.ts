@@ -13,6 +13,7 @@ import { Route as VerificacaoRouteImport } from './routes/verificacao'
 import { Route as TermosRouteImport } from './routes/termos'
 import { Route as SobreRouteImport } from './routes/sobre'
 import { Route as RecadosRouteImport } from './routes/recados'
+import { Route as QuizBiblicoRouteImport } from './routes/quiz-biblico'
 import { Route as PerfilRouteImport } from './routes/perfil'
 import { Route as OracoesRouteImport } from './routes/oracoes'
 import { Route as NotificacoesRouteImport } from './routes/notificacoes'
@@ -88,6 +89,11 @@ const SobreRoute = SobreRouteImport.update({
 const RecadosRoute = RecadosRouteImport.update({
   id: '/recados',
   path: '/recados',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const QuizBiblicoRoute = QuizBiblicoRouteImport.update({
+  id: '/quiz-biblico',
+  path: '/quiz-biblico',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PerfilRoute = PerfilRouteImport.update({
@@ -393,6 +399,7 @@ export interface FileRoutesByFullPath {
   '/notificacoes': typeof NotificacoesRoute
   '/oracoes': typeof OracoesRoute
   '/perfil': typeof PerfilRoute
+  '/quiz-biblico': typeof QuizBiblicoRoute
   '/recados': typeof RecadosRoute
   '/sobre': typeof SobreRoute
   '/termos': typeof TermosRoute
@@ -455,6 +462,7 @@ export interface FileRoutesByTo {
   '/notificacoes': typeof NotificacoesRoute
   '/oracoes': typeof OracoesRoute
   '/perfil': typeof PerfilRoute
+  '/quiz-biblico': typeof QuizBiblicoRoute
   '/recados': typeof RecadosRoute
   '/sobre': typeof SobreRoute
   '/termos': typeof TermosRoute
@@ -518,6 +526,7 @@ export interface FileRoutesById {
   '/notificacoes': typeof NotificacoesRoute
   '/oracoes': typeof OracoesRoute
   '/perfil': typeof PerfilRoute
+  '/quiz-biblico': typeof QuizBiblicoRoute
   '/recados': typeof RecadosRoute
   '/sobre': typeof SobreRoute
   '/termos': typeof TermosRoute
@@ -582,6 +591,7 @@ export interface FileRouteTypes {
     | '/notificacoes'
     | '/oracoes'
     | '/perfil'
+    | '/quiz-biblico'
     | '/recados'
     | '/sobre'
     | '/termos'
@@ -644,6 +654,7 @@ export interface FileRouteTypes {
     | '/notificacoes'
     | '/oracoes'
     | '/perfil'
+    | '/quiz-biblico'
     | '/recados'
     | '/sobre'
     | '/termos'
@@ -706,6 +717,7 @@ export interface FileRouteTypes {
     | '/notificacoes'
     | '/oracoes'
     | '/perfil'
+    | '/quiz-biblico'
     | '/recados'
     | '/sobre'
     | '/termos'
@@ -769,6 +781,7 @@ export interface RootRouteChildren {
   NotificacoesRoute: typeof NotificacoesRoute
   OracoesRoute: typeof OracoesRoute
   PerfilRoute: typeof PerfilRoute
+  QuizBiblicoRoute: typeof QuizBiblicoRoute
   RecadosRoute: typeof RecadosRoute
   SobreRoute: typeof SobreRoute
   TermosRoute: typeof TermosRoute
@@ -838,6 +851,13 @@ declare module '@tanstack/react-router' {
       path: '/recados'
       fullPath: '/recados'
       preLoaderRoute: typeof RecadosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/quiz-biblico': {
+      id: '/quiz-biblico'
+      path: '/quiz-biblico'
+      fullPath: '/quiz-biblico'
+      preLoaderRoute: typeof QuizBiblicoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/perfil': {
@@ -1267,6 +1287,7 @@ const rootRouteChildren: RootRouteChildren = {
   NotificacoesRoute: NotificacoesRoute,
   OracoesRoute: OracoesRoute,
   PerfilRoute: PerfilRoute,
+  QuizBiblicoRoute: QuizBiblicoRoute,
   RecadosRoute: RecadosRoute,
   SobreRoute: SobreRoute,
   TermosRoute: TermosRoute,
