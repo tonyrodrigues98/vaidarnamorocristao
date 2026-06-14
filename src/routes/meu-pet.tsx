@@ -369,9 +369,20 @@ function Showcase({
           />
           <PetConfessionBubble triggerKey={confessionTrigger} />
           </div>
-          <p className="relative z-10 mt-2 px-4 pb-4 text-center text-[10px] uppercase tracking-wider text-neutral-400 sm:pb-6">
-            Segure no pet para abrir as ações
-          </p>
+          <div className="relative z-10 mt-2 flex items-center justify-center gap-3 px-4 pb-4 sm:pb-6">
+            <p className="text-[10px] uppercase tracking-wider text-neutral-400">
+              Segure no pet para abrir as ações
+            </p>
+            <button
+              type="button"
+              onClick={() => setConfessionTrigger((n) => n + 1)}
+              className="inline-flex items-center gap-1 rounded-full border border-neutral-200 bg-white px-2 py-1 text-[10px] font-medium text-neutral-500 transition hover:border-sky-300 hover:text-sky-600"
+              aria-label="O que meu pet está pensando?"
+            >
+              <MessageCircle className="size-3" />
+              Pensamento
+            </button>
+          </div>
         </div>
 
         {/* Info */}
