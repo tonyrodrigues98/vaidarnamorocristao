@@ -6,6 +6,7 @@ import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/quiz-biblico")({ component: QuizPage });
 
@@ -47,6 +48,7 @@ function QuizPage() {
   const remaining = 3 - answered.length;
 
   async function answer(q: Question, idx: number) {
+    if (q.already_answered) return;
     setSubmitting(q.id);
     const { data, error } = await (supabase.rpc as unknown as (
       fn: string,
@@ -56,14 +58,22 @@ function QuizPage() {
       _chosen: idx,
     });
     setSubmitting(null);
-    if (error) return;
+    if (error) {
+      const msg = (error as { message?: string })?.message ?? "Erro ao responder";
+      toast.error(msg);
+      await load();
+      return;
+    }
     const row = ((data as unknown) as Array<{
       correct: boolean;
       correct_index: number;
       reference: string;
       explanation: string;
     }>)?.[0];
-    if (!row) return;
+    if (!row) {
+      await load();
+      return;
+    }
     setItems((prev) =>
       (prev ?? []).map((p) =>
         p.id === q.id
