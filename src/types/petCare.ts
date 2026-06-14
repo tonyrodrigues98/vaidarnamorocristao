@@ -10,6 +10,9 @@ export type PetCareItem = {
   image_url: string | null;
   cost_coins: number;
   restore_amount: number;
+  energy_cost: number;
+  sleep_hours: number;
+  daily_uses: number;
   active: boolean;
   sort_order: number;
   created_at: string;
