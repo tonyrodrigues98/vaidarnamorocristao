@@ -4517,6 +4517,10 @@ export type Database = {
       }
       set_anonymous_optout: { Args: { _accept: boolean }; Returns: undefined }
       spend_coin: { Args: { _amount?: number }; Returns: number }
+      spend_coin_for_pet_care: {
+        Args: { _amount: number; _item_id: string; _user_pet_id: string }
+        Returns: number
+      }
       touch_my_activity: { Args: never; Returns: undefined }
       unaccent_safe: { Args: { input: string }; Returns: string }
       unequip_decoration: {
