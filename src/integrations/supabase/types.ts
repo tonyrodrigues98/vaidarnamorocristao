@@ -1850,6 +1850,7 @@ export type Database = {
           image_url_baby: string | null
           is_exclusive: boolean
           name: string
+          nocturnal: boolean
           price_coins: number
           rarity: Database["public"]["Enums"]["pet_rarity"]
           slug: string
@@ -1868,6 +1869,7 @@ export type Database = {
           image_url_baby?: string | null
           is_exclusive?: boolean
           name: string
+          nocturnal?: boolean
           price_coins?: number
           rarity?: Database["public"]["Enums"]["pet_rarity"]
           slug: string
@@ -1886,6 +1888,7 @@ export type Database = {
           image_url_baby?: string | null
           is_exclusive?: boolean
           name?: string
+          nocturnal?: boolean
           price_coins?: number
           rarity?: Database["public"]["Enums"]["pet_rarity"]
           slug?: string
