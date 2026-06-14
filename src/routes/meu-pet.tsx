@@ -441,6 +441,10 @@ function Showcase({
           </div>
         </div>
       </div>
+      {/* Barra de XP — full-width dentro do bloco do pet */}
+      <div className="border-t border-neutral-100 bg-white p-3 sm:p-4">
+        <PetXpBar refreshKey={xpRefresh} />
+      </div>
     </section>
     {pet.category?.id && (
       <PetSceneryPanel
