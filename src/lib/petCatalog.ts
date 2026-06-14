@@ -42,6 +42,8 @@ const SIGN_TTL_MS = (SIGNED_TTL - 60 * 60) * 1000; // refresh 1h before expiry
 
 export async function resolvePetImage(value: string | null): Promise<string | null> {
   if (!value) return null;
+  // Lovable CDN assets — usar direto, não passa pelo Storage
+  if (value.startsWith("/__l5e/")) return value;
   const path = extractStoragePath(value);
   if (!path) return value; // external https URL we don't own — return as-is
   const now = Date.now();
