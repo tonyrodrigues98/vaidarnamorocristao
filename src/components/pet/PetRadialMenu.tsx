@@ -33,14 +33,14 @@ export function PetRadialMenu({
 
   return (
     <div
-      className="absolute inset-0 z-30 grid place-items-center"
+      className="fixed inset-0 z-[60] grid place-items-center p-4"
       onClick={onClose}
       role="dialog"
       aria-label="Central de ações do pet"
     >
       <div className="absolute inset-0 bg-black/30 backdrop-blur-sm animate-in fade-in duration-150" />
       <div
-        className="relative h-[min(78vw,300px)] w-[min(78vw,300px)] animate-in zoom-in-95 duration-200"
+        className="relative h-[min(72vw,320px)] w-[min(72vw,320px)] animate-in zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
       >
         {PET_CARE_ORDER.map((k, i) => {
@@ -58,14 +58,14 @@ export function PetRadialMenu({
               onClick={() => onPick(k)}
               className={cn(
                 "absolute -translate-x-1/2 -translate-y-1/2",
-                "flex h-16 w-16 flex-col items-center justify-center gap-0.5 rounded-full",
+                "flex h-14 w-14 sm:h-16 sm:w-16 flex-col items-center justify-center gap-0.5 rounded-full",
                 "bg-white text-neutral-800 shadow-lg ring-1 ring-black/5 transition",
                 "hover:scale-110 active:scale-95",
               )}
               style={{ left: `${x}%`, top: `${y}%` }}
               aria-label={PET_CARE_LABEL[k]}
             >
-              <Icon className="h-5 w-5" />
+              <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
               <span className="text-[9px] font-semibold uppercase tracking-wide text-neutral-500">
                 {v}%
               </span>
