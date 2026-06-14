@@ -125,17 +125,17 @@ self.addEventListener("fetch", (event) => {
 
   const url = new URL(request.url);
 
+  if (isPetStorageRequest(request, url)) {
+    event.respondWith(petImageStaleWhileRevalidate(request, url));
+    return;
+  }
+
   if (url.origin !== self.location.origin) {
     return;
   }
 
   if (request.mode === "navigate") {
     event.respondWith(fetch(request).catch(() => caches.match("/offline.html")));
-    return;
-  }
-
-  if (isPetStorageRequest(request, url)) {
-    event.respondWith(petImageStaleWhileRevalidate(request, url));
     return;
   }
 
