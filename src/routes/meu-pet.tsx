@@ -56,6 +56,7 @@ import {
   type PetRuntimeModifiers,
 } from "@/types/petCare";
 import { getPetMood } from "@/lib/petMood";
+import { PetXpBar } from "@/components/pet/PetXpBar";
 
 export const Route = createFileRoute("/meu-pet")({ component: MeuPetPage });
 
@@ -241,6 +242,7 @@ function Showcase({
   const [tick, setTick] = useState(0);
   const [radialOpen, setRadialOpen] = useState(false);
   const [actionKind, setActionKind] = useState<PetCareKind | null>(null);
+  const [xpRefresh, setXpRefresh] = useState(0);
 
   async function reloadCare() {
     try {
@@ -439,6 +441,10 @@ function Showcase({
           </div>
         </div>
       </div>
+      {/* Barra de XP — full-width dentro do bloco do pet */}
+      <div className="border-t border-neutral-100 bg-white p-3 sm:p-4">
+        <PetXpBar refreshKey={xpRefresh} />
+      </div>
     </section>
     {pet.category?.id && (
       <PetSceneryPanel
@@ -460,7 +466,10 @@ function Showcase({
         speciesId={pet.species?.id ?? null}
         currentValue={actionKind ? careValues[actionKind] ?? 0 : 0}
         onClose={() => setActionKind(null)}
-        onApplied={() => void reloadCare()}
+          onApplied={() => {
+            void reloadCare();
+            setXpRefresh((n) => n + 1);
+          }}
       />
     )}
     </>

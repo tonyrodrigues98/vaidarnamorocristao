@@ -1,92 +1,138 @@
+# Plano: XP, Conquistas, Quiz, Eventos e Efeitos do Pet
 
-# Personalidades com efeitos no cuidado
+Entrega em **5 fases independentes** (cada fase = 1 turno de implementação). Você decide quando seguir pra próxima.
 
-Objetivo: cada uma das 5 personalidades vira um conjunto de **modificadores sutis (10–30%)** aplicados em runtime sobre o sistema atual (`pet_care_items`, `pet_care_state`, `apply_pet_care`), com eventos aleatórios configuráveis e integração com o ciclo dia/noite que já existe.
+---
 
-## 1. Modelo de dados (admin-editável, nada hardcoded)
+## Fase 1 — Sistema de XP + Barra + Conquistas
 
-Nova tabela `pet_personality_effects` ligando `pet_personalities` a regras:
+### O que muda na tela
+- Barra azul **full-width dentro do bloco do pet**, embaixo da arte (não junto das barras de fome/energia).
+- Mostra: nível atual, nome do nível, XP atual / XP pro próximo, % preenchido.
+- Animação suave ao ganhar XP + toast "+12 XP".
 
-```text
-personality_id  | kind (feed|play|hygiene|sleep|affection|energy|all)
-restore_mult    | 1.20  → multiplica restore_amount
-energy_cost_mult| 0.50  → multiplica energy_cost
-decay_mult      | 0.70  → afeta decay daquela barra (config global × mult)
-cap_max         | 70    → barra não passa desse valor após restauração
-daypart         | any | day | night   → bônus só vale na janela
-condition_kind  | play  → condicional (ex.: humor>70)
-condition_op    | gt | lt
-condition_value | 70
-```
+### Curva de nível
+- Cap **50**. Fórmula: `xp_pro_nivel(n) = 100 * n^1.6` (nível 2 ≈ 100, nível 10 ≈ 4k, nível 50 ≈ 60k).
+- Nomes por faixa: Filhote (1–5), Curioso (6–10), Companheiro (11–20), Fiel (21–30), Sábio (31–40), Lendário (41–50).
 
-Uma personalidade pode ter N linhas (ex.: Carinhoso tem 3 regras). O admin edita tudo no painel de personalidades.
+### Fontes de XP (integradas ao app inteiro)
+| Ação | XP | Cap diário |
+|---|---|---|
+| Usar item de care com barra <50% | +8 | 6×/dia |
+| Usar item com barra <20% (resgate) | +15 | 4×/dia |
+| Streak diário de login | +20 | 1×/dia |
+| Completar missão diária | +30 | 3×/dia |
+| Acerto no quiz bíblico | +10 por acerto | 3×/dia |
+| Receber match | +25 | 5×/dia |
+| Mandar 1ª mensagem em novo match | +15 | 3×/dia |
+| Devocional do dia (ler+marcar como orei) | +20 | 1×/dia |
+| Orar por pedido de oração de alguém | +5 | 5×/dia |
+| Avatar/perfil completado (one-shot) | +50 | 1× total |
 
-Tabelas auxiliares:
-- `pet_random_events` — `item_id` ou `kind`, `chance` (0–1), `payload` JSON (`{type:'coins', min:1, max:5}` | `{type:'buff', kind:'play', mult:1.5, duration_min:30}`), `personality_id` opcional (chance × 2 quando bate).
-- `user_pet_buffs` — buffs temporários ativos por pet (kind, mult, expires_at). Aplicados em runtime junto com `restore_mult`.
+### Recompensas por nível (cosmético + econômico + social)
+- **Cosmético**: a cada 3 níveis libera 1 fundo de pet/aura/moldura/gradiente do catálogo (marcados como `unlock_level` no admin).
+- **Econômico**: claim diário cresce com nível (`nivel * 5 coins/dia`). Desconto na loja: -5% a partir do nv 20, -10% a partir do nv 35.
+- **Social**: badge "Nv X" no perfil + título textual (ex: "Fiel"). A partir do nv 25, destaque sutil no card de pretendentes.
 
-## 2. Mapeamento das personalidades (valores propostos, ajustáveis no admin)
+### Conquistas (achievements)
+- Tabela `pet_achievements` com slug, nome, descrição, ícone (lucide), critério (JSONB) e recompensa (XP + opcionalmente coins/cosmético).
+- ~30 conquistas seed: "Primeira refeição", "7 dias seguidos", "Nível 10", "100 carinhos", "Quiz: 50 acertos", "10 matches", "Devocional 30 dias", etc.
+- Card "Conquistas" no perfil do pet com progress bars.
 
-**Calmo**
-- ✅ Energia regenera 25% mais rápido (`kind=energy, restore_mult=1.25`, mexe no `energy_regen_minutes_per_point` via fator)
-- ✅ Decay de humor 20% mais lento (`kind=play, decay_mult=0.80`)
-- ✅ Bônus de +15% noturno em todas restaurações (`kind=all, restore_mult=1.15, daypart=night`)
-- ❌ Sono restaura no máximo 70% (`kind=sleep, cap_max=70`)
+---
 
-**Brincalhão**
-- ✅ Brincar restaura +30% humor (`kind=play, restore_mult=1.30`)
-- ✅ +15% diurno em brincar (`kind=play, daypart=day, restore_mult=1.15`)
-- ❌ Decay de humor 25% mais rápido (`kind=play, decay_mult=1.25`)
-- ❌ Banho restaura 80% (`kind=hygiene, restore_mult=0.80`)
+## Fase 2 — Missões Diárias (100 no pool, 3/dia)
 
-**Curioso**
-- ✅ Evento aleatório: 12% de chance ao brincar de ganhar 1–5 moedas (`pet_random_events` com `personality_id=curioso` dobra a chance base)
-- ✅ 5% de chance ao explorar (qualquer ação) de buff temporário "petisco" (+15% próxima restauração de fome por 1h)
-- ❌ Higiene decai 20% mais rápido
-- ❌ Todas ações custam +10% energia
+- Tabela `pet_missions` com 100 missões seed (geradas via IA pt-BR), só ações **solo** (nada que dependa de outra pessoa aceitar — ex: nada de "dê match").
+- Exemplos: "Alimente seu pet 2x", "Use 1 item de higiene", "Leia o devocional do dia", "Faça o quiz", "Visite 3 perfis", "Atualize sua bio", "Adicione 1 foto", "Marque 1 interesse novo", "Acerte 2 perguntas no quiz".
+- Tabela `user_daily_missions` (3 por dia, sorteadas 00h SP, respeitando categorias variadas).
+- Painel "Missões de hoje" na home + atalho na tela do pet.
+- Recompensa: +30 XP + coins variável por dificuldade (easy/med/hard).
 
-**Energético**
-- ✅ Todas ações custam 30% menos energia (`kind=all, energy_cost_mult=0.70`) — ajustado de 50% pra ficar dentro da faixa sutil
-- ✅ Brincar restaura +20% humor diurno
-- ❌ Fome decai 25% mais rápido
-- ❌ Sono restaura 80%
+---
 
-**Carinhoso — modelo "termômetro emocional"**
-- ✅ Carinho restaura +30% (afeição) e +15% humor na mesma ação
-- ✅ Decay de carência 30% mais lento **quando humor ≥ 70** (`kind=affection, decay_mult=0.70, condition_kind=play, condition_op=gt, condition_value=70`)
-- ❌ Decay de carência 50% mais rápido **quando humor < 30** (`condition_op=lt, condition_value=30, decay_mult=1.50`)
-- ❌ Sem carinho por 24h: buff negativo `-10% restore_mult global` até receber carinho (gerado por job/heurística no cálculo runtime)
+## Fase 3 — Quiz Bíblico
 
-## 3. Onde os modificadores entram
+- Tabela `bible_quiz_questions`: 300 perguntas seed (geradas via Lovable AI em pt-BR, com referência bíblica e explicação curta após responder).
+- 3 perguntas/dia, sorteadas sem repetir até esgotar o pool.
+- 3 opções, 1 correta. Após responder mostra: ✓/✗, versículo de referência, 1–2 frases de contexto.
+- Erro **consome tentativa** (não volta).
+- Recompensas: 1 acerto = +10 XP +5 coins; 2 = +25 XP +15 coins; 3 = +50 XP +40 coins + buff de pet (24h decay -10%).
+- Rota nova `/quiz-biblico` + card de entrada na home quando ainda há perguntas do dia.
 
-- **`apply_pet_care` (RPC)**: lê regras da personalidade do pet equipado, aplica `restore_mult` no `restore_amount`, `energy_cost_mult` no consumo, e respeita `cap_max` antes de gravar. Avalia `condition_*` consultando `pet_care_state` no momento. Rola dados de `pet_random_events` e grava resultado (moedas via `coin_transactions`, buff via `user_pet_buffs`).
-- **`deriveCurrentValue` (client + futura função SQL)**: aplica `decay_mult` por kind, considerando condicionais e janela dia/noite usando o helper existente `petDayNight.ts`. Inclui buffs ativos de `user_pet_buffs`.
-- **`getCareConfig`**: passa a retornar também os modificadores resolvidos do pet equipado pra o tick de 1s já existente em `meu-pet.tsx` calcular tudo localmente sem refresh.
+---
 
-## 4. Feedback ao jogador
+## Fase 4 — Eventos/Confissões do Pet + Sonho com Match
 
-- Toast da ação mostra os modificadores aplicados: "✨ Brincalhão: +30% humor" / "🌙 Calmo (noite): +15%".
-- `PetNeedsHud` ganha um ícone discreto sobre a barra quando há buff ativo ou condicional ativo (ex.: coração pulsando na barra de carência do Carinhoso quando humor alto/baixo).
-- Quando o evento aleatório dispara, animação curta + toast ("🪙 +3 moedas encontradas!" / "🍪 Petisco encontrado").
+### Confissões (500 textos)
+- Tabela `pet_confessions` com 500 textos seed pt-BR (gerados via IA), cada um com efeito opcional nas barras (ex: "Sonhei que comi um biscoito gigante… acordei com fome" → fome -5).
+- Disparam **automaticamente a cada 30–90 min** quando o pet está em foreground, ou via botão "O que meu pet está pensando?".
+- Renderizam como balão de fala flutuante sobre o pet, com fade in/out de 6s.
+- Categorias: feliz, faminto, sonolento, carente, travesso, espiritual, fofo.
 
-## 5. Admin
+### Sonho com match (raro, ~1×/dia)
+- Server function `getPetDreamMatch`: filtra pretendentes que batem com **"o que eu busco"** (purpose compatibility já existe em `purposeCompatibility.ts`), pega 1 aleatório do top 10.
+- Confissão especial: "Sonhei com alguém especial 💭… acho que era {nome}". CTA opcional: "Ver perfil".
+- Trigger: aparece à noite (Zzz ativo) com chance baixa.
 
-- Painel **Personalidades** ganha aba "Efeitos" — CRUD das regras (kind, mult, cap, daypart, condition).
-- Painel **Itens de cuidado** ganha aba "Eventos aleatórios" pra configurar chance/payload por item ou por kind.
-- Tudo respeita a regra de inputs (`type="text" inputMode="decimal"`).
+---
 
-## 6. Etapas de implementação (ordem sugerida)
+## Fase 5 — Efeitos Visuais + Diurno/Noturno + Push de Oração
 
-1. Migration: `pet_personality_effects`, `pet_random_events`, `user_pet_buffs` + GRANTs + RLS + seeds com os valores acima.
-2. Reescrita do `apply_pet_care` aplicando mult/cap/condicional + rolagem de eventos + persistência de buffs/moedas.
-3. `petCare.ts` (client): carregar efeitos da personalidade do pet equipado, aplicar em `deriveCurrentValue` e expor toasts ricos.
-4. Integração `petDayNight` no cálculo.
-5. UI HUD: indicadores de buff/condicional + animação de evento aleatório.
-6. Admin: telas de regras e eventos.
-7. Seed inicial dos 5 perfis e teste manual de cada bônus/maléfico.
+### Efeitos visuais sobre o pet
+- **Fedido (higiene <30)**: partículas verdes/onduladas saindo do pet, leves, contínuas. SVG/CSS, não asset.
+- **Feliz (humor >85 E carência >85)**: 1–3 corações flutuando, raros (a cada ~20s), com fade subindo.
+- **Dormindo à noite (pet noturno=false E phase=night, ou pet noturno=true E phase=day)**: "Zzz" azul claro subindo com fade in/out a cada 4s.
 
-## Pontos abertos pra fechar antes de codar
+### Flag diurno/noturno por espécie
+- Adicionar coluna `nocturnal boolean default false` em `pet_species`.
+- Admin: toggle em `PetSpeciesPanel` (gato, coruja, morcego = noturno; cachorro, pássaro = diurno).
+- Pet noturno fica **ativo de noite** e dorme de dia (e vice-versa). Decay de energia inverte: noturno regenera energia de dia.
 
-- Buff negativo do Carinhoso após 24h sem carinho: aplicar via job (cron) ou calcular puramente em runtime a partir do `last_affection_at`? (Recomendo runtime, evita cron.)
-- Eventos aleatórios devem ter cooldown por pet (ex.: máximo 3 moedas/dia) pra não virar farm?
-- Mostrar os efeitos da personalidade na ficha do pet (transparência total) ou manter como descoberta pelo jogador?
+### Push "Orou por você"
+- Hoje o botão de orar (em `prayer_requests`) não dispara push. Vou ligar ao `push_queue` existente.
+- Server fn `prayForRequest`: insere em `prayer_request_prayed` (já existe) + insere em `push_queue` com `title="🙏 Alguém orou por você"` `body="{nome} orou pelo seu pedido"` `url=/oracoes`.
+- Throttle: 1 push por (orador, pedido) — não spamma se a pessoa orar várias vezes.
+
+---
+
+## Detalhes técnicos
+
+### Banco (migrations Fase 1–5)
+- `user_xp` (user_id, xp_total, level, updated_at) + RLS por usuário
+- `xp_events` (id, user_id, source, amount, created_at) — log + cap diário
+- `pet_achievements` + `user_achievements`
+- `pet_missions` + `user_daily_missions`
+- `bible_quiz_questions` + `user_quiz_attempts`
+- `pet_confessions` + `user_pet_confession_log`
+- `pet_species.nocturnal boolean`
+- Sempre com GRANT + RLS + service_role
+
+### Server functions novas
+- `awardXp({ source, amount })` — middleware `requireSupabaseAuth`, valida cap diário, atualiza `user_xp`, dispara evento.
+- `getMyXpState()` — retorna nível, xp, próximo nível, recompensas desbloqueadas.
+- `rollDailyMissions()` — idempotente, roda 1×/dia/usuário.
+- `getTodayQuiz()` / `answerQuiz({ questionId, optionIndex })`
+- `getNextPetConfession()` — pesos por estado das barras
+- `getPetDreamMatch()` — usa `purposeCompatibility`
+- `prayForRequest({ requestId })` — insere prayed + push
+
+### Geração de conteúdo (IA pt-BR)
+- 500 confissões + 300 perguntas bíblicas + 100 missões + 30 conquistas → scripts no sandbox usando `lovable_ai.py` em modo batch + JSON schema, gravando direto via INSERT nas tabelas.
+- Você revisa depois no admin (painéis CRUD pra cada tabela).
+
+### Admin
+- 4 painéis novos em `/admin`: Missões, Quiz Bíblico, Confissões do Pet, Conquistas (listar, editar texto, ativar/desativar).
+
+---
+
+## Ordem sugerida de implementação
+
+1. **Fase 1** (base que tudo usa): XP + barra + conquistas
+2. **Fase 5** (quick wins visuais): efeitos + diurno/noturno + push de oração
+3. **Fase 2**: missões diárias (já consome XP da Fase 1)
+4. **Fase 3**: quiz bíblico
+5. **Fase 4**: confissões + sonho com match
+
+Quando aprovar, começo pela **Fase 1**.
+

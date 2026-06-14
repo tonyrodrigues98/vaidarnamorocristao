@@ -23,6 +23,7 @@ import {
   getItemUsesToday,
   listCareItemsForPet,
 } from "@/lib/petCare";
+import { awardXp, XP_SOURCES } from "@/lib/xp";
 import { cn } from "@/lib/utils";
 import { PET_CARE_ICON } from "./PetNeedsHud";
 
@@ -84,6 +85,24 @@ export function PetCareActionSheet({
       toast.success(`+${restore} ${PET_CARE_LABEL[item.kind]}${multiTxt}`, {
         description: result.notes?.length ? result.notes.slice(0, 2).join(" · ") : undefined,
       });
+      // XP: care de resgate (<20%) ou care preventivo (<50%)
+      if (currentValue < 20) {
+        const xp = await awardXp(
+          XP_SOURCES.CARE_RESCUE.source,
+          XP_SOURCES.CARE_RESCUE.amount,
+          XP_SOURCES.CARE_RESCUE.cap,
+          { kind: item.kind, item: item.slug },
+        );
+        if (xp && xp.granted > 0) toast.success(`+${xp.granted} XP`, { description: "Resgate na hora certa" });
+      } else if (currentValue < 50) {
+        const xp = await awardXp(
+          XP_SOURCES.CARE_LOW.source,
+          XP_SOURCES.CARE_LOW.amount,
+          XP_SOURCES.CARE_LOW.cap,
+          { kind: item.kind, item: item.slug },
+        );
+        if (xp && xp.granted > 0) toast.success(`+${xp.granted} XP`);
+      }
       if (result.random_event) {
         const re = result.random_event;
         if (re.type === "coins") {

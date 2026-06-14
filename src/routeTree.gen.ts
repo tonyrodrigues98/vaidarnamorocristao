@@ -27,6 +27,7 @@ import { Route as DevocionalRouteImport } from './routes/devocional'
 import { Route as DepoimentosRouteImport } from './routes/depoimentos'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ContaRouteImport } from './routes/conta'
+import { Route as ConquistasRouteImport } from './routes/conquistas'
 import { Route as ComunidadeRouteImport } from './routes/comunidade'
 import { Route as ComoFuncionaRouteImport } from './routes/como-funciona'
 import { Route as BloqueadosRouteImport } from './routes/bloqueados'
@@ -157,6 +158,11 @@ const DashboardRoute = DashboardRouteImport.update({
 const ContaRoute = ContaRouteImport.update({
   id: '/conta',
   path: '/conta',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConquistasRoute = ConquistasRouteImport.update({
+  id: '/conquistas',
+  path: '/conquistas',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ComunidadeRoute = ComunidadeRouteImport.update({
@@ -372,6 +378,7 @@ export interface FileRoutesByFullPath {
   '/bloqueados': typeof BloqueadosRoute
   '/como-funciona': typeof ComoFuncionaRoute
   '/comunidade': typeof ComunidadeRoute
+  '/conquistas': typeof ConquistasRoute
   '/conta': typeof ContaRoute
   '/dashboard': typeof DashboardRoute
   '/depoimentos': typeof DepoimentosRoute
@@ -433,6 +440,7 @@ export interface FileRoutesByTo {
   '/bloqueados': typeof BloqueadosRoute
   '/como-funciona': typeof ComoFuncionaRoute
   '/comunidade': typeof ComunidadeRoute
+  '/conquistas': typeof ConquistasRoute
   '/conta': typeof ContaRoute
   '/dashboard': typeof DashboardRoute
   '/depoimentos': typeof DepoimentosRoute
@@ -495,6 +503,7 @@ export interface FileRoutesById {
   '/bloqueados': typeof BloqueadosRoute
   '/como-funciona': typeof ComoFuncionaRoute
   '/comunidade': typeof ComunidadeRoute
+  '/conquistas': typeof ConquistasRoute
   '/conta': typeof ContaRoute
   '/dashboard': typeof DashboardRoute
   '/depoimentos': typeof DepoimentosRoute
@@ -558,6 +567,7 @@ export interface FileRouteTypes {
     | '/bloqueados'
     | '/como-funciona'
     | '/comunidade'
+    | '/conquistas'
     | '/conta'
     | '/dashboard'
     | '/depoimentos'
@@ -619,6 +629,7 @@ export interface FileRouteTypes {
     | '/bloqueados'
     | '/como-funciona'
     | '/comunidade'
+    | '/conquistas'
     | '/conta'
     | '/dashboard'
     | '/depoimentos'
@@ -680,6 +691,7 @@ export interface FileRouteTypes {
     | '/bloqueados'
     | '/como-funciona'
     | '/comunidade'
+    | '/conquistas'
     | '/conta'
     | '/dashboard'
     | '/depoimentos'
@@ -742,6 +754,7 @@ export interface RootRouteChildren {
   BloqueadosRoute: typeof BloqueadosRoute
   ComoFuncionaRoute: typeof ComoFuncionaRoute
   ComunidadeRoute: typeof ComunidadeRoute
+  ConquistasRoute: typeof ConquistasRoute
   ContaRoute: typeof ContaRoute
   DashboardRoute: typeof DashboardRoute
   DepoimentosRoute: typeof DepoimentosRoute
@@ -923,6 +936,13 @@ declare module '@tanstack/react-router' {
       path: '/conta'
       fullPath: '/conta'
       preLoaderRoute: typeof ContaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/conquistas': {
+      id: '/conquistas'
+      path: '/conquistas'
+      fullPath: '/conquistas'
+      preLoaderRoute: typeof ConquistasRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/comunidade': {
@@ -1232,6 +1252,7 @@ const rootRouteChildren: RootRouteChildren = {
   BloqueadosRoute: BloqueadosRoute,
   ComoFuncionaRoute: ComoFuncionaRoute,
   ComunidadeRoute: ComunidadeRoute,
+  ConquistasRoute: ConquistasRoute,
   ContaRoute: ContaRoute,
   DashboardRoute: DashboardRoute,
   DepoimentosRoute: DepoimentosRoute,
@@ -1289,13 +1310,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
