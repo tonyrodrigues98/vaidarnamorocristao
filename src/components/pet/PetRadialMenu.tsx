@@ -36,14 +36,15 @@ export function PetRadialMenu({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[60] grid place-items-center p-4"
+      className="fixed inset-0 z-[60]"
+      style={{ height: "100dvh" }}
       onClick={onClose}
       role="dialog"
       aria-label="Central de ações do pet"
     >
       <div className="absolute inset-0 bg-black/30 backdrop-blur-sm animate-in fade-in duration-150" />
       <div
-        className="relative h-[min(72vw,320px)] w-[min(72vw,320px)] animate-in zoom-in-95 duration-200"
+        className="absolute left-1/2 top-1/2 h-[min(72vw,320px)] w-[min(72vw,320px)] -translate-x-1/2 -translate-y-1/2 animate-in zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
       >
         {PET_CARE_ORDER.map((k, i) => {
