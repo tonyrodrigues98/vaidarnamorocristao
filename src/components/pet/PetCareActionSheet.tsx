@@ -76,8 +76,24 @@ export function PetCareActionSheet({
   async function pick(item: PetCareItem) {
     setPending(item.id);
     try {
-      await applyPetCare(userPetId, item.id);
-      toast.success(`+${item.restore_amount} ${PET_CARE_LABEL[item.kind]}`);
+      const result = await applyPetCare(userPetId, item.id);
+      const restore = result.restore || item.restore_amount;
+      const multiTxt = result.multiplier && result.multiplier !== 1
+        ? ` (×${result.multiplier.toFixed(2)})`
+        : "";
+      toast.success(`+${restore} ${PET_CARE_LABEL[item.kind]}${multiTxt}`, {
+        description: result.notes?.length ? result.notes.slice(0, 2).join(" · ") : undefined,
+      });
+      if (result.random_event) {
+        const re = result.random_event;
+        if (re.type === "coins") {
+          toast.success(`🪙 +${re.amount} moedas — ${re.label}`);
+        } else if (re.type === "buff") {
+          toast.success(`✨ ${re.label}`, {
+            description: `Próximas ações de ${PET_CARE_LABEL[re.kind as never] ?? re.kind} +${Math.round((re.mult - 1) * 100)}% por ${re.duration_min}min`,
+          });
+        }
+      }
       onApplied();
       onClose();
     } catch (e) {
