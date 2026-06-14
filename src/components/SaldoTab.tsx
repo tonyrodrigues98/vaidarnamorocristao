@@ -11,6 +11,12 @@ import {
   VenetianMask,
   Gift,
   Sticker,
+  PawPrint,
+  Utensils,
+  Bone,
+  Bath,
+  BedDouble,
+  HeartHandshake,
 } from "lucide-react";
 import coinIcon from "@/assets/coin.webp";
 import coinSound from "@/assets/coin-reward.mp3";
@@ -289,6 +295,16 @@ function EmptyState() {
   );
 }
 
+function petCareIconFromSubtitle(subtitle: string | null, title: string) {
+  const haystack = `${title ?? ""} ${subtitle ?? ""}`.toLowerCase();
+  if (haystack.startsWith("alimento") || haystack.includes("alimentou")) return Utensils;
+  if (haystack.startsWith("brincadeira") || haystack.includes("brincou")) return Bone;
+  if (haystack.startsWith("banho") || haystack.includes("banhou")) return Bath;
+  if (haystack.startsWith("cama") || haystack.includes("dormir")) return BedDouble;
+  if (haystack.startsWith("carinho") || haystack.includes("carinho")) return HeartHandshake;
+  return PawPrint;
+}
+
 function TxRow({ tx }: { tx: CoinTx }) {
   const isIn = tx.direction === "in";
   const valueColor = isIn
@@ -314,9 +330,13 @@ function TxRow({ tx }: { tx: CoinTx }) {
           ? Gift
           : tx.kind === "anonymous_extra"
             ? VenetianMask
-            : isIn
-              ? ArrowDownLeft
-              : ArrowUpRight;
+            : tx.kind === "pet_random_event"
+              ? PawPrint
+              : tx.kind === "pet_care_spend"
+                ? petCareIconFromSubtitle(tx.subtitle, tx.title)
+                : isIn
+                  ? ArrowDownLeft
+                  : ArrowUpRight;
   return (
     <li className="group flex items-center gap-3 rounded-2xl border border-border/60 bg-card/50 p-3 shadow-soft backdrop-blur transition hover:border-border hover:bg-card/80">
       <div className="relative shrink-0">
