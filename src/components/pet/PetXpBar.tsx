@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Sparkles, Trophy } from "lucide-react";
+import { ChevronRight, Sparkles, Trophy } from "lucide-react";
 import { getMyXpState, levelTitle, type XpState } from "@/lib/xp";
 import { cn } from "@/lib/utils";
 
@@ -47,13 +47,9 @@ export function PetXpBar({
           Nível {lv}
           <span className="text-sky-500/80">· {title}</span>
         </span>
-        <Link
-          to="/conquistas"
-          className="inline-flex items-center gap-1 tabular-nums text-sky-600/80 hover:text-sky-700"
-        >
-          <Trophy className="size-3" />
+        <span className="tabular-nums text-sky-600/80">
           {state?.is_max ? "MAX" : `${into} / ${need} XP`}
-        </Link>
+        </span>
       </div>
       <div className="h-2 w-full overflow-hidden rounded-full bg-sky-100">
         <div
@@ -61,6 +57,16 @@ export function PetXpBar({
           style={{ width: `${pct}%` }}
         />
       </div>
+      <Link
+        to="/conquistas"
+        className="mt-2 flex items-center justify-between gap-2 rounded-lg bg-sky-100/60 px-2.5 py-1.5 text-[11px] font-medium text-sky-700 transition hover:bg-sky-100"
+      >
+        <span className="inline-flex items-center gap-1.5">
+          <Trophy className="size-3.5" />
+          Ver conquistas
+        </span>
+        <ChevronRight className="size-3.5 text-sky-500" />
+      </Link>
     </div>
   );
 }
