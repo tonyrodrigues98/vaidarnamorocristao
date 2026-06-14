@@ -429,7 +429,7 @@ function DraftForm({
           <div className="space-y-1.5">
             <Label>Preço (moedas)</Label>
             <Input
-              type="number"
+              type="text" inputMode="decimal"
               min={0}
               value={draft.price_coins}
               onChange={(e) => onChange({ ...draft, price_coins: Number(e.target.value) || 0 })}

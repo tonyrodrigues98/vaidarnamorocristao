@@ -166,7 +166,7 @@ export function PetCareItemsPanel() {
           <div className="space-y-1.5">
             <Label>Decaimento global por hora (todas as barras menos energia)</Label>
             <Input
-              type="number"
+              type="text" inputMode="decimal"
               min={0}
               max={100}
               value={cfg.decay_per_hour}
@@ -177,7 +177,7 @@ export function PetCareItemsPanel() {
           <div className="space-y-1.5">
             <Label className="flex items-center gap-1.5"><Zap className="h-3.5 w-3.5 text-yellow-500" /> Minutos para +1 de Energia</Label>
             <Input
-              type="number"
+              type="text" inputMode="decimal"
               min={1}
               max={240}
               value={cfg.energy_regen_minutes_per_point}
@@ -443,7 +443,7 @@ function DraftForm({
         <div className="space-y-1.5">
           <Label>Custo (moedas)</Label>
           <Input
-            type="number"
+            type="text" inputMode="decimal"
             min={0}
             value={draft.cost_coins}
             onChange={(e) => onChange({ ...draft, cost_coins: Number(e.target.value) || 0 })}
@@ -452,7 +452,7 @@ function DraftForm({
         <div className="space-y-1.5">
           <Label>Restaura (+barra)</Label>
           <Input
-            type="number"
+            type="text" inputMode="decimal"
             min={1}
             max={100}
             value={draft.restore_amount}
@@ -462,7 +462,7 @@ function DraftForm({
         <div className="space-y-1.5">
           <Label>Ordem</Label>
           <Input
-            type="number"
+            type="text" inputMode="decimal"
             value={draft.sort_order}
             onChange={(e) => onChange({ ...draft, sort_order: Number(e.target.value) || 0 })}
           />

@@ -1041,7 +1041,7 @@ function ThresholdField({
     <div className="space-y-1.5">
       <Label className="text-sm">{label}</Label>
       <Input
-        type="number"
+        type="text" inputMode="decimal"
         min={0}
         max={1}
         step={0.05}

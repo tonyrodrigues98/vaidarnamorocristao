@@ -794,7 +794,7 @@ function DecorationDialog({
               <div className="space-y-2">
                 <Label>Preco</Label>
                 <Input
-                  type="number"
+                  type="text" inputMode="decimal"
                   min={0}
                   value={form.price_coins}
                   onChange={(e) => onFormChange({ ...form, price_coins: Number(e.target.value) })}
@@ -823,7 +823,7 @@ function DecorationDialog({
               <div className="space-y-2">
                 <Label>Ordem</Label>
                 <Input
-                  type="number"
+                  type="text" inputMode="decimal"
                   value={form.sort_order}
                   onChange={(e) => onFormChange({ ...form, sort_order: Number(e.target.value) })}
                 />

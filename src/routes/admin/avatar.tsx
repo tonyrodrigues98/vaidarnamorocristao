@@ -421,7 +421,7 @@ function AdminAvatarPage() {
               <div>
                 <Label>Preço (moedas)</Label>
                 <Input
-                  type="number"
+                  type="text" inputMode="decimal"
                   min={0}
                   value={form.price}
                   onChange={(e) => setForm({ ...form, price: parseInt(e.target.value) || 0 })}
@@ -441,7 +441,7 @@ function AdminAvatarPage() {
               <div>
                 <Label>Ordem</Label>
                 <Input
-                  type="number"
+                  type="text" inputMode="decimal"
                   value={form.sort_order}
                   onChange={(e) => setForm({ ...form, sort_order: parseInt(e.target.value) || 0 })}
                 />

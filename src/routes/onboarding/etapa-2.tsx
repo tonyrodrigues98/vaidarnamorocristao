@@ -123,7 +123,7 @@ function Etapa2() {
             <div className="space-y-2">
               <Label>Idade mínima</Label>
               <Input
-                type="number"
+                type="text" inputMode="decimal"
                 min={18}
                 max={110}
                 value={form.age_min}
@@ -134,7 +134,7 @@ function Etapa2() {
             <div className="space-y-2">
               <Label>Idade máxima</Label>
               <Input
-                type="number"
+                type="text" inputMode="decimal"
                 min={18}
                 max={110}
                 value={form.age_max}

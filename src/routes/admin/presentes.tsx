@@ -461,7 +461,7 @@ function AdminPresentesPage() {
               </div>
 
               <Input
-                type="number"
+                type="text" inputMode="decimal"
                 placeholder="Preço"
                 value={form.price_coins}
                 onChange={(e) =>
@@ -663,7 +663,7 @@ function AdminPresentesPage() {
               </div>
 
               <Input
-                type="number"
+                type="text" inputMode="decimal"
                 value={form.price_coins}
                 onChange={(e) =>
                   setForm({
