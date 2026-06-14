@@ -441,6 +441,48 @@ export type Database = {
         }
         Relationships: []
       }
+      bible_quiz_questions: {
+        Row: {
+          active: boolean
+          correct_index: number
+          created_at: string
+          difficulty: string
+          explanation: string
+          id: string
+          option_a: string
+          option_b: string
+          option_c: string
+          question: string
+          reference: string
+        }
+        Insert: {
+          active?: boolean
+          correct_index: number
+          created_at?: string
+          difficulty?: string
+          explanation: string
+          id?: string
+          option_a: string
+          option_b: string
+          option_c: string
+          question: string
+          reference: string
+        }
+        Update: {
+          active?: boolean
+          correct_index?: number
+          created_at?: string
+          difficulty?: string
+          explanation?: string
+          id?: string
+          option_a?: string
+          option_b?: string
+          option_c?: string
+          question?: string
+          reference?: string
+        }
+        Relationships: []
+      }
       blocks: {
         Row: {
           blocked_id: string
@@ -4153,6 +4195,44 @@ export type Database = {
           },
         ]
       }
+      user_quiz_attempts: {
+        Row: {
+          chosen_index: number
+          correct: boolean
+          created_at: string
+          day: string
+          id: string
+          question_id: string
+          user_id: string
+        }
+        Insert: {
+          chosen_index: number
+          correct: boolean
+          created_at?: string
+          day?: string
+          id?: string
+          question_id: string
+          user_id: string
+        }
+        Update: {
+          chosen_index?: number
+          correct?: boolean
+          created_at?: string
+          day?: string
+          id?: string
+          question_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_quiz_attempts_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "bible_quiz_questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           badge_color: string | null
@@ -4457,6 +4537,15 @@ export type Database = {
       }
       admin_unban_user: { Args: { _user_id: string }; Returns: undefined }
       anon_check_restricted: { Args: { _text: string }; Returns: undefined }
+      answer_quiz: {
+        Args: { _chosen: number; _question_id: string }
+        Returns: {
+          correct: boolean
+          correct_index: number
+          explanation: string
+          reference: string
+        }[]
+      }
       apply_pet_care: {
         Args: { _item_id: string; _user_pet_id: string }
         Returns: Json
@@ -4649,6 +4738,23 @@ export type Database = {
           target: number
           title: string
           xp_reward: number
+        }[]
+      }
+      get_today_quiz: {
+        Args: never
+        Returns: {
+          already_answered: boolean
+          chosen_index: number
+          correct_index: number
+          difficulty: string
+          explanation: string
+          id: string
+          option_a: string
+          option_b: string
+          option_c: string
+          question: string
+          reference: string
+          was_correct: boolean
         }[]
       }
       get_user_primary_role: {
