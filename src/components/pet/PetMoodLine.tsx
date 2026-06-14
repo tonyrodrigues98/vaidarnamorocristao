@@ -17,19 +17,22 @@ export function PetMoodLine({
   mood: PetMood;
   className?: string;
 }) {
+  const { Icon } = mood;
   return (
-    <p
+    <div
       className={cn(
-        "flex items-center gap-1.5 text-[12px] font-medium leading-snug",
+        "flex items-start gap-1.5 text-[12px] font-medium leading-snug",
         TONE[mood.tone],
         className,
       )}
       aria-live="polite"
     >
-      <span aria-hidden className="text-base leading-none">{mood.emoji}</span>
-      <span className="truncate">
-        <span className="text-neutral-500">{name} está</span> {mood.label}
-      </span>
-    </p>
+      <Icon aria-hidden className="size-4 shrink-0 mt-px" strokeWidth={2} />
+      <p className="min-w-0">
+        <span className="text-neutral-500">{name} está</span>
+        <br />
+        {mood.label}
+      </p>
+    </div>
   );
 }
