@@ -300,9 +300,9 @@ function Showcase({
       </div>
       <div className="grid gap-0 sm:grid-cols-[260px_1fr]">
         {/* Visual */}
-        <div className="relative flex flex-col items-stretch justify-center overflow-hidden border-b border-neutral-100 bg-gradient-to-b from-neutral-50 to-white p-4 sm:border-b-0 sm:border-r sm:p-6">
+        <div className="relative flex flex-col items-stretch justify-center overflow-hidden border-b border-neutral-100 bg-gradient-to-b from-neutral-50 to-white pt-4 sm:border-b-0 sm:border-r sm:pt-6">
           {/* HUD compacto apenas no mobile */}
-          <div className="relative z-20 mb-3 sm:hidden">
+          <div className="relative z-20 mb-3 px-4 sm:hidden">
             <PetNeedsHud values={careValues} onPick={(k) => setActionKind(k)} />
           </div>
           <div className="relative flex min-h-[240px] flex-1 items-center justify-center">
@@ -338,7 +338,7 @@ function Showcase({
             }}
           />
           </div>
-          <p className="relative z-10 mt-2 text-center text-[10px] uppercase tracking-wider text-neutral-400">
+          <p className="relative z-10 mt-2 px-4 pb-4 text-center text-[10px] uppercase tracking-wider text-neutral-400 sm:pb-6">
             Segure no pet para abrir as ações
           </p>
         </div>
