@@ -37,8 +37,62 @@ import type {
 } from "@/types/petCatalog";
 import { cn } from "@/lib/utils";
 import { PetBackgroundLayer, PetSceneryPanel, usePetScenery } from "@/components/pet/PetSceneryPanel";
+import { usePetDayNight } from "@/lib/petDayNight";
 
 export const Route = createFileRoute("/meu-pet")({ component: MeuPetPage });
+
+/**
+ * Renderiza a arte do pet com um filtro noturno suave quando o cenário
+ * tem dia/noite e estamos no período noturno (cross-fade de 30min).
+ */
+function PetArtwork({
+  src,
+  alt,
+  hasBackground,
+}: {
+  src: string;
+  alt: string;
+  hasBackground: boolean;
+}) {
+  const { dayOpacity } = usePetDayNight();
+  // Aplica o tom noturno só quando há cenário equipado.
+  const nightAmount = hasBackground ? 1 - dayOpacity : 0;
+  const brightness = 1 - 0.45 * nightAmount; // até 0.55
+  const saturate = 1 - 0.35 * nightAmount;
+  const blueTint = 0.18 * nightAmount;
+  return (
+    <div className="relative h-44 w-44">
+      <img
+        src={src}
+        alt={alt}
+        className="absolute inset-0 h-full w-full object-contain drop-shadow-[0_12px_18px_rgba(0,0,0,0.12)]"
+        style={{
+          filter: `brightness(${brightness}) saturate(${saturate})`,
+          transition: "filter 600ms ease-in-out",
+        }}
+      />
+      {/* Overlay azulado mascarado pela própria silhueta do pet */}
+      <div
+        aria-hidden
+        className="absolute inset-0 h-full w-full"
+        style={{
+          WebkitMaskImage: `url(${src})`,
+          maskImage: `url(${src})`,
+          WebkitMaskRepeat: "no-repeat",
+          maskRepeat: "no-repeat",
+          WebkitMaskSize: "contain",
+          maskSize: "contain",
+          WebkitMaskPosition: "center",
+          maskPosition: "center",
+          backgroundColor: `rgba(30, 58, 138, ${blueTint})`,
+          mixBlendMode: "multiply",
+          opacity: nightAmount,
+          transition: "opacity 600ms ease-in-out",
+        }}
+      />
+    </div>
+  );
+}
 
 type StepKey =
   | "category"
@@ -196,11 +250,7 @@ function Showcase({
             className="absolute inset-x-10 bottom-10 h-2 rounded-full bg-neutral-900/10 blur-2xl"
           />
           {image ? (
-            <img
-              src={image}
-              alt={pet.custom_name}
-              className="relative h-44 w-44 object-contain drop-shadow-[0_12px_18px_rgba(0,0,0,0.12)]"
-            />
+            <PetArtwork src={image} alt={pet.custom_name} hasBackground={!!scenery.equipped} />
           ) : (
             <PawPrint className="h-20 w-20 text-neutral-300" />
           )}
