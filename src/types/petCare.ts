@@ -70,3 +70,40 @@ export const PET_CARE_ACTION_LABEL: Record<PetCareKindWithItems, string> = {
   sleep: "Ninar",
   affection: "Carinho",
 };
+
+export type PetRuntimeRule = {
+  kind: PetCareKind | "all";
+  restore_mult: number;
+  energy_cost_mult: number;
+  decay_mult: number;
+  cap_max: number | null;
+  note: string | null;
+};
+
+export type PetRuntimeBuff = {
+  kind: PetCareKind | "all";
+  restore_mult: number;
+  decay_mult: number;
+  label: string | null;
+  expires_at: string;
+};
+
+export type PetRuntimeModifiers = {
+  rules: PetRuntimeRule[];
+  buffs: PetRuntimeBuff[];
+  daypart: "day" | "night";
+  values: Record<PetCareKind, number>;
+};
+
+export type ApplyCareResult = {
+  new_value: number;
+  restore: number;
+  energy: number;
+  energy_delta: number;
+  multiplier: number;
+  notes: string[];
+  random_event:
+    | { type: "coins"; amount: number; label: string }
+    | { type: "buff"; kind: PetCareKind | "all"; mult: number; duration_min: number; label: string }
+    | null;
+};
