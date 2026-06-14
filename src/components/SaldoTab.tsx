@@ -296,7 +296,6 @@ function EmptyState() {
 }
 
 function TxRow({ tx }: { tx: CoinTx }) {
-  const _ = 0;
   const isIn = tx.direction === "in";
   const valueColor = isIn
     ? "text-emerald-600 dark:text-emerald-400"
