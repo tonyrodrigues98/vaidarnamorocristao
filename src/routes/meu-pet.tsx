@@ -230,6 +230,45 @@ function Showcase({
     speciesId: pet.species?.id ?? null,
   });
 
+  // ----- Central de Ações: estado + valores derivados -----
+  const [careConfig, setCareConfig] = useState<PetCareConfig | null>(null);
+  const [careStates, setCareStates] = useState<PetCareState[]>([]);
+  const [tick, setTick] = useState(0);
+  const [radialOpen, setRadialOpen] = useState(false);
+  const [actionKind, setActionKind] = useState<PetCareKind | null>(null);
+
+  async function reloadCare() {
+    try {
+      const [cfg, rows] = await Promise.all([getCareConfig(), listCareState(pet.id)]);
+      setCareConfig(cfg);
+      setCareStates(rows);
+    } catch (e) {
+      // silencioso — UI degrada para valores padrão
+    }
+  }
+
+  useEffect(() => {
+    void reloadCare();
+    // re-render a cada 30s pra suavizar barras/energia
+    const t = setInterval(() => setTick((n) => n + 1), 30_000);
+    return () => clearInterval(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pet.id]);
+
+  const careValues = useMemo(() => {
+    const cfg = careConfig ?? { id: 1, decay_per_hour: 2, energy_regen_minutes_per_point: 6 };
+    const map = {} as Record<PetCareKind, number>;
+    const byKind = new Map(careStates.map((s) => [s.kind, s]));
+    for (const k of PET_CARE_ORDER) {
+      map[k] = deriveCurrentValue(byKind.get(k), cfg, k);
+    }
+    return map;
+    // tick força recálculo
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [careStates, careConfig, tick]);
+
+  const longPress = useLongPress(() => setRadialOpen(true), 350);
+
   async function saveName() {
     try {
       await updateMyPetV2(pet.id, { custom_name: name.trim().slice(0, 30) || pet.custom_name });
