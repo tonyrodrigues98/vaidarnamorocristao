@@ -242,6 +242,7 @@ function Showcase({
   const [tick, setTick] = useState(0);
   const [radialOpen, setRadialOpen] = useState(false);
   const [actionKind, setActionKind] = useState<PetCareKind | null>(null);
+  const [xpRefresh, setXpRefresh] = useState(0);
 
   async function reloadCare() {
     try {
@@ -461,7 +462,10 @@ function Showcase({
         speciesId={pet.species?.id ?? null}
         currentValue={actionKind ? careValues[actionKind] ?? 0 : 0}
         onClose={() => setActionKind(null)}
-        onApplied={() => void reloadCare()}
+          onApplied={() => {
+            void reloadCare();
+            setXpRefresh((n) => n + 1);
+          }}
       />
     )}
     </>
