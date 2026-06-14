@@ -11,6 +11,12 @@ import {
   VenetianMask,
   Gift,
   Sticker,
+  PawPrint,
+  Utensils,
+  Bone,
+  Bath,
+  BedDouble,
+  HeartHandshake,
 } from "lucide-react";
 import coinIcon from "@/assets/coin.webp";
 import coinSound from "@/assets/coin-reward.mp3";
