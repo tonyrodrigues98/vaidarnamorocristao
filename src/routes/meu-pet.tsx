@@ -56,6 +56,7 @@ import {
   type PetRuntimeModifiers,
 } from "@/types/petCare";
 import { getPetMood } from "@/lib/petMood";
+import { PetXpBar } from "@/components/pet/PetXpBar";
 
 export const Route = createFileRoute("/meu-pet")({ component: MeuPetPage });
 
