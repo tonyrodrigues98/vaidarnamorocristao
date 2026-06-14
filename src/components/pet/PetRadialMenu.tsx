@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { createPortal } from "react-dom";
 import { PET_CARE_LABEL, PET_CARE_ORDER, type PetCareKind } from "@/types/petCare";
 import { PET_CARE_ICON } from "./PetNeedsHud";
 import { cn } from "@/lib/utils";
@@ -31,7 +32,9 @@ export function PetRadialMenu({
 
   const total = PET_CARE_ORDER.length;
 
-  return (
+  if (typeof document === "undefined") return null;
+
+  return createPortal(
     <div
       className="fixed inset-0 z-[60] grid place-items-center p-4"
       onClick={onClose}
@@ -82,7 +85,8 @@ export function PetRadialMenu({
           ×
         </button>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 
