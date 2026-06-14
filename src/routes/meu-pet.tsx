@@ -294,10 +294,15 @@ function Showcase({
   return (
     <>
     <section className="overflow-hidden rounded-3xl border border-neutral-200/80 bg-white shadow-[0_1px_0_rgba(0,0,0,0.02),0_24px_60px_-30px_rgba(0,0,0,0.12)]">
+      {/* HUD full-width no desktop para barras legíveis */}
+      <div className="hidden border-b border-neutral-100 bg-neutral-50/60 p-4 sm:block">
+        <PetNeedsHud values={careValues} onPick={(k) => setActionKind(k)} />
+      </div>
       <div className="grid gap-0 sm:grid-cols-[260px_1fr]">
         {/* Visual */}
         <div className="relative flex flex-col items-stretch justify-center overflow-hidden border-b border-neutral-100 bg-gradient-to-b from-neutral-50 to-white p-4 sm:border-b-0 sm:border-r sm:p-6">
-          <div className="relative z-20 mb-3">
+          {/* HUD compacto apenas no mobile */}
+          <div className="relative z-20 mb-3 sm:hidden">
             <PetNeedsHud values={careValues} onPick={(k) => setActionKind(k)} />
           </div>
           <div className="relative flex min-h-[240px] flex-1 items-center justify-center">
