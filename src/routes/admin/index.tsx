@@ -1557,7 +1557,7 @@ function GrantCoinsButton({ userId, userName }: { userId: string; userName: stri
           <Label htmlFor="grant-coins-amount">Quantidade</Label>
           <Input
             id="grant-coins-amount"
-            type="number"
+            type="text" inputMode="decimal"
             min={1}
             max={500}
             step={1}
@@ -1862,7 +1862,7 @@ function PreCadastrosPanel({
             <div className="space-y-1">
               <Label>Idade</Label>
               <Input
-                type="number"
+                type="text" inputMode="decimal"
                 value={draft.age ?? ""}
                 onChange={(e) => set("age", numOrNull(e.target.value))}
               />
@@ -1870,7 +1870,7 @@ function PreCadastrosPanel({
             <div className="space-y-1">
               <Label>Altura (cm)</Label>
               <Input
-                type="number"
+                type="text" inputMode="decimal"
                 value={draft.height_cm ?? ""}
                 onChange={(e) => set("height_cm", numOrNull(e.target.value))}
               />
@@ -1932,7 +1932,7 @@ function PreCadastrosPanel({
             <div className="space-y-1">
               <Label>Idade desejada (mín)</Label>
               <Input
-                type="number"
+                type="text" inputMode="decimal"
                 value={draft.pref_age_min ?? ""}
                 onChange={(e) => set("pref_age_min", numOrNull(e.target.value))}
               />
@@ -1940,7 +1940,7 @@ function PreCadastrosPanel({
             <div className="space-y-1">
               <Label>Idade desejada (máx)</Label>
               <Input
-                type="number"
+                type="text" inputMode="decimal"
                 value={draft.pref_age_max ?? ""}
                 onChange={(e) => set("pref_age_max", numOrNull(e.target.value))}
               />
@@ -1978,7 +1978,7 @@ function PreCadastrosPanel({
                 <div className="space-y-1">
                   <Label className="text-xs">Quantidade de filhos</Label>
                   <Input
-                    type="number"
+                    type="text" inputMode="decimal"
                     min={1}
                     value={draft.children_count ?? ""}
                     onChange={(e) => set("children_count", numOrNull(e.target.value))}
@@ -2807,7 +2807,7 @@ function MatchDialog({
           <div className="space-y-1">
             <Label>Idade</Label>
             <Input
-              type="number"
+              type="text" inputMode="decimal"
               value={draft.partner_age ?? ""}
               onChange={(e) => set("partner_age", numOrNull(e.target.value))}
             />
@@ -2815,7 +2815,7 @@ function MatchDialog({
           <div className="space-y-1">
             <Label>Altura (cm)</Label>
             <Input
-              type="number"
+              type="text" inputMode="decimal"
               value={draft.partner_height_cm ?? ""}
               onChange={(e) => set("partner_height_cm", numOrNull(e.target.value))}
             />
@@ -2896,7 +2896,7 @@ function MatchDialog({
               <div className="space-y-1">
                 <Label className="text-xs">Quantidade</Label>
                 <Input
-                  type="number"
+                  type="text" inputMode="decimal"
                   min={1}
                   value={draft.partner_children_count ?? ""}
                   onChange={(e) => set("partner_children_count", numOrNull(e.target.value))}

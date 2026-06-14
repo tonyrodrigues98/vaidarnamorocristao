@@ -489,7 +489,7 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
             </div>
             <Field icon={Hash} label="Ordem">
               <Input
-                type="number"
+                type="text" inputMode="decimal"
                 value={(draft.sort_order as number) ?? 0}
                 onChange={(e) => setDraft({ ...draft, sort_order: Number(e.target.value) })}
               />
@@ -602,7 +602,7 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
                 {selectedEffect?.numeric_param && (
                   <Field icon={Hash} label="Quantidade">
                     <Input
-                      type="number"
+                      type="text" inputMode="decimal"
                       value={(draft.effect_param as number) ?? selectedEffect.default_param ?? 0}
                       onChange={(e) =>
                         setDraft({ ...draft, effect_param: Number(e.target.value) || 0 })
@@ -741,7 +741,7 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
                         {selectedEffect?.numeric_param && (
                           <Field icon={Hash} label="Quantidade">
                             <Input
-                              type="number"
+                              type="text" inputMode="decimal"
                               value={(draft.effect_param as number) ?? selectedEffect.default_param ?? 0}
                               onChange={(e) =>
                                 setDraft({ ...draft, effect_param: Number(e.target.value) || 0 })
@@ -809,7 +809,7 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
                     </Field>
                     <Field icon={Sparkles} label="Preço (moedas)">
                       <Input
-                        type="number"
+                        type="text" inputMode="decimal"
                         min={0}
                         value={(draft.price_coins as number) ?? 0}
                         onChange={(e) =>
@@ -1509,7 +1509,7 @@ function PerkEffectsPanel() {
             </Field>
             <Field icon={Hash} label="Ordem">
               <Input
-                type="number"
+                type="text" inputMode="decimal"
                 value={draft.sort_order ?? 0}
                 onChange={(e) => setDraft({ ...draft, sort_order: Number(e.target.value) || 0 })}
               />
@@ -1524,7 +1524,7 @@ function PerkEffectsPanel() {
             {draft.numeric_param && (
               <Field icon={Hash} label="Valor padrão">
                 <Input
-                  type="number"
+                  type="text" inputMode="decimal"
                   value={draft.default_param ?? 0}
                   onChange={(e) => setDraft({ ...draft, default_param: Number(e.target.value) || 0 })}
                 />
@@ -1871,7 +1871,7 @@ function LegacyPetsPanel() {
             </div>
             <Field icon={Hash} label="Ordem">
               <Input
-                type="number"
+                type="text" inputMode="decimal"
                 value={draft.sort_order ?? 0}
                 onChange={(e) => setDraft({ ...draft, sort_order: Number(e.target.value) || 0 })}
               />
@@ -1915,7 +1915,7 @@ function LegacyPetsPanel() {
                 </Field>
                 <Field icon={Sparkles} label="Preço (moedas)">
                   <Input
-                    type="number"
+                    type="text" inputMode="decimal"
                     min={0}
                     value={draft.price_coins ?? 0}
                     onChange={(e) =>
