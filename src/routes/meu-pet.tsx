@@ -41,6 +41,7 @@ import { usePetDayNight } from "@/lib/petDayNight";
 import { PetNeedsHud } from "@/components/pet/PetNeedsHud";
 import { PetRadialMenu, useLongPress } from "@/components/pet/PetRadialMenu";
 import { PetCareActionSheet } from "@/components/pet/PetCareActionSheet";
+import { PetMoodLine } from "@/components/pet/PetMoodLine";
 import {
   deriveCurrentValue,
   getCareConfig,
