@@ -58,6 +58,7 @@ import {
 import { getPetMood } from "@/lib/petMood";
 import { PetXpBar } from "@/components/pet/PetXpBar";
 import { PetEffectsLayer } from "@/components/pet/PetEffectsLayer";
+import { MissionsTodayCard } from "@/components/pet/MissionsTodayCard";
 
 export const Route = createFileRoute("/meu-pet")({ component: MeuPetPage });
 
