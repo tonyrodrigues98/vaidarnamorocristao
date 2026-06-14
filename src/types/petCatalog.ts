@@ -23,7 +23,11 @@ export type PetSpeciesProductFields = {
 };
 
 export type PetSpecies = PetCatalogEntity &
-  PetSpeciesProductFields & { category_id: string; benefit_id: string | null };
+  PetSpeciesProductFields & {
+    category_id: string;
+    benefit_id: string | null;
+    nocturnal: boolean;
+  };
 
 export type PetVariant = PetCatalogEntity &
   PetSpeciesProductFields & {

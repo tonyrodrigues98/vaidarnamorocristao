@@ -57,6 +57,7 @@ import {
 } from "@/types/petCare";
 import { getPetMood } from "@/lib/petMood";
 import { PetXpBar } from "@/components/pet/PetXpBar";
+import { PetEffectsLayer } from "@/components/pet/PetEffectsLayer";
 
 export const Route = createFileRoute("/meu-pet")({ component: MeuPetPage });
 
@@ -354,6 +355,12 @@ function Showcase({
               setRadialOpen(false);
               setActionKind(k);
             }}
+          />
+          <PetEffectsLayer
+            hygiene={careValues.hygiene ?? 100}
+            happiness={careValues.play ?? 100}
+            affection={careValues.affection ?? 100}
+            nocturnal={(pet.species as { nocturnal?: boolean } | null)?.nocturnal ?? false}
           />
           </div>
           <p className="relative z-10 mt-2 px-4 pb-4 text-center text-[10px] uppercase tracking-wider text-neutral-400 sm:pb-6">

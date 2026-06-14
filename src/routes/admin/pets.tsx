@@ -530,6 +530,16 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
               </div>
             )}
 
+            {table === "pet_species" && (
+              <div className="flex items-end gap-3">
+                <Switch
+                  checked={Boolean(draft.nocturnal)}
+                  onCheckedChange={(v) => setDraft({ ...draft, nocturnal: v })}
+                />
+                <span className="text-sm">Noturno (dorme de dia)</span>
+              </div>
+            )}
+
             {table === "pet_variants" && (
               <>
                 <Field icon={Layers} label="Categoria">
