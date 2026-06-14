@@ -38,6 +38,20 @@ import type {
 import { cn } from "@/lib/utils";
 import { PetBackgroundLayer, PetSceneryPanel, usePetScenery } from "@/components/pet/PetSceneryPanel";
 import { usePetDayNight } from "@/lib/petDayNight";
+import { PetNeedsHud } from "@/components/pet/PetNeedsHud";
+import { PetRadialMenu, useLongPress } from "@/components/pet/PetRadialMenu";
+import { PetCareActionSheet } from "@/components/pet/PetCareActionSheet";
+import {
+  deriveCurrentValue,
+  getCareConfig,
+  listCareState,
+} from "@/lib/petCare";
+import {
+  PET_CARE_ORDER,
+  type PetCareConfig,
+  type PetCareKind,
+  type PetCareState,
+} from "@/types/petCare";
 
 export const Route = createFileRoute("/meu-pet")({ component: MeuPetPage });
 
