@@ -296,17 +296,46 @@ function Showcase({
     <section className="overflow-hidden rounded-3xl border border-neutral-200/80 bg-white shadow-[0_1px_0_rgba(0,0,0,0.02),0_24px_60px_-30px_rgba(0,0,0,0.12)]">
       <div className="grid gap-0 sm:grid-cols-[260px_1fr]">
         {/* Visual */}
-        <div className="relative flex items-center justify-center overflow-hidden border-b border-neutral-100 bg-gradient-to-b from-neutral-50 to-white p-8 sm:border-b-0 sm:border-r">
+        <div className="relative flex flex-col items-stretch justify-center overflow-hidden border-b border-neutral-100 bg-gradient-to-b from-neutral-50 to-white p-4 sm:border-b-0 sm:border-r sm:p-6">
+          <div className="relative z-20 mb-3">
+            <PetNeedsHud values={careValues} onPick={(k) => setActionKind(k)} />
+          </div>
+          <div className="relative flex min-h-[240px] flex-1 items-center justify-center">
           <PetBackgroundLayer background={scenery.equipped} />
           <div
             aria-hidden
             className="absolute inset-x-10 bottom-10 h-2 rounded-full bg-neutral-900/10 blur-2xl"
           />
-          {image ? (
-            <PetArtwork src={image} alt={pet.custom_name} hasBackground={!!scenery.equipped} />
-          ) : (
-            <PawPrint className="h-20 w-20 text-neutral-300" />
-          )}
+          <button
+            type="button"
+            {...longPress}
+            onContextMenu={(e) => {
+              e.preventDefault();
+              setRadialOpen(true);
+            }}
+            onDoubleClick={() => setRadialOpen(true)}
+            className="relative z-10 cursor-pointer select-none touch-none rounded-3xl outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
+            aria-label="Segure para abrir a central de ações"
+          >
+            {image ? (
+              <PetArtwork src={image} alt={pet.custom_name} hasBackground={!!scenery.equipped} />
+            ) : (
+              <PawPrint className="h-20 w-20 text-neutral-300" />
+            )}
+          </button>
+          <PetRadialMenu
+            open={radialOpen}
+            values={careValues}
+            onClose={() => setRadialOpen(false)}
+            onPick={(k) => {
+              setRadialOpen(false);
+              setActionKind(k);
+            }}
+          />
+          </div>
+          <p className="relative z-10 mt-2 text-center text-[10px] uppercase tracking-wider text-neutral-400">
+            Segure no pet para abrir as ações
+          </p>
         </div>
 
         {/* Info */}
