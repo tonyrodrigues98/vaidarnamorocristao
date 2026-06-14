@@ -430,6 +430,18 @@ function Showcase({
         onChanged={scenery.reload}
       />
     )}
+    {pet.category?.id && (
+      <PetCareActionSheet
+        open={actionKind !== null}
+        kind={actionKind}
+        userPetId={pet.id}
+        categoryId={pet.category.id}
+        speciesId={pet.species?.id ?? null}
+        currentValue={actionKind ? careValues[actionKind] ?? 0 : 0}
+        onClose={() => setActionKind(null)}
+        onApplied={() => void reloadCare()}
+      />
+    )}
     </>
   );
 }
