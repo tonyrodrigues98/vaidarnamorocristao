@@ -37,6 +37,7 @@ import type {
 } from "@/types/petCatalog";
 import { cn } from "@/lib/utils";
 import { PetBackgroundLayer, PetSceneryPanel, usePetScenery } from "@/components/pet/PetSceneryPanel";
+import { usePetDayNight } from "@/lib/petDayNight";
 
 export const Route = createFileRoute("/meu-pet")({ component: MeuPetPage });
 
@@ -196,11 +197,7 @@ function Showcase({
             className="absolute inset-x-10 bottom-10 h-2 rounded-full bg-neutral-900/10 blur-2xl"
           />
           {image ? (
-            <img
-              src={image}
-              alt={pet.custom_name}
-              className="relative h-44 w-44 object-contain drop-shadow-[0_12px_18px_rgba(0,0,0,0.12)]"
-            />
+            <PetArtwork src={image} alt={pet.custom_name} hasBackground={!!scenery.equipped} />
           ) : (
             <PawPrint className="h-20 w-20 text-neutral-300" />
           )}
