@@ -247,6 +247,7 @@ function Showcase({
   const [tick, setTick] = useState(0);
   const [radialOpen, setRadialOpen] = useState(false);
   const [actionKind, setActionKind] = useState<PetCareKind | null>(null);
+  const [confessionTrigger, setConfessionTrigger] = useState(0);
   const [xpRefresh, setXpRefresh] = useState(0);
 
   async function reloadCare() {
