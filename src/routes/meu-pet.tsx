@@ -59,6 +59,8 @@ import { getPetMood } from "@/lib/petMood";
 import { PetXpBar } from "@/components/pet/PetXpBar";
 import { PetEffectsLayer } from "@/components/pet/PetEffectsLayer";
 import { MissionsTodayCard } from "@/components/pet/MissionsTodayCard";
+import { Link as RouterLink } from "@tanstack/react-router";
+import { BookOpen } from "lucide-react";
 
 export const Route = createFileRoute("/meu-pet")({ component: MeuPetPage });
 
