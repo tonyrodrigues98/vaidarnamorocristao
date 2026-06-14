@@ -140,7 +140,7 @@ export async function listCareItemsForPet(opts: {
     .from("pet_care_item_compat" as any)
     .select("item_id, category_id, species_id");
   if (ce) throw ce;
-  const compat = (c ?? []) as PetCareItemCompat[];
+  const compat = ((c ?? []) as unknown) as PetCareItemCompat[];
   const allowed = new Set<string>();
   for (const r of compat) {
     if (r.category_id !== opts.categoryId) continue;
