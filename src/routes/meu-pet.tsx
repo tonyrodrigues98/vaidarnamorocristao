@@ -454,6 +454,7 @@ function Showcase({
         <PetXpBar refreshKey={xpRefresh} />
       </div>
     </section>
+    <MissionsTodayCard refreshKey={xpRefresh} />
     {pet.category?.id && (
       <PetSceneryPanel
         categoryId={pet.category.id}
