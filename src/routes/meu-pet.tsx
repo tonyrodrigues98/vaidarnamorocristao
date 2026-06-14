@@ -366,6 +366,7 @@ function Showcase({
             affection={careValues.affection ?? 100}
             nocturnal={(pet.species as { nocturnal?: boolean } | null)?.nocturnal ?? false}
           />
+          <PetConfessionBubble triggerKey={confessionTrigger} />
           </div>
           <p className="relative z-10 mt-2 px-4 pb-4 text-center text-[10px] uppercase tracking-wider text-neutral-400 sm:pb-6">
             Segure no pet para abrir as ações
