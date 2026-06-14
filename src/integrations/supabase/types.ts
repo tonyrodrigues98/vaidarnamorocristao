@@ -1631,6 +1631,57 @@ export type Database = {
         }
         Relationships: []
       }
+      pet_missions: {
+        Row: {
+          action_key: string
+          active: boolean
+          category: string
+          coin_reward: number
+          created_at: string
+          description: string | null
+          difficulty: string
+          icon: string
+          id: string
+          slug: string
+          sort_order: number
+          target: number
+          title: string
+          xp_reward: number
+        }
+        Insert: {
+          action_key: string
+          active?: boolean
+          category: string
+          coin_reward?: number
+          created_at?: string
+          description?: string | null
+          difficulty?: string
+          icon?: string
+          id?: string
+          slug: string
+          sort_order?: number
+          target?: number
+          title: string
+          xp_reward?: number
+        }
+        Update: {
+          action_key?: string
+          active?: boolean
+          category?: string
+          coin_reward?: number
+          created_at?: string
+          description?: string | null
+          difficulty?: string
+          icon?: string
+          id?: string
+          slug?: string
+          sort_order?: number
+          target?: number
+          title?: string
+          xp_reward?: number
+        }
+        Relationships: []
+      }
       pet_perk_effects: {
         Row: {
           active: boolean
@@ -3656,6 +3707,44 @@ export type Database = {
         }
         Relationships: []
       }
+      user_daily_missions: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          day: string
+          id: string
+          mission_id: string
+          progress: number
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          day?: string
+          id?: string
+          mission_id: string
+          progress?: number
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          day?: string
+          id?: string
+          mission_id?: string
+          progress?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_daily_missions_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "pet_missions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_decorations: {
         Row: {
           decoration_id: string
@@ -4543,6 +4632,25 @@ export type Database = {
           sender_id: string
         }[]
       }
+      get_today_missions: {
+        Args: never
+        Returns: {
+          action_key: string
+          category: string
+          coin_reward: number
+          completed_at: string
+          description: string
+          difficulty: string
+          icon: string
+          id: string
+          mission_id: string
+          progress: number
+          slug: string
+          target: number
+          title: string
+          xp_reward: number
+        }[]
+      }
       get_user_primary_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
@@ -4612,6 +4720,10 @@ export type Database = {
       }
       pet_runtime_modifiers: { Args: { _user_pet_id: string }; Returns: Json }
       pet_state_snapshot: { Args: { _user_pet_id: string }; Returns: Json }
+      progress_mission_action: {
+        Args: { _action_key: string; _inc?: number; _user_id: string }
+        Returns: undefined
+      }
       purchase_avatar_item: { Args: { _item_id: string }; Returns: Json }
       purchase_decoration: { Args: { _decoration_id: string }; Returns: Json }
       purchase_name_gradient: { Args: { _gradient_id: string }; Returns: Json }
@@ -4642,6 +4754,24 @@ export type Database = {
         Returns: string
       }
       request_reverification: { Args: { _message: string }; Returns: string }
+      roll_daily_missions: {
+        Args: never
+        Returns: {
+          completed_at: string | null
+          created_at: string
+          day: string
+          id: string
+          mission_id: string
+          progress: number
+          user_id: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "user_daily_missions"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       run_reactivation_reminders: { Args: never; Returns: number }
       send_anonymous_hint: {
         Args: { _hint_option_id: string; _message_id: string }
