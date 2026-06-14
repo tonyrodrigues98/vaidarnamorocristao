@@ -314,7 +314,7 @@ function Showcase({
   }
 
   return (
-    <>
+    <div className="space-y-4">
     <section className="overflow-hidden rounded-3xl border border-neutral-200/80 bg-white shadow-[0_1px_0_rgba(0,0,0,0.02),0_24px_60px_-30px_rgba(0,0,0,0.12)]">
       {/* HUD full-width no desktop para barras legíveis */}
       <div className="hidden border-b border-neutral-100 bg-neutral-50/60 p-4 sm:block">
@@ -512,7 +512,7 @@ function Showcase({
           }}
       />
     )}
-    </>
+    </div>
   );
 }
 
