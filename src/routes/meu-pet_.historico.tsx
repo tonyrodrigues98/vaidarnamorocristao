@@ -14,7 +14,7 @@ import {
 import { PET_CARE_ICON } from "@/components/pet/PetNeedsHud";
 import { cn } from "@/lib/utils";
 
-export const Route = createFileRoute("/meu-pet/historico")({
+export const Route = createFileRoute("/meu-pet_/historico")({
   component: PetCareHistoryPage,
 });
 
