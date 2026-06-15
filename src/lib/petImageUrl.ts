@@ -17,9 +17,10 @@ function extractPath(raw: string | null | undefined): string | null {
   if (!raw) return null;
   for (const m of MARKERS) {
     const i = raw.indexOf(m);
-    if (i >= 0) return raw.slice(i + m.length).split("?")[0];
+    if (i >= 0) return decodeURIComponent(raw.slice(i + m.length).split("?")[0]);
   }
-  return null;
+  if (/^(https?:|data:|blob:|\/)/i.test(raw)) return null;
+  return decodeURIComponent(raw.split("?")[0]);
 }
 
 async function sign(path: string): Promise<string | null> {
