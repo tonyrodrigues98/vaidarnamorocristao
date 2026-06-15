@@ -86,10 +86,63 @@ export async function getPrestige(): Promise<PrestigeState> {
 
 export type RebirthResult =
   | { ok: false; reason: string; required_level?: number }
-  | { ok: true; new_prestige_level: number; xp_bonus_pct: number };
+  | {
+      ok: true;
+      new_prestige_level: number;
+      xp_bonus_pct: number;
+      medal: MedalKind | null;
+    };
 
 export async function prestigeRebirth(): Promise<RebirthResult> {
   const { data, error } = await supabase.rpc("prestige_rebirth" as never);
   if (error) throw error;
   return data as RebirthResult;
+}
+
+export type MedalKind = "bronze" | "silver" | "gold" | "diamond";
+
+/** Marcos de prestígio que desbloqueiam medalhas. */
+export const PRESTIGE_MEDALS: ReadonlyArray<{
+  level: number;
+  medal: MedalKind;
+  label: string;
+}> = [
+  { level: 1, medal: "bronze", label: "Bronze" },
+  { level: 3, medal: "silver", label: "Prata" },
+  { level: 5, medal: "gold", label: "Ouro" },
+  { level: 10, medal: "diamond", label: "Diamante" },
+];
+
+/** Próxima medalha a conquistar com base no nível de prestígio atual. */
+export function nextMedal(currentLevel: number): {
+  next: { level: number; medal: MedalKind; label: string } | null;
+  current: { level: number; medal: MedalKind; label: string } | null;
+  progress: number; // 0..1 até a próxima medalha
+} {
+  const past = PRESTIGE_MEDALS.filter((m) => currentLevel >= m.level);
+  const current = past.length ? past[past.length - 1] : null;
+  const next = PRESTIGE_MEDALS.find((m) => m.level > currentLevel) ?? null;
+  if (!next) return { next: null, current, progress: 1 };
+  const start = current?.level ?? 0;
+  const span = next.level - start;
+  const done = currentLevel - start;
+  return {
+    next,
+    current,
+    progress: span > 0 ? Math.max(0, Math.min(1, done / span)) : 0,
+  };
+}
+
+export type RebirthHistoryRow = {
+  id: string;
+  prestige_level: number;
+  xp_at_rebirth: number;
+  medal: MedalKind | null;
+  created_at: string;
+};
+
+export async function getRebirthHistory(): Promise<RebirthHistoryRow[]> {
+  const { data, error } = await supabase.rpc("get_my_rebirth_history" as never);
+  if (error) throw error;
+  return (data ?? []) as RebirthHistoryRow[];
 }
