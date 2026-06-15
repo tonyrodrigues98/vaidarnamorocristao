@@ -63,6 +63,10 @@ import { PetConfessionBubble } from "@/components/pet/PetConfessionBubble";
 import { MissionsTodayCard } from "@/components/pet/MissionsTodayCard";
 import { PetCareHistoryCard } from "@/components/pet/PetCareHistoryCard";
 import { PetOnboardingTour } from "@/components/pet/PetOnboardingTour";
+import {
+  PetRandomEventModal,
+  type PetRandomEventPayload,
+} from "@/components/pet/PetRandomEventModal";
 import { Link as RouterLink } from "@tanstack/react-router";
 import { BookOpen, MessageCircle } from "lucide-react";
 
@@ -249,6 +253,7 @@ function Showcase({
   const [actionKind, setActionKind] = useState<PetCareKind | null>(null);
   const [confessionTrigger, setConfessionTrigger] = useState(0);
   const [xpRefresh, setXpRefresh] = useState(0);
+  const [randomEvent, setRandomEvent] = useState<PetRandomEventPayload | null>(null);
 
   async function reloadCare() {
     try {
@@ -529,8 +534,10 @@ function Showcase({
             void reloadCare();
             setXpRefresh((n) => n + 1);
           }}
+          onRandomEvent={(ev) => setRandomEvent(ev)}
       />
     )}
+    <PetRandomEventModal event={randomEvent} onClose={() => setRandomEvent(null)} />
     </div>
   );
 }
