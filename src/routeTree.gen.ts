@@ -48,7 +48,6 @@ import { Route as PropositoMatchIdRouteImport } from './routes/proposito/$matchI
 import { Route as PretendentesIdRouteImport } from './routes/pretendentes/$id'
 import { Route as OnboardingEtapa2RouteImport } from './routes/onboarding/etapa-2'
 import { Route as OnboardingEtapa1RouteImport } from './routes/onboarding/etapa-1'
-import { Route as MeuPetHistoricoRouteImport } from './routes/meu-pet_.historico'
 import { Route as ConversasComunidadeRouteImport } from './routes/conversas/comunidade'
 import { Route as ConversasMatchIdRouteImport } from './routes/conversas/$matchId'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
@@ -268,11 +267,6 @@ const OnboardingEtapa1Route = OnboardingEtapa1RouteImport.update({
   path: '/onboarding/etapa-1',
   getParentRoute: () => rootRouteImport,
 } as any)
-const MeuPetHistoricoRoute = MeuPetHistoricoRouteImport.update({
-  id: '/meu-pet_/historico',
-  path: '/meu-pet/historico',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ConversasComunidadeRoute = ConversasComunidadeRouteImport.update({
   id: '/conversas/comunidade',
   path: '/conversas/comunidade',
@@ -438,7 +432,6 @@ export interface FileRoutesByFullPath {
   '/blog/$slug': typeof BlogSlugRoute
   '/conversas/$matchId': typeof ConversasMatchIdRoute
   '/conversas/comunidade': typeof ConversasComunidadeRoute
-  '/meu-pet/historico': typeof MeuPetHistoricoRoute
   '/onboarding/etapa-1': typeof OnboardingEtapa1Route
   '/onboarding/etapa-2': typeof OnboardingEtapa2Route
   '/pretendentes/$id': typeof PretendentesIdRoute
@@ -503,7 +496,6 @@ export interface FileRoutesByTo {
   '/blog/$slug': typeof BlogSlugRoute
   '/conversas/$matchId': typeof ConversasMatchIdRoute
   '/conversas/comunidade': typeof ConversasComunidadeRoute
-  '/meu-pet/historico': typeof MeuPetHistoricoRoute
   '/onboarding/etapa-1': typeof OnboardingEtapa1Route
   '/onboarding/etapa-2': typeof OnboardingEtapa2Route
   '/pretendentes/$id': typeof PretendentesIdRoute
@@ -569,7 +561,6 @@ export interface FileRoutesById {
   '/blog/$slug': typeof BlogSlugRoute
   '/conversas/$matchId': typeof ConversasMatchIdRoute
   '/conversas/comunidade': typeof ConversasComunidadeRoute
-  '/meu-pet_/historico': typeof MeuPetHistoricoRoute
   '/onboarding/etapa-1': typeof OnboardingEtapa1Route
   '/onboarding/etapa-2': typeof OnboardingEtapa2Route
   '/pretendentes/$id': typeof PretendentesIdRoute
@@ -636,7 +627,6 @@ export interface FileRouteTypes {
     | '/blog/$slug'
     | '/conversas/$matchId'
     | '/conversas/comunidade'
-    | '/meu-pet/historico'
     | '/onboarding/etapa-1'
     | '/onboarding/etapa-2'
     | '/pretendentes/$id'
@@ -701,7 +691,6 @@ export interface FileRouteTypes {
     | '/blog/$slug'
     | '/conversas/$matchId'
     | '/conversas/comunidade'
-    | '/meu-pet/historico'
     | '/onboarding/etapa-1'
     | '/onboarding/etapa-2'
     | '/pretendentes/$id'
@@ -766,7 +755,6 @@ export interface FileRouteTypes {
     | '/blog/$slug'
     | '/conversas/$matchId'
     | '/conversas/comunidade'
-    | '/meu-pet_/historico'
     | '/onboarding/etapa-1'
     | '/onboarding/etapa-2'
     | '/pretendentes/$id'
@@ -831,7 +819,6 @@ export interface RootRouteChildren {
   BlogSlugRoute: typeof BlogSlugRoute
   ConversasMatchIdRoute: typeof ConversasMatchIdRoute
   ConversasComunidadeRoute: typeof ConversasComunidadeRoute
-  MeuPetHistoricoRoute: typeof MeuPetHistoricoRoute
   OnboardingEtapa1Route: typeof OnboardingEtapa1Route
   OnboardingEtapa2Route: typeof OnboardingEtapa2Route
   PretendentesIdRoute: typeof PretendentesIdRoute
@@ -1124,13 +1111,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OnboardingEtapa1RouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/meu-pet_/historico': {
-      id: '/meu-pet_/historico'
-      path: '/meu-pet/historico'
-      fullPath: '/meu-pet/historico'
-      preLoaderRoute: typeof MeuPetHistoricoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/conversas/comunidade': {
       id: '/conversas/comunidade'
       path: '/conversas/comunidade'
@@ -1353,7 +1333,6 @@ const rootRouteChildren: RootRouteChildren = {
   BlogSlugRoute: BlogSlugRoute,
   ConversasMatchIdRoute: ConversasMatchIdRoute,
   ConversasComunidadeRoute: ConversasComunidadeRoute,
-  MeuPetHistoricoRoute: MeuPetHistoricoRoute,
   OnboardingEtapa1Route: OnboardingEtapa1Route,
   OnboardingEtapa2Route: OnboardingEtapa2Route,
   PretendentesIdRoute: PretendentesIdRoute,
