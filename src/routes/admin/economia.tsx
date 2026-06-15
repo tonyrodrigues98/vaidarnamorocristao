@@ -1,5 +1,5 @@
 import { createFileRoute, Navigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Loader2,
   TrendingUp,
@@ -9,12 +9,17 @@ import {
   AlertTriangle,
   ArrowDownLeft,
   ArrowUpRight,
+  Search,
+  Plus,
+  Minus,
+  X,
 } from "lucide-react";
 
 import { Header } from "@/components/layout/Header";
 import { AdminTopNav } from "@/components/admin/AdminTopNav";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/economia")({
   component: AdminEconomiaPage,
@@ -61,6 +66,8 @@ type EconomySummary = {
 };
 
 const WINDOWS = [7, 30, 90] as const;
+const TABS = ["overview", "users"] as const;
+type Tab = (typeof TABS)[number];
 
 const KIND_LABEL: Record<string, string> = {
   daily_claim: "Resgate diário",
@@ -87,6 +94,7 @@ function kindLabel(kind: string) {
 
 function AdminEconomiaPage() {
   const { isAdmin, loading: authLoading } = useAuth();
+  const [tab, setTab] = useState<Tab>("overview");
   const [days, setDays] = useState<number>(30);
   const [data, setData] = useState<EconomySummary | null>(null);
   const [loading, setLoading] = useState(true);
@@ -142,9 +150,10 @@ function AdminEconomiaPage() {
           <div>
             <h1 className="text-2xl font-bold tracking-tight">Economia da plataforma</h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              Faucets, sinks, distribuição de saldos e atividade diária.
+              Faucets, sinks, distribuição de saldos e gestão por usuário.
             </p>
           </div>
+          {tab === "overview" && (
           <div className="inline-flex rounded-full border border-border bg-card p-1 text-xs font-semibold">
             {WINDOWS.map((w) => (
               <button
@@ -161,22 +170,42 @@ function AdminEconomiaPage() {
               </button>
             ))}
           </div>
+          )}
         </header>
 
-        {loading && (
+        <div className="mb-5 inline-flex rounded-full border border-border bg-card p-1 text-xs font-semibold">
+          <button
+            type="button"
+            onClick={() => setTab("overview")}
+            className={`rounded-full px-3 py-1.5 transition ${tab === "overview" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
+          >
+            Visão geral
+          </button>
+          <button
+            type="button"
+            onClick={() => setTab("users")}
+            className={`rounded-full px-3 py-1.5 transition ${tab === "users" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
+          >
+            Usuários
+          </button>
+        </div>
+
+        {tab === "users" && <UsersTab />}
+
+        {tab === "overview" && loading && (
           <div className="flex h-40 items-center justify-center">
             <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
           </div>
         )}
 
-        {error && (
+        {tab === "overview" && error && (
           <div className="rounded-2xl border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
             <AlertTriangle className="mr-2 inline h-4 w-4" />
             Não foi possível carregar os dados: {error}
           </div>
         )}
 
-        {data && !loading && (
+        {tab === "overview" && data && !loading && (
           <div className="space-y-6">
             {/* KPIs */}
             <section className="grid grid-cols-2 gap-3 md:grid-cols-4">
