@@ -61,7 +61,6 @@ import { PetXpBar } from "@/components/pet/PetXpBar";
 import { PetEffectsLayer } from "@/components/pet/PetEffectsLayer";
 import { PetConfessionBubble } from "@/components/pet/PetConfessionBubble";
 import { MissionsTodayCard } from "@/components/pet/MissionsTodayCard";
-import { PetCareHistoryCard } from "@/components/pet/PetCareHistoryCard";
 import { PetOnboardingTour } from "@/components/pet/PetOnboardingTour";
 import { PetShowcaseSkeleton } from "@/components/pet/PetShowcaseSkeleton";
 import { PetStreakCard } from "@/components/pet/PetStreakCard";
@@ -72,7 +71,7 @@ import {
   type PetRandomEventPayload,
 } from "@/components/pet/PetRandomEventModal";
 import { Link as RouterLink } from "@tanstack/react-router";
-import { BookOpen, MessageCircle } from "lucide-react";
+import { BookOpen, Clock, MessageCircle } from "lucide-react";
 
 export const Route = createFileRoute("/meu-pet")({ component: MeuPetPage });
 
@@ -497,7 +496,23 @@ function Showcase({
     <PetStreakCard refreshKey={xpRefresh} />
     <PetWeeklyChestCard refreshKey={xpRefresh} onClaimed={() => setXpRefresh((n) => n + 1)} />
     <PetProgressionCard refreshKey={xpRefresh} onChanged={() => setXpRefresh((n) => n + 1)} />
-    <PetCareHistoryCard userPetId={pet.id} refreshKey={xpRefresh} />
+    <RouterLink
+      to="/meu-pet/historico"
+      className="group flex items-center gap-3 rounded-2xl border border-neutral-200 bg-white p-4 transition hover:border-neutral-300 hover:shadow-sm"
+    >
+      <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-neutral-100 text-neutral-700">
+        <Clock className="size-5" />
+      </div>
+      <div className="min-w-0 flex-1">
+        <div className="text-sm font-semibold text-neutral-900">
+          Histórico de cuidado
+        </div>
+        <div className="text-[12px] text-neutral-500">
+          Veja as ações dos últimos 7 dias, filtradas por dia
+        </div>
+      </div>
+      <ArrowRight className="size-4 text-neutral-300 transition group-hover:text-neutral-500" />
+    </RouterLink>
     <PetOnboardingTour />
     <RouterLink
       to="/quiz-biblico"

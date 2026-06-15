@@ -48,6 +48,7 @@ import { Route as PropositoMatchIdRouteImport } from './routes/proposito/$matchI
 import { Route as PretendentesIdRouteImport } from './routes/pretendentes/$id'
 import { Route as OnboardingEtapa2RouteImport } from './routes/onboarding/etapa-2'
 import { Route as OnboardingEtapa1RouteImport } from './routes/onboarding/etapa-1'
+import { Route as MeuPetHistoricoRouteImport } from './routes/meu-pet.historico'
 import { Route as ConversasComunidadeRouteImport } from './routes/conversas/comunidade'
 import { Route as ConversasMatchIdRouteImport } from './routes/conversas/$matchId'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
@@ -267,6 +268,11 @@ const OnboardingEtapa1Route = OnboardingEtapa1RouteImport.update({
   path: '/onboarding/etapa-1',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MeuPetHistoricoRoute = MeuPetHistoricoRouteImport.update({
+  id: '/historico',
+  path: '/historico',
+  getParentRoute: () => MeuPetRoute,
+} as any)
 const ConversasComunidadeRoute = ConversasComunidadeRouteImport.update({
   id: '/conversas/comunidade',
   path: '/conversas/comunidade',
@@ -401,7 +407,7 @@ export interface FileRoutesByFullPath {
   '/loja': typeof LojaRoute
   '/manual': typeof ManualRoute
   '/matches': typeof MatchesRoute
-  '/meu-pet': typeof MeuPetRoute
+  '/meu-pet': typeof MeuPetRouteWithChildren
   '/notificacoes': typeof NotificacoesRoute
   '/oracoes': typeof OracoesRoute
   '/perfil': typeof PerfilRoute
@@ -432,6 +438,7 @@ export interface FileRoutesByFullPath {
   '/blog/$slug': typeof BlogSlugRoute
   '/conversas/$matchId': typeof ConversasMatchIdRoute
   '/conversas/comunidade': typeof ConversasComunidadeRoute
+  '/meu-pet/historico': typeof MeuPetHistoricoRoute
   '/onboarding/etapa-1': typeof OnboardingEtapa1Route
   '/onboarding/etapa-2': typeof OnboardingEtapa2Route
   '/pretendentes/$id': typeof PretendentesIdRoute
@@ -465,7 +472,7 @@ export interface FileRoutesByTo {
   '/loja': typeof LojaRoute
   '/manual': typeof ManualRoute
   '/matches': typeof MatchesRoute
-  '/meu-pet': typeof MeuPetRoute
+  '/meu-pet': typeof MeuPetRouteWithChildren
   '/notificacoes': typeof NotificacoesRoute
   '/oracoes': typeof OracoesRoute
   '/perfil': typeof PerfilRoute
@@ -496,6 +503,7 @@ export interface FileRoutesByTo {
   '/blog/$slug': typeof BlogSlugRoute
   '/conversas/$matchId': typeof ConversasMatchIdRoute
   '/conversas/comunidade': typeof ConversasComunidadeRoute
+  '/meu-pet/historico': typeof MeuPetHistoricoRoute
   '/onboarding/etapa-1': typeof OnboardingEtapa1Route
   '/onboarding/etapa-2': typeof OnboardingEtapa2Route
   '/pretendentes/$id': typeof PretendentesIdRoute
@@ -530,7 +538,7 @@ export interface FileRoutesById {
   '/loja': typeof LojaRoute
   '/manual': typeof ManualRoute
   '/matches': typeof MatchesRoute
-  '/meu-pet': typeof MeuPetRoute
+  '/meu-pet': typeof MeuPetRouteWithChildren
   '/notificacoes': typeof NotificacoesRoute
   '/oracoes': typeof OracoesRoute
   '/perfil': typeof PerfilRoute
@@ -561,6 +569,7 @@ export interface FileRoutesById {
   '/blog/$slug': typeof BlogSlugRoute
   '/conversas/$matchId': typeof ConversasMatchIdRoute
   '/conversas/comunidade': typeof ConversasComunidadeRoute
+  '/meu-pet/historico': typeof MeuPetHistoricoRoute
   '/onboarding/etapa-1': typeof OnboardingEtapa1Route
   '/onboarding/etapa-2': typeof OnboardingEtapa2Route
   '/pretendentes/$id': typeof PretendentesIdRoute
@@ -627,6 +636,7 @@ export interface FileRouteTypes {
     | '/blog/$slug'
     | '/conversas/$matchId'
     | '/conversas/comunidade'
+    | '/meu-pet/historico'
     | '/onboarding/etapa-1'
     | '/onboarding/etapa-2'
     | '/pretendentes/$id'
@@ -691,6 +701,7 @@ export interface FileRouteTypes {
     | '/blog/$slug'
     | '/conversas/$matchId'
     | '/conversas/comunidade'
+    | '/meu-pet/historico'
     | '/onboarding/etapa-1'
     | '/onboarding/etapa-2'
     | '/pretendentes/$id'
@@ -755,6 +766,7 @@ export interface FileRouteTypes {
     | '/blog/$slug'
     | '/conversas/$matchId'
     | '/conversas/comunidade'
+    | '/meu-pet/historico'
     | '/onboarding/etapa-1'
     | '/onboarding/etapa-2'
     | '/pretendentes/$id'
@@ -789,7 +801,7 @@ export interface RootRouteChildren {
   LojaRoute: typeof LojaRoute
   ManualRoute: typeof ManualRoute
   MatchesRoute: typeof MatchesRoute
-  MeuPetRoute: typeof MeuPetRoute
+  MeuPetRoute: typeof MeuPetRouteWithChildren
   NotificacoesRoute: typeof NotificacoesRoute
   OracoesRoute: typeof OracoesRoute
   PerfilRoute: typeof PerfilRoute
@@ -1111,6 +1123,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OnboardingEtapa1RouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/meu-pet/historico': {
+      id: '/meu-pet/historico'
+      path: '/historico'
+      fullPath: '/meu-pet/historico'
+      preLoaderRoute: typeof MeuPetHistoricoRouteImport
+      parentRoute: typeof MeuPetRoute
+    }
     '/conversas/comunidade': {
       id: '/conversas/comunidade'
       path: '/conversas/comunidade'
@@ -1286,6 +1305,17 @@ const AvatarRouteChildren: AvatarRouteChildren = {
 const AvatarRouteWithChildren =
   AvatarRoute._addFileChildren(AvatarRouteChildren)
 
+interface MeuPetRouteChildren {
+  MeuPetHistoricoRoute: typeof MeuPetHistoricoRoute
+}
+
+const MeuPetRouteChildren: MeuPetRouteChildren = {
+  MeuPetHistoricoRoute: MeuPetHistoricoRoute,
+}
+
+const MeuPetRouteWithChildren =
+  MeuPetRoute._addFileChildren(MeuPetRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AvatarRoute: AvatarRouteWithChildren,
@@ -1303,7 +1333,7 @@ const rootRouteChildren: RootRouteChildren = {
   LojaRoute: LojaRoute,
   ManualRoute: ManualRoute,
   MatchesRoute: MatchesRoute,
-  MeuPetRoute: MeuPetRoute,
+  MeuPetRoute: MeuPetRouteWithChildren,
   NotificacoesRoute: NotificacoesRoute,
   OracoesRoute: OracoesRoute,
   PerfilRoute: PerfilRoute,
