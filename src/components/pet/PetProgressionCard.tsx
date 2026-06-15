@@ -119,8 +119,17 @@ export function PetProgressionCard({
   async function handleClaim() {
     if (claiming) return;
     setClaiming(true);
+    // Timeout amigável para evitar spinner infinito se o backend travar.
+    const TIMEOUT_MS = 12_000;
+    let timedOut = false;
+    const timeout = new Promise<never>((_, reject) => {
+      setTimeout(() => {
+        timedOut = true;
+        reject(new Error("timeout"));
+      }, TIMEOUT_MS);
+    });
     try {
-      const r = await claimStarterBundle();
+      const r = await Promise.race([claimStarterBundle(), timeout]);
       if (r.ok) {
         haptics.success();
         toast.success("Pacote inicial coletado!", {
@@ -133,14 +142,60 @@ export function PetProgressionCard({
           xp_granted: r.xp_granted,
         });
         onChanged?.();
-      } else if (r.reason === "already_claimed") {
-        toast.message("Você já coletou o pacote inicial.");
+      } else {
+        // Mensagens amigáveis por motivo de falha do servidor.
+        switch (r.reason) {
+          case "already_claimed":
+            toast.message("Você já coletou o pacote inicial.", {
+              description: "Cada conta pode resgatar apenas uma vez.",
+            });
+            break;
+          case "locked":
+          case "lock_not_available":
+          case "concurrent_claim":
+            toast.error("Resgate em andamento", {
+              description:
+                "Já existe uma tentativa de coleta em processamento. Aguarde alguns segundos e tente novamente.",
+            });
+            break;
+          case "credit_failed":
+          case "payment_failed":
+          case "coins_credit_failed":
+          case "xp_credit_failed":
+            toast.error("Falha ao creditar recompensas", {
+              description:
+                "Não conseguimos liberar moedas/XP agora. Nenhum valor foi descontado — tente de novo em instantes.",
+            });
+            break;
+          default:
+            toast.error("Não foi possível confirmar o resgate", {
+              description:
+                "Tente novamente. Se persistir, recarregue a página.",
+            });
+        }
         // Sincroniza UI mesmo se o servidor recusar.
-        const fresh = await getStarterBundle();
-        setBundle(fresh);
+        const fresh = await getStarterBundle().catch(() => null);
+        if (fresh) setBundle(fresh);
       }
-    } catch {
-      toast.error("Não foi possível coletar agora.");
+    } catch (err) {
+      const msg = (err as Error)?.message ?? "";
+      if (timedOut || msg === "timeout") {
+        toast.error("Tempo esgotado", {
+          description:
+            "A confirmação demorou demais. Verifique sua conexão — se o crédito caiu, ele aparecerá no seu saldo em instantes.",
+        });
+      } else if (/network|fetch|Failed to fetch/i.test(msg)) {
+        toast.error("Sem conexão", {
+          description: "Conecte-se à internet e tente novamente.",
+        });
+      } else {
+        toast.error("Não foi possível coletar agora", {
+          description: "Tente novamente em alguns segundos.",
+        });
+      }
+      // Sincroniza para refletir possível crédito que tenha passado.
+      const fresh = await getStarterBundle().catch(() => null);
+      if (fresh) setBundle(fresh);
     } finally {
       setClaiming(false);
       setConfirmClaim(false);
