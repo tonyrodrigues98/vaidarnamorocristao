@@ -18,6 +18,7 @@ import {
   Shirt,
   PawPrint,
 } from "lucide-react";
+import { CoinIcon } from "@/components/icons/CoinIcon";
 
 export type HubSection =
   | "identity"
@@ -43,7 +44,7 @@ export type ProfileActionHubProps = {
   activeTab: string;
   isStaff: boolean;
   onSelect: (id: HubSection) => void;
-  onOpenResource: (id: "missions" | "role" | "customizacao") => void;
+  onOpenResource: (id: "missions" | "role" | "customizacao" | "saldo" | "presentes") => void;
 };
 
 export function ProfileActionHub({ activeTab, isStaff, onSelect, onOpenResource }: ProfileActionHubProps) {
@@ -128,6 +129,18 @@ export function ProfileActionHub({ activeTab, isStaff, onSelect, onOpenResource 
 
         {resourcesOpen && (
           <ul className="space-y-1.5 border-t border-border/60 p-2">
+            <ResourceButton
+              Icon={({ className }) => <CoinIcon className={className} />}
+              title="Minhas moedas"
+              desc="Saldo, recompensas e transações."
+              onClick={() => onOpenResource("saldo")}
+            />
+            <ResourceButton
+              Icon={Gift}
+              title="Presentes"
+              desc="Recebidos no seu perfil."
+              onClick={() => onOpenResource("presentes")}
+            />
             <ResourceButton
               Icon={Trophy}
               title="Minhas conquistas"
