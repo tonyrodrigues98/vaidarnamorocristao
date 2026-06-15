@@ -63,6 +63,11 @@ import { PetConfessionBubble } from "@/components/pet/PetConfessionBubble";
 import { MissionsTodayCard } from "@/components/pet/MissionsTodayCard";
 import { PetCareHistoryCard } from "@/components/pet/PetCareHistoryCard";
 import { PetOnboardingTour } from "@/components/pet/PetOnboardingTour";
+import { PetShowcaseSkeleton } from "@/components/pet/PetShowcaseSkeleton";
+import {
+  PetRandomEventModal,
+  type PetRandomEventPayload,
+} from "@/components/pet/PetRandomEventModal";
 import { Link as RouterLink } from "@tanstack/react-router";
 import { BookOpen, MessageCircle } from "lucide-react";
 
@@ -198,9 +203,7 @@ function MeuPetPage() {
         </header>
 
         {reloading ? (
-          <div className="flex justify-center py-24">
-            <Loader2 className="h-5 w-5 animate-spin text-neutral-300" />
-          </div>
+          <PetShowcaseSkeleton />
         ) : wizard ? (
           <Wizard
             onCancel={existing ? () => setWizardOverride(false) : undefined}
@@ -249,6 +252,7 @@ function Showcase({
   const [actionKind, setActionKind] = useState<PetCareKind | null>(null);
   const [confessionTrigger, setConfessionTrigger] = useState(0);
   const [xpRefresh, setXpRefresh] = useState(0);
+  const [randomEvent, setRandomEvent] = useState<PetRandomEventPayload | null>(null);
 
   async function reloadCare() {
     try {
@@ -380,7 +384,10 @@ function Showcase({
             affection={careValues.affection ?? 100}
             nocturnal={(pet.species as { nocturnal?: boolean } | null)?.nocturnal ?? false}
           />
-          <PetConfessionBubble triggerKey={confessionTrigger} />
+          <PetConfessionBubble
+            triggerKey={confessionTrigger}
+            personalitySlug={pet.personality?.slug ?? null}
+          />
           </div>
           <div className="relative z-10 mt-2 flex items-center justify-center gap-3 px-4 pb-4 sm:pb-6">
             <p className="text-[10px] uppercase tracking-wider text-neutral-400">
@@ -526,8 +533,10 @@ function Showcase({
             void reloadCare();
             setXpRefresh((n) => n + 1);
           }}
+          onRandomEvent={(ev) => setRandomEvent(ev)}
       />
     )}
+    <PetRandomEventModal event={randomEvent} onClose={() => setRandomEvent(null)} />
     </div>
   );
 }

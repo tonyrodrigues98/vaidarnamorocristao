@@ -26,6 +26,7 @@ import {
 import { awardXp, XP_SOURCES } from "@/lib/xp";
 import { cn } from "@/lib/utils";
 import { PET_CARE_ICON } from "./PetNeedsHud";
+import type { PetRandomEventPayload } from "./PetRandomEventModal";
 
 type Props = {
   open: boolean;
@@ -36,6 +37,7 @@ type Props = {
   currentValue: number;
   onClose: () => void;
   onApplied: () => void;
+  onRandomEvent?: (event: PetRandomEventPayload) => void;
 };
 
 export function PetCareActionSheet({
@@ -47,6 +49,7 @@ export function PetCareActionSheet({
   currentValue,
   onClose,
   onApplied,
+  onRandomEvent,
 }: Props) {
   const [items, setItems] = useState<PetCareItem[]>([]);
   const [loading, setLoading] = useState(false);
@@ -105,12 +108,9 @@ export function PetCareActionSheet({
       }
       if (result.random_event) {
         const re = result.random_event;
-        if (re.type === "coins") {
-          toast.success(`🪙 +${re.amount} moedas — ${re.label}`);
-        } else if (re.type === "buff") {
-          toast.success(`✨ ${re.label}`, {
-            description: `Próximas ações de ${PET_CARE_LABEL[re.kind as never] ?? re.kind} +${Math.round((re.mult - 1) * 100)}% por ${re.duration_min}min`,
-          });
+        // Antes só um toast; agora um modal celebratório (parent controla).
+        if (onRandomEvent) {
+          onRandomEvent(re as PetRandomEventPayload);
         }
       }
       onApplied();
