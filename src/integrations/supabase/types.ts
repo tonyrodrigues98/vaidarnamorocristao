@@ -4987,6 +4987,10 @@ export type Database = {
         Returns: number
       }
       touch_my_activity: { Args: never; Returns: undefined }
+      track_achievement: {
+        Args: { _category: string; _inc?: number; _user_id: string }
+        Returns: undefined
+      }
       unaccent_safe: { Args: { input: string }; Returns: string }
       unequip_decoration: {
         Args: { _type: Database["public"]["Enums"]["decoration_type"] }
