@@ -18,9 +18,6 @@ describe("shouldHidePrimaryActions — elegibilidade vs cargo", () => {
     ).toBe(true);
     expect(
       shouldHidePrimaryActions({ viewerSex: "feminino", profileSex: "feminino" }),
-    ).toBe(false === false ? true : false), // sanity
-    expect(
-      shouldHidePrimaryActions({ viewerSex: "feminino", profileSex: "feminino" }),
     ).toBe(true);
   });
 
