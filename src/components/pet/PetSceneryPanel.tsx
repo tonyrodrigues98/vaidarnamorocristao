@@ -1,16 +1,20 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
+import { useQueries, useQueryClient } from "@tanstack/react-query";
 import { Check, Loader2, Lock, Sparkles } from "lucide-react";
 import { CoinIcon } from "@/components/icons/CoinIcon";
 
 import {
   equipPetBackground,
-  getEquippedBackground,
-  listCompatibleBackgroundsForPet,
-  listMyBackgroundUnlocks,
   unlockPetBackground,
 } from "@/lib/petBackgrounds";
-import { getMyXpState } from "@/lib/xp";
+import {
+  petKeys,
+  petSceneryEquippedQueryOptions,
+  petSceneryListQueryOptions,
+  petSceneryUnlocksQueryOptions,
+  petXpStateQueryOptions,
+} from "@/lib/petQueries";
 import { PET_RARITY_COLOR, PET_RARITY_LABEL } from "@/types/pet";
 import type { PetBackground, UserPetBackground } from "@/types/petBackground";
 import { cn } from "@/lib/utils";
@@ -20,37 +24,32 @@ import { PetBackgroundLayer } from "./PetBackgroundLayer";
 export { PetBackgroundLayer };
 
 export function usePetScenery(opts: { categoryId: string; speciesId: string | null }) {
-  const [list, setList] = useState<PetBackground[]>([]);
-  const [unlocks, setUnlocks] = useState<UserPetBackground[]>([]);
-  const [equipped, setEquipped] = useState<PetBackground | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [level, setLevel] = useState(1);
-
-  async function reload() {
-    setLoading(true);
-    try {
-      const [items, mine, eq, xp] = await Promise.all([
-        listCompatibleBackgroundsForPet(opts),
-        listMyBackgroundUnlocks(),
-        getEquippedBackground(),
-        getMyXpState().catch(() => null),
-      ]);
-      setList(items);
-      setUnlocks(mine);
-      setEquipped(eq);
-      setLevel(xp?.level ?? 1);
-    } catch (e) {
-      toast.error((e as Error).message);
-    } finally {
-      setLoading(false);
-    }
+  const qc = useQueryClient();
+  const results = useQueries({
+    queries: [
+      petSceneryListQueryOptions({ categoryId: opts.categoryId, speciesId: opts.speciesId }),
+      petSceneryUnlocksQueryOptions(),
+      petSceneryEquippedQueryOptions(),
+      petXpStateQueryOptions(),
+    ],
+  });
+  const [listQ, unlocksQ, equippedQ, xpQ] = results;
+  const list: PetBackground[] = listQ.data ?? [];
+  const unlocks: UserPetBackground[] = unlocksQ.data ?? [];
+  const equipped: PetBackground | null = equippedQ.data ?? null;
+  const level: number = xpQ.data?.level ?? 1;
+  const loading = results.some((r) => r.isLoading && !r.data);
+  const firstError = results.find((r) => r.error)?.error as Error | undefined;
+  if (firstError) {
+    // toast só uma vez por erro; o react-query controla retries.
+    queueMicrotask(() => toast.error(firstError.message));
   }
-
-  useEffect(() => {
-    void reload();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [opts.categoryId, opts.speciesId]);
-
+  const reload = () => {
+    void qc.invalidateQueries({ queryKey: petKeys.sceneryList(opts.categoryId, opts.speciesId) });
+    void qc.invalidateQueries({ queryKey: petKeys.sceneryUnlocks() });
+    void qc.invalidateQueries({ queryKey: petKeys.sceneryEquipped() });
+    void qc.invalidateQueries({ queryKey: petKeys.xpState() });
+  };
   return { list, unlocks, equipped, loading, level, reload };
 }
 

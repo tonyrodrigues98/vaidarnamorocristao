@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { ChevronRight, PawPrint, Sparkles } from "lucide-react";
 
-import { getMyPetV2, listBenefitsFor, resolvePetDisplayImage } from "@/lib/petCatalog";
-import type { PetBenefit, UserPetV2Full } from "@/types/petCatalog";
+import { resolvePetDisplayImage } from "@/lib/petCatalog";
+import { myPetV2QueryOptions, petBenefitsQueryOptions } from "@/lib/petQueries";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -22,37 +22,18 @@ type Props = {
  * pet is private — enforced by RLS on user_pets_v2).
  */
 export function PetProfileCard({ userId, linkToManager = false, className }: Props) {
-  const [pet, setPet] = useState<UserPetV2Full | null>(null);
-  const [benefits, setBenefits] = useState<PetBenefit[]>([]);
-  const [loaded, setLoaded] = useState(false);
+  const petQuery = useQuery(myPetV2QueryOptions(userId));
+  const pet = petQuery.data ?? null;
+  const benefitsQuery = useQuery(
+    petBenefitsQueryOptions({
+      categoryId: pet?.category?.id ?? null,
+      speciesId: pet?.species?.id ?? null,
+      variantId: pet?.variant?.id ?? null,
+    }),
+  );
+  const benefits = benefitsQuery.data ?? [];
 
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const p = await getMyPetV2(userId);
-        if (cancelled) return;
-        setPet(p);
-        if (p?.category) {
-          const bs = await listBenefitsFor({
-            categoryId: p.category.id,
-            speciesId: p.species?.id ?? null,
-            variantId: p.variant?.id ?? null,
-          });
-          if (!cancelled) setBenefits(bs);
-        }
-      } catch {
-        /* silent */
-      } finally {
-        if (!cancelled) setLoaded(true);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [userId]);
-
-  if (!loaded || !pet) return null;
+  if (petQuery.isLoading || !pet) return null;
 
   const stageKind = pet.life_stage?.kind ?? null;
   const image =

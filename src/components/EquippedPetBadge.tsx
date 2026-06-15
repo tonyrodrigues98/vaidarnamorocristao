@@ -1,10 +1,9 @@
-import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { PawPrint } from "lucide-react";
 
-import { getEquippedPet } from "@/lib/pets";
+import { equippedPetV1QueryOptions } from "@/lib/petQueries";
 import { PET_RARITY_META } from "@/types/pet";
-import type { UserPetWithPet } from "@/types/pet";
 import { cn } from "@/lib/utils";
 
 interface EquippedPetBadgeProps {
@@ -21,25 +20,8 @@ export function EquippedPetBadge({
   size = "md",
   className,
 }: EquippedPetBadgeProps) {
-  const [pet, setPet] = useState<UserPetWithPet | null>(null);
-  const [loaded, setLoaded] = useState(false);
-
-  useEffect(() => {
-    let cancelled = false;
-    getEquippedPet(userId)
-      .then((p) => {
-        if (!cancelled) setPet(p);
-      })
-      .catch(() => {})
-      .finally(() => {
-        if (!cancelled) setLoaded(true);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [userId]);
-
-  if (!loaded || !pet) return null;
+  const { data: pet, isLoading } = useQuery(equippedPetV1QueryOptions(userId));
+  if (isLoading || !pet) return null;
 
   const rarity = PET_RARITY_META[pet.pet.rarity];
   const displayName = pet.custom_name?.trim() || pet.pet.name;

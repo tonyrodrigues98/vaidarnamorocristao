@@ -19,13 +19,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   createMyPetV2,
-  getMyPetV2,
   listActive,
   resolvePetDisplayImage,
   listSpeciesByCategory,
   listVariantsFor,
   updateMyPetV2,
 } from "@/lib/petCatalog";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { myPetV2QueryOptions, petKeys } from "@/lib/petQueries";
 import type {
   PetCategory,
   PetLifeStage,
@@ -156,26 +157,23 @@ function resolvePetImage(sel: Selection): string | null {
 
 function MeuPetPage() {
   const { user, loading } = useAuth();
-  const [existing, setExisting] = useState<UserPetV2Full | null>(null);
-  const [reloading, setReloading] = useState(true);
-  const [wizard, setWizard] = useState(false);
+  const queryClient = useQueryClient();
+  const petQuery = useQuery(myPetV2QueryOptions(user?.id));
+  const existing = petQuery.data ?? null;
+  const [wizardOverride, setWizardOverride] = useState<boolean | null>(null);
+  const wizard = wizardOverride ?? (petQuery.isSuccess && !existing);
+  // Mostra spinner apenas quando realmente não há nada em cache.
+  const reloading = petQuery.isLoading && !petQuery.data;
 
-  async function reload(uid: string) {
-    setReloading(true);
-    try {
-      const me = await getMyPetV2(uid);
-      setExisting(me);
-      setWizard(!me);
-    } catch (e) {
-      toast.error((e as Error).message);
-    } finally {
-      setReloading(false);
-    }
-  }
+  const reload = () => {
+    if (!user) return;
+    setWizardOverride(null);
+    void queryClient.invalidateQueries({ queryKey: petKeys.myV2(user.id) });
+  };
 
   useEffect(() => {
-    if (user) void reload(user.id);
-  }, [user]);
+    if (petQuery.error) toast.error((petQuery.error as Error).message);
+  }, [petQuery.error]);
 
   if (loading) return null;
   if (!user) return <Navigate to="/auth/login" />;
@@ -203,14 +201,14 @@ function MeuPetPage() {
           </div>
         ) : wizard ? (
           <Wizard
-            onCancel={existing ? () => setWizard(false) : undefined}
-            onDone={() => user && reload(user.id)}
+            onCancel={existing ? () => setWizardOverride(false) : undefined}
+            onDone={reload}
           />
         ) : existing ? (
           <Showcase
             pet={existing}
-            onChange={() => setWizard(true)}
-            onUpdated={() => user && reload(user.id)}
+            onChange={() => setWizardOverride(true)}
+            onUpdated={reload}
           />
         ) : null}
       </main>

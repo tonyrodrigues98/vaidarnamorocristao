@@ -71,6 +71,8 @@ import { fetchNameGradientsByIds, type NameGradient } from "@/lib/nameGradients"
 import { ProfileActionHub, type HubSection } from "@/components/profile/ProfileActionHub";
 import { PetProfileCard } from "@/components/PetProfileCard";
 import { EquippedPetSidekick } from "@/components/EquippedPetSidekick";
+import { prefetchPetEssentials } from "@/lib/petQueries";
+import { useQueryClient } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/perfil")({
   component: PerfilPage,
@@ -125,6 +127,16 @@ function PerfilPage() {
   const { user, loading, role, badgeColor, publicListing, refreshRole } = useAuth();
   const { isOnline } = useNetworkStatus();
   const search = Route.useSearch();
+  const queryClient = useQueryClient();
+
+  // Pré-aquece os dados do pet/cenário assim que o /perfil monta — ao
+  // navegar para /meu-pet (ou aos cards de pet no próprio perfil) a UI
+  // pinta sem flash de loading.
+  useEffect(() => {
+    if (!user?.id) return;
+    void prefetchPetEssentials(queryClient, user.id);
+  }, [user?.id, queryClient]);
+
   const [savingRole, setSavingRole] = useState(false);
   const [activeTab, setActiveTab] = useState<string>("profile");
   const [localColor, setLocalColor] = useState<RoleColor | null>(null);
