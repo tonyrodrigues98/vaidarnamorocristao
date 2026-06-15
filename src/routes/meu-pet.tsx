@@ -498,9 +498,10 @@ function Showcase({
     <PetStreakCard refreshKey={xpRefresh} />
     <PetWeeklyChestCard refreshKey={xpRefresh} onClaimed={() => setXpRefresh((n) => n + 1)} />
     <PetProgressionCard refreshKey={xpRefresh} onChanged={() => setXpRefresh((n) => n + 1)} />
-    <RouterLink
-      to="/meu-pet/historico"
-      className="group flex items-center gap-3 rounded-2xl border border-neutral-200 bg-white p-4 transition hover:border-neutral-300 hover:shadow-sm"
+    <button
+      type="button"
+      onClick={() => setHistoryOpen(true)}
+      className="group flex w-full items-center gap-3 rounded-2xl border border-neutral-200 bg-white p-4 text-left transition hover:border-neutral-300 hover:shadow-sm"
     >
       <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-neutral-100 text-neutral-700">
         <Clock className="size-5" />
@@ -514,7 +515,8 @@ function Showcase({
         </div>
       </div>
       <ArrowRight className="size-4 text-neutral-300 transition group-hover:text-neutral-500" />
-    </RouterLink>
+    </button>
+    <PetCareHistorySheet open={historyOpen} onOpenChange={setHistoryOpen} />
     <PetOnboardingTour />
     <RouterLink
       to="/quiz-biblico"
