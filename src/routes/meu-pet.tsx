@@ -380,7 +380,10 @@ function Showcase({
             affection={careValues.affection ?? 100}
             nocturnal={(pet.species as { nocturnal?: boolean } | null)?.nocturnal ?? false}
           />
-          <PetConfessionBubble triggerKey={confessionTrigger} />
+          <PetConfessionBubble
+            triggerKey={confessionTrigger}
+            personalitySlug={pet.personality?.slug ?? null}
+          />
           </div>
           <div className="relative z-10 mt-2 flex items-center justify-center gap-3 px-4 pb-4 sm:pb-6">
             <p className="text-[10px] uppercase tracking-wider text-neutral-400">
