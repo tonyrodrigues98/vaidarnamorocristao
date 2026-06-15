@@ -17,6 +17,7 @@ import {
   Sparkles,
   Shirt,
   PawPrint,
+  Gift,
 } from "lucide-react";
 import { CoinIcon } from "@/components/icons/CoinIcon";
 
