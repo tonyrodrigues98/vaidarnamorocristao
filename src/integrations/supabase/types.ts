@@ -4837,6 +4837,7 @@ export type Database = {
           was_correct: boolean
         }[]
       }
+      get_user_equipped_pet_image: { Args: { _uid: string }; Returns: string }
       get_user_primary_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
