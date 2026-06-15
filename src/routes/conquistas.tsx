@@ -8,6 +8,7 @@ import { Header } from "@/components/layout/Header";
 import { supabase } from "@/integrations/supabase/client";
 import { getMyXpState, levelTitle, type XpState } from "@/lib/xp";
 import { cn } from "@/lib/utils";
+import { LevelRewardsRail } from "@/components/pet/LevelRewardsRail";
 
 export const Route = createFileRoute("/conquistas")({ component: ConquistasPage });
 
@@ -83,6 +84,8 @@ function ConquistasPage() {
             </p>
           )}
         </header>
+
+        <LevelRewardsRail level={level} className="mb-8" />
 
         {busy ? (
           <div className="py-20 text-center text-sm text-neutral-400">Carregando…</div>
