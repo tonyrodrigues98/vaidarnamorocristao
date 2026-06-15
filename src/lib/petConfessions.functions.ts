@@ -9,8 +9,15 @@ export type PetConfessionDto = {
 };
 
 export const getRandomPetConfession = createServerFn({ method: "GET" }).handler(
-  async (): Promise<PetConfessionDto | null> => {
+  async ({ context }): Promise<PetConfessionDto | null> => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const userId =
+      typeof context === "object" &&
+      context !== null &&
+      "userId" in context &&
+      typeof context.userId === "string"
+        ? context.userId
+        : null;
 
     const { data, error } = await supabaseAdmin
       .from("pet_confessions")
@@ -21,6 +28,14 @@ export const getRandomPetConfession = createServerFn({ method: "GET" }).handler(
     if (error) throw new Error(error.message);
     if (!data?.length) return null;
 
-    return data[Math.floor(Math.random() * data.length)] ?? null;
+    const pick = data[Math.floor(Math.random() * data.length)] ?? null;
+    if (pick && userId) {
+      await supabaseAdmin.from("user_pet_confession_log").insert({
+        user_id: userId,
+        confession_id: pick.id,
+      });
+    }
+
+    return pick;
   },
 );
