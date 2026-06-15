@@ -4638,6 +4638,10 @@ export type Database = {
         }
         Returns: Json
       }
+      bump_achievement_slug: {
+        Args: { _inc?: number; _slug: string; _user_id: string }
+        Returns: undefined
+      }
       buy_anonymous_extra: {
         Args: never
         Returns: {
@@ -5001,6 +5005,10 @@ export type Database = {
       spend_coin_for_pet_care: {
         Args: { _amount: number; _item_id: string; _user_pet_id: string }
         Returns: number
+      }
+      sync_level_achievements: {
+        Args: { _level: number; _user_id: string }
+        Returns: undefined
       }
       touch_my_activity: { Args: never; Returns: undefined }
       track_achievement:
