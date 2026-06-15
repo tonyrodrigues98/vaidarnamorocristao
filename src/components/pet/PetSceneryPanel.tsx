@@ -81,17 +81,24 @@ export function PetSceneryPanel({
       toast.error(`Disponível a partir do nível ${bg.min_level}. Você está no nível ${level}.`);
       return;
     }
+    // Confirmação para itens pagos (sem window.confirm — usa toast com ação).
+    if (!ownedIds.has(bg.id) && bg.is_exclusive && bg.price_coins > 0) {
+      toast(`Desbloquear "${bg.name}"?`, {
+        description: `Custa ${bg.price_coins} moedas — depois o cenário fica seu.`,
+        action: {
+          label: "Desbloquear",
+          onClick: () => void applyUnlockAndEquip(bg),
+        },
+      });
+      return;
+    }
+    await applyUnlockAndEquip(bg);
+  }
+
+  async function applyUnlockAndEquip(bg: PetBackground) {
     setBusyId(bg.id);
     try {
-      if (!ownedIds.has(bg.id)) {
-        if (bg.is_exclusive && bg.price_coins > 0) {
-          const ok = window.confirm(
-            `Desbloquear "${bg.name}" por ${bg.price_coins} moedas?`,
-          );
-          if (!ok) return;
-        }
-        await unlockPetBackground(bg.id);
-      }
+      if (!ownedIds.has(bg.id)) await unlockPetBackground(bg.id);
       await equipPetBackground(bg.id);
       toast.success("Cenário aplicado");
       onChanged();

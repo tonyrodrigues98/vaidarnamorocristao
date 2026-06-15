@@ -8,6 +8,36 @@ type Props = {
   nocturnal: boolean;
 };
 
+// Keyframes injetados uma única vez no <head> (evita re-criação a cada render
+// dos sub-componentes).
+const PET_FX_KEYFRAMES = `
+@keyframes pet-stink-rise {
+  0% { transform: translate(0,0) scale(0.7); opacity: 0; }
+  15% { opacity: 0.55; }
+  50% { transform: translate(-8px,-32px) scale(1); opacity: 0.45; }
+  100% { transform: translate(8px,-64px) scale(0.8); opacity: 0; }
+}
+@keyframes pet-heart-float {
+  0% { transform: translateY(0) scale(0.6); opacity: 0; }
+  15% { opacity: 1; }
+  100% { transform: translateY(-80px) scale(1); opacity: 0; }
+}
+@keyframes pet-zzz-rise {
+  0% { transform: translateY(0) scale(0.6); opacity: 0; }
+  25% { opacity: 0.9; }
+  100% { transform: translateY(-40px) scale(1.1); opacity: 0; }
+}
+`;
+let _petFxInjected = false;
+function ensurePetFxStyles() {
+  if (_petFxInjected || typeof document === "undefined") return;
+  const el = document.createElement("style");
+  el.setAttribute("data-pet-fx", "true");
+  el.textContent = PET_FX_KEYFRAMES;
+  document.head.appendChild(el);
+  _petFxInjected = true;
+}
+
 /**
  * Camada de efeitos visuais sobre o pet (CSS/SVG, sem assets):
  * - Fedido (hygiene < 30): partículas verdes onduladas subindo.
@@ -16,6 +46,7 @@ type Props = {
  */
 export function PetEffectsLayer({ hygiene, happiness, affection, nocturnal }: Props) {
   const { phase } = usePetDayNight();
+  useEffect(ensurePetFxStyles, []);
   const sleeping = nocturnal ? phase === "day" : phase === "night";
   const stinky = hygiene < 30;
   const happy = happiness > 85 && affection > 85;
@@ -33,14 +64,6 @@ export function PetEffectsLayer({ hygiene, happiness, affection, nocturnal }: Pr
 function StinkyParticles() {
   return (
     <>
-      <style>{`
-        @keyframes pet-stink-rise {
-          0% { transform: translate(0,0) scale(0.7); opacity: 0; }
-          15% { opacity: 0.55; }
-          50% { transform: translate(-8px,-32px) scale(1); opacity: 0.45; }
-          100% { transform: translate(8px,-64px) scale(0.8); opacity: 0; }
-        }
-      `}</style>
       {[0, 1, 2].map((i) => (
         <span
           key={i}
@@ -85,13 +108,6 @@ function HappyHearts() {
 
   return (
     <>
-      <style>{`
-        @keyframes pet-heart-float {
-          0% { transform: translateY(0) scale(0.6); opacity: 0; }
-          15% { opacity: 1; }
-          100% { transform: translateY(-80px) scale(1); opacity: 0; }
-        }
-      `}</style>
       {hearts.map((h) => (
         <svg
           key={h.id}
@@ -120,13 +136,6 @@ function ZzzCloud() {
   const items = useMemo(() => [0, 1, 2], []);
   return (
     <>
-      <style>{`
-        @keyframes pet-zzz-rise {
-          0% { transform: translateY(0) scale(0.6); opacity: 0; }
-          25% { opacity: 0.9; }
-          100% { transform: translateY(-40px) scale(1.1); opacity: 0; }
-        }
-      `}</style>
       {items.map((i) => (
         <span
           key={i}
