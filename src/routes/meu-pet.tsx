@@ -71,7 +71,7 @@ import {
   type PetRandomEventPayload,
 } from "@/components/pet/PetRandomEventModal";
 import { Link as RouterLink } from "@tanstack/react-router";
-import { BookOpen, MessageCircle } from "lucide-react";
+import { BookOpen, Clock, MessageCircle } from "lucide-react";
 
 export const Route = createFileRoute("/meu-pet")({ component: MeuPetPage });
 
