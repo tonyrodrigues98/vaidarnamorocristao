@@ -52,12 +52,23 @@ export function PetWeeklyChestCard({
   }
 
   return (
-    <div className="rounded-2xl border border-neutral-200 bg-white p-4">
+    <div
+      className={
+        "rounded-2xl border p-4 transition " +
+        (ready
+          ? "border-amber-300 bg-gradient-to-br from-amber-50 to-white shadow-[0_8px_24px_-12px_rgba(245,158,11,0.45)]"
+          : "border-neutral-200 bg-white")
+      }
+    >
       <div className="flex items-start gap-3">
         <div
           className={
             "flex size-11 shrink-0 items-center justify-center rounded-xl " +
-            (ready ? "bg-amber-50 text-amber-600" : "bg-neutral-100 text-neutral-400")
+            (ready
+              ? "bg-amber-500 text-white shadow-sm animate-pulse"
+              : data.claimed
+                ? "bg-emerald-50 text-emerald-600"
+                : "bg-neutral-100 text-neutral-400")
           }
         >
           <Gift className="size-5" />
@@ -70,7 +81,11 @@ export function PetWeeklyChestCard({
             </span>
           </div>
           <p className="mt-0.5 text-[12px] text-neutral-500">
-            Complete {data.target} missões diárias na semana para abrir.
+            {data.claimed
+              ? "Você já abriu esta semana. Volta segunda-feira."
+              : ready
+                ? "Recompensa pronta para ser coletada."
+                : `Complete ${data.target} missões diárias na semana para abrir.`}
           </p>
           <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-neutral-100">
             <div
@@ -82,7 +97,12 @@ export function PetWeeklyChestCard({
             />
           </div>
           <div className="mt-3 flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2 text-[11px] text-neutral-500">
+            <div
+              className={
+                "flex items-center gap-2 text-[11px] " +
+                (ready ? "font-semibold text-amber-700" : "text-neutral-500")
+              }
+            >
               <span className="inline-flex items-center gap-1">
                 <CoinIcon className="size-3" /> +{data.reward_coins}
               </span>
@@ -97,7 +117,7 @@ export function PetWeeklyChestCard({
               className={
                 "rounded-full px-3.5 py-1.5 text-xs font-medium transition " +
                 (data.claimed
-                  ? "border border-neutral-200 bg-neutral-50 text-neutral-400"
+                  ? "border border-emerald-200 bg-emerald-50 text-emerald-600"
                   : ready
                     ? "bg-amber-500 text-white hover:bg-amber-600"
                     : "border border-neutral-200 bg-white text-neutral-400")
