@@ -29,23 +29,32 @@ function ConquistasPage() {
   const { user, loading } = useAuth();
   const [items, setItems] = useState<Achievement[]>([]);
   const [xp, setXp] = useState<XpState | null>(null);
+  const [progressByAch, setProgressByAch] = useState<Record<string, { progress: number; unlocked: boolean }>>({});
   const [busy, setBusy] = useState(true);
 
   useEffect(() => {
     let alive = true;
     (async () => {
       try {
-        const [{ data }, state] = await Promise.all([
+        const [{ data }, state, { data: prog }] = await Promise.all([
           supabase
             .from("pet_achievements" as never)
             .select("*")
             .eq("active", true)
             .order("sort_order"),
           getMyXpState().catch(() => null),
+          supabase
+            .from("user_achievements" as never)
+            .select("achievement_id, progress, unlocked_at"),
         ]);
         if (!alive) return;
         setItems((data ?? []) as Achievement[]);
         setXp(state);
+        const map: Record<string, { progress: number; unlocked: boolean }> = {};
+        for (const r of (prog ?? []) as Array<{ achievement_id: string; progress: number; unlocked_at: string | null }>) {
+          map[r.achievement_id] = { progress: r.progress ?? 0, unlocked: !!r.unlocked_at };
+        }
+        setProgressByAch(map);
       } finally {
         if (alive) setBusy(false);
       }
@@ -92,7 +101,9 @@ function ConquistasPage() {
         ) : (
           <div className="grid gap-3 sm:grid-cols-2">
             {items.map((a) => {
-              const unlocked = isUnlocked(a, level);
+              const p = progressByAch[a.id];
+              const unlocked = p?.unlocked || isUnlocked(a, level);
+              const progress = p?.progress ?? (a.category === "level" ? Math.min(a.goal, level) : 0);
               const IconCmp =
                 (LucideIcons as unknown as Record<string, React.ComponentType<{ className?: string }>>)[a.icon] ??
                 Trophy;
@@ -120,6 +131,19 @@ function ConquistasPage() {
                     </h3>
                     {a.description && (
                       <p className="mt-0.5 text-xs text-neutral-500">{a.description}</p>
+                    )}
+                    {!unlocked && a.goal > 1 && (
+                      <div className="mt-1.5">
+                        <div className="h-1 w-full overflow-hidden rounded-full bg-neutral-100">
+                          <div
+                            className="h-full rounded-full bg-neutral-400 transition-[width]"
+                            style={{ width: `${Math.min(100, (progress / a.goal) * 100)}%` }}
+                          />
+                        </div>
+                        <div className="mt-0.5 text-[10px] tabular-nums text-neutral-400">
+                          {progress} / {a.goal}
+                        </div>
+                      </div>
                     )}
                     <div className="mt-1.5 flex flex-wrap gap-1 text-[10px] font-medium uppercase tracking-wide text-neutral-400">
                       {a.xp_reward > 0 && <span>+{a.xp_reward} XP</span>}
