@@ -63,8 +63,19 @@ export function PetConfessionBubble({
   async function fetchConfession(): Promise<Confession | null> {
     const { data, error } = await supabase.rpc("get_next_pet_confession" as never);
     if (error) {
-      console.warn("[pet] confession rpc error", error);
-      throw error;
+      console.warn("[pet] confession rpc error, falling back to direct select", error);
+      // Fallback: lê direto da tabela (policy permite leitura pública de ativos)
+      const { data: rows, error: selErr } = await supabase
+        .from("pet_confessions")
+        .select("id, text, category, effect_kind, effect_delta")
+        .eq("active", true)
+        .limit(200);
+      if (selErr || !rows || rows.length === 0) {
+        if (selErr) console.warn("[pet] confession fallback select error", selErr);
+        throw error;
+      }
+      const pick = rows[Math.floor(Math.random() * rows.length)];
+      return pick as Confession;
     }
     const row = ((data as unknown) as Confession[])?.[0];
     return row ?? null;
