@@ -67,6 +67,7 @@ import { Route as AdminGradientesNomeRouteImport } from './routes/admin/gradient
 import { Route as AdminFundosRouteImport } from './routes/admin/fundos'
 import { Route as AdminFotosRouteImport } from './routes/admin/fotos'
 import { Route as AdminEquipeLiveRouteImport } from './routes/admin/equipe-live'
+import { Route as AdminEconomiaRouteImport } from './routes/admin/economia'
 import { Route as AdminAvatarRouteImport } from './routes/admin/avatar'
 import { Route as AdminAurasRouteImport } from './routes/admin/auras'
 import { Route as ApiPublicHooksPushDispatchRouteImport } from './routes/api/public/hooks/push-dispatch'
@@ -361,6 +362,11 @@ const AdminEquipeLiveRoute = AdminEquipeLiveRouteImport.update({
   path: '/admin/equipe-live',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminEconomiaRoute = AdminEconomiaRouteImport.update({
+  id: '/admin/economia',
+  path: '/admin/economia',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminAvatarRoute = AdminAvatarRouteImport.update({
   id: '/admin/avatar',
   path: '/admin/avatar',
@@ -406,6 +412,7 @@ export interface FileRoutesByFullPath {
   '/verificacao': typeof VerificacaoRoute
   '/admin/auras': typeof AdminAurasRoute
   '/admin/avatar': typeof AdminAvatarRoute
+  '/admin/economia': typeof AdminEconomiaRoute
   '/admin/equipe-live': typeof AdminEquipeLiveRoute
   '/admin/fotos': typeof AdminFotosRoute
   '/admin/fundos': typeof AdminFundosRoute
@@ -469,6 +476,7 @@ export interface FileRoutesByTo {
   '/verificacao': typeof VerificacaoRoute
   '/admin/auras': typeof AdminAurasRoute
   '/admin/avatar': typeof AdminAvatarRoute
+  '/admin/economia': typeof AdminEconomiaRoute
   '/admin/equipe-live': typeof AdminEquipeLiveRoute
   '/admin/fotos': typeof AdminFotosRoute
   '/admin/fundos': typeof AdminFundosRoute
@@ -533,6 +541,7 @@ export interface FileRoutesById {
   '/verificacao': typeof VerificacaoRoute
   '/admin/auras': typeof AdminAurasRoute
   '/admin/avatar': typeof AdminAvatarRoute
+  '/admin/economia': typeof AdminEconomiaRoute
   '/admin/equipe-live': typeof AdminEquipeLiveRoute
   '/admin/fotos': typeof AdminFotosRoute
   '/admin/fundos': typeof AdminFundosRoute
@@ -598,6 +607,7 @@ export interface FileRouteTypes {
     | '/verificacao'
     | '/admin/auras'
     | '/admin/avatar'
+    | '/admin/economia'
     | '/admin/equipe-live'
     | '/admin/fotos'
     | '/admin/fundos'
@@ -661,6 +671,7 @@ export interface FileRouteTypes {
     | '/verificacao'
     | '/admin/auras'
     | '/admin/avatar'
+    | '/admin/economia'
     | '/admin/equipe-live'
     | '/admin/fotos'
     | '/admin/fundos'
@@ -724,6 +735,7 @@ export interface FileRouteTypes {
     | '/verificacao'
     | '/admin/auras'
     | '/admin/avatar'
+    | '/admin/economia'
     | '/admin/equipe-live'
     | '/admin/fotos'
     | '/admin/fundos'
@@ -788,6 +800,7 @@ export interface RootRouteChildren {
   VerificacaoRoute: typeof VerificacaoRoute
   AdminAurasRoute: typeof AdminAurasRoute
   AdminAvatarRoute: typeof AdminAvatarRoute
+  AdminEconomiaRoute: typeof AdminEconomiaRoute
   AdminEquipeLiveRoute: typeof AdminEquipeLiveRoute
   AdminFotosRoute: typeof AdminFotosRoute
   AdminFundosRoute: typeof AdminFundosRoute
@@ -1231,6 +1244,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminEquipeLiveRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/economia': {
+      id: '/admin/economia'
+      path: '/admin/economia'
+      fullPath: '/admin/economia'
+      preLoaderRoute: typeof AdminEconomiaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/avatar': {
       id: '/admin/avatar'
       path: '/admin/avatar'
@@ -1294,6 +1314,7 @@ const rootRouteChildren: RootRouteChildren = {
   VerificacaoRoute: VerificacaoRoute,
   AdminAurasRoute: AdminAurasRoute,
   AdminAvatarRoute: AdminAvatarRoute,
+  AdminEconomiaRoute: AdminEconomiaRoute,
   AdminEquipeLiveRoute: AdminEquipeLiveRoute,
   AdminFotosRoute: AdminFotosRoute,
   AdminFundosRoute: AdminFundosRoute,
