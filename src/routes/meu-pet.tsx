@@ -63,6 +63,7 @@ import { PetConfessionBubble } from "@/components/pet/PetConfessionBubble";
 import { MissionsTodayCard } from "@/components/pet/MissionsTodayCard";
 import { PetCareHistoryCard } from "@/components/pet/PetCareHistoryCard";
 import { PetOnboardingTour } from "@/components/pet/PetOnboardingTour";
+import { PetShowcaseSkeleton } from "@/components/pet/PetShowcaseSkeleton";
 import {
   PetRandomEventModal,
   type PetRandomEventPayload,
@@ -202,9 +203,7 @@ function MeuPetPage() {
         </header>
 
         {reloading ? (
-          <div className="flex justify-center py-24">
-            <Loader2 className="h-5 w-5 animate-spin text-neutral-300" />
-          </div>
+          <PetShowcaseSkeleton />
         ) : wizard ? (
           <Wizard
             onCancel={existing ? () => setWizardOverride(false) : undefined}
