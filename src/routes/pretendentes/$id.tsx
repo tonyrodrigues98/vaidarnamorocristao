@@ -2,6 +2,7 @@ import { friendlyError } from "@/lib/errors";
 import { PhotoCarousel } from "@/components/PhotoCarousel";
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { RequireApproved } from "@/components/RequireApproved";
+import { shouldHidePrimaryActions } from "@/lib/pretendentesEligibility";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -474,10 +475,11 @@ function Detail() {
   const surfaceClass = hasPremiumBackground
     ? "rounded-[2rem] border border-white/60 bg-card/86 p-5 text-foreground shadow-[0_20px_70px_rgba(31,41,55,0.12)] backdrop-blur-xl sm:p-6 dark:border-white/10 dark:bg-card/78 dark:shadow-[0_24px_80px_rgba(0,0,0,0.38)]"
     : "rounded-[2rem] border border-border/70 bg-card/85 p-5 shadow-[0_20px_70px_rgba(31,41,55,0.08)] backdrop-blur sm:p-6 dark:bg-card/80 dark:shadow-[0_24px_80px_rgba(0,0,0,0.35)]";
-  // Eligibility rules (staff role) do NOT apply when a moderador/admin/apresentador
-  // chose to appear in the list — they are treated as normal profiles for interaction.
-  // Only the same-sex rule remains (regular eligibility).
-  const hasHiddenPrimaryActions = Boolean(profile && mySex && profile.sex === mySex);
+  const hasHiddenPrimaryActions = shouldHidePrimaryActions({
+    viewerSex: mySex ?? null,
+    profileSex: profile?.sex ?? null,
+    profileRole: targetRole?.role ?? null,
+  });
 
   return (
     <div className="relative min-h-screen overflow-x-hidden bg-background">
