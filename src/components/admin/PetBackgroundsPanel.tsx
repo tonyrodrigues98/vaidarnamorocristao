@@ -54,6 +54,7 @@ function emptyDraft(sort: number): Draft {
     price_coins: 0,
     active: true,
     sort_order: sort,
+    min_level: 1,
     compat: [],
   };
 }
@@ -101,6 +102,7 @@ export function PetBackgroundsPanel() {
       price_coins: row.price_coins,
       active: row.active,
       sort_order: row.sort_order,
+      min_level: row.min_level ?? 1,
       compat: row.compat.map((c) => ({ category_id: c.category_id, species_id: c.species_id })),
     });
   }
@@ -124,6 +126,7 @@ export function PetBackgroundsPanel() {
         price_coins: draft.is_exclusive ? Math.max(0, draft.price_coins | 0) : 0,
         active: draft.active,
         sort_order: draft.sort_order,
+        min_level: Math.max(1, Math.min(50, draft.min_level | 0 || 1)),
       };
       const row = draft.id
         ? await updateBackground(draft.id, payload)
