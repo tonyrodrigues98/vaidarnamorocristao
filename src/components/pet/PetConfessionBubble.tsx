@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { MessageCircle, Sparkles, X } from "lucide-react";
+import { Loader2, MessageCircle, Sparkles, X } from "lucide-react";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { usePetDayNight } from "@/lib/petDayNight";
 import { cn } from "@/lib/utils";
@@ -24,7 +25,8 @@ type DreamMatch = {
 
 type Active =
   | { kind: "text"; data: Confession }
-  | { kind: "dream"; data: Confession; match: DreamMatch };
+  | { kind: "dream"; data: Confession; match: DreamMatch }
+  | { kind: "loading" };
 
 const AUTO_MIN_MS = 30 * 60_000; // 30 min
 const AUTO_MAX_MS = 90 * 60_000; // 90 min
@@ -49,6 +51,7 @@ export function PetConfessionBubble({
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const hideRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const firstRender = useRef(true);
+  const bubbleRef = useRef<HTMLDivElement | null>(null);
 
   async function fetchDreamMatch(): Promise<DreamMatch | null> {
     const { data } = await supabase.rpc("get_pet_dream_match" as never);
@@ -62,7 +65,11 @@ export function PetConfessionBubble({
     return row ?? null;
   }
 
-  async function showNew() {
+  async function showNew(manual = false) {
+    if (manual) {
+      if (hideRef.current) clearTimeout(hideRef.current);
+      setActive({ kind: "loading" });
+    }
     let next: Active | null = null;
     if (isNight && Math.random() < DREAM_CHANCE_AT_NIGHT) {
       const match = await fetchDreamMatch();
@@ -84,7 +91,15 @@ export function PetConfessionBubble({
       const c = await fetchConfession();
       if (c) next = { kind: "text", data: c };
     }
-    if (!next) return;
+    if (!next) {
+      if (manual) {
+        setActive(null);
+        toast.message("Seu pet está quietinho agora", {
+          description: "Tente novamente em instantes.",
+        });
+      }
+      return;
+    }
     setActive(next);
     if (hideRef.current) clearTimeout(hideRef.current);
     hideRef.current = setTimeout(
@@ -123,15 +138,26 @@ export function PetConfessionBubble({
       firstRender.current = false;
       return;
     }
-    void showNew();
+    void showNew(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [triggerKey]);
+
+  // Garante que o balão fique visível ao usuário (especialmente em mobile,
+  // quando o botão "Pensamento" está abaixo do pet e o balão aparece acima).
+  useEffect(() => {
+    if (!active) return;
+    bubbleRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [active]);
 
   if (!active) return null;
 
   const isDream = active.kind === "dream";
+  const isLoading = active.kind === "loading";
   return (
-    <div className="pointer-events-none absolute left-1/2 top-3 z-30 w-[min(92%,320px)] -translate-x-1/2 animate-in fade-in slide-in-from-top-2 duration-500">
+    <div
+      ref={bubbleRef}
+      className="pointer-events-none absolute left-1/2 top-3 z-30 w-[min(92%,320px)] -translate-x-1/2 animate-in fade-in slide-in-from-top-2 duration-500"
+    >
       <div
         className={cn(
           "pointer-events-auto relative rounded-2xl border bg-white px-3 py-2.5 shadow-lg",
@@ -153,11 +179,19 @@ export function PetConfessionBubble({
               isDream ? "bg-indigo-100 text-indigo-600" : "bg-sky-100 text-sky-600",
             )}
           >
-            {isDream ? <Sparkles className="size-3.5" /> : <MessageCircle className="size-3.5" />}
+            {isLoading ? (
+              <Loader2 className="size-3.5 animate-spin" />
+            ) : isDream ? (
+              <Sparkles className="size-3.5" />
+            ) : (
+              <MessageCircle className="size-3.5" />
+            )}
           </div>
-          <p className="text-[13px] leading-snug text-neutral-700">{active.data.text}</p>
+          <p className="text-[13px] leading-snug text-neutral-700">
+            {isLoading ? "Ouvindo seu pet…" : active.data.text}
+          </p>
         </div>
-        {isDream && (
+        {!isLoading && isDream && (
           <Link
             to="/pretendentes/$id"
             params={{ id: active.match.id }}
