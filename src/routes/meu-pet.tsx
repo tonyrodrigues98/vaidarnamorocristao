@@ -72,6 +72,7 @@ import {
 } from "@/components/pet/PetRandomEventModal";
 import { Link as RouterLink } from "@tanstack/react-router";
 import { BookOpen, Clock, MessageCircle } from "lucide-react";
+import { PetCareHistorySheet } from "@/components/pet/PetCareHistorySheet";
 
 export const Route = createFileRoute("/meu-pet")({ component: MeuPetPage });
 
@@ -255,6 +256,7 @@ function Showcase({
   const [confessionTrigger, setConfessionTrigger] = useState(0);
   const [xpRefresh, setXpRefresh] = useState(0);
   const [randomEvent, setRandomEvent] = useState<PetRandomEventPayload | null>(null);
+  const [historyOpen, setHistoryOpen] = useState(false);
 
   async function reloadCare() {
     try {
@@ -496,9 +498,10 @@ function Showcase({
     <PetStreakCard refreshKey={xpRefresh} />
     <PetWeeklyChestCard refreshKey={xpRefresh} onClaimed={() => setXpRefresh((n) => n + 1)} />
     <PetProgressionCard refreshKey={xpRefresh} onChanged={() => setXpRefresh((n) => n + 1)} />
-    <RouterLink
-      to="/meu-pet/historico"
-      className="group flex items-center gap-3 rounded-2xl border border-neutral-200 bg-white p-4 transition hover:border-neutral-300 hover:shadow-sm"
+    <button
+      type="button"
+      onClick={() => setHistoryOpen(true)}
+      className="group flex w-full items-center gap-3 rounded-2xl border border-neutral-200 bg-white p-4 text-left transition hover:border-neutral-300 hover:shadow-sm"
     >
       <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-neutral-100 text-neutral-700">
         <Clock className="size-5" />
@@ -512,7 +515,8 @@ function Showcase({
         </div>
       </div>
       <ArrowRight className="size-4 text-neutral-300 transition group-hover:text-neutral-500" />
-    </RouterLink>
+    </button>
+    <PetCareHistorySheet open={historyOpen} onOpenChange={setHistoryOpen} />
     <PetOnboardingTour />
     <RouterLink
       to="/quiz-biblico"
