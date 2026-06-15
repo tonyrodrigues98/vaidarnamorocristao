@@ -4602,6 +4602,10 @@ export type Database = {
         Returns: undefined
       }
       admin_economy_summary: { Args: { _days?: number }; Returns: Json }
+      admin_grant_coins: {
+        Args: { _amount: number; _note?: string; _user_id: string }
+        Returns: Json
+      }
       admin_hard_delete_user: {
         Args: { _reason: string; _user_id: string }
         Returns: undefined
@@ -4610,7 +4614,22 @@ export type Database = {
         Args: { _code: string; _user_id: string }
         Returns: undefined
       }
+      admin_search_users: {
+        Args: { _limit?: number; _q?: string }
+        Returns: {
+          balance: number
+          claim_streak: number
+          full_name: string
+          photo_url: string
+          top_role: string
+          user_id: string
+        }[]
+      }
       admin_unban_user: { Args: { _user_id: string }; Returns: undefined }
+      admin_user_economy: {
+        Args: { _limit?: number; _user_id: string }
+        Returns: Json
+      }
       anon_check_restricted: { Args: { _text: string }; Returns: undefined }
       answer_quiz: {
         Args: { _chosen: number; _question_id: string }
