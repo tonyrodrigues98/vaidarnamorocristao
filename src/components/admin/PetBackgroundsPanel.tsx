@@ -411,7 +411,11 @@ function DraftForm({
           <Label>Raridade</Label>
           <Select
             value={draft.rarity}
-            onValueChange={(v) => onChange({ ...draft, rarity: v as PetRarity })}
+            onValueChange={(v) => {
+              const r = v as PetRarity;
+              const suggested = r === "legendary" ? 30 : r === "epic" ? 9 : r === "rare" ? 3 : 1;
+              onChange({ ...draft, rarity: r, min_level: suggested });
+            }}
           >
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
@@ -420,6 +424,21 @@ function DraftForm({
               ))}
             </SelectContent>
           </Select>
+        </div>
+        <div className="space-y-1.5">
+          <Label>Nível mínimo</Label>
+          <Input
+            type="text"
+            inputMode="numeric"
+            value={draft.min_level}
+            onChange={(e) => {
+              const n = parseInt(e.target.value.replace(/\D+/g, ""), 10);
+              onChange({ ...draft, min_level: Number.isFinite(n) ? Math.max(1, Math.min(50, n)) : 1 });
+            }}
+          />
+          <p className="text-[10px] text-muted-foreground">
+            Sugestão: comum 1 · raro 3 · épico 9 · lendário 30
+          </p>
         </div>
         <div className="flex items-center gap-2 pt-6">
           <Switch
