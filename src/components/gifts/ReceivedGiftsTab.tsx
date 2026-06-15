@@ -4,7 +4,7 @@ import { listMyReceivedGifts, redeemGift, RARITY_STYLE, type GiftTransaction } f
 import { GiftMedia } from "./GiftMedia";
 import { Button } from "@/components/ui/button";
 import { CoinIcon } from "@/components/icons/CoinIcon";
-import { Gift, Sparkles, CheckCircle2, Coins, Inbox } from "lucide-react";
+import { Gift, Sparkles, CheckCircle2, Inbox } from "lucide-react";
 import { PhotoImg } from "@/components/PhotoImg";
 import { cn } from "@/lib/utils";
 
@@ -157,7 +157,7 @@ export function ReceivedGiftsTab({ userId }: { userId: string }) {
                       disabled={busy === tx.id}
                       className="rounded-full bg-gradient-to-r from-amber-400 to-orange-500 text-amber-950 shadow-md shadow-amber-400/30 hover:from-amber-300 hover:to-orange-400"
                     >
-                      <Coins className="mr-1 h-3.5 w-3.5" /> Resgatar +{redeemValue}
+                      <CoinIcon className="mr-1 h-3.5 w-3.5" /> Resgatar +{redeemValue}
                     </Button>
                   )}
                 </div>

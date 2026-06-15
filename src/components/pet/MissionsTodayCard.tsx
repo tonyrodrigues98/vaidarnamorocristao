@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import * as LucideIcons from "lucide-react";
-import { Target, CheckCircle2, Coins, Sparkles } from "lucide-react";
+import { Target, CheckCircle2, Sparkles } from "lucide-react";
+import { CoinIcon } from "@/components/icons/CoinIcon";
 import { rollAndGetTodayMissions, DIFFICULTY_LABEL, type TodayMission } from "@/lib/missions";
 import { cn } from "@/lib/utils";
 
@@ -125,8 +126,8 @@ function MissionRow({ mission }: { mission: TodayMission }) {
                 {mission.xp_reward} XP
               </span>
               {mission.coin_reward > 0 && (
-                <span className="inline-flex items-center gap-0.5 text-amber-600">
-                  <Coins className="size-3" />
+                <span className="inline-flex items-center gap-1 text-amber-600">
+                  <CoinIcon className="h-3.5 w-3.5" />
                   {mission.coin_reward}
                 </span>
               )}
