@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Check, Coins, Loader2, Lock, Sparkles } from "lucide-react";
+import { Check, Loader2, Lock, Sparkles } from "lucide-react";
+import { CoinIcon } from "@/components/icons/CoinIcon";
 
 import {
   equipPetBackground,
@@ -177,7 +178,7 @@ export function PetSceneryPanel({
                   )}
                   {!owned && bg.is_exclusive && (
                     <div className="absolute left-1.5 top-1.5 inline-flex items-center gap-1 rounded-full bg-amber-500 px-2 py-0.5 text-[10px] font-semibold text-white">
-                      <Coins className="h-3 w-3" /> {bg.price_coins}
+                      <CoinIcon className="h-3 w-3" /> {bg.price_coins}
                     </div>
                   )}
                   {!owned && !bg.is_exclusive && (
