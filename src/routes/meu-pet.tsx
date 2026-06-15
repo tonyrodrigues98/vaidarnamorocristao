@@ -256,6 +256,7 @@ function Showcase({
   const [confessionTrigger, setConfessionTrigger] = useState(0);
   const [xpRefresh, setXpRefresh] = useState(0);
   const [randomEvent, setRandomEvent] = useState<PetRandomEventPayload | null>(null);
+  const [historyOpen, setHistoryOpen] = useState(false);
 
   async function reloadCare() {
     try {
