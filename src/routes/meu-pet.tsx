@@ -64,6 +64,8 @@ import { MissionsTodayCard } from "@/components/pet/MissionsTodayCard";
 import { PetCareHistoryCard } from "@/components/pet/PetCareHistoryCard";
 import { PetOnboardingTour } from "@/components/pet/PetOnboardingTour";
 import { PetShowcaseSkeleton } from "@/components/pet/PetShowcaseSkeleton";
+import { PetStreakCard } from "@/components/pet/PetStreakCard";
+import { PetWeeklyChestCard } from "@/components/pet/PetWeeklyChestCard";
 import {
   PetRandomEventModal,
   type PetRandomEventPayload,
@@ -491,6 +493,8 @@ function Showcase({
       </div>
     </section>
     <MissionsTodayCard refreshKey={xpRefresh} />
+    <PetStreakCard refreshKey={xpRefresh} />
+    <PetWeeklyChestCard refreshKey={xpRefresh} onClaimed={() => setXpRefresh((n) => n + 1)} />
     <PetCareHistoryCard userPetId={pet.id} refreshKey={xpRefresh} />
     <PetOnboardingTour />
     <RouterLink
