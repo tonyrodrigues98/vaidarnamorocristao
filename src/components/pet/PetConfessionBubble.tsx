@@ -42,9 +42,12 @@ const DREAM_CHANCE_AT_NIGHT = 0.15;
  */
 export function PetConfessionBubble({
   triggerKey,
+  personalitySlug,
 }: {
   /** Incrementar este valor força exibir uma nova confissão (botão manual). */
   triggerKey?: number;
+  /** Slug da personalidade do pet — filtra confissões compatíveis no servidor. */
+  personalitySlug?: string | null;
 }) {
   const { phase } = usePetDayNight();
   const [active, setActive] = useState<Active | null>(null);
@@ -58,6 +61,8 @@ export function PetConfessionBubble({
   isNightRef.current = phase === "night";
   const loadRef = useRef(loadConfession);
   loadRef.current = loadConfession;
+  const personalityRef = useRef(personalitySlug ?? null);
+  personalityRef.current = personalitySlug ?? null;
   const shouldScrollRef = useRef(false);
 
   async function fetchDreamMatch(): Promise<DreamMatch | null> {
@@ -92,7 +97,9 @@ export function PetConfessionBubble({
     }
     if (!next) {
       try {
-        const c = await loadRef.current();
+        const c = await loadRef.current({
+          data: { personalitySlug: personalityRef.current ?? null },
+        });
         if (c) next = { kind: "text", data: c };
       } catch (err) {
         console.warn("[pet] confession error", err);
