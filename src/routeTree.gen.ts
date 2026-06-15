@@ -48,7 +48,7 @@ import { Route as PropositoMatchIdRouteImport } from './routes/proposito/$matchI
 import { Route as PretendentesIdRouteImport } from './routes/pretendentes/$id'
 import { Route as OnboardingEtapa2RouteImport } from './routes/onboarding/etapa-2'
 import { Route as OnboardingEtapa1RouteImport } from './routes/onboarding/etapa-1'
-import { Route as MeuPetHistoricoRouteImport } from './routes/meu-pet.historico'
+import { Route as MeuPetHistoricoRouteImport } from './routes/meu-pet_.historico'
 import { Route as ConversasComunidadeRouteImport } from './routes/conversas/comunidade'
 import { Route as ConversasMatchIdRouteImport } from './routes/conversas/$matchId'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
@@ -269,9 +269,9 @@ const OnboardingEtapa1Route = OnboardingEtapa1RouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const MeuPetHistoricoRoute = MeuPetHistoricoRouteImport.update({
-  id: '/historico',
-  path: '/historico',
-  getParentRoute: () => MeuPetRoute,
+  id: '/meu-pet_/historico',
+  path: '/meu-pet/historico',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ConversasComunidadeRoute = ConversasComunidadeRouteImport.update({
   id: '/conversas/comunidade',
@@ -407,7 +407,7 @@ export interface FileRoutesByFullPath {
   '/loja': typeof LojaRoute
   '/manual': typeof ManualRoute
   '/matches': typeof MatchesRoute
-  '/meu-pet': typeof MeuPetRouteWithChildren
+  '/meu-pet': typeof MeuPetRoute
   '/notificacoes': typeof NotificacoesRoute
   '/oracoes': typeof OracoesRoute
   '/perfil': typeof PerfilRoute
@@ -472,7 +472,7 @@ export interface FileRoutesByTo {
   '/loja': typeof LojaRoute
   '/manual': typeof ManualRoute
   '/matches': typeof MatchesRoute
-  '/meu-pet': typeof MeuPetRouteWithChildren
+  '/meu-pet': typeof MeuPetRoute
   '/notificacoes': typeof NotificacoesRoute
   '/oracoes': typeof OracoesRoute
   '/perfil': typeof PerfilRoute
@@ -538,7 +538,7 @@ export interface FileRoutesById {
   '/loja': typeof LojaRoute
   '/manual': typeof ManualRoute
   '/matches': typeof MatchesRoute
-  '/meu-pet': typeof MeuPetRouteWithChildren
+  '/meu-pet': typeof MeuPetRoute
   '/notificacoes': typeof NotificacoesRoute
   '/oracoes': typeof OracoesRoute
   '/perfil': typeof PerfilRoute
@@ -569,7 +569,7 @@ export interface FileRoutesById {
   '/blog/$slug': typeof BlogSlugRoute
   '/conversas/$matchId': typeof ConversasMatchIdRoute
   '/conversas/comunidade': typeof ConversasComunidadeRoute
-  '/meu-pet/historico': typeof MeuPetHistoricoRoute
+  '/meu-pet_/historico': typeof MeuPetHistoricoRoute
   '/onboarding/etapa-1': typeof OnboardingEtapa1Route
   '/onboarding/etapa-2': typeof OnboardingEtapa2Route
   '/pretendentes/$id': typeof PretendentesIdRoute
@@ -766,7 +766,7 @@ export interface FileRouteTypes {
     | '/blog/$slug'
     | '/conversas/$matchId'
     | '/conversas/comunidade'
-    | '/meu-pet/historico'
+    | '/meu-pet_/historico'
     | '/onboarding/etapa-1'
     | '/onboarding/etapa-2'
     | '/pretendentes/$id'
@@ -801,7 +801,7 @@ export interface RootRouteChildren {
   LojaRoute: typeof LojaRoute
   ManualRoute: typeof ManualRoute
   MatchesRoute: typeof MatchesRoute
-  MeuPetRoute: typeof MeuPetRouteWithChildren
+  MeuPetRoute: typeof MeuPetRoute
   NotificacoesRoute: typeof NotificacoesRoute
   OracoesRoute: typeof OracoesRoute
   PerfilRoute: typeof PerfilRoute
@@ -831,6 +831,7 @@ export interface RootRouteChildren {
   BlogSlugRoute: typeof BlogSlugRoute
   ConversasMatchIdRoute: typeof ConversasMatchIdRoute
   ConversasComunidadeRoute: typeof ConversasComunidadeRoute
+  MeuPetHistoricoRoute: typeof MeuPetHistoricoRoute
   OnboardingEtapa1Route: typeof OnboardingEtapa1Route
   OnboardingEtapa2Route: typeof OnboardingEtapa2Route
   PretendentesIdRoute: typeof PretendentesIdRoute
@@ -1123,12 +1124,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OnboardingEtapa1RouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/meu-pet/historico': {
-      id: '/meu-pet/historico'
-      path: '/historico'
+    '/meu-pet_/historico': {
+      id: '/meu-pet_/historico'
+      path: '/meu-pet/historico'
       fullPath: '/meu-pet/historico'
       preLoaderRoute: typeof MeuPetHistoricoRouteImport
-      parentRoute: typeof MeuPetRoute
+      parentRoute: typeof rootRouteImport
     }
     '/conversas/comunidade': {
       id: '/conversas/comunidade'
@@ -1305,17 +1306,6 @@ const AvatarRouteChildren: AvatarRouteChildren = {
 const AvatarRouteWithChildren =
   AvatarRoute._addFileChildren(AvatarRouteChildren)
 
-interface MeuPetRouteChildren {
-  MeuPetHistoricoRoute: typeof MeuPetHistoricoRoute
-}
-
-const MeuPetRouteChildren: MeuPetRouteChildren = {
-  MeuPetHistoricoRoute: MeuPetHistoricoRoute,
-}
-
-const MeuPetRouteWithChildren =
-  MeuPetRoute._addFileChildren(MeuPetRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AvatarRoute: AvatarRouteWithChildren,
@@ -1333,7 +1323,7 @@ const rootRouteChildren: RootRouteChildren = {
   LojaRoute: LojaRoute,
   ManualRoute: ManualRoute,
   MatchesRoute: MatchesRoute,
-  MeuPetRoute: MeuPetRouteWithChildren,
+  MeuPetRoute: MeuPetRoute,
   NotificacoesRoute: NotificacoesRoute,
   OracoesRoute: OracoesRoute,
   PerfilRoute: PerfilRoute,
@@ -1363,6 +1353,7 @@ const rootRouteChildren: RootRouteChildren = {
   BlogSlugRoute: BlogSlugRoute,
   ConversasMatchIdRoute: ConversasMatchIdRoute,
   ConversasComunidadeRoute: ConversasComunidadeRoute,
+  MeuPetHistoricoRoute: MeuPetHistoricoRoute,
   OnboardingEtapa1Route: OnboardingEtapa1Route,
   OnboardingEtapa2Route: OnboardingEtapa2Route,
   PretendentesIdRoute: PretendentesIdRoute,
@@ -1382,13 +1373,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
