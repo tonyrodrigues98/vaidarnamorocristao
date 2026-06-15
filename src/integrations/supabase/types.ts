@@ -1645,6 +1645,7 @@ export type Database = {
           effect_delta: number
           effect_kind: string | null
           id: string
+          personality_slug: string | null
           text: string
         }
         Insert: {
@@ -1654,6 +1655,7 @@ export type Database = {
           effect_delta?: number
           effect_kind?: string | null
           id?: string
+          personality_slug?: string | null
           text: string
         }
         Update: {
@@ -1663,6 +1665,7 @@ export type Database = {
           effect_delta?: number
           effect_kind?: string | null
           id?: string
+          personality_slug?: string | null
           text?: string
         }
         Relationships: []
