@@ -2017,6 +2017,33 @@ export type Database = {
           },
         ]
       }
+      pet_rebirth_history: {
+        Row: {
+          created_at: string
+          id: string
+          medal: string | null
+          prestige_level: number
+          user_id: string
+          xp_at_rebirth: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          medal?: string | null
+          prestige_level: number
+          user_id: string
+          xp_at_rebirth?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          medal?: string | null
+          prestige_level?: number
+          user_id?: string
+          xp_at_rebirth?: number
+        }
+        Relationships: []
+      }
       pet_species: {
         Row: {
           active: boolean
@@ -4929,6 +4956,16 @@ export type Database = {
         }[]
       }
       get_my_prestige: { Args: never; Returns: Json }
+      get_my_rebirth_history: {
+        Args: never
+        Returns: {
+          created_at: string
+          id: string
+          medal: string
+          prestige_level: number
+          xp_at_rebirth: number
+        }[]
+      }
       get_my_starter_bundle: { Args: never; Returns: Json }
       get_my_terms_status: {
         Args: never
@@ -5068,6 +5105,7 @@ export type Database = {
       }
       mark_all_notifications_read: { Args: never; Returns: number }
       mark_message_read: { Args: { _message_id: string }; Returns: undefined }
+      medal_for_prestige: { Args: { _level: number }; Returns: string }
       pet_care_uses_today: {
         Args: { _item_id: string; _user_pet_id: string }
         Returns: number
