@@ -106,7 +106,7 @@ export const Route = createFileRoute("/pretendentes/$id")({
 
 function Detail() {
   const { id } = Route.useParams();
-  const { user, loading, isAdmin } = useAuth();
+  const { user, loading } = useAuth();
   const [profile, setProfile] = useState<Full | null | undefined>(undefined);
   const [prefs, setPrefs] = useState<Prefs | null>(null);
   const [interestSent, setInterestSent] = useState(false);
