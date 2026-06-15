@@ -17,6 +17,7 @@ import {
 
 import { Header } from "@/components/layout/Header";
 import { AdminTopNav } from "@/components/admin/AdminTopNav";
+import { PhotoImg } from "@/components/PhotoImg";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -577,9 +578,7 @@ function UsersTab() {
                   className="flex w-full items-center gap-3 px-4 py-3 text-left hover:bg-muted/50"
                 >
                   <div className="size-10 shrink-0 overflow-hidden rounded-full bg-muted">
-                    {u.photo_url && (
-                      <img src={u.photo_url} alt="" className="size-full object-cover" />
-                    )}
+                    <PhotoImg src={u.photo_url} alt="" className="size-full object-cover" />
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-medium">
@@ -675,9 +674,7 @@ function UserEconomyDrawer({
         <div className="flex items-center justify-between border-b border-border px-5 py-3">
           <div className="flex min-w-0 items-center gap-3">
             <div className="size-10 overflow-hidden rounded-full bg-muted">
-              {user.photo_url && (
-                <img src={user.photo_url} alt="" className="size-full object-cover" />
-              )}
+              <PhotoImg src={user.photo_url} alt="" className="size-full object-cover" />
             </div>
             <div className="min-w-0">
               <p className="truncate text-sm font-semibold">
