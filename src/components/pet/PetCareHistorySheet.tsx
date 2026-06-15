@@ -1,5 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Clock, Loader2 } from "lucide-react";
+import {
+  Activity,
+  Clock,
+  Coins,
+  Layers,
+  Loader2,
+  Moon,
+  PawPrint,
+  TrendingUp,
+} from "lucide-react";
 
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { supabase } from "@/integrations/supabase/client";
@@ -157,6 +166,21 @@ export function PetCareHistorySheet({ open, onOpenChange }: Props) {
     return events.filter((ev) => dayKey(new Date(ev.created_at)) === selectedDay);
   }, [events, selectedDay]);
 
+  const summary = useMemo(() => {
+    let gained = 0;
+    let spent = 0;
+    const kinds = new Set<string>();
+    for (const ev of filtered) {
+      if (ev.delta > 0) gained += ev.delta;
+      if (ev.cost_coins > 0) spent += ev.cost_coins;
+      kinds.add(ev.kind);
+    }
+    return { count: filtered.length, gained, spent, kinds: kinds.size };
+  }, [filtered]);
+
+  const todayKey = dayKey(new Date());
+  const isToday = selectedDay === todayKey;
+
   function onTouchStart(e: React.TouchEvent) {
     const t = e.touches[0];
     touchStart.current = { x: t.clientX, y: t.clientY };
@@ -255,11 +279,56 @@ export function PetCareHistorySheet({ open, onOpenChange }: Props) {
                 <Loader2 className="size-4 animate-spin text-neutral-300" />
               </div>
             ) : filtered.length === 0 ? (
-              <p className="py-10 text-center text-[12px] text-neutral-400">
-                Nenhuma ação registrada neste dia.
-              </p>
+              <div className="flex flex-col items-center px-6 py-12 text-center">
+                <div className="flex size-14 items-center justify-center rounded-full bg-neutral-100 text-neutral-400">
+                  {isToday ? (
+                    <PawPrint className="size-6" />
+                  ) : (
+                    <Moon className="size-6" />
+                  )}
+                </div>
+                <h3 className="mt-3 text-sm font-semibold text-neutral-800">
+                  {isToday ? "Nada por aqui ainda" : "Dia tranquilo"}
+                </h3>
+                <p className="mt-1 max-w-[240px] text-[12px] text-neutral-500">
+                  {isToday
+                    ? "Cuide do seu pet para registrar o primeiro evento."
+                    : "Seu pet não recebeu cuidados neste dia."}
+                </p>
+                {isToday ? (
+                  <button
+                    type="button"
+                    onClick={() => onOpenChange(false)}
+                    className="mt-4 rounded-lg border border-neutral-200 bg-white px-3 py-1.5 text-[12px] font-medium text-neutral-800 transition hover:bg-neutral-50"
+                  >
+                    Ir para cuidados
+                  </button>
+                ) : null}
+              </div>
             ) : (
-              <ul className="divide-y divide-neutral-100">
+              <>
+                <div className="grid grid-cols-4 gap-2 border-b border-neutral-100 bg-neutral-50/60 px-3 py-3">
+                  {[
+                    { icon: Activity, label: "Ações", value: summary.count },
+                    { icon: TrendingUp, label: "Ganho", value: `+${summary.gained}` },
+                    { icon: Coins, label: "Gasto", value: `-${summary.spent}` },
+                    { icon: Layers, label: "Tipos", value: summary.kinds },
+                  ].map(({ icon: Icon, label, value }) => (
+                    <div
+                      key={label}
+                      className="flex flex-col items-center rounded-lg border border-neutral-200 bg-white px-1.5 py-2"
+                    >
+                      <Icon className="size-3.5 text-neutral-400" />
+                      <span className="mt-1 text-sm font-semibold text-neutral-900">
+                        {value}
+                      </span>
+                      <span className="text-[10px] uppercase tracking-wide text-neutral-500">
+                        {label}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+                <ul className="divide-y divide-neutral-100">
                 {filtered.map((ev) => {
                   const Icon = PET_CARE_ICON[ev.kind as PetCareKind] ?? Clock;
                   return (
@@ -291,7 +360,8 @@ export function PetCareHistorySheet({ open, onOpenChange }: Props) {
                     </li>
                   );
                 })}
-              </ul>
+                </ul>
+              </>
             )}
           </div>
         </div>
