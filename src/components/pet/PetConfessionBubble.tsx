@@ -54,13 +54,18 @@ export function PetConfessionBubble({
   const bubbleRef = useRef<HTMLDivElement | null>(null);
 
   async function fetchDreamMatch(): Promise<DreamMatch | null> {
-    const { data } = await supabase.rpc("get_pet_dream_match" as never);
+    const { data, error } = await supabase.rpc("get_pet_dream_match" as never);
+    if (error) console.warn("[pet] dream rpc error", error);
     const row = ((data as unknown) as DreamMatch[])?.[0];
     return row ?? null;
   }
 
   async function fetchConfession(): Promise<Confession | null> {
-    const { data } = await supabase.rpc("get_next_pet_confession" as never);
+    const { data, error } = await supabase.rpc("get_next_pet_confession" as never);
+    if (error) {
+      console.warn("[pet] confession rpc error", error);
+      throw error;
+    }
     const row = ((data as unknown) as Confession[])?.[0];
     return row ?? null;
   }
@@ -88,14 +93,30 @@ export function PetConfessionBubble({
       }
     }
     if (!next) {
-      const c = await fetchConfession();
-      if (c) next = { kind: "text", data: c };
+      try {
+        const c = await fetchConfession();
+        if (c) next = { kind: "text", data: c };
+      } catch (err) {
+        if (manual) {
+          setActive(null);
+          const { data: sess } = await supabase.auth.getSession();
+          toast.error("Não consegui ouvir seu pet", {
+            description: sess.session
+              ? "Tente novamente em alguns segundos."
+              : "Sua sessão expirou. Faça login novamente.",
+          });
+        }
+        return;
+      }
     }
     if (!next) {
       if (manual) {
         setActive(null);
+        const { data: sess } = await supabase.auth.getSession();
         toast.message("Seu pet está quietinho agora", {
-          description: "Tente novamente em instantes.",
+          description: sess.session
+            ? "Tente novamente em instantes."
+            : "Sua sessão expirou. Faça login novamente.",
         });
       }
       return;
