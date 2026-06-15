@@ -2,6 +2,7 @@ import { friendlyError } from "@/lib/errors";
 import { PhotoCarousel } from "@/components/PhotoCarousel";
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { RequireApproved } from "@/components/RequireApproved";
+import { shouldHidePrimaryActions } from "@/lib/pretendentesEligibility";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
