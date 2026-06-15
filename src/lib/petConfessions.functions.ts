@@ -16,10 +16,11 @@ export const getRandomPetConfession = createServerFn({ method: "GET" }).handler(
       .from("pet_confessions")
       .select("id, text, category, effect_kind, effect_delta")
       .eq("active", true)
-      .limit(1)
-      .single();
+      .limit(500);
 
     if (error) throw new Error(error.message);
-    return data ?? null;
+    if (!data?.length) return null;
+
+    return data[Math.floor(Math.random() * data.length)] ?? null;
   },
 );
