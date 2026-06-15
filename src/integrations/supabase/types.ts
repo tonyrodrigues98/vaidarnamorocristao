@@ -1566,6 +1566,27 @@ export type Database = {
         }
         Relationships: []
       }
+      pet_care_push_log: {
+        Row: {
+          last_push_at: string | null
+          last_push_kind: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          last_push_at?: string | null
+          last_push_kind?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          last_push_at?: string | null
+          last_push_kind?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       pet_care_state: {
         Row: {
           anchor_at: string
@@ -1600,6 +1621,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      pet_care_streaks: {
+        Row: {
+          best_streak: number
+          current_streak: number
+          last_care_date: string | null
+          shield_count: number
+          shield_week_start: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          best_streak?: number
+          current_streak?: number
+          last_care_date?: string | null
+          shield_count?: number
+          shield_week_start?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          best_streak?: number
+          current_streak?: number
+          last_care_date?: string | null
+          shield_count?: number
+          shield_week_start?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       pet_categories: {
         Row: {
@@ -3993,6 +4044,33 @@ export type Database = {
           },
         ]
       }
+      user_pet_chest_claims: {
+        Row: {
+          claimed_at: string
+          coins_awarded: number
+          id: string
+          user_id: string
+          week_start: string
+          xp_awarded: number
+        }
+        Insert: {
+          claimed_at?: string
+          coins_awarded?: number
+          id?: string
+          user_id: string
+          week_start: string
+          xp_awarded?: number
+        }
+        Update: {
+          claimed_at?: string
+          coins_awarded?: number
+          id?: string
+          user_id?: string
+          week_start?: string
+          xp_awarded?: number
+        }
+        Relationships: []
+      }
       user_pet_confession_log: {
         Row: {
           confession_id: string
@@ -4589,6 +4667,16 @@ export type Database = {
       }
     }
     Functions: {
+      _pet_streak_grant: {
+        Args: {
+          _coins: number
+          _source: string
+          _title: string
+          _user: string
+          _xp: number
+        }
+        Returns: undefined
+      }
       admin_add_user_coins: {
         Args: { _amount: number; _user_id: string }
         Returns: number
@@ -4688,6 +4776,7 @@ export type Database = {
         }[]
       }
       claim_free_frame: { Args: { _decoration_id: string }; Returns: Json }
+      claim_pet_weekly_chest: { Args: never; Returns: Json }
       cleanup_photo_moderation_rejects: { Args: never; Returns: number }
       collect_pet_reward: {
         Args: never
@@ -4711,6 +4800,7 @@ export type Database = {
         Returns: string
       }
       current_terms_version: { Args: never; Returns: string }
+      enqueue_pet_care_reminders: { Args: never; Returns: number }
       enqueue_push_for_shop_item: {
         Args: { p_emoji: string; p_label: string; p_name: string }
         Returns: undefined
@@ -4823,6 +4913,8 @@ export type Database = {
           state: string
         }[]
       }
+      get_pet_streak: { Args: never; Returns: Json }
+      get_pet_weekly_chest: { Args: never; Returns: Json }
       get_prayer_streak: {
         Args: { _user_id: string }
         Returns: {
