@@ -14,7 +14,7 @@ import {
 import { PET_CARE_ICON } from "@/components/pet/PetNeedsHud";
 import { cn } from "@/lib/utils";
 
-export const Route = createFileRoute("/meu-pet/historico")({
+export const Route = createFileRoute("/meu-pet_/historico")({
   component: PetCareHistoryPage,
 });
 
@@ -174,9 +174,9 @@ function PetCareHistoryPage() {
   if (!user) return <Navigate to="/auth/login" />;
 
   return (
-    <div className="min-h-dvh bg-neutral-50">
+    <div className="min-h-dvh bg-neutral-50 animate-fade-in">
       <Header />
-      <main className="mx-auto w-full max-w-2xl space-y-4 px-4 py-4">
+      <main className="mx-auto w-full max-w-2xl space-y-4 px-4 py-4 animate-slide-in-right">
         <div className="flex items-center gap-2">
           <Link
             to="/meu-pet"
