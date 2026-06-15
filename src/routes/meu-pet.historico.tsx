@@ -36,36 +36,57 @@ type DayBucket = {
 
 const MAX_DAYS = 7;
 
-function startOfLocalDay(d: Date): Date {
-  const x = new Date(d);
-  x.setHours(0, 0, 0, 0);
-  return x;
+/**
+ * Timezone do usuário (resolvido pelo browser). Usado de forma consistente
+ * em TODA agregação para evitar mismatch entre "Hoje" e "Ontem" quando o
+ * device cruza meia-noite ou usa DST diferente do servidor.
+ */
+const USER_TZ =
+  (typeof Intl !== "undefined" &&
+    Intl.DateTimeFormat().resolvedOptions().timeZone) ||
+  "America/Sao_Paulo";
+
+const DAY_KEY_FMT = new Intl.DateTimeFormat("en-CA", {
+  timeZone: USER_TZ,
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+});
+
+/** YYYY-MM-DD no fuso do usuário (en-CA garante este formato). */
+function dayKey(d: Date): string {
+  return DAY_KEY_FMT.format(d);
 }
 
-function dayKey(d: Date): string {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
+/** Diferença em dias entre dois dayKeys YYYY-MM-DD (independe de DST). */
+function dayDiff(aKey: string, bKey: string): number {
+  const [ay, am, ad] = aKey.split("-").map(Number);
+  const [by, bm, bd] = bKey.split("-").map(Number);
+  const a = Date.UTC(ay, am - 1, ad);
+  const b = Date.UTC(by, bm - 1, bd);
+  return Math.round((a - b) / 86_400_000);
 }
 
 function lastSevenDays(): DayBucket[] {
-  const today = startOfLocalDay(new Date());
+  const todayKey = dayKey(new Date());
+  const [ty, tm, td] = todayKey.split("-").map(Number);
   const out: DayBucket[] = [];
   for (let i = 0; i < MAX_DAYS; i++) {
-    const d = new Date(today);
-    d.setDate(today.getDate() - i);
-    out.push({ key: dayKey(d), date: d, count: 0 });
+    // Construímos a data como meio-dia UTC só para fins de exibição
+    // (toLocaleDateString abaixo); o key é o que importa para agrupar.
+    const utc = new Date(Date.UTC(ty, tm - 1, td - i, 12));
+    out.push({ key: dayKey(utc), date: utc, count: 0 });
   }
   return out;
 }
 
-function formatDayLabel(d: Date): string {
-  const today = startOfLocalDay(new Date());
-  const diff = Math.round((today.getTime() - d.getTime()) / 86_400_000);
+function formatDayLabel(key: string, date: Date): string {
+  const todayKey = dayKey(new Date());
+  const diff = dayDiff(todayKey, key);
   if (diff === 0) return "Hoje";
   if (diff === 1) return "Ontem";
-  return d.toLocaleDateString("pt-BR", {
+  return date.toLocaleDateString("pt-BR", {
+    timeZone: USER_TZ,
     weekday: "short",
     day: "2-digit",
     month: "short",
@@ -74,6 +95,7 @@ function formatDayLabel(d: Date): string {
 
 function formatTime(iso: string): string {
   return new Date(iso).toLocaleTimeString("pt-BR", {
+    timeZone: USER_TZ,
     hour: "2-digit",
     minute: "2-digit",
   });
@@ -194,7 +216,7 @@ function PetCareHistoryPage() {
                     aria-pressed={active}
                   >
                     <span className="text-[11px] font-medium uppercase tracking-wide">
-                      {formatDayLabel(d.date)}
+                      {formatDayLabel(d.key, d.date)}
                     </span>
                     <span className="mt-0.5 text-[11px] text-neutral-500">
                       {d.count === 0
