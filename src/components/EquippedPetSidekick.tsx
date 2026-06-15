@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
 import { Heart } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 
-import { getMyPetV2, resolvePetDisplayImage } from "@/lib/petCatalog";
-import type { UserPetV2Full } from "@/types/petCatalog";
+import { resolvePetDisplayImage } from "@/lib/petCatalog";
+import { myPetV2QueryOptions } from "@/lib/petQueries";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -26,19 +26,7 @@ export function EquippedPetSidekick({
   showHeartBubble = true,
   className,
 }: Props) {
-  const [pet, setPet] = useState<UserPetV2Full | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    getMyPetV2(userId)
-      .then((p) => {
-        if (!cancelled) setPet(p);
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, [userId]);
+  const { data: pet } = useQuery(myPetV2QueryOptions(userId));
 
   const stageKind = pet?.life_stage?.kind ?? null;
   const image =
