@@ -19,6 +19,7 @@ import { Header } from "@/components/layout/Header";
 import { AdminTopNav } from "@/components/admin/AdminTopNav";
 import { PhotoImg } from "@/components/PhotoImg";
 import { useAuth } from "@/lib/auth";
+import { extractProfilePhotoPath } from "@/lib/photoUrl";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -464,6 +465,7 @@ type SearchedUser = {
   user_id: string;
   full_name: string | null;
   photo_url: string | null;
+  signed_photo_url?: string | null;
   balance: number;
   claim_streak: number;
   top_role: string;
@@ -488,6 +490,30 @@ type UserEconomy = {
   transactions: UserTx[];
 };
 
+async function signEconomyUserPhotos(users: SearchedUser[]): Promise<SearchedUser[]> {
+  const paths = users
+    .map((u) => extractProfilePhotoPath(u.photo_url))
+    .filter((path): path is string => Boolean(path));
+  const uniquePaths = Array.from(new Set(paths));
+  if (uniquePaths.length === 0) return users;
+
+  const { data, error } = await supabase.storage
+    .from("profile-photos")
+    .createSignedUrls(uniquePaths, 60 * 60);
+
+  if (error || !data) return users;
+
+  const signedByPath = new Map<string, string>();
+  data.forEach((entry, index) => {
+    if (entry.signedUrl) signedByPath.set(uniquePaths[index], entry.signedUrl);
+  });
+
+  return users.map((user) => {
+    const path = extractProfilePhotoPath(user.photo_url);
+    return { ...user, signed_photo_url: path ? signedByPath.get(path) ?? null : user.photo_url };
+  });
+}
+
 function UsersTab() {
   const [q, setQ] = useState("");
   const [results, setResults] = useState<SearchedUser[]>([]);
@@ -510,7 +536,10 @@ function UsersTab() {
         toast.error("Falha ao buscar usuários: " + error.message);
         setResults([]);
       } else {
-        setResults((data ?? []) as unknown as SearchedUser[]);
+        const users = (data ?? []) as unknown as SearchedUser[];
+        const signedUsers = await signEconomyUserPhotos(users);
+        if (cancel) return;
+        setResults(signedUsers);
       }
       setSearching(false);
     }, 250);
