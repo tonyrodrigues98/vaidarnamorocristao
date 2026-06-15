@@ -186,7 +186,8 @@ export function SaldoTab() {
           <div className="mb-2 text-sm text-muted-foreground">/ {COIN_MAX}</div>
         </div>
         <p className="relative mt-3 text-xs text-muted-foreground/80">
-          Use moedas para enviar stickers, comprar molduras, auras e recados extras.
+          O limite é {COIN_MAX} moedas — gaste em stickers, molduras, fundos ou itens do pet
+          para liberar espaço e continuar recebendo recompensas diárias.
         </p>
       </div>
 

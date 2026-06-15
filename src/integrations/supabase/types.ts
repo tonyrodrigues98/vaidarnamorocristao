@@ -3758,6 +3758,7 @@ export type Database = {
       user_coins: {
         Row: {
           balance: number
+          claim_streak: number
           created_at: string
           last_claim_date: string | null
           updated_at: string
@@ -3765,6 +3766,7 @@ export type Database = {
         }
         Insert: {
           balance?: number
+          claim_streak?: number
           created_at?: string
           last_claim_date?: string | null
           updated_at?: string
@@ -3772,6 +3774,7 @@ export type Database = {
         }
         Update: {
           balance?: number
+          claim_streak?: number
           created_at?: string
           last_claim_date?: string | null
           updated_at?: string
@@ -4566,6 +4569,18 @@ export type Database = {
         }
         Relationships: []
       }
+      v_economy_daily: {
+        Row: {
+          coins_in: number | null
+          coins_out: number | null
+          day: string | null
+          peak_balance: number | null
+          tx_in: number | null
+          tx_out: number | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       admin_add_user_coins: {
@@ -4586,6 +4601,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      admin_economy_summary: { Args: { _days?: number }; Returns: Json }
       admin_hard_delete_user: {
         Args: { _reason: string; _user_id: string }
         Returns: undefined

@@ -481,7 +481,7 @@ function Showcase({
       <div className="min-w-0 flex-1">
         <div className="text-sm font-semibold text-neutral-900">Quiz Bíblico do dia</div>
         <div className="text-[12px] text-neutral-500">
-          3 perguntas · até +30 XP e +40 moedas
+          3 perguntas · até +30 XP e +15 moedas
         </div>
       </div>
       <ArrowRight className="size-4 text-neutral-300 transition group-hover:text-sky-500" />

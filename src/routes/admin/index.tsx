@@ -752,6 +752,12 @@ function Admin() {
                 title="Pets"
                 description="Catálogo de pets companheiros."
               />
+              <AdminModuleLink
+                to="/admin/economia"
+                icon={<Gem className="h-4 w-4" />}
+                title="Economia"
+                description="Faucets, sinks e saldo dos usuários."
+              />
             </AdminModuleGroup>
 
             <AdminModuleGroup
@@ -1328,7 +1334,8 @@ type AdminModuleTo =
   | "/admin/gradientes-nome"
   | "/admin/stickers"
   | "/admin/avatar"
-  | "/admin/pets";
+  | "/admin/pets"
+  | "/admin/economia";
 
 function AdminMetricPill({ label, value }: { label: string; value: string | number }) {
   return (
