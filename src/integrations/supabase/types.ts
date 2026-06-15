@@ -4312,6 +4312,30 @@ export type Database = {
           },
         ]
       }
+      user_prestige: {
+        Row: {
+          last_prestige_at: string | null
+          level: number
+          total_rebirths: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          last_prestige_at?: string | null
+          level?: number
+          total_rebirths?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          last_prestige_at?: string | null
+          level?: number
+          total_rebirths?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_profile_backgrounds: {
         Row: {
           background_id: string
@@ -4406,6 +4430,27 @@ export type Database = {
           public_listing?: boolean
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
+        }
+        Relationships: []
+      }
+      user_starter_bundle: {
+        Row: {
+          claimed_at: string
+          coins_granted: number
+          user_id: string
+          xp_granted: number
+        }
+        Insert: {
+          claimed_at?: string
+          coins_granted?: number
+          user_id: string
+          xp_granted?: number
+        }
+        Update: {
+          claimed_at?: string
+          coins_granted?: number
+          user_id?: string
+          xp_granted?: number
         }
         Relationships: []
       }
@@ -4777,6 +4822,7 @@ export type Database = {
       }
       claim_free_frame: { Args: { _decoration_id: string }; Returns: Json }
       claim_pet_weekly_chest: { Args: never; Returns: Json }
+      claim_starter_bundle: { Args: never; Returns: Json }
       cleanup_photo_moderation_rejects: { Args: never; Returns: number }
       collect_pet_reward: {
         Args: never
@@ -4882,6 +4928,8 @@ export type Database = {
           profile_complete: boolean
         }[]
       }
+      get_my_prestige: { Args: never; Returns: Json }
+      get_my_starter_bundle: { Args: never; Returns: Json }
       get_my_terms_status: {
         Args: never
         Returns: {
@@ -5044,6 +5092,7 @@ export type Database = {
       }
       pet_runtime_modifiers: { Args: { _user_pet_id: string }; Returns: Json }
       pet_state_snapshot: { Args: { _user_pet_id: string }; Returns: Json }
+      prestige_rebirth: { Args: never; Returns: Json }
       progress_mission_action: {
         Args: { _action_key: string; _inc?: number; _user_id: string }
         Returns: undefined
