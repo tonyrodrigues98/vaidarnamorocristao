@@ -2,6 +2,25 @@ import { useQuery } from "@tanstack/react-query";
 import { Flame, Shield, Trophy } from "lucide-react";
 import { getPetStreak, nextStreakMarker } from "@/lib/petStreak";
 
+function formatRelative(dateStr: string | null): string | null {
+  if (!dateStr) return null;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const d = new Date(`${dateStr}T00:00:00`);
+  const diff = Math.round((today.getTime() - d.getTime()) / 86_400_000);
+  if (diff <= 0) return "hoje";
+  if (diff === 1) return "ontem";
+  return `há ${diff} dias`;
+}
+
+function flameClass(current: number, caredToday: boolean): string {
+  if (!caredToday && current === 0) return "bg-neutral-100 text-neutral-400";
+  if (current >= 30) return "bg-rose-50 text-rose-600";
+  if (current >= 7) return "bg-orange-50 text-orange-600";
+  if (current >= 3) return "bg-amber-50 text-amber-600";
+  return "bg-yellow-50 text-yellow-600";
+}
+
 export function PetStreakCard({ refreshKey = 0 }: { refreshKey?: number }) {
   const { data, isLoading } = useQuery({
     queryKey: ["pet", "streak", refreshKey],
@@ -17,6 +36,7 @@ export function PetStreakCard({ refreshKey = 0 }: { refreshKey?: number }) {
 
   const next = nextStreakMarker(data.current);
   const remaining = next ? next - data.current : 0;
+  const lastLabel = formatRelative(data.last_care_date);
 
   return (
     <div className="rounded-2xl border border-neutral-200 bg-white p-4">
@@ -24,9 +44,7 @@ export function PetStreakCard({ refreshKey = 0 }: { refreshKey?: number }) {
         <div
           className={
             "flex size-12 shrink-0 items-center justify-center rounded-xl " +
-            (data.cared_today
-              ? "bg-orange-50 text-orange-600"
-              : "bg-neutral-100 text-neutral-400")
+            flameClass(data.current, data.cared_today)
           }
         >
           <Flame className="size-6" />
@@ -41,7 +59,9 @@ export function PetStreakCard({ refreshKey = 0 }: { refreshKey?: number }) {
           <p className="mt-0.5 text-[12px] text-neutral-500">
             {data.cared_today
               ? "Cuidado de hoje registrado."
-              : "Cuide do seu pet hoje para manter o streak."}
+              : lastLabel
+                ? `Último cuidado ${lastLabel}. Cuide para manter o streak.`
+                : "Cuide do seu pet hoje para começar o streak."}
           </p>
         </div>
         <div className="flex flex-col items-end gap-1 text-[11px]">

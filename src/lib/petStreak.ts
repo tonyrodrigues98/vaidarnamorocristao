@@ -41,7 +41,7 @@ export async function claimPetWeeklyChest(): Promise<{
 }
 
 /** Próximo marco do streak (linear+marcos). */
-export const STREAK_MARKERS = [7, 14, 30, 60, 100];
+export const STREAK_MARKERS = [3, 7, 14, 30, 60, 100];
 export function nextStreakMarker(current: number): number | null {
   for (const m of STREAK_MARKERS) if (current < m) return m;
   return null;
