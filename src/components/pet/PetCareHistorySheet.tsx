@@ -194,9 +194,6 @@ export function PetCareHistorySheet({ open, onOpenChange }: Props) {
         ref={contentRef}
         side="right"
         className="w-full p-0 sm:max-w-md"
-        onTouchStart={onTouchStart}
-        onTouchMove={onTouchMove}
-        onTouchEnd={onTouchEnd}
       >
         <div className="flex h-full flex-col">
           <header className="flex items-center gap-2 border-b border-neutral-200 px-4 py-3 pr-12">
@@ -213,7 +210,7 @@ export function PetCareHistorySheet({ open, onOpenChange }: Props) {
             </div>
           </header>
 
-          <div className="overflow-x-auto border-b border-neutral-100 bg-white px-2 py-2">
+          <div className="overflow-x-auto border-b border-neutral-100 bg-white px-2 py-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             <ul className="flex gap-2">
               {days.map((d) => {
                 const active = d.key === selectedDay;
@@ -247,7 +244,12 @@ export function PetCareHistorySheet({ open, onOpenChange }: Props) {
             </ul>
           </div>
 
-          <div className="flex-1 overflow-y-auto">
+          <div
+            className="flex-1 overflow-y-auto"
+            onTouchStart={onTouchStart}
+            onTouchMove={onTouchMove}
+            onTouchEnd={onTouchEnd}
+          >
             {loading && events === null ? (
               <div className="flex justify-center py-10">
                 <Loader2 className="size-4 animate-spin text-neutral-300" />
