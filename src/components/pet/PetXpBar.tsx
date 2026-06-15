@@ -1,8 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { ChevronRight, Sparkles, Trophy } from "lucide-react";
 import { getMyXpState, levelTitle, type XpState } from "@/lib/xp";
 import { cn } from "@/lib/utils";
+import { haptics } from "@/lib/haptics";
+import { toast } from "sonner";
 
 /**
  * Barra de XP azul, full-width dentro do bloco do pet.
@@ -16,11 +18,23 @@ export function PetXpBar({
   className?: string;
 }) {
   const [state, setState] = useState<XpState | null>(null);
+  const prevLevelRef = useRef<number | null>(null);
 
   useEffect(() => {
     let alive = true;
     getMyXpState()
-      .then((s) => alive && setState(s))
+      .then((s) => {
+        if (!alive) return;
+        setState(s);
+        // Detecta level-up entre renders e dispara feedback tátil + toast.
+        if (prevLevelRef.current != null && s.level > prevLevelRef.current) {
+          haptics.success();
+          toast.success(`Nível ${s.level}!`, {
+            description: `Agora você é ${levelTitle(s.level)}.`,
+          });
+        }
+        prevLevelRef.current = s.level;
+      })
       .catch(() => {});
     return () => {
       alive = false;

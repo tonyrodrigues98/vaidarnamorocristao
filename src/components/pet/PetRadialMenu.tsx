@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { PET_CARE_LABEL, PET_CARE_ORDER, type PetCareKind } from "@/types/petCare";
 import { PET_CARE_ICON } from "./PetNeedsHud";
 import { cn } from "@/lib/utils";
+import { haptics } from "@/lib/haptics";
 
 /**
  * Menu radial: 6 setores em torno do pet. Cada um abre um sub-painel para
@@ -21,6 +22,7 @@ export function PetRadialMenu({
 }) {
   useEffect(() => {
     if (!open) return;
+    haptics.tap();
     function onKey(e: KeyboardEvent) {
       if (e.key === "Escape") onClose();
     }
@@ -59,7 +61,10 @@ export function PetRadialMenu({
             <button
               key={k}
               type="button"
-              onClick={() => onPick(k)}
+              onClick={() => {
+                haptics.pick();
+                onPick(k);
+              }}
               className={cn(
                 "absolute -translate-x-1/2 -translate-y-1/2",
                 "flex h-14 w-14 sm:h-16 sm:w-16 flex-col items-center justify-center gap-0.5 rounded-full",

@@ -61,6 +61,8 @@ import { PetXpBar } from "@/components/pet/PetXpBar";
 import { PetEffectsLayer } from "@/components/pet/PetEffectsLayer";
 import { PetConfessionBubble } from "@/components/pet/PetConfessionBubble";
 import { MissionsTodayCard } from "@/components/pet/MissionsTodayCard";
+import { PetCareHistoryCard } from "@/components/pet/PetCareHistoryCard";
+import { PetOnboardingTour } from "@/components/pet/PetOnboardingTour";
 import { Link as RouterLink } from "@tanstack/react-router";
 import { BookOpen, MessageCircle } from "lucide-react";
 
@@ -482,6 +484,8 @@ function Showcase({
       </div>
     </section>
     <MissionsTodayCard refreshKey={xpRefresh} />
+    <PetCareHistoryCard userPetId={pet.id} refreshKey={xpRefresh} />
+    <PetOnboardingTour />
     <RouterLink
       to="/quiz-biblico"
       className="group flex items-center gap-3 rounded-2xl border border-neutral-200 bg-white p-4 transition hover:border-sky-300 hover:shadow-sm"
