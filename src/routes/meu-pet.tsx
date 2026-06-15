@@ -66,6 +66,7 @@ import { PetOnboardingTour } from "@/components/pet/PetOnboardingTour";
 import { PetShowcaseSkeleton } from "@/components/pet/PetShowcaseSkeleton";
 import { PetStreakCard } from "@/components/pet/PetStreakCard";
 import { PetWeeklyChestCard } from "@/components/pet/PetWeeklyChestCard";
+import { PetProgressionCard } from "@/components/pet/PetProgressionCard";
 import {
   PetRandomEventModal,
   type PetRandomEventPayload,
