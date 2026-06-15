@@ -12,6 +12,7 @@ export type PetBackground = {
   price_coins: number;
   active: boolean;
   sort_order: number;
+  min_level: number;
   created_at: string;
   updated_at: string;
 };

@@ -1296,6 +1296,7 @@ export type Database = {
           image_url_day: string | null
           image_url_night: string | null
           is_exclusive: boolean
+          min_level: number
           name: string
           price_coins: number
           rarity: string
@@ -1311,6 +1312,7 @@ export type Database = {
           image_url_day?: string | null
           image_url_night?: string | null
           is_exclusive?: boolean
+          min_level?: number
           name: string
           price_coins?: number
           rarity?: string
@@ -1326,6 +1328,7 @@ export type Database = {
           image_url_day?: string | null
           image_url_night?: string | null
           is_exclusive?: boolean
+          min_level?: number
           name?: string
           price_coins?: number
           rarity?: string

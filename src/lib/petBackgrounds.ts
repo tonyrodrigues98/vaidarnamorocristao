@@ -67,6 +67,7 @@ export type BackgroundWritable = {
   price_coins: number;
   active: boolean;
   sort_order: number;
+  min_level: number;
 };
 
 export async function createBackground(input: BackgroundWritable): Promise<PetBackground> {

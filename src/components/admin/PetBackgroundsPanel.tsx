@@ -54,6 +54,7 @@ function emptyDraft(sort: number): Draft {
     price_coins: 0,
     active: true,
     sort_order: sort,
+    min_level: 1,
     compat: [],
   };
 }
@@ -101,6 +102,7 @@ export function PetBackgroundsPanel() {
       price_coins: row.price_coins,
       active: row.active,
       sort_order: row.sort_order,
+      min_level: row.min_level ?? 1,
       compat: row.compat.map((c) => ({ category_id: c.category_id, species_id: c.species_id })),
     });
   }
@@ -124,6 +126,7 @@ export function PetBackgroundsPanel() {
         price_coins: draft.is_exclusive ? Math.max(0, draft.price_coins | 0) : 0,
         active: draft.active,
         sort_order: draft.sort_order,
+        min_level: Math.max(1, Math.min(50, draft.min_level | 0 || 1)),
       };
       const row = draft.id
         ? await updateBackground(draft.id, payload)
@@ -408,7 +411,11 @@ function DraftForm({
           <Label>Raridade</Label>
           <Select
             value={draft.rarity}
-            onValueChange={(v) => onChange({ ...draft, rarity: v as PetRarity })}
+            onValueChange={(v) => {
+              const r = v as PetRarity;
+              const suggested = r === "legendary" ? 30 : r === "epic" ? 9 : r === "rare" ? 3 : 1;
+              onChange({ ...draft, rarity: r, min_level: suggested });
+            }}
           >
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
@@ -417,6 +424,21 @@ function DraftForm({
               ))}
             </SelectContent>
           </Select>
+        </div>
+        <div className="space-y-1.5">
+          <Label>Nível mínimo</Label>
+          <Input
+            type="text"
+            inputMode="numeric"
+            value={draft.min_level}
+            onChange={(e) => {
+              const n = parseInt(e.target.value.replace(/\D+/g, ""), 10);
+              onChange({ ...draft, min_level: Number.isFinite(n) ? Math.max(1, Math.min(50, n)) : 1 });
+            }}
+          />
+          <p className="text-[10px] text-muted-foreground">
+            Sugestão: comum 1 · raro 3 · épico 9 · lendário 30
+          </p>
         </div>
         <div className="flex items-center gap-2 pt-6">
           <Switch

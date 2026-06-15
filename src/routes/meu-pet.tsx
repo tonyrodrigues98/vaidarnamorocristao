@@ -493,6 +493,7 @@ function Showcase({
         list={scenery.list}
         unlocks={scenery.unlocks}
         equipped={scenery.equipped}
+        level={scenery.level}
         loading={scenery.loading}
         onChanged={scenery.reload}
       />

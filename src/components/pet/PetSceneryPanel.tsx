@@ -10,6 +10,7 @@ import {
   listMyBackgroundUnlocks,
   unlockPetBackground,
 } from "@/lib/petBackgrounds";
+import { getMyXpState } from "@/lib/xp";
 import { PET_RARITY_COLOR, PET_RARITY_LABEL } from "@/types/pet";
 import type { PetBackground, UserPetBackground } from "@/types/petBackground";
 import { cn } from "@/lib/utils";
@@ -23,18 +24,21 @@ export function usePetScenery(opts: { categoryId: string; speciesId: string | nu
   const [unlocks, setUnlocks] = useState<UserPetBackground[]>([]);
   const [equipped, setEquipped] = useState<PetBackground | null>(null);
   const [loading, setLoading] = useState(true);
+  const [level, setLevel] = useState(1);
 
   async function reload() {
     setLoading(true);
     try {
-      const [items, mine, eq] = await Promise.all([
+      const [items, mine, eq, xp] = await Promise.all([
         listCompatibleBackgroundsForPet(opts),
         listMyBackgroundUnlocks(),
         getEquippedBackground(),
+        getMyXpState().catch(() => null),
       ]);
       setList(items);
       setUnlocks(mine);
       setEquipped(eq);
+      setLevel(xp?.level ?? 1);
     } catch (e) {
       toast.error((e as Error).message);
     } finally {
@@ -47,7 +51,7 @@ export function usePetScenery(opts: { categoryId: string; speciesId: string | nu
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [opts.categoryId, opts.speciesId]);
 
-  return { list, unlocks, equipped, loading, reload };
+  return { list, unlocks, equipped, loading, level, reload };
 }
 
 export function PetSceneryPanel({
@@ -56,6 +60,7 @@ export function PetSceneryPanel({
   list,
   unlocks,
   equipped,
+  level,
   loading,
   onChanged,
 }: {
@@ -64,6 +69,7 @@ export function PetSceneryPanel({
   list: PetBackground[];
   unlocks: UserPetBackground[];
   equipped: PetBackground | null;
+  level: number;
   loading: boolean;
   onChanged: () => void;
 }) {
@@ -71,6 +77,10 @@ export function PetSceneryPanel({
   const ownedIds = new Set(unlocks.map((u) => u.background_id));
 
   async function handleClick(bg: PetBackground) {
+    if (!ownedIds.has(bg.id) && level < (bg.min_level ?? 1)) {
+      toast.error(`Disponível a partir do nível ${bg.min_level}. Você está no nível ${level}.`);
+      return;
+    }
     setBusyId(bg.id);
     try {
       if (!ownedIds.has(bg.id)) {
@@ -89,6 +99,9 @@ export function PetSceneryPanel({
       const msg = (e as Error).message;
       if (msg.includes("insufficient_coins")) {
         toast.error("Saldo de moedas insuficiente");
+      } else if (msg.includes("level_too_low")) {
+        const m = msg.match(/level_too_low:(\d+)/);
+        toast.error(m ? `Disponível a partir do nível ${m[1]}.` : "Nível insuficiente.");
       } else {
         toast.error(msg);
       }
@@ -150,17 +163,20 @@ export function PetSceneryPanel({
             const owned = ownedIds.has(bg.id);
             const isEquipped = equipped?.id === bg.id;
             const busy = busyId === bg.id;
+            const locked = !owned && level < (bg.min_level ?? 1);
             return (
               <button
                 key={bg.id}
                 type="button"
                 onClick={() => void handleClick(bg)}
-                disabled={busy}
+                disabled={busy || locked}
+                aria-disabled={locked}
                 className={cn(
                   "group relative flex w-40 shrink-0 snap-start flex-col overflow-hidden rounded-2xl border bg-white text-left transition-all",
                   isEquipped
                     ? "border-neutral-900 ring-2 ring-neutral-900/10"
                     : "border-neutral-200 hover:-translate-y-0.5 hover:border-neutral-300 hover:shadow-[0_12px_30px_-18px_rgba(0,0,0,0.25)]",
+                  locked && "opacity-60",
                 )}
               >
                 <div className="relative aspect-[4/3] w-full overflow-hidden bg-gradient-to-b from-neutral-100 to-neutral-50">
@@ -169,6 +185,7 @@ export function PetSceneryPanel({
                       src={bg.image_url_day}
                       alt={bg.name}
                       className="absolute inset-0 h-full w-full object-cover"
+                      style={locked ? { filter: "grayscale(0.6)" } : undefined}
                     />
                   ) : null}
                   {isEquipped && (
@@ -176,12 +193,19 @@ export function PetSceneryPanel({
                       <Check className="h-3.5 w-3.5" />
                     </div>
                   )}
-                  {!owned && bg.is_exclusive && (
+                  {locked && (
+                    <div className="absolute inset-0 grid place-items-center bg-black/30">
+                      <div className="inline-flex items-center gap-1 rounded-full bg-white/95 px-2.5 py-1 text-[11px] font-semibold text-neutral-800 ring-1 ring-neutral-200">
+                        <Lock className="h-3 w-3" /> Nível {bg.min_level}
+                      </div>
+                    </div>
+                  )}
+                  {!locked && !owned && bg.is_exclusive && (
                     <div className="absolute left-1.5 top-1.5 inline-flex items-center gap-1 rounded-full bg-amber-500 px-2 py-0.5 text-[10px] font-semibold text-white">
                       <CoinIcon className="h-3 w-3" /> {bg.price_coins}
                     </div>
                   )}
-                  {!owned && !bg.is_exclusive && (
+                  {!locked && !owned && !bg.is_exclusive && (
                     <div className="absolute left-1.5 top-1.5 inline-flex items-center gap-1 rounded-full bg-white/95 px-2 py-0.5 text-[10px] font-semibold text-neutral-700 ring-1 ring-neutral-200">
                       <Lock className="h-3 w-3" /> Grátis
                     </div>
