@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { PET_CARE_LABEL, PET_CARE_ORDER, type PetCareKind } from "@/types/petCare";
 import { PET_CARE_ICON } from "./PetNeedsHud";
@@ -96,18 +96,20 @@ export function PetRadialMenu({
  * Retorna handlers para colar no elemento alvo.
  */
 export function useLongPress(onLongPress: () => void, delay = 400) {
-  let timer: ReturnType<typeof setTimeout> | null = null;
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const cbRef = useRef(onLongPress);
+  cbRef.current = onLongPress;
   function start() {
-    if (timer) clearTimeout(timer);
-    timer = setTimeout(() => {
-      onLongPress();
-      timer = null;
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => {
+      cbRef.current();
+      timerRef.current = null;
     }, delay);
   }
   function cancel() {
-    if (timer) {
-      clearTimeout(timer);
-      timer = null;
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
     }
   }
   return {

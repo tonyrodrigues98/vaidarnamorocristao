@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { Loader2, MessageCircle, Sparkles, X } from "lucide-react";
@@ -47,13 +47,18 @@ export function PetConfessionBubble({
   triggerKey?: number;
 }) {
   const { phase } = usePetDayNight();
-  const isNight = phase === "night";
   const [active, setActive] = useState<Active | null>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const hideRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const firstRender = useRef(true);
   const bubbleRef = useRef<HTMLDivElement | null>(null);
   const loadConfession = useServerFn(getRandomPetConfession);
+  // refs evitam stale closure dentro dos timers
+  const isNightRef = useRef(phase === "night");
+  isNightRef.current = phase === "night";
+  const loadRef = useRef(loadConfession);
+  loadRef.current = loadConfession;
+  const shouldScrollRef = useRef(false);
 
   async function fetchDreamMatch(): Promise<DreamMatch | null> {
     const { data, error } = await supabase.rpc("get_pet_dream_match" as never);
@@ -62,17 +67,14 @@ export function PetConfessionBubble({
     return row ?? null;
   }
 
-  async function fetchConfession(): Promise<Confession | null> {
-    return await loadConfession();
-  }
-
-  async function showNew(manual = false) {
+  const showNew = useCallback(async (manual = false) => {
     if (manual) {
       if (hideRef.current) clearTimeout(hideRef.current);
       setActive({ kind: "loading" });
+      shouldScrollRef.current = true;
     }
     let next: Active | null = null;
-    if (isNight && Math.random() < DREAM_CHANCE_AT_NIGHT) {
+    if (isNightRef.current && Math.random() < DREAM_CHANCE_AT_NIGHT) {
       const match = await fetchDreamMatch();
       if (match) {
         next = {
@@ -90,9 +92,10 @@ export function PetConfessionBubble({
     }
     if (!next) {
       try {
-        const c = await fetchConfession();
+        const c = await loadRef.current();
         if (c) next = { kind: "text", data: c };
       } catch (err) {
+        console.warn("[pet] confession error", err);
         if (manual) {
           setActive({
             kind: "text",
@@ -129,16 +132,16 @@ export function PetConfessionBubble({
       () => setActive(null),
       next.kind === "dream" ? VISIBLE_MS * 2 : VISIBLE_MS,
     );
-  }
+  }, []);
 
-  function scheduleAuto() {
+  const scheduleAuto = useCallback(() => {
     if (timerRef.current) clearTimeout(timerRef.current);
     const delay = AUTO_MIN_MS + Math.random() * (AUTO_MAX_MS - AUTO_MIN_MS);
     timerRef.current = setTimeout(async () => {
       if (document.visibilityState === "visible") await showNew();
       scheduleAuto();
     }, delay);
-  }
+  }, [showNew]);
 
   // Auto-trigger
   useEffect(() => {
@@ -152,8 +155,7 @@ export function PetConfessionBubble({
       if (timerRef.current) clearTimeout(timerRef.current);
       if (hideRef.current) clearTimeout(hideRef.current);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [scheduleAuto, showNew]);
 
   // Trigger manual via botão externo
   useEffect(() => {
@@ -162,13 +164,13 @@ export function PetConfessionBubble({
       return;
     }
     void showNew(true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [triggerKey]);
+  }, [triggerKey, showNew]);
 
-  // Garante que o balão fique visível ao usuário (especialmente em mobile,
-  // quando o botão "Pensamento" está abaixo do pet e o balão aparece acima).
+  // Só faz scroll automático quando o usuário pediu (clicou no botão).
+  // Auto-confissões não devem "roubar" o scroll.
   useEffect(() => {
-    if (!active) return;
+    if (!active || !shouldScrollRef.current) return;
+    shouldScrollRef.current = false;
     bubbleRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
   }, [active]);
 
