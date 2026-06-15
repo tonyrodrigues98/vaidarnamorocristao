@@ -13,21 +13,22 @@ export type LevelReward = {
  * Marcadores são exibidos no rail; níveis sem entrada aparecem como pontos simples.
  */
 export const LEVEL_REWARDS: LevelReward[] = [
-  { level: 1, title: "Boas-vindas", description: "Seu pet companheiro está pronto pra começar.", icon: "Sparkles" },
-  { level: 3, title: "Fundos raros", description: "Desbloqueia cenários de raridade rara na loja.", rarity: "rare", icon: "Image" },
-  { level: 5, title: "Filhote graduado", description: "Slot extra de missão diária.", icon: "Star" },
-  { level: 7, title: "Acessório raro", description: "Item raro liberado no avatar.", rarity: "rare", icon: "Glasses" },
-  { level: 9, title: "Fundos épicos", description: "Cenários épicos disponíveis na loja.", rarity: "epic", icon: "Mountain" },
-  { level: 12, title: "Bônus diário +", description: "+10 moedas no login diário.", icon: "Coins" },
-  { level: 15, title: "Poses exclusivas", description: "Novas poses de avatar liberadas.", icon: "PersonStanding" },
-  { level: 18, title: "Pack de stickers", description: "Pacote exclusivo nos chats.", icon: "Smile" },
-  { level: 20, title: "Companheiro", description: "Novo título exibido no perfil.", icon: "Award" },
-  { level: 25, title: "Moldura rara", description: "Moldura de foto rara desbloqueada.", rarity: "rare", icon: "Frame" },
-  { level: 30, title: "Fundos lendários", description: "Cenários lendários na loja.", rarity: "legendary", icon: "Crown" },
-  { level: 35, title: "Aura especial", description: "Aura visível no avatar.", rarity: "epic", icon: "Flame" },
-  { level: 40, title: "Moldura épica", description: "Moldura de foto épica liberada.", rarity: "epic", icon: "Frame" },
-  { level: 45, title: "Nome em gradiente", description: "Gradiente exclusivo no seu nome.", rarity: "legendary", icon: "Wand2" },
-  { level: 50, title: "Lendário", description: "Aura lendária + título máximo.", rarity: "legendary", icon: "Trophy" },
+  { level: 1,  title: "Boas-vindas", description: "Seu pet companheiro está pronto pra começar.", icon: "Sparkles" },
+  { level: 2,  title: "Bônus rápido", description: "+2 moedas no próximo login diário.", icon: "Coins" },
+  { level: 3,  title: "Fundos de pet raros", description: "Desbloqueia cenários raros para o seu pet.", rarity: "rare", icon: "Image" },
+  { level: 5,  title: "Slot de missão", description: "Slot extra de missão diária do pet.", icon: "ListChecks" },
+  { level: 7,  title: "Recompensa de moedas", description: "+10 moedas no próximo login diário.", icon: "Coins" },
+  { level: 9,  title: "Fundos de pet épicos", description: "Cenários épicos disponíveis para o seu pet.", rarity: "epic", icon: "Mountain" },
+  { level: 12, title: "Fundos de perfil raros", description: "Novos fundos raros para o seu perfil.", rarity: "rare", icon: "LayoutTemplate" },
+  { level: 15, title: "Bônus surpresa", description: "+25 moedas no próximo login diário.", icon: "Coins" },
+  { level: 18, title: "Pack de stickers", description: "Pacote exclusivo de stickers nos chats.", icon: "Smile" },
+  { level: 20, title: "Título Companheiro", description: "Novo título exibido no seu perfil.", icon: "Award" },
+  { level: 25, title: "Moldura de foto rara", description: "Moldura de foto de perfil rara desbloqueada.", rarity: "rare", icon: "Frame" },
+  { level: 30, title: "Fundos lendários", description: "Cenários lendários para o seu pet.", rarity: "legendary", icon: "Crown" },
+  { level: 35, title: "Cofre de moedas", description: "+75 moedas no próximo login diário.", rarity: "epic", icon: "Coins" },
+  { level: 40, title: "Moldura épica", description: "Moldura de foto de perfil épica liberada.", rarity: "epic", icon: "Frame" },
+  { level: 45, title: "Nome em gradiente", description: "Gradiente exclusivo para o seu nome.", rarity: "legendary", icon: "Wand2" },
+  { level: 50, title: "Lendário", description: "Título máximo + moldura lendária de perfil.", rarity: "legendary", icon: "Trophy" },
 ];
 
 export const MAX_LEVEL = 50;
