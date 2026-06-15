@@ -1,6 +1,6 @@
 import type { AppRole } from "@/lib/roles";
 
-export type Sex = "masculino" | "feminino";
+export type Sex = "masculino" | "feminino" | string;
 
 /**
  * Decide se as ações primárias de interação (mensagem anônima, presente, etc.)
@@ -16,8 +16,8 @@ export type Sex = "masculino" | "feminino";
  *     outro perfil em relação à interação.
  */
 export function shouldHidePrimaryActions(params: {
-  viewerSex: Sex | null;
-  profileSex: Sex | null;
+  viewerSex: string | null;
+  profileSex: string | null;
   profileRole?: AppRole | null;
   viewerIsAdmin?: boolean;
 }): boolean {
