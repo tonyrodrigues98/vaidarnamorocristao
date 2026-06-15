@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { Loader2, MessageCircle, Sparkles, X } from "lucide-react";
-import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { getRandomPetConfession } from "@/lib/petConfessions.functions";
 import { usePetDayNight } from "@/lib/petDayNight";
 import { cn } from "@/lib/utils";
 
@@ -52,6 +53,7 @@ export function PetConfessionBubble({
   const hideRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const firstRender = useRef(true);
   const bubbleRef = useRef<HTMLDivElement | null>(null);
+  const loadConfession = useServerFn(getRandomPetConfession);
 
   async function fetchDreamMatch(): Promise<DreamMatch | null> {
     const { data, error } = await supabase.rpc("get_pet_dream_match" as never);
@@ -61,24 +63,7 @@ export function PetConfessionBubble({
   }
 
   async function fetchConfession(): Promise<Confession | null> {
-    const { data, error } = await supabase.rpc("get_next_pet_confession" as never);
-    if (error) {
-      console.warn("[pet] confession rpc error, falling back to direct select", error);
-      // Fallback: lê direto da tabela (policy permite leitura pública de ativos)
-      const { data: rows, error: selErr } = await supabase
-        .from("pet_confessions")
-        .select("id, text, category, effect_kind, effect_delta")
-        .eq("active", true)
-        .limit(200);
-      if (selErr || !rows || rows.length === 0) {
-        if (selErr) console.warn("[pet] confession fallback select error", selErr);
-        throw error;
-      }
-      const pick = rows[Math.floor(Math.random() * rows.length)];
-      return pick as Confession;
-    }
-    const row = ((data as unknown) as Confession[])?.[0];
-    return row ?? null;
+    return await loadConfession();
   }
 
   async function showNew(manual = false) {
@@ -109,12 +94,15 @@ export function PetConfessionBubble({
         if (c) next = { kind: "text", data: c };
       } catch (err) {
         if (manual) {
-          setActive(null);
-          const { data: sess } = await supabase.auth.getSession();
-          toast.error("Não consegui ouvir seu pet", {
-            description: sess.session
-              ? "Tente novamente em alguns segundos."
-              : "Sua sessão expirou. Faça login novamente.",
+          setActive({
+            kind: "text",
+            data: {
+              id: "fallback-local",
+              text: "Estou aqui com você, mesmo quando fico em silêncio.",
+              category: "fallback",
+              effect_kind: null,
+              effect_delta: 0,
+            },
           });
         }
         return;
@@ -122,12 +110,15 @@ export function PetConfessionBubble({
     }
     if (!next) {
       if (manual) {
-        setActive(null);
-        const { data: sess } = await supabase.auth.getSession();
-        toast.message("Seu pet está quietinho agora", {
-          description: sess.session
-            ? "Tente novamente em instantes."
-            : "Sua sessão expirou. Faça login novamente.",
+        setActive({
+          kind: "text",
+          data: {
+            id: "fallback-empty",
+            text: "Estou aqui com você, só estava procurando as palavras certas.",
+            category: "fallback",
+            effect_kind: null,
+            effect_delta: 0,
+          },
         });
       }
       return;
