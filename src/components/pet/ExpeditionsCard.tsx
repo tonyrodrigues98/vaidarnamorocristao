@@ -15,9 +15,11 @@ import {
   DIFFICULTY_LABEL,
   DIFFICULTY_TONE,
   type ActiveExpedition,
+  type ClaimResult,
   type TodayExpedition,
 } from "@/types/petExpedition";
 import { cn } from "@/lib/utils";
+import { ExpeditionRewardModal } from "@/components/pet/ExpeditionRewardModal";
 
 function fmtRemaining(ms: number): string {
   if (ms <= 0) return "pronto";
@@ -55,6 +57,7 @@ export function ExpeditionsCard({
   const [active, setActive] = useState<ActiveExpedition | null>(null);
   const [now, setNow] = useState(() => Date.now());
   const [busy, setBusy] = useState<string | null>(null);
+  const [reveal, setReveal] = useState<{ result: ClaimResult; title: string } | null>(null);
 
   async function reload() {
     const [t, a] = await Promise.all([
@@ -93,15 +96,10 @@ export function ExpeditionsCard({
   async function handleClaim() {
     if (!active) return;
     setBusy(active.run_id);
+    const claimedTitle = active.title;
     try {
       const result = await claimExpedition(active.run_id);
-      const head =
-        result.outcome === "crit"
-          ? "Crítico!"
-          : result.outcome === "success"
-            ? "Sucesso!"
-            : "Pet voltou cansado";
-      toast.success(`${head} +${result.xp} XP · +${result.coins} moedas${result.item ? ` · ${result.item}` : ""}`);
+      setReveal({ result, title: claimedTitle });
       await reload();
       onChanged?.();
     } catch (e) {
@@ -216,6 +214,12 @@ export function ExpeditionsCard({
           })}
         </ul>
       )}
+      <ExpeditionRewardModal
+        open={!!reveal}
+        result={reveal?.result ?? null}
+        expeditionTitle={reveal?.title ?? ""}
+        onClose={() => setReveal(null)}
+      />
     </section>
   );
 }
