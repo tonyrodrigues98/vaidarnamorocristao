@@ -186,9 +186,9 @@ export type PrizeMeta = { name: string; image_url: string | null; rarity?: Prize
 function rarityFromCareItem(row: { cost_coins?: number | null; restore_amount?: number | null }): PrizeRarity {
   const cost = row.cost_coins ?? 0;
   const restore = row.restore_amount ?? 0;
-  if (cost > 20 || restore >= 80) return "legendary";
-  if (cost > 10) return "epic";
-  if (cost > 5) return "rare";
+  if (cost >= 25 || restore >= 80) return "legendary";
+  if (cost >= 15) return "epic";
+  if (cost >= 8) return "rare";
   return "common";
 }
 function rarityFromString(r: string | null | undefined): PrizeRarity {
@@ -200,9 +200,9 @@ function rarityFromString(r: string | null | undefined): PrizeRarity {
 }
 function rarityFromGradientPrice(price: number | null | undefined): PrizeRarity {
   const p = price ?? 0;
-  if (p >= 3000) return "legendary";
-  if (p >= 1500) return "epic";
-  if (p >= 600) return "rare";
+  if (p >= 80) return "legendary";
+  if (p >= 50) return "epic";
+  if (p >= 30) return "rare";
   return "common";
 }
 
