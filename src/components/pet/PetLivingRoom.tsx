@@ -1,5 +1,4 @@
 import { useMemo, useState, type ReactNode } from "react";
-import { Link as RouterLink } from "@tanstack/react-router";
 import {
   Sheet,
   SheetContent,
@@ -7,7 +6,7 @@ import {
   SheetTitle,
   SheetDescription,
 } from "@/components/ui/sheet";
-import { PawPrint, LayoutList, Compass, Image as ImageIcon } from "lucide-react";
+import { PawPrint, LayoutList, Compass, Image as ImageIcon, BookHeart } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { usePetDayNight } from "@/lib/petDayNight";
 import type { PetCareKind } from "@/types/petCare";
@@ -24,6 +23,8 @@ import { PetProgressionCard } from "./PetProgressionCard";
 import { PetCaixasEntryCard } from "./grab/PetCaixasEntryCard";
 import { PetCareHistorySheet } from "./PetCareHistorySheet";
 import { PetSceneryPanel, type usePetScenery } from "./PetSceneryPanel";
+import { PetDiaryBubble } from "./PetDiaryBubble";
+import { PetDiarySheet } from "./PetDiarySheet";
 
 import sceneAsset from "@/assets/pet-room/pet-room-scene.png.asset.json";
 
@@ -55,6 +56,10 @@ type Props = {
   onEvolved: () => void;
   babyImage: string | null;
   adultImage: string | null;
+  /** Dias consecutivos de cuidado — para o tom do diário. */
+  streakDays?: number;
+  /** Missões diárias já fechadas — para o tom do diário. */
+  missionsDoneToday?: number;
 };
 
 /**
@@ -75,8 +80,12 @@ export function PetLivingRoom({
   onEvolved,
   babyImage,
   adultImage,
+  streakDays = 0,
+  missionsDoneToday = 0,
 }: Props) {
   const [sheet, setSheet] = useState<SheetKind>(null);
+  const [diaryOpen, setDiaryOpen] = useState(false);
+  const [diaryRefresh, setDiaryRefresh] = useState(0);
   const { dayOpacity } = usePetDayNight();
 
   // Glow dourado nos hotspots de cuidado quando a stat estiver baixa.
@@ -183,92 +192,112 @@ export function PetLivingRoom({
           </button>
         </div>
 
-        {/* HOTSPOTS — coordenadas estáveis em % */}
+        {/* HOTSPOTS — coordenadas estáveis em % do quadro 2:3 */}
         {/* Esquerda */}
         <RoomHotspot
-          x={2} y={2} width={20} height={11}
-          label="Caixas (loja)"
+          x={2.5} y={3.5} width={18} height={9}
+          label="Vitrine de caixas"
           onClick={() => setSheet("caixas")}
         />
         <RoomHotspot
-          x={1} y={15} width={24} height={11}
+          x={2.5} y={16} width={22} height={11}
           label="Quiz Bíblico do dia"
           onClick={() => { window.location.assign("/quiz-biblico"); }}
         />
         <RoomHotspot
-          x={2} y={33} width={24} height={13}
+          x={2.5} y={33} width={22} height={12}
           label="Evolução do pet"
           onClick={() => setSheet("evolution")}
         />
         <RoomHotspot
-          x={2} y={48} width={24} height={13}
+          x={3} y={48} width={21} height={12}
           label="Streak diário"
           onClick={() => setSheet("streak")}
         />
         <RoomHotspot
-          x={0} y={62} width={28} height={18}
+          x={0.5} y={62} width={26} height={16}
           label="Missões do dia"
           onClick={() => setSheet("missions")}
         />
 
         {/* Direita */}
         <RoomHotspot
-          x={75} y={6} width={24} height={13}
+          x={77} y={6} width={22} height={12}
           label="Banho"
           urgent={lowOf("hygiene")}
           onClick={() => onCareAction("hygiene")}
         />
         <RoomHotspot
-          x={77} y={24} width={23} height={28}
+          x={79} y={25} width={20} height={26}
           label="Expedições"
           onClick={() => setSheet("expeditions")}
         />
         <RoomHotspot
-          x={72} y={54} width={27} height={15}
+          x={74} y={55} width={24} height={14}
           label="Dormir"
           urgent={lowOf("sleep")}
           onClick={() => onCareAction("sleep")}
         />
         <RoomHotspot
-          x={75} y={70} width={25} height={20}
+          x={76} y={72} width={23} height={17}
           label="Caixa semanal"
           onClick={() => setSheet("weekly")}
         />
 
         {/* Centro/baixo */}
         <RoomHotspot
-          x={6} y={84} width={22} height={13}
+          x={7} y={86} width={20} height={11}
           label="Alimentar"
           urgent={lowOf("feed")}
           onClick={() => onCareAction("feed")}
         />
         <RoomHotspot
-          x={55} y={88} width={16} height={11}
+          x={56} y={89} width={15} height={10}
           label="Brincar"
           urgent={lowOf("play")}
           onClick={() => onCareAction("play")}
         />
 
-        {/* Toolbar diegética no rodapé — histórico, cenário, progressão */}
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-30 flex items-center justify-center gap-2 p-3">
+        {/* Vida Autônoma — balão de pensamento do pet */}
+        {!isAway ? (
+          <PetDiaryBubble
+            petId={pet.id}
+            petName={pet.custom_name}
+            personality={pet.personality?.slug ?? null}
+            values={careValues}
+            streak={streakDays}
+            missionsDone={missionsDoneToday}
+            onSaved={() => setDiaryRefresh((n) => n + 1)}
+          />
+        ) : null}
+
+        {/* Toolbar diegética no rodapé — diário, histórico, cenário, progressão */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-30 flex flex-wrap items-center justify-center gap-1.5 p-2.5">
+          <button
+            type="button"
+            onClick={() => setDiaryOpen(true)}
+            className="pointer-events-auto inline-flex items-center gap-1.5 rounded-full bg-white/90 px-2.5 py-1.5 text-[11px] font-medium text-amber-700 shadow-sm ring-1 ring-amber-200/60 backdrop-blur transition hover:bg-white"
+          >
+            <BookHeart className="size-3.5" /> Diário
+          </button>
           <button
             type="button"
             onClick={() => setSheet("history")}
-            className="pointer-events-auto inline-flex items-center gap-1.5 rounded-full bg-white/85 px-3 py-1.5 text-[11px] font-medium text-neutral-700 shadow-sm ring-1 ring-black/5 backdrop-blur transition hover:bg-white"
+            className="pointer-events-auto inline-flex items-center gap-1.5 rounded-full bg-white/85 px-2.5 py-1.5 text-[11px] font-medium text-neutral-700 shadow-sm ring-1 ring-black/5 backdrop-blur transition hover:bg-white"
           >
             <PawPrint className="size-3.5" /> Histórico
           </button>
           <button
             type="button"
             onClick={() => setSheet("scenery")}
-            className="pointer-events-auto inline-flex items-center gap-1.5 rounded-full bg-white/85 px-3 py-1.5 text-[11px] font-medium text-neutral-700 shadow-sm ring-1 ring-black/5 backdrop-blur transition hover:bg-white"
+            className="pointer-events-auto inline-flex items-center gap-1.5 rounded-full bg-white/85 px-2.5 py-1.5 text-[11px] font-medium text-neutral-700 shadow-sm ring-1 ring-black/5 backdrop-blur transition hover:bg-white"
           >
             <ImageIcon className="size-3.5" /> Cenário
           </button>
           <button
             type="button"
             onClick={() => setSheet("progression")}
-            className="pointer-events-auto inline-flex items-center gap-1.5 rounded-full bg-white/85 px-3 py-1.5 text-[11px] font-medium text-neutral-700 shadow-sm ring-1 ring-black/5 backdrop-blur transition hover:bg-white"
+            className="pointer-events-auto inline-flex items-center gap-1.5 rounded-full bg-white/85 px-2.5 py-1.5 text-[11px] font-medium text-neutral-700 shadow-sm ring-1 ring-black/5 backdrop-blur transition hover:bg-white"
           >
             <PawPrint className="size-3.5" /> Progressão
           </button>
@@ -368,6 +397,13 @@ export function PetLivingRoom({
       </SceneSheet>
 
       <PetCareHistorySheet open={sheet === "history"} onOpenChange={(o) => setSheet(o ? "history" : null)} />
+
+      <PetDiarySheet
+        open={diaryOpen}
+        onOpenChange={setDiaryOpen}
+        petId={pet.id}
+        refreshKey={diaryRefresh}
+      />
     </section>
   );
 }

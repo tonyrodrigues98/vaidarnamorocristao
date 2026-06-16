@@ -84,6 +84,7 @@ import { Link as RouterLink } from "@tanstack/react-router";
 import { BookOpen, Clock, MessageCircle, Compass } from "lucide-react";
 import { PetCareHistorySheet } from "@/components/pet/PetCareHistorySheet";
 import { PetLivingRoom } from "@/components/pet/PetLivingRoom";
+import { recordLastAction, saveCareSnapshot } from "@/lib/petLocalCache";
 
 export const Route = createFileRoute("/meu-pet")({ component: MeuPetPage });
 
@@ -310,6 +311,7 @@ function Showcase({
       showAwayToast(k);
       return;
     }
+    try { recordLastAction(pet.id, k); } catch { /* ignore */ }
     setActionKind(k);
   }
 
@@ -399,6 +401,12 @@ function Showcase({
   }, [careStates, careConfig, runtimeMods, tick]);
 
   const mood = useMemo(() => getPetMood(careValues, pet.id), [careValues, pet.id]);
+
+  // Snapshot otimista das stats no navegador — evita "flash" ao recarregar.
+  useEffect(() => {
+    if (careStates.length === 0) return;
+    try { saveCareSnapshot(pet.id, careValues); } catch { /* ignore */ }
+  }, [careValues, careStates.length, pet.id]);
 
   const longPress = useLongPress(() => setRadialOpen(true), 350);
 
