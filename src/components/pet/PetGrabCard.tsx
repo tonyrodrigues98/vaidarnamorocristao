@@ -148,9 +148,13 @@ export function PetGrabCard({ refreshKey, onChanged }: Props) {
   );
 }
 
-const ROULETTE_ITEM = 112;
-const ROULETTE_VIEW = 320;
-const ROULETTE_SPIN_MS = 6500;
+const ROULETTE_ITEM = 120;
+const ROULETTE_VIEW = 360;
+const ROULETTE_VIEW_H = 152;
+const ROULETTE_INTRO_MS = 500;
+const ROULETTE_SPIN_MS = 8500;
+const ROULETTE_BURST_MS = 1100;
+const SPARKLE_COUNT = 16;
 
 function GrabRouletteModal({
   res,
@@ -163,8 +167,9 @@ function GrabRouletteModal({
   prizes: PrizeMeta[];
   onClose: () => void;
 }) {
-  const [phase, setPhase] = useState<"spin" | "done">("spin");
+  const [phase, setPhase] = useState<"intro" | "spin" | "settle" | "done">("intro");
   const [translate, setTranslate] = useState(0);
+  const [blur, setBlur] = useState(true);
   const rafRef = useRef<number | null>(null);
 
   const { items, winnerIndex } = useMemo(() => {
@@ -183,100 +188,276 @@ function GrabRouletteModal({
   const targetX = -(winnerIndex * ROULETTE_ITEM + ROULETTE_ITEM / 2 - ROULETTE_VIEW / 2);
 
   useEffect(() => {
-    // start at 0, then on next frame apply target to trigger CSS transition
-    rafRef.current = requestAnimationFrame(() => {
-      rafRef.current = requestAnimationFrame(() => setTranslate(targetX));
-    });
-    const t = setTimeout(() => setPhase("done"), ROULETTE_SPIN_MS + 150);
+    const timers: ReturnType<typeof setTimeout>[] = [];
+    // intro → spin
+    timers.push(setTimeout(() => {
+      setPhase("spin");
+      rafRef.current = requestAnimationFrame(() => {
+        rafRef.current = requestAnimationFrame(() => setTranslate(targetX));
+      });
+    }, ROULETTE_INTRO_MS));
+    // unblur ~40% of the spin
+    timers.push(setTimeout(() => setBlur(false), ROULETTE_INTRO_MS + ROULETTE_SPIN_MS * 0.45));
+    // spin finished → settle (burst + pop)
+    timers.push(setTimeout(() => setPhase("settle"), ROULETTE_INTRO_MS + ROULETTE_SPIN_MS + 80));
+    // settle done → reveal details
+    timers.push(setTimeout(() => setPhase("done"),
+      ROULETTE_INTRO_MS + ROULETTE_SPIN_MS + ROULETTE_BURST_MS));
     return () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
-      clearTimeout(t);
+      timers.forEach(clearTimeout);
     };
   }, [targetX]);
 
+  const sparkles = useMemo(() => Array.from({ length: SPARKLE_COUNT }, (_, i) => {
+    const angle = (Math.PI * 2 * i) / SPARKLE_COUNT + Math.random() * 0.3;
+    const dist = 90 + Math.random() * 70;
+    return {
+      tx: Math.cos(angle) * dist,
+      ty: Math.sin(angle) * dist,
+      delay: Math.random() * 120,
+      hue: ["#fbbf24", "#f97316", "#ec4899", "#a855f7", "#22d3ee"][i % 5],
+      size: 6 + Math.random() * 6,
+    };
+  }), []);
+
   return (
     <Dialog open onOpenChange={(o) => !o && phase === "done" && onClose()}>
-      <DialogContent className="max-w-sm border-neutral-800 bg-neutral-950 text-white">
-        <DialogTitle className="flex items-center justify-center gap-2 text-white">
-          <Sparkles className="size-5 text-amber-400" />
-          {phase === "done" ? "Você ganhou!" : "Sorteando..."}
-        </DialogTitle>
+      <DialogContent className="max-w-md overflow-hidden border-neutral-800 bg-neutral-950 p-0 text-white">
+        <style>{`
+          @keyframes grab-spin-conic { to { transform: rotate(360deg); } }
+          @keyframes grab-spark-burst {
+            0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.3); }
+            15%  { opacity: 1; transform: translate(calc(-50% + var(--tx) * 0.35px), calc(-50% + var(--ty) * 0.35px)) scale(1); }
+            100% { opacity: 0; transform: translate(calc(-50% + var(--tx) * 1px), calc(-50% + var(--ty) * 1px)) scale(0.2) rotate(220deg); }
+          }
+          @keyframes grab-pop {
+            0%   { transform: scale(1); }
+            40%  { transform: scale(1.18); }
+            70%  { transform: scale(0.96); }
+            100% { transform: scale(1.04); }
+          }
+          @keyframes grab-bg-pulse {
+            0%,100% { opacity: 0.55; }
+            50%     { opacity: 0.95; }
+          }
+          @keyframes grab-title-shine {
+            0%   { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+          }
+        `}</style>
 
-        <div
-          className="relative mx-auto mt-2 overflow-hidden rounded-xl bg-neutral-900 ring-1 ring-neutral-800"
-          style={{ width: ROULETTE_VIEW, height: 128 }}
-        >
-          {/* center frame */}
+        {/* animated backdrop */}
+        <div className="pointer-events-none absolute inset-0 -z-0">
           <div
-            className={cn(
-              "pointer-events-none absolute left-1/2 top-1/2 z-20 -translate-x-1/2 -translate-y-1/2 rounded-2xl",
-              "ring-2 ring-amber-400",
-              phase === "done" && "ring-amber-300 shadow-[0_0_24px_rgba(251,191,36,0.55)]",
-            )}
-            style={{ width: 96, height: 96 }}
-          />
-          {/* edge fades */}
-          <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 bg-gradient-to-r from-neutral-950 to-transparent" />
-          <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 bg-gradient-to-l from-neutral-950 to-transparent" />
-          {/* strip */}
-          <div
-            className="absolute left-0 top-1/2 flex"
+            className="absolute inset-0"
             style={{
-              transform: `translate3d(${translate}px, -50%, 0)`,
-              transition:
-                phase === "spin"
-                  ? `transform ${ROULETTE_SPIN_MS}ms cubic-bezier(0.12, 0.85, 0.18, 1)`
-                  : "none",
-              willChange: "transform",
+              background:
+                "radial-gradient(60% 60% at 50% 40%, rgba(251,191,36,0.18), transparent 70%), radial-gradient(50% 50% at 80% 80%, rgba(236,72,153,0.15), transparent 70%), radial-gradient(50% 50% at 10% 90%, rgba(34,211,238,0.12), transparent 70%)",
+              animation: "grab-bg-pulse 4s ease-in-out infinite",
             }}
-          >
-            {items.map((it, i) => (
-              <div
-                key={i}
-                className="grid place-items-center"
-                style={{ width: ROULETTE_ITEM, height: ROULETTE_ITEM }}
-              >
-                <div className="grid size-20 place-items-center overflow-hidden rounded-xl bg-neutral-800 ring-1 ring-neutral-700">
-                  {it?.image_url ? (
-                    <img
-                      src={it.image_url}
-                      alt=""
-                      className="size-full object-cover"
-                      draggable={false}
-                    />
-                  ) : (
-                    <Gift className="size-8 text-neutral-500" />
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
+          />
         </div>
 
-        {phase === "done" ? (
-          <div className="mt-3 text-center">
-            <div className="text-base font-semibold">
-              {winner.name}
-              {res.prize_amount > 1 && ` x${res.prize_amount}`}
-            </div>
-            <div className="mt-1 text-xs text-neutral-400">
-              {GRAB_PRIZE_KIND_LABEL[res.prize_kind]}
-              {res.was_paid
-                ? ` · ${res.cost_paid} moedas`
-                : ` · grátis (${res.free_remaining} restantes hoje)`}
-            </div>
-            <Button
-              className="mt-4 w-full bg-amber-500 text-neutral-950 hover:bg-amber-400"
-              onClick={onClose}
+        <div className="relative z-10 px-6 pb-6 pt-5">
+          <DialogTitle className="flex items-center justify-center gap-2 text-center text-base font-semibold tracking-tight">
+            <Sparkles
+              className={cn(
+                "size-5 text-amber-400 transition-transform",
+                phase === "spin" && "animate-pulse",
+                (phase === "settle" || phase === "done") && "drop-shadow-[0_0_10px_rgba(251,191,36,0.9)]",
+              )}
+            />
+            <span
+              className={cn(
+                "bg-clip-text",
+                (phase === "settle" || phase === "done")
+                  ? "bg-[linear-gradient(90deg,#fbbf24,#f97316,#ec4899,#fbbf24)] text-transparent"
+                  : "text-neutral-100",
+              )}
+              style={(phase === "settle" || phase === "done")
+                ? { backgroundSize: "200% 100%", animation: "grab-title-shine 2.5s linear infinite" }
+                : undefined}
             >
-              Continuar
-            </Button>
+              {phase === "intro" && "Preparando..."}
+              {phase === "spin" && "Girando a roleta..."}
+              {(phase === "settle" || phase === "done") && "Você ganhou!"}
+            </span>
+          </DialogTitle>
+
+          {/* roulette container */}
+          <div className="relative mx-auto mt-5" style={{ width: ROULETTE_VIEW, height: ROULETTE_VIEW_H }}>
+            {/* conic-gradient rotating ring behind frame */}
+            <div
+              className="pointer-events-none absolute left-1/2 top-1/2 z-20 -translate-x-1/2 -translate-y-1/2"
+              style={{ width: 132, height: 132 }}
+            >
+              <div
+                className="absolute inset-0 rounded-3xl"
+                style={{
+                  background:
+                    "conic-gradient(from 0deg, #fbbf24, #f97316, #ec4899, #a855f7, #06b6d4, #fbbf24)",
+                  animation: `grab-spin-conic ${phase === "intro" ? "6s" : phase === "spin" ? "1.6s" : "3.5s"} linear infinite`,
+                  filter: "blur(2px)",
+                  opacity: phase === "intro" ? 0.4 : 0.9,
+                  transition: "opacity 400ms",
+                }}
+              />
+              <div className="absolute inset-[3px] rounded-[20px] bg-neutral-950" />
+            </div>
+
+            {/* center frame on top */}
+            <div
+              className={cn(
+                "pointer-events-none absolute left-1/2 top-1/2 z-30 -translate-x-1/2 -translate-y-1/2 rounded-2xl",
+                "ring-1 ring-white/15",
+              )}
+              style={{
+                width: 112,
+                height: 112,
+                boxShadow:
+                  phase === "settle" || phase === "done"
+                    ? "0 0 40px 8px rgba(251,191,36,0.55), inset 0 0 0 2px rgba(251,191,36,0.9)"
+                    : "inset 0 0 0 2px rgba(255,255,255,0.18)",
+                transition: "box-shadow 350ms ease-out",
+              }}
+            />
+
+            {/* strip viewport */}
+            <div
+              className="relative h-full overflow-hidden rounded-2xl bg-neutral-900/80 ring-1 ring-neutral-800"
+              style={{ width: ROULETTE_VIEW }}
+            >
+              {/* edge fades */}
+              <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-20 bg-gradient-to-r from-neutral-950 via-neutral-950/80 to-transparent" />
+              <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-20 bg-gradient-to-l from-neutral-950 via-neutral-950/80 to-transparent" />
+              {/* top/bottom subtle vignette */}
+              <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-6 bg-gradient-to-b from-neutral-950/90 to-transparent" />
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-6 bg-gradient-to-t from-neutral-950/90 to-transparent" />
+
+              {/* strip */}
+              <div
+                className="absolute left-0 top-1/2 flex"
+                style={{
+                  transform: `translate3d(${translate}px, -50%, 0)`,
+                  transition:
+                    phase === "spin"
+                      ? `transform ${ROULETTE_SPIN_MS}ms cubic-bezier(0.08, 0.82, 0.18, 1)`
+                      : "none",
+                  filter: blur && phase === "spin" ? "blur(2.5px)" : "blur(0)",
+                  transitionProperty: "transform, filter",
+                  transitionDuration: `${ROULETTE_SPIN_MS}ms, 700ms`,
+                  willChange: "transform, filter",
+                }}
+              >
+                {items.map((it, i) => {
+                  const isWinner = i === winnerIndex;
+                  const popping = isWinner && (phase === "settle" || phase === "done");
+                  return (
+                    <div
+                      key={i}
+                      className="grid place-items-center"
+                      style={{ width: ROULETTE_ITEM, height: ROULETTE_ITEM }}
+                    >
+                      <div
+                        className={cn(
+                          "relative grid size-24 place-items-center overflow-hidden rounded-2xl",
+                          "bg-gradient-to-br from-neutral-800 to-neutral-900",
+                          "ring-1 ring-white/10 shadow-lg shadow-black/40",
+                        )}
+                        style={popping ? { animation: "grab-pop 700ms cubic-bezier(0.22,1.4,0.36,1) forwards" } : undefined}
+                      >
+                        {it?.image_url ? (
+                          <img
+                            src={it.image_url}
+                            alt=""
+                            className="size-full object-cover"
+                            draggable={false}
+                          />
+                        ) : (
+                          <Gift className="size-9 text-neutral-500" />
+                        )}
+                        {/* gloss highlight */}
+                        <div className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-b from-white/10 to-transparent" />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* sparkle burst */}
+              {(phase === "settle" || phase === "done") && (
+                <div className="pointer-events-none absolute left-1/2 top-1/2 z-40">
+                  {sparkles.map((s, i) => (
+                    <span
+                      key={i}
+                      className="absolute left-0 top-0 block rounded-full"
+                      style={{
+                        width: s.size,
+                        height: s.size,
+                        background: s.hue,
+                        boxShadow: `0 0 12px ${s.hue}`,
+                        ["--tx" as never]: String(s.tx),
+                        ["--ty" as never]: String(s.ty),
+                        animation: `grab-spark-burst 1100ms ease-out ${s.delay}ms forwards`,
+                      } as React.CSSProperties}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
-        ) : (
-          <p className="mt-3 text-center text-xs text-neutral-400">
-            Girando a roleta...
-          </p>
-        )}
+
+          {/* footer / reveal */}
+          <div className="mt-5 min-h-[120px] text-center">
+            {phase === "done" ? (
+              <div className="animate-in fade-in zoom-in-95 duration-300">
+                <div className="text-lg font-semibold tracking-tight">
+                  {winner.name}
+                  {res.prize_amount > 1 && (
+                    <span className="ml-1.5 rounded-md bg-amber-400/20 px-1.5 py-0.5 text-sm text-amber-300">
+                      x{res.prize_amount}
+                    </span>
+                  )}
+                </div>
+                <div className="mt-1.5 inline-flex items-center gap-1.5 rounded-full bg-white/5 px-2.5 py-0.5 text-[11px] text-neutral-300 ring-1 ring-white/10">
+                  <span>{GRAB_PRIZE_KIND_LABEL[res.prize_kind]}</span>
+                  <span className="text-neutral-600">·</span>
+                  {res.was_paid ? (
+                    <span className="inline-flex items-center gap-1">
+                      <CoinIcon className="size-3" />
+                      {res.cost_paid}
+                    </span>
+                  ) : (
+                    <span className="text-amber-300">grátis · {res.free_remaining} restantes</span>
+                  )}
+                </div>
+                <Button
+                  className="relative mt-5 w-full overflow-hidden bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 text-neutral-950 hover:from-amber-400 hover:to-amber-400"
+                  onClick={onClose}
+                >
+                  <span className="relative z-10 font-semibold">Continuar</span>
+                  <span
+                    aria-hidden
+                    className="pointer-events-none absolute inset-0"
+                    style={{
+                      background:
+                        "linear-gradient(110deg, transparent 30%, rgba(255,255,255,0.5) 50%, transparent 70%)",
+                      backgroundSize: "200% 100%",
+                      animation: "grab-title-shine 2.4s linear infinite",
+                    }}
+                  />
+                </Button>
+              </div>
+            ) : (
+              <p className="pt-5 text-xs text-neutral-400">
+                {phase === "intro" && "A roleta está aquecendo..."}
+                {phase === "spin" && "Girando..."}
+                {phase === "settle" && "Selando o resultado..."}
+              </p>
+            )}
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   );
