@@ -393,8 +393,6 @@ export function PetLivingRoom({
         ) : null}
       </SceneSheet>
 
-      <PetCareHistorySheet open={sheet === "history"} onOpenChange={(o) => setSheet(o ? "history" : null)} />
-
       <PetDiarySheet
         open={diaryOpen}
         onOpenChange={setDiaryOpen}
