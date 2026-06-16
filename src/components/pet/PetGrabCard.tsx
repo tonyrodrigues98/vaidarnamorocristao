@@ -364,6 +364,16 @@ function GrabRouletteModal({
   const lastTickCenterRef = useRef<number>(Number.NEGATIVE_INFINITY);
   const tickStartedRef = useRef(false);
   const dingPlayedRef = useRef(false);
+  // Garante que onClose só dispare uma vez por montagem do modal — evita
+  // múltiplos reload()/onChanged() quando o usuário martela cliques fora
+  // (Radix Dialog pode disparar onOpenChange(false) mais de uma vez em
+  // sequência rápida durante a animação de fechamento).
+  const closedRef = useRef(false);
+  const handleClose = () => {
+    if (closedRef.current) return;
+    closedRef.current = true;
+    onClose();
+  };
 
   const { items, winnerIndex } = useMemo(() => {
     const base = prizes.length > 0 ? prizes : [winner];
@@ -483,7 +493,7 @@ function GrabRouletteModal({
   }), []);
 
   return (
-    <Dialog open onOpenChange={(o) => { if (!o) onClose(); }}>
+    <Dialog open onOpenChange={(o) => { if (!o) handleClose(); }}>
       <DialogContent className="max-w-md overflow-hidden border-neutral-800 bg-neutral-950 p-0 text-white">
         <style>{`
           @keyframes grab-spin-conic { to { transform: rotate(360deg); } }
