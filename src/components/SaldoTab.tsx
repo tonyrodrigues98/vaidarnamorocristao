@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 import coinIcon from "@/assets/coin.webp";
 import coinSound from "@/assets/coin-reward.mp3";
-import { DECORATION_ASSETS, assetFor } from "@/lib/decorations";
+import { DECORATION_ASSETS } from "@/lib/decorations";
 import {
   claimDailyCoins,
   COIN_DAILY,
