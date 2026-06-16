@@ -865,5 +865,7 @@ function UserEconomyDrawer({
         </div>
       </div>
     </div>
+    ,
+    document.body,
   );
 }
