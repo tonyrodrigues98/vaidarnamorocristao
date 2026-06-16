@@ -597,18 +597,26 @@ function Wizard({ onCancel, onDone }: { onCancel?: () => void; onDone: () => voi
   const [variants, setVariants] = useState<PetVariant[]>([]);
   const [stages, setStages] = useState<PetLifeStage[]>([]);
   const [personalities, setPersonalities] = useState<PetPersonality[]>([]);
+  const [adultUnlocked, setAdultUnlocked] = useState<boolean | null>(null);
   // Initial load
   useEffect(() => {
     (async () => {
       try {
-        const [c, st, pe] = await Promise.all([
+        const [c, st, pe, unlocked] = await Promise.all([
           listActive<PetCategory>("pet_categories"),
           listActive<PetLifeStage>("pet_life_stages"),
           listActive<PetPersonality>("pet_personalities"),
+          isAdultPetUnlocked(),
         ]);
         setCategories(c);
-        setStages(st);
+        setAdultUnlocked(unlocked);
+        const filteredStages = unlocked ? st : st.filter((s) => s.kind === "baby");
+        setStages(filteredStages);
         setPersonalities(pe);
+        // Auto-seleciona filhote quando é o único disponível
+        if (!unlocked && filteredStages.length === 1) {
+          setSel((prev) => ({ ...prev, stage: filteredStages[0] }));
+        }
       } catch (e) {
         toast.error((e as Error).message);
       }
@@ -630,8 +638,11 @@ function Wizard({ onCancel, onDone }: { onCancel?: () => void; onDone: () => voi
   }, [sel.category, sel.species]);
 
   const order: StepKey[] = useMemo(
-    () => ["category", "stage", "personality", "name", "type", "confirm"],
-    [],
+    () =>
+      adultUnlocked === false
+        ? ["category", "personality", "name", "type", "confirm"]
+        : ["category", "stage", "personality", "name", "type", "confirm"],
+    [adultUnlocked],
   );
 
   function nextOf(current: StepKey, override?: Partial<Selection>): StepKey {
