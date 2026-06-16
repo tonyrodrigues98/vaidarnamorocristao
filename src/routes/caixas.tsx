@@ -23,7 +23,6 @@ import {
   type GrabState,
   type GrabStatePool,
 } from "@/types/petGrab";
-import { rarityTokens } from "@/lib/grabRarity";
 import { unlockGrabAudio } from "@/lib/grabAudio";
 import { GrabRouletteModal } from "@/components/pet/PetGrabCard";
 import { GrabPoolCard } from "@/components/pet/grab/GrabPoolCard";
