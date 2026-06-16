@@ -418,12 +418,9 @@ function MultiResultsDialog({
 }) {
   const totalPaid = results.reduce((sum, item) => sum + item.res.cost_paid, 0);
   return (
-    <div
-      className="fixed inset-0 z-50 grid place-items-center bg-black/60 px-4 backdrop-blur-sm"
-      role="dialog"
-      aria-modal="true"
-    >
-      <div className="w-full max-w-md rounded-2xl bg-[#FAF7EF] p-4 text-[#1a1410] shadow-2xl ring-1 ring-[#e6cf8a]">
+    <Dialog open onOpenChange={(o) => { if (!o) onClose(); }}>
+      <DialogContent className="max-w-md border-[#e6cf8a] bg-[#FAF7EF] p-4 text-[#1a1410]">
+        <DialogTitle className="sr-only">{poolName}</DialogTitle>
         <div className="mb-3 flex items-center justify-between gap-3">
           <div className="min-w-0">
             <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#9a7626]">
@@ -448,6 +445,8 @@ function MultiResultsDialog({
                   <img src={prize.image_url} alt="" className="size-full object-cover" />
                 ) : res.prize_kind === "coins" ? (
                   <CoinIcon className="size-8" />
+                ) : res.prize_kind === "xp" ? (
+                  <img src={capsulaXpImg} alt="" className="size-full object-contain p-1" />
                 ) : (
                   <Package className="size-8 text-[#9a7626]" />
                 )}
@@ -466,8 +465,8 @@ function MultiResultsDialog({
         >
           Continuar
         </Button>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 
