@@ -34,7 +34,6 @@ import {
   phaseAtProgress,
   resolveBiome,
   type StoryIcon,
-  type DayPhase,
 } from "@/lib/expeditionStoryEngine";
 import type { ActiveExpedition } from "@/types/petExpedition";
 import { SceneWeatherLayer } from "./SceneWeatherLayer";
