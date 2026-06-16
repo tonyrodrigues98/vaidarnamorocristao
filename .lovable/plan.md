@@ -1,100 +1,116 @@
+# Plano: Página Dedicada de Caixas
 
-# Sistema Grab — Sorteio de Itens + Inventário
-
-## Visão geral
-
-Nova feature de pet que sorteia recompensas em pools configuráveis. Tudo que hoje é compra direta (consumíveis de cuidado) ou ganho cosmético (fundos, molduras, auras, gradientes) passa a poder ser sorteado. Consumíveis de cuidado ganham um **estoque**: ao usar um item, o estoque é consumido primeiro; só cobra moedas quando o estoque zera.
-
-- **3 grabs grátis/dia + ilimitados pagos a 10 moedas** (configurável)
-- **Múltiplos pools** (Comum / Raro / Evento), cada um com seus itens e probabilidades
-- **CRUD admin** completo em `/admin/pets` → nova aba "Grab"
+Nova seção visual e gameplay para o sistema de grab, expandindo de uma única roleta para um catálogo completo de caixas temáticas.
 
 ---
 
-## 1. Schema (migração)
+## 1. Nova rota e navegação
 
-### `grab_pools` — pools/caixas
-`id, slug, name, description, active, sort_order, cost_coins (override do preço padrão), free_daily_uses (override do default 3), weight (peso entre pools se houver sorteio de pool), created_at, updated_at`
-
-### `grab_pool_prizes` — itens do pool com peso
-`id, pool_id, prize_kind (enum: 'care_item'|'pet_background'|'decoration'|'name_gradient'|'coins'|'xp'|'pet_buff'), prize_ref_id (uuid nullable, FK lógica conforme kind), prize_amount (int, para coins/xp/quantidade de care_item), weight (int >0), active, created_at`
-- Para `care_item`: `prize_ref_id` = `pet_care_items.id`, `prize_amount` = unidades estocadas
-- Para `pet_background`/`decoration`/`name_gradient`: `prize_ref_id` = id do catálogo, ignora `prize_amount`
-- Para `coins`/`xp`: `prize_ref_id` null, `prize_amount` = quantia
-- Para `pet_buff`: `prize_ref_id` = pet_perk_effect id (futuro)
-
-### `grab_config` — singleton de config global
-`id (sempre 1), default_free_daily int (default 3), default_paid_cost_coins int (default 10), updated_at`
-
-### `user_grab_inventory` — **NOVO inventário com quantidade**
-`id, user_id, prize_kind, prize_ref_id, quantity int (>0), created_at, updated_at` + unique `(user_id, prize_kind, prize_ref_id)`. Inicialmente usado só para `care_item`; cosméticos vão direto para suas tabelas de ownership existentes.
-
-### `user_daily_grabs` — quota diária
-`id, user_id, day date, free_used int default 0, paid_used int default 0` + unique `(user_id, day)`.
-
-### `user_grab_log` — histórico (auditoria + UI "últimos prêmios")
-`id, user_id, pool_id, prize_kind, prize_ref_id, prize_amount, was_paid bool, rolled_at`
-
-### RPCs
-- `perform_grab(_pool_id uuid)` → sorteia por weight, decide free/paid, debita moedas se pago, credita prêmio (estoque ou ownership), insere log. Retorna `{ prize_kind, prize_ref_id, prize_amount, was_paid, new_balance, free_remaining }`.
-- `get_grab_state()` → retorna pools ativos + `free_used` / `free_remaining` / `paid_cost` / últimos 5 prêmios do usuário.
-- `consume_care_inventory(_item_id)` → decrementa `user_grab_inventory.quantity` em 1 se houver; retorna bool "consumiu do estoque".
-- Modificar `apply_pet_care`: chamar `consume_care_inventory` ANTES de `spend_coin_for_pet_care`. Se consumiu do estoque, pular cobrança de moedas.
-
-### RLS
-- Catálogo (`grab_pools`, `grab_pool_prizes`, `grab_config`): SELECT `authenticated` ativos; ALL `service_role` + admin via `has_role`.
-- Tabelas de usuário: SELECT/UPDATE/INSERT scoped a `auth.uid()`; ALL `service_role`.
+- Criar `/meu-pet/caixas` com banner hero próprio (estilo loot-box gamer: bordas brilhantes, partículas, dark com glow por raridade).
+- No `/meu-pet`, substituir o `PetGrabCard` atual por um **card de entrada** ("Caixas — abrir agora", mostra quantas grátis disponíveis hoje) que leva pra nova página.
+- Header da página: banner animado destacando a "Caixa da Semana" (rotaciona via campo `featured_until` na pool).
 
 ---
 
-## 2. Admin — `/admin/pets` aba "Grab"
+## 2. Catálogo de caixas no lançamento
 
-Novo `<PetGrabPanel>` em `src/components/admin/PetGrabPanel.tsx`:
+Total de **11 caixas** divididas em 4 famílias, cada uma com sua arte/cor de raridade:
 
-- **Seção config global** (card no topo): editar `default_free_daily`, `default_paid_cost_coins` (inputs `text` + `inputMode="numeric"`).
-- **Lista de pools** (cards): nome, slug, ativo (switch), custo override, free/dia override, soma de pesos. Botão "Editar prêmios".
-- **Modal de edição de pool**: form do pool + tabela de prêmios com colunas: tipo (select), item (combobox carregado por tipo), quantidade, peso, % calculada (peso/sum*100), ativo, ações. Adicionar/remover linhas inline.
-- **Preview de probabilidades**: ao lado de cada prêmio, mostra `(weight / Σweight) * 100%` formatado.
+### Família A — Caixa do Iniciante (migração da atual)
 
-Adicionar entrada na `TABS` de `src/routes/admin/pets.tsx` com ícone `Gift` (já importado).
+- **Caixa do Iniciante** — barata (~30 moedas), drops fracos garantidos, foco em onboarding. Migra a pool atual renomeada + pesos rebalanceados.
 
----
+### Família B — Por recurso (3 caixas)
 
-## 3. UI usuário
+- **Cofre de Moedas** — só moedas, 5 faixas (10/25/50/100/jackpot 250).
+- **Cápsula de XP** — só XP pro pet (50/200/500/1500).
+- **Baú de Cuidado** — só itens de cuidado (comida/brinquedo/remédio).
 
-Novo bloco "Grab" no card de pet (`src/components/pet/`):
+### Família C — Por categoria visual (3 caixas)
 
-- Botão grande "Sortear" com contador `2/3 grátis hoje` ou `10 moedas`.
-- Modal de resultado com animação de revelação (reuso de padrões existentes), mostrando ícone do prêmio + nome + quantidade.
-- Aba/lista "Meu estoque" mostrando `user_grab_inventory` agrupado por tipo, com badge de quantidade.
-- Em `PetCareActionSheet`: badge "x3 em estoque" no item; ao usar, se houver estoque, label muda para "Usar (grátis)" em vez de mostrar custo. (Tudo via lucide icons — sem emojis.)
+- **Caixa de Cenários** — só `pet_background`. 
+- **Caixa de Decorações** — só `decoration` de perfil.
+- **Caixa de Gradientes** — só `name_gradient` (mais cara, drops raros).
 
----
+### Família D — Por raridade (4 caixas)
 
-## 4. Detalhes técnicos
+- **Comum** (10 moedas) — mix amplo, drops baixos.
+- **Rara** (25) — mix médio.
+- **Épica** (60) — chance real de itens fortes.
+- **Lendária** (80, **cooldown 7 dias**) —  chance alta de lendário exclusivo.
 
-- **Sorteio**: random weighted via `random() * sum(weight)` em PL/pgSQL com `ORDER BY` cumulativo (padrão Postgres). Tudo server-side.
-- **Atomicidade**: `perform_grab` numa única transação — quota → cobrança → sorteio → credit → log. Lança erro se quota esgotada e sem moedas.
-- **Idempotência**: nenhum retry duplica prêmio (não há retry transparente; cliente mostra erro).
-- **Tipos**: `src/types/petGrab.ts` com enums e interfaces.
-- **Lib**: `src/lib/petGrab.ts` com helpers tipados (`performGrab`, `getGrabState`, `adminListPools`, `adminUpsertPool`, `adminUpsertPrize`).
-- **Memória do projeto**: respeitar regras (inputs `text`+`inputMode`, zero emojis na UI, lucide icons).
+### Mantida
+
+- **Roleta da Sorte Original** — caixa única com TODOS os tipos de prêmio, pesos brutais, custo médio (200). Preserva sua ideia inicial como sink de loteria.
 
 ---
 
-## 5. Ordem de execução
+## 3. Mecânica: Pity Counter
 
-1. Migração: tabelas + RLS + GRANTs + RPCs + alteração de `apply_pet_care` + seed inicial (1 pool "Comum" vazio + `grab_config` default).
-2. Tipos + lib client (`petGrab.ts`, `types/petGrab.ts`).
-3. `PetGrabPanel` admin + registro na aba.
-4. Componente usuário (`GrabCard` + modal de resultado + lista de estoque).
-5. Ajuste em `PetCareActionSheet` para mostrar estoque.
-6. Smoke test: criar pool com 1 prêmio de carne (quantidade 3, peso 100%), sortear 1x, verificar estoque, usar carne e confirmar que não debitou moedas.
+Sistema anti-frustração por caixa:
+
+- Cada usuário×caixa acumula um contador de aberturas sem prêmio raro+.
+- Ao atingir o limite configurado (ex: 10 na comum, 5 na épica), próxima abertura **garante** raro+.
+- Contador zera quando o pity é ativado ou quando o usuário tira raro+ naturalmente.
 
 ---
 
-## Fora de escopo nesta entrega
+## 4. UX da página
 
-- Itens de **avatar** (acessórios/roupas) como prêmio — você marcou apenas pet/cosméticos do perfil; fica trivial adicionar depois (mesma estrutura, novo `prize_kind`).
-- Tickets de Grab como recompensa de outras ações (missão/expedição) — pode entrar numa próxima fase.
-- Animação 3D/gacha elaborada — entrega com revelação simples mas polida; podemos iterar visual depois.
+- **Grid de cards** das caixas: arte, borda colorida por raridade, custo, badge "grátis hoje" quando aplicável, contador de pity.
+- **Modal de detalhe** ao tocar uma caixa: nome, descrição, custo, lista de prêmios possíveis (sem %, só raridades), botão "Abrir".
+- **Animação de abertura** por raridade: comum = spin simples; épica = flash + shake; lendária = cerimônia (overlay tela cheia, partículas, som).
+- **Histórico pessoal** ("Suas últimas aberturas") em accordion no fim da página, usando `user_grab_log` existente.
+
+---
+
+## 5. Backend (migrações)
+
+- `grab_pools`: adicionar `rarity` (enum: starter/common/rare/epic/legendary/special), `cooldown_hours`, `featured_until`, `icon_key`.
+- Nova tabela `grab_pool_pity`: `user_id`, `pool_id`, `rolls_since_rare`, `last_rolled_at`.
+- Nova tabela `grab_pool_cooldowns`: `user_id`, `pool_id`, `available_at` (pra lendária).
+- Migrar pool atual → `rarity = 'starter'`, renomear pra "Caixa do Iniciante".
+- Seed das 10 novas pools com prêmios e pesos.
+- RPC `grab_open(pool_id)` atualizado pra: validar cooldown, aplicar pity, decidir prêmio, atualizar contadores, registrar no log — tudo numa transação.
+- GRANTs e RLS nas novas tabelas (user_id = auth.uid()).
+
+---
+
+## 6. Detalhes técnicos
+
+### Arquivos novos
+
+- `src/routes/meu-pet/caixas.tsx` (página dedicada, dentro de `_authenticated` se aplicável)
+- `src/components/pet/grab/GrabHeroBanner.tsx`
+- `src/components/pet/grab/GrabPoolCard.tsx`
+- `src/components/pet/grab/GrabPoolDetailSheet.tsx`
+- `src/components/pet/grab/GrabOpenCeremony.tsx` (animação por raridade)
+- `src/components/pet/grab/GrabHistoryList.tsx`
+- `src/lib/grabRarity.ts` (tokens de cor/glow por raridade)
+
+### Arquivos editados
+
+- `src/types/petGrab.ts` — novos campos (rarity, pity, cooldown).
+- `src/lib/petGrab.ts` — funções: `getPoolsWithPity`, `getCooldown`, `openPool`.
+- `src/components/pet/PetGrabCard.tsx` — vira card de atalho pra `/meu-pet/caixas`.
+- `src/styles.css` — tokens semânticos: `--rarity-common/rare/epic/legendary` + glows.
+
+### Migrações SQL
+
+1. `alter_grab_pools_add_rarity_and_cooldown.sql`
+2. `create_grab_pool_pity.sql`
+3. `create_grab_pool_cooldowns.sql`
+4. `seed_grab_pools_v2.sql` (renomear iniciante + inserir 10 novas + prêmios)
+5. `update_grab_open_rpc.sql` (pity + cooldown logic)
+
+---
+
+## 7. Fora do escopo desta entrega
+
+- Caixas comunitárias / pity global.
+- Proteção de duplicata (pode entrar em v2).
+- Preview de % exato de cada prêmio.
+- Feed comunitário de drops recentes.
+- Caixas sazonais/temáticas (entram via admin depois).
+
+Se quiser que algum desses entre no v1, me avise antes de implementar.
