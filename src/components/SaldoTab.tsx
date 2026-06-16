@@ -21,6 +21,10 @@ import {
 } from "lucide-react";
 import coinIcon from "@/assets/coin.webp";
 import coinSound from "@/assets/coin-reward.mp3";
+import grabComumImg from "@/assets/grab-comum.png";
+import grabRaraImg from "@/assets/grab-rara.png";
+import grabEpicaImg from "@/assets/grab-epica.png";
+import grabLendariaImg from "@/assets/grab-lendaria.png";
 import { DECORATION_ASSETS } from "@/lib/decorations";
 import {
   claimDailyCoins,
@@ -34,6 +38,17 @@ import { fetchMyCoinTransactions, type CoinTx } from "@/lib/coinTx";
 import { useSignedPetUrl } from "@/lib/petImageUrl";
 
 type Filter = "all" | "in" | "out";
+
+const GRAB_BOX_IMAGES: Record<string, string> = {
+  comum: grabComumImg,
+  "caixa-comum": grabComumImg,
+  "caixa-rara": grabRaraImg,
+  rara: grabRaraImg,
+  "caixa-epica": grabEpicaImg,
+  epica: grabEpicaImg,
+  "caixa-lendaria": grabLendariaImg,
+  lendaria: grabLendariaImg,
+};
 
 export function SaldoTab() {
   const [status, setStatus] = useState<CoinsStatus | null>(null);
