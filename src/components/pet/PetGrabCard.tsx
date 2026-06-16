@@ -20,6 +20,11 @@ import {
   type GrabState,
 } from "@/types/petGrab";
 import { cn } from "@/lib/utils";
+import {
+  playGrabFinalDing,
+  playGrabTick,
+  unlockGrabAudio,
+} from "@/lib/grabAudio";
 
 type GrabTier = {
   image: string;
@@ -99,6 +104,10 @@ export function PetGrabCard({ refreshKey, onChanged }: Props) {
   useEffect(() => { void reload(); }, [refreshKey]);
 
   async function grab(poolId: string) {
+    // Unlock the shared AudioContext synchronously inside this user gesture
+    // so iOS Safari permits later scheduled sounds (the modal mounts after
+    // an async DB round-trip, which is outside the gesture).
+    unlockGrabAudio();
     setPendingPoolId(poolId);
     try {
       const [prizes, res] = await Promise.all([
