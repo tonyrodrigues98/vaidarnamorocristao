@@ -91,6 +91,7 @@ import { useSignedPetUrl } from "@/lib/petImageUrl";
 import { PetBackgroundsPanel } from "@/components/admin/PetBackgroundsPanel";
 import { PetCareItemsPanel } from "@/components/admin/PetCareItemsPanel";
 import { PetPersonalityEffectsPanel } from "@/components/admin/PetPersonalityEffectsPanel";
+import { PetExpeditionsPanel } from "@/components/admin/PetExpeditionsPanel";
 
 export const Route = createFileRoute("/admin/pets")({ component: PetsAdmin });
 
@@ -100,6 +101,7 @@ type TabKey =
   | "personality_effects"
   | "backgrounds"
   | "care"
+  | "expeditions"
   | PetCatalogTable;
 
 const TABS: { key: TabKey; label: string; icon: ComponentType<{ className?: string }> }[] = [
@@ -112,6 +114,7 @@ const TABS: { key: TabKey; label: string; icon: ComponentType<{ className?: stri
   { key: "perk_effects", label: "Tipos de efeito", icon: Zap },
   { key: "backgrounds", label: "Backgrounds", icon: ImageLucide },
   { key: "care", label: "Cuidados", icon: Heart },
+  { key: "expeditions", label: "Expedições", icon: Sparkles },
   { key: "legacy", label: "Pets (legado)", icon: Star },
 ];
 
@@ -175,6 +178,8 @@ function PetsAdmin() {
           <PetBackgroundsPanel />
         ) : tab === "care" ? (
           <PetCareItemsPanel />
+        ) : tab === "expeditions" ? (
+          <PetExpeditionsPanel />
         ) : (
           <CatalogPanel table={tab} />
         )}
