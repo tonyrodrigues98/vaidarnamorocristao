@@ -265,6 +265,45 @@ function Showcase({
   const [xpRefresh, setXpRefresh] = useState(0);
   const [randomEvent, setRandomEvent] = useState<PetRandomEventPayload | null>(null);
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [activeExpedition, setActiveExpedition] = useState<ActiveExpedition | null>(null);
+
+  async function reloadActiveExpedition() {
+    try {
+      const a = await getActiveExpedition(pet.id);
+      setActiveExpedition(a);
+    } catch {
+      // silencioso
+    }
+  }
+
+  const isAway = !!activeExpedition && new Date(activeExpedition.ends_at).getTime() > Date.now();
+  const awayRemaining = useMemo(() => {
+    if (!activeExpedition) return "";
+    const ms = new Date(activeExpedition.ends_at).getTime() - Date.now();
+    if (ms <= 0) return "Concluindo…";
+    const totalMin = Math.ceil(ms / 60_000);
+    if (totalMin < 60) return `${totalMin} min`;
+    const h = Math.floor(totalMin / 60);
+    const m = totalMin % 60;
+    return m ? `${h}h ${m}min` : `${h}h`;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeExpedition, tick]);
+
+  function requestAction(k: PetCareKind) {
+    if (isAway) {
+      toast.info(`${pet.custom_name} está em expedição. Volta em ${awayRemaining}.`);
+      return;
+    }
+    setActionKind(k);
+  }
+
+  function openRadial() {
+    if (isAway) {
+      toast.info(`${pet.custom_name} está em expedição. Volta em ${awayRemaining}.`);
+      return;
+    }
+    setRadialOpen(true);
+  }
 
   async function reloadCare() {
     try {
