@@ -4207,6 +4207,27 @@ export type Database = {
           },
         ]
       }
+      user_pet_unlocks: {
+        Row: {
+          adult_unlocked_at: string | null
+          created_at: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          adult_unlocked_at?: string | null
+          created_at?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          adult_unlocked_at?: string | null
+          created_at?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_pets: {
         Row: {
           acquired_at: string
@@ -4254,6 +4275,7 @@ export type Database = {
           category_id: string
           created_at: string
           custom_name: string
+          evolved_at: string | null
           id: string
           is_equipped: boolean
           life_stage_id: string
@@ -4269,6 +4291,7 @@ export type Database = {
           category_id: string
           created_at?: string
           custom_name: string
+          evolved_at?: string | null
           id?: string
           is_equipped?: boolean
           life_stage_id: string
@@ -4284,6 +4307,7 @@ export type Database = {
           category_id?: string
           created_at?: string
           custom_name?: string
+          evolved_at?: string | null
           id?: string
           is_equipped?: boolean
           life_stage_id?: string
@@ -4890,6 +4914,7 @@ export type Database = {
         Returns: undefined
       }
       equip_user_pet_v2: { Args: { _user_pet_id: string }; Returns: undefined }
+      evolve_my_pet: { Args: never; Returns: Json }
       expire_anonymous_messages: { Args: never; Returns: number }
       get_active_pet_perks: {
         Args: { _user_id: string }
@@ -4998,6 +5023,7 @@ export type Database = {
           state: string
         }[]
       }
+      get_pet_evolution_status: { Args: never; Returns: Json }
       get_pet_streak: { Args: never; Returns: Json }
       get_pet_weekly_chest: { Args: never; Returns: Json }
       get_prayer_streak: {
@@ -5084,6 +5110,7 @@ export type Database = {
         Returns: undefined
       }
       increment_article_views: { Args: { _slug: string }; Returns: undefined }
+      is_adult_pet_unlocked: { Args: { _user_id: string }; Returns: boolean }
       is_match_participant: { Args: { _match_id: string }; Returns: boolean }
       is_pet_catalog_admin: { Args: never; Returns: boolean }
       is_staff: { Args: { _user_id: string }; Returns: boolean }
