@@ -343,7 +343,7 @@ const ROULETTE_SPIN_MS = 8500;
 const ROULETTE_BURST_MS = 1100;
 const SPARKLE_COUNT = 16;
 
-function GrabRouletteModal({
+export function GrabRouletteModal({
   res,
   winner,
   prizes,
