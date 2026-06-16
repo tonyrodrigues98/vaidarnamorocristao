@@ -1,4 +1,12 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode, type KeyboardEvent } from "react";
+import {
+  forwardRef,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+  type KeyboardEvent,
+} from "react";
 import {
   Sheet,
   SheetContent,
@@ -320,23 +328,18 @@ export function PetConstellation({
   );
 }
 
-const StarButton = (() => {
-  const Inner = (
-    {
-      star,
-      attention,
-      isLastVisited,
-      onClick,
-      onKeyDown,
-    }: {
-      star: StarDef;
-      attention: 0 | 1 | 2;
-      isLastVisited: boolean;
-      onClick: () => void;
-      onKeyDown: (e: KeyboardEvent<HTMLButtonElement>) => void;
-    },
-    ref: React.Ref<HTMLButtonElement>,
-  ) => {
+type StarButtonProps = {
+  star: StarDef;
+  attention: 0 | 1 | 2;
+  isLastVisited: boolean;
+  onClick: () => void;
+  onKeyDown: (e: KeyboardEvent<HTMLButtonElement>) => void;
+};
+
+const StarButton = forwardRef<HTMLButtonElement, StarButtonProps>(function StarButton(
+  { star, attention, isLastVisited, onClick, onKeyDown },
+  ref,
+) {
   // Tamanho do botão clicável (área generosa pra touch), escala com r.
   const buttonSize = Math.max(44, star.r * 14);
   // Velocidade e opacidade do pulso conforme atenção.
@@ -398,20 +401,7 @@ const StarButton = (() => {
       </TooltipContent>
     </Tooltip>
   );
-  };
-  const Forwarded = (Inner as unknown) as never;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return (require("react") as typeof import("react")).forwardRef(Inner as any) as unknown as (
-    props: {
-      star: StarDef;
-      attention: 0 | 1 | 2;
-      isLastVisited: boolean;
-      onClick: () => void;
-      onKeyDown: (e: KeyboardEvent<HTMLButtonElement>) => void;
-      ref?: React.Ref<HTMLButtonElement>;
-    },
-  ) => JSX.Element;
-})();
+});
 
 function ConstellationSheet({
   open,
