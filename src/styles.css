@@ -1031,3 +1031,17 @@ button,
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-3px); }
 }
+
+/* Quarto Vivo — animações sutis do pet sprite */
+@keyframes pet-breathe {
+  0%, 100% { transform: scale(1) translateY(0); }
+  50% { transform: scale(1.02) translateY(-2px); }
+}
+@keyframes pet-sleep {
+  0%, 100% { transform: rotate(-1deg) translateY(0); }
+  50% { transform: rotate(-2deg) translateY(2px); }
+}
+@keyframes pet-eat {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-3px) rotate(1deg); }
+}
