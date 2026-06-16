@@ -3,7 +3,6 @@ import * as LucideIcons from "lucide-react";
 import {
   Compass,
   Loader2,
-  Sparkles,
   Clock,
   Lock,
   Zap,

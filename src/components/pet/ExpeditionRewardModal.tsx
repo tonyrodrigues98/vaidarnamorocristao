@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { Sparkles, Gift, X, Trophy, Zap, Flame } from "lucide-react";
+import { Gift, X, Trophy, Zap, Flame } from "lucide-react";
 
 import { CoinIcon } from "@/components/icons/CoinIcon";
 import { XpIcon } from "@/components/icons/XpIcon";
