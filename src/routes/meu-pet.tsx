@@ -402,6 +402,12 @@ function Showcase({
 
   const mood = useMemo(() => getPetMood(careValues, pet.id), [careValues, pet.id]);
 
+  // Snapshot otimista das stats no navegador — evita "flash" ao recarregar.
+  useEffect(() => {
+    if (careStates.length === 0) return;
+    try { saveCareSnapshot(pet.id, careValues); } catch { /* ignore */ }
+  }, [careValues, careStates.length, pet.id]);
+
   const longPress = useLongPress(() => setRadialOpen(true), 350);
 
   async function saveName() {
