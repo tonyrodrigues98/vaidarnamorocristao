@@ -66,6 +66,7 @@ import { PetShowcaseSkeleton } from "@/components/pet/PetShowcaseSkeleton";
 import { PetStreakCard } from "@/components/pet/PetStreakCard";
 import { PetWeeklyChestCard } from "@/components/pet/PetWeeklyChestCard";
 import { PetProgressionCard } from "@/components/pet/PetProgressionCard";
+import { PetEvolutionCard } from "@/components/pet/PetEvolutionCard";
 import {
   PetRandomEventModal,
   type PetRandomEventPayload,
@@ -497,6 +498,24 @@ function Showcase({
     <MissionsTodayCard refreshKey={xpRefresh} />
     <PetStreakCard refreshKey={xpRefresh} />
     <PetWeeklyChestCard refreshKey={xpRefresh} onClaimed={() => setXpRefresh((n) => n + 1)} />
+    <PetEvolutionCard
+      refreshKey={xpRefresh}
+      petName={pet.custom_name}
+      babyImage={
+        resolvePetDisplayImage(pet.variant, "baby") ||
+        resolvePetDisplayImage(pet.species, "baby") ||
+        null
+      }
+      adultImage={
+        resolvePetDisplayImage(pet.variant, "adult") ||
+        resolvePetDisplayImage(pet.species, "adult") ||
+        null
+      }
+      onEvolved={() => {
+        setXpRefresh((n) => n + 1);
+        onUpdated();
+      }}
+    />
     <PetProgressionCard refreshKey={xpRefresh} onChanged={() => setXpRefresh((n) => n + 1)} />
     <button
       type="button"
