@@ -806,6 +806,15 @@ function Wizard({ onCancel, onDone }: { onCancel?: () => void; onDone: () => voi
 
   return (
     <section className="overflow-hidden rounded-3xl border border-neutral-200/80 bg-white p-6 shadow-[0_1px_0_rgba(0,0,0,0.02),0_24px_60px_-30px_rgba(0,0,0,0.12)] sm:p-8">
+      {adultUnlocked === false && (
+        <div className="mb-6 flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-3.5">
+          <Sparkles className="mt-0.5 size-4 shrink-0 text-amber-600" />
+          <p className="text-[12px] leading-relaxed text-amber-900">
+            Seu primeiro pet começa <strong>filhote</strong>. Cuide dele todos os dias
+            e suba de nível — quando ele crescer, você desbloqueia adultos pros próximos pets.
+          </p>
+        </div>
+      )}
       {/* Progress */}
       <div className="mb-6">
         <div className="flex items-end justify-between gap-4">
