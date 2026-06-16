@@ -1,5 +1,10 @@
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 type Props = {
   /** Posição em % do container (0-100) */
@@ -8,6 +13,8 @@ type Props = {
   width: number;
   height: number;
   label: string;
+  /** Texto curto explicando o que esta ação faz (ex: "Cuidado · dar banho"). */
+  tooltip?: string;
   onClick: () => void;
   /** Pulsa em dourado quando precisa de atenção (stat baixa) */
   urgent?: boolean;
@@ -27,12 +34,13 @@ export function RoomHotspot({
   width,
   height,
   label,
+  tooltip,
   onClick,
   urgent,
   children,
   className,
 }: Props) {
-  return (
+  const btn = (
     <button
       type="button"
       onClick={onClick}
@@ -74,5 +82,20 @@ export function RoomHotspot({
       />
       {children}
     </button>
+  );
+  if (!tooltip) return btn;
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>{btn}</TooltipTrigger>
+      <TooltipContent
+        side="top"
+        className="max-w-[220px] border border-amber-200/40 bg-neutral-900/95 text-amber-50 shadow-lg backdrop-blur"
+      >
+        <div className="flex flex-col gap-0.5">
+          <span className="text-[11px] font-semibold">{label}</span>
+          <span className="text-[10px] text-amber-100/85">{tooltip}</span>
+        </div>
+      </TooltipContent>
+    </Tooltip>
   );
 }
