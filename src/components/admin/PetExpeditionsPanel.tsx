@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import {
   Compass,
@@ -7,6 +7,8 @@ import {
   Plus,
   Sparkles,
   Trash2,
+  Upload,
+  ImageOff,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -38,6 +40,7 @@ import {
 } from "@/types/petExpedition";
 import { slugify } from "@/lib/petCatalog";
 import { cn } from "@/lib/utils";
+import { uploadExpeditionImage, useSignedExpeditionUrl } from "@/lib/expeditionImageUrl";
 
 type Draft = PetExpeditionWritable & { id?: string };
 
