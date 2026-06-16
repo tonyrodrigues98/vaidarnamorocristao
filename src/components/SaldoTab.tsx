@@ -346,9 +346,6 @@ function TxRow({ tx }: { tx: CoinTx }) {
   const valueColor = isIn
     ? "text-emerald-600 dark:text-emerald-400"
     : "text-rose-600 dark:text-rose-400";
-  const iconWrap = isIn
-    ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-    : "bg-rose-500/10 text-rose-600 dark:text-rose-400";
   const d = new Date(tx.created_at);
   const date = d.toLocaleDateString("pt-BR");
   const time = d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
