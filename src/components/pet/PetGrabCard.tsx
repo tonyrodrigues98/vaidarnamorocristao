@@ -289,7 +289,7 @@ function GrabRouletteModal({
           <div className="relative mx-auto mt-5" style={{ width: ROULETTE_VIEW, height: ROULETTE_VIEW_H }}>
             {/* conic-gradient rotating ring behind frame */}
             <div
-              className="pointer-events-none absolute left-1/2 top-1/2 z-40 -translate-x-1/2 -translate-y-1/2"
+              className="pointer-events-none absolute left-1/2 top-1/2 z-0 -translate-x-1/2 -translate-y-1/2"
               style={{ width: 132, height: 132 }}
             >
               <div
@@ -312,7 +312,7 @@ function GrabRouletteModal({
             {/* center frame on top */}
             <div
               className={cn(
-                "pointer-events-none absolute left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2 rounded-2xl",
+                "pointer-events-none absolute left-1/2 top-1/2 z-0 -translate-x-1/2 -translate-y-1/2 rounded-2xl",
                 "ring-1 ring-white/15",
               )}
               style={{
@@ -328,7 +328,7 @@ function GrabRouletteModal({
 
             {/* strip viewport */}
             <div
-              className="relative h-full overflow-hidden rounded-2xl bg-neutral-900/80 ring-1 ring-neutral-800"
+              className="relative z-10 h-full overflow-hidden rounded-2xl bg-transparent ring-1 ring-neutral-800"
               style={{ width: ROULETTE_VIEW }}
             >
               {/* edge fades */}
