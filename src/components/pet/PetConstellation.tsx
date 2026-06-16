@@ -155,10 +155,10 @@ export function PetConstellation({
   return (
     <TooltipProvider delayDuration={150} skipDelayDuration={300}>
       <section
-        className="relative mx-auto w-full max-w-[520px] overflow-hidden rounded-3xl border border-neutral-200/80 bg-neutral-950 shadow-[0_2px_0_rgba(0,0,0,0.02),0_30px_70px_-35px_rgba(0,0,0,0.4)]"
+        className="relative h-full w-full overflow-hidden bg-neutral-950"
         aria-label="Constelação do pet"
       >
-        <div className="relative aspect-[2/3] w-full">
+        <div className="relative h-full w-full">
           <img
             src={skyAsset.url}
             alt=""
