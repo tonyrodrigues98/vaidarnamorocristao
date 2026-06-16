@@ -4186,6 +4186,47 @@ export type Database = {
         }
         Relationships: []
       }
+      user_daily_grabs_by_pool: {
+        Row: {
+          created_at: string
+          day: string
+          free_used: number
+          id: string
+          paid_used: number
+          pool_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          day?: string
+          free_used?: number
+          id?: string
+          paid_used?: number
+          pool_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          day?: string
+          free_used?: number
+          id?: string
+          paid_used?: number
+          pool_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_daily_grabs_by_pool_pool_id_fkey"
+            columns: ["pool_id"]
+            isOneToOne: false
+            referencedRelation: "grab_pools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_daily_missions: {
         Row: {
           completed_at: string | null
@@ -5632,6 +5673,10 @@ export type Database = {
       mark_message_read: { Args: { _message_id: string }; Returns: undefined }
       medal_for_prestige: { Args: { _level: number }; Returns: string }
       perform_grab: { Args: { _pool_id: string }; Returns: Json }
+      perform_grab_multi: {
+        Args: { _count: number; _pool_id: string }
+        Returns: Json
+      }
       pet_care_uses_today: {
         Args: { _item_id: string; _user_pet_id: string }
         Returns: number
@@ -5710,6 +5755,7 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      rotate_grab_featured_pool: { Args: never; Returns: undefined }
       run_reactivation_reminders: { Args: never; Returns: number }
       send_anonymous_hint: {
         Args: { _hint_option_id: string; _message_id: string }

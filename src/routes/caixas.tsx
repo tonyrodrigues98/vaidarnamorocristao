@@ -13,6 +13,7 @@ import {
   listMyGrabInventory,
   listPoolPrizeMetas,
   performGrab,
+  performGrabMulti,
   resolvePrize,
   type PrizeMeta,
 } from "@/lib/petGrab";
@@ -34,7 +35,8 @@ export const Route = createFileRoute("/caixas")({
       { title: "Caixas — Meu Pet" },
       {
         name: "description",
-        content: "Abra caixas temáticas: moedas, XP, cenários, decorações e itens lendários para o seu pet.",
+        content:
+          "Abra caixas temáticas: moedas, XP, cenários, decorações e itens lendários para o seu pet.",
       },
     ],
   }),
@@ -89,6 +91,10 @@ function CaixasPage() {
     poolId: string;
     poolCost: number;
   } | null>(null);
+  const [multiResults, setMultiResults] = useState<{
+    poolName: string;
+    results: Array<{ res: GrabResult; prize: PrizeMeta }>;
+  } | null>(null);
 
   async function reload() {
     try {
@@ -108,10 +114,7 @@ function CaixasPage() {
     unlockGrabAudio();
     setPendingPoolId(poolId);
     try {
-      const [prizes, res] = await Promise.all([
-        listPoolPrizeMetas(poolId),
-        performGrab(poolId),
-      ]);
+      const [prizes, res] = await Promise.all([listPoolPrizeMetas(poolId), performGrab(poolId)]);
       const winnerMeta = await resolvePrize(res.prize_kind, res.prize_ref_id);
       const winner: PrizeMeta = {
         ...(winnerMeta ?? { name: GRAB_PRIZE_KIND_LABEL[res.prize_kind], image_url: null }),
@@ -120,6 +123,45 @@ function CaixasPage() {
       };
       const pool = state?.pools.find((p) => p.id === poolId);
       setRoulette({ res, winner, prizes, poolId, poolCost: pool?.cost_coins ?? 0 });
+      await reload();
+    } catch (e) {
+      const msg = (e as Error).message;
+      toast.error(
+        msg.includes("insufficient_coins")
+          ? "Moedas insuficientes"
+          : msg.includes("pool_on_cooldown")
+            ? "Esta caixa ainda está em cooldown"
+            : msg.includes("pool_empty")
+              ? "Caixa sem prêmios configurados"
+              : msg.includes("pool_not_found")
+                ? "Caixa indisponível"
+                : msg,
+      );
+    } finally {
+      setPendingPoolId(null);
+    }
+  }
+
+  async function openMulti(poolId: string, count: 5 | 10) {
+    unlockGrabAudio();
+    setPendingPoolId(poolId);
+    try {
+      const multi = await performGrabMulti(poolId, count);
+      const results = await Promise.all(
+        multi.results.map(async (res) => {
+          const meta = await resolvePrize(res.prize_kind, res.prize_ref_id);
+          return {
+            res,
+            prize: {
+              ...(meta ?? { name: GRAB_PRIZE_KIND_LABEL[res.prize_kind], image_url: null }),
+              kind: res.prize_kind,
+              amount: res.prize_amount,
+            } as PrizeMeta,
+          };
+        }),
+      );
+      const pool = state?.pools.find((p) => p.id === poolId);
+      setMultiResults({ poolName: pool?.name ?? "Caixa", results });
       await reload();
     } catch (e) {
       const msg = (e as Error).message;
@@ -159,6 +201,9 @@ function CaixasPage() {
   if (!user) return <Navigate to="/auth/login" />;
 
   const totalInv = inv.reduce((s, x) => s + x.quantity, 0);
+  const totalFreeRemaining = state
+    ? state.pools.reduce((sum, pool) => sum + Math.max(0, pool.free_daily - pool.free_used), 0)
+    : 0;
 
   return (
     <div className="min-h-screen bg-[#FAF7EF] text-[#1a1410]">
@@ -187,8 +232,7 @@ function CaixasPage() {
           aria-hidden
           className="pointer-events-none absolute inset-x-0 bottom-0 h-px"
           style={{
-            background:
-              "linear-gradient(90deg, transparent, rgba(201,162,74,0.85), transparent)",
+            background: "linear-gradient(90deg, transparent, rgba(201,162,74,0.85), transparent)",
           }}
         />
         <div className="relative mx-auto flex min-h-[280px] max-w-3xl flex-col justify-between px-4 py-5 sm:min-h-[340px]">
@@ -212,8 +256,7 @@ function CaixasPage() {
                 <span
                   className="rounded-full px-1.5 text-[10px] font-bold text-[#1a1410]"
                   style={{
-                    background:
-                      "linear-gradient(135deg, #F1DDA1 0%, #C9A24A 100%)",
+                    background: "linear-gradient(135deg, #F1DDA1 0%, #C9A24A 100%)",
                   }}
                 >
                   {totalInv}
@@ -230,16 +273,22 @@ function CaixasPage() {
           <div className="flex flex-wrap gap-2 text-[11px]">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-2.5 py-1 text-[#3a3328] ring-1 ring-[#ece3d0]">
               <Sparkles className="size-3 text-[#c9a24a]" />
-              {Math.max(0, state.default_free_daily - state.free_used)} grátis hoje
+              {totalFreeRemaining} grátis nas caixas hoje
             </span>
             <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-2.5 py-1 text-[#3a3328] ring-1 ring-[#ece3d0]">
               <CoinIcon className="size-3" />
-              {state.recent.length > 0 ? `${state.recent.length} aberturas recentes` : "Nenhuma abertura ainda"}
+              {state.recent.length > 0
+                ? `${state.recent.length} aberturas recentes`
+                : "Nenhuma abertura ainda"}
             </span>
           </div>
         )}
         {groups?.featured && (
-          <FeaturedBanner pool={groups.featured} onOpen={() => void open(groups.featured!.id)} busy={pendingPoolId === groups.featured.id} />
+          <FeaturedBanner
+            pool={groups.featured}
+            onOpen={() => void open(groups.featured!.id)}
+            busy={pendingPoolId === groups.featured.id}
+          />
         )}
       </section>
 
@@ -279,9 +328,11 @@ function CaixasPage() {
               <GrabPoolCard
                 key={pool.id}
                 pool={pool}
-                freeRemaining={Math.max(0, pool.free_daily - state.free_used)}
+                freeRemaining={Math.max(0, pool.free_daily - pool.free_used)}
+                coinBalance={state.coin_balance ?? 0}
                 busy={pendingPoolId === pool.id}
                 onOpen={() => void open(pool.id)}
+                onOpenMulti={(count) => void openMulti(pool.id, count)}
               />
             ))}
           </div>
@@ -326,8 +377,7 @@ function CaixasPage() {
           winner={roulette.winner}
           prizes={roulette.prizes}
           canOpenAgain={
-            roulette.res.free_remaining > 0 ||
-            roulette.res.new_balance >= roulette.poolCost
+            roulette.res.free_remaining > 0 || roulette.res.new_balance >= roulette.poolCost
           }
           onOpenAgain={() => {
             const pid = roulette.poolId;
@@ -340,9 +390,81 @@ function CaixasPage() {
           }}
         />
       )}
-      {showInv && (
-        <InventoryDialog inventory={inv} onClose={() => setShowInv(false)} />
+      {showInv && <InventoryDialog inventory={inv} onClose={() => setShowInv(false)} />}
+      {multiResults && (
+        <MultiResultsDialog
+          poolName={multiResults.poolName}
+          results={multiResults.results}
+          onClose={() => {
+            setMultiResults(null);
+            void reload();
+          }}
+        />
       )}
+    </div>
+  );
+}
+
+function MultiResultsDialog({
+  poolName,
+  results,
+  onClose,
+}: {
+  poolName: string;
+  results: Array<{ res: GrabResult; prize: PrizeMeta }>;
+  onClose: () => void;
+}) {
+  const totalPaid = results.reduce((sum, item) => sum + item.res.cost_paid, 0);
+  return (
+    <div
+      className="fixed inset-0 z-50 grid place-items-center bg-black/60 px-4 backdrop-blur-sm"
+      role="dialog"
+      aria-modal="true"
+    >
+      <div className="w-full max-w-md rounded-2xl bg-[#FAF7EF] p-4 text-[#1a1410] shadow-2xl ring-1 ring-[#e6cf8a]">
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#9a7626]">
+              Abertura múltipla
+            </div>
+            <h2 className="truncate text-base font-semibold">{poolName}</h2>
+          </div>
+          <span className="inline-flex items-center gap-1 rounded-full bg-white px-2 py-1 text-[11px] font-semibold ring-1 ring-[#ece3d0]">
+            <CoinIcon className="size-3" /> {totalPaid}
+          </span>
+        </div>
+        <div className="grid max-h-[55vh] grid-cols-2 gap-2 overflow-y-auto pr-1">
+          {results.map(({ res, prize }, index) => (
+            <div
+              key={`${res.prize_kind}-${res.prize_ref_id ?? index}-${index}`}
+              className="rounded-xl bg-white p-2 ring-1 ring-[#ece3d0]"
+            >
+              <div className="grid aspect-square place-items-center overflow-hidden rounded-lg bg-[#f1ead8]">
+                {res.prize_kind === "name_gradient" && prize.gradient_css ? (
+                  <div className="size-full" style={{ background: prize.gradient_css }} />
+                ) : prize.image_url ? (
+                  <img src={prize.image_url} alt="" className="size-full object-cover" />
+                ) : res.prize_kind === "coins" ? (
+                  <CoinIcon className="size-8" />
+                ) : (
+                  <Package className="size-8 text-[#9a7626]" />
+                )}
+              </div>
+              <div className="mt-1.5 truncate text-xs font-semibold">{prize.name}</div>
+              <div className="text-[10px] text-[#7a6f5e]">
+                {GRAB_PRIZE_KIND_LABEL[res.prize_kind]}
+                {res.prize_amount > 1 ? ` x${res.prize_amount}` : ""}
+              </div>
+            </div>
+          ))}
+        </div>
+        <Button
+          className="mt-4 w-full bg-[#1a1410] text-[#FAF7EF] hover:bg-[#2a2018]"
+          onClick={onClose}
+        >
+          Continuar
+        </Button>
+      </div>
     </div>
   );
 }
@@ -360,8 +482,7 @@ function FeaturedBanner({
     <div
       className="relative mt-5 overflow-hidden rounded-2xl border border-[#e6cf8a] bg-white p-4"
       style={{
-        boxShadow:
-          "0 18px 44px -18px rgba(201,162,74,0.45), inset 0 1px 0 rgba(255,255,255,0.9)",
+        boxShadow: "0 18px 44px -18px rgba(201,162,74,0.45), inset 0 1px 0 rgba(255,255,255,0.9)",
       }}
     >
       <div

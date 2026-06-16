@@ -191,7 +191,7 @@ export function PetGrabCard({ refreshKey, onChanged }: Props) {
 
         <div className="grid grid-cols-2 gap-3">
           {state.pools.map((pool) => {
-            const freeRemaining = Math.max(0, pool.free_daily - state.free_used);
+            const freeRemaining = Math.max(0, pool.free_daily - pool.free_used);
             const isFree = freeRemaining > 0;
             const busy = pendingPoolId === pool.id;
             const tier = tierFor(pool.name);
@@ -328,7 +328,7 @@ export function PetGrabCard({ refreshKey, onChanged }: Props) {
             const pool = state?.pools.find((p) => p.id === roulette.poolId);
             if (!pool) return false;
             if (pool.prize_count === 0) return false;
-            const freeRemaining = Math.max(0, pool.free_daily - state!.free_used);
+            const freeRemaining = Math.max(0, pool.free_daily - pool.free_used);
             return freeRemaining > 0 || (roulette.res.new_balance ?? 0) >= pool.cost_coins;
           })()}
           onOpenAgain={() => {
