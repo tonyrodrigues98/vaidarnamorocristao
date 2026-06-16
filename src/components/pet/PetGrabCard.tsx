@@ -416,11 +416,44 @@ export function GrabRouletteModal({
     const base = prizes.length > 0 ? prizes : [winner];
     const list: PrizeMeta[] = [];
     const TOTAL = 48;
+    // Near-miss bias: classify prizes by rarity tier so the neighbors of the
+    // winning card pull from a high-rarity bucket. Creates the CS:GO "fuck,
+    // almost got the knife" feeling — the eye catches an epic/legendary right
+    // beside the winner as the reel decelerates.
+    const RANK: Record<string, number> = {
+      legendary: 4, epic: 3, rare: 2, uncommon: 1, common: 0,
+    };
+    const rankOf = (p: PrizeMeta) => RANK[(p.rarity as string) ?? "common"] ?? 0;
+    const sorted = [...base].sort((a, b) => rankOf(b) - rankOf(a));
+    const topCut = Math.max(1, Math.ceil(sorted.length * 0.3));
+    const highBucket = sorted.slice(0, topCut); // top ~30% rarities
+    const pickRandom = (pool: PrizeMeta[]) =>
+      pool[Math.floor(Math.random() * pool.length)] ?? winner;
     for (let i = 0; i < TOTAL; i++) {
-      list.push(base[Math.floor(Math.random() * base.length)] ?? winner);
+      list.push(pickRandom(base));
     }
     const idx = TOTAL - 4;
     list[idx] = winner;
+    // Neighbor bias — distance-weighted: closer = more chance of high tier.
+    const NEIGHBOR_BIAS: Array<{ d: number; chance: number }> = [
+      { d: -2, chance: 0.55 },
+      { d: -1, chance: 0.85 },
+      { d:  1, chance: 0.85 },
+      { d:  2, chance: 0.55 },
+    ];
+    const winnerRank = rankOf(winner);
+    for (const { d, chance } of NEIGHBOR_BIAS) {
+      const j = idx + d;
+      if (j < 0 || j >= TOTAL) continue;
+      if (Math.random() > chance) continue;
+      // Try a few times to land on something rarer than the winner so the
+      // "quase ganhei algo melhor" effect actually lands.
+      const candidates = highBucket.filter(
+        (p) => rankOf(p) > winnerRank && p !== winner,
+      );
+      const pool = candidates.length > 0 ? candidates : highBucket;
+      list[j] = pickRandom(pool);
+    }
     // CS:GO-style near-miss: stop anywhere inside the winning card instead of
     // dead center. Random offset within ±40% of item width — anchor still
     // touches the winner, but sometimes lands near an edge so the player
