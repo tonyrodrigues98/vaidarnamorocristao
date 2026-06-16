@@ -20,6 +20,11 @@ import {
   type GrabState,
 } from "@/types/petGrab";
 import { cn } from "@/lib/utils";
+import {
+  playGrabFinalDing,
+  playGrabTick,
+  unlockGrabAudio,
+} from "@/lib/grabAudio";
 
 type GrabTier = {
   image: string;
@@ -99,6 +104,10 @@ export function PetGrabCard({ refreshKey, onChanged }: Props) {
   useEffect(() => { void reload(); }, [refreshKey]);
 
   async function grab(poolId: string) {
+    // Unlock the shared AudioContext synchronously inside this user gesture
+    // so iOS Safari permits later scheduled sounds (the modal mounts after
+    // an async DB round-trip, which is outside the gesture).
+    unlockGrabAudio();
     setPendingPoolId(poolId);
     try {
       const [prizes, res] = await Promise.all([
@@ -342,7 +351,6 @@ function GrabRouletteModal({
   const [blur, setBlur] = useState(true);
   const rafRef = useRef<number | null>(null);
   const tickRafRef = useRef<number | null>(null);
-  const audioCtxRef = useRef<AudioContext | null>(null);
   // Persisted across StrictMode double-invocations / re-renders so the same
   // item center can never trigger a tick twice within one modal mount.
   const lastTickCenterRef = useRef<number>(Number.NEGATIVE_INFINITY);
@@ -386,162 +394,6 @@ function GrabRouletteModal({
     };
   }, []);
 
-  // Realistic casino-roulette click: a tiny noise burst (the "tac" of the ball
-  // hitting a metal fret) blended with a short wood/ivory body resonance.
-  // Slight randomization per hit prevents the machine-gun feel.
-  const noiseBufferRef = useRef<AudioBuffer | null>(null);
-  const getNoiseBuffer = (ctx: AudioContext) => {
-    if (noiseBufferRef.current) return noiseBufferRef.current;
-    const len = Math.floor(ctx.sampleRate * 0.08);
-    const buf = ctx.createBuffer(1, len, ctx.sampleRate);
-    const data = buf.getChannelData(0);
-    for (let i = 0; i < len; i++) data[i] = Math.random() * 2 - 1;
-    noiseBufferRef.current = buf;
-    return buf;
-  };
-
-  const playTick = (speed: number, pan: number = 0) => {
-    try {
-      const Ctor =
-        window.AudioContext ||
-        (window as unknown as { webkitAudioContext?: typeof AudioContext })
-          .webkitAudioContext;
-      if (!Ctor) return;
-      if (!audioCtxRef.current) audioCtxRef.current = new Ctor();
-      const ctx = audioCtxRef.current;
-      if (ctx.state === "suspended") void ctx.resume();
-      const now = ctx.currentTime;
-      const s = Math.min(1, Math.max(0, speed));
-      // Per-hit randomization (avoids repetitive timbre)
-      const jitter = 0.85 + Math.random() * 0.3;
-
-      // Stereo bus: each tick sweeps from the incoming side (right) past
-      // the listener and out to the opposite side (left), mirroring the
-      // strip direction. `pan` (-1..1) biases the whole sweep so simultaneous
-      // ticks at slightly different positions feel spatially distinct.
-      const supportsPanner = typeof ctx.createStereoPanner === "function";
-      const panner = supportsPanner ? ctx.createStereoPanner() : null;
-      if (panner) {
-        const start = Math.max(-1, Math.min(1, 0.85 + pan * 0.4));
-        const end = Math.max(-1, Math.min(1, -0.85 + pan * 0.4));
-        panner.pan.setValueAtTime(start, now);
-        panner.pan.linearRampToValueAtTime(end, now + 0.07);
-        panner.connect(ctx.destination);
-      }
-      const out: AudioNode = panner ?? ctx.destination;
-
-      // --- 1) Noise transient: the bright "tac" of ball-on-fret
-      const noise = ctx.createBufferSource();
-      noise.buffer = getNoiseBuffer(ctx);
-      const bp = ctx.createBiquadFilter();
-      bp.type = "bandpass";
-      bp.frequency.value = (2200 + s * 2800) * jitter;
-      bp.Q.value = 6 + s * 4;
-      const hp = ctx.createBiquadFilter();
-      hp.type = "highpass";
-      hp.frequency.value = 1200;
-      const nGain = ctx.createGain();
-      const nVol = (0.18 + s * 0.32) * jitter;
-      nGain.gain.setValueAtTime(0.0001, now);
-      nGain.gain.exponentialRampToValueAtTime(nVol, now + 0.0015);
-      nGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.035);
-      noise.connect(bp).connect(hp).connect(nGain).connect(out);
-      noise.start(now);
-      noise.stop(now + 0.05);
-
-      // --- 2) Body resonance: short wooden "tock" under the click
-      const body = ctx.createOscillator();
-      const bodyGain = ctx.createGain();
-      body.type = "triangle";
-      const bodyFreq = (520 + s * 380) * jitter;
-      body.frequency.setValueAtTime(bodyFreq * 1.6, now);
-      body.frequency.exponentialRampToValueAtTime(bodyFreq, now + 0.012);
-      const bVol = 0.06 + s * 0.1;
-      bodyGain.gain.setValueAtTime(0.0001, now);
-      bodyGain.gain.exponentialRampToValueAtTime(bVol, now + 0.004);
-      bodyGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.07);
-      body.connect(bodyGain).connect(out);
-      body.start(now);
-      body.stop(now + 0.08);
-    } catch {
-      /* noop */
-    }
-  };
-
-  const playFinalDing = () => {
-    try {
-      const Ctor =
-        window.AudioContext ||
-        (window as unknown as { webkitAudioContext?: typeof AudioContext })
-          .webkitAudioContext;
-      if (!Ctor) return;
-      if (!audioCtxRef.current) audioCtxRef.current = new Ctor();
-      const ctx = audioCtxRef.current;
-      if (ctx.state === "suspended") void ctx.resume();
-      const now = ctx.currentTime;
-      // --- 1) Sub-bass "BUM": chest-thump that seals the win
-      const sub = ctx.createOscillator();
-      const subGain = ctx.createGain();
-      sub.type = "sine";
-      sub.frequency.setValueAtTime(120, now);
-      sub.frequency.exponentialRampToValueAtTime(38, now + 0.35);
-      subGain.gain.setValueAtTime(0.0001, now);
-      subGain.gain.exponentialRampToValueAtTime(0.55, now + 0.012);
-      subGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.55);
-      sub.connect(subGain).connect(ctx.destination);
-      sub.start(now);
-      sub.stop(now + 0.6);
-
-      // --- 2) Noise burst with bandpass for the "splash" of a hit
-      const noise = ctx.createBufferSource();
-      noise.buffer = getNoiseBuffer(ctx);
-      const nbp = ctx.createBiquadFilter();
-      nbp.type = "bandpass";
-      nbp.frequency.value = 3200;
-      nbp.Q.value = 1.2;
-      const nGain = ctx.createGain();
-      nGain.gain.setValueAtTime(0.0001, now);
-      nGain.gain.exponentialRampToValueAtTime(0.35, now + 0.005);
-      nGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.18);
-      noise.connect(nbp).connect(nGain).connect(ctx.destination);
-      noise.start(now);
-      noise.stop(now + 0.2);
-
-      // --- 3) Bell-like ding: stacked harmonics with long shimmer tail,
-      // panned slightly L/R so it feels wide
-      const supportsPanner = typeof ctx.createStereoPanner === "function";
-      const partials: Array<{ f: number; v: number; pan: number; dur: number }> = [
-        { f: 880, v: 0.32, pan: -0.3, dur: 1.4 },
-        { f: 1320, v: 0.24, pan: 0.25, dur: 1.2 },
-        { f: 1760, v: 0.2, pan: -0.15, dur: 1.0 },
-        { f: 2640, v: 0.12, pan: 0.4, dur: 0.8 },
-      ];
-      partials.forEach(({ f, v, pan, dur }, i) => {
-        const t0 = now + 0.04 + i * 0.025;
-        const osc = ctx.createOscillator();
-        const g = ctx.createGain();
-        osc.type = "sine";
-        osc.frequency.setValueAtTime(f, t0);
-        g.gain.setValueAtTime(0.0001, t0);
-        g.gain.exponentialRampToValueAtTime(v, t0 + 0.008);
-        g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
-        let tail: AudioNode = g;
-        if (supportsPanner) {
-          const p = ctx.createStereoPanner();
-          p.pan.value = pan;
-          g.connect(p);
-          tail = p;
-        }
-        osc.connect(g);
-        tail.connect(ctx.destination);
-        osc.start(t0);
-        osc.stop(t0 + dur + 0.05);
-      });
-    } catch {
-      /* noop */
-    }
-  };
-
   useEffect(() => {
     const timers: ReturnType<typeof setTimeout>[] = [];
     // intro → spin
@@ -579,7 +431,7 @@ function GrabRouletteModal({
               // as the wheel slows so the final ticks feel centered.
               const idx = lastTickCenterRef.current + 1 + i;
               const pan = ((idx % 2 === 0 ? 1 : -1) * (0.4 + speed * 0.5));
-              playTick(speed, pan);
+              playGrabTick(speed, pan);
             }
           }
           lastTickCenterRef.current = centerIndex;
@@ -597,7 +449,7 @@ function GrabRouletteModal({
       setPhase("settle");
       if (!dingPlayedRef.current) {
         dingPlayedRef.current = true;
-        playFinalDing();
+        playGrabFinalDing();
       }
     }, ROULETTE_INTRO_MS + ROULETTE_SPIN_MS + 80));
     // settle done → reveal details
@@ -606,11 +458,6 @@ function GrabRouletteModal({
     return () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       if (tickRafRef.current) cancelAnimationFrame(tickRafRef.current);
-      const ctx = audioCtxRef.current;
-      if (ctx) {
-        ctx.close().catch(() => {});
-        audioCtxRef.current = null;
-      }
       timers.forEach(clearTimeout);
     };
   }, [targetX, easeProgress]);
