@@ -37,6 +37,7 @@ import type {
   UserPetV2Full,
 } from "@/types/petCatalog";
 import { cn } from "@/lib/utils";
+import { isAdultPetUnlocked } from "@/lib/petEvolution";
 import { PetBackgroundLayer, PetSceneryPanel, usePetScenery } from "@/components/pet/PetSceneryPanel";
 import { usePetDayNight } from "@/lib/petDayNight";
 import { PetNeedsHud } from "@/components/pet/PetNeedsHud";
@@ -66,6 +67,7 @@ import { PetShowcaseSkeleton } from "@/components/pet/PetShowcaseSkeleton";
 import { PetStreakCard } from "@/components/pet/PetStreakCard";
 import { PetWeeklyChestCard } from "@/components/pet/PetWeeklyChestCard";
 import { PetProgressionCard } from "@/components/pet/PetProgressionCard";
+import { PetEvolutionCard } from "@/components/pet/PetEvolutionCard";
 import {
   PetRandomEventModal,
   type PetRandomEventPayload,
@@ -497,6 +499,24 @@ function Showcase({
     <MissionsTodayCard refreshKey={xpRefresh} />
     <PetStreakCard refreshKey={xpRefresh} />
     <PetWeeklyChestCard refreshKey={xpRefresh} onClaimed={() => setXpRefresh((n) => n + 1)} />
+    <PetEvolutionCard
+      refreshKey={xpRefresh}
+      petName={pet.custom_name}
+      babyImage={
+        resolvePetDisplayImage(pet.variant, "baby") ||
+        resolvePetDisplayImage(pet.species, "baby") ||
+        null
+      }
+      adultImage={
+        resolvePetDisplayImage(pet.variant, "adult") ||
+        resolvePetDisplayImage(pet.species, "adult") ||
+        null
+      }
+      onEvolved={() => {
+        setXpRefresh((n) => n + 1);
+        onUpdated();
+      }}
+    />
     <PetProgressionCard refreshKey={xpRefresh} onChanged={() => setXpRefresh((n) => n + 1)} />
     <button
       type="button"
@@ -577,18 +597,26 @@ function Wizard({ onCancel, onDone }: { onCancel?: () => void; onDone: () => voi
   const [variants, setVariants] = useState<PetVariant[]>([]);
   const [stages, setStages] = useState<PetLifeStage[]>([]);
   const [personalities, setPersonalities] = useState<PetPersonality[]>([]);
+  const [adultUnlocked, setAdultUnlocked] = useState<boolean | null>(null);
   // Initial load
   useEffect(() => {
     (async () => {
       try {
-        const [c, st, pe] = await Promise.all([
+        const [c, st, pe, unlocked] = await Promise.all([
           listActive<PetCategory>("pet_categories"),
           listActive<PetLifeStage>("pet_life_stages"),
           listActive<PetPersonality>("pet_personalities"),
+          isAdultPetUnlocked(),
         ]);
         setCategories(c);
-        setStages(st);
+        setAdultUnlocked(unlocked);
+        const filteredStages = unlocked ? st : st.filter((s) => s.kind === "baby");
+        setStages(filteredStages);
         setPersonalities(pe);
+        // Auto-seleciona filhote quando é o único disponível
+        if (!unlocked && filteredStages.length === 1) {
+          setSel((prev) => ({ ...prev, stage: filteredStages[0] }));
+        }
       } catch (e) {
         toast.error((e as Error).message);
       }
@@ -610,8 +638,11 @@ function Wizard({ onCancel, onDone }: { onCancel?: () => void; onDone: () => voi
   }, [sel.category, sel.species]);
 
   const order: StepKey[] = useMemo(
-    () => ["category", "stage", "personality", "name", "type", "confirm"],
-    [],
+    () =>
+      adultUnlocked === false
+        ? ["category", "personality", "name", "type", "confirm"]
+        : ["category", "stage", "personality", "name", "type", "confirm"],
+    [adultUnlocked],
   );
 
   function nextOf(current: StepKey, override?: Partial<Selection>): StepKey {
@@ -775,6 +806,15 @@ function Wizard({ onCancel, onDone }: { onCancel?: () => void; onDone: () => voi
 
   return (
     <section className="overflow-hidden rounded-3xl border border-neutral-200/80 bg-white p-6 shadow-[0_1px_0_rgba(0,0,0,0.02),0_24px_60px_-30px_rgba(0,0,0,0.12)] sm:p-8">
+      {adultUnlocked === false && (
+        <div className="mb-6 flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-3.5">
+          <Sparkles className="mt-0.5 size-4 shrink-0 text-amber-600" />
+          <p className="text-[12px] leading-relaxed text-amber-900">
+            Seu primeiro pet começa <strong>filhote</strong>. Cuide dele todos os dias
+            e suba de nível — quando ele crescer, você desbloqueia adultos pros próximos pets.
+          </p>
+        </div>
+      )}
       {/* Progress */}
       <div className="mb-6">
         <div className="flex items-end justify-between gap-4">
