@@ -18,6 +18,7 @@ import {
   BedDouble,
   HeartHandshake,
   Brain,
+  Trophy,
 } from "lucide-react";
 import coinIcon from "@/assets/coin.webp";
 import coinSound from "@/assets/coin-reward.mp3";
