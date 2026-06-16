@@ -19,6 +19,11 @@ import {
   HeartHandshake,
   Brain,
   Trophy,
+  Package,
+  PackageOpen,
+  Image as ImageIcon,
+  Map as MapIcon,
+  Flame,
 } from "lucide-react";
 import coinIcon from "@/assets/coin.webp";
 import coinSound from "@/assets/coin-reward.mp3";
