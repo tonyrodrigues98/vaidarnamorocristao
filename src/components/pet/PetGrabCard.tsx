@@ -1006,6 +1006,7 @@ export function GrabRouletteModal({
 }
 
 export function InventoryDialog({ inventory, onClose }: { inventory: GrabInventoryItem[]; onClose: () => void }) {
+  // (defined below)
   const [resolved, setResolved] = useState<Record<string, PrizeMeta | null>>({});
   useEffect(() => {
     let cancelled = false;
