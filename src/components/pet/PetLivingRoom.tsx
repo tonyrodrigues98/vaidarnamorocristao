@@ -43,6 +43,7 @@ type Props = {
   scenery: SceneryHook;
   onCareAction: (k: PetCareKind) => void;
   onSwitchToList: () => void;
+  onOpenProfile?: () => void;
   onCareChanged: () => void;
   onEvolved: () => void;
   babyImage: string | null;
