@@ -151,25 +151,25 @@ export async function listPrizeCatalog(kind: string): Promise<PrizeCatalogItem[]
       const { data, error } = await supabase
         .from("pet_care_items" as any).select("id, name").eq("active", true).order("name");
       if (error) throw error;
-      return (data ?? []) as PrizeCatalogItem[];
+      return (data ?? []) as unknown as PrizeCatalogItem[];
     }
     case "pet_background": {
       const { data, error } = await supabase
         .from("pet_backgrounds" as any).select("id, name").eq("active", true).order("name");
       if (error) throw error;
-      return (data ?? []) as PrizeCatalogItem[];
+      return (data ?? []) as unknown as PrizeCatalogItem[];
     }
     case "decoration": {
       const { data, error } = await supabase
         .from("avatar_decorations" as any).select("id, name").eq("active", true).order("name");
       if (error) throw error;
-      return (data ?? []) as PrizeCatalogItem[];
+      return (data ?? []) as unknown as PrizeCatalogItem[];
     }
     case "name_gradient": {
       const { data, error } = await supabase
         .from("name_gradients" as any).select("id, name").eq("is_active", true).order("name");
       if (error) throw error;
-      return (data ?? []) as PrizeCatalogItem[];
+      return (data ?? []) as unknown as PrizeCatalogItem[];
     }
     default:
       return [];
