@@ -69,10 +69,17 @@ export function PetKingdomMap({
   return (
     <TooltipProvider delayDuration={200} skipDelayDuration={300}>
       <section
-        className="relative h-full w-full overflow-hidden bg-amber-50/40"
+        className="relative grid h-full w-full place-items-center overflow-hidden bg-neutral-950"
         aria-label="Mapa do reino"
       >
-        <div className="relative h-full w-full">
+        <div
+          className="relative shadow-[0_30px_60px_-20px_rgba(0,0,0,0.6)] ring-1 ring-white/5"
+          style={{
+            width: "min(100%, calc(100dvh * 2 / 3))",
+            height: "min(100%, calc(100dvw * 3 / 2))",
+            aspectRatio: "2 / 3",
+          }}
+        >
           <MapBackground />
           <MapClouds />
 
@@ -86,45 +93,50 @@ export function PetKingdomMap({
 
           {/* CASA — volta pro quarto */}
           <RegionHotspot
-            x={32} y={50} width={32} height={26}
-            label="Casa do pet"
-            tooltip="Voltar pro Quarto · onde mora o cuidado do dia-a-dia."
+            x={48} y={62} radius={9}
+            label="Casa"
+            tooltip="Voltar pro Quarto · cuidado do dia-a-dia."
+            labelPlacement="bottom"
             attention={0}
             onClick={onBackToRoom}
           />
 
           {/* FLORESTA — expedições */}
           <RegionHotspot
-            x={1} y={32} width={34} height={28}
-            label="Floresta das Expedições"
+            x={18} y={42} radius={10}
+            label="Floresta"
             tooltip="Mundo · enviar o pet em expedição pra trazer recompensas."
+            labelPlacement="bottom"
             attention={forestAttention}
             onClick={() => setSheet("expeditions")}
           />
 
           {/* MERCADO — caixas */}
           <RegionHotspot
-            x={54} y={26} width={45} height={30}
-            label="Mercado de Caixas"
+            x={76} y={38} radius={11}
+            label="Mercado"
             tooltip="Mundo · abrir caixas surpresa com itens raros."
+            labelPlacement="bottom"
             attention={valleyAttention}
             onClick={() => setSheet("caixas")}
           />
 
           {/* LAGO — quiz */}
           <RegionHotspot
-            x={2} y={70} width={42} height={24}
-            label="Lago do Conhecimento"
+            x={22} y={80} radius={10}
+            label="Lago"
             tooltip="Mundo · responder o Quiz Bíblico do dia."
+            labelPlacement="top"
             attention={lakeAttention}
             onClick={() => { window.location.assign("/quiz-biblico"); }}
           />
 
           {/* TORRE — caixa semanal */}
           <RegionHotspot
-            x={65} y={56} width={32} height={32}
-            label="Torre do Tesouro"
+            x={80} y={75} radius={10}
+            label="Torre"
             tooltip="Mundo · caixa semanal que enche conforme você completa missões."
+            labelPlacement="top"
             attention={towerAttention}
             onClick={() => setSheet("weekly")}
           />
