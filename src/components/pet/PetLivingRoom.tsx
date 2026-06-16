@@ -26,6 +26,7 @@ import { PetSceneryPanel, type usePetScenery } from "./PetSceneryPanel";
 import { PetDiaryBubble } from "./PetDiaryBubble";
 import { PetDiarySheet } from "./PetDiarySheet";
 import { PetKingdomMap } from "./PetKingdomMap";
+import { PetConstellation } from "./PetConstellation";
 
 import sceneAsset from "@/assets/pet-room/pet-room-scene.png.asset.json";
 
@@ -91,11 +92,19 @@ export function PetLivingRoom({
   // Zoom level Z1 (quarto) <-> Z2 (mapa). Persistido em localStorage.
   const [zoomLevel, setZoomLevel] = useState<"room" | "kingdom">(() => {
     if (typeof window === "undefined") return "room";
-    return (window.localStorage.getItem("pet:last-zoom") as "room" | "kingdom") ?? "room";
+    const v = window.localStorage.getItem("pet:last-zoom") as
+      | "room"
+      | "kingdom"
+      | "constellation"
+      | null;
+    // "constellation" não é restaurada — sempre cai pro kingdom no reload.
+    return v === "constellation" ? "kingdom" : (v ?? "room");
   });
+  const [constellationOpen, setConstellationOpen] = useState(false);
 
   function goTo(level: "room" | "kingdom") {
     setZoomLevel(level);
+    setConstellationOpen(false);
     try { window.localStorage.setItem("pet:last-zoom", level); } catch { /* ignore */ }
   }
 
@@ -117,23 +126,44 @@ export function PetLivingRoom({
   // Z2 — Mapa do Reino
   if (zoomLevel === "kingdom") {
     return (
-      <div className="animate-[zoom-in-kingdom_700ms_ease-out] motion-reduce:animate-none">
-        <PetKingdomMap
-          pet={pet}
-          petImage={petImage}
-          careValues={careValues}
-          isAway={isAway}
-          xpRefresh={xpRefresh}
-          streakDays={streakDays}
-          missionsDoneToday={missionsDoneToday}
-          babyImage={babyImage}
-          adultImage={adultImage}
-          onCareAction={onCareAction}
-          onCareChanged={onCareChanged}
-          onEvolved={onEvolved}
-          onBackToRoom={() => goTo("room")}
-        />
-      </div>
+      <>
+        {constellationOpen ? (
+          <div className="animate-[zoom-in-constellation_800ms_ease-out] motion-reduce:animate-none">
+            <PetConstellation
+              pet={pet}
+              careValues={careValues}
+              isAway={isAway}
+              xpRefresh={xpRefresh}
+              streakDays={streakDays}
+              missionsDoneToday={missionsDoneToday}
+              babyImage={babyImage}
+              adultImage={adultImage}
+              onCareChanged={onCareChanged}
+              onEvolved={onEvolved}
+              onBackToKingdom={() => setConstellationOpen(false)}
+            />
+          </div>
+        ) : (
+          <div className="animate-[zoom-in-kingdom_700ms_ease-out] motion-reduce:animate-none">
+            <PetKingdomMap
+              pet={pet}
+              petImage={petImage}
+              careValues={careValues}
+              isAway={isAway}
+              xpRefresh={xpRefresh}
+              streakDays={streakDays}
+              missionsDoneToday={missionsDoneToday}
+              babyImage={babyImage}
+              adultImage={adultImage}
+              onCareAction={onCareAction}
+              onCareChanged={onCareChanged}
+              onEvolved={onEvolved}
+              onBackToRoom={() => goTo("room")}
+              onOpenConstellation={() => setConstellationOpen(true)}
+            />
+          </div>
+        )}
+      </>
     );
   }
 

@@ -33,6 +33,7 @@ type Props = {
   onCareChanged: () => void;
   onEvolved: () => void;
   onBackToRoom: () => void;
+  onOpenConstellation: () => void;
 };
 
 /**
@@ -53,6 +54,7 @@ export function PetKingdomMap({
   onCareChanged,
   onEvolved,
   onBackToRoom,
+  onOpenConstellation,
 }: Props) {
   const [sheet, setSheet] = useState<SheetKind>(null);
 
@@ -76,6 +78,7 @@ export function PetKingdomMap({
           streakDays={streakDays}
           level={null}
           onBack={onBackToRoom}
+          onOpenConstellation={onOpenConstellation}
         />
 
         {/* CASA — volta pro quarto */}
