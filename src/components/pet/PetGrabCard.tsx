@@ -672,7 +672,20 @@ export function GrabRouletteModal({
                         )}
                         style={popping ? { animation: "grab-pop 700ms cubic-bezier(0.22,1.4,0.36,1) forwards" } : undefined}
                       >
-                        {it?.image_url ? (
+                        {it?.kind === "name_gradient" && it.gradient_css ? (
+                          <div
+                            className="size-full"
+                            style={{ background: it.gradient_css }}
+                          >
+                            <div className="flex h-full w-full items-end justify-center p-1.5">
+                              <span
+                                className="max-w-full truncate rounded-md bg-black/45 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-white backdrop-blur"
+                              >
+                                Aa
+                              </span>
+                            </div>
+                          </div>
+                        ) : it?.image_url ? (
                           <img
                             src={it.image_url}
                             alt=""
