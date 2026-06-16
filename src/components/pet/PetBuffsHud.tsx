@@ -1,107 +1,63 @@
-import { useEffect, useState } from "react";
-import { Sparkles } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { PET_CARE_ICON } from "@/components/pet/PetNeedsHud";
-import { PET_CARE_LABEL, type PetCareKind } from "@/types/petCare";
-
-type Buff = {
-  id: string;
-  kind: string;
-  label: string | null;
-  restore_mult: number;
-  decay_mult: number;
-  source: string;
-  expires_at: string;
-};
-
-function formatRemaining(ms: number): string {
-  if (ms <= 0) return "0s";
-  const s = Math.floor(ms / 1000);
-  if (s < 60) return `${s}s`;
-  const m = Math.floor(s / 60);
-  if (m < 60) return `${m}m`;
-  const h = Math.floor(m / 60);
-  const rm = m % 60;
-  return rm ? `${h}h${rm}m` : `${h}h`;
-}
+import { PET_CARE_LABEL, PET_CARE_ORDER, type PetCareKind, type PetRuntimeModifiers } from "@/types/petCare";
 
 function fmtMult(n: number): string {
   return `×${n.toFixed(2).replace(/\.?0+$/, "")}`;
 }
 
-function pickMult(b: Buff): { value: number; isBoost: boolean } | null {
-  if (b.restore_mult !== 1) return { value: b.restore_mult, isBoost: b.restore_mult > 1 };
-  if (b.decay_mult !== 1) return { value: b.decay_mult, isBoost: b.decay_mult < 1 };
-  return null;
-}
-
-// Agrupa por necessidade afetada, mantendo o efeito mais forte por kind
-function dedupe(buffs: Buff[]): Array<{ kind: string; mult: number; isBoost: boolean; expires: number; label: string }> {
-  const map = new Map<string, { kind: string; mult: number; isBoost: boolean; expires: number; label: string }>();
-  for (const b of buffs) {
-    const m = pickMult(b);
-    if (!m) continue;
-    const exp = new Date(b.expires_at).getTime();
-    const cur = map.get(b.kind);
-    const score = Math.abs(Math.log(m.value)); // intensidade do desvio
-    const curScore = cur ? Math.abs(Math.log(cur.mult)) : -1;
-    if (!cur || score > curScore) {
-      map.set(b.kind, {
-        kind: b.kind,
-        mult: m.value,
-        isBoost: m.isBoost,
-        expires: exp,
-        label: b.label?.trim() || PET_CARE_LABEL[b.kind as PetCareKind] || b.kind,
-      });
+/**
+ * Agrega o multiplicador REAL aplicado por kind, combinando rules + buffs
+ * + entradas com kind "all" — espelha `aggregateMult` em `petCare.ts`.
+ * Usa o restore_mult (ganho); se não houver desvio, mostra inverso do decay.
+ */
+function appliedMult(mods: PetRuntimeModifiers | null | undefined, kind: PetCareKind): number {
+  if (!mods) return 1;
+  let restore = 1;
+  let decay = 1;
+  for (const r of mods.rules) {
+    if (r.kind === kind || r.kind === "all") {
+      restore *= Number(r.restore_mult ?? 1);
+      decay *= Number(r.decay_mult ?? 1);
     }
   }
-  return Array.from(map.values());
+  for (const b of mods.buffs) {
+    if (b.kind === kind || b.kind === "all") {
+      restore *= Number(b.restore_mult ?? 1);
+      decay *= Number(b.decay_mult ?? 1);
+    }
+  }
+  // Prioriza desvio em restore; se neutro, expressa decay como ×(1/decay) para representar ganho de durabilidade.
+  if (restore !== 1) return restore;
+  if (decay !== 1) return 1 / decay;
+  return 1;
 }
 
-export function PetBuffsHud({ petId, className }: { petId: string; className?: string }) {
-  const [buffs, setBuffs] = useState<Buff[]>([]);
-  const [now, setNow] = useState(() => Date.now());
-
-  useEffect(() => {
-    let cancelled = false;
-    async function load() {
-      const { data, error } = await supabase
-        .from("user_pet_buffs" as any)
-        .select("id, kind, label, restore_mult, decay_mult, source, expires_at")
-        .eq("user_pet_id", petId)
-        .gt("expires_at", new Date().toISOString())
-        .order("expires_at", { ascending: true });
-      if (!cancelled && !error) setBuffs((data ?? []) as unknown as Buff[]);
-    }
-    void load();
-    const reload = setInterval(load, 30_000);
-    const tick = setInterval(() => setNow(Date.now()), 1_000);
-    return () => {
-      cancelled = true;
-      clearInterval(reload);
-      clearInterval(tick);
-    };
-  }, [petId]);
-
-  const active = buffs.filter((b) => new Date(b.expires_at).getTime() > now);
-  const grouped = dedupe(active);
-  if (grouped.length === 0) return null;
+export function PetBuffsHud({
+  mods,
+  className,
+}: {
+  mods: PetRuntimeModifiers | null | undefined;
+  className?: string;
+}) {
+  const rows = PET_CARE_ORDER.map((k) => ({ kind: k, mult: appliedMult(mods, k) })).filter(
+    (r) => Math.abs(r.mult - 1) > 0.001,
+  );
+  if (rows.length === 0) return null;
 
   return (
     <div className={cn("flex flex-wrap items-center gap-x-3 gap-y-1", className)}>
-      {grouped.map((g) => {
-        const Icon = PET_CARE_ICON[g.kind as PetCareKind] ?? Sparkles;
-        const tone = g.isBoost ? "text-emerald-600" : "text-rose-600";
-        const remaining = g.expires - now;
+      {rows.map(({ kind, mult }) => {
+        const Icon = PET_CARE_ICON[kind];
+        const tone = mult > 1 ? "text-emerald-600" : "text-rose-600";
         return (
           <span
-            key={g.kind}
+            key={kind}
             className={cn("inline-flex items-center gap-1 text-[11px] font-medium tabular-nums", tone)}
-            title={`${g.label} · ${fmtMult(g.mult)} · ${formatRemaining(remaining)}`}
+            title={`${PET_CARE_LABEL[kind]} ${fmtMult(mult)}`}
           >
             <Icon className="size-3 text-neutral-500" />
-            {fmtMult(g.mult)}
+            {fmtMult(mult)}
           </span>
         );
       })}
