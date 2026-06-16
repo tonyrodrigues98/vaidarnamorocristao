@@ -35,14 +35,14 @@ const WEATHER_CONFIG: Record<
   Weather,
   { count: number; animation: string; className: string }
 > = {
-  snow: { count: 28, animation: "scene-fall", className: "bg-white/85 rounded-full shadow-[0_0_6px_rgba(255,255,255,0.6)]" },
-  dust: { count: 22, animation: "scene-fall", className: "bg-amber-200/70 rounded-full" },
-  leaves: { count: 18, animation: "scene-drift", className: "bg-emerald-300/70 rounded-[40%_60%_60%_40%]" },
-  light: { count: 16, animation: "scene-rise", className: "bg-amber-100/80 rounded-full shadow-[0_0_8px_rgba(255,220,150,0.7)]" },
-  stars: { count: 30, animation: "scene-twinkle", className: "bg-white rounded-full shadow-[0_0_4px_rgba(255,255,255,0.9)]" },
-  mist: { count: 14, animation: "scene-drift", className: "bg-white/30 rounded-full blur-md" },
-  sparks: { count: 24, animation: "scene-rise", className: "bg-orange-300/90 rounded-full shadow-[0_0_6px_rgba(255,180,80,0.9)]" },
-  fireflies: { count: 18, animation: "scene-twinkle", className: "bg-lime-200/90 rounded-full shadow-[0_0_8px_rgba(190,255,120,0.9)]" },
+  snow: { count: 50, animation: "scene-fall", className: "bg-white rounded-full shadow-[0_0_8px_rgba(255,255,255,0.9)]" },
+  dust: { count: 40, animation: "scene-fall", className: "bg-amber-200 rounded-full shadow-[0_0_4px_rgba(255,220,150,0.7)]" },
+  leaves: { count: 30, animation: "scene-drift", className: "bg-emerald-300 rounded-[40%_60%_60%_40%] shadow-[0_0_4px_rgba(120,255,160,0.5)]" },
+  light: { count: 30, animation: "scene-rise", className: "bg-amber-100 rounded-full shadow-[0_0_10px_rgba(255,220,150,0.9)]" },
+  stars: { count: 60, animation: "scene-twinkle", className: "bg-white rounded-full shadow-[0_0_6px_rgba(255,255,255,1)]" },
+  mist: { count: 22, animation: "scene-drift", className: "bg-white/60 rounded-full blur-md" },
+  sparks: { count: 40, animation: "scene-rise", className: "bg-orange-300 rounded-full shadow-[0_0_8px_rgba(255,180,80,1)]" },
+  fireflies: { count: 30, animation: "scene-twinkle", className: "bg-lime-200 rounded-full shadow-[0_0_10px_rgba(190,255,120,1)]" },
 };
 
 export function SceneWeatherLayer({ weather }: { weather: Weather }) {
@@ -58,10 +58,9 @@ export function SceneWeatherLayer({ weather }: { weather: Weather }) {
           style={{
             left: `${p.left}%`,
             top: `${p.top}%`,
-            width: `${p.size * 4}px`,
-            height: `${p.size * 4}px`,
+            width: `${Math.max(3, p.size * 5)}px`,
+            height: `${Math.max(3, p.size * 5)}px`,
             animation: `${cfg.animation} ${p.duration}s linear ${p.delay}s infinite`,
-            // CSS var consumed by keyframes
             ["--drift" as string]: `${p.drift}px`,
           }}
         />
