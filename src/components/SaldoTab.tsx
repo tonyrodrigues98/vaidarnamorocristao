@@ -18,6 +18,7 @@ import {
   BedDouble,
   HeartHandshake,
   Brain,
+  Trophy,
 } from "lucide-react";
 import coinIcon from "@/assets/coin.webp";
 import coinSound from "@/assets/coin-reward.mp3";
@@ -368,9 +369,11 @@ function TxRow({ tx }: { tx: CoinTx }) {
                   ? Brain
                   : tx.kind === "mission_done"
                     ? PawPrint
-                    : isIn
-                      ? ArrowDownLeft
-                      : ArrowUpRight;
+                    : tx.kind === "achievement_unlock"
+                      ? Trophy
+                      : isIn
+                        ? ArrowDownLeft
+                        : ArrowUpRight;
   return (
     <li className="group flex items-center gap-3 rounded-2xl border border-border/60 bg-card/50 p-3 shadow-soft backdrop-blur transition hover:border-border hover:bg-card/80">
       <div className="relative shrink-0">
