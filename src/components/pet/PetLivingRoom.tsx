@@ -6,6 +6,7 @@ import {
   SheetTitle,
   SheetDescription,
 } from "@/components/ui/sheet";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { PawPrint, LayoutList, Compass, Image as ImageIcon, BookHeart, Map as MapIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { usePetDayNight } from "@/lib/petDayNight";
@@ -15,13 +16,7 @@ import type { UserPetV2Full } from "@/types/petCatalog";
 import { RoomHotspot } from "./RoomHotspot";
 import { StatsHUD } from "./StatsHUD";
 import { MissionsTodayCard } from "./MissionsTodayCard";
-import { ExpeditionsCard } from "./ExpeditionsCard";
 import { PetStreakCard } from "./PetStreakCard";
-import { PetWeeklyChestCard } from "./PetWeeklyChestCard";
-import { PetEvolutionCard } from "./PetEvolutionCard";
-import { PetProgressionCard } from "./PetProgressionCard";
-import { PetCaixasEntryCard } from "./grab/PetCaixasEntryCard";
-import { PetCareHistorySheet } from "./PetCareHistorySheet";
 import { PetSceneryPanel, type usePetScenery } from "./PetSceneryPanel";
 import { PetDiaryBubble } from "./PetDiaryBubble";
 import { PetDiarySheet } from "./PetDiarySheet";
@@ -35,14 +30,8 @@ type SceneryHook = ReturnType<typeof usePetScenery>;
 type SheetKind =
   | null
   | "missions"
-  | "expeditions"
-  | "caixas"
   | "streak"
-  | "weekly"
-  | "evolution"
-  | "progression"
-  | "scenery"
-  | "history";
+  | "scenery";
 
 type Props = {
   pet: UserPetV2Full;
