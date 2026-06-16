@@ -1,0 +1,2 @@
+ALTER TABLE public.pet_expeditions DROP CONSTRAINT IF EXISTS pet_expeditions_duration_minutes_check;
+ALTER TABLE public.pet_expeditions ADD CONSTRAINT pet_expeditions_duration_minutes_check CHECK (duration_minutes >= 1 AND duration_minutes <= 1440);
