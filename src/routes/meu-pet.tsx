@@ -901,15 +901,102 @@ function Wizard({ onCancel, onDone }: { onCancel?: () => void; onDone: () => voi
         )
       )}
       {step === "stage" && (
-        <Grid
-          items={stages}
-          selectedId={sel.stage?.id}
-          onPick={(s) => {
-            const next = { ...sel, stage: s };
-            setSel(next);
-            go(nextOf("stage", next));
-          }}
-        />
+        <div className="space-y-4">
+          {stages.length === 0 ? (
+            <p className="rounded-2xl border border-dashed border-neutral-200 p-8 text-center text-sm text-neutral-400">
+              Nada disponível por aqui ainda.
+            </p>
+          ) : (
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+              {stages.map((s) => {
+                const isAdult = s.kind === "adult";
+                const locked = isAdult && adultUnlocked === false;
+                const selected = sel.stage?.id === s.id;
+                return (
+                  <button
+                    key={s.id}
+                    type="button"
+                    disabled={unlockBusy}
+                    onClick={() => {
+                      if (locked) {
+                        void handleUnlockAdult();
+                        return;
+                      }
+                      const next = { ...sel, stage: s };
+                      setSel(next);
+                      go(nextOf("stage", next));
+                    }}
+                    className={cn(
+                      "group relative flex flex-col items-center gap-2.5 rounded-2xl border bg-white p-3.5 text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-neutral-300 hover:shadow-[0_12px_30px_-18px_rgba(0,0,0,0.25)]",
+                      selected
+                        ? "border-neutral-900 ring-2 ring-neutral-900/10"
+                        : "border-neutral-200",
+                    )}
+                  >
+                    {selected && !locked && (
+                      <span className="absolute right-2 top-2 z-10 flex h-5 w-5 items-center justify-center rounded-full bg-neutral-900 text-white shadow-sm ring-2 ring-white">
+                        <Check className="h-3 w-3" />
+                      </span>
+                    )}
+                    <div className="relative flex h-32 w-full items-center justify-center overflow-hidden rounded-xl bg-gradient-to-b from-neutral-50 to-white">
+                      {s.image_url ? (
+                        <img
+                          src={s.image_url}
+                          alt={s.name}
+                          className={cn(
+                            "h-[150%] w-[150%] object-contain object-center transition-transform duration-300 group-hover:scale-[1.08]",
+                            locked && "grayscale blur-[2px] opacity-70",
+                          )}
+                        />
+                      ) : (
+                        <PawPrint className={cn("h-10 w-10 text-neutral-300", locked && "grayscale")} />
+                      )}
+                      {locked && (
+                        <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 bg-white/30 backdrop-blur-[1px]">
+                          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-neutral-900/90 text-white shadow-md">
+                            <Lock className="h-4 w-4" />
+                          </span>
+                          <span className="flex items-center gap-1 rounded-full bg-white/95 px-2.5 py-1 text-[11px] font-semibold text-neutral-900 shadow-sm">
+                            <CoinIcon className="h-3.5 w-3.5" />
+                            {ADULT_PET_UNLOCK_COST}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                    <p className="w-full truncate text-center text-sm font-semibold text-neutral-900">
+                      {s.name}
+                    </p>
+                    {s.description && (
+                      <p className="line-clamp-2 w-full text-center text-[11px] text-neutral-500">
+                        {s.description}
+                      </p>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
+          {adultUnlocked === false && (
+            <div className="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-3.5">
+              <Sparkles className="mt-0.5 size-4 shrink-0 text-amber-600" />
+              <div className="space-y-1.5 text-[12px] leading-relaxed text-amber-900">
+                <p>
+                  Seu <strong>primeiro pet</strong> nasce filhote: você acompanha o crescimento,
+                  sobe de nível com ele e, quando ele cresce, o adulto fica liberado pros próximos pets.
+                </p>
+                <p>
+                  Quer pular essa fase agora? Desbloqueie o adulto por{" "}
+                  <span className="inline-flex items-center gap-0.5 align-middle">
+                    <CoinIcon className="h-3 w-3" />
+                    <strong>{ADULT_PET_UNLOCK_COST} moedas</strong>
+                  </span>{" "}
+                  tocando no cadeado.
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
       )}
       {step === "name" && (
         <div className="space-y-4">
