@@ -189,11 +189,10 @@ export function PetGrabCard({ refreshKey, onChanged }: Props) {
                   "disabled:opacity-60 disabled:hover:translate-y-0",
                 )}
               >
-                {/* tier glow behind the box */}
-                <div className={cn("pointer-events-none absolute inset-0", tier.glow)} />
-
                 {/* the box IS the visual */}
-                <div className="relative flex aspect-square w-full items-center justify-center">
+                <div className="relative flex aspect-[5/4] w-full items-center justify-center">
+                  {/* tier glow centered on the box */}
+                  <div className={cn("pointer-events-none absolute inset-0", tier.glow)} />
                   {/* Aura effects (rank-based) */}
                   {tier.rank >= 1 && (
                     <div
