@@ -9,7 +9,7 @@ import caixaRara from "@/assets/caixas/caixa_rara.png";
 import caixaEpica from "@/assets/caixas/caixa_epica.png";
 import caixaLendaria from "@/assets/caixas/caixa_lendaria.png";
 import roletaSorte from "@/assets/caixas/roleta_sorte.png";
-import starter from "@/assets/caixas/starter.png";
+import iniciante from "@/assets/caixas/iniciante.png";
 import banner from "@/assets/caixas/banner.jpg";
 
 /**
@@ -28,15 +28,12 @@ export const CAIXA_ART: Record<string, string> = {
   caixa_epica: caixaEpica,
   caixa_lendaria: caixaLendaria,
   roleta_sorte: roletaSorte,
-  // Variantes starter (legacy slugs)
-  "caixa-epica": caixaEpica,
-  "caixa-lendaria": caixaLendaria,
-  "caixa-rara": caixaRara,
-  comum: caixaComum,
+  // Caixa do Iniciante (única)
+  iniciante,
 };
 
 export function caixaArtFor(slug: string, rarity?: string | null): string {
-  return CAIXA_ART[slug] ?? (rarity === "starter" ? starter : starter);
+  return CAIXA_ART[slug] ?? (rarity === "starter" ? iniciante : iniciante);
 }
 
 export const CAIXAS_BANNER = banner;
