@@ -21,6 +21,7 @@ import {
 import { cn } from "@/lib/utils";
 import { ExpeditionRewardModal } from "@/components/pet/ExpeditionRewardModal";
 import { useSignedExpeditionUrl } from "@/lib/expeditionImageUrl";
+import { ExpeditionLiveSceneModal } from "@/components/pet/ExpeditionLiveSceneModal";
 
 function fmtRemaining(ms: number): string {
   if (ms <= 0) return "pronto";
@@ -59,6 +60,7 @@ export function ExpeditionsCard({
   const [now, setNow] = useState(() => Date.now());
   const [busy, setBusy] = useState<string | null>(null);
   const [reveal, setReveal] = useState<{ result: ClaimResult; title: string } | null>(null);
+  const [sceneOpen, setSceneOpen] = useState(false);
 
   async function reload() {
     const [t, a] = await Promise.all([
@@ -138,6 +140,7 @@ export function ExpeditionsCard({
           now={now}
           busy={busy === active.run_id}
           onClaim={handleClaim}
+          onOpenScene={() => setSceneOpen(true)}
         />
       ) : (
         <ul className="space-y-2">
@@ -162,6 +165,16 @@ export function ExpeditionsCard({
         result={reveal?.result ?? null}
         expeditionTitle={reveal?.title ?? ""}
         onClose={() => setReveal(null)}
+      />
+      <ExpeditionLiveSceneModal
+        open={sceneOpen && !!active}
+        active={active}
+        busy={!!active && busy === active.run_id}
+        onClose={() => setSceneOpen(false)}
+        onClaim={async () => {
+          await handleClaim();
+          setSceneOpen(false);
+        }}
       />
     </section>
   );
@@ -271,11 +284,13 @@ function ActiveRunCard({
   now,
   busy,
   onClaim,
+  onOpenScene,
 }: {
   active: ActiveExpedition;
   now: number;
   busy: boolean;
   onClaim: () => void;
+  onOpenScene: () => void;
 }) {
   const Icon = iconFor(active.icon);
   const img = useSignedExpeditionUrl(active.image_url);
@@ -286,7 +301,12 @@ function ActiveRunCard({
   const ready = remaining <= 0;
 
   return (
-    <div className="rounded-xl border border-indigo-200 bg-indigo-50/50 p-3">
+    <button
+      type="button"
+      onClick={onOpenScene}
+      className="w-full rounded-xl border border-indigo-200 bg-indigo-50/50 p-3 text-left transition hover:bg-indigo-50 active:scale-[0.99]"
+      aria-label="Ver progresso da expedição"
+    >
       <div className="flex items-center gap-3">
         <div className="relative grid size-12 shrink-0 place-items-center overflow-hidden rounded-lg bg-white text-indigo-600 ring-1 ring-indigo-200">
           {img ? (
@@ -305,7 +325,14 @@ function ActiveRunCard({
           </div>
         </div>
         {ready && (
-          <Button size="sm" onClick={onClaim} disabled={busy}>
+          <Button
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              onClaim();
+            }}
+            disabled={busy}
+          >
             {busy ? <Loader2 className="size-3.5 animate-spin" /> : <><Gift className="mr-1 size-3.5" />Coletar</>}
           </Button>
         )}
@@ -316,6 +343,9 @@ function ActiveRunCard({
           style={{ width: `${pct}%` }}
         />
       </div>
-    </div>
+      <p className="mt-2 text-center text-[10px] font-medium uppercase tracking-wider text-indigo-500/70">
+        Toque para acompanhar
+      </p>
+    </button>
   );
 }

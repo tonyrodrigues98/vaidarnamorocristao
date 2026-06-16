@@ -999,3 +999,35 @@ button,
 .app-safe-top {
   padding-top: env(safe-area-inset-top, 0px);
 }
+
+/* ---------- Expedition live-scene weather keyframes ---------- */
+@keyframes scene-fall {
+  0% { transform: translate3d(0, -10%, 0); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translate3d(var(--drift, 0px), 110vh, 0); opacity: 0; }
+}
+@keyframes scene-drift {
+  0% { transform: translate3d(-10%, 0, 0); opacity: 0; }
+  20% { opacity: 0.9; }
+  80% { opacity: 0.9; }
+  100% { transform: translate3d(110vw, var(--drift, 0px), 0); opacity: 0; }
+}
+@keyframes scene-rise {
+  0% { transform: translate3d(0, 110%, 0); opacity: 0; }
+  15% { opacity: 1; }
+  85% { opacity: 1; }
+  100% { transform: translate3d(var(--drift, 0px), -20vh, 0); opacity: 0; }
+}
+@keyframes scene-twinkle {
+  0%, 100% { opacity: 0.2; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+@keyframes scene-zoom {
+  from { transform: scale(1.0); }
+  to { transform: scale(1.08); }
+}
+@keyframes scene-walk {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
