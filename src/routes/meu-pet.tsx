@@ -600,6 +600,7 @@ function Wizard({ onCancel, onDone }: { onCancel?: () => void; onDone: () => voi
   const [stages, setStages] = useState<PetLifeStage[]>([]);
   const [personalities, setPersonalities] = useState<PetPersonality[]>([]);
   const [adultUnlocked, setAdultUnlocked] = useState<boolean | null>(null);
+  const [unlockBusy, setUnlockBusy] = useState(false);
   // Initial load
   useEffect(() => {
     (async () => {
@@ -612,13 +613,8 @@ function Wizard({ onCancel, onDone }: { onCancel?: () => void; onDone: () => voi
         ]);
         setCategories(c);
         setAdultUnlocked(unlocked);
-        const filteredStages = unlocked ? st : st.filter((s) => s.kind === "baby");
-        setStages(filteredStages);
+        setStages(st);
         setPersonalities(pe);
-        // Auto-seleciona filhote quando é o único disponível
-        if (!unlocked && filteredStages.length === 1) {
-          setSel((prev) => ({ ...prev, stage: filteredStages[0] }));
-        }
       } catch (e) {
         toast.error((e as Error).message);
       }
@@ -640,12 +636,30 @@ function Wizard({ onCancel, onDone }: { onCancel?: () => void; onDone: () => voi
   }, [sel.category, sel.species]);
 
   const order: StepKey[] = useMemo(
-    () =>
-      adultUnlocked === false
-        ? ["category", "personality", "name", "type", "confirm"]
-        : ["category", "stage", "personality", "name", "type", "confirm"],
-    [adultUnlocked],
+    () => ["category", "stage", "personality", "name", "type", "confirm"],
+    [],
   );
+
+  async function handleUnlockAdult() {
+    if (unlockBusy) return;
+    if (!window.confirm(`Desbloquear pet adulto por ${ADULT_PET_UNLOCK_COST} moedas?`)) return;
+    setUnlockBusy(true);
+    try {
+      const res = await unlockAdultPetWithCoins();
+      if (res.ok) {
+        setAdultUnlocked(true);
+        toast.success("Pet adulto desbloqueado!");
+      } else if (res.reason === "insufficient_coins") {
+        toast.error(`Moedas insuficientes (você tem ${res.balance ?? 0}).`);
+      } else {
+        toast.error("Não foi possível desbloquear agora.");
+      }
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setUnlockBusy(false);
+    }
+  }
 
   function nextOf(current: StepKey, override?: Partial<Selection>): StepKey {
     const merged = { ...sel, ...(override ?? {}) };
