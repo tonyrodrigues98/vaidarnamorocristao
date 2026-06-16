@@ -378,8 +378,7 @@ function CaixasPage() {
           winner={roulette.winner}
           prizes={roulette.prizes}
           canOpenAgain={
-            roulette.res.free_remaining > 0 ||
-            roulette.res.new_balance >= roulette.poolCost
+            roulette.res.free_remaining > 0 || roulette.res.new_balance >= roulette.poolCost
           }
           onOpenAgain={() => {
             const pid = roulette.poolId;
@@ -392,9 +391,7 @@ function CaixasPage() {
           }}
         />
       )}
-      {showInv && (
-        <InventoryDialog inventory={inv} onClose={() => setShowInv(false)} />
-      )}
+      {showInv && <InventoryDialog inventory={inv} onClose={() => setShowInv(false)} />}
       {multiResults && (
         <MultiResultsDialog
           poolName={multiResults.poolName}
@@ -420,11 +417,17 @@ function MultiResultsDialog({
 }) {
   const totalPaid = results.reduce((sum, item) => sum + item.res.cost_paid, 0);
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-black/60 px-4 backdrop-blur-sm" role="dialog" aria-modal="true">
+    <div
+      className="fixed inset-0 z-50 grid place-items-center bg-black/60 px-4 backdrop-blur-sm"
+      role="dialog"
+      aria-modal="true"
+    >
       <div className="w-full max-w-md rounded-2xl bg-[#FAF7EF] p-4 text-[#1a1410] shadow-2xl ring-1 ring-[#e6cf8a]">
         <div className="mb-3 flex items-center justify-between gap-3">
           <div className="min-w-0">
-            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#9a7626]">Abertura múltipla</div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#9a7626]">
+              Abertura múltipla
+            </div>
             <h2 className="truncate text-base font-semibold">{poolName}</h2>
           </div>
           <span className="inline-flex items-center gap-1 rounded-full bg-white px-2 py-1 text-[11px] font-semibold ring-1 ring-[#ece3d0]">
@@ -433,7 +436,10 @@ function MultiResultsDialog({
         </div>
         <div className="grid max-h-[55vh] grid-cols-2 gap-2 overflow-y-auto pr-1">
           {results.map(({ res, prize }, index) => (
-            <div key={`${res.prize_kind}-${res.prize_ref_id ?? index}-${index}`} className="rounded-xl bg-white p-2 ring-1 ring-[#ece3d0]">
+            <div
+              key={`${res.prize_kind}-${res.prize_ref_id ?? index}-${index}`}
+              className="rounded-xl bg-white p-2 ring-1 ring-[#ece3d0]"
+            >
               <div className="grid aspect-square place-items-center overflow-hidden rounded-lg bg-[#f1ead8]">
                 {res.prize_kind === "name_gradient" && prize.gradient_css ? (
                   <div className="size-full" style={{ background: prize.gradient_css }} />
@@ -453,7 +459,10 @@ function MultiResultsDialog({
             </div>
           ))}
         </div>
-        <Button className="mt-4 w-full bg-[#1a1410] text-[#FAF7EF] hover:bg-[#2a2018]" onClick={onClose}>
+        <Button
+          className="mt-4 w-full bg-[#1a1410] text-[#FAF7EF] hover:bg-[#2a2018]"
+          onClick={onClose}
+        >
           Continuar
         </Button>
       </div>
