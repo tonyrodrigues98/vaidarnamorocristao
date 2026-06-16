@@ -182,13 +182,78 @@ export function PetGrabCard({ refreshKey, onChanged }: Props) {
 
                 {/* the box IS the visual */}
                 <div className="relative flex aspect-square w-full items-center justify-center">
+                  {/* Aura effects (rank-based) */}
+                  {tier.rank >= 1 && (
+                    <div
+                      aria-hidden
+                      className="pointer-events-none absolute inset-[8%] rounded-full"
+                      style={{
+                        background: `radial-gradient(circle, ${tier.haloColor} 0%, transparent 62%)`,
+                        filter: "blur(8px)",
+                        animation: "grab-halo-pulse 3.2s ease-in-out infinite",
+                      }}
+                    />
+                  )}
+                  {tier.rank >= 1 && (
+                    <div
+                      aria-hidden
+                      className="pointer-events-none absolute inset-[10%] rounded-full border"
+                      style={{
+                        borderColor: tier.ringColor,
+                        borderStyle: "dashed",
+                        animation: "grab-ring-spin 14s linear infinite",
+                      }}
+                    />
+                  )}
+                  {tier.rank >= 2 && (
+                    <div
+                      aria-hidden
+                      className="pointer-events-none absolute inset-[2%] rounded-full border"
+                      style={{
+                        borderColor: tier.ringColor,
+                        borderStyle: "dotted",
+                        animation: "grab-ring-spin-rev 22s linear infinite",
+                      }}
+                    />
+                  )}
+                  {tier.rank >= 3 && (
+                    <div
+                      aria-hidden
+                      className="pointer-events-none absolute inset-[-6%] rounded-full"
+                      style={{
+                        background: `conic-gradient(from 0deg, transparent 0deg, ${tier.ringColor} 60deg, transparent 120deg, transparent 240deg, ${tier.ringColor} 300deg, transparent 360deg)`,
+                        WebkitMask: "radial-gradient(circle, transparent 56%, #000 58%, #000 62%, transparent 64%)",
+                        mask: "radial-gradient(circle, transparent 56%, #000 58%, #000 62%, transparent 64%)",
+                        animation: "grab-ring-spin 9s linear infinite",
+                        opacity: 0.9,
+                      }}
+                    />
+                  )}
+                  {tier.rank >= 2 && (
+                    <>
+                      {[0, 1, 2, 3, 4, 5].map((i) => (
+                        <span
+                          key={i}
+                          aria-hidden
+                          className="pointer-events-none absolute size-1 rounded-full"
+                          style={{
+                            top: `${20 + (i * 47) % 60}%`,
+                            left: `${10 + (i * 67) % 80}%`,
+                            background: tier.ringColor,
+                            boxShadow: `0 0 6px ${tier.ringColor}`,
+                            animation: `grab-particle-float ${2.4 + (i % 3) * 0.4}s ease-in-out ${i * 0.25}s infinite`,
+                          }}
+                        />
+                      ))}
+                    </>
+                  )}
                   <img
                     src={tier.image}
                     alt={pool.name}
                     loading="lazy"
                     width={1024}
                     height={1024}
-                    className="size-[88%] object-contain drop-shadow-[0_18px_18px_rgba(0,0,0,0.12)] transition-transform duration-500 group-hover:-translate-y-1 group-hover:scale-[1.03]"
+                    className="relative z-10 size-[76%] object-contain drop-shadow-[0_18px_18px_rgba(0,0,0,0.14)] transition-transform duration-500 group-hover:-translate-y-1 group-hover:scale-[1.04]"
                   />
                 </div>
 
