@@ -7,7 +7,7 @@ import {
   SheetDescription,
 } from "@/components/ui/sheet";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { PawPrint, LayoutList, Compass, Image as ImageIcon, BookHeart, Map as MapIcon } from "lucide-react";
+import { PawPrint, LayoutList, Compass, Image as ImageIcon, BookHeart, Map as MapIcon, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { usePetDayNight } from "@/lib/petDayNight";
 import type { PetCareKind } from "@/types/petCare";
@@ -43,6 +43,7 @@ type Props = {
   scenery: SceneryHook;
   onCareAction: (k: PetCareKind) => void;
   onSwitchToList: () => void;
+  onOpenProfile?: () => void;
   onCareChanged: () => void;
   onEvolved: () => void;
   babyImage: string | null;
@@ -67,6 +68,7 @@ export function PetLivingRoom({
   scenery,
   onCareAction,
   onSwitchToList,
+  onOpenProfile,
   onCareChanged,
   onEvolved,
   babyImage,
@@ -176,12 +178,12 @@ export function PetLivingRoom({
     <TooltipProvider delayDuration={200} skipDelayDuration={300}>
     <section
       key="room"
-      className="relative mx-auto w-full max-w-[520px] overflow-hidden rounded-3xl border border-neutral-200/80 bg-amber-50/40 shadow-[0_2px_0_rgba(0,0,0,0.02),0_30px_70px_-35px_rgba(0,0,0,0.18)]"
+      className="relative h-full w-full overflow-hidden bg-amber-50/40"
       aria-label="Quarto do pet"
       style={{ animation: "zoom-in-room 600ms ease-out" }}
     >
-      {/* Aspect ratio fixo (2:3) para alinhar hotspots de forma estável. */}
-      <div className="relative aspect-[2/3] w-full">
+      {/* Hotspots posicionados em % do quadro — o container fica responsivo. */}
+      <div className="relative h-full w-full">
         {/* Fundo: a cena */}
         <img
           src={sceneAsset.url}
@@ -255,6 +257,17 @@ export function PetLivingRoom({
             <StatsHUD values={careValues} />
           </div>
           <div className="pointer-events-auto flex items-center gap-1.5">
+            {onOpenProfile ? (
+              <button
+                type="button"
+                onClick={onOpenProfile}
+                className="inline-flex items-center gap-1 rounded-full bg-white/85 px-2.5 py-1.5 text-[11px] font-medium text-neutral-700 shadow-sm ring-1 ring-black/5 backdrop-blur transition hover:bg-white"
+                aria-label="Perfil do pet"
+                title="Perfil · nome, visibilidade e XP"
+              >
+                <User className="size-3.5" />
+              </button>
+            ) : null}
             <button
               type="button"
               onClick={() => goTo("kingdom")}
