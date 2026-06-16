@@ -15,7 +15,14 @@ type Props = {
 export function KingdomHUD({ petName, streakDays, level, onBack, onOpenConstellation }: Props) {
   const realmName = `Reino de ${petName}`;
   return (
-    <div className="pointer-events-none absolute inset-x-0 top-0 z-30 flex items-start justify-between gap-2 p-3">
+    <div
+      className="pointer-events-none absolute inset-x-0 top-0 z-30 flex items-start justify-between gap-2 p-3"
+      style={{
+        paddingTop: "max(0.75rem, env(safe-area-inset-top))",
+        paddingLeft: "max(0.75rem, env(safe-area-inset-left))",
+        paddingRight: "max(0.75rem, env(safe-area-inset-right))",
+      }}
+    >
       <div className="pointer-events-auto flex flex-col gap-1">
         <span
           className="text-[15px] font-semibold tracking-tight text-neutral-900"

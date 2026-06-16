@@ -249,7 +249,14 @@ export function PetLivingRoom({
         ) : null}
 
         {/* HUD topo: nome + status + toggle modo lista */}
-        <div className="pointer-events-none absolute inset-x-0 top-0 z-30 flex items-start justify-between gap-2 p-3">
+        <div
+          className="pointer-events-none absolute inset-x-0 top-0 z-30 flex items-start justify-between gap-2 p-3"
+          style={{
+            paddingTop: "max(0.75rem, env(safe-area-inset-top))",
+            paddingLeft: "max(0.75rem, env(safe-area-inset-left))",
+            paddingRight: "max(0.75rem, env(safe-area-inset-right))",
+          }}
+        >
           <div className="pointer-events-auto rounded-full bg-white/85 px-3 py-1.5 text-sm font-semibold tracking-tight text-neutral-900 shadow-sm ring-1 ring-black/5 backdrop-blur">
             {pet.custom_name}
           </div>
@@ -349,7 +356,14 @@ export function PetLivingRoom({
         ) : null}
 
         {/* Toolbar diegética no rodapé — diário (dia-a-dia) e cenário do quarto */}
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-30 flex flex-wrap items-center justify-center gap-1.5 p-2.5">
+        <div
+          className="pointer-events-none absolute inset-x-0 bottom-0 z-30 flex flex-wrap items-center justify-center gap-1.5 p-2.5"
+          style={{
+            paddingBottom: "max(0.625rem, env(safe-area-inset-bottom))",
+            paddingLeft: "max(0.625rem, env(safe-area-inset-left))",
+            paddingRight: "max(0.625rem, env(safe-area-inset-right))",
+          }}
+        >
           <button
             type="button"
             onClick={() => setDiaryOpen(true)}
