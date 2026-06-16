@@ -26,6 +26,9 @@ type GrabTier = {
   label: string;
   glow: string;
   dot: string;
+  rank: 0 | 1 | 2 | 3;
+  ringColor: string;
+  haloColor: string;
 };
 
 function tierFor(name: string): GrabTier {
@@ -34,28 +37,40 @@ function tierFor(name: string): GrabTier {
     return {
       image: grabLendariaImg,
       label: "Lendária",
-      glow: "bg-[radial-gradient(circle_at_50%_65%,rgba(217,160,48,0.28),transparent_60%)]",
+      glow: "bg-[radial-gradient(circle_at_50%_60%,rgba(217,160,48,0.40),transparent_65%)]",
       dot: "bg-amber-400",
+      rank: 3,
+      ringColor: "rgba(217,160,48,0.55)",
+      haloColor: "rgba(255,210,120,0.55)",
     };
   if (n.includes("ép") || n.includes("ep"))
     return {
       image: grabEpicaImg,
       label: "Épica",
-      glow: "bg-[radial-gradient(circle_at_50%_65%,rgba(139,92,246,0.28),transparent_60%)]",
+      glow: "bg-[radial-gradient(circle_at_50%_60%,rgba(139,92,246,0.34),transparent_65%)]",
       dot: "bg-violet-500",
+      rank: 2,
+      ringColor: "rgba(139,92,246,0.50)",
+      haloColor: "rgba(196,181,253,0.45)",
     };
   if (n.includes("rar"))
     return {
       image: grabRaraImg,
       label: "Rara",
-      glow: "bg-[radial-gradient(circle_at_50%_65%,rgba(20,184,166,0.22),transparent_60%)]",
-      dot: "bg-teal-500",
+      glow: "bg-[radial-gradient(circle_at_50%_60%,rgba(56,189,248,0.26),transparent_65%)]",
+      dot: "bg-sky-500",
+      rank: 1,
+      ringColor: "rgba(56,189,248,0.45)",
+      haloColor: "rgba(186,230,253,0.40)",
     };
   return {
     image: grabComumImg,
     label: "Comum",
-    glow: "bg-[radial-gradient(circle_at_50%_65%,rgba(244,114,182,0.20),transparent_60%)]",
+    glow: "bg-[radial-gradient(circle_at_50%_65%,rgba(244,114,182,0.18),transparent_65%)]",
     dot: "bg-rose-400",
+    rank: 0,
+    ringColor: "rgba(0,0,0,0)",
+    haloColor: "rgba(0,0,0,0)",
   };
 }
 
@@ -126,6 +141,18 @@ export function PetGrabCard({ refreshKey, onChanged }: Props) {
   return (
     <>
       <section className="rounded-2xl border border-neutral-200 bg-white p-4">
+        <style>{`
+          @keyframes grab-ring-spin { to { transform: rotate(360deg); } }
+          @keyframes grab-ring-spin-rev { to { transform: rotate(-360deg); } }
+          @keyframes grab-halo-pulse {
+            0%,100% { opacity: 0.55; transform: scale(1); }
+            50%     { opacity: 1;    transform: scale(1.06); }
+          }
+          @keyframes grab-particle-float {
+            0%,100% { transform: translateY(0) scale(1);   opacity: 0.85; }
+            50%     { transform: translateY(-6px) scale(1.2); opacity: 1; }
+          }
+        `}</style>
         <div className="mb-3 flex items-center gap-2">
           <div className="grid size-9 place-items-center rounded-xl bg-amber-50 text-amber-600 ring-1 ring-amber-100">
             <Gift className="size-4" />
@@ -167,13 +194,78 @@ export function PetGrabCard({ refreshKey, onChanged }: Props) {
 
                 {/* the box IS the visual */}
                 <div className="relative flex aspect-square w-full items-center justify-center">
+                  {/* Aura effects (rank-based) */}
+                  {tier.rank >= 1 && (
+                    <div
+                      aria-hidden
+                      className="pointer-events-none absolute inset-[8%] rounded-full"
+                      style={{
+                        background: `radial-gradient(circle, ${tier.haloColor} 0%, transparent 62%)`,
+                        filter: "blur(8px)",
+                        animation: "grab-halo-pulse 3.2s ease-in-out infinite",
+                      }}
+                    />
+                  )}
+                  {tier.rank >= 1 && (
+                    <div
+                      aria-hidden
+                      className="pointer-events-none absolute inset-[10%] rounded-full border"
+                      style={{
+                        borderColor: tier.ringColor,
+                        borderStyle: "dashed",
+                        animation: "grab-ring-spin 14s linear infinite",
+                      }}
+                    />
+                  )}
+                  {tier.rank >= 2 && (
+                    <div
+                      aria-hidden
+                      className="pointer-events-none absolute inset-[2%] rounded-full border"
+                      style={{
+                        borderColor: tier.ringColor,
+                        borderStyle: "dotted",
+                        animation: "grab-ring-spin-rev 22s linear infinite",
+                      }}
+                    />
+                  )}
+                  {tier.rank >= 3 && (
+                    <div
+                      aria-hidden
+                      className="pointer-events-none absolute inset-[-6%] rounded-full"
+                      style={{
+                        background: `conic-gradient(from 0deg, transparent 0deg, ${tier.ringColor} 60deg, transparent 120deg, transparent 240deg, ${tier.ringColor} 300deg, transparent 360deg)`,
+                        WebkitMask: "radial-gradient(circle, transparent 56%, #000 58%, #000 62%, transparent 64%)",
+                        mask: "radial-gradient(circle, transparent 56%, #000 58%, #000 62%, transparent 64%)",
+                        animation: "grab-ring-spin 9s linear infinite",
+                        opacity: 0.9,
+                      }}
+                    />
+                  )}
+                  {tier.rank >= 2 && (
+                    <>
+                      {[0, 1, 2, 3, 4, 5].map((i) => (
+                        <span
+                          key={i}
+                          aria-hidden
+                          className="pointer-events-none absolute size-1 rounded-full"
+                          style={{
+                            top: `${20 + (i * 47) % 60}%`,
+                            left: `${10 + (i * 67) % 80}%`,
+                            background: tier.ringColor,
+                            boxShadow: `0 0 6px ${tier.ringColor}`,
+                            animation: `grab-particle-float ${2.4 + (i % 3) * 0.4}s ease-in-out ${i * 0.25}s infinite`,
+                          }}
+                        />
+                      ))}
+                    </>
+                  )}
                   <img
                     src={tier.image}
                     alt={pool.name}
                     loading="lazy"
                     width={1024}
                     height={1024}
-                    className="size-[88%] object-contain drop-shadow-[0_18px_18px_rgba(0,0,0,0.12)] transition-transform duration-500 group-hover:-translate-y-1 group-hover:scale-[1.03]"
+                    className="relative z-10 size-[76%] object-contain drop-shadow-[0_18px_18px_rgba(0,0,0,0.14)] transition-transform duration-500 group-hover:-translate-y-1 group-hover:scale-[1.04]"
                   />
                 </div>
 
