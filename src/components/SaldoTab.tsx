@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 import coinIcon from "@/assets/coin.webp";
 import coinSound from "@/assets/coin-reward.mp3";
-import { DECORATION_ASSETS, assetFor } from "@/lib/decorations";
+import { DECORATION_ASSETS } from "@/lib/decorations";
 import {
   claimDailyCoins,
   COIN_DAILY,
@@ -31,6 +31,7 @@ import {
   type CoinsStatus,
 } from "@/lib/coins";
 import { fetchMyCoinTransactions, type CoinTx } from "@/lib/coinTx";
+import { useSignedPetUrl } from "@/lib/petImageUrl";
 
 type Filter = "all" | "in" | "out";
 
@@ -318,11 +319,18 @@ function TxRow({ tx }: { tx: CoinTx }) {
   const d = new Date(tx.created_at);
   const date = d.toLocaleDateString("pt-BR");
   const time = d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
-  const resolvedIcon = tx.icon_url
-    ? (DECORATION_ASSETS[tx.icon_url] ??
-      assetFor({ image_url: tx.icon_url }) ??
-      (tx.icon_url.startsWith("http") || tx.icon_url.startsWith("/") ? tx.icon_url : null))
-    : null;
+  // 1) Static decoration assets (bundled).
+  // 2) Absolute URLs (http/data/blob/leading-slash).
+  // 3) Anything else is treated as a pets-bucket storage path and signed.
+  const isAbsolute = !!tx.icon_url && /^(https?:|data:|blob:|\/)/i.test(tx.icon_url);
+  const decorationAsset = tx.icon_url ? DECORATION_ASSETS[tx.icon_url] : undefined;
+  const needsSign = !!tx.icon_url && !decorationAsset && !isAbsolute;
+  const signed = useSignedPetUrl(needsSign ? tx.icon_url : null);
+  const resolvedIcon =
+    decorationAsset ??
+    (isAbsolute ? tx.icon_url : null) ??
+    signed ??
+    null;
   const KindIcon =
     tx.kind === "daily_claim"
       ? DollarSign
