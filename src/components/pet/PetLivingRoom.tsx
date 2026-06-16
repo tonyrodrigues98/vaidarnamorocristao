@@ -275,67 +275,48 @@ export function PetLivingRoom({
         </div>
 
         {/* HOTSPOTS — coordenadas estáveis em % do quadro 2:3 */}
-        {/* Esquerda */}
-        <RoomHotspot
-          x={2.5} y={3.5} width={18} height={9}
-          label="Vitrine de caixas"
-          onClick={() => setSheet("caixas")}
-        />
-        <RoomHotspot
-          x={2.5} y={16} width={22} height={11}
-          label="Quiz Bíblico do dia"
-          onClick={() => { window.location.assign("/quiz-biblico"); }}
-        />
-        <RoomHotspot
-          x={2.5} y={33} width={22} height={12}
-          label="Evolução do pet"
-          onClick={() => setSheet("evolution")}
-        />
+        {/* Esquerda — rotina */}
         <RoomHotspot
           x={3} y={48} width={21} height={12}
           label="Streak diário"
+          tooltip="Dia-a-dia · ver dias seguidos cuidando do pet."
           onClick={() => setSheet("streak")}
         />
         <RoomHotspot
           x={0.5} y={62} width={26} height={16}
           label="Missões do dia"
+          tooltip="Dia-a-dia · tarefas curtas pra ganhar XP e moedas hoje."
           onClick={() => setSheet("missions")}
         />
 
-        {/* Direita */}
+        {/* Direita — cuidado imediato */}
         <RoomHotspot
           x={77} y={6} width={22} height={12}
           label="Banho"
+          tooltip="Cuidado · dar banho pra subir higiene."
           urgent={lowOf("hygiene")}
           onClick={() => onCareAction("hygiene")}
         />
         <RoomHotspot
-          x={79} y={25} width={20} height={26}
-          label="Expedições"
-          onClick={() => setSheet("expeditions")}
-        />
-        <RoomHotspot
           x={74} y={55} width={24} height={14}
           label="Dormir"
+          tooltip="Cuidado · pet descansa e recupera energia."
           urgent={lowOf("sleep")}
           onClick={() => onCareAction("sleep")}
         />
-        <RoomHotspot
-          x={76} y={72} width={23} height={17}
-          label="Caixa semanal"
-          onClick={() => setSheet("weekly")}
-        />
 
-        {/* Centro/baixo */}
+        {/* Centro/baixo — cuidado */}
         <RoomHotspot
           x={7} y={86} width={20} height={11}
           label="Alimentar"
+          tooltip="Cuidado · alimentar pra subir fome."
           urgent={lowOf("feed")}
           onClick={() => onCareAction("feed")}
         />
         <RoomHotspot
           x={56} y={89} width={15} height={10}
           label="Brincar"
+          tooltip="Cuidado · brincar pra subir diversão e carinho."
           urgent={lowOf("play")}
           onClick={() => onCareAction("play")}
         />
@@ -353,35 +334,23 @@ export function PetLivingRoom({
           />
         ) : null}
 
-        {/* Toolbar diegética no rodapé — diário, histórico, cenário, progressão */}
+        {/* Toolbar diegética no rodapé — diário (dia-a-dia) e cenário do quarto */}
         <div className="pointer-events-none absolute inset-x-0 bottom-0 z-30 flex flex-wrap items-center justify-center gap-1.5 p-2.5">
           <button
             type="button"
             onClick={() => setDiaryOpen(true)}
+            title="Dia-a-dia · escrever no diário do pet"
             className="pointer-events-auto inline-flex items-center gap-1.5 rounded-full bg-white/90 px-2.5 py-1.5 text-[11px] font-medium text-amber-700 shadow-sm ring-1 ring-amber-200/60 backdrop-blur transition hover:bg-white"
           >
             <BookHeart className="size-3.5" /> Diário
           </button>
           <button
             type="button"
-            onClick={() => setSheet("history")}
-            className="pointer-events-auto inline-flex items-center gap-1.5 rounded-full bg-white/85 px-2.5 py-1.5 text-[11px] font-medium text-neutral-700 shadow-sm ring-1 ring-black/5 backdrop-blur transition hover:bg-white"
-          >
-            <PawPrint className="size-3.5" /> Histórico
-          </button>
-          <button
-            type="button"
             onClick={() => setSheet("scenery")}
+            title="Ambiente · trocar decoração do quarto"
             className="pointer-events-auto inline-flex items-center gap-1.5 rounded-full bg-white/85 px-2.5 py-1.5 text-[11px] font-medium text-neutral-700 shadow-sm ring-1 ring-black/5 backdrop-blur transition hover:bg-white"
           >
             <ImageIcon className="size-3.5" /> Cenário
-          </button>
-          <button
-            type="button"
-            onClick={() => setSheet("progression")}
-            className="pointer-events-auto inline-flex items-center gap-1.5 rounded-full bg-white/85 px-2.5 py-1.5 text-[11px] font-medium text-neutral-700 shadow-sm ring-1 ring-black/5 backdrop-blur transition hover:bg-white"
-          >
-            <PawPrint className="size-3.5" /> Progressão
           </button>
         </div>
       </div>
@@ -397,66 +366,12 @@ export function PetLivingRoom({
       </SceneSheet>
 
       <SceneSheet
-        open={sheet === "expeditions"}
-        onClose={() => setSheet(null)}
-        title="Floresta"
-        description="A porta dá em uma expedição."
-      >
-        <ExpeditionsCard
-          userPetId={pet.id}
-          petImage={petImage}
-          petName={pet.custom_name}
-          onChanged={onCareChanged}
-        />
-      </SceneSheet>
-
-      <SceneSheet
-        open={sheet === "caixas"}
-        onClose={() => setSheet(null)}
-        title="Vitrine de caixas"
-      >
-        <PetCaixasEntryCard />
-      </SceneSheet>
-
-      <SceneSheet
         open={sheet === "streak"}
         onClose={() => setSheet(null)}
         title="Streak diário"
         description="O calendário a giz marca cada dia."
       >
         <PetStreakCard refreshKey={xpRefresh} />
-      </SceneSheet>
-
-      <SceneSheet
-        open={sheet === "weekly"}
-        onClose={() => setSheet(null)}
-        title="Caixa semanal"
-        description="As velas acendem a cada missão."
-      >
-        <PetWeeklyChestCard refreshKey={xpRefresh} onClaimed={onCareChanged} />
-      </SceneSheet>
-
-      <SceneSheet
-        open={sheet === "evolution"}
-        onClose={() => setSheet(null)}
-        title="Evolução"
-        description="O quadro mostra o caminho do pet."
-      >
-        <PetEvolutionCard
-          refreshKey={xpRefresh}
-          petName={pet.custom_name}
-          babyImage={babyImage}
-          adultImage={adultImage}
-          onEvolved={onEvolved}
-        />
-      </SceneSheet>
-
-      <SceneSheet
-        open={sheet === "progression"}
-        onClose={() => setSheet(null)}
-        title="Progressão"
-      >
-        <PetProgressionCard refreshKey={xpRefresh} onChanged={onCareChanged} />
       </SceneSheet>
 
       <SceneSheet
