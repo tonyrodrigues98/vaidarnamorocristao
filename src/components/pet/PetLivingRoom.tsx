@@ -88,6 +88,16 @@ export function PetLivingRoom({
   const [diaryOpen, setDiaryOpen] = useState(false);
   const [diaryRefresh, setDiaryRefresh] = useState(0);
   const { dayOpacity } = usePetDayNight();
+  // Zoom level Z1 (quarto) <-> Z2 (mapa). Persistido em localStorage.
+  const [zoomLevel, setZoomLevel] = useState<"room" | "kingdom">(() => {
+    if (typeof window === "undefined") return "room";
+    return (window.localStorage.getItem("pet:last-zoom") as "room" | "kingdom") ?? "room";
+  });
+
+  function goTo(level: "room" | "kingdom") {
+    setZoomLevel(level);
+    try { window.localStorage.setItem("pet:last-zoom", level); } catch { /* ignore */ }
+  }
 
   // Glow dourado nos hotspots de cuidado quando a stat estiver baixa.
   const lowOf = (k: PetCareKind) => (careValues[k] ?? 100) < 45;
@@ -104,10 +114,35 @@ export function PetLivingRoom({
   // Overlay diegético dia/noite: âmbar quente de manhã/tarde, azulado à noite.
   const nightAmount = 1 - dayOpacity;
 
+  // Z2 — Mapa do Reino
+  if (zoomLevel === "kingdom") {
+    return (
+      <div className="animate-[zoom-in-kingdom_700ms_ease-out] motion-reduce:animate-none">
+        <PetKingdomMap
+          pet={pet}
+          petImage={petImage}
+          careValues={careValues}
+          isAway={isAway}
+          xpRefresh={xpRefresh}
+          streakDays={streakDays}
+          missionsDoneToday={missionsDoneToday}
+          babyImage={babyImage}
+          adultImage={adultImage}
+          onCareAction={onCareAction}
+          onCareChanged={onCareChanged}
+          onEvolved={onEvolved}
+          onBackToRoom={() => goTo("room")}
+        />
+      </div>
+    );
+  }
+
   return (
     <section
+      key="room"
       className="relative mx-auto w-full max-w-[520px] overflow-hidden rounded-3xl border border-neutral-200/80 bg-amber-50/40 shadow-[0_2px_0_rgba(0,0,0,0.02),0_30px_70px_-35px_rgba(0,0,0,0.18)]"
       aria-label="Quarto do pet"
+      style={{ animation: "zoom-in-room 600ms ease-out" }}
     >
       {/* Aspect ratio fixo (2:3) para alinhar hotspots de forma estável. */}
       <div className="relative aspect-[2/3] w-full">
@@ -183,14 +218,25 @@ export function PetLivingRoom({
           <div className="pointer-events-auto relative">
             <StatsHUD values={careValues} />
           </div>
-          <button
-            type="button"
-            onClick={onSwitchToList}
-            className="pointer-events-auto inline-flex items-center gap-1 rounded-full bg-white/85 px-2.5 py-1.5 text-[11px] font-medium text-neutral-700 shadow-sm ring-1 ring-black/5 backdrop-blur transition hover:bg-white"
-            aria-label="Ver modo lista"
-          >
-            <LayoutList className="size-3.5" />
-          </button>
+          <div className="pointer-events-auto flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => goTo("kingdom")}
+              className="inline-flex items-center gap-1 rounded-full bg-white/90 px-2.5 py-1.5 text-[11px] font-medium text-amber-700 shadow-sm ring-1 ring-amber-200/60 backdrop-blur transition hover:bg-white"
+              aria-label="Ver o reino"
+            >
+              <MapIcon className="size-3.5" />
+              Reino
+            </button>
+            <button
+              type="button"
+              onClick={onSwitchToList}
+              className="inline-flex items-center gap-1 rounded-full bg-white/85 px-2.5 py-1.5 text-[11px] font-medium text-neutral-700 shadow-sm ring-1 ring-black/5 backdrop-blur transition hover:bg-white"
+              aria-label="Ver modo lista"
+            >
+              <LayoutList className="size-3.5" />
+            </button>
+          </div>
         </div>
 
         {/* HOTSPOTS — coordenadas estáveis em % do quadro 2:3 */}
