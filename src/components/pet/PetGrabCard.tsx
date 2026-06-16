@@ -483,7 +483,7 @@ function GrabRouletteModal({
   }), []);
 
   return (
-    <Dialog open onOpenChange={(o) => !o && phase === "done" && onClose()}>
+    <Dialog open onOpenChange={(o) => { if (!o) onClose(); }}>
       <DialogContent className="max-w-md overflow-hidden border-neutral-800 bg-neutral-950 p-0 text-white">
         <style>{`
           @keyframes grab-spin-conic { to { transform: rotate(360deg); } }
