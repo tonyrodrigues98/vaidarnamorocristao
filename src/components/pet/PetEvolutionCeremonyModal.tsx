@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Sparkles, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { hapticSuccess } from "@/lib/haptics";
+import { haptics } from "@/lib/haptics";
 
 type Props = {
   open: boolean;
@@ -30,7 +30,7 @@ export function PetEvolutionCeremonyModal({
     const t1 = setTimeout(() => setPhase("transition"), 600);
     const t2 = setTimeout(() => {
       setPhase("adult");
-      hapticSuccess();
+      haptics.success();
     }, 1400);
     return () => {
       clearTimeout(t1);
