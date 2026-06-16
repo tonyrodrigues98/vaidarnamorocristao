@@ -15,7 +15,14 @@ type Props = {
   onOpenMulti?: (count: 5 | 10) => void;
 };
 
-export function GrabPoolCard({ pool, freeRemaining, coinBalance = 0, busy, onOpen, onOpenMulti }: Props) {
+export function GrabPoolCard({
+  pool,
+  freeRemaining,
+  coinBalance = 0,
+  busy,
+  onOpen,
+  onOpenMulti,
+}: Props) {
   const r = rarityTokens(pool.rarity);
   const art = caixaArtFor(pool.slug, pool.rarity);
   const [cd, setCd] = useState<number>(pool.cooldown_seconds);
@@ -34,12 +41,14 @@ export function GrabPoolCard({ pool, freeRemaining, coinBalance = 0, busy, onOpe
   const empty = pool.prize_count === 0;
   const paidCostFor = (count: 5 | 10) => Math.max(0, count - freeRemaining) * pool.cost_coins;
   const canMulti = (count: 5 | 10) =>
-    !!onOpenMulti && !busy && !empty && !onCooldown && pool.cooldown_hours === 0 && paidCostFor(count) <= coinBalance;
+    !!onOpenMulti &&
+    !busy &&
+    !empty &&
+    !onCooldown &&
+    pool.cooldown_hours === 0 &&
+    paidCostFor(count) <= coinBalance;
 
-  const pityProgress =
-    pool.pity_threshold > 0
-      ? Math.min(1, pool.pity_count / pool.pity_threshold)
-      : 0;
+  const pityProgress = pool.pity_threshold > 0 ? Math.min(1, pool.pity_count / pool.pity_threshold) : 0;
 
   return (
     <article
@@ -50,9 +59,7 @@ export function GrabPoolCard({ pool, freeRemaining, coinBalance = 0, busy, onOpe
         disabled && "opacity-60 hover:translate-y-0",
       )}
       style={{
-        boxShadow: onCooldown
-          ? "0 2px 8px -4px rgba(91,81,66,0.10)"
-          : r.shadowCss,
+        boxShadow: onCooldown ? "0 2px 8px -4px rgba(91,81,66,0.10)" : r.shadowCss,
       }}
     >
       {/* glow background */}
@@ -66,8 +73,7 @@ export function GrabPoolCard({ pool, freeRemaining, coinBalance = 0, busy, onOpe
         aria-hidden
         className="pointer-events-none absolute inset-x-0 top-0 h-px"
         style={{
-          background:
-            "linear-gradient(90deg, transparent, rgba(201,162,74,0.55), transparent)",
+          background: "linear-gradient(90deg, transparent, rgba(201,162,74,0.55), transparent)",
         }}
       />
 
@@ -170,8 +176,7 @@ export function GrabPoolCard({ pool, freeRemaining, coinBalance = 0, busy, onOpe
           style={
             !onCooldown && !isFree && !empty
               ? {
-                  background:
-                    "linear-gradient(135deg, #FFF6DF 0%, #F1DDA1 60%, #C9A24A 100%)",
+                  background: "linear-gradient(135deg, #FFF6DF 0%, #F1DDA1 60%, #C9A24A 100%)",
                   boxShadow:
                     "inset 0 1px 0 rgba(255,255,255,0.7), 0 4px 12px -6px rgba(201,162,74,0.45)",
                 }
