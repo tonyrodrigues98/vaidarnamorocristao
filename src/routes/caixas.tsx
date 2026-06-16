@@ -86,6 +86,8 @@ function CaixasPage() {
     res: GrabResult;
     winner: PrizeMeta;
     prizes: PrizeMeta[];
+    poolId: string;
+    poolCost: number;
   } | null>(null);
 
   async function reload() {
@@ -116,7 +118,8 @@ function CaixasPage() {
         kind: res.prize_kind,
         amount: res.prize_amount,
       };
-      setRoulette({ res, winner, prizes });
+      const pool = state?.pools.find((p) => p.id === poolId);
+      setRoulette({ res, winner, prizes, poolId, poolCost: pool?.cost_coins ?? 0 });
       await reload();
     } catch (e) {
       const msg = (e as Error).message;
@@ -322,6 +325,15 @@ function CaixasPage() {
           res={roulette.res}
           winner={roulette.winner}
           prizes={roulette.prizes}
+          canOpenAgain={
+            roulette.res.free_remaining > 0 ||
+            roulette.res.new_balance >= roulette.poolCost
+          }
+          onOpenAgain={() => {
+            const pid = roulette.poolId;
+            setRoulette(null);
+            void open(pid);
+          }}
           onClose={() => {
             setRoulette(null);
             void reload();
