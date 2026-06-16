@@ -679,9 +679,13 @@ export function GrabRouletteModal({
                           >
                             <div className="flex h-full w-full items-end justify-center p-1.5">
                               <span
-                                className="max-w-full truncate rounded-md bg-black/45 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-white backdrop-blur"
+                                className="block max-w-[88%] whitespace-nowrap rounded-md bg-black/55 px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-tight text-white backdrop-blur"
+                                style={{
+                                  transform: `scale(${Math.min(1, 11 / Math.max(it.name.length, 6))})`,
+                                  transformOrigin: "center bottom",
+                                }}
                               >
-                                Aa
+                                {it.name}
                               </span>
                             </div>
                           </div>
