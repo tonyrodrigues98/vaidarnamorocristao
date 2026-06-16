@@ -21,6 +21,10 @@ import {
 } from "lucide-react";
 import coinIcon from "@/assets/coin.webp";
 import coinSound from "@/assets/coin-reward.mp3";
+import grabComumImg from "@/assets/grab-comum.png";
+import grabRaraImg from "@/assets/grab-rara.png";
+import grabEpicaImg from "@/assets/grab-epica.png";
+import grabLendariaImg from "@/assets/grab-lendaria.png";
 import { DECORATION_ASSETS } from "@/lib/decorations";
 import {
   claimDailyCoins,
@@ -34,6 +38,17 @@ import { fetchMyCoinTransactions, type CoinTx } from "@/lib/coinTx";
 import { useSignedPetUrl } from "@/lib/petImageUrl";
 
 type Filter = "all" | "in" | "out";
+
+const GRAB_BOX_IMAGES: Record<string, string> = {
+  comum: grabComumImg,
+  "caixa-comum": grabComumImg,
+  "caixa-rara": grabRaraImg,
+  rara: grabRaraImg,
+  "caixa-epica": grabEpicaImg,
+  epica: grabEpicaImg,
+  "caixa-lendaria": grabLendariaImg,
+  lendaria: grabLendariaImg,
+};
 
 export function SaldoTab() {
   const [status, setStatus] = useState<CoinsStatus | null>(null);
@@ -324,10 +339,15 @@ function TxRow({ tx }: { tx: CoinTx }) {
   // 3) Anything else is treated as a pets-bucket storage path and signed.
   const isAbsolute = !!tx.icon_url && /^(https?:|data:|blob:|\/)/i.test(tx.icon_url);
   const decorationAsset = tx.icon_url ? DECORATION_ASSETS[tx.icon_url] : undefined;
-  const needsSign = !!tx.icon_url && !decorationAsset && !isAbsolute;
+  const grabAsset =
+    tx.icon_url && tx.icon_url.startsWith("grab:")
+      ? GRAB_BOX_IMAGES[tx.icon_url.slice(5)]
+      : undefined;
+  const needsSign = !!tx.icon_url && !decorationAsset && !grabAsset && !isAbsolute;
   const signed = useSignedPetUrl(needsSign ? tx.icon_url : null);
   const resolvedIcon =
     decorationAsset ??
+    grabAsset ??
     (isAbsolute ? tx.icon_url : null) ??
     signed ??
     null;
