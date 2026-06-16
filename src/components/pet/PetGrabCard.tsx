@@ -574,7 +574,13 @@ function GrabRouletteModal({
             // Emit exactly one tick per integer step, even if several centers
             // were skipped in a single frame (very early, very fast section).
             const steps = Math.min(4, centerIndex - lastTickCenterRef.current);
-            for (let i = 0; i < steps; i++) playTick(speed);
+            for (let i = 0; i < steps; i++) {
+              // Alternate ticks across the stereo field; magnitude shrinks
+              // as the wheel slows so the final ticks feel centered.
+              const idx = lastTickCenterRef.current + 1 + i;
+              const pan = ((idx % 2 === 0 ? 1 : -1) * (0.4 + speed * 0.5));
+              playTick(speed, pan);
+            }
           }
           lastTickCenterRef.current = centerIndex;
         }
