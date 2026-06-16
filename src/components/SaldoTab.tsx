@@ -376,9 +376,19 @@ function TxRow({ tx }: { tx: CoinTx }) {
                     ? PawPrint
                     : tx.kind === "achievement_unlock"
                       ? Trophy
-                      : isIn
-                        ? ArrowDownLeft
-                        : ArrowUpRight;
+                      : tx.kind === "decoration_purchase"
+                        ? Sparkles
+                        : tx.kind === "profile_background_purchase"
+                          ? ImageIcon
+                          : tx.kind === "grab_open"
+                            ? Package
+                            : tx.kind === "expedition"
+                              ? MapIcon
+                              : tx.kind === "pet_streak_daily"
+                                ? Flame
+                                : tx.kind === "starter_bundle"
+                                  ? PackageOpen
+                                  : Wallet;
   return (
     <li className="group flex items-center gap-3 rounded-2xl border border-border/60 bg-card/50 p-3 shadow-soft backdrop-blur transition hover:border-border hover:bg-card/80">
       <div className="relative shrink-0">
