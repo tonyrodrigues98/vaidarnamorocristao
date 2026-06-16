@@ -68,6 +68,7 @@ import { MissionsTodayCard } from "@/components/pet/MissionsTodayCard";
 import { ExpeditionsCard } from "@/components/pet/ExpeditionsCard";
 import { getActiveExpedition } from "@/lib/petExpeditions";
 import type { ActiveExpedition } from "@/types/petExpedition";
+import { PetAwayToast } from "@/components/pet/PetAwayToast";
 import { PetOnboardingTour } from "@/components/pet/PetOnboardingTour";
 import { PetShowcaseSkeleton } from "@/components/pet/PetShowcaseSkeleton";
 import { PetStreakCard } from "@/components/pet/PetStreakCard";
@@ -291,7 +292,7 @@ function Showcase({
 
   function requestAction(k: PetCareKind) {
     if (isAway) {
-      toast.info(`${pet.custom_name} está em expedição. Volta em ${awayRemaining}.`);
+      showAwayToast(k);
       return;
     }
     setActionKind(k);
@@ -299,10 +300,30 @@ function Showcase({
 
   function openRadial() {
     if (isAway) {
-      toast.info(`${pet.custom_name} está em expedição. Volta em ${awayRemaining}.`);
+      showAwayToast("radial");
       return;
     }
     setRadialOpen(true);
+  }
+
+  function showAwayToast(kind: PetCareKind | "radial") {
+    if (!activeExpedition) return;
+    const total = activeExpedition.duration_minutes * 60_000;
+    const elapsed = Math.max(0, Date.now() - new Date(activeExpedition.started_at).getTime());
+    const pct = Math.min(100, Math.round((elapsed / total) * 100));
+    toast.custom(
+      () => (
+        <PetAwayToast
+          petName={pet.custom_name}
+          expeditionTitle={activeExpedition.title}
+          remaining={awayRemaining}
+          progressPct={pct}
+          kind={kind}
+          petId={pet.id}
+        />
+      ),
+      { duration: 3200 },
+    );
   }
 
   async function reloadCare() {
@@ -429,7 +450,7 @@ function Showcase({
             <div
               className={
                 isAway
-                  ? "transition duration-500 [filter:grayscale(1)_blur(2px)_brightness(0.85)]"
+                  ? "opacity-50 transition duration-500 [filter:grayscale(1)_blur(8px)_brightness(0.8)]"
                   : ""
               }
             >
