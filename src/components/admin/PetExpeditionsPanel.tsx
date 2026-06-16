@@ -148,6 +148,7 @@ export function PetExpeditionsPanel() {
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {rows.map((row) => (
             <div key={row.id} className="space-y-2 rounded-2xl border border-border bg-card p-4">
+              <RowPreview imagePath={row.image_url} />
               <div className="flex items-start justify-between gap-2">
                 <div className="flex items-center gap-2">
                   <Compass className="size-4 text-muted-foreground" />
