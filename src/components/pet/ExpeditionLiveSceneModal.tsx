@@ -165,15 +165,21 @@ export function ExpeditionLiveSceneModal({
             className="pointer-events-none absolute inset-0 transition-[background] duration-1000"
             style={{ background: PHASE_OVERLAY[data.phase], mixBlendMode: "overlay" }}
           />
-          {/* Soft top vignette */}
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-black/60 to-transparent" />
+          {/* Soft top vignette (covers status bar / URL chrome area) */}
+          <div
+            className="pointer-events-none absolute inset-x-0 top-0 bg-gradient-to-b from-black/75 to-transparent"
+            style={{ height: "calc(env(safe-area-inset-top, 0px) + 7rem)" }}
+          />
           {/* Bottom fade into feed */}
           <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-b from-transparent to-neutral-950" />
           {/* Weather particles */}
           <SceneWeatherLayer weather={data.weather} />
 
           {/* HUD top (absolute over scene) */}
-          <div className="absolute inset-x-0 top-0 z-10 flex items-start justify-between gap-2 p-4 pt-5">
+          <div
+            className="absolute inset-x-0 top-0 z-10 flex items-start justify-between gap-2 px-4 pb-4"
+            style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 1.25rem)" }}
+          >
             <div className="min-w-0">
               <div className="text-[10px] font-medium uppercase tracking-wider text-white/80 drop-shadow">
                 Expedição ativa
