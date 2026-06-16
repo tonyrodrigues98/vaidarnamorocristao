@@ -189,7 +189,7 @@ export async function listPoolPrizeMetas(poolId: string): Promise<PrizeMeta[]> {
     .eq("pool_id", poolId)
     .eq("active", true);
   if (error) throw error;
-  const rows = (data ?? []) as { prize_kind: string; prize_ref_id: string | null }[];
+  const rows = (data ?? []) as unknown as { prize_kind: string; prize_ref_id: string | null }[];
   const metas = await Promise.all(rows.map((r) => resolvePrize(r.prize_kind, r.prize_ref_id)));
   return metas.filter((m): m is PrizeMeta => !!m);
 }
