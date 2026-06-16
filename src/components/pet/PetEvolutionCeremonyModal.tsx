@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
-import { Sparkles, X } from "lucide-react";
+import { createPortal } from "react-dom";
+import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { haptics } from "@/lib/haptics";
+import { XpIcon } from "@/components/icons/XpIcon";
 
 type Props = {
   open: boolean;
@@ -39,8 +41,9 @@ export function PetEvolutionCeremonyModal({
   }, [open]);
 
   if (!open) return null;
+  if (typeof document === "undefined") return null;
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-neutral-950/70 p-4 backdrop-blur-sm">
       <div className="relative w-full max-w-sm overflow-hidden rounded-3xl border border-neutral-200 bg-white shadow-2xl">
         <button
@@ -102,7 +105,7 @@ export function PetEvolutionCeremonyModal({
             um pet novo, você poderá escolher já adulto.
           </p>
           <div className="mx-auto inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-700">
-            <Sparkles className="size-3.5" /> +{xpBonus} XP de bônus
+            <XpIcon className="size-4" /> +{xpBonus} XP de bônus
           </div>
           <button
             type="button"
@@ -113,6 +116,7 @@ export function PetEvolutionCeremonyModal({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

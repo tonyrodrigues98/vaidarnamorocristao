@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { Link } from "@tanstack/react-router";
 import {
   ArrowRight,
@@ -346,7 +347,7 @@ export function HomeStarterSection({ userId, onAction, topSpacing }: Props) {
       </div>
 
       {/* Free frame modal */}
-      {showFrames && (
+      {showFrames && typeof document !== "undefined" && createPortal(
         <div
           className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-3 sm:items-center"
           onClick={() => setShowFrames(false)}
@@ -423,7 +424,8 @@ export function HomeStarterSection({ userId, onAction, topSpacing }: Props) {
               </Button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
     </section>
   );

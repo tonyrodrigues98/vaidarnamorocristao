@@ -253,7 +253,12 @@ export async function resolvePrize(
     return { name: "Moedas", image_url: null, kind, rarity: "common" };
   }
   if (kind === "xp") {
-    return { name: "XP", image_url: null, kind, rarity: "common" };
+    return {
+      name: "XP",
+      image_url: new URL("../assets/caixas/capsula_xp.png", import.meta.url).href,
+      kind,
+      rarity: "common",
+    };
   }
   if (!refId) return null;
   if (kind === "care_item") {

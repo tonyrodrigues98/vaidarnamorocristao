@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { Sparkles, Gift, X, Trophy, Zap, Flame } from "lucide-react";
+import { Gift, X, Trophy, Zap, Flame } from "lucide-react";
 
 import { CoinIcon } from "@/components/icons/CoinIcon";
+import { XpIcon } from "@/components/icons/XpIcon";
 import type { ClaimResult } from "@/types/petExpedition";
 
 type Reward = {
@@ -58,7 +59,7 @@ export function ExpeditionRewardModal({
         key: "xp",
         label: "Experiência",
         value: `+${result.xp} XP`,
-        Icon: Sparkles,
+        Icon: XpIcon,
         tint: "text-sky-600",
         glow: "bg-sky-300/40",
       });

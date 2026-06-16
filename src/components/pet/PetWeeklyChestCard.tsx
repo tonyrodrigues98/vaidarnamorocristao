@@ -1,10 +1,11 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Gift, Sparkles } from "lucide-react";
+import { Gift } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { claimPetWeeklyChest, getPetWeeklyChest } from "@/lib/petStreak";
 import { haptics } from "@/lib/haptics";
 import { CoinIcon } from "@/components/icons/CoinIcon";
+import { XpIcon } from "@/components/icons/XpIcon";
 
 export function PetWeeklyChestCard({
   refreshKey = 0,
@@ -107,7 +108,7 @@ export function PetWeeklyChestCard({
                 <CoinIcon className="size-3" /> +{data.reward_coins}
               </span>
               <span className="inline-flex items-center gap-1">
-                <Sparkles className="size-3" /> +{data.reward_xp} XP
+                <XpIcon className="size-3.5" /> +{data.reward_xp} XP
               </span>
             </div>
             <button

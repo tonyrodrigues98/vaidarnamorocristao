@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { createPortal } from "react-dom";
 import { GiftMedia } from "./GiftMedia";
 import type { GiftRarity } from "@/lib/gifts";
 
@@ -26,8 +27,9 @@ export function GiftSendAnimation({
   }, [show, onDone]);
 
   if (!show) return null;
+  if (typeof document === "undefined") return null;
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm animate-[fade-in_0.2s_ease-out]">
       <div className="relative flex flex-col items-center">
         {/* particles */}
@@ -56,6 +58,7 @@ export function GiftSendAnimation({
           {giftName ? `${giftName} enviado!` : "Presente enviado!"}
         </p>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

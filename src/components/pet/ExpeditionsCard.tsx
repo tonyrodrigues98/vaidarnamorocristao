@@ -3,7 +3,6 @@ import * as LucideIcons from "lucide-react";
 import {
   Compass,
   Loader2,
-  Sparkles,
   Clock,
   Lock,
   Zap,
@@ -18,6 +17,7 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { CoinIcon } from "@/components/icons/CoinIcon";
+import { XpIcon } from "@/components/icons/XpIcon";
 import {
   claimExpedition,
   getActiveExpedition,
@@ -316,7 +316,7 @@ function ExpeditionRow({
             <Zap className="size-3" />-{m.energy_cost}
           </span>
           <span className="inline-flex items-center gap-1 text-sky-600">
-            <Sparkles className="size-3" />+{m.xp_reward} XP
+            <XpIcon className="size-3.5" />+{m.xp_reward} XP
           </span>
           <span className="inline-flex items-center gap-1 text-amber-600">
             <CoinIcon className="size-3" />+{m.coin_reward}

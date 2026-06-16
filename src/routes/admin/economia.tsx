@@ -1,5 +1,6 @@
 import { createFileRoute, Navigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import {
   Loader2,
   TrendingUp,
@@ -695,7 +696,8 @@ function UserEconomyDrawer({
     onChanged();
   };
 
-  return (
+  if (typeof document === "undefined") return null;
+  return createPortal(
     <div
       className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-0 sm:items-center sm:p-4"
       onClick={onClose}
@@ -863,5 +865,7 @@ function UserEconomyDrawer({
         </div>
       </div>
     </div>
+    ,
+    document.body,
   );
 }
