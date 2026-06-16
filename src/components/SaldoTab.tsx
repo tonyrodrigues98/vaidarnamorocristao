@@ -306,14 +306,39 @@ function EmptyState() {
   );
 }
 
-function petCareIconFromSubtitle(subtitle: string | null, title: string) {
-  const haystack = `${title ?? ""} ${subtitle ?? ""}`.toLowerCase();
-  if (haystack.startsWith("alimento") || haystack.includes("alimentou")) return Utensils;
-  if (haystack.startsWith("brincadeira") || haystack.includes("brincou")) return Bone;
-  if (haystack.startsWith("banho") || haystack.includes("banhou")) return Bath;
-  if (haystack.startsWith("cama") || haystack.includes("dormir")) return BedDouble;
-  if (haystack.startsWith("carinho") || haystack.includes("carinho")) return HeartHandshake;
-  return PawPrint;
+/**
+ * Imagem padrão por tipo de transação — usada quando o registro não trouxe
+ * `icon_url` próprio. Toda transação deve renderizar com imagem, sem fallback
+ * para ícone lucide.
+ */
+function fallbackImageFor(kind: string, direction: "in" | "out"): string {
+  switch (kind) {
+    case "daily_claim":
+    case "anonymous_extra":
+    case "quiz_bonus":
+    case "mission_done":
+    case "achievement_unlock":
+    case "pet_streak_daily":
+    case "admin_grant":
+      return coinIcon;
+    case "grab_open":
+      return CAIXA_ART.caixa_comum;
+    case "starter_bundle":
+      return CAIXA_ART.iniciante;
+    case "expedition":
+      return CAIXA_ART.bau_cuidado;
+    case "gift_sent":
+    case "gift_redeem":
+      return commitmentRing;
+    case "sticker_spend":
+      return anonymousLetter;
+    case "decoration_purchase":
+    case "profile_background_purchase":
+    case "pet_care_spend":
+    case "pet_random_event":
+    default:
+      return coinIcon;
+  }
 }
 
 function TxRow({ tx }: { tx: CoinTx }) {
@@ -343,54 +368,16 @@ function TxRow({ tx }: { tx: CoinTx }) {
     grabAsset ??
     (isAbsolute ? tx.icon_url : null) ??
     signed ??
-    null;
-  const KindIcon =
-    tx.kind === "daily_claim"
-      ? DollarSign
-      : tx.kind === "sticker_spend"
-        ? Sticker
-        : tx.kind === "gift_sent" || tx.kind === "gift_redeem" || tx.kind === "admin_grant"
-          ? Gift
-          : tx.kind === "anonymous_extra"
-            ? VenetianMask
-            : tx.kind === "pet_random_event"
-              ? PawPrint
-              : tx.kind === "pet_care_spend"
-                ? petCareIconFromSubtitle(tx.subtitle, tx.title)
-                : tx.kind === "quiz_bonus"
-                  ? Brain
-                  : tx.kind === "mission_done"
-                    ? PawPrint
-                    : tx.kind === "achievement_unlock"
-                      ? Trophy
-                      : tx.kind === "decoration_purchase"
-                        ? Sparkles
-                        : tx.kind === "profile_background_purchase"
-                          ? ImageIcon
-                          : tx.kind === "grab_open"
-                            ? Package
-                            : tx.kind === "expedition"
-                              ? MapIcon
-                              : tx.kind === "pet_streak_daily"
-                                ? Flame
-                                : tx.kind === "starter_bundle"
-                                  ? PackageOpen
-                                  : Wallet;
+    fallbackImageFor(tx.kind, tx.direction);
   return (
     <li className="group flex items-center gap-3 rounded-2xl border border-border/60 bg-card/50 p-3 shadow-soft backdrop-blur transition hover:border-border hover:bg-card/80">
       <div className="relative shrink-0">
-        {resolvedIcon ? (
-          <img
-            src={resolvedIcon}
-            alt=""
-            className="h-11 w-11 rounded-xl border border-border/40 bg-card object-contain p-1"
-            loading="lazy"
-          />
-        ) : (
-          <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${iconWrap}`}>
-            <KindIcon className="h-5 w-5" />
-          </div>
-        )}
+        <img
+          src={resolvedIcon}
+          alt=""
+          className="h-11 w-11 rounded-xl border border-border/40 bg-card object-contain p-1"
+          loading="lazy"
+        />
       </div>
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-medium">{tx.title}</p>
