@@ -23,9 +23,6 @@ import { cn } from "@/lib/utils";
 import {
   playGrabFinalDing,
   playGrabTick,
-  setGrabRumbleSpeed,
-  startGrabRumble,
-  stopGrabRumble,
   unlockGrabAudio,
 } from "@/lib/grabAudio";
 
@@ -409,8 +406,6 @@ function GrabRouletteModal({
       if (tickStartedRef.current) return;
       tickStartedRef.current = true;
       const spinStart = performance.now();
-      // Kick off the continuous rolling-ball bed underneath the ticks.
-      startGrabRumble();
       // Tick when an item's CENTER (not its left edge) crosses the selector.
       // `centerIndex` = floor of how many full items have already passed center.
       const tickLoop = (now: number) => {
@@ -418,12 +413,6 @@ function GrabRouletteModal({
         const t = Math.min(1, elapsed / ROULETTE_SPIN_MS);
         const eased = easeProgress(t);
         const currentX = targetX * eased;
-        // Always drive the rumble (even on frames with no new tick) so the
-        // bed decays smoothly with the wheel.
-        const dt2 = 1 / ROULETTE_SPIN_MS;
-        const next2 = easeProgress(Math.min(1, t + dt2));
-        const liveSpeed = Math.min(1, (next2 - eased) * ROULETTE_SPIN_MS * 0.6);
-        setGrabRumbleSpeed(liveSpeed);
         const centerIndex = Math.floor(
           (-currentX + ROULETTE_VIEW / 2 - ROULETTE_ITEM / 2) / ROULETTE_ITEM,
         );
@@ -449,9 +438,6 @@ function GrabRouletteModal({
         }
         if (t < 1) {
           tickRafRef.current = requestAnimationFrame(tickLoop);
-        } else {
-          // Wheel reached the stop — fade the bed out cleanly.
-          stopGrabRumble();
         }
       };
       tickRafRef.current = requestAnimationFrame(tickLoop);
@@ -472,8 +458,6 @@ function GrabRouletteModal({
     return () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       if (tickRafRef.current) cancelAnimationFrame(tickRafRef.current);
-      // Hard-stop the rumble if the modal closes mid-spin.
-      stopGrabRumble();
       timers.forEach(clearTimeout);
     };
   }, [targetX, easeProgress]);
