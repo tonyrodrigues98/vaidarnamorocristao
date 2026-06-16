@@ -264,6 +264,7 @@ function ActiveRunCard({
   onClaim: () => void;
 }) {
   const Icon = iconFor(active.icon);
+  const img = useSignedExpeditionUrl(active.image_url);
   const total = active.duration_minutes * 60_000;
   const elapsed = Math.max(0, now - new Date(active.started_at).getTime());
   const remaining = new Date(active.ends_at).getTime() - now;
@@ -273,8 +274,12 @@ function ActiveRunCard({
   return (
     <div className="rounded-xl border border-indigo-200 bg-indigo-50/50 p-3">
       <div className="flex items-center gap-3">
-        <div className="grid size-11 shrink-0 place-items-center rounded-lg bg-white text-indigo-600 ring-1 ring-indigo-200">
-          <Icon className="size-5" />
+        <div className="relative grid size-12 shrink-0 place-items-center overflow-hidden rounded-lg bg-white text-indigo-600 ring-1 ring-indigo-200">
+          {img ? (
+            <img src={img} alt="" className="size-full object-cover" loading="lazy" />
+          ) : (
+            <Icon className="size-5" />
+          )}
         </div>
         <div className="min-w-0 flex-1">
           <p className="truncate text-[13px] font-semibold text-neutral-900">{active.title}</p>
