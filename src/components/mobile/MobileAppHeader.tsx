@@ -29,7 +29,7 @@ export function MobileAppHeader({
   return (
     <header
       className={cn(
-        "sticky top-0 z-30 flex w-full shrink-0 items-center gap-3 border-b border-border/60 bg-background/95 px-4 pt-[max(env(safe-area-inset-top),0.5rem)] pb-3 backdrop-blur-xl md:hidden",
+        "sticky top-0 z-30 flex w-full shrink-0 items-center gap-3 border-b border-border/60 bg-background px-4 pt-[env(safe-area-inset-top)] pb-3 md:hidden",
         className,
       )}
     >
