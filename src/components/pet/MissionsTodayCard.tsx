@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import * as LucideIcons from "lucide-react";
-import { Target, CheckCircle2, Sparkles } from "lucide-react";
+import { Target, CheckCircle2, Sparkles, Clock } from "lucide-react";
 import { CoinIcon } from "@/components/icons/CoinIcon";
 import { rollAndGetTodayMissions, DIFFICULTY_LABEL, type TodayMission } from "@/lib/missions";
 import { cn } from "@/lib/utils";
@@ -18,6 +18,12 @@ export function MissionsTodayCard({
   className?: string;
 }) {
   const [items, setItems] = useState<TodayMission[] | null>(null);
+  const [resetIn, setResetIn] = useState<string>(() => timeUntilMidnight());
+
+  useEffect(() => {
+    const id = window.setInterval(() => setResetIn(timeUntilMidnight()), 60_000);
+    return () => window.clearInterval(id);
+  }, []);
 
   useEffect(() => {
     let alive = true;
@@ -54,9 +60,15 @@ export function MissionsTodayCard({
           <Sparkles className="size-4 text-sky-500" />
           Missões de hoje
         </h3>
-        <span className="text-[11px] font-medium text-neutral-400">
-          {items.filter((m) => m.completed_at).length}/{items.length} concluídas
-        </span>
+        <div className="flex items-center gap-2 text-[11px] font-medium text-neutral-400">
+          <span>
+            {items.filter((m) => m.completed_at).length}/{items.length} feitas
+          </span>
+          <span className="inline-flex items-center gap-1 rounded-full bg-neutral-100 px-1.5 py-0.5 tabular-nums text-neutral-500">
+            <Clock className="size-3" />
+            {resetIn}
+          </span>
+        </div>
       </header>
       <ul className="space-y-2.5">
         {items.map((m) => (
@@ -65,6 +77,16 @@ export function MissionsTodayCard({
       </ul>
     </section>
   );
+}
+
+function timeUntilMidnight(): string {
+  const now = new Date();
+  const next = new Date(now);
+  next.setHours(24, 0, 0, 0);
+  const diff = next.getTime() - now.getTime();
+  const h = Math.floor(diff / 3_600_000);
+  const m = Math.floor((diff % 3_600_000) / 60_000);
+  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
 }
 
 function MissionRow({ mission }: { mission: TodayMission }) {
