@@ -13,6 +13,7 @@ import {
   listMyGrabInventory,
   listPoolPrizeMetas,
   performGrab,
+  performGrabMulti,
   resolvePrize,
   type PrizeMeta,
 } from "@/lib/petGrab";
@@ -89,6 +90,10 @@ function CaixasPage() {
     poolId: string;
     poolCost: number;
   } | null>(null);
+  const [multiResults, setMultiResults] = useState<{
+    poolName: string;
+    results: Array<{ res: GrabResult; prize: PrizeMeta }>;
+  } | null>(null);
 
   async function reload() {
     try {
@@ -120,6 +125,45 @@ function CaixasPage() {
       };
       const pool = state?.pools.find((p) => p.id === poolId);
       setRoulette({ res, winner, prizes, poolId, poolCost: pool?.cost_coins ?? 0 });
+      await reload();
+    } catch (e) {
+      const msg = (e as Error).message;
+      toast.error(
+        msg.includes("insufficient_coins")
+          ? "Moedas insuficientes"
+          : msg.includes("pool_on_cooldown")
+            ? "Esta caixa ainda está em cooldown"
+            : msg.includes("pool_empty")
+              ? "Caixa sem prêmios configurados"
+              : msg.includes("pool_not_found")
+                ? "Caixa indisponível"
+                : msg,
+      );
+    } finally {
+      setPendingPoolId(null);
+    }
+  }
+
+  async function openMulti(poolId: string, count: 5 | 10) {
+    unlockGrabAudio();
+    setPendingPoolId(poolId);
+    try {
+      const multi = await performGrabMulti(poolId, count);
+      const results = await Promise.all(
+        multi.results.map(async (res) => {
+          const meta = await resolvePrize(res.prize_kind, res.prize_ref_id);
+          return {
+            res,
+            prize: {
+              ...(meta ?? { name: GRAB_PRIZE_KIND_LABEL[res.prize_kind], image_url: null }),
+              kind: res.prize_kind,
+              amount: res.prize_amount,
+            } as PrizeMeta,
+          };
+        }),
+      );
+      const pool = state?.pools.find((p) => p.id === poolId);
+      setMultiResults({ poolName: pool?.name ?? "Caixa", results });
       await reload();
     } catch (e) {
       const msg = (e as Error).message;
@@ -279,9 +323,11 @@ function CaixasPage() {
               <GrabPoolCard
                 key={pool.id}
                 pool={pool}
-                freeRemaining={Math.max(0, pool.free_daily - state.free_used)}
+                freeRemaining={Math.max(0, pool.free_daily - pool.free_used)}
+                coinBalance={state.coin_balance ?? 0}
                 busy={pendingPoolId === pool.id}
                 onOpen={() => void open(pool.id)}
+                onOpenMulti={(count) => void openMulti(pool.id, count)}
               />
             ))}
           </div>
@@ -343,6 +389,68 @@ function CaixasPage() {
       {showInv && (
         <InventoryDialog inventory={inv} onClose={() => setShowInv(false)} />
       )}
+      {multiResults && (
+        <MultiResultsDialog
+          poolName={multiResults.poolName}
+          results={multiResults.results}
+          onClose={() => {
+            setMultiResults(null);
+            void reload();
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+function MultiResultsDialog({
+  poolName,
+  results,
+  onClose,
+}: {
+  poolName: string;
+  results: Array<{ res: GrabResult; prize: PrizeMeta }>;
+  onClose: () => void;
+}) {
+  const totalPaid = results.reduce((sum, item) => sum + item.res.cost_paid, 0);
+  return (
+    <div className="fixed inset-0 z-50 grid place-items-center bg-black/60 px-4 backdrop-blur-sm" role="dialog" aria-modal="true">
+      <div className="w-full max-w-md rounded-2xl bg-[#FAF7EF] p-4 text-[#1a1410] shadow-2xl ring-1 ring-[#e6cf8a]">
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#9a7626]">Abertura múltipla</div>
+            <h2 className="truncate text-base font-semibold">{poolName}</h2>
+          </div>
+          <span className="inline-flex items-center gap-1 rounded-full bg-white px-2 py-1 text-[11px] font-semibold ring-1 ring-[#ece3d0]">
+            <CoinIcon className="size-3" /> {totalPaid}
+          </span>
+        </div>
+        <div className="grid max-h-[55vh] grid-cols-2 gap-2 overflow-y-auto pr-1">
+          {results.map(({ res, prize }, index) => (
+            <div key={`${res.prize_kind}-${res.prize_ref_id ?? index}-${index}`} className="rounded-xl bg-white p-2 ring-1 ring-[#ece3d0]">
+              <div className="grid aspect-square place-items-center overflow-hidden rounded-lg bg-[#f1ead8]">
+                {res.prize_kind === "name_gradient" && prize.gradient_css ? (
+                  <div className="size-full" style={{ background: prize.gradient_css }} />
+                ) : prize.image_url ? (
+                  <img src={prize.image_url} alt="" className="size-full object-cover" />
+                ) : res.prize_kind === "coins" ? (
+                  <CoinIcon className="size-8" />
+                ) : (
+                  <Package className="size-8 text-[#9a7626]" />
+                )}
+              </div>
+              <div className="mt-1.5 truncate text-xs font-semibold">{prize.name}</div>
+              <div className="text-[10px] text-[#7a6f5e]">
+                {GRAB_PRIZE_KIND_LABEL[res.prize_kind]}
+                {res.prize_amount > 1 ? ` x${res.prize_amount}` : ""}
+              </div>
+            </div>
+          ))}
+        </div>
+        <Button className="mt-4 w-full bg-[#1a1410] text-[#FAF7EF] hover:bg-[#2a2018]" onClick={onClose}>
+          Continuar
+        </Button>
+      </div>
     </div>
   );
 }
