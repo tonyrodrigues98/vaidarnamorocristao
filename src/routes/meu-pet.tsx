@@ -11,6 +11,7 @@ import {
   PawPrint,
   Pencil,
   Sparkles,
+  Lock,
 } from "lucide-react";
 
 import { useAuth } from "@/lib/auth";
@@ -37,7 +38,8 @@ import type {
   UserPetV2Full,
 } from "@/types/petCatalog";
 import { cn } from "@/lib/utils";
-import { isAdultPetUnlocked } from "@/lib/petEvolution";
+import { ADULT_PET_UNLOCK_COST, isAdultPetUnlocked, unlockAdultPetWithCoins } from "@/lib/petEvolution";
+import { CoinIcon } from "@/components/icons/CoinIcon";
 import { PetBackgroundLayer, PetSceneryPanel, usePetScenery } from "@/components/pet/PetSceneryPanel";
 import { usePetDayNight } from "@/lib/petDayNight";
 import { PetNeedsHud } from "@/components/pet/PetNeedsHud";
