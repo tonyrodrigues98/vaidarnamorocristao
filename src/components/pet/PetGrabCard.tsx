@@ -800,7 +800,13 @@ export function GrabRouletteModal({
                           rarityStyle.ring,
                           rarityStyle.shadow,
                         )}
-                        style={popping ? { animation: "grab-pop 700ms cubic-bezier(0.22,1.4,0.36,1) forwards" } : undefined}
+                        style={popping ? {
+                          animation: isLegendary && isWinner
+                            ? "grab-pop-legendary 900ms cubic-bezier(0.22,1.4,0.36,1) forwards"
+                            : "grab-pop 700ms cubic-bezier(0.22,1.4,0.36,1) forwards",
+                          zIndex: isLegendary && isWinner ? 50 : undefined,
+                          position: "relative",
+                        } : undefined}
                       >
                         {it?.kind === "name_gradient" && it.gradient_css ? (
                           <div
