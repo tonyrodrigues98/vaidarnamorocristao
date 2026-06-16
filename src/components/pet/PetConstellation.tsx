@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode, type KeyboardEvent } from "react";
 import {
   Sheet,
   SheetContent,
@@ -6,6 +6,12 @@ import {
   SheetTitle,
   SheetDescription,
 } from "@/components/ui/sheet";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { ArrowDownLeft } from "lucide-react";
 import skyAsset from "@/assets/pet-kingdom/constellation-sky.png.asset.json";
 import type { PetCareKind } from "@/types/petCare";
@@ -65,6 +71,14 @@ type Props = {
 
 type SheetKind = null | "diary" | "missions" | "streak" | "expedition" | "evolution" | "care";
 
+const LAST_STAR_KEY = "pet:constellation:last-star";
+
+function attentionLabel(a: 0 | 1 | 2): string {
+  if (a === 2) return "atenção urgente";
+  if (a === 1) return "brilho calmo";
+  return "tudo em dia";
+}
+
 /**
  * Constelação (Z3) — zoom-in cinematográfico do mapa pro céu.
  * 6 estrelas conectadas representam os pilares do progresso do usuário.
@@ -85,6 +99,51 @@ export function PetConstellation({
   onBackToKingdom,
 }: Props) {
   const [sheet, setSheet] = useState<SheetKind>(null);
+  const starRefs = useRef<Record<StarId, HTMLButtonElement | null>>({
+    diary: null,
+    missions: null,
+    streak: null,
+    expedition: null,
+    evolution: null,
+    care: null,
+  });
+  // Persistência: última estrela visitada — restaura foco visual ao reabrir.
+  const [lastVisited, setLastVisited] = useState<StarId | null>(() => {
+    if (typeof window === "undefined") return null;
+    const v = window.localStorage.getItem(LAST_STAR_KEY) as StarId | null;
+    if (!v) return null;
+    return STARS.some((s) => s.id === v) ? v : null;
+  });
+
+  function visit(id: StarId) {
+    setLastVisited(id);
+    setSheet(id);
+    try { window.localStorage.setItem(LAST_STAR_KEY, id); } catch { /* ignore */ }
+  }
+
+  // Ao montar, devolve foco visual pra última estrela visitada (sem abrir sheet).
+  useEffect(() => {
+    if (!lastVisited) return;
+    const btn = starRefs.current[lastVisited];
+    if (btn) btn.focus({ preventScroll: true });
+    // Apenas no mount inicial.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  function handleStarKey(e: KeyboardEvent<HTMLButtonElement>, currentId: StarId) {
+    const idx = STARS.findIndex((s) => s.id === currentId);
+    if (idx < 0) return;
+    let nextIdx: number | null = null;
+    if (e.key === "ArrowRight" || e.key === "ArrowDown") nextIdx = (idx + 1) % STARS.length;
+    else if (e.key === "ArrowLeft" || e.key === "ArrowUp") nextIdx = (idx - 1 + STARS.length) % STARS.length;
+    else if (e.key === "Home") nextIdx = 0;
+    else if (e.key === "End") nextIdx = STARS.length - 1;
+    if (nextIdx === null) return;
+    e.preventDefault();
+    const target = STARS[nextIdx];
+    const btn = starRefs.current[target.id];
+    if (btn) btn.focus();
+  }
 
   // Pendências reais — intensidade do brilho de cada estrela (0 / 1 / 2).
   const attention = useMemo<Record<StarId, 0 | 1 | 2>>(() => {
@@ -110,6 +169,7 @@ export function PetConstellation({
   }, [pet.id, careValues, isAway, streakDays, missionsDoneToday]);
 
   return (
+    <TooltipProvider delayDuration={150} skipDelayDuration={300}>
     <section
       className="relative mx-auto w-full max-w-[520px] overflow-hidden rounded-3xl border border-neutral-200/80 bg-neutral-950 shadow-[0_2px_0_rgba(0,0,0,0.02),0_30px_70px_-35px_rgba(0,0,0,0.4)]"
       aria-label="Constelação do pet"
@@ -168,19 +228,33 @@ export function PetConstellation({
         </div>
 
         {/* Estrelas */}
-        {STARS.map((s) => (
-          <StarButton
-            key={s.id}
-            star={s}
-            attention={attention[s.id]}
-            onClick={() => setSheet(s.id)}
-          />
-        ))}
+        <div
+          role="group"
+          aria-label="Estrelas da constelação. Use as setas pra navegar."
+          className="contents"
+        >
+          {STARS.map((s) => (
+            <StarButton
+              key={s.id}
+              ref={(el) => { starRefs.current[s.id] = el; }}
+              star={s}
+              attention={attention[s.id]}
+              isLastVisited={lastVisited === s.id}
+              onClick={() => visit(s.id)}
+              onKeyDown={(e) => handleStarKey(e, s.id)}
+            />
+          ))}
+        </div>
 
         {/* Legenda discreta no rodapé */}
         <div className="pointer-events-none absolute inset-x-0 bottom-0 z-30 px-4 pb-3 text-center text-[10px] font-medium tracking-wide text-amber-100/80">
           As estrelas que brilham forte pedem atenção.
         </div>
+
+        {/* Anúncio acessível pra leitores de tela */}
+        <p className="sr-only" aria-live="polite">
+          Constelação aberta. {STARS.length} estrelas. Use Tab e setas para navegar; Enter para abrir.
+        </p>
       </div>
 
       <ConstellationSheet
@@ -242,37 +316,52 @@ export function PetConstellation({
         onOpenChange={(o) => setSheet(o ? "care" : null)}
       />
     </section>
+    </TooltipProvider>
   );
 }
 
-function StarButton({
-  star,
-  attention,
-  onClick,
-}: {
-  star: StarDef;
-  attention: 0 | 1 | 2;
-  onClick: () => void;
-}) {
+const StarButton = (() => {
+  const Inner = (
+    {
+      star,
+      attention,
+      isLastVisited,
+      onClick,
+      onKeyDown,
+    }: {
+      star: StarDef;
+      attention: 0 | 1 | 2;
+      isLastVisited: boolean;
+      onClick: () => void;
+      onKeyDown: (e: KeyboardEvent<HTMLButtonElement>) => void;
+    },
+    ref: React.Ref<HTMLButtonElement>,
+  ) => {
   // Tamanho do botão clicável (área generosa pra touch), escala com r.
-  const buttonSize = Math.max(40, star.r * 14); // px aprox via inline em em-equivalents — usamos % do width via wrapper
+  const buttonSize = Math.max(44, star.r * 14);
   // Velocidade e opacidade do pulso conforme atenção.
   const pulseDuration = attention === 2 ? "2s" : attention === 1 ? "4s" : "0s";
   const baseGlowOpacity = attention === 2 ? 0.95 : attention === 1 ? 0.55 : 0.3;
+  const stateText = attentionLabel(attention);
 
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-label={star.label}
-      className="group absolute z-20 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center outline-none focus-visible:ring-2 focus-visible:ring-amber-200/70"
-      style={{
-        left: `${star.x}%`,
-        top: `${star.y}%`,
-        width: `${buttonSize}px`,
-        height: `${buttonSize}px`,
-      }}
-    >
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button
+          ref={ref}
+          type="button"
+          onClick={onClick}
+          onKeyDown={onKeyDown}
+          aria-label={`${star.label} — ${stateText}`}
+          data-last-visited={isLastVisited ? "true" : undefined}
+          className="group absolute z-20 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full outline-none transition focus-visible:ring-2 focus-visible:ring-amber-200/90 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950 data-[last-visited=true]:ring-1 data-[last-visited=true]:ring-amber-200/40"
+          style={{
+            left: `${star.x}%`,
+            top: `${star.y}%`,
+            width: `${buttonSize}px`,
+            height: `${buttonSize}px`,
+          }}
+        >
       {/* Halo externo pulsando */}
       <span
         aria-hidden
@@ -287,7 +376,7 @@ function StarButton({
       {/* Núcleo da estrela */}
       <span
         aria-hidden
-        className="relative inline-block rounded-full bg-amber-50 transition-transform duration-300 group-hover:scale-125 group-active:scale-95"
+        className="relative inline-block rounded-full bg-amber-50 transition-transform duration-300 group-hover:scale-125 group-focus-visible:scale-125 group-active:scale-95"
         style={{
           width: `${star.r * 4}px`,
           height: `${star.r * 4}px`,
@@ -295,9 +384,34 @@ function StarButton({
             "0 0 8px 1px rgba(255,236,180,0.95), 0 0 22px 6px rgba(255,200,120,0.5)",
         }}
       />
-    </button>
+        </button>
+      </TooltipTrigger>
+      <TooltipContent
+        side="top"
+        sideOffset={10}
+        className="border border-amber-200/40 bg-neutral-900/95 text-amber-50 shadow-lg backdrop-blur"
+      >
+        <div className="flex flex-col gap-0.5">
+          <span className="text-[11px] font-semibold">{star.label}</span>
+          <span className="text-[10px] text-amber-100/80">{stateText}</span>
+        </div>
+      </TooltipContent>
+    </Tooltip>
   );
-}
+  };
+  const Forwarded = (Inner as unknown) as never;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (require("react") as typeof import("react")).forwardRef(Inner as any) as unknown as (
+    props: {
+      star: StarDef;
+      attention: 0 | 1 | 2;
+      isLastVisited: boolean;
+      onClick: () => void;
+      onKeyDown: (e: KeyboardEvent<HTMLButtonElement>) => void;
+      ref?: React.Ref<HTMLButtonElement>;
+    },
+  ) => JSX.Element;
+})();
 
 function ConstellationSheet({
   open,
