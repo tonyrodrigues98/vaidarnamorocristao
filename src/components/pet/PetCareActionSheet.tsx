@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { createElement, useEffect, useState } from "react";
 import { Loader2, Sparkles, Zap } from "lucide-react";
 import { toast } from "sonner";
 
@@ -85,8 +85,10 @@ export function PetCareActionSheet({
       const multiTxt = result.multiplier && result.multiplier !== 1
         ? ` (×${result.multiplier.toFixed(2)})`
         : "";
-      toast.success(`+${restore} ${PET_CARE_LABEL[item.kind]}${multiTxt}`, {
+      const KindIcon = PET_CARE_ICON[item.kind];
+      toast.success(`${PET_CARE_LABEL[item.kind]} +${restore}${multiTxt}`, {
         description: result.notes?.length ? result.notes.slice(0, 2).join(" · ") : undefined,
+        icon: createElement(KindIcon, { className: "size-4" }),
       });
       // XP: care de resgate (<20%) ou care preventivo (<50%)
       if (currentValue < 20) {
@@ -96,7 +98,11 @@ export function PetCareActionSheet({
           XP_SOURCES.CARE_RESCUE.cap,
           { kind: item.kind, item: item.slug },
         );
-        if (xp && xp.granted > 0) toast.success(`+${xp.granted} XP`, { description: "Resgate na hora certa" });
+        if (xp && xp.granted > 0)
+          toast.success(`XP +${xp.granted}`, {
+            description: "Resgate na hora certa",
+            icon: createElement(Sparkles, { className: "size-4 text-amber-500" }),
+          });
       } else if (currentValue < 50) {
         const xp = await awardXp(
           XP_SOURCES.CARE_LOW.source,
@@ -104,7 +110,11 @@ export function PetCareActionSheet({
           XP_SOURCES.CARE_LOW.cap,
           { kind: item.kind, item: item.slug },
         );
-        if (xp && xp.granted > 0) toast.success(`+${xp.granted} XP`);
+        if (xp && xp.granted > 0)
+          toast.success(`XP +${xp.granted}`, {
+            description: "Cuidado preventivo",
+            icon: createElement(Sparkles, { className: "size-4 text-amber-500" }),
+          });
       }
       if (result.random_event) {
         const re = result.random_event;
