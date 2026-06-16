@@ -185,69 +185,83 @@ function ExpeditionRow({
   return (
     <li
       className={cn(
-        "flex items-center gap-3 rounded-xl border p-3 transition",
+        "overflow-hidden rounded-2xl border transition",
         sent ? "border-neutral-200 bg-neutral-50 opacity-60" : "border-neutral-200 bg-white",
       )}
     >
-      <div className="relative grid size-12 shrink-0 place-items-center overflow-hidden rounded-lg bg-indigo-50 text-indigo-600 ring-1 ring-indigo-100">
+      <div className="relative aspect-[16/9] w-full overflow-hidden bg-indigo-50">
         {img ? (
           <img src={img} alt="" className="size-full object-cover" loading="lazy" />
         ) : (
-          <Icon className="size-4" />
+          <div className="grid size-full place-items-center text-indigo-400">
+            <Icon className="size-8" />
+          </div>
         )}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/55 to-transparent" />
+        <span
+          className={cn(
+            "absolute left-2 top-2 rounded-full px-2 py-0.5 text-[10px] font-medium ring-1 backdrop-blur",
+            DIFFICULTY_TONE[m.difficulty],
+          )}
+        >
+          {DIFFICULTY_LABEL[m.difficulty]}
+        </span>
+        <h4 className="absolute inset-x-3 bottom-2 text-[14px] font-semibold leading-snug text-white drop-shadow">
+          {m.title}
+        </h4>
       </div>
-      <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <p className="truncate text-[13px] font-medium text-neutral-900">{m.title}</p>
-                    <span
-                      className={cn(
-                        "shrink-0 rounded-full px-1.5 py-0.5 text-[9px] font-medium ring-1",
-                        DIFFICULTY_TONE[m.difficulty],
-                      )}
-                    >
-                      {DIFFICULTY_LABEL[m.difficulty]}
-                    </span>
-                  </div>
-                  <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-neutral-500">
-                    <span className="inline-flex items-center gap-0.5">
-                      <Clock className="size-3" />
-                      {fmtDuration(m.duration_minutes)}
-                    </span>
-                    <span className="inline-flex items-center gap-0.5 text-yellow-600">
-                      <Zap className="size-3" />-{m.energy_cost}
-                    </span>
-                    <span className="inline-flex items-center gap-0.5 text-sky-600">
-                      <Sparkles className="size-3" />+{m.xp_reward}
-                    </span>
-                    <span className="inline-flex items-center gap-0.5 text-amber-600">
-                      <CoinIcon className="size-3" />+{m.coin_reward}
-                    </span>
-                    {m.item_reward_label && (
-                      <span className="inline-flex items-center gap-0.5 text-fuchsia-600">
-                        <Gift className="size-3" />
-                        {m.item_reward_label}
-                      </span>
-                    )}
-                  </div>
-                </div>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="shrink-0"
-                  disabled={disabled}
-                  onClick={onStart}
-                >
-                  {busy ? (
-                    <Loader2 className="size-3.5 animate-spin" />
-                  ) : sent ? (
-                    <Lock className="size-3.5" />
-                  ) : (
-                    <>
-                      <Send className="mr-1 size-3.5" />
-                      Enviar
-                    </>
-                  )}
-                </Button>
+      <div className="space-y-3 p-3">
+        {m.description && (
+          <p className="line-clamp-2 text-[12px] leading-relaxed text-neutral-600">
+            {m.description}
+          </p>
+        )}
+        <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[11px] text-neutral-600">
+          <span className="inline-flex items-center gap-1">
+            <Clock className="size-3" />
+            {fmtDuration(m.duration_minutes)}
+          </span>
+          <span className="inline-flex items-center gap-1 text-yellow-600">
+            <Zap className="size-3" />-{m.energy_cost}
+          </span>
+          <span className="inline-flex items-center gap-1 text-sky-600">
+            <Sparkles className="size-3" />+{m.xp_reward} XP
+          </span>
+          <span className="inline-flex items-center gap-1 text-amber-600">
+            <CoinIcon className="size-3" />+{m.coin_reward}
+          </span>
+          {m.item_reward_label && (
+            <span className="inline-flex items-center gap-1 text-fuchsia-600">
+              <Gift className="size-3" />
+              {m.item_reward_label}
+            </span>
+          )}
+          <span className="ml-auto text-[10px] text-neutral-400">
+            sucesso {m.success_rate}% · crit {m.crit_rate}%
+          </span>
+        </div>
+        <Button
+          size="sm"
+          variant={sent ? "outline" : "default"}
+          className="w-full"
+          disabled={disabled}
+          onClick={onStart}
+        >
+          {busy ? (
+            <Loader2 className="size-3.5 animate-spin" />
+          ) : sent ? (
+            <>
+              <Lock className="mr-1 size-3.5" />
+              Já enviada hoje
+            </>
+          ) : (
+            <>
+              <Send className="mr-1 size-3.5" />
+              Enviar pet
+            </>
+          )}
+        </Button>
+      </div>
     </li>
   );
 }
