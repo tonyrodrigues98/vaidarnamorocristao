@@ -48,7 +48,8 @@ export function GrabPoolCard({
     pool.cooldown_hours === 0 &&
     paidCostFor(count) <= coinBalance;
 
-  const pityProgress = pool.pity_threshold > 0 ? Math.min(1, pool.pity_count / pool.pity_threshold) : 0;
+  const pityProgress =
+    pool.pity_threshold > 0 ? Math.min(1, pool.pity_count / pool.pity_threshold) : 0;
 
   return (
     <article

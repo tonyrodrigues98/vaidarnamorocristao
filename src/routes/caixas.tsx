@@ -232,8 +232,7 @@ function CaixasPage() {
           aria-hidden
           className="pointer-events-none absolute inset-x-0 bottom-0 h-px"
           style={{
-            background:
-              "linear-gradient(90deg, transparent, rgba(201,162,74,0.85), transparent)",
+            background: "linear-gradient(90deg, transparent, rgba(201,162,74,0.85), transparent)",
           }}
         />
         <div className="relative mx-auto flex min-h-[280px] max-w-3xl flex-col justify-between px-4 py-5 sm:min-h-[340px]">
@@ -483,8 +482,7 @@ function FeaturedBanner({
     <div
       className="relative mt-5 overflow-hidden rounded-2xl border border-[#e6cf8a] bg-white p-4"
       style={{
-        boxShadow:
-          "0 18px 44px -18px rgba(201,162,74,0.45), inset 0 1px 0 rgba(255,255,255,0.9)",
+        boxShadow: "0 18px 44px -18px rgba(201,162,74,0.45), inset 0 1px 0 rgba(255,255,255,0.9)",
       }}
     >
       <div
