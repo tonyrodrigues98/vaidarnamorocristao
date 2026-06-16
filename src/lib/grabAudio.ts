@@ -183,6 +183,95 @@ export function stopGrabRumble(): void {
 }
 
 /**
+ * Cinematic reveal for a LEGENDARY drop. Layered sustained pad (choir-like
+ * stack of detuned saws) + deeper gong-style sub thump + crystalline bell
+ * stack. Slightly longer and more dramatic than `playGrabFinalDing`.
+ */
+export function playGrabLegendaryReveal(): void {
+  const ac = getOrCreateCtx();
+  if (!ac) return;
+  ensureRunning(ac);
+  try {
+    const now = ac.currentTime;
+
+    // 1) Deep gong sub
+    const sub = ac.createOscillator();
+    const subGain = ac.createGain();
+    sub.type = "sine";
+    sub.frequency.setValueAtTime(90, now);
+    sub.frequency.exponentialRampToValueAtTime(28, now + 0.9);
+    subGain.gain.setValueAtTime(0.0001, now);
+    subGain.gain.exponentialRampToValueAtTime(0.7, now + 0.02);
+    subGain.gain.exponentialRampToValueAtTime(0.0001, now + 1.2);
+    sub.connect(subGain).connect(ac.destination);
+    sub.start(now);
+    sub.stop(now + 1.3);
+
+    // 2) Choir pad — detuned sawtooth stack with lowpass + slow swell
+    const padGain = ac.createGain();
+    padGain.gain.setValueAtTime(0.0001, now);
+    padGain.gain.exponentialRampToValueAtTime(0.18, now + 0.4);
+    padGain.gain.exponentialRampToValueAtTime(0.0001, now + 2.4);
+    const padLp = ac.createBiquadFilter();
+    padLp.type = "lowpass";
+    padLp.frequency.setValueAtTime(800, now);
+    padLp.frequency.linearRampToValueAtTime(2400, now + 1.4);
+    padLp.Q.value = 0.8;
+    padGain.connect(padLp).connect(ac.destination);
+    [261.6, 329.6, 392.0, 523.2].forEach((f, i) => {
+      const o1 = ac.createOscillator();
+      const o2 = ac.createOscillator();
+      o1.type = "sawtooth";
+      o2.type = "sawtooth";
+      o1.frequency.value = f;
+      o2.frequency.value = f * 1.005;
+      const g = ac.createGain();
+      g.gain.value = 0.18 / (i + 1);
+      o1.connect(g);
+      o2.connect(g);
+      g.connect(padGain);
+      o1.start(now);
+      o2.start(now);
+      o1.stop(now + 2.5);
+      o2.stop(now + 2.5);
+    });
+
+    // 3) Bell crystal cascade — staggered partials with stereo spread
+    const supportsPanner = typeof ac.createStereoPanner === "function";
+    const bells = [
+      { f: 1046, v: 0.32, pan: -0.4, t: 0.05, dur: 2.0 },
+      { f: 1318, v: 0.26, pan: 0.35, t: 0.12, dur: 1.8 },
+      { f: 1568, v: 0.22, pan: -0.2, t: 0.2, dur: 1.6 },
+      { f: 2093, v: 0.18, pan: 0.5, t: 0.3, dur: 1.4 },
+      { f: 2637, v: 0.13, pan: -0.5, t: 0.42, dur: 1.2 },
+    ];
+    bells.forEach(({ f, v, pan, t, dur }) => {
+      const t0 = now + t;
+      const osc = ac.createOscillator();
+      const g = ac.createGain();
+      osc.type = "sine";
+      osc.frequency.value = f;
+      g.gain.setValueAtTime(0.0001, t0);
+      g.gain.exponentialRampToValueAtTime(v, t0 + 0.008);
+      g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+      let tail: AudioNode = g;
+      if (supportsPanner) {
+        const p = ac.createStereoPanner();
+        p.pan.value = pan;
+        g.connect(p);
+        tail = p;
+      }
+      osc.connect(g);
+      tail.connect(ac.destination);
+      osc.start(t0);
+      osc.stop(t0 + dur + 0.05);
+    });
+  } catch {
+    /* noop */
+  }
+}
+
+/**
  * Unlock the shared AudioContext from inside a user gesture (e.g. button
  * onClick). Safe to call repeatedly — the first call performs the actual
  * iOS/Safari unlock dance; subsequent calls just resume if suspended.
