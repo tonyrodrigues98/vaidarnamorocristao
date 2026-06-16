@@ -68,6 +68,7 @@ export function PetLivingRoom({
   scenery,
   onCareAction,
   onSwitchToList,
+  onOpenProfile,
   onCareChanged,
   onEvolved,
   babyImage,
