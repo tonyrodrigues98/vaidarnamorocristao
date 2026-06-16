@@ -9,6 +9,7 @@ import grabComumImg from "@/assets/grab-comum.png";
 import grabRaraImg from "@/assets/grab-rara.png";
 import grabEpicaImg from "@/assets/grab-epica.png";
 import grabLendariaImg from "@/assets/grab-lendaria.png";
+import capsulaXpImg from "@/assets/caixas/capsula_xp.png";
 import {
   getGrabState, listMyGrabInventory, listPoolPrizeMetas, performGrab, resolvePrize,
   type PrizeMeta,
