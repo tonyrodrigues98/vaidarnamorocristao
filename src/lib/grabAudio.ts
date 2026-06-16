@@ -189,23 +189,31 @@ export function stopGrabRumble(): void {
  */
 export function unlockGrabAudio(): void {
   const ac = getOrCreateCtx();
-  if (!ac) return;
-  if (ac.state === "suspended") {
-    void ac.resume().catch(() => {});
+  if (!ac) {
+    console.warn("[grabAudio] no AudioContext available");
+    return;
   }
-  if (unlocked) return;
-  unlocked = true;
-  // iOS Safari: schedule a silent buffer inside this gesture so the audio
-  // graph is considered "started" by the OS. Without this, scheduling a
-  // sound later (after async work) is silently dropped.
+  // Always re-resume — iOS Safari can put the context back to "interrupted"
+  // after backgrounding or after a phone call without firing any event.
+  if (ac.state !== "running") {
+    void ac.resume().catch((e) => console.warn("[grabAudio] resume failed", e));
+  }
   try {
-    const silent = ac.createBuffer(1, 1, 22050);
+    // Slightly longer silent buffer (1024 samples ≈ 23ms @ 44.1kHz). Some
+    // iOS versions require the unlock buffer to be > 1 sample, otherwise
+    // the audio graph is never marked as "started" and later schedules are
+    // silently dropped.
+    const silent = ac.createBuffer(1, 1024, ac.sampleRate);
     const src = ac.createBufferSource();
     src.buffer = silent;
     src.connect(ac.destination);
     src.start(0);
-  } catch {
-    /* noop */
+  } catch (e) {
+    console.warn("[grabAudio] silent buffer failed", e);
+  }
+  if (!unlocked) {
+    unlocked = true;
+    console.info("[grabAudio] unlocked", { state: ac.state, sampleRate: ac.sampleRate });
   }
 }
 
