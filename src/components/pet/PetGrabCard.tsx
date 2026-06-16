@@ -5,6 +5,10 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { CoinIcon } from "@/components/icons/CoinIcon";
+import grabComumImg from "@/assets/grab-comum.jpg";
+import grabRaraImg from "@/assets/grab-rara.jpg";
+import grabEpicaImg from "@/assets/grab-epica.jpg";
+import grabLendariaImg from "@/assets/grab-lendaria.jpg";
 import {
   getGrabState, listMyGrabInventory, listPoolPrizeMetas, performGrab, resolvePrize,
   type PrizeMeta,
@@ -16,6 +20,44 @@ import {
   type GrabState,
 } from "@/types/petGrab";
 import { cn } from "@/lib/utils";
+
+type GrabTier = {
+  image: string;
+  accent: string;
+  ring: string;
+  glow: string;
+};
+
+function tierFor(name: string): GrabTier {
+  const n = name.toLowerCase();
+  if (n.includes("lend"))
+    return {
+      image: grabLendariaImg,
+      accent: "from-amber-200/0 via-amber-100/10 to-amber-950/80",
+      ring: "ring-amber-200/40",
+      glow: "shadow-[0_20px_60px_-20px_rgba(217,160,48,0.45)]",
+    };
+  if (n.includes("ép") || n.includes("ep"))
+    return {
+      image: grabEpicaImg,
+      accent: "from-violet-200/0 via-violet-500/10 to-neutral-950/85",
+      ring: "ring-violet-300/30",
+      glow: "shadow-[0_20px_60px_-20px_rgba(139,92,246,0.45)]",
+    };
+  if (n.includes("rar"))
+    return {
+      image: grabRaraImg,
+      accent: "from-cyan-200/0 via-cyan-500/10 to-slate-950/80",
+      ring: "ring-cyan-200/30",
+      glow: "shadow-[0_20px_60px_-20px_rgba(20,184,166,0.4)]",
+    };
+  return {
+    image: grabComumImg,
+    accent: "from-rose-100/0 via-rose-100/10 to-neutral-900/70",
+    ring: "ring-rose-200/40",
+    glow: "shadow-[0_20px_60px_-20px_rgba(244,114,182,0.35)]",
+  };
+}
 
 type Props = {
   refreshKey?: number;
