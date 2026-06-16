@@ -9,6 +9,7 @@ import grabComumImg from "@/assets/grab-comum.png";
 import grabRaraImg from "@/assets/grab-rara.png";
 import grabEpicaImg from "@/assets/grab-epica.png";
 import grabLendariaImg from "@/assets/grab-lendaria.png";
+import capsulaXpImg from "@/assets/caixas/capsula_xp.png";
 import {
   getGrabState, listMyGrabInventory, listPoolPrizeMetas, performGrab, resolvePrize,
   type PrizeMeta,
@@ -847,10 +848,15 @@ export function GrabRouletteModal({
                             </span>
                           </div>
                         ) : it?.kind === "xp" ? (
-                          <div className="flex flex-col items-center justify-center">
-                            <span className="text-base font-extrabold text-sky-300">XP</span>
-                            <span className="text-sm font-bold text-sky-200">
-                              +{it.amount ?? 1}
+                          <div className="relative flex h-full w-full items-center justify-center">
+                            <img
+                              src={capsulaXpImg}
+                              alt=""
+                              className="size-full object-contain p-1"
+                              draggable={false}
+                            />
+                            <span className="absolute bottom-0.5 rounded-md bg-black/55 px-1.5 py-0.5 text-[10px] font-bold text-sky-200 backdrop-blur">
+                              +{it.amount ?? 1} XP
                             </span>
                           </div>
                         ) : (
@@ -912,6 +918,7 @@ export function GrabRouletteModal({
                       Você ganhou
                     </div>
                     <div className="flex items-center gap-2">
+                      <img src={capsulaXpImg} alt="" className="size-10 object-contain" />
                       <span className="text-3xl font-extrabold tracking-tight text-sky-300">
                         +<AnimatedCounter value={res.prize_amount} />
                       </span>
