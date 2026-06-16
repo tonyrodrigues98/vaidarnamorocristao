@@ -203,7 +203,7 @@ export function PetCareActionSheet({
                       <div className="min-w-0 w-full">
                         <div className="truncate text-xs font-semibold">{it.name}</div>
                         <div className="mt-0.5 flex items-center justify-center gap-1 text-[10px] text-neutral-500">
-                          <Sparkles className="h-3 w-3" />+{it.restore_amount}
+                          <Icon className="h-3 w-3" />+{it.restore_amount}
                           {it.energy_cost > 0 && kind !== "sleep" && (
                             <span className="ml-1 inline-flex items-center gap-0.5 text-yellow-600">
                               <Zap className="h-3 w-3" />-{it.energy_cost}
