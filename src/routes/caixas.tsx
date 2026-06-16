@@ -23,7 +23,6 @@ import {
   type GrabState,
   type GrabStatePool,
 } from "@/types/petGrab";
-import { rarityTokens } from "@/lib/grabRarity";
 import { unlockGrabAudio } from "@/lib/grabAudio";
 import { GrabRouletteModal } from "@/components/pet/PetGrabCard";
 import { GrabPoolCard } from "@/components/pet/grab/GrabPoolCard";
@@ -144,9 +143,9 @@ function CaixasPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-neutral-950">
+      <div className="min-h-screen bg-[#FAF7EF]">
         <div className="grid h-[60vh] place-items-center">
-          <Loader2 className="size-6 animate-spin text-white/50" />
+          <Loader2 className="size-6 animate-spin text-[#9a7626]" />
         </div>
       </div>
     );
@@ -156,44 +155,68 @@ function CaixasPage() {
   const totalInv = inv.reduce((s, x) => s + x.quantity, 0);
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-neutral-100">
+    <div className="min-h-screen bg-[#FAF7EF] text-[#1a1410]">
       <Header />
 
       {/* Hero banner */}
-      <section className="relative overflow-hidden border-b border-neutral-900">
+      <section className="relative overflow-hidden border-b border-[#ece3d0]">
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0"
           style={{
             background:
-              "radial-gradient(60% 60% at 30% 30%, rgba(251,191,36,0.18), transparent 70%), radial-gradient(50% 50% at 80% 70%, rgba(168,85,247,0.18), transparent 70%), radial-gradient(40% 40% at 50% 100%, rgba(34,211,238,0.14), transparent 70%)",
+              "radial-gradient(80% 60% at 20% 0%, rgba(232,199,122,0.35), transparent 65%), radial-gradient(60% 50% at 100% 30%, rgba(91,26,46,0.10), transparent 70%), radial-gradient(80% 80% at 50% 120%, rgba(15,107,79,0.08), transparent 70%)",
+          }}
+        />
+        {/* hairline gold separator */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-px"
+          style={{
+            background:
+              "linear-gradient(90deg, transparent, rgba(201,162,74,0.6), transparent)",
           }}
         />
         <div className="relative mx-auto max-w-3xl px-4 py-8">
           <Link
             to="/meu-pet"
-            className="inline-flex items-center gap-1.5 text-xs text-neutral-400 hover:text-white"
+            className="inline-flex items-center gap-1.5 text-xs text-[#7a6f5e] hover:text-[#1a1410]"
           >
             <ArrowLeft className="size-3.5" /> Voltar para o pet
           </Link>
           <div className="mt-3 flex items-center gap-3">
-            <div className="grid size-12 place-items-center rounded-2xl bg-gradient-to-br from-amber-400/30 to-violet-500/30 ring-1 ring-white/15">
-              <Box className="size-6 text-amber-300" />
+            <div
+              className="grid size-12 place-items-center rounded-2xl ring-1 ring-[#e6cf8a]"
+              style={{
+                background:
+                  "linear-gradient(135deg, #FFF6DF 0%, #F1DDA1 60%, #C9A24A 100%)",
+                boxShadow: "inset 0 1px 0 rgba(255,255,255,0.6), 0 6px 18px -10px rgba(201,162,74,0.55)",
+              }}
+            >
+              <Box className="size-6 text-[#5b1a2e]" />
             </div>
             <div className="min-w-0">
-              <h1 className="text-xl font-semibold tracking-tight">Caixas da Sorte</h1>
-              <p className="text-xs text-neutral-400">
+              <h1 className="text-xl font-semibold tracking-tight text-[#1a1410]">
+                Caixas da Sorte
+              </h1>
+              <p className="text-xs text-[#7a6f5e]">
                 Abra caixas temáticas e suba sua coleção. Cada caixa, uma chance.
               </p>
             </div>
             <Link
               to="/meu-pet"
-              className="ml-auto inline-flex items-center gap-1.5 rounded-full bg-white/5 px-3 py-1.5 text-xs font-medium text-neutral-200 ring-1 ring-white/10 hover:bg-white/10"
+              className="ml-auto inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-xs font-medium text-[#1a1410] ring-1 ring-[#ece3d0] hover:ring-[#e6cf8a]"
             >
               <Package className="size-3.5" />
               Estoque
               {totalInv > 0 && (
-                <span className="rounded-full bg-amber-400 px-1.5 text-[10px] font-bold text-black">
+                <span
+                  className="rounded-full px-1.5 text-[10px] font-bold text-[#1a1410]"
+                  style={{
+                    background:
+                      "linear-gradient(135deg, #F1DDA1 0%, #C9A24A 100%)",
+                  }}
+                >
                   {totalInv}
                 </span>
               )}
@@ -203,11 +226,11 @@ function CaixasPage() {
           {/* Daily quota */}
           {state && (
             <div className="mt-5 flex flex-wrap gap-2 text-[11px]">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/5 px-2.5 py-1 text-neutral-300 ring-1 ring-white/10">
-                <Sparkles className="size-3 text-amber-300" />
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-2.5 py-1 text-[#3a3328] ring-1 ring-[#ece3d0]">
+                <Sparkles className="size-3 text-[#c9a24a]" />
                 {Math.max(0, state.default_free_daily - state.free_used)} grátis hoje
               </span>
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/5 px-2.5 py-1 text-neutral-300 ring-1 ring-white/10">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-2.5 py-1 text-[#3a3328] ring-1 ring-[#ece3d0]">
                 <CoinIcon className="size-3" />
                 {state.recent.length > 0 ? `${state.recent.length} aberturas recentes` : "Nenhuma abertura ainda"}
               </span>
@@ -222,7 +245,7 @@ function CaixasPage() {
       </section>
 
       {/* Filters */}
-      <div className="sticky top-0 z-20 border-b border-neutral-900 bg-neutral-950/80 backdrop-blur">
+      <div className="sticky top-0 z-20 border-b border-[#ece3d0] bg-[#FAF7EF]/85 backdrop-blur">
         <div className="mx-auto flex max-w-3xl gap-2 overflow-x-auto px-4 py-3">
           {(Object.keys(FAMILY_LABELS) as FamilyKey[]).map((k) => (
             <button
@@ -231,8 +254,8 @@ function CaixasPage() {
               className={cn(
                 "shrink-0 rounded-full px-3 py-1.5 text-xs font-medium ring-1 transition",
                 filter === k
-                  ? "bg-white text-black ring-white"
-                  : "bg-white/5 text-neutral-300 ring-white/10 hover:bg-white/10",
+                  ? "bg-[#1a1410] text-[#FAF7EF] ring-[#1a1410]"
+                  : "bg-white text-[#5b5142] ring-[#ece3d0] hover:ring-[#e6cf8a]",
               )}
             >
               {FAMILY_LABELS[k]}
@@ -245,10 +268,10 @@ function CaixasPage() {
       <main className="mx-auto max-w-3xl px-4 py-5 pb-24">
         {!state ? (
           <div className="grid h-[40vh] place-items-center">
-            <Loader2 className="size-5 animate-spin text-white/50" />
+            <Loader2 className="size-5 animate-spin text-[#9a7626]" />
           </div>
         ) : groups && groups.filtered.length === 0 ? (
-          <div className="grid h-[30vh] place-items-center text-sm text-neutral-500">
+          <div className="grid h-[30vh] place-items-center text-sm text-[#7a6f5e]">
             Nenhuma caixa neste filtro.
           </div>
         ) : (
@@ -268,22 +291,22 @@ function CaixasPage() {
         {/* Recent log */}
         {state && state.recent.length > 0 && (
           <section className="mt-8">
-            <h2 className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-neutral-500">
+            <h2 className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-[#9a7626]">
               Suas últimas aberturas
             </h2>
             <ul className="space-y-1.5">
               {state.recent.map((r, i) => (
                 <li
                   key={i}
-                  className="flex items-center justify-between rounded-xl bg-white/5 px-3 py-2 text-xs ring-1 ring-white/5"
+                  className="flex items-center justify-between rounded-xl bg-white px-3 py-2 text-xs ring-1 ring-[#ece3d0]"
                 >
-                  <span className="text-neutral-200">
+                  <span className="text-[#1a1410]">
                     {GRAB_PRIZE_KIND_LABEL[r.prize_kind]}
                     {r.prize_amount > 1 && (
-                      <span className="ml-1 text-amber-300">x{r.prize_amount}</span>
+                      <span className="ml-1 font-semibold text-[#9a7626]">x{r.prize_amount}</span>
                     )}
                   </span>
-                  <span className="text-neutral-500">
+                  <span className="text-[#7a6f5e]">
                     {new Date(r.rolled_at).toLocaleString("pt-BR", {
                       day: "2-digit",
                       month: "2-digit",
@@ -322,31 +345,47 @@ function FeaturedBanner({
   onOpen: () => void;
   busy: boolean;
 }) {
-  const r = rarityTokens(pool.rarity);
   return (
     <div
-      className="relative mt-5 overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-neutral-900 to-black p-4"
-      style={{ boxShadow: r.shadowCss }}
+      className="relative mt-5 overflow-hidden rounded-2xl border border-[#e6cf8a] bg-white p-4"
+      style={{
+        boxShadow:
+          "0 18px 44px -18px rgba(201,162,74,0.45), inset 0 1px 0 rgba(255,255,255,0.9)",
+      }}
     >
-      <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: r.glowCss }} />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(80% 100% at 0% 0%, rgba(232,199,122,0.30), transparent 60%), radial-gradient(70% 90% at 100% 100%, rgba(91,26,46,0.10), transparent 60%)",
+        }}
+      />
       <div className="relative flex items-center gap-3">
-        <div className="grid size-14 place-items-center rounded-xl bg-black/40 ring-1 ring-white/10">
-          <Sparkles className={cn("size-7", r.textClass)} />
+        <div
+          className="grid size-14 place-items-center rounded-xl ring-1 ring-[#e6cf8a]"
+          style={{
+            background:
+              "linear-gradient(135deg, #FFF6DF 0%, #F1DDA1 60%, #C9A24A 100%)",
+            boxShadow: "inset 0 1px 0 rgba(255,255,255,0.7)",
+          }}
+        >
+          <Sparkles className="size-7 text-[#5b1a2e]" />
         </div>
         <div className="min-w-0 flex-1">
-          <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-amber-300">
+          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#9a7626]">
             Em destaque
           </div>
-          <div className="truncate text-sm font-semibold text-white">{pool.name}</div>
+          <div className="truncate text-sm font-semibold text-[#1a1410]">{pool.name}</div>
           {pool.description && (
-            <div className="line-clamp-1 text-[11px] text-neutral-400">{pool.description}</div>
+            <div className="line-clamp-1 text-[11px] text-[#7a6f5e]">{pool.description}</div>
           )}
         </div>
         <Button
           size="sm"
           onClick={onOpen}
           disabled={busy || pool.cooldown_seconds > 0}
-          className="bg-white text-black hover:bg-neutral-200"
+          className="bg-[#1a1410] text-[#FAF7EF] hover:bg-[#2a2018]"
         >
           {busy ? <Loader2 className="size-3.5 animate-spin" /> : "Abrir"}
         </Button>

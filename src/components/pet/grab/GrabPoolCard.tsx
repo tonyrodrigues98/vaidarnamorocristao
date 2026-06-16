@@ -41,27 +41,38 @@ export function GrabPoolCard({ pool, freeRemaining, busy, onOpen }: Props) {
       onClick={onOpen}
       disabled={disabled}
       className={cn(
-        "group relative flex flex-col overflow-hidden rounded-2xl border bg-neutral-950 p-3 text-left transition",
+        "group relative flex flex-col overflow-hidden rounded-2xl border bg-white p-3 text-left transition-all duration-300",
         "hover:-translate-y-0.5",
         r.borderClass,
         disabled && "opacity-60 hover:translate-y-0",
       )}
       style={{
-        boxShadow: onCooldown ? "none" : r.shadowCss,
+        boxShadow: onCooldown
+          ? "0 2px 8px -4px rgba(91,81,66,0.10)"
+          : r.shadowCss,
       }}
     >
       {/* glow background */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0"
-        style={{ background: r.glowCss, opacity: onCooldown ? 0.2 : 0.9 }}
+        style={{ background: r.glowCss, opacity: onCooldown ? 0.15 : 1 }}
+      />
+      {/* hairline gold top accent */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 h-px"
+        style={{
+          background:
+            "linear-gradient(90deg, transparent, rgba(201,162,74,0.55), transparent)",
+        }}
       />
 
       {/* rarity ribbon */}
       <div className="relative z-10 mb-2 flex items-center justify-between">
         <span
           className={cn(
-            "inline-flex items-center gap-1 rounded-full border bg-black/40 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] backdrop-blur",
+            "inline-flex items-center gap-1 rounded-full border bg-white/80 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] backdrop-blur",
             r.borderClass,
             r.textClass,
           )}
@@ -69,7 +80,7 @@ export function GrabPoolCard({ pool, freeRemaining, busy, onOpen }: Props) {
           {r.shortLabel}
         </span>
         {pool.cooldown_hours > 0 && (
-          <span className="inline-flex items-center gap-1 text-[10px] text-neutral-400">
+          <span className="inline-flex items-center gap-1 text-[10px] text-[#7a6f5e]">
             <Timer className="size-3" />
             {pool.cooldown_hours}h
           </span>
@@ -77,39 +88,50 @@ export function GrabPoolCard({ pool, freeRemaining, busy, onOpen }: Props) {
       </div>
 
       {/* icon plate */}
-      <div className="relative z-10 mx-auto my-1 grid aspect-square w-24 place-items-center rounded-2xl bg-gradient-to-br from-neutral-900 to-black ring-1 ring-white/10">
+      <div
+        className="relative z-10 mx-auto my-1 grid aspect-square w-24 place-items-center rounded-2xl ring-1 ring-[#e6cf8a]"
+        style={{
+          background:
+            "linear-gradient(135deg, #FFFAEC 0%, #F4E2B5 55%, #E6CF8A 100%)",
+          boxShadow:
+            "inset 0 1px 0 rgba(255,255,255,0.85), inset 0 -8px 18px -10px rgba(154,118,38,0.25)",
+        }}
+      >
         <Icon
-          className={cn("size-10 transition-transform duration-500 group-hover:scale-110", r.textClass)}
+          className={cn(
+            "size-10 transition-transform duration-500 group-hover:scale-110",
+            r.textClass,
+          )}
           strokeWidth={1.5}
         />
       </div>
 
       {/* name */}
       <div className="relative z-10 mt-2 text-center">
-        <div className="truncate text-[13px] font-semibold tracking-tight text-white">
+        <div className="truncate text-[13px] font-semibold tracking-tight text-[#1a1410]">
           {pool.name}
         </div>
         {pool.description && (
-          <div className="mt-0.5 line-clamp-2 text-[10px] text-neutral-400">{pool.description}</div>
+          <div className="mt-0.5 line-clamp-2 text-[10px] text-[#7a6f5e]">{pool.description}</div>
         )}
       </div>
 
       {/* pity bar */}
       {pool.pity_threshold > 0 && (
         <div className="relative z-10 mt-2">
-          <div className="flex items-center justify-between text-[9px] uppercase tracking-[0.12em] text-neutral-500">
+          <div className="flex items-center justify-between text-[9px] uppercase tracking-[0.12em] text-[#9a7626]">
             <span>Pity</span>
             <span>
               {pool.pity_count}/{pool.pity_threshold}
             </span>
           </div>
-          <div className="mt-0.5 h-1 overflow-hidden rounded-full bg-neutral-800">
+          <div className="mt-0.5 h-1 overflow-hidden rounded-full bg-[#f1ead8]">
             <div
               className="h-full transition-all"
               style={{
                 width: `${pityProgress * 100}%`,
                 background: r.hex,
-                boxShadow: `0 0 8px ${r.hex}`,
+                boxShadow: `0 0 6px ${r.hex}`,
               }}
             />
           </div>
@@ -122,13 +144,23 @@ export function GrabPoolCard({ pool, freeRemaining, busy, onOpen }: Props) {
           className={cn(
             "inline-flex w-full items-center justify-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-semibold",
             onCooldown
-              ? "bg-neutral-800 text-neutral-400"
+              ? "bg-[#f1ead8] text-[#9a8b6c]"
               : isFree
-                ? "bg-white text-black"
+                ? "bg-[#1a1410] text-[#FAF7EF] ring-1 ring-[#1a1410]"
                 : empty
-                  ? "bg-neutral-800 text-neutral-500"
-                  : "bg-black text-white ring-1 ring-white/10",
+                  ? "bg-[#f1ead8] text-[#9a8b6c]"
+                  : "text-[#1a1410] ring-1 ring-[#e6cf8a]",
           )}
+          style={
+            !onCooldown && !isFree && !empty
+              ? {
+                  background:
+                    "linear-gradient(135deg, #FFF6DF 0%, #F1DDA1 60%, #C9A24A 100%)",
+                  boxShadow:
+                    "inset 0 1px 0 rgba(255,255,255,0.7), 0 4px 12px -6px rgba(201,162,74,0.45)",
+                }
+              : undefined
+          }
         >
           {busy ? (
             <Loader2 className="size-3 animate-spin" />
