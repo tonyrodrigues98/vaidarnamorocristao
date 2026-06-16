@@ -45,9 +45,19 @@ const WEATHER_CONFIG: Record<
   fireflies: { count: 30, animation: "scene-twinkle", className: "bg-lime-200 rounded-full shadow-[0_0_10px_rgba(190,255,120,1)]" },
 };
 
-export function SceneWeatherLayer({ weather }: { weather: Weather }) {
+export function SceneWeatherLayer({
+  weather,
+  densityMul = 1,
+}: {
+  weather: Weather;
+  densityMul?: number;
+}) {
   const cfg = WEATHER_CONFIG[weather];
-  const particles = useMemo(() => buildParticles(cfg.count, weather.length * 137), [cfg.count, weather]);
+  const count = Math.max(4, Math.round(cfg.count * densityMul));
+  const particles = useMemo(
+    () => buildParticles(count, weather.length * 137 + count),
+    [count, weather],
+  );
 
   return (
     <div className="pointer-events-none absolute inset-0 overflow-hidden">
