@@ -602,6 +602,8 @@ function Showcase({
     <MissionsTodayCard refreshKey={xpRefresh} />
     <ExpeditionsCard
       userPetId={pet.id}
+      petImage={image}
+      petName={pet.custom_name}
       onChanged={() => {
         setXpRefresh((n) => n + 1);
         void reloadCare();
