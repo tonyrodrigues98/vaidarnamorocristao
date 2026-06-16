@@ -1721,6 +1721,72 @@ export type Database = {
         }
         Relationships: []
       }
+      pet_expeditions: {
+        Row: {
+          active: boolean
+          coin_reward: number
+          created_at: string
+          crit_rate: number
+          description: string | null
+          difficulty: string
+          duration_minutes: number
+          energy_cost: number
+          icon: string
+          id: string
+          image_url: string | null
+          item_reward_label: string | null
+          min_user_level: number
+          slug: string
+          sort_order: number
+          success_rate: number
+          title: string
+          updated_at: string
+          xp_reward: number
+        }
+        Insert: {
+          active?: boolean
+          coin_reward?: number
+          created_at?: string
+          crit_rate?: number
+          description?: string | null
+          difficulty?: string
+          duration_minutes?: number
+          energy_cost?: number
+          icon?: string
+          id?: string
+          image_url?: string | null
+          item_reward_label?: string | null
+          min_user_level?: number
+          slug: string
+          sort_order?: number
+          success_rate?: number
+          title: string
+          updated_at?: string
+          xp_reward?: number
+        }
+        Update: {
+          active?: boolean
+          coin_reward?: number
+          created_at?: string
+          crit_rate?: number
+          description?: string | null
+          difficulty?: string
+          duration_minutes?: number
+          energy_cost?: number
+          icon?: string
+          id?: string
+          image_url?: string | null
+          item_reward_label?: string | null
+          min_user_level?: number
+          slug?: string
+          sort_order?: number
+          success_rate?: number
+          title?: string
+          updated_at?: string
+          xp_reward?: number
+        }
+        Relationships: []
+      }
       pet_life_stages: {
         Row: {
           active: boolean
@@ -3866,6 +3932,41 @@ export type Database = {
         }
         Relationships: []
       }
+      user_daily_expeditions: {
+        Row: {
+          created_at: string
+          day: string
+          expedition_id: string
+          id: string
+          sent_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          day?: string
+          expedition_id: string
+          id?: string
+          sent_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          day?: string
+          expedition_id?: string
+          id?: string
+          sent_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_daily_expeditions_expedition_id_fkey"
+            columns: ["expedition_id"]
+            isOneToOne: false
+            referencedRelation: "pet_expeditions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_daily_missions: {
         Row: {
           completed_at: string | null
@@ -4123,6 +4224,59 @@ export type Database = {
             columns: ["confession_id"]
             isOneToOne: false
             referencedRelation: "pet_confessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_pet_expedition_runs: {
+        Row: {
+          claimed_at: string | null
+          coin_awarded: number
+          created_at: string
+          ends_at: string
+          expedition_id: string
+          id: string
+          item_awarded_label: string | null
+          outcome: string
+          started_at: string
+          user_id: string
+          user_pet_id: string
+          xp_awarded: number
+        }
+        Insert: {
+          claimed_at?: string | null
+          coin_awarded?: number
+          created_at?: string
+          ends_at: string
+          expedition_id: string
+          id?: string
+          item_awarded_label?: string | null
+          outcome?: string
+          started_at?: string
+          user_id: string
+          user_pet_id: string
+          xp_awarded?: number
+        }
+        Update: {
+          claimed_at?: string | null
+          coin_awarded?: number
+          created_at?: string
+          ends_at?: string
+          expedition_id?: string
+          id?: string
+          item_awarded_label?: string | null
+          outcome?: string
+          started_at?: string
+          user_id?: string
+          user_pet_id?: string
+          xp_awarded?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_pet_expedition_runs_expedition_id_fkey"
+            columns: ["expedition_id"]
+            isOneToOne: false
+            referencedRelation: "pet_expeditions"
             referencedColumns: ["id"]
           },
         ]
@@ -4871,6 +5025,7 @@ export type Database = {
           balance: number
         }[]
       }
+      claim_expedition: { Args: { _run_id: string }; Returns: Json }
       claim_free_frame: { Args: { _decoration_id: string }; Returns: Json }
       claim_pet_weekly_chest: { Args: never; Returns: Json }
       claim_starter_bundle: { Args: never; Returns: Json }
@@ -4916,6 +5071,26 @@ export type Database = {
       equip_user_pet_v2: { Args: { _user_pet_id: string }; Returns: undefined }
       evolve_my_pet: { Args: never; Returns: Json }
       expire_anonymous_messages: { Args: never; Returns: number }
+      get_active_expedition: {
+        Args: { _user_pet_id: string }
+        Returns: {
+          coin_reward: number
+          crit_rate: number
+          difficulty: string
+          duration_minutes: number
+          ends_at: string
+          expedition_id: string
+          icon: string
+          image_url: string
+          item_reward_label: string
+          run_id: string
+          slug: string
+          started_at: string
+          success_rate: number
+          title: string
+          xp_reward: number
+        }[]
+      }
       get_active_pet_perks: {
         Args: { _user_id: string }
         Returns: {
@@ -5047,6 +5222,28 @@ export type Database = {
           id: string
           message: string
           sender_id: string
+        }[]
+      }
+      get_today_expeditions: {
+        Args: never
+        Returns: {
+          coin_reward: number
+          crit_rate: number
+          description: string
+          difficulty: string
+          duration_minutes: number
+          energy_cost: number
+          expedition_id: string
+          icon: string
+          id: string
+          image_url: string
+          item_reward_label: string
+          min_user_level: number
+          sent_at: string
+          slug: string
+          success_rate: number
+          title: string
+          xp_reward: number
         }[]
       }
       get_today_missions: {
@@ -5192,6 +5389,7 @@ export type Database = {
         Returns: string
       }
       request_reverification: { Args: { _message: string }; Returns: string }
+      roll_daily_expeditions: { Args: never; Returns: undefined }
       roll_daily_missions: {
         Args: never
         Returns: {
@@ -5236,6 +5434,10 @@ export type Database = {
       spend_coin_for_pet_care: {
         Args: { _amount: number; _item_id: string; _user_pet_id: string }
         Returns: number
+      }
+      start_expedition: {
+        Args: { _expedition_id: string; _user_pet_id: string }
+        Returns: string
       }
       sync_level_achievements: {
         Args: { _level: number; _user_id: string }
