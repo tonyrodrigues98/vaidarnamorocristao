@@ -412,3 +412,82 @@ function formatDuration(minutes: number): string {
   const m = minutes % 60;
   return m ? `${h}h ${m}min` : `${h}h`;
 }
+
+function ImageUploader({
+  value,
+  slugHint,
+  onChange,
+}: {
+  value: string | null;
+  slugHint: string;
+  onChange: (path: string | null) => void;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+  const previewUrl = useSignedExpeditionUrl(value);
+
+  async function handleFile(file: File) {
+    setUploading(true);
+    try {
+      const path = await uploadExpeditionImage(file, slugHint);
+      onChange(path);
+      toast.success("Imagem enviada");
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center gap-2">
+        <div className="grid size-14 shrink-0 place-items-center overflow-hidden rounded-lg border border-border bg-muted">
+          {previewUrl ? (
+            <img src={previewUrl} alt="" className="size-full object-cover" />
+          ) : (
+            <ImageOff className="size-4 text-muted-foreground" />
+          )}
+        </div>
+        <div className="flex flex-col gap-1">
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={() => inputRef.current?.click()}
+            disabled={uploading}
+          >
+            {uploading ? (
+              <Loader2 className="mr-1 size-3.5 animate-spin" />
+            ) : (
+              <Upload className="mr-1 size-3.5" />
+            )}
+            {value ? "Trocar" : "Enviar"}
+          </Button>
+          {value && (
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              className="h-7 px-2 text-[11px] text-muted-foreground"
+              onClick={() => onChange(null)}
+            >
+              Remover
+            </Button>
+          )}
+        </div>
+      </div>
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        hidden
+        onChange={(e) => {
+          const f = e.target.files?.[0];
+          if (f) void handleFile(f);
+          e.target.value = "";
+        }}
+      />
+    </div>
+  );
+}
