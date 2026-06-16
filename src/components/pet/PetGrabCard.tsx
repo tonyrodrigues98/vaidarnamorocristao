@@ -145,30 +145,68 @@ export function PetGrabCard({ refreshKey, onChanged }: Props) {
           </Button>
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-3">
           {state.pools.map((pool) => {
             const freeRemaining = Math.max(0, pool.free_daily - state.free_used);
             const isFree = freeRemaining > 0;
             const busy = pendingPoolId === pool.id;
+            const tier = tierFor(pool.name);
             return (
-              <div key={pool.id} className="flex items-center gap-3 rounded-xl border border-neutral-200 p-3">
-                <div className="min-w-0 flex-1">
-                  <div className="truncate text-sm font-medium">{pool.name}</div>
-                  <div className="text-[11px] text-neutral-500">
-                    {isFree
-                      ? `${freeRemaining} grátis hoje`
-                      : <span className="inline-flex items-center gap-1">
-                          <CoinIcon className="size-3" /> {pool.cost_coins} por sorteio
-                        </span>}
+              <button
+                key={pool.id}
+                onClick={() => void grab(pool.id)}
+                disabled={busy || pool.prize_count === 0}
+                className={cn(
+                  "group relative w-full overflow-hidden rounded-2xl text-left ring-1 transition",
+                  "h-24 sm:h-28",
+                  tier.ring,
+                  tier.glow,
+                  "hover:-translate-y-0.5 hover:shadow-xl disabled:opacity-60 disabled:hover:translate-y-0",
+                )}
+              >
+                <img
+                  src={tier.image}
+                  alt=""
+                  loading="lazy"
+                  width={1024}
+                  height={1024}
+                  className="absolute inset-0 size-full object-cover transition-transform duration-700 group-hover:scale-105"
+                />
+                <div className={cn("absolute inset-0 bg-gradient-to-r", tier.accent)} />
+                <div className="absolute inset-0 bg-gradient-to-r from-black/55 via-black/20 to-transparent" />
+
+                <div className="relative flex h-full items-center gap-3 px-4">
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-[15px] font-semibold tracking-tight text-white drop-shadow">
+                      {pool.name}
+                    </div>
+                    <div className="mt-0.5 text-[11px] font-medium text-white/85">
+                      {isFree
+                        ? `${freeRemaining} grátis hoje`
+                        : <span className="inline-flex items-center gap-1">
+                            <CoinIcon className="size-3" /> {pool.cost_coins} por sorteio
+                          </span>}
+                    </div>
+                  </div>
+
+                  <div
+                    className={cn(
+                      "pointer-events-none inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold backdrop-blur",
+                      isFree
+                        ? "bg-white text-neutral-900 ring-1 ring-white/60"
+                        : "bg-white/15 text-white ring-1 ring-white/30",
+                    )}
+                  >
+                    {busy ? (
+                      <Loader2 className="size-3.5 animate-spin" />
+                    ) : isFree ? (
+                      <>Sortear <Sparkles className="size-3.5" /></>
+                    ) : (
+                      <><CoinIcon className="size-3.5" />{pool.cost_coins}</>
+                    )}
                   </div>
                 </div>
-                <Button onClick={() => void grab(pool.id)} disabled={busy || pool.prize_count === 0}
-                  className={cn(isFree && "bg-amber-500 hover:bg-amber-600 text-white")}>
-                  {busy ? <Loader2 className="size-4 animate-spin" /> :
-                    isFree ? <>Sortear <Sparkles className="size-4 ml-1" /></> :
-                      <span className="inline-flex items-center gap-1"><CoinIcon className="size-3" />{pool.cost_coins}</span>}
-                </Button>
-              </div>
+              </button>
             );
           })}
         </div>
