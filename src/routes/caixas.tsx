@@ -28,6 +28,8 @@ import { unlockGrabAudio } from "@/lib/grabAudio";
 import { GrabRouletteModal, InventoryDialog } from "@/components/pet/PetGrabCard";
 import { GrabPoolCard } from "@/components/pet/grab/GrabPoolCard";
 import { CAIXAS_BANNER, caixaArtFor } from "@/lib/caixaArt";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import capsulaXpImg from "@/assets/caixas/capsula_xp.png";
 
 export const Route = createFileRoute("/caixas")({
   head: () => ({
