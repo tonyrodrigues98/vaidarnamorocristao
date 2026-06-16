@@ -918,6 +918,7 @@ export function GrabRouletteModal({
                       Você ganhou
                     </div>
                     <div className="flex items-center gap-2">
+                      <img src={capsulaXpImg} alt="" className="size-10 object-contain" />
                       <span className="text-3xl font-extrabold tracking-tight text-sky-300">
                         +<AnimatedCounter value={res.prize_amount} />
                       </span>
