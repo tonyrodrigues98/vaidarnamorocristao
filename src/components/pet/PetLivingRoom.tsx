@@ -22,6 +22,7 @@ import { PetDiaryBubble } from "./PetDiaryBubble";
 import { PetDiarySheet } from "./PetDiarySheet";
 import { PetKingdomMap } from "./PetKingdomMap";
 import { PetConstellation } from "./PetConstellation";
+import { getPetSizeScale } from "@/lib/petRealSize";
 
 import sceneAsset from "@/assets/pet-room/pet-room-scene.png.asset.json";
 
@@ -135,7 +136,7 @@ export function PetLivingRoom({
     return (
       <>
         {constellationOpen ? (
-          <div className="animate-[zoom-in-constellation_800ms_ease-out] motion-reduce:animate-none">
+          <div className="h-full w-full animate-[zoom-in-constellation_800ms_ease-out] motion-reduce:animate-none">
             <PetConstellation
               pet={pet}
               careValues={careValues}
@@ -151,7 +152,7 @@ export function PetLivingRoom({
             />
           </div>
         ) : (
-          <div className="animate-[zoom-in-kingdom_700ms_ease-out] motion-reduce:animate-none">
+          <div className="h-full w-full animate-[zoom-in-kingdom_700ms_ease-out] motion-reduce:animate-none">
             <PetKingdomMap
               pet={pet}
               petImage={petImage}
@@ -174,16 +175,31 @@ export function PetLivingRoom({
     );
   }
 
+  // Tamanho do pet proporcional à vida real (porte do animal).
+  const petSize = getPetSizeScale({
+    categorySlug: pet.category?.slug ?? null,
+    speciesSlug: pet.species?.slug ?? null,
+    stage: pet.life_stage?.kind ?? null,
+  });
+
   return (
     <TooltipProvider delayDuration={200} skipDelayDuration={300}>
     <section
       key="room"
-      className="relative h-full w-full overflow-hidden bg-amber-50/40"
+      className="relative grid h-full w-full place-items-center overflow-hidden bg-neutral-950"
       aria-label="Quarto do pet"
       style={{ animation: "zoom-in-room 600ms ease-out" }}
     >
-      {/* Hotspots posicionados em % do quadro — o container fica responsivo. */}
-      <div className="relative h-full w-full">
+      {/* Frame 2:3 cinematográfico — preenche a tela sem cortar a cena.
+          Usa min() pra que largura e altura caibam na viewport mantendo a proporção. */}
+      <div
+        className="relative shadow-[0_30px_60px_-20px_rgba(0,0,0,0.6)] ring-1 ring-white/5"
+        style={{
+          width: "min(100%, calc(100dvh * 2 / 3))",
+          height: "min(100%, calc(100dvw * 3 / 2))",
+          aspectRatio: "2 / 3",
+        }}
+      >
         {/* Fundo: a cena */}
         <img
           src={sceneAsset.url}
@@ -212,10 +228,10 @@ export function PetLivingRoom({
               isAway && "opacity-40 [filter:grayscale(1)_blur(3px)]",
             )}
             style={{
-              left: "32%",
-              top: "62%",
-              width: "36%",
-              height: "26%",
+              left: `${50 - petSize.widthPct / 2}%`,
+              top: `${petSize.anchorYPct - (petSize.widthPct * 0.9)}%`,
+              width: `${petSize.widthPct}%`,
+              height: `${petSize.widthPct * 0.9}%`,
             }}
           >
             <img
@@ -295,49 +311,51 @@ export function PetLivingRoom({
           </div>
         </div>
 
-        {/* HOTSPOTS — coordenadas estáveis em % do quadro 2:3 */}
-        {/* Esquerda — rotina */}
+        {/* HOTSPOTS — pontos com glow no item + etiqueta visível.
+            Coordenadas em % do quadro 2:3. */}
         <RoomHotspot
-          x={3} y={48} width={21} height={12}
-          label="Streak diário"
+          x={13} y={54} radius={7}
+          label="Streak"
           tooltip="Dia-a-dia · ver dias seguidos cuidando do pet."
+          labelPlacement="bottom"
           onClick={() => setSheet("streak")}
         />
         <RoomHotspot
-          x={0.5} y={62} width={26} height={16}
-          label="Missões do dia"
+          x={13} y={70} radius={8}
+          label="Missões"
           tooltip="Dia-a-dia · tarefas curtas pra ganhar XP e moedas hoje."
+          labelPlacement="bottom"
           onClick={() => setSheet("missions")}
         />
-
-        {/* Direita — cuidado imediato */}
         <RoomHotspot
-          x={77} y={6} width={22} height={12}
+          x={87} y={12} radius={7}
           label="Banho"
           tooltip="Cuidado · dar banho pra subir higiene."
+          labelPlacement="bottom"
           urgent={lowOf("hygiene")}
           onClick={() => onCareAction("hygiene")}
         />
         <RoomHotspot
-          x={74} y={55} width={24} height={14}
+          x={86} y={62} radius={8}
           label="Dormir"
           tooltip="Cuidado · pet descansa e recupera energia."
+          labelPlacement="left"
           urgent={lowOf("sleep")}
           onClick={() => onCareAction("sleep")}
         />
-
-        {/* Centro/baixo — cuidado */}
         <RoomHotspot
-          x={7} y={86} width={20} height={11}
+          x={17} y={91} radius={7}
           label="Alimentar"
           tooltip="Cuidado · alimentar pra subir fome."
+          labelPlacement="top"
           urgent={lowOf("feed")}
           onClick={() => onCareAction("feed")}
         />
         <RoomHotspot
-          x={56} y={89} width={15} height={10}
+          x={63} y={93} radius={6}
           label="Brincar"
           tooltip="Cuidado · brincar pra subir diversão e carinho."
+          labelPlacement="top"
           urgent={lowOf("play")}
           onClick={() => onCareAction("play")}
         />
