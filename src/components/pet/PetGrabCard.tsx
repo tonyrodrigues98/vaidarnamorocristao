@@ -400,7 +400,7 @@ function GrabRouletteModal({
     return buf;
   };
 
-  const playTick = (speed: number) => {
+  const playTick = (speed: number, pan: number = 0) => {
     try {
       const Ctor =
         window.AudioContext ||
@@ -414,6 +414,21 @@ function GrabRouletteModal({
       const s = Math.min(1, Math.max(0, speed));
       // Per-hit randomization (avoids repetitive timbre)
       const jitter = 0.85 + Math.random() * 0.3;
+
+      // Stereo bus: each tick sweeps from the incoming side (right) past
+      // the listener and out to the opposite side (left), mirroring the
+      // strip direction. `pan` (-1..1) biases the whole sweep so simultaneous
+      // ticks at slightly different positions feel spatially distinct.
+      const supportsPanner = typeof ctx.createStereoPanner === "function";
+      const panner = supportsPanner ? ctx.createStereoPanner() : null;
+      if (panner) {
+        const start = Math.max(-1, Math.min(1, 0.85 + pan * 0.4));
+        const end = Math.max(-1, Math.min(1, -0.85 + pan * 0.4));
+        panner.pan.setValueAtTime(start, now);
+        panner.pan.linearRampToValueAtTime(end, now + 0.07);
+        panner.connect(ctx.destination);
+      }
+      const out: AudioNode = panner ?? ctx.destination;
 
       // --- 1) Noise transient: the bright "tac" of ball-on-fret
       const noise = ctx.createBufferSource();
@@ -430,7 +445,7 @@ function GrabRouletteModal({
       nGain.gain.setValueAtTime(0.0001, now);
       nGain.gain.exponentialRampToValueAtTime(nVol, now + 0.0015);
       nGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.035);
-      noise.connect(bp).connect(hp).connect(nGain).connect(ctx.destination);
+      noise.connect(bp).connect(hp).connect(nGain).connect(out);
       noise.start(now);
       noise.stop(now + 0.05);
 
@@ -445,7 +460,7 @@ function GrabRouletteModal({
       bodyGain.gain.setValueAtTime(0.0001, now);
       bodyGain.gain.exponentialRampToValueAtTime(bVol, now + 0.004);
       bodyGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.07);
-      body.connect(bodyGain).connect(ctx.destination);
+      body.connect(bodyGain).connect(out);
       body.start(now);
       body.stop(now + 0.08);
     } catch {
@@ -464,17 +479,63 @@ function GrabRouletteModal({
       const ctx = audioCtxRef.current;
       if (ctx.state === "suspended") void ctx.resume();
       const now = ctx.currentTime;
-      [880, 1320, 1760].forEach((f, i) => {
+      // --- 1) Sub-bass "BUM": chest-thump that seals the win
+      const sub = ctx.createOscillator();
+      const subGain = ctx.createGain();
+      sub.type = "sine";
+      sub.frequency.setValueAtTime(120, now);
+      sub.frequency.exponentialRampToValueAtTime(38, now + 0.35);
+      subGain.gain.setValueAtTime(0.0001, now);
+      subGain.gain.exponentialRampToValueAtTime(0.55, now + 0.012);
+      subGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.55);
+      sub.connect(subGain).connect(ctx.destination);
+      sub.start(now);
+      sub.stop(now + 0.6);
+
+      // --- 2) Noise burst with bandpass for the "splash" of a hit
+      const noise = ctx.createBufferSource();
+      noise.buffer = getNoiseBuffer(ctx);
+      const nbp = ctx.createBiquadFilter();
+      nbp.type = "bandpass";
+      nbp.frequency.value = 3200;
+      nbp.Q.value = 1.2;
+      const nGain = ctx.createGain();
+      nGain.gain.setValueAtTime(0.0001, now);
+      nGain.gain.exponentialRampToValueAtTime(0.35, now + 0.005);
+      nGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.18);
+      noise.connect(nbp).connect(nGain).connect(ctx.destination);
+      noise.start(now);
+      noise.stop(now + 0.2);
+
+      // --- 3) Bell-like ding: stacked harmonics with long shimmer tail,
+      // panned slightly L/R so it feels wide
+      const supportsPanner = typeof ctx.createStereoPanner === "function";
+      const partials: Array<{ f: number; v: number; pan: number; dur: number }> = [
+        { f: 880, v: 0.32, pan: -0.3, dur: 1.4 },
+        { f: 1320, v: 0.24, pan: 0.25, dur: 1.2 },
+        { f: 1760, v: 0.2, pan: -0.15, dur: 1.0 },
+        { f: 2640, v: 0.12, pan: 0.4, dur: 0.8 },
+      ];
+      partials.forEach(({ f, v, pan, dur }, i) => {
+        const t0 = now + 0.04 + i * 0.025;
         const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.type = "triangle";
-        osc.frequency.setValueAtTime(f, now + i * 0.06);
-        gain.gain.setValueAtTime(0.0001, now + i * 0.06);
-        gain.gain.exponentialRampToValueAtTime(0.18, now + i * 0.06 + 0.01);
-        gain.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.06 + 0.45);
-        osc.connect(gain).connect(ctx.destination);
-        osc.start(now + i * 0.06);
-        osc.stop(now + i * 0.06 + 0.5);
+        const g = ctx.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(f, t0);
+        g.gain.setValueAtTime(0.0001, t0);
+        g.gain.exponentialRampToValueAtTime(v, t0 + 0.008);
+        g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+        let tail: AudioNode = g;
+        if (supportsPanner) {
+          const p = ctx.createStereoPanner();
+          p.pan.value = pan;
+          g.connect(p);
+          tail = p;
+        }
+        osc.connect(g);
+        tail.connect(ctx.destination);
+        osc.start(t0);
+        osc.stop(t0 + dur + 0.05);
       });
     } catch {
       /* noop */
@@ -513,7 +574,13 @@ function GrabRouletteModal({
             // Emit exactly one tick per integer step, even if several centers
             // were skipped in a single frame (very early, very fast section).
             const steps = Math.min(4, centerIndex - lastTickCenterRef.current);
-            for (let i = 0; i < steps; i++) playTick(speed);
+            for (let i = 0; i < steps; i++) {
+              // Alternate ticks across the stereo field; magnitude shrinks
+              // as the wheel slows so the final ticks feel centered.
+              const idx = lastTickCenterRef.current + 1 + i;
+              const pan = ((idx % 2 === 0 ? 1 : -1) * (0.4 + speed * 0.5));
+              playTick(speed, pan);
+            }
           }
           lastTickCenterRef.current = centerIndex;
         }
