@@ -897,6 +897,113 @@ export type Database = {
           },
         ]
       }
+      grab_config: {
+        Row: {
+          default_free_daily: number
+          default_paid_cost_coins: number
+          id: number
+          updated_at: string
+        }
+        Insert: {
+          default_free_daily?: number
+          default_paid_cost_coins?: number
+          id?: number
+          updated_at?: string
+        }
+        Update: {
+          default_free_daily?: number
+          default_paid_cost_coins?: number
+          id?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      grab_pool_prizes: {
+        Row: {
+          active: boolean
+          created_at: string
+          id: string
+          pool_id: string
+          prize_amount: number
+          prize_kind: Database["public"]["Enums"]["grab_prize_kind"]
+          prize_ref_id: string | null
+          sort_order: number
+          weight: number
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          pool_id: string
+          prize_amount?: number
+          prize_kind: Database["public"]["Enums"]["grab_prize_kind"]
+          prize_ref_id?: string | null
+          sort_order?: number
+          weight?: number
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          pool_id?: string
+          prize_amount?: number
+          prize_kind?: Database["public"]["Enums"]["grab_prize_kind"]
+          prize_ref_id?: string | null
+          sort_order?: number
+          weight?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "grab_pool_prizes_pool_id_fkey"
+            columns: ["pool_id"]
+            isOneToOne: false
+            referencedRelation: "grab_pools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      grab_pools: {
+        Row: {
+          active: boolean
+          cost_coins: number | null
+          created_at: string
+          description: string | null
+          free_daily_uses: number | null
+          id: string
+          name: string
+          slug: string
+          sort_order: number
+          updated_at: string
+          weight: number
+        }
+        Insert: {
+          active?: boolean
+          cost_coins?: number | null
+          created_at?: string
+          description?: string | null
+          free_daily_uses?: number | null
+          id?: string
+          name: string
+          slug: string
+          sort_order?: number
+          updated_at?: string
+          weight?: number
+        }
+        Update: {
+          active?: boolean
+          cost_coins?: number | null
+          created_at?: string
+          description?: string | null
+          free_daily_uses?: number | null
+          id?: string
+          name?: string
+          slug?: string
+          sort_order?: number
+          updated_at?: string
+          weight?: number
+        }
+        Relationships: []
+      }
       interests: {
         Row: {
           created_at: string
@@ -3967,6 +4074,36 @@ export type Database = {
           },
         ]
       }
+      user_daily_grabs: {
+        Row: {
+          created_at: string
+          day: string
+          free_used: number
+          id: string
+          paid_used: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          day: string
+          free_used?: number
+          id?: string
+          paid_used?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          day?: string
+          free_used?: number
+          id?: string
+          paid_used?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_daily_missions: {
         Row: {
           completed_at: string | null
@@ -4063,6 +4200,77 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      user_grab_inventory: {
+        Row: {
+          created_at: string
+          id: string
+          prize_kind: Database["public"]["Enums"]["grab_prize_kind"]
+          prize_ref_id: string
+          quantity: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          prize_kind: Database["public"]["Enums"]["grab_prize_kind"]
+          prize_ref_id: string
+          quantity?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          prize_kind?: Database["public"]["Enums"]["grab_prize_kind"]
+          prize_ref_id?: string
+          quantity?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_grab_log: {
+        Row: {
+          id: string
+          pool_id: string | null
+          prize_amount: number
+          prize_kind: Database["public"]["Enums"]["grab_prize_kind"]
+          prize_ref_id: string | null
+          rolled_at: string
+          user_id: string
+          was_paid: boolean
+        }
+        Insert: {
+          id?: string
+          pool_id?: string | null
+          prize_amount?: number
+          prize_kind: Database["public"]["Enums"]["grab_prize_kind"]
+          prize_ref_id?: string | null
+          rolled_at?: string
+          user_id: string
+          was_paid?: boolean
+        }
+        Update: {
+          id?: string
+          pool_id?: string | null
+          prize_amount?: number
+          prize_kind?: Database["public"]["Enums"]["grab_prize_kind"]
+          prize_ref_id?: string | null
+          rolled_at?: string
+          user_id?: string
+          was_paid?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_grab_log_pool_id_fkey"
+            columns: ["pool_id"]
+            isOneToOne: false
+            referencedRelation: "grab_pools"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_name_gradients: {
         Row: {
@@ -5038,6 +5246,7 @@ export type Database = {
           source: string
         }[]
       }
+      consume_care_inventory: { Args: { _item_id: string }; Returns: boolean }
       count_advanced_sections: { Args: { _user_id: string }; Returns: number }
       create_notification: {
         Args: {
@@ -5130,6 +5339,7 @@ export type Database = {
         }[]
       }
       get_flagged_message_ids: { Args: never; Returns: string[] }
+      get_grab_state: { Args: never; Returns: Json }
       get_hidden_staff_ids: { Args: never; Returns: string[] }
       get_my_coins: {
         Args: never
@@ -5330,6 +5540,7 @@ export type Database = {
       mark_all_notifications_read: { Args: never; Returns: number }
       mark_message_read: { Args: { _message_id: string }; Returns: undefined }
       medal_for_prestige: { Args: { _level: number }; Returns: string }
+      perform_grab: { Args: { _pool_id: string }; Returns: Json }
       pet_care_uses_today: {
         Args: { _item_id: string; _user_pet_id: string }
         Returns: number
@@ -5503,6 +5714,13 @@ export type Database = {
         | "legendary"
       gift_rarity: "common" | "rare" | "epic" | "legendary" | "exclusive"
       gift_tx_status: "held" | "redeemed"
+      grab_prize_kind:
+        | "care_item"
+        | "pet_background"
+        | "decoration"
+        | "name_gradient"
+        | "coins"
+        | "xp"
       location_scope: "regiao" | "brasil" | "mundo" | "personalizado"
       marital_status: "solteiro" | "divorciado" | "viuvo"
       pet_care_kind: "feed" | "play" | "hygiene" | "sleep" | "affection"
@@ -5697,6 +5915,14 @@ export const Constants = {
       ],
       gift_rarity: ["common", "rare", "epic", "legendary", "exclusive"],
       gift_tx_status: ["held", "redeemed"],
+      grab_prize_kind: [
+        "care_item",
+        "pet_background",
+        "decoration",
+        "name_gradient",
+        "coins",
+        "xp",
+      ],
       location_scope: ["regiao", "brasil", "mundo", "personalizado"],
       marital_status: ["solteiro", "divorciado", "viuvo"],
       pet_care_kind: ["feed", "play", "hygiene", "sleep", "affection"],

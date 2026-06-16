@@ -1,5 +1,5 @@
 import { createElement, useEffect, useState } from "react";
-import { Loader2, Sparkles, Zap } from "lucide-react";
+import { Loader2, Sparkles, Zap, Package } from "lucide-react";
 import { toast } from "sonner";
 
 import {
@@ -23,6 +23,7 @@ import {
   getItemUsesToday,
   listCareItemsForPet,
 } from "@/lib/petCare";
+import { getCareItemStockMap } from "@/lib/petGrab";
 import { awardXp, XP_SOURCES } from "@/lib/xp";
 import { cn } from "@/lib/utils";
 import { PET_CARE_ICON } from "./PetNeedsHud";
@@ -56,6 +57,7 @@ export function PetCareActionSheet({
   const [pending, setPending] = useState<string | null>(null);
   const [regenMin, setRegenMin] = useState(6);
   const [usesToday, setUsesToday] = useState<Record<string, number>>({});
+  const [stock, setStock] = useState<Record<string, number>>({});
 
   useEffect(() => {
     if (!open || !kind) return;
@@ -72,6 +74,10 @@ export function PetCareActionSheet({
           its.filter((i) => i.daily_uses > 0).map(async (i) => [i.id, await getItemUsesToday(userPetId, i.id)] as const),
         );
         setUsesToday(Object.fromEntries(entries));
+        try {
+          const map = await getCareItemStockMap(its.map((i) => i.id));
+          setStock(map);
+        } catch { /* ignore */ }
       })
       .catch((e) => toast.error((e as Error).message))
       .finally(() => setLoading(false));
@@ -81,6 +87,10 @@ export function PetCareActionSheet({
     setPending(item.id);
     try {
       const result = await applyPetCare(userPetId, item.id);
+      // refresh local stock if it was used
+      if ((result as any)?.used_stock) {
+        setStock((s) => ({ ...s, [item.id]: Math.max(0, (s[item.id] ?? 0) - 1) }));
+      }
       const restore = result.restore || item.restore_amount;
       const multiTxt = result.multiplier && result.multiplier !== 1
         ? ` (×${result.multiplier.toFixed(2)})`
@@ -217,7 +227,11 @@ export function PetCareActionSheet({
                         )}
                       </div>
                       <div className="flex items-center gap-1 text-[11px] font-semibold text-neutral-700">
-                        {it.cost_coins > 0 ? (
+                        {(stock[it.id] ?? 0) > 0 ? (
+                          <span className="inline-flex items-center gap-1 text-amber-600">
+                            <Package className="h-3 w-3" /> Grátis · x{stock[it.id]}
+                          </span>
+                        ) : it.cost_coins > 0 ? (
                           <>
                             <CoinIcon className="h-3 w-3" /> {it.cost_coins}
                           </>
