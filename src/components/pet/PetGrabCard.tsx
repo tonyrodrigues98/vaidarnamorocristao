@@ -1006,7 +1006,6 @@ export function GrabRouletteModal({
 }
 
 export function InventoryDialog({ inventory, onClose }: { inventory: GrabInventoryItem[]; onClose: () => void }) {
-  // (defined below)
   const [resolved, setResolved] = useState<Record<string, PrizeMeta | null>>({});
   useEffect(() => {
     let cancelled = false;
@@ -1059,5 +1058,54 @@ export function InventoryDialog({ inventory, onClose }: { inventory: GrabInvento
         </Button>
       </DialogContent>
     </Dialog>
+  );
+}
+
+/**
+ * Counts from 0 → `value` over ~800ms using ease-out cubic. Used for the
+ * coins/XP reveal so the number feels won, not just printed.
+ */
+function AnimatedCounter({ value, duration = 800 }: { value: number; duration?: number }) {
+  const [n, setN] = useState(0);
+  useEffect(() => {
+    const target = Number.isFinite(value) ? value : 0;
+    if (target <= 0) { setN(target); return; }
+    let raf = 0;
+    const start = performance.now();
+    const loop = (now: number) => {
+      const t = Math.min(1, (now - start) / duration);
+      const eased = 1 - Math.pow(1 - t, 3);
+      setN(Math.round(target * eased));
+      if (t < 1) raf = requestAnimationFrame(loop);
+    };
+    raf = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(raf);
+  }, [value, duration]);
+  return <>{n}</>;
+}
+
+/**
+ * Reveals `text` one character at a time. Adds a subtle caret while typing
+ * to signal motion; caret disappears once the line is complete.
+ */
+function Typewriter({ text, msPerChar = 40 }: { text: string; msPerChar?: number }) {
+  const [shown, setShown] = useState(0);
+  useEffect(() => {
+    setShown(0);
+    if (!text) return;
+    let i = 0;
+    const id = setInterval(() => {
+      i += 1;
+      setShown(i);
+      if (i >= text.length) clearInterval(id);
+    }, msPerChar);
+    return () => clearInterval(id);
+  }, [text, msPerChar]);
+  const done = shown >= text.length;
+  return (
+    <>
+      {text.slice(0, shown)}
+      {!done && <span className="inline-block w-[1px] animate-pulse">|</span>}
+    </>
   );
 }
