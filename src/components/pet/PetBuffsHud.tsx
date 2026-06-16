@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-import { Sparkles, TrendingUp, TrendingDown, Shield, Clock } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
+import { TrendingUp, TrendingDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 
@@ -25,19 +24,15 @@ function formatRemaining(ms: number): string {
   return rm ? `${h}h${rm}m` : `${h}h`;
 }
 
-function buffMeta(b: Buff): { Icon: LucideIcon; tone: string; label: string } {
-  const isBoost = b.restore_mult > 1 || b.decay_mult < 1;
-  const isDebuff = b.restore_mult < 1 || b.decay_mult > 1;
-  const label =
-    b.label?.trim() ||
-    (b.restore_mult !== 1
-      ? `Ganho ×${b.restore_mult.toFixed(2).replace(/\.?0+$/, "")}`
-      : b.decay_mult !== 1
-        ? `Desgaste ×${b.decay_mult.toFixed(2).replace(/\.?0+$/, "")}`
-        : b.kind);
-  if (isDebuff) return { Icon: TrendingDown, tone: "border-rose-200 bg-rose-50 text-rose-700", label };
-  if (isBoost) return { Icon: TrendingUp, tone: "border-emerald-200 bg-emerald-50 text-emerald-700", label };
-  return { Icon: Shield, tone: "border-neutral-200 bg-neutral-50 text-neutral-700", label };
+function fmtMult(n: number): string {
+  return `×${n.toFixed(2).replace(/\.?0+$/, "")}`;
+}
+
+function pickMult(b: Buff): { value: number; isBoost: boolean } | null {
+  // Mostra o desvio mais relevante: ganho (restore) tem prioridade sobre desgaste (decay)
+  if (b.restore_mult !== 1) return { value: b.restore_mult, isBoost: b.restore_mult > 1 };
+  if (b.decay_mult !== 1) return { value: b.decay_mult, isBoost: b.decay_mult < 1 };
+  return null;
 }
 
 export function PetBuffsHud({ petId, className }: { petId: string; className?: string }) {
@@ -69,29 +64,21 @@ export function PetBuffsHud({ petId, className }: { petId: string; className?: s
   if (active.length === 0) return null;
 
   return (
-    <div className={cn("flex flex-wrap items-center gap-1.5", className)}>
-      <span className="inline-flex items-center gap-1 text-[10px] font-medium uppercase tracking-wider text-neutral-400">
-        <Sparkles className="size-3" />
-        Ativos
-      </span>
+    <div className={cn("flex flex-wrap items-center gap-1", className)}>
       {active.map((b) => {
-        const { Icon, tone, label } = buffMeta(b);
+        const m = pickMult(b);
+        if (!m) return null;
+        const Icon = m.isBoost ? TrendingUp : TrendingDown;
         const remaining = new Date(b.expires_at).getTime() - now;
+        const tone = m.isBoost ? "text-emerald-600" : "text-rose-600";
         return (
           <span
             key={b.id}
-            className={cn(
-              "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium",
-              tone,
-            )}
-            title={`${label} · expira em ${formatRemaining(remaining)}`}
+            className={cn("inline-flex items-center gap-0.5 text-[11px] font-medium tabular-nums", tone)}
+            title={`${b.label?.trim() || b.kind} · ${formatRemaining(remaining)}`}
           >
             <Icon className="size-3" />
-            <span className="max-w-[8rem] truncate">{label}</span>
-            <span className="inline-flex items-center gap-0.5 text-neutral-500">
-              <Clock className="size-2.5" />
-              <span className="tabular-nums">{formatRemaining(remaining)}</span>
-            </span>
+            {fmtMult(m.value)}
           </span>
         );
       })}
