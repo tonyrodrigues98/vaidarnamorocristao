@@ -918,6 +918,70 @@ export type Database = {
         }
         Relationships: []
       }
+      grab_pool_cooldowns: {
+        Row: {
+          available_at: string
+          id: string
+          pool_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          available_at: string
+          id?: string
+          pool_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          available_at?: string
+          id?: string
+          pool_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "grab_pool_cooldowns_pool_id_fkey"
+            columns: ["pool_id"]
+            isOneToOne: false
+            referencedRelation: "grab_pools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      grab_pool_pity: {
+        Row: {
+          id: string
+          pool_id: string
+          rolls_since_rare: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          pool_id: string
+          rolls_since_rare?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          pool_id?: string
+          rolls_since_rare?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "grab_pool_pity_pool_id_fkey"
+            columns: ["pool_id"]
+            isOneToOne: false
+            referencedRelation: "grab_pools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       grab_pool_prizes: {
         Row: {
           active: boolean
@@ -965,12 +1029,17 @@ export type Database = {
       grab_pools: {
         Row: {
           active: boolean
+          cooldown_hours: number
           cost_coins: number | null
           created_at: string
           description: string | null
+          featured_until: string | null
           free_daily_uses: number | null
+          icon_key: string | null
           id: string
           name: string
+          pity_threshold: number
+          rarity: string
           slug: string
           sort_order: number
           updated_at: string
@@ -978,12 +1047,17 @@ export type Database = {
         }
         Insert: {
           active?: boolean
+          cooldown_hours?: number
           cost_coins?: number | null
           created_at?: string
           description?: string | null
+          featured_until?: string | null
           free_daily_uses?: number | null
+          icon_key?: string | null
           id?: string
           name: string
+          pity_threshold?: number
+          rarity?: string
           slug: string
           sort_order?: number
           updated_at?: string
@@ -991,12 +1065,17 @@ export type Database = {
         }
         Update: {
           active?: boolean
+          cooldown_hours?: number
           cost_coins?: number | null
           created_at?: string
           description?: string | null
+          featured_until?: string | null
           free_daily_uses?: number | null
+          icon_key?: string | null
           id?: string
           name?: string
+          pity_threshold?: number
+          rarity?: string
           slug?: string
           sort_order?: number
           updated_at?: string
@@ -5496,6 +5575,14 @@ export type Database = {
       get_user_primary_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
+      }
+      grab_prize_rarity: {
+        Args: {
+          _amount: number
+          _kind: Database["public"]["Enums"]["grab_prize_kind"]
+          _ref_id: string
+        }
+        Returns: string
       }
       grant_coin_event: {
         Args: { _amount: number; _ref: string; _user: string }
