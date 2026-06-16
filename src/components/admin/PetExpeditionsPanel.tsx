@@ -414,6 +414,19 @@ function formatDuration(minutes: number): string {
   return m ? `${h}h ${m}min` : `${h}h`;
 }
 
+function RowPreview({ imagePath }: { imagePath: string | null }) {
+  const url = useSignedExpeditionUrl(imagePath);
+  return (
+    <div className="grid aspect-[16/9] w-full place-items-center overflow-hidden rounded-xl border border-border bg-muted">
+      {url ? (
+        <img src={url} alt="" className="size-full object-cover" loading="lazy" />
+      ) : (
+        <ImageOff className="size-5 text-muted-foreground" />
+      )}
+    </div>
+  );
+}
+
 function ImageUploader({
   value,
   slugHint,
