@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { Sparkles, Gift, X, Trophy, Zap, Flame } from "lucide-react";
 
@@ -103,7 +104,9 @@ export function ExpeditionRewardModal({
   const meta = OUTCOME_META[result.outcome];
   const allRevealed = step >= rewards.length;
 
-  return (
+  if (typeof document === "undefined") return null;
+
+  return createPortal(
     <AnimatePresence>
       <motion.div
         key="backdrop"
@@ -266,7 +269,8 @@ export function ExpeditionRewardModal({
           </button>
         </motion.div>
       </motion.div>
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body,
   );
 }
 
