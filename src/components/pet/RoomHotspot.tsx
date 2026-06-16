@@ -39,9 +39,8 @@ export function RoomHotspot({
       aria-label={label}
       className={cn(
         "group absolute z-20 flex items-center justify-center rounded-2xl outline-none",
-        "transition-transform duration-200 hover:scale-105 active:scale-95",
-        "focus-visible:ring-2 focus-visible:ring-amber-300/80 focus-visible:ring-offset-0",
-        urgent && "animate-[pulse_2.4s_ease-in-out_infinite]",
+        "transition-transform duration-300 ease-out hover:scale-[1.04] active:scale-95",
+        "focus-visible:ring-2 focus-visible:ring-amber-300/70 focus-visible:ring-offset-0",
         className,
       )}
       style={{
@@ -51,26 +50,26 @@ export function RoomHotspot({
         height: `${height}%`,
       }}
     >
-      {/* halo dourado quando urgente */}
+      {/* halo dourado sutil pulsando quando urgente */}
       {urgent ? (
         <span
           aria-hidden
-          className="pointer-events-none absolute inset-0 rounded-2xl"
+          className="pointer-events-none absolute inset-0 rounded-2xl motion-reduce:animate-none"
           style={{
-            boxShadow:
-              "0 0 0 2px rgba(251, 191, 36, 0.55), 0 0 24px 4px rgba(251, 191, 36, 0.45)",
+            animation: "hotspot-glow 3s ease-in-out infinite",
           }}
         />
       ) : null}
-      {/* anel discreto no hover */}
+      {/* anel discreto no hover/focus */}
       <span
         aria-hidden
         className={cn(
-          "pointer-events-none absolute inset-0 rounded-2xl opacity-0 transition-opacity duration-200",
+          "pointer-events-none absolute inset-0 rounded-2xl opacity-0 transition-opacity duration-300",
           "group-hover:opacity-100 group-focus-visible:opacity-100",
         )}
         style={{
-          boxShadow: "0 0 0 2px rgba(255, 255, 255, 0.75), 0 6px 18px -6px rgba(0,0,0,0.35)",
+          boxShadow:
+            "inset 0 0 0 1.5px rgba(255,255,255,0.85), 0 6px 22px -10px rgba(120,53,15,0.45)",
         }}
       />
       {children}
