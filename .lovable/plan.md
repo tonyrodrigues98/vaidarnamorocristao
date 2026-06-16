@@ -1,93 +1,100 @@
-## O que vamos construir
 
-Quando o usuário tocar no card da expedição em andamento (`ActiveRunCard` em `ExpeditionsCard.tsx`), abrir um modal full-screen cinematográfico que mostra o pet vivendo a aventura em tempo real — não um log de texto, mas uma cena viva.
+# Sistema Grab — Sorteio de Itens + Inventário
 
-### Anatomia do modal
+## Visão geral
 
-1. **Cena de fundo** — a imagem da expedição preenche o modal inteiro com:
-   - Vinheta escura nas bordas pra dar profundidade
-   - **Parallax sutil**: imagem amplia ~5% conforme o progresso avança (zoom cinematográfico lento)
-   - **Camada de clima** sobreposta conforme o bioma da expedição (derivado do slug/nome):
-     - Neve/montanha → flocos caindo
-     - Deserto → poeira dourada flutuando
-     - Floresta/jardim → folhas/pólen suaves
-     - Caverna/santuário → partículas de luz subindo
-     - Noite/aurora → estrelas piscando
-   - **Ciclo dia→noite**: tonalização da cena muda do amanhecer (azul-laranja) → meio-dia (claro) → entardecer (âmbar) → noite (azul-índigo) conforme % de progresso
-   - Avatar do pet em silhueta no canto inferior, com micro-animação de respiração/caminhada
+Nova feature de pet que sorteia recompensas em pools configuráveis. Tudo que hoje é compra direta (consumíveis de cuidado) ou ganho cosmético (fundos, molduras, auras, gradientes) passa a poder ser sorteado. Consumíveis de cuidado ganham um **estoque**: ao usar um item, o estoque é consumido primeiro; só cobra moedas quando o estoque zera.
 
-2. **HUD superior** (overlay sobre a cena)
-   - Título da expedição + badge de dificuldade
-   - Barra de progresso fina e elegante (gradient indigo→fuchsia) com tempo restante tabular
-   - Botão fechar
+- **3 grabs grátis/dia + ilimitados pagos a 10 moedas** (configurável)
+- **Múltiplos pools** (Comum / Raro / Evento), cada um com seus itens e probabilidades
+- **CRUD admin** completo em `/admin/pets` → nova aba "Grab"
 
-3. **Cards flutuantes de eventos** — sobrepostos na parte inferior central:
-   - 3 cards visíveis máximo, empilhados com leve transparência (o mais recente em destaque)
-   - Cada evento entra com `fade-in` de baixo, vive ~8s, depois desliza pra trás e desaparece
-   - Cada card tem: ícone lucide pequeno, frase do evento (1-2 linhas), e timestamp relativo ("agora", "12min atrás")
-   - Novo evento aparece a cada ~30-60s reais (ritmo varia por dificuldade — mais eventos em hard/extreme)
+---
 
-4. **Rodapé** — quando `ready === true`, substitui os cards flutuantes pelo botão grande "Coletar recompensas" com pulse sutil. Antes disso, mostra discreto "Volte mais tarde — sua aventura continua".
+## 1. Schema (migração)
 
-### Como os 500+ eventos funcionam (pool combinatório)
+### `grab_pools` — pools/caixas
+`id, slug, name, description, active, sort_order, cost_coins (override do preço padrão), free_daily_uses (override do default 3), weight (peso entre pools se houver sorteio de pool), created_at, updated_at`
 
-Em vez de 500 frases hard-coded, geramos via templates com slots — manutenção mínima, variedade altíssima, controle editorial total.
+### `grab_pool_prizes` — itens do pool com peso
+`id, pool_id, prize_kind (enum: 'care_item'|'pet_background'|'decoration'|'name_gradient'|'coins'|'xp'|'pet_buff'), prize_ref_id (uuid nullable, FK lógica conforme kind), prize_amount (int, para coins/xp/quantidade de care_item), weight (int >0), active, created_at`
+- Para `care_item`: `prize_ref_id` = `pet_care_items.id`, `prize_amount` = unidades estocadas
+- Para `pet_background`/`decoration`/`name_gradient`: `prize_ref_id` = id do catálogo, ignora `prize_amount`
+- Para `coins`/`xp`: `prize_ref_id` null, `prize_amount` = quantia
+- Para `pet_buff`: `prize_ref_id` = pet_perk_effect id (futuro)
 
-**Estrutura** (`src/lib/expeditionStoryEngine.ts`):
+### `grab_config` — singleton de config global
+`id (sempre 1), default_free_daily int (default 3), default_paid_cost_coins int (default 10), updated_at`
 
-```ts
-// Pools temáticos
-const BIOMES = {
-  mountain: { creatures: [...20], places: [...20], actions: [...20], discoveries: [...20] },
-  desert:   { creatures: [...20], places: [...20], actions: [...20], discoveries: [...20] },
-  forest:   { ... },
-  sanctuary:{ ... },
-  market:   { ... },
-  night:    { ... },
-  // ~6 biomas
-};
+### `user_grab_inventory` — **NOVO inventário com quantidade**
+`id, user_id, prize_kind, prize_ref_id, quantity int (>0), created_at, updated_at` + unique `(user_id, prize_kind, prize_ref_id)`. Inicialmente usado só para `care_item`; cosméticos vão direto para suas tabelas de ownership existentes.
 
-// ~25 templates por categoria de fase × 4 fases = ~100 templates
-// Ex: "Seu pet {action} perto de {place} e {discovery}."
-//     "{creature} cruzou o caminho. Seu pet {reaction}."
-```
+### `user_daily_grabs` — quota diária
+`id, user_id, day date, free_used int default 0, paid_used int default 0` + unique `(user_id, day)`.
 
-Cada slot tem 15-25 opções → milhares de combinações únicas por bioma. Os eventos são determinísticos por `(expedition_id, run_id, event_index)` usando um seed PRNG, então o usuário vê a mesma sequência se reabrir o modal (continuidade narrativa), mas cada expedição tem sequência única.
+### `user_grab_log` — histórico (auditoria + UI "últimos prêmios")
+`id, user_id, pool_id, prize_kind, prize_ref_id, prize_amount, was_paid bool, rolled_at`
 
-**Mapeamento bioma**: derivamos do slug atual (`cume-da-alianca` → mountain, `travessia-do-deserto` → desert, etc.) via tabela simples — sem mudanças no DB.
+### RPCs
+- `perform_grab(_pool_id uuid)` → sorteia por weight, decide free/paid, debita moedas se pago, credita prêmio (estoque ou ownership), insere log. Retorna `{ prize_kind, prize_ref_id, prize_amount, was_paid, new_balance, free_remaining }`.
+- `get_grab_state()` → retorna pools ativos + `free_used` / `free_remaining` / `paid_cost` / últimos 5 prêmios do usuário.
+- `consume_care_inventory(_item_id)` → decrementa `user_grab_inventory.quantity` em 1 se houver; retorna bool "consumiu do estoque".
+- Modificar `apply_pet_care`: chamar `consume_care_inventory` ANTES de `spend_coin_for_pet_care`. Se consumiu do estoque, pular cobrança de moedas.
 
-**Eventos especiais raros (~5% dos slots)**:
-- Achado de item ("Encontrou {item_reward_label} brilhando entre as folhas") — só aparece se a expedição tem item_reward
-- Momento de oração/reflexão wholesome ("Parou e contemplou {place}")
-- Pequeno susto que vira aprendizado
+### RLS
+- Catálogo (`grab_pools`, `grab_pool_prizes`, `grab_config`): SELECT `authenticated` ativos; ALL `service_role` + admin via `has_role`.
+- Tabelas de usuário: SELECT/UPDATE/INSERT scoped a `auth.uid()`; ALL `service_role`.
 
-### Detalhes técnicos
+---
 
-- **Sem mudanças de schema**: tudo client-side. O modal calcula quantos eventos já "aconteceram" baseado em `(now - started_at) / event_interval` e renderiza os últimos 3.
-- **Performance**: partículas são divs CSS com `transform` + `animation` (sem canvas). 15-25 partículas no máximo, animadas via keyframes.
-- **Determinismo**: usar `mulberry32(hashStringToInt(run_id + event_index))` pra escolher slots, garantindo mesma narrativa em reaberturas.
-- **Mobile-first**: modal usa `Dialog` do shadcn com `max-w-md` e altura quase full, design pensado pra 393x697.
+## 2. Admin — `/admin/pets` aba "Grab"
 
-### Estrutura de arquivos
+Novo `<PetGrabPanel>` em `src/components/admin/PetGrabPanel.tsx`:
 
-**Novos:**
-- `src/lib/expeditionStoryEngine.ts` — biomas, pools, templates, função `getEventAt(runId, index, context)`, mapping slug→bioma
-- `src/components/pet/ExpeditionLiveSceneModal.tsx` — o modal completo (cena + HUD + partículas + cards de evento)
-- `src/components/pet/SceneWeatherLayer.tsx` — partículas animadas por bioma (reutilizável)
+- **Seção config global** (card no topo): editar `default_free_daily`, `default_paid_cost_coins` (inputs `text` + `inputMode="numeric"`).
+- **Lista de pools** (cards): nome, slug, ativo (switch), custo override, free/dia override, soma de pesos. Botão "Editar prêmios".
+- **Modal de edição de pool**: form do pool + tabela de prêmios com colunas: tipo (select), item (combobox carregado por tipo), quantidade, peso, % calculada (peso/sum*100), ativo, ações. Adicionar/remover linhas inline.
+- **Preview de probabilidades**: ao lado de cada prêmio, mostra `(weight / Σweight) * 100%` formatado.
 
-**Editados:**
-- `src/components/pet/ExpeditionsCard.tsx` — `ActiveRunCard` vira clicável (`role=button`), abre o modal; passa props necessárias (`active`, `now`, `onClaim`, `busy`)
+Adicionar entrada na `TABS` de `src/routes/admin/pets.tsx` com ícone `Gift` (já importado).
 
-### Fora do escopo
+---
 
-- Sem persistir eventos no DB (são deterministicamente recalculáveis)
-- Sem áudio/som (pode ser fase 2)
-- Sem mudar o card listado (só o ativo abre modal)
-- Sem editor admin para os pools (texto fica no código por ora)
+## 3. UI usuário
 
-### Quality bar
+Novo bloco "Grab" no card de pet (`src/components/pet/`):
 
-- Abrir o modal numa expedição de 1h e voltar 20min depois mostra os 3 últimos eventos coerentes (não os mesmos primeiros)
-- Trocar de expedição = clima e eventos visivelmente diferentes (montanha gelada ≠ deserto)
-- Animações suaves a 60fps em mobile (transform/opacity only)
-- Botão "Coletar" só aparece quando `ready === true`
+- Botão grande "Sortear" com contador `2/3 grátis hoje` ou `10 moedas`.
+- Modal de resultado com animação de revelação (reuso de padrões existentes), mostrando ícone do prêmio + nome + quantidade.
+- Aba/lista "Meu estoque" mostrando `user_grab_inventory` agrupado por tipo, com badge de quantidade.
+- Em `PetCareActionSheet`: badge "x3 em estoque" no item; ao usar, se houver estoque, label muda para "Usar (grátis)" em vez de mostrar custo. (Tudo via lucide icons — sem emojis.)
+
+---
+
+## 4. Detalhes técnicos
+
+- **Sorteio**: random weighted via `random() * sum(weight)` em PL/pgSQL com `ORDER BY` cumulativo (padrão Postgres). Tudo server-side.
+- **Atomicidade**: `perform_grab` numa única transação — quota → cobrança → sorteio → credit → log. Lança erro se quota esgotada e sem moedas.
+- **Idempotência**: nenhum retry duplica prêmio (não há retry transparente; cliente mostra erro).
+- **Tipos**: `src/types/petGrab.ts` com enums e interfaces.
+- **Lib**: `src/lib/petGrab.ts` com helpers tipados (`performGrab`, `getGrabState`, `adminListPools`, `adminUpsertPool`, `adminUpsertPrize`).
+- **Memória do projeto**: respeitar regras (inputs `text`+`inputMode`, zero emojis na UI, lucide icons).
+
+---
+
+## 5. Ordem de execução
+
+1. Migração: tabelas + RLS + GRANTs + RPCs + alteração de `apply_pet_care` + seed inicial (1 pool "Comum" vazio + `grab_config` default).
+2. Tipos + lib client (`petGrab.ts`, `types/petGrab.ts`).
+3. `PetGrabPanel` admin + registro na aba.
+4. Componente usuário (`GrabCard` + modal de resultado + lista de estoque).
+5. Ajuste em `PetCareActionSheet` para mostrar estoque.
+6. Smoke test: criar pool com 1 prêmio de carne (quantidade 3, peso 100%), sortear 1x, verificar estoque, usar carne e confirmar que não debitou moedas.
+
+---
+
+## Fora de escopo nesta entrega
+
+- Itens de **avatar** (acessórios/roupas) como prêmio — você marcou apenas pet/cosméticos do perfil; fica trivial adicionar depois (mesma estrutura, novo `prize_kind`).
+- Tickets de Grab como recompensa de outras ações (missão/expedição) — pode entrar numa próxima fase.
+- Animação 3D/gacha elaborada — entrega com revelação simples mas polida; podemos iterar visual depois.
