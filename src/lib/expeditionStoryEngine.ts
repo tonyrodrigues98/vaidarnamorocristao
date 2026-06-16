@@ -316,3 +316,29 @@ export const PHASE_OVERLAY: Record<DayPhase, string> = {
   dusk: "linear-gradient(to bottom, rgba(255,140,90,0.30), rgba(80,30,90,0.25))",
   night: "linear-gradient(to bottom, rgba(20,30,80,0.55), rgba(0,0,30,0.65))",
 };
+
+/** Color wash applied with soft-light blend — gives a global temperature shift. */
+export const PHASE_TINT: Record<DayPhase, string> = {
+  dawn: "rgba(255,170,120,0.35)",
+  day: "rgba(255,255,255,0.0)",
+  dusk: "rgba(255,110,70,0.42)",
+  night: "rgba(30,40,90,0.55)",
+};
+
+/** Ambient particle layer that crossfades when the day phase changes. */
+export const PHASE_AMBIENT: Record<DayPhase, Weather> = {
+  dawn: "light",
+  day: "dust",
+  dusk: "sparks",
+  night: "stars",
+};
+
+/** Density multiplier for the base weather, per phase. */
+export const PHASE_DENSITY: Record<DayPhase, number> = {
+  dawn: 0.85,
+  day: 1.0,
+  dusk: 0.95,
+  night: 0.7,
+};
+
+export const PHASE_ORDER: readonly DayPhase[] = ["dawn", "day", "dusk", "night"];
