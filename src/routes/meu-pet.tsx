@@ -43,6 +43,7 @@ import { CoinIcon } from "@/components/icons/CoinIcon";
 import { PetBackgroundLayer, PetSceneryPanel, usePetScenery } from "@/components/pet/PetSceneryPanel";
 import { usePetDayNight } from "@/lib/petDayNight";
 import { PetNeedsHud } from "@/components/pet/PetNeedsHud";
+import { PetBuffsHud } from "@/components/pet/PetBuffsHud";
 import { PetRadialMenu, useLongPress } from "@/components/pet/PetRadialMenu";
 import { PetCareActionSheet } from "@/components/pet/PetCareActionSheet";
 import { PetMoodLine } from "@/components/pet/PetMoodLine";
@@ -345,6 +346,7 @@ function Showcase({
       <div className="hidden border-b border-neutral-100 bg-neutral-50/60 p-4 sm:block">
         <PetMoodLine name={pet.custom_name} mood={mood} />
         <PetNeedsHud values={careValues} onPick={(k) => setActionKind(k)} />
+        <PetBuffsHud petId={pet.id} className="mt-3" />
       </div>
       <div className="grid gap-0 sm:grid-cols-[260px_1fr]">
         {/* Visual */}
@@ -353,6 +355,7 @@ function Showcase({
           <div className="relative z-20 mb-3 px-4 sm:hidden">
             <PetMoodLine name={pet.custom_name} mood={mood} className="mb-2" />
             <PetNeedsHud values={careValues} onPick={(k) => setActionKind(k)} />
+            <PetBuffsHud petId={pet.id} className="mt-2" />
           </div>
           <div className="relative flex min-h-[240px] flex-1 items-center justify-center">
           <PetBackgroundLayer background={scenery.equipped} />
