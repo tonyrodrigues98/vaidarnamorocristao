@@ -37,7 +37,7 @@ function tierFor(name: string): GrabTier {
     return {
       image: grabLendariaImg,
       label: "Lendária",
-      glow: "bg-[radial-gradient(circle_at_50%_60%,rgba(217,160,48,0.40),transparent_65%)]",
+      glow: "bg-[radial-gradient(circle_at_50%_50%,rgba(217,160,48,0.40),transparent_65%)]",
       dot: "bg-amber-400",
       rank: 3,
       ringColor: "rgba(217,160,48,0.55)",
@@ -47,7 +47,7 @@ function tierFor(name: string): GrabTier {
     return {
       image: grabEpicaImg,
       label: "Épica",
-      glow: "bg-[radial-gradient(circle_at_50%_60%,rgba(139,92,246,0.34),transparent_65%)]",
+      glow: "bg-[radial-gradient(circle_at_50%_50%,rgba(139,92,246,0.34),transparent_65%)]",
       dot: "bg-violet-500",
       rank: 2,
       ringColor: "rgba(139,92,246,0.50)",
@@ -57,7 +57,7 @@ function tierFor(name: string): GrabTier {
     return {
       image: grabRaraImg,
       label: "Rara",
-      glow: "bg-[radial-gradient(circle_at_50%_60%,rgba(56,189,248,0.26),transparent_65%)]",
+      glow: "bg-[radial-gradient(circle_at_50%_50%,rgba(56,189,248,0.26),transparent_65%)]",
       dot: "bg-sky-500",
       rank: 1,
       ringColor: "rgba(56,189,248,0.45)",
@@ -66,7 +66,7 @@ function tierFor(name: string): GrabTier {
   return {
     image: grabComumImg,
     label: "Comum",
-    glow: "bg-[radial-gradient(circle_at_50%_65%,rgba(244,114,182,0.18),transparent_65%)]",
+    glow: "bg-[radial-gradient(circle_at_50%_50%,rgba(244,114,182,0.18),transparent_65%)]",
     dot: "bg-rose-400",
     rank: 0,
     ringColor: "rgba(0,0,0,0)",
@@ -189,11 +189,10 @@ export function PetGrabCard({ refreshKey, onChanged }: Props) {
                   "disabled:opacity-60 disabled:hover:translate-y-0",
                 )}
               >
-                {/* tier glow behind the box */}
-                <div className={cn("pointer-events-none absolute inset-0", tier.glow)} />
-
                 {/* the box IS the visual */}
-                <div className="relative flex aspect-square w-full items-center justify-center">
+                <div className="relative flex aspect-[5/4] w-full items-center justify-center">
+                  {/* tier glow centered on the box */}
+                  <div className={cn("pointer-events-none absolute inset-0", tier.glow)} />
                   {/* Aura effects (rank-based) */}
                   {tier.rank >= 1 && (
                     <div
