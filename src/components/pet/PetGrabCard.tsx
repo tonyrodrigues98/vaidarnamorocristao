@@ -672,7 +672,20 @@ export function GrabRouletteModal({
                         )}
                         style={popping ? { animation: "grab-pop 700ms cubic-bezier(0.22,1.4,0.36,1) forwards" } : undefined}
                       >
-                        {it?.image_url ? (
+                        {it?.kind === "name_gradient" && it.gradient_css ? (
+                          <div
+                            className="size-full"
+                            style={{ background: it.gradient_css }}
+                          >
+                            <div className="flex h-full w-full items-end justify-center p-1.5">
+                              <span
+                                className="max-w-full truncate rounded-md bg-black/45 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-white backdrop-blur"
+                              >
+                                Aa
+                              </span>
+                            </div>
+                          </div>
+                        ) : it?.image_url ? (
                           <img
                             src={it.image_url}
                             alt=""
@@ -757,6 +770,26 @@ export function GrabRouletteModal({
                       </span>
                       <span className="text-base font-medium text-neutral-200">XP</span>
                     </div>
+                  </div>
+                ) : res.prize_kind === "name_gradient" && winner.gradient_css ? (
+                  <div className="flex flex-col items-center gap-2">
+                    <div className="text-xs uppercase tracking-[0.18em] text-neutral-400">
+                      Você ganhou um gradiente
+                    </div>
+                    <div
+                      className="rounded-xl px-4 py-2 text-lg font-extrabold tracking-tight text-transparent ring-1 ring-white/15"
+                      style={{
+                        backgroundImage: winner.gradient_css,
+                        WebkitBackgroundClip: "text",
+                        backgroundClip: "text",
+                      }}
+                    >
+                      {winner.name}
+                    </div>
+                    <div
+                      className="h-2 w-32 rounded-full"
+                      style={{ background: winner.gradient_css }}
+                    />
                   </div>
                 ) : (
                   <div className="text-lg font-semibold tracking-tight">
