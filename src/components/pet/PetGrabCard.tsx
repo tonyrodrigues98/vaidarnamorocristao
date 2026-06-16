@@ -26,6 +26,9 @@ type GrabTier = {
   label: string;
   glow: string;
   dot: string;
+  rank: 0 | 1 | 2 | 3;
+  ringColor: string;
+  haloColor: string;
 };
 
 function tierFor(name: string): GrabTier {
@@ -34,28 +37,40 @@ function tierFor(name: string): GrabTier {
     return {
       image: grabLendariaImg,
       label: "Lendária",
-      glow: "bg-[radial-gradient(circle_at_50%_65%,rgba(217,160,48,0.28),transparent_60%)]",
+      glow: "bg-[radial-gradient(circle_at_50%_60%,rgba(217,160,48,0.40),transparent_65%)]",
       dot: "bg-amber-400",
+      rank: 3,
+      ringColor: "rgba(217,160,48,0.55)",
+      haloColor: "rgba(255,210,120,0.55)",
     };
   if (n.includes("ép") || n.includes("ep"))
     return {
       image: grabEpicaImg,
       label: "Épica",
-      glow: "bg-[radial-gradient(circle_at_50%_65%,rgba(139,92,246,0.28),transparent_60%)]",
+      glow: "bg-[radial-gradient(circle_at_50%_60%,rgba(139,92,246,0.34),transparent_65%)]",
       dot: "bg-violet-500",
+      rank: 2,
+      ringColor: "rgba(139,92,246,0.50)",
+      haloColor: "rgba(196,181,253,0.45)",
     };
   if (n.includes("rar"))
     return {
       image: grabRaraImg,
       label: "Rara",
-      glow: "bg-[radial-gradient(circle_at_50%_65%,rgba(20,184,166,0.22),transparent_60%)]",
-      dot: "bg-teal-500",
+      glow: "bg-[radial-gradient(circle_at_50%_60%,rgba(56,189,248,0.26),transparent_65%)]",
+      dot: "bg-sky-500",
+      rank: 1,
+      ringColor: "rgba(56,189,248,0.45)",
+      haloColor: "rgba(186,230,253,0.40)",
     };
   return {
     image: grabComumImg,
     label: "Comum",
-    glow: "bg-[radial-gradient(circle_at_50%_65%,rgba(244,114,182,0.20),transparent_60%)]",
+    glow: "bg-[radial-gradient(circle_at_50%_65%,rgba(244,114,182,0.18),transparent_65%)]",
     dot: "bg-rose-400",
+    rank: 0,
+    ringColor: "rgba(0,0,0,0)",
+    haloColor: "rgba(0,0,0,0)",
   };
 }
 
