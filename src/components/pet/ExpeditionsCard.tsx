@@ -279,6 +279,11 @@ function ExpeditionRow({
           </div>
         )}
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/55 to-transparent" />
+        {!sent && (
+          <div className="absolute right-2 top-2">
+            <StatusBadge status="available" />
+          </div>
+        )}
         <span
           className={cn(
             "absolute left-2 top-2 rounded-full px-2 py-0.5 text-[10px] font-medium ring-1 backdrop-blur",
@@ -292,10 +297,7 @@ function ExpeditionRow({
         </h4>
         {sent && (
           <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/45 backdrop-blur-[3px]">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-[12px] font-semibold text-emerald-600 shadow-lg ring-1 ring-emerald-200">
-              <CheckCircle2 className="size-4 text-emerald-600" />
-              Concluída
-            </span>
+            <StatusBadge status="done" />
           </div>
         )}
       </div>
