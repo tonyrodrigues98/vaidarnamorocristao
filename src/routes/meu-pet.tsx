@@ -322,9 +322,12 @@ function Showcase({
 
   useEffect(() => {
     void reloadCare();
+    void reloadActiveExpedition();
     // As barras caem ~2 pts/h: re-render a cada 1s desperdiça CPU.
     // 5s já dá fluidez visual e reduz ~80% dos renders.
     const t = setInterval(() => setTick((n) => n + 1), 5_000);
+    // Expedição: poll mais lento (30s) — só precisa virar quando terminar.
+    const e = setInterval(() => void reloadActiveExpedition(), 30_000);
     // a cada 60s, recarrega modificadores (buffs expiram, condicionais mudam)
     const m = setInterval(
       () => void getPetRuntimeModifiers(pet.id).then((mm) => mm && setRuntimeMods(mm)),
@@ -332,11 +335,15 @@ function Showcase({
     );
     // Pausa o tick quando a aba está oculta — economiza bateria.
     function onVis() {
-      if (document.visibilityState === "visible") void reloadCare();
+      if (document.visibilityState === "visible") {
+        void reloadCare();
+        void reloadActiveExpedition();
+      }
     }
     document.addEventListener("visibilitychange", onVis);
     return () => {
       clearInterval(t);
+      clearInterval(e);
       clearInterval(m);
       document.removeEventListener("visibilitychange", onVis);
     };
