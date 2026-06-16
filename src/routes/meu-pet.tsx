@@ -84,6 +84,7 @@ import { Link as RouterLink } from "@tanstack/react-router";
 import { BookOpen, Clock, MessageCircle, Compass } from "lucide-react";
 import { PetCareHistorySheet } from "@/components/pet/PetCareHistorySheet";
 import { PetLivingRoom } from "@/components/pet/PetLivingRoom";
+import { recordLastAction, saveCareSnapshot } from "@/lib/petLocalCache";
 
 export const Route = createFileRoute("/meu-pet")({ component: MeuPetPage });
 
