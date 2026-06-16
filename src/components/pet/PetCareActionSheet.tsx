@@ -86,8 +86,7 @@ export function PetCareActionSheet({
         ? ` (×${result.multiplier.toFixed(2)})`
         : "";
       const KindIcon = PET_CARE_ICON[item.kind];
-      toast.success(`${PET_CARE_LABEL[item.kind]} +${restore}${multiTxt}`, {
-        description: result.notes?.length ? result.notes.slice(0, 2).join(" · ") : undefined,
+      toast(`${PET_CARE_LABEL[item.kind]} +${restore}${multiTxt}`, {
         icon: createElement(KindIcon, { className: "size-4" }),
       });
       // XP: care de resgate (<20%) ou care preventivo (<50%)
@@ -99,8 +98,7 @@ export function PetCareActionSheet({
           { kind: item.kind, item: item.slug },
         );
         if (xp && xp.granted > 0)
-          toast.success(`XP +${xp.granted}`, {
-            description: "Resgate na hora certa",
+          toast(`XP +${xp.granted}`, {
             icon: createElement(Sparkles, { className: "size-4 text-amber-500" }),
           });
       } else if (currentValue < 50) {
@@ -111,8 +109,7 @@ export function PetCareActionSheet({
           { kind: item.kind, item: item.slug },
         );
         if (xp && xp.granted > 0)
-          toast.success(`XP +${xp.granted}`, {
-            description: "Cuidado preventivo",
+          toast(`XP +${xp.granted}`, {
             icon: createElement(Sparkles, { className: "size-4 text-amber-500" }),
           });
       }
