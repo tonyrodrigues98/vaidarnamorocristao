@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { Loader2, Lock, Sparkles, Timer } from "lucide-react";
 import { CoinIcon } from "@/components/icons/CoinIcon";
 import { cn } from "@/lib/utils";
-import { formatCooldown, iconForKey, rarityTokens } from "@/lib/grabRarity";
+import { formatCooldown, rarityTokens } from "@/lib/grabRarity";
+import { caixaArtFor } from "@/lib/caixaArt";
 import type { GrabStatePool } from "@/types/petGrab";
 
 type Props = {
@@ -14,7 +15,7 @@ type Props = {
 
 export function GrabPoolCard({ pool, freeRemaining, busy, onOpen }: Props) {
   const r = rarityTokens(pool.rarity);
-  const Icon = iconForKey(pool.icon_key);
+  const art = caixaArtFor(pool.slug, pool.rarity);
   const [cd, setCd] = useState<number>(pool.cooldown_seconds);
 
   // Live countdown
@@ -87,22 +88,32 @@ export function GrabPoolCard({ pool, freeRemaining, busy, onOpen }: Props) {
         )}
       </div>
 
-      {/* icon plate */}
-      <div
-        className="relative z-10 mx-auto my-1 grid aspect-square w-24 place-items-center rounded-2xl ring-1 ring-[#e6cf8a]"
-        style={{
-          background:
-            "linear-gradient(135deg, #FFFAEC 0%, #F4E2B5 55%, #E6CF8A 100%)",
-          boxShadow:
-            "inset 0 1px 0 rgba(255,255,255,0.85), inset 0 -8px 18px -10px rgba(154,118,38,0.25)",
-        }}
-      >
-        <Icon
-          className={cn(
-            "size-10 transition-transform duration-500 group-hover:scale-110",
-            r.textClass,
-          )}
-          strokeWidth={1.5}
+      {/* cinematic artwork */}
+      <div className="relative z-10 mx-auto my-1 aspect-square w-28">
+        {/* radial spotlight behind the box */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 rounded-full"
+          style={{
+            background: r.glowCss,
+            filter: "blur(6px)",
+            transform: "scale(1.05)",
+          }}
+        />
+        <img
+          src={art}
+          alt={pool.name}
+          width={224}
+          height={224}
+          loading="lazy"
+          decoding="async"
+          draggable={false}
+          className="relative z-10 h-full w-full object-contain transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-2"
+          style={{
+            filter: onCooldown
+              ? "grayscale(0.6) brightness(0.85)"
+              : `drop-shadow(0 10px 14px rgba(0,0,0,0.18)) drop-shadow(0 0 14px ${r.hex}55)`,
+          }}
         />
       </div>
 
