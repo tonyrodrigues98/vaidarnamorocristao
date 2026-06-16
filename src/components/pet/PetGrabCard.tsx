@@ -438,12 +438,32 @@ function GrabRouletteModal({
                   const rarity = (it as any)?.rarity as "common" | "rare" | "epic" | "legendary" | undefined;
                   const rarityStyle =
                     rarity === "legendary"
-                      ? { ring: "ring-2 ring-amber-400/90", shadow: "shadow-[0_0_18px_rgba(251,191,36,0.55)]" }
+                      ? {
+                          ring: popping ? "ring-4 ring-amber-300" : "ring-2 ring-amber-400/90",
+                          shadow: popping
+                            ? "shadow-[0_0_38px_12px_rgba(251,191,36,0.85)]"
+                            : "shadow-[0_0_18px_rgba(251,191,36,0.55)]",
+                        }
                       : rarity === "epic"
-                      ? { ring: "ring-2 ring-violet-400/90", shadow: "shadow-[0_0_16px_rgba(167,139,250,0.50)]" }
+                      ? {
+                          ring: popping ? "ring-4 ring-violet-300" : "ring-2 ring-violet-400/90",
+                          shadow: popping
+                            ? "shadow-[0_0_34px_10px_rgba(167,139,250,0.80)]"
+                            : "shadow-[0_0_16px_rgba(167,139,250,0.50)]",
+                        }
                       : rarity === "rare"
-                      ? { ring: "ring-2 ring-sky-400/90", shadow: "shadow-[0_0_14px_rgba(56,189,248,0.45)]" }
-                      : { ring: "ring-1 ring-white/10", shadow: "shadow-lg shadow-black/40" };
+                      ? {
+                          ring: popping ? "ring-4 ring-sky-300" : "ring-2 ring-sky-400/90",
+                          shadow: popping
+                            ? "shadow-[0_0_30px_10px_rgba(56,189,248,0.75)]"
+                            : "shadow-[0_0_14px_rgba(56,189,248,0.45)]",
+                        }
+                      : {
+                          ring: popping ? "ring-2 ring-white/70" : "ring-1 ring-white/10",
+                          shadow: popping
+                            ? "shadow-[0_0_24px_8px_rgba(255,255,255,0.35)]"
+                            : "shadow-lg shadow-black/40",
+                        };
                   return (
                     <div
                       key={i}
