@@ -3,8 +3,6 @@ import { toast } from "sonner";
 import {
   Loader2,
   Sparkles,
-  ArrowDownLeft,
-  ArrowUpRight,
   Wallet,
   Inbox,
   DollarSign,
