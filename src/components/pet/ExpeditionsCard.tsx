@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import * as LucideIcons from "lucide-react";
-import { Compass, Loader2, Sparkles, Clock, Lock, Zap, Gift, Send } from "lucide-react";
+import { Compass, Loader2, Sparkles, Clock, Lock, Zap, Gift, Send, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -205,12 +205,17 @@ function ExpeditionRow({
     <li
       className={cn(
         "overflow-hidden rounded-2xl border transition",
-        sent ? "border-neutral-200 bg-neutral-50 opacity-60" : "border-neutral-200 bg-white",
+        sent ? "border-neutral-200 bg-neutral-50" : "border-neutral-200 bg-white",
       )}
     >
       <div className="relative aspect-[16/9] w-full overflow-hidden bg-indigo-50">
         {img ? (
-          <img src={img} alt="" className="size-full object-cover" loading="lazy" />
+          <img
+            src={img}
+            alt=""
+            className={cn("size-full object-cover transition", sent && "scale-[1.02]")}
+            loading="lazy"
+          />
         ) : (
           <div className="grid size-full place-items-center text-indigo-400">
             <Icon className="size-8" />
@@ -228,6 +233,14 @@ function ExpeditionRow({
         <h4 className="absolute inset-x-3 bottom-2 text-[14px] font-semibold leading-snug text-white drop-shadow">
           {m.title}
         </h4>
+        {sent && (
+          <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/45 backdrop-blur-[3px]">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/95 px-3 py-1.5 text-[12px] font-semibold text-white shadow-lg ring-1 ring-white/20">
+              <CheckCircle2 className="size-4" />
+              Concluída
+            </span>
+          </div>
+        )}
       </div>
       <div className="space-y-3 p-3">
         {m.description && (
