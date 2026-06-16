@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
-import { TrendingUp, TrendingDown } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import { PET_CARE_ICON } from "@/components/pet/PetNeedsHud";
+import { PET_CARE_LABEL, type PetCareKind } from "@/types/petCare";
 
 type Buff = {
   id: string;
@@ -29,10 +31,32 @@ function fmtMult(n: number): string {
 }
 
 function pickMult(b: Buff): { value: number; isBoost: boolean } | null {
-  // Mostra o desvio mais relevante: ganho (restore) tem prioridade sobre desgaste (decay)
   if (b.restore_mult !== 1) return { value: b.restore_mult, isBoost: b.restore_mult > 1 };
   if (b.decay_mult !== 1) return { value: b.decay_mult, isBoost: b.decay_mult < 1 };
   return null;
+}
+
+// Agrupa por necessidade afetada, mantendo o efeito mais forte por kind
+function dedupe(buffs: Buff[]): Array<{ kind: string; mult: number; isBoost: boolean; expires: number; label: string }> {
+  const map = new Map<string, { kind: string; mult: number; isBoost: boolean; expires: number; label: string }>();
+  for (const b of buffs) {
+    const m = pickMult(b);
+    if (!m) continue;
+    const exp = new Date(b.expires_at).getTime();
+    const cur = map.get(b.kind);
+    const score = Math.abs(Math.log(m.value)); // intensidade do desvio
+    const curScore = cur ? Math.abs(Math.log(cur.mult)) : -1;
+    if (!cur || score > curScore) {
+      map.set(b.kind, {
+        kind: b.kind,
+        mult: m.value,
+        isBoost: m.isBoost,
+        expires: exp,
+        label: b.label?.trim() || PET_CARE_LABEL[b.kind as PetCareKind] || b.kind,
+      });
+    }
+  }
+  return Array.from(map.values());
 }
 
 export function PetBuffsHud({ petId, className }: { petId: string; className?: string }) {
@@ -61,24 +85,23 @@ export function PetBuffsHud({ petId, className }: { petId: string; className?: s
   }, [petId]);
 
   const active = buffs.filter((b) => new Date(b.expires_at).getTime() > now);
-  if (active.length === 0) return null;
+  const grouped = dedupe(active);
+  if (grouped.length === 0) return null;
 
   return (
-    <div className={cn("flex flex-wrap items-center gap-1", className)}>
-      {active.map((b) => {
-        const m = pickMult(b);
-        if (!m) return null;
-        const Icon = m.isBoost ? TrendingUp : TrendingDown;
-        const remaining = new Date(b.expires_at).getTime() - now;
-        const tone = m.isBoost ? "text-emerald-600" : "text-rose-600";
+    <div className={cn("flex flex-wrap items-center gap-x-3 gap-y-1", className)}>
+      {grouped.map((g) => {
+        const Icon = PET_CARE_ICON[g.kind as PetCareKind] ?? Sparkles;
+        const tone = g.isBoost ? "text-emerald-600" : "text-rose-600";
+        const remaining = g.expires - now;
         return (
           <span
-            key={b.id}
-            className={cn("inline-flex items-center gap-0.5 text-[11px] font-medium tabular-nums", tone)}
-            title={`${b.label?.trim() || b.kind} · ${formatRemaining(remaining)}`}
+            key={g.kind}
+            className={cn("inline-flex items-center gap-1 text-[11px] font-medium tabular-nums", tone)}
+            title={`${g.label} · ${fmtMult(g.mult)} · ${formatRemaining(remaining)}`}
           >
-            <Icon className="size-3" />
-            {fmtMult(m.value)}
+            <Icon className="size-3 text-neutral-500" />
+            {fmtMult(g.mult)}
           </span>
         );
       })}
