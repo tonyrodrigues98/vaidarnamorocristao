@@ -441,12 +441,22 @@ function MultiResultsDialog({
               <div className="grid aspect-square place-items-center overflow-hidden rounded-lg bg-[#f1ead8]">
                 {res.prize_kind === "name_gradient" && prize.gradient_css ? (
                   <div className="size-full" style={{ background: prize.gradient_css }} />
+                ) : res.prize_kind === "coins" ? (
+                  <div className="relative flex size-full items-center justify-center">
+                    <CoinIcon className="size-10" />
+                    <span className="absolute bottom-1 rounded-md bg-black/70 px-1.5 py-0.5 text-[10px] font-bold text-amber-200">
+                      +{res.prize_amount}
+                    </span>
+                  </div>
+                ) : res.prize_kind === "xp" ? (
+                  <div className="relative flex size-full items-center justify-center">
+                    <img src={capsulaXpImg} alt="" className="size-full object-contain p-1" />
+                    <span className="absolute bottom-1 rounded-md bg-black/70 px-1.5 py-0.5 text-[10px] font-bold text-sky-200">
+                      +{res.prize_amount} XP
+                    </span>
+                  </div>
                 ) : prize.image_url ? (
                   <img src={prize.image_url} alt="" className="size-full object-cover" />
-                ) : res.prize_kind === "coins" ? (
-                  <CoinIcon className="size-8" />
-                ) : res.prize_kind === "xp" ? (
-                  <img src={capsulaXpImg} alt="" className="size-full object-contain p-1" />
                 ) : (
                   <Package className="size-8 text-[#9a7626]" />
                 )}
