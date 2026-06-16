@@ -66,6 +66,8 @@ import { PetEffectsLayer } from "@/components/pet/PetEffectsLayer";
 import { PetConfessionBubble } from "@/components/pet/PetConfessionBubble";
 import { MissionsTodayCard } from "@/components/pet/MissionsTodayCard";
 import { ExpeditionsCard } from "@/components/pet/ExpeditionsCard";
+import { getActiveExpedition } from "@/lib/petExpeditions";
+import type { ActiveExpedition } from "@/types/petExpedition";
 import { PetOnboardingTour } from "@/components/pet/PetOnboardingTour";
 import { PetShowcaseSkeleton } from "@/components/pet/PetShowcaseSkeleton";
 import { PetStreakCard } from "@/components/pet/PetStreakCard";
@@ -77,7 +79,7 @@ import {
   type PetRandomEventPayload,
 } from "@/components/pet/PetRandomEventModal";
 import { Link as RouterLink } from "@tanstack/react-router";
-import { BookOpen, Clock, MessageCircle } from "lucide-react";
+import { BookOpen, Clock, MessageCircle, Compass } from "lucide-react";
 import { PetCareHistorySheet } from "@/components/pet/PetCareHistorySheet";
 
 export const Route = createFileRoute("/meu-pet")({ component: MeuPetPage });
@@ -263,6 +265,45 @@ function Showcase({
   const [xpRefresh, setXpRefresh] = useState(0);
   const [randomEvent, setRandomEvent] = useState<PetRandomEventPayload | null>(null);
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [activeExpedition, setActiveExpedition] = useState<ActiveExpedition | null>(null);
+
+  async function reloadActiveExpedition() {
+    try {
+      const a = await getActiveExpedition(pet.id);
+      setActiveExpedition(a);
+    } catch {
+      // silencioso
+    }
+  }
+
+  const isAway = !!activeExpedition && new Date(activeExpedition.ends_at).getTime() > Date.now();
+  const awayRemaining = useMemo(() => {
+    if (!activeExpedition) return "";
+    const ms = new Date(activeExpedition.ends_at).getTime() - Date.now();
+    if (ms <= 0) return "Concluindo…";
+    const totalMin = Math.ceil(ms / 60_000);
+    if (totalMin < 60) return `${totalMin} min`;
+    const h = Math.floor(totalMin / 60);
+    const m = totalMin % 60;
+    return m ? `${h}h ${m}min` : `${h}h`;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeExpedition, tick]);
+
+  function requestAction(k: PetCareKind) {
+    if (isAway) {
+      toast.info(`${pet.custom_name} está em expedição. Volta em ${awayRemaining}.`);
+      return;
+    }
+    setActionKind(k);
+  }
+
+  function openRadial() {
+    if (isAway) {
+      toast.info(`${pet.custom_name} está em expedição. Volta em ${awayRemaining}.`);
+      return;
+    }
+    setRadialOpen(true);
+  }
 
   async function reloadCare() {
     try {
@@ -281,9 +322,12 @@ function Showcase({
 
   useEffect(() => {
     void reloadCare();
+    void reloadActiveExpedition();
     // As barras caem ~2 pts/h: re-render a cada 1s desperdiça CPU.
     // 5s já dá fluidez visual e reduz ~80% dos renders.
     const t = setInterval(() => setTick((n) => n + 1), 5_000);
+    // Expedição: poll mais lento (30s) — só precisa virar quando terminar.
+    const e = setInterval(() => void reloadActiveExpedition(), 30_000);
     // a cada 60s, recarrega modificadores (buffs expiram, condicionais mudam)
     const m = setInterval(
       () => void getPetRuntimeModifiers(pet.id).then((mm) => mm && setRuntimeMods(mm)),
@@ -291,11 +335,15 @@ function Showcase({
     );
     // Pausa o tick quando a aba está oculta — economiza bateria.
     function onVis() {
-      if (document.visibilityState === "visible") void reloadCare();
+      if (document.visibilityState === "visible") {
+        void reloadCare();
+        void reloadActiveExpedition();
+      }
     }
     document.addEventListener("visibilitychange", onVis);
     return () => {
       clearInterval(t);
+      clearInterval(e);
       clearInterval(m);
       document.removeEventListener("visibilitychange", onVis);
     };
@@ -346,7 +394,7 @@ function Showcase({
       {/* HUD full-width no desktop para barras legíveis */}
       <div className="hidden border-b border-neutral-100 bg-neutral-50/60 p-4 sm:block">
         <PetMoodLine name={pet.custom_name} mood={mood} />
-        <PetNeedsHud values={careValues} onPick={(k) => setActionKind(k)} />
+        <PetNeedsHud values={careValues} onPick={requestAction} />
         <PetBuffsHud mods={runtimeMods} className="mt-3" />
       </div>
       <div className="grid gap-0 sm:grid-cols-[260px_1fr]">
@@ -355,7 +403,7 @@ function Showcase({
           {/* HUD compacto apenas no mobile */}
           <div className="relative z-20 mb-3 px-4 sm:hidden">
             <PetMoodLine name={pet.custom_name} mood={mood} className="mb-2" />
-            <PetNeedsHud values={careValues} onPick={(k) => setActionKind(k)} />
+            <PetNeedsHud values={careValues} onPick={requestAction} />
             <PetBuffsHud mods={runtimeMods} className="mt-2" />
           </div>
           <div className="relative flex min-h-[240px] flex-1 items-center justify-center">
@@ -366,28 +414,56 @@ function Showcase({
           />
           <button
             type="button"
-            {...longPress}
+            {...(isAway ? {} : longPress)}
             onContextMenu={(e) => {
               e.preventDefault();
-              setRadialOpen(true);
+              openRadial();
             }}
-            onDoubleClick={() => setRadialOpen(true)}
-            className="relative z-10 cursor-pointer select-none touch-none rounded-3xl outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
-            aria-label="Segure para abrir a central de ações"
+            onDoubleClick={() => openRadial()}
+            className={`relative z-10 cursor-pointer select-none touch-none rounded-3xl outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 ${
+              isAway ? "pointer-events-none" : ""
+            }`}
+            aria-label={isAway ? "Pet em expedição" : "Segure para abrir a central de ações"}
+            aria-disabled={isAway}
           >
-            {image ? (
-              <PetArtwork src={image} alt={pet.custom_name} hasBackground={!!scenery.equipped} />
-            ) : (
-              <PawPrint className="h-20 w-20 text-neutral-300" />
-            )}
+            <div
+              className={
+                isAway
+                  ? "transition duration-500 [filter:grayscale(1)_blur(2px)_brightness(0.85)]"
+                  : ""
+              }
+            >
+              {image ? (
+                <PetArtwork src={image} alt={pet.custom_name} hasBackground={!!scenery.equipped} />
+              ) : (
+                <PawPrint className="h-20 w-20 text-neutral-300" />
+              )}
+            </div>
           </button>
+          {isAway && activeExpedition ? (
+            <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center px-4">
+              <div className="pointer-events-auto flex flex-col items-center gap-1 rounded-2xl border border-neutral-900/10 bg-white/95 px-4 py-2.5 text-center shadow-[0_8px_24px_-12px_rgba(0,0,0,0.35)] backdrop-blur">
+                <div className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-700">
+                  <Compass className="size-3.5" />
+                  Em expedição
+                </div>
+                <div className="line-clamp-1 text-xs font-medium text-neutral-900">
+                  {activeExpedition.title}
+                </div>
+                <div className="inline-flex items-center gap-1 text-[11px] text-neutral-500">
+                  <Clock className="size-3" />
+                  Volta em {awayRemaining}
+                </div>
+              </div>
+            </div>
+          ) : null}
           <PetRadialMenu
             open={radialOpen}
             values={careValues}
             onClose={() => setRadialOpen(false)}
             onPick={(k) => {
               setRadialOpen(false);
-              setActionKind(k);
+              requestAction(k);
             }}
           />
           <PetEffectsLayer
@@ -503,7 +579,14 @@ function Showcase({
       </div>
     </section>
     <MissionsTodayCard refreshKey={xpRefresh} />
-    <ExpeditionsCard userPetId={pet.id} onChanged={() => { setXpRefresh((n) => n + 1); void reloadCare(); }} />
+    <ExpeditionsCard
+      userPetId={pet.id}
+      onChanged={() => {
+        setXpRefresh((n) => n + 1);
+        void reloadCare();
+        void reloadActiveExpedition();
+      }}
+    />
     <PetStreakCard refreshKey={xpRefresh} />
     <PetWeeklyChestCard refreshKey={xpRefresh} onClaimed={() => setXpRefresh((n) => n + 1)} />
     <PetEvolutionCard
