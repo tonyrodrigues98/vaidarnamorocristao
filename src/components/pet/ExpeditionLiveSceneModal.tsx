@@ -173,7 +173,10 @@ export function ExpeditionLiveSceneModal({
           <SceneWeatherLayer weather={data.weather} />
 
           {/* HUD top (absolute over scene) */}
-          <div className="absolute inset-x-0 top-0 z-10 flex items-start justify-between gap-2 p-4 pt-5">
+          <div
+            className="absolute inset-x-0 top-0 z-10 flex items-start justify-between gap-2 px-4 pb-4"
+            style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 1.25rem)" }}
+          >
             <div className="min-w-0">
               <div className="text-[10px] font-medium uppercase tracking-wider text-white/80 drop-shadow">
                 Expedição ativa
