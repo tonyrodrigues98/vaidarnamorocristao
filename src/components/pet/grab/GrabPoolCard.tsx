@@ -9,11 +9,13 @@ import type { GrabStatePool } from "@/types/petGrab";
 type Props = {
   pool: GrabStatePool;
   freeRemaining: number;
+  coinBalance?: number;
   busy: boolean;
   onOpen: () => void;
+  onOpenMulti?: (count: 5 | 10) => void;
 };
 
-export function GrabPoolCard({ pool, freeRemaining, busy, onOpen }: Props) {
+export function GrabPoolCard({ pool, freeRemaining, coinBalance = 0, busy, onOpen, onOpenMulti }: Props) {
   const r = rarityTokens(pool.rarity);
   const art = caixaArtFor(pool.slug, pool.rarity);
   const [cd, setCd] = useState<number>(pool.cooldown_seconds);
@@ -30,6 +32,9 @@ export function GrabPoolCard({ pool, freeRemaining, busy, onOpen }: Props) {
   const isFree = freeRemaining > 0 && !onCooldown;
   const disabled = busy || pool.prize_count === 0 || onCooldown;
   const empty = pool.prize_count === 0;
+  const paidCostFor = (count: 5 | 10) => Math.max(0, count - freeRemaining) * pool.cost_coins;
+  const canMulti = (count: 5 | 10) =>
+    !!onOpenMulti && !busy && !empty && !onCooldown && pool.cooldown_hours === 0 && paidCostFor(count) <= coinBalance;
 
   const pityProgress =
     pool.pity_threshold > 0
@@ -37,10 +42,7 @@ export function GrabPoolCard({ pool, freeRemaining, busy, onOpen }: Props) {
       : 0;
 
   return (
-    <button
-      type="button"
-      onClick={onOpen}
-      disabled={disabled}
+    <article
       className={cn(
         "group relative flex flex-col overflow-hidden rounded-2xl border bg-white p-3 text-left transition-all duration-300",
         "hover:-translate-y-0.5",
@@ -150,8 +152,11 @@ export function GrabPoolCard({ pool, freeRemaining, busy, onOpen }: Props) {
       )}
 
       {/* CTA */}
-      <div className="relative z-10 mt-3">
-        <div
+      <div className="relative z-10 mt-3 space-y-2">
+        <button
+          type="button"
+          onClick={onOpen}
+          disabled={disabled}
           className={cn(
             "inline-flex w-full items-center justify-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-semibold",
             onCooldown
@@ -193,8 +198,23 @@ export function GrabPoolCard({ pool, freeRemaining, busy, onOpen }: Props) {
               {pool.cost_coins}
             </>
           )}
-        </div>
+        </button>
+        {!empty && pool.cooldown_hours === 0 && (
+          <div className="grid grid-cols-2 gap-1.5">
+            {[5, 10].map((count) => (
+              <button
+                key={count}
+                type="button"
+                onClick={() => onOpenMulti?.(count as 5 | 10)}
+                disabled={!canMulti(count as 5 | 10)}
+                className="inline-flex min-h-8 items-center justify-center gap-1 rounded-full bg-white/80 px-2 text-[10px] font-semibold text-[#5b5142] ring-1 ring-[#ece3d0] transition hover:ring-[#c9a24a] disabled:opacity-45"
+              >
+                Abrir {count}x
+              </button>
+            ))}
+          </div>
+        )}
       </div>
-    </button>
+    </article>
   );
 }
