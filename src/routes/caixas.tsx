@@ -325,6 +325,15 @@ function CaixasPage() {
           res={roulette.res}
           winner={roulette.winner}
           prizes={roulette.prizes}
+          canOpenAgain={
+            roulette.res.free_remaining > 0 ||
+            roulette.res.new_balance >= roulette.poolCost
+          }
+          onOpenAgain={() => {
+            const pid = roulette.poolId;
+            setRoulette(null);
+            void open(pid);
+          }}
           onClose={() => {
             setRoulette(null);
             void reload();
