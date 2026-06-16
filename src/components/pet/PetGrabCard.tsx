@@ -141,6 +141,18 @@ export function PetGrabCard({ refreshKey, onChanged }: Props) {
   return (
     <>
       <section className="rounded-2xl border border-neutral-200 bg-white p-4">
+        <style>{`
+          @keyframes grab-ring-spin { to { transform: rotate(360deg); } }
+          @keyframes grab-ring-spin-rev { to { transform: rotate(-360deg); } }
+          @keyframes grab-halo-pulse {
+            0%,100% { opacity: 0.55; transform: scale(1); }
+            50%     { opacity: 1;    transform: scale(1.06); }
+          }
+          @keyframes grab-particle-float {
+            0%,100% { transform: translateY(0) scale(1);   opacity: 0.85; }
+            50%     { transform: translateY(-6px) scale(1.2); opacity: 1; }
+          }
+        `}</style>
         <div className="mb-3 flex items-center gap-2">
           <div className="grid size-9 place-items-center rounded-xl bg-amber-50 text-amber-600 ring-1 ring-amber-100">
             <Gift className="size-4" />
