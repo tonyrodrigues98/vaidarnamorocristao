@@ -17,7 +17,7 @@ import { MissionsTodayCard } from "./MissionsTodayCard";
 import { ExpeditionsCard } from "./ExpeditionsCard";
 import { PetEvolutionCard } from "./PetEvolutionCard";
 
-type Sheet = null | "missions" | "expeditions" | "evolution";
+type SheetKind = null | "missions" | "expeditions" | "evolution";
 
 type Props = {
   pet: UserPetV2Full;
@@ -54,7 +54,7 @@ export function PetKingdomMap({
   onEvolved,
   onBackToRoom,
 }: Props) {
-  const [sheet, setSheet] = useState<Sheet>(null);
+  const [sheet, setSheet] = useState<SheetKind>(null);
 
   // Sinais de atenção por região — a paisagem inteira "respira" sem texto.
   const forestAttention = isAway ? 2 : 1; // expedição em curso = urgente
