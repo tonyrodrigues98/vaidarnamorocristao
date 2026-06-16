@@ -115,9 +115,10 @@ export function PetGrabCard({ refreshKey, onChanged }: Props) {
         performGrab(poolId),
       ]);
       const winnerMeta = await resolvePrize(res.prize_kind, res.prize_ref_id);
-      const winner: PrizeMeta = winnerMeta ?? {
-        name: GRAB_PRIZE_KIND_LABEL[res.prize_kind],
-        image_url: null,
+      const winner: PrizeMeta = {
+        ...(winnerMeta ?? { name: GRAB_PRIZE_KIND_LABEL[res.prize_kind], image_url: null }),
+        kind: res.prize_kind,
+        amount: res.prize_amount,
       };
       setRoulette({ res, winner, prizes });
       await reload();
@@ -678,6 +679,20 @@ export function GrabRouletteModal({
                             className="size-full object-cover"
                             draggable={false}
                           />
+                        ) : it?.kind === "coins" ? (
+                          <div className="flex flex-col items-center justify-center gap-0.5">
+                            <CoinIcon className="size-10" />
+                            <span className="text-sm font-bold text-amber-300">
+                              +{it.amount ?? 1}
+                            </span>
+                          </div>
+                        ) : it?.kind === "xp" ? (
+                          <div className="flex flex-col items-center justify-center">
+                            <span className="text-base font-extrabold text-sky-300">XP</span>
+                            <span className="text-sm font-bold text-sky-200">
+                              +{it.amount ?? 1}
+                            </span>
+                          </div>
                         ) : (
                           <Gift className="size-9 text-neutral-500" />
                         )}
@@ -716,14 +731,43 @@ export function GrabRouletteModal({
           <div className="mt-5 min-h-[120px] text-center">
             {phase === "done" ? (
               <div className="animate-in fade-in zoom-in-95 duration-300">
-                <div className="text-lg font-semibold tracking-tight">
-                  {winner.name}
-                  {res.prize_amount > 1 && (
-                    <span className="ml-1.5 rounded-md bg-amber-400/20 px-1.5 py-0.5 text-sm text-amber-300">
-                      x{res.prize_amount}
-                    </span>
-                  )}
-                </div>
+                {res.prize_kind === "coins" ? (
+                  <div className="flex flex-col items-center gap-1.5">
+                    <div className="text-xs uppercase tracking-[0.18em] text-amber-300/80">
+                      Você ganhou
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <CoinIcon className="size-8" />
+                      <span className="text-3xl font-extrabold tracking-tight text-amber-300">
+                        {res.prize_amount}
+                      </span>
+                      <span className="text-base font-medium text-neutral-200">
+                        {res.prize_amount === 1 ? "moeda" : "moedas"}
+                      </span>
+                    </div>
+                  </div>
+                ) : res.prize_kind === "xp" ? (
+                  <div className="flex flex-col items-center gap-1.5">
+                    <div className="text-xs uppercase tracking-[0.18em] text-sky-300/80">
+                      Você ganhou
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-3xl font-extrabold tracking-tight text-sky-300">
+                        +{res.prize_amount}
+                      </span>
+                      <span className="text-base font-medium text-neutral-200">XP</span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-lg font-semibold tracking-tight">
+                    {winner.name}
+                    {res.prize_amount > 1 && (
+                      <span className="ml-1.5 rounded-md bg-amber-400/20 px-1.5 py-0.5 text-sm text-amber-300">
+                        x{res.prize_amount}
+                      </span>
+                    )}
+                  </div>
+                )}
                 <div className="mt-1.5 inline-flex items-center gap-1.5 rounded-full bg-white/5 px-2.5 py-0.5 text-[11px] text-neutral-300 ring-1 ring-white/10">
                   <span>{GRAB_PRIZE_KIND_LABEL[res.prize_kind]}</span>
                   <span className="text-neutral-600">·</span>

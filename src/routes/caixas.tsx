@@ -111,9 +111,10 @@ function CaixasPage() {
         performGrab(poolId),
       ]);
       const winnerMeta = await resolvePrize(res.prize_kind, res.prize_ref_id);
-      const winner: PrizeMeta = winnerMeta ?? {
-        name: GRAB_PRIZE_KIND_LABEL[res.prize_kind],
-        image_url: null,
+      const winner: PrizeMeta = {
+        ...(winnerMeta ?? { name: GRAB_PRIZE_KIND_LABEL[res.prize_kind], image_url: null }),
+        kind: res.prize_kind,
+        amount: res.prize_amount,
       };
       setRoulette({ res, winner, prizes });
       await reload();
