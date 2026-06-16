@@ -343,6 +343,11 @@ function GrabRouletteModal({
   const rafRef = useRef<number | null>(null);
   const tickRafRef = useRef<number | null>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
+  // Persisted across StrictMode double-invocations / re-renders so the same
+  // item center can never trigger a tick twice within one modal mount.
+  const lastTickCenterRef = useRef<number>(Number.NEGATIVE_INFINITY);
+  const tickStartedRef = useRef(false);
+  const dingPlayedRef = useRef(false);
 
   const { items, winnerIndex } = useMemo(() => {
     const base = prizes.length > 0 ? prizes : [winner];
@@ -449,25 +454,33 @@ function GrabRouletteModal({
       rafRef.current = requestAnimationFrame(() => {
         rafRef.current = requestAnimationFrame(() => setTranslate(targetX));
       });
-      // start tick loop synced with the eased translate
+      // Start tick loop only once per modal mount, even under StrictMode.
+      if (tickStartedRef.current) return;
+      tickStartedRef.current = true;
       const spinStart = performance.now();
-      let lastIndex = -1;
+      // Tick when an item's CENTER (not its left edge) crosses the selector.
+      // `centerIndex` = floor of how many full items have already passed center.
       const tickLoop = (now: number) => {
         const elapsed = now - spinStart;
         const t = Math.min(1, elapsed / ROULETTE_SPIN_MS);
         const eased = easeProgress(t);
         const currentX = targetX * eased;
-        // which item is under the center selector
-        const idx = Math.floor((-currentX + ROULETTE_VIEW / 2) / ROULETTE_ITEM);
-        if (idx !== lastIndex && idx >= 0) {
-          if (lastIndex >= 0) {
-            // derivative of bezier ≈ instantaneous speed; map to [0,1]
+        const centerIndex = Math.floor(
+          (-currentX + ROULETTE_VIEW / 2 - ROULETTE_ITEM / 2) / ROULETTE_ITEM,
+        );
+        if (centerIndex > lastTickCenterRef.current) {
+          // First observation just seeds the baseline — no tick yet.
+          if (lastTickCenterRef.current !== Number.NEGATIVE_INFINITY) {
+            // Instantaneous speed via bezier derivative, normalised to [0, 1]
             const dt = 1 / ROULETTE_SPIN_MS;
             const next = easeProgress(Math.min(1, t + dt));
             const speed = Math.min(1, (next - eased) * ROULETTE_SPIN_MS * 0.6);
-            playTick(speed);
+            // Emit exactly one tick per integer step, even if several centers
+            // were skipped in a single frame (very early, very fast section).
+            const steps = Math.min(4, centerIndex - lastTickCenterRef.current);
+            for (let i = 0; i < steps; i++) playTick(speed);
           }
-          lastIndex = idx;
+          lastTickCenterRef.current = centerIndex;
         }
         if (t < 1) {
           tickRafRef.current = requestAnimationFrame(tickLoop);
@@ -480,7 +493,10 @@ function GrabRouletteModal({
     // spin finished → settle (burst + pop)
     timers.push(setTimeout(() => {
       setPhase("settle");
-      playFinalDing();
+      if (!dingPlayedRef.current) {
+        dingPlayedRef.current = true;
+        playFinalDing();
+      }
     }, ROULETTE_INTRO_MS + ROULETTE_SPIN_MS + 80));
     // settle done → reveal details
     timers.push(setTimeout(() => setPhase("done"),
