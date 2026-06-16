@@ -435,6 +435,15 @@ function GrabRouletteModal({
                 {items.map((it, i) => {
                   const isWinner = i === winnerIndex;
                   const popping = isWinner && (phase === "settle" || phase === "done");
+                  const rarity = (it as any)?.rarity as "common" | "rare" | "epic" | "legendary" | undefined;
+                  const rarityStyle =
+                    rarity === "legendary"
+                      ? { ring: "ring-2 ring-amber-400/90", shadow: "shadow-[0_0_18px_rgba(251,191,36,0.55)]" }
+                      : rarity === "epic"
+                      ? { ring: "ring-2 ring-violet-400/90", shadow: "shadow-[0_0_16px_rgba(167,139,250,0.50)]" }
+                      : rarity === "rare"
+                      ? { ring: "ring-2 ring-sky-400/90", shadow: "shadow-[0_0_14px_rgba(56,189,248,0.45)]" }
+                      : { ring: "ring-1 ring-white/10", shadow: "shadow-lg shadow-black/40" };
                   return (
                     <div
                       key={i}
@@ -445,7 +454,8 @@ function GrabRouletteModal({
                         className={cn(
                           "relative grid size-24 place-items-center overflow-hidden rounded-2xl",
                           "bg-gradient-to-br from-neutral-800 to-neutral-900",
-                          "ring-1 ring-white/10 shadow-lg shadow-black/40",
+                          rarityStyle.ring,
+                          rarityStyle.shadow,
                         )}
                         style={popping ? { animation: "grab-pop 700ms cubic-bezier(0.22,1.4,0.36,1) forwards" } : undefined}
                       >
