@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Gift, Loader2, Sparkles, Package, X } from "lucide-react";
 import { toast } from "sonner";
 
@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { CoinIcon } from "@/components/icons/CoinIcon";
 import {
-  getGrabState, listMyGrabInventory, performGrab, resolvePrize,
+  getGrabState, listMyGrabInventory, listPoolPrizeMetas, performGrab, resolvePrize,
   type PrizeMeta,
 } from "@/lib/petGrab";
 import {
@@ -26,7 +26,11 @@ export function PetGrabCard({ refreshKey, onChanged }: Props) {
   const [state, setState] = useState<GrabState | null>(null);
   const [inv, setInv] = useState<GrabInventoryItem[]>([]);
   const [pendingPoolId, setPendingPoolId] = useState<string | null>(null);
-  const [result, setResult] = useState<{ res: GrabResult; meta: PrizeMeta | null } | null>(null);
+  const [roulette, setRoulette] = useState<{
+    res: GrabResult;
+    winner: PrizeMeta;
+    prizes: PrizeMeta[];
+  } | null>(null);
   const [showInv, setShowInv] = useState(false);
 
   async function reload() {
@@ -40,9 +44,16 @@ export function PetGrabCard({ refreshKey, onChanged }: Props) {
   async function grab(poolId: string) {
     setPendingPoolId(poolId);
     try {
-      const res = await performGrab(poolId);
-      const meta = await resolvePrize(res.prize_kind, res.prize_ref_id);
-      setResult({ res, meta });
+      const [prizes, res] = await Promise.all([
+        listPoolPrizeMetas(poolId),
+        performGrab(poolId),
+      ]);
+      const winnerMeta = await resolvePrize(res.prize_kind, res.prize_ref_id);
+      const winner: PrizeMeta = winnerMeta ?? {
+        name: GRAB_PRIZE_KIND_LABEL[res.prize_kind],
+        image_url: null,
+      };
+      setRoulette({ res, winner, prizes });
       await reload();
       onChanged?.();
     } catch (e) {
@@ -121,41 +132,153 @@ export function PetGrabCard({ refreshKey, onChanged }: Props) {
         </div>
       </section>
 
-      {result && (
-        <Dialog open onOpenChange={(o) => !o && setResult(null)}>
-          <DialogContent className="max-w-sm text-center">
-            <DialogTitle className="flex items-center justify-center gap-2">
-              <Sparkles className="size-5 text-amber-500" /> Você ganhou!
-            </DialogTitle>
-            <div className="my-4 grid place-items-center">
-              {result.meta?.image_url ? (
-                <img src={result.meta.image_url} alt={result.meta.name}
-                  className="size-32 rounded-2xl object-cover ring-2 ring-amber-200" />
-              ) : (
-                <div className="grid size-28 place-items-center rounded-2xl bg-gradient-to-br from-amber-100 to-amber-50 ring-2 ring-amber-200">
-                  <Gift className="size-12 text-amber-600" />
-                </div>
-              )}
-            </div>
-            <div className="text-sm font-semibold">
-              {result.meta?.name ?? GRAB_PRIZE_KIND_LABEL[result.res.prize_kind]}
-              {result.res.prize_amount > 1 && ` x${result.res.prize_amount}`}
-            </div>
-            <div className="mt-1 text-xs text-neutral-500">
-              {GRAB_PRIZE_KIND_LABEL[result.res.prize_kind]}
-              {result.res.was_paid
-                ? ` · ${result.res.cost_paid} moedas`
-                : ` · grátis (${result.res.free_remaining} restantes hoje)`}
-            </div>
-            <Button className="mt-4 w-full" onClick={() => setResult(null)}>Continuar</Button>
-          </DialogContent>
-        </Dialog>
+      {roulette && (
+        <GrabRouletteModal
+          res={roulette.res}
+          winner={roulette.winner}
+          prizes={roulette.prizes}
+          onClose={() => setRoulette(null)}
+        />
       )}
 
       {showInv && (
         <InventoryDialog inventory={inv} onClose={() => setShowInv(false)} />
       )}
     </>
+  );
+}
+
+const ROULETTE_ITEM = 112;
+const ROULETTE_VIEW = 320;
+const ROULETTE_SPIN_MS = 6500;
+
+function GrabRouletteModal({
+  res,
+  winner,
+  prizes,
+  onClose,
+}: {
+  res: GrabResult;
+  winner: PrizeMeta;
+  prizes: PrizeMeta[];
+  onClose: () => void;
+}) {
+  const [phase, setPhase] = useState<"spin" | "done">("spin");
+  const [translate, setTranslate] = useState(0);
+  const rafRef = useRef<number | null>(null);
+
+  const { items, winnerIndex } = useMemo(() => {
+    const base = prizes.length > 0 ? prizes : [winner];
+    const list: PrizeMeta[] = [];
+    const TOTAL = 48;
+    for (let i = 0; i < TOTAL; i++) {
+      list.push(base[Math.floor(Math.random() * base.length)] ?? winner);
+    }
+    const idx = TOTAL - 4;
+    list[idx] = winner;
+    return { items: list, winnerIndex: idx };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const targetX = -(winnerIndex * ROULETTE_ITEM + ROULETTE_ITEM / 2 - ROULETTE_VIEW / 2);
+
+  useEffect(() => {
+    // start at 0, then on next frame apply target to trigger CSS transition
+    rafRef.current = requestAnimationFrame(() => {
+      rafRef.current = requestAnimationFrame(() => setTranslate(targetX));
+    });
+    const t = setTimeout(() => setPhase("done"), ROULETTE_SPIN_MS + 150);
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      clearTimeout(t);
+    };
+  }, [targetX]);
+
+  return (
+    <Dialog open onOpenChange={(o) => !o && phase === "done" && onClose()}>
+      <DialogContent className="max-w-sm border-neutral-800 bg-neutral-950 text-white">
+        <DialogTitle className="flex items-center justify-center gap-2 text-white">
+          <Sparkles className="size-5 text-amber-400" />
+          {phase === "done" ? "Você ganhou!" : "Sorteando..."}
+        </DialogTitle>
+
+        <div
+          className="relative mx-auto mt-2 overflow-hidden rounded-xl bg-neutral-900 ring-1 ring-neutral-800"
+          style={{ width: ROULETTE_VIEW, height: 128 }}
+        >
+          {/* center frame */}
+          <div
+            className={cn(
+              "pointer-events-none absolute left-1/2 top-1/2 z-20 -translate-x-1/2 -translate-y-1/2 rounded-2xl",
+              "ring-2 ring-amber-400",
+              phase === "done" && "ring-amber-300 shadow-[0_0_24px_rgba(251,191,36,0.55)]",
+            )}
+            style={{ width: 96, height: 96 }}
+          />
+          {/* edge fades */}
+          <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 bg-gradient-to-r from-neutral-950 to-transparent" />
+          <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 bg-gradient-to-l from-neutral-950 to-transparent" />
+          {/* strip */}
+          <div
+            className="absolute left-0 top-1/2 flex"
+            style={{
+              transform: `translate3d(${translate}px, -50%, 0)`,
+              transition:
+                phase === "spin"
+                  ? `transform ${ROULETTE_SPIN_MS}ms cubic-bezier(0.12, 0.85, 0.18, 1)`
+                  : "none",
+              willChange: "transform",
+            }}
+          >
+            {items.map((it, i) => (
+              <div
+                key={i}
+                className="grid place-items-center"
+                style={{ width: ROULETTE_ITEM, height: ROULETTE_ITEM }}
+              >
+                <div className="grid size-20 place-items-center overflow-hidden rounded-xl bg-neutral-800 ring-1 ring-neutral-700">
+                  {it?.image_url ? (
+                    <img
+                      src={it.image_url}
+                      alt=""
+                      className="size-full object-cover"
+                      draggable={false}
+                    />
+                  ) : (
+                    <Gift className="size-8 text-neutral-500" />
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {phase === "done" ? (
+          <div className="mt-3 text-center">
+            <div className="text-base font-semibold">
+              {winner.name}
+              {res.prize_amount > 1 && ` x${res.prize_amount}`}
+            </div>
+            <div className="mt-1 text-xs text-neutral-400">
+              {GRAB_PRIZE_KIND_LABEL[res.prize_kind]}
+              {res.was_paid
+                ? ` · ${res.cost_paid} moedas`
+                : ` · grátis (${res.free_remaining} restantes hoje)`}
+            </div>
+            <Button
+              className="mt-4 w-full bg-amber-500 text-neutral-950 hover:bg-amber-400"
+              onClick={onClose}
+            >
+              Continuar
+            </Button>
+          </div>
+        ) : (
+          <p className="mt-3 text-center text-xs text-neutral-400">
+            Girando a roleta...
+          </p>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 }
 

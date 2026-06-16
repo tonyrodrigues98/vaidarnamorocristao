@@ -182,6 +182,18 @@ export async function listPrizeCatalog(kind: string): Promise<PrizeCatalogItem[]
 
 export type PrizeMeta = { name: string; image_url: string | null };
 
+export async function listPoolPrizeMetas(poolId: string): Promise<PrizeMeta[]> {
+  const { data, error } = await supabase
+    .from("grab_pool_prizes" as any)
+    .select("prize_kind, prize_ref_id")
+    .eq("pool_id", poolId)
+    .eq("active", true);
+  if (error) throw error;
+  const rows = (data ?? []) as unknown as { prize_kind: string; prize_ref_id: string | null }[];
+  const metas = await Promise.all(rows.map((r) => resolvePrize(r.prize_kind, r.prize_ref_id)));
+  return metas.filter((m): m is PrizeMeta => !!m);
+}
+
 export async function resolvePrize(
   kind: string,
   refId: string | null,
