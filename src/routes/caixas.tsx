@@ -346,7 +346,6 @@ function FeaturedBanner({
   onOpen: () => void;
   busy: boolean;
 }) {
-  const r = rarityTokens(pool.rarity);
   return (
     <div
       className="relative mt-5 overflow-hidden rounded-2xl border border-[#e6cf8a] bg-white p-4"
