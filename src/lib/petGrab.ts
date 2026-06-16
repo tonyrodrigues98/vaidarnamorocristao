@@ -187,6 +187,7 @@ export type PrizeMeta = {
   rarity?: PrizeRarity;
   kind?: string;
   amount?: number;
+  gradient_css?: string;
 };
 
 function rarityFromCareItem(row: { cost_coins?: number | null; restore_amount?: number | null }): PrizeRarity {
@@ -261,8 +262,21 @@ export async function resolvePrize(
     return { name: (data as any).name, image_url: decorationAssetFor({ image_url: (data as any).image_url }), kind, rarity: rarityFromString((data as any).rarity) };
   }
   if (kind === "name_gradient") {
-    const { data } = await supabase.from("name_gradients" as any).select("name, price").eq("id", refId).maybeSingle();
-    return data ? { name: (data as any).name, image_url: null, kind, rarity: rarityFromGradientPrice((data as any).price) } : null;
+    const { data } = await supabase
+      .from("name_gradients" as any)
+      .select("name, price, color_a, color_b")
+      .eq("id", refId)
+      .maybeSingle();
+    if (!data) return null;
+    const a = (data as any).color_a ?? "#C9A24A";
+    const b = (data as any).color_b ?? "#FFFFFF";
+    return {
+      name: (data as any).name,
+      image_url: null,
+      kind,
+      rarity: rarityFromGradientPrice((data as any).price),
+      gradient_css: `linear-gradient(135deg, ${a} 0%, ${b} 100%)`,
+    };
   }
   return null;
 }
