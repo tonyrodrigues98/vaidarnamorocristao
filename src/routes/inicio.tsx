@@ -966,9 +966,10 @@ function InicioPage() {
           )}
 
           {/* MISSÃO DE HOJE */}
+          {isApproved && <MissionsTodayCard />}
+
           {!isBanned && !isRejected && nextActions.length > 0 && (
             <section>
-              {isApproved && <MissionsTodayCard className="mb-4" />}
               <div className="mb-2.5 flex items-baseline justify-between px-1">
                 <h2 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
                   Missão de hoje
