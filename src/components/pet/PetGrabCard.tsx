@@ -316,7 +316,15 @@ export function PetGrabCard({ refreshKey, onChanged }: Props) {
           res={roulette.res}
           winner={roulette.winner}
           prizes={roulette.prizes}
-          onClose={() => setRoulette(null)}
+          onClose={() => {
+            // Defensivo: sempre re-sincroniza o inventário ao fechar o
+            // modal — independente de o usuário clicar em "Continuar" ou
+            // fora do modal — garantindo que o prêmio apareça mesmo se
+            // a primeira reload() pós-grab tiver falhado por rede.
+            setRoulette(null);
+            void reload();
+            onChanged?.();
+          }}
         />
       )}
 
