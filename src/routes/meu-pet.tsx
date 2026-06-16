@@ -311,6 +311,7 @@ function Showcase({
       showAwayToast(k);
       return;
     }
+    try { recordLastAction(pet.id, k); } catch { /* ignore */ }
     setActionKind(k);
   }
 
