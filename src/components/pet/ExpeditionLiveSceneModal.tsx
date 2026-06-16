@@ -236,7 +236,7 @@ export function ExpeditionLiveSceneModal({
                       "flex items-start gap-2.5 rounded-2xl border p-3 backdrop-blur-md transition-all",
                       isLatest
                         ? "border-white/30 bg-white/15 text-white shadow-lg animate-fade-in"
-                        : "border-white/15 bg-white/8 text-white/70",
+                        : "border-white/15 bg-white/10 text-white/70",
                     )}
                     style={{ opacity: isLatest ? 1 : 0.7 - idx * 0.15 }}
                   >
