@@ -4,6 +4,7 @@ import { assetFor as decorationAssetFor } from "@/lib/decorations";
 import type {
   GrabConfig,
   GrabInventoryItem,
+  GrabMultiResult,
   GrabPool,
   GrabPoolPrize,
   GrabResult,
@@ -22,6 +23,15 @@ export async function performGrab(poolId: string): Promise<GrabResult> {
   const { data, error } = await supabase.rpc("perform_grab" as any, { _pool_id: poolId });
   if (error) throw error;
   return data as GrabResult;
+}
+
+export async function performGrabMulti(poolId: string, count: 5 | 10): Promise<GrabMultiResult> {
+  const { data, error } = await supabase.rpc("perform_grab_multi" as any, {
+    _pool_id: poolId,
+    _count: count,
+  });
+  if (error) throw error;
+  return data as GrabMultiResult;
 }
 
 export async function listMyGrabInventory(): Promise<GrabInventoryItem[]> {

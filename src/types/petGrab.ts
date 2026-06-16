@@ -54,6 +54,8 @@ export type GrabStatePool = {
   sort_order: number;
   cost_coins: number;
   free_daily: number;
+  free_used: number;
+  paid_used: number;
   prize_count: number;
   rarity: GrabPoolRarity;
   cooldown_hours: number;
@@ -86,6 +88,7 @@ export type GrabState = {
   pools: GrabStatePool[];
   free_used: number;
   paid_used: number;
+  coin_balance?: number;
   default_free_daily: number;
   default_paid_cost: number;
   recent: GrabRecentRoll[];
@@ -99,6 +102,11 @@ export type GrabResult = {
   new_balance: number;
   free_remaining: number;
   cost_paid: number;
+};
+
+export type GrabMultiResult = {
+  count: number;
+  results: GrabResult[];
 };
 
 export type GrabInventoryItem = {

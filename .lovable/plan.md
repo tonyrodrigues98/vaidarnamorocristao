@@ -76,6 +76,10 @@
 - **Fase 3** precisa de migrations: seed das pools, nova tabela `user_daily_grabs_by_pool`, cron pg para featured rotation, ajuste em `perform_grab` para validar janela sazonal e buy-multi (loop server-side com cap de 10).
 - **Fase 4** precisa de migration para `user_pet_backgrounds.quality_seed` e similares + nova rota pública `/drops/:id` com server route para OG.
 
+## Regra econômica inegociável
+
+- O teto máximo é **500 moedas por usuário**. Nenhuma sugestão, jackpot, prêmio, saldo final, custo ou bônus pode ultrapassar esse cap. Não propor 1000 moedas.
+
 **Ordem sugerida**: Fase 1 isolada (resultado imediato visível), depois Fase 3#10 (caixas vazias quebram a experiência), depois Fase 2 (social cria loop), depois Fase 4 (refinamento de retenção).
 
 **Quero confirmação só de duas coisas**:
