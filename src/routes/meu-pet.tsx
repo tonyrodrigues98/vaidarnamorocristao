@@ -66,6 +66,8 @@ import { PetEffectsLayer } from "@/components/pet/PetEffectsLayer";
 import { PetConfessionBubble } from "@/components/pet/PetConfessionBubble";
 import { MissionsTodayCard } from "@/components/pet/MissionsTodayCard";
 import { ExpeditionsCard } from "@/components/pet/ExpeditionsCard";
+import { getActiveExpedition } from "@/lib/petExpeditions";
+import type { ActiveExpedition } from "@/types/petExpedition";
 import { PetOnboardingTour } from "@/components/pet/PetOnboardingTour";
 import { PetShowcaseSkeleton } from "@/components/pet/PetShowcaseSkeleton";
 import { PetStreakCard } from "@/components/pet/PetStreakCard";
@@ -77,7 +79,7 @@ import {
   type PetRandomEventPayload,
 } from "@/components/pet/PetRandomEventModal";
 import { Link as RouterLink } from "@tanstack/react-router";
-import { BookOpen, Clock, MessageCircle } from "lucide-react";
+import { BookOpen, Clock, MessageCircle, Compass } from "lucide-react";
 import { PetCareHistorySheet } from "@/components/pet/PetCareHistorySheet";
 
 export const Route = createFileRoute("/meu-pet")({ component: MeuPetPage });
