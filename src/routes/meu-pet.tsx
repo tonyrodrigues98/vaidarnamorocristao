@@ -600,7 +600,10 @@ function Showcase({
         <PetXpBar refreshKey={xpRefresh} />
       </div>
     </section>
-    <MissionsTodayCard refreshKey={xpRefresh} />
+    <MissionsTodayCard
+      refreshKey={xpRefresh}
+      onCompletedChange={() => setXpRefresh((n) => n + 1)}
+    />
     <ExpeditionsCard
       userPetId={pet.id}
       petImage={image}
