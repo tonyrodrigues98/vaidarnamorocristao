@@ -37,6 +37,7 @@ import type {
   UserPetV2Full,
 } from "@/types/petCatalog";
 import { cn } from "@/lib/utils";
+import { isAdultPetUnlocked } from "@/lib/petEvolution";
 import { PetBackgroundLayer, PetSceneryPanel, usePetScenery } from "@/components/pet/PetSceneryPanel";
 import { usePetDayNight } from "@/lib/petDayNight";
 import { PetNeedsHud } from "@/components/pet/PetNeedsHud";
