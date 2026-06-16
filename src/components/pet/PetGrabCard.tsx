@@ -163,8 +163,8 @@ export function PetGrabCard({ refreshKey, onChanged }: Props) {
           }
         `}</style>
         <div className="mb-3 flex items-center gap-2">
-          <div className="grid size-9 place-items-center rounded-xl bg-amber-50 text-amber-600 ring-1 ring-amber-100">
-            <Gift className="size-4" />
+          <div className="grid size-9 place-items-center text-amber-600">
+            <Gift className="size-5" />
           </div>
           <div>
             <h2 className="text-sm font-semibold">Grab — Sorteio diário</h2>
