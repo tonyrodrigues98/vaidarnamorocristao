@@ -188,7 +188,6 @@ function CaixasPage() {
             </div>
             <Link
               to="/meu-pet"
-              search={{ tab: "inventory" } as never}
               className="ml-auto inline-flex items-center gap-1.5 rounded-full bg-white/5 px-3 py-1.5 text-xs font-medium text-neutral-200 ring-1 ring-white/10 hover:bg-white/10"
             >
               <Package className="size-3.5" />
