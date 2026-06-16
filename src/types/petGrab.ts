@@ -62,6 +62,8 @@ export type GrabStatePool = {
   featured_until: string | null;
   pity_threshold: number;
   pity_count: number;
+  pity_tier?: "rare" | "epic" | "legendary";
+  pity_eligible?: boolean;
 };
 
 export type GrabPoolRarity =
