@@ -66,7 +66,7 @@ import { PetEffectsLayer } from "@/components/pet/PetEffectsLayer";
 import { PetConfessionBubble } from "@/components/pet/PetConfessionBubble";
 import { MissionsTodayCard } from "@/components/pet/MissionsTodayCard";
 import { ExpeditionsCard } from "@/components/pet/ExpeditionsCard";
-import { PetGrabCard } from "@/components/pet/PetGrabCard";
+import { PetCaixasEntryCard } from "@/components/pet/grab/PetCaixasEntryCard";
 import { getActiveExpedition } from "@/lib/petExpeditions";
 import type { ActiveExpedition } from "@/types/petExpedition";
 import { PetAwayToast } from "@/components/pet/PetAwayToast";
@@ -611,7 +611,7 @@ function Showcase({
         void reloadActiveExpedition();
       }}
     />
-    <PetGrabCard refreshKey={xpRefresh} onChanged={() => setXpRefresh((n) => n + 1)} />
+    <PetCaixasEntryCard />
     <PetStreakCard refreshKey={xpRefresh} />
     <PetWeeklyChestCard refreshKey={xpRefresh} onClaimed={() => setXpRefresh((n) => n + 1)} />
     <PetEvolutionCard
