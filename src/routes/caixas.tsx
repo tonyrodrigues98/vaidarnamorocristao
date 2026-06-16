@@ -1,6 +1,6 @@
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, Box, Loader2, Package, Sparkles } from "lucide-react";
+import { ArrowLeft, Loader2, Package, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
 import { useAuth } from "@/lib/auth";
@@ -26,6 +26,7 @@ import {
 import { unlockGrabAudio } from "@/lib/grabAudio";
 import { GrabRouletteModal } from "@/components/pet/PetGrabCard";
 import { GrabPoolCard } from "@/components/pet/grab/GrabPoolCard";
+import { CAIXAS_BANNER, caixaArtFor } from "@/lib/caixaArt";
 
 export const Route = createFileRoute("/caixas")({
   head: () => ({
@@ -158,14 +159,22 @@ function CaixasPage() {
     <div className="min-h-screen bg-[#FAF7EF] text-[#1a1410]">
       <Header />
 
-      {/* Hero banner */}
+      {/* Cinematic hero banner */}
       <section className="relative overflow-hidden border-b border-[#ece3d0]">
+        <img
+          src={CAIXAS_BANNER}
+          alt="Caixas da Sorte — abra, colecione, conquiste"
+          className="absolute inset-0 h-full w-full object-cover"
+          fetchPriority="high"
+          decoding="async"
+        />
+        {/* readability gradient */}
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-0"
+          className="absolute inset-0"
           style={{
             background:
-              "radial-gradient(80% 60% at 20% 0%, rgba(232,199,122,0.35), transparent 65%), radial-gradient(60% 50% at 100% 30%, rgba(91,26,46,0.10), transparent 70%), radial-gradient(80% 80% at 50% 120%, rgba(15,107,79,0.08), transparent 70%)",
+              "linear-gradient(180deg, rgba(10,6,4,0.10) 0%, rgba(10,6,4,0.35) 60%, rgba(250,247,239,0.92) 100%)",
           }}
         />
         {/* hairline gold separator */}
@@ -174,38 +183,22 @@ function CaixasPage() {
           className="pointer-events-none absolute inset-x-0 bottom-0 h-px"
           style={{
             background:
-              "linear-gradient(90deg, transparent, rgba(201,162,74,0.6), transparent)",
+              "linear-gradient(90deg, transparent, rgba(201,162,74,0.85), transparent)",
           }}
         />
-        <div className="relative mx-auto max-w-3xl px-4 py-8">
+        <div className="relative mx-auto flex min-h-[280px] max-w-3xl flex-col justify-between px-4 py-5 sm:min-h-[340px]">
           <Link
             to="/meu-pet"
-            className="inline-flex items-center gap-1.5 text-xs text-[#7a6f5e] hover:text-[#1a1410]"
+            className="inline-flex w-fit items-center gap-1.5 rounded-full bg-black/40 px-2.5 py-1 text-xs text-[#f5e7c4] ring-1 ring-[#c9a24a]/40 backdrop-blur hover:bg-black/55"
           >
             <ArrowLeft className="size-3.5" /> Voltar para o pet
           </Link>
-          <div className="mt-3 flex items-center gap-3">
-            <div
-              className="grid size-12 place-items-center rounded-2xl ring-1 ring-[#e6cf8a]"
-              style={{
-                background:
-                  "linear-gradient(135deg, #FFF6DF 0%, #F1DDA1 60%, #C9A24A 100%)",
-                boxShadow: "inset 0 1px 0 rgba(255,255,255,0.6), 0 6px 18px -10px rgba(201,162,74,0.55)",
-              }}
-            >
-              <Box className="size-6 text-[#5b1a2e]" />
-            </div>
-            <div className="min-w-0">
-              <h1 className="text-xl font-semibold tracking-tight text-[#1a1410]">
-                Caixas da Sorte
-              </h1>
-              <p className="text-xs text-[#7a6f5e]">
-                Abra caixas temáticas e suba sua coleção. Cada caixa, uma chance.
-              </p>
-            </div>
+
+          <div className="flex items-end justify-between gap-3">
+            <div className="min-w-0" />
             <Link
               to="/meu-pet"
-              className="ml-auto inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-xs font-medium text-[#1a1410] ring-1 ring-[#ece3d0] hover:ring-[#e6cf8a]"
+              className="inline-flex items-center gap-1.5 rounded-full bg-white/95 px-3 py-1.5 text-xs font-medium text-[#1a1410] ring-1 ring-[#e6cf8a] backdrop-blur hover:ring-[#c9a24a]"
             >
               <Package className="size-3.5" />
               Estoque
@@ -222,30 +215,30 @@ function CaixasPage() {
               )}
             </Link>
           </div>
-
-          {/* Daily quota */}
-          {state && (
-            <div className="mt-5 flex flex-wrap gap-2 text-[11px]">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-2.5 py-1 text-[#3a3328] ring-1 ring-[#ece3d0]">
-                <Sparkles className="size-3 text-[#c9a24a]" />
-                {Math.max(0, state.default_free_daily - state.free_used)} grátis hoje
-              </span>
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-2.5 py-1 text-[#3a3328] ring-1 ring-[#ece3d0]">
-                <CoinIcon className="size-3" />
-                {state.recent.length > 0 ? `${state.recent.length} aberturas recentes` : "Nenhuma abertura ainda"}
-              </span>
-            </div>
-          )}
-
-          {/* Featured pool */}
-          {groups?.featured && (
-            <FeaturedBanner pool={groups.featured} onOpen={() => void open(groups.featured!.id)} busy={pendingPoolId === groups.featured.id} />
-          )}
         </div>
       </section>
 
+      {/* Quotas + featured (sits on ivory, below the banner) */}
+      <section className="mx-auto max-w-3xl px-4 pt-4">
+        {state && (
+          <div className="flex flex-wrap gap-2 text-[11px]">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-2.5 py-1 text-[#3a3328] ring-1 ring-[#ece3d0]">
+              <Sparkles className="size-3 text-[#c9a24a]" />
+              {Math.max(0, state.default_free_daily - state.free_used)} grátis hoje
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-2.5 py-1 text-[#3a3328] ring-1 ring-[#ece3d0]">
+              <CoinIcon className="size-3" />
+              {state.recent.length > 0 ? `${state.recent.length} aberturas recentes` : "Nenhuma abertura ainda"}
+            </span>
+          </div>
+        )}
+        {groups?.featured && (
+          <FeaturedBanner pool={groups.featured} onOpen={() => void open(groups.featured!.id)} busy={pendingPoolId === groups.featured.id} />
+        )}
+      </section>
+
       {/* Filters */}
-      <div className="sticky top-0 z-20 border-b border-[#ece3d0] bg-[#FAF7EF]/85 backdrop-blur">
+      <div className="sticky top-0 z-20 mt-4 border-b border-[#ece3d0] bg-[#FAF7EF]/90 backdrop-blur">
         <div className="mx-auto flex max-w-3xl gap-2 overflow-x-auto px-4 py-3">
           {(Object.keys(FAMILY_LABELS) as FamilyKey[]).map((k) => (
             <button
@@ -362,16 +355,15 @@ function FeaturedBanner({
         }}
       />
       <div className="relative flex items-center gap-3">
-        <div
-          className="grid size-14 place-items-center rounded-xl ring-1 ring-[#e6cf8a]"
-          style={{
-            background:
-              "linear-gradient(135deg, #FFF6DF 0%, #F1DDA1 60%, #C9A24A 100%)",
-            boxShadow: "inset 0 1px 0 rgba(255,255,255,0.7)",
-          }}
-        >
-          <Sparkles className="size-7 text-[#5b1a2e]" />
-        </div>
+        <img
+          src={caixaArtFor(pool.slug, pool.rarity)}
+          alt=""
+          width={120}
+          height={120}
+          loading="lazy"
+          className="size-16 shrink-0 object-contain"
+          style={{ filter: "drop-shadow(0 8px 12px rgba(91,26,46,0.25))" }}
+        />
         <div className="min-w-0 flex-1">
           <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#9a7626]">
             Em destaque
