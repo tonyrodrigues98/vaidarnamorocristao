@@ -1,4 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
+import { resolvePetImage } from "@/lib/petCatalog";
+import { assetFor as decorationAssetFor } from "@/lib/decorations";
 import type {
   GrabConfig,
   GrabInventoryItem,
@@ -187,15 +189,18 @@ export async function resolvePrize(
   if (!refId) return null;
   if (kind === "care_item") {
     const { data } = await supabase.from("pet_care_items" as any).select("name, image_url").eq("id", refId).maybeSingle();
-    return data ? { name: (data as any).name, image_url: (data as any).image_url } : null;
+    if (!data) return null;
+    return { name: (data as any).name, image_url: await resolvePetImage((data as any).image_url) };
   }
   if (kind === "pet_background") {
     const { data } = await supabase.from("pet_backgrounds" as any).select("name, image_url_day").eq("id", refId).maybeSingle();
-    return data ? { name: (data as any).name, image_url: (data as any).image_url_day } : null;
+    if (!data) return null;
+    return { name: (data as any).name, image_url: await resolvePetImage((data as any).image_url_day) };
   }
   if (kind === "decoration") {
     const { data } = await supabase.from("avatar_decorations" as any).select("name, image_url").eq("id", refId).maybeSingle();
-    return data ? { name: (data as any).name, image_url: (data as any).image_url } : null;
+    if (!data) return null;
+    return { name: (data as any).name, image_url: decorationAssetFor({ image_url: (data as any).image_url }) };
   }
   if (kind === "name_gradient") {
     const { data } = await supabase.from("name_gradients" as any).select("name").eq("id", refId).maybeSingle();
