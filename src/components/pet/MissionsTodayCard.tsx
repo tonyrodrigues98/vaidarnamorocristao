@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as LucideIcons from "lucide-react";
 import { Target, CheckCircle2, Sparkles, Clock } from "lucide-react";
 import { CoinIcon } from "@/components/icons/CoinIcon";
@@ -14,12 +14,15 @@ import { cn } from "@/lib/utils";
 export function MissionsTodayCard({
   refreshKey,
   className,
+  onCompletedChange,
 }: {
   refreshKey?: number;
   className?: string;
+  onCompletedChange?: (completed: number) => void;
 }) {
   const [items, setItems] = useState<TodayMission[] | null>(null);
   const [resetIn, setResetIn] = useState<string>(() => timeUntilMidnight());
+  const lastCompletedRef = useRef<number | null>(null);
 
   useEffect(() => {
     const id = window.setInterval(() => setResetIn(timeUntilMidnight()), 60_000);
@@ -28,13 +31,30 @@ export function MissionsTodayCard({
 
   useEffect(() => {
     let alive = true;
-    rollAndGetTodayMissions()
-      .then((data) => alive && setItems(data))
-      .catch(() => alive && setItems([]));
+    const load = () =>
+      rollAndGetTodayMissions()
+        .then((data) => {
+          if (!alive) return;
+          setItems(data);
+          const done = data.filter((m) => m.completed_at).length;
+          if (lastCompletedRef.current !== null && done !== lastCompletedRef.current) {
+            onCompletedChange?.(done);
+          }
+          lastCompletedRef.current = done;
+        })
+        .catch(() => alive && setItems([]));
+    load();
+    // Refetch on focus and a slow interval so o card e dependentes
+    // (caixa semanal) reflitam missões concluídas por triggers no banco.
+    const onFocus = () => load();
+    window.addEventListener("focus", onFocus);
+    const id = window.setInterval(load, 30_000);
     return () => {
       alive = false;
+      window.removeEventListener("focus", onFocus);
+      window.clearInterval(id);
     };
-  }, [refreshKey]);
+  }, [refreshKey, onCompletedChange]);
 
   if (items === null) {
     return (
