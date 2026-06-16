@@ -5,23 +5,6 @@ import {
   Sparkles,
   Wallet,
   Inbox,
-  DollarSign,
-  VenetianMask,
-  Gift,
-  Sticker,
-  PawPrint,
-  Utensils,
-  Bone,
-  Bath,
-  BedDouble,
-  HeartHandshake,
-  Brain,
-  Trophy,
-  Package,
-  PackageOpen,
-  Image as ImageIcon,
-  Map as MapIcon,
-  Flame,
 } from "lucide-react";
 import coinIcon from "@/assets/coin.webp";
 import coinSound from "@/assets/coin-reward.mp3";
@@ -29,6 +12,9 @@ import grabComumImg from "@/assets/grab-comum.png";
 import grabRaraImg from "@/assets/grab-rara.png";
 import grabEpicaImg from "@/assets/grab-epica.png";
 import grabLendariaImg from "@/assets/grab-lendaria.png";
+import { CAIXA_ART } from "@/lib/caixaArt";
+import anonymousLetter from "@/assets/anonymous-letter.webp";
+import commitmentRing from "@/assets/commitment-ring.webp";
 import { DECORATION_ASSETS } from "@/lib/decorations";
 import {
   claimDailyCoins,
@@ -44,6 +30,7 @@ import { useSignedPetUrl } from "@/lib/petImageUrl";
 type Filter = "all" | "in" | "out";
 
 const GRAB_BOX_IMAGES: Record<string, string> = {
+  // backwards-compat aliases
   comum: grabComumImg,
   "caixa-comum": grabComumImg,
   "caixa-rara": grabRaraImg,
@@ -52,6 +39,8 @@ const GRAB_BOX_IMAGES: Record<string, string> = {
   epica: grabEpicaImg,
   "caixa-lendaria": grabLendariaImg,
   lendaria: grabLendariaImg,
+  // todas as caixas atuais (slug do banco)
+  ...CAIXA_ART,
 };
 
 export function SaldoTab() {
