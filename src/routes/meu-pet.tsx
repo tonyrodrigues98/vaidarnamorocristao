@@ -65,6 +65,7 @@ import { PetXpBar } from "@/components/pet/PetXpBar";
 import { PetEffectsLayer } from "@/components/pet/PetEffectsLayer";
 import { PetConfessionBubble } from "@/components/pet/PetConfessionBubble";
 import { MissionsTodayCard } from "@/components/pet/MissionsTodayCard";
+import { ExpeditionsCard } from "@/components/pet/ExpeditionsCard";
 import { PetOnboardingTour } from "@/components/pet/PetOnboardingTour";
 import { PetShowcaseSkeleton } from "@/components/pet/PetShowcaseSkeleton";
 import { PetStreakCard } from "@/components/pet/PetStreakCard";
@@ -502,6 +503,7 @@ function Showcase({
       </div>
     </section>
     <MissionsTodayCard refreshKey={xpRefresh} />
+    <ExpeditionsCard userPetId={pet.id} onChanged={() => { setXpRefresh((n) => n + 1); void reloadCare(); }} />
     <PetStreakCard refreshKey={xpRefresh} />
     <PetWeeklyChestCard refreshKey={xpRefresh} onClaimed={() => setXpRefresh((n) => n + 1)} />
     <PetEvolutionCard
