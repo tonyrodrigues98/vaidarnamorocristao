@@ -1,6 +1,19 @@
 import { useEffect, useState } from "react";
 import * as LucideIcons from "lucide-react";
-import { Compass, Loader2, Sparkles, Clock, Lock, Zap, Gift, Send, CheckCircle2 } from "lucide-react";
+import {
+  Compass,
+  Loader2,
+  Sparkles,
+  Clock,
+  Lock,
+  Zap,
+  Gift,
+  Send,
+  CheckCircle2,
+  PlayCircle,
+  Hourglass,
+  PackageCheck,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -44,6 +57,50 @@ function fmtDuration(min: number): string {
 function iconFor(name: string) {
   const map = LucideIcons as unknown as Record<string, React.ComponentType<{ className?: string }>>;
   return map[name] ?? Compass;
+}
+
+type StatusKey = "available" | "in_progress" | "ready" | "done";
+
+const STATUS_META: Record<
+  StatusKey,
+  { label: string; Icon: React.ComponentType<{ className?: string }>; cls: string }
+> = {
+  available: {
+    label: "Disponível",
+    Icon: PlayCircle,
+    cls: "bg-white text-indigo-600 ring-indigo-200",
+  },
+  in_progress: {
+    label: "Em andamento",
+    Icon: Hourglass,
+    cls: "bg-white text-sky-600 ring-sky-200",
+  },
+  ready: {
+    label: "Pronta para coletar",
+    Icon: PackageCheck,
+    cls: "bg-white text-amber-600 ring-amber-200",
+  },
+  done: {
+    label: "Concluída",
+    Icon: CheckCircle2,
+    cls: "bg-white text-emerald-600 ring-emerald-200",
+  },
+};
+
+function StatusBadge({ status, className }: { status: StatusKey; className?: string }) {
+  const { label, Icon, cls } = STATUS_META[status];
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[12px] font-semibold shadow-lg ring-1",
+        cls,
+        className,
+      )}
+    >
+      <Icon className="size-4" />
+      {label}
+    </span>
+  );
 }
 
 export function ExpeditionsCard({
@@ -222,6 +279,11 @@ function ExpeditionRow({
           </div>
         )}
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/55 to-transparent" />
+        {!sent && (
+          <div className="absolute right-2 top-2">
+            <StatusBadge status="available" />
+          </div>
+        )}
         <span
           className={cn(
             "absolute left-2 top-2 rounded-full px-2 py-0.5 text-[10px] font-medium ring-1 backdrop-blur",
@@ -235,10 +297,7 @@ function ExpeditionRow({
         </h4>
         {sent && (
           <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/45 backdrop-blur-[3px]">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-[12px] font-semibold text-emerald-600 shadow-lg ring-1 ring-emerald-200">
-              <CheckCircle2 className="size-4 text-emerald-600" />
-              Concluída
-            </span>
+            <StatusBadge status="done" />
           </div>
         )}
       </div>
@@ -335,7 +394,13 @@ function ActiveRunCard({
           )}
         </div>
         <div className="min-w-0 flex-1">
-          <p className="truncate text-[13px] font-semibold text-neutral-900">{active.title}</p>
+          <div className="flex items-center gap-2">
+            <p className="truncate text-[13px] font-semibold text-neutral-900">{active.title}</p>
+            <StatusBadge
+              status={ready ? "ready" : "in_progress"}
+              className="shrink-0 px-2 py-0.5 text-[10px] shadow-none"
+            />
+          </div>
           <div className="mt-0.5 flex items-center gap-1 text-[11px] text-neutral-500">
             <Clock className="size-3" />
             <span className="tabular-nums">
