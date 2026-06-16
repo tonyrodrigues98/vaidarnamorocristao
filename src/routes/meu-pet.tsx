@@ -83,6 +83,7 @@ import {
 import { Link as RouterLink } from "@tanstack/react-router";
 import { BookOpen, Clock, MessageCircle, Compass } from "lucide-react";
 import { PetCareHistorySheet } from "@/components/pet/PetCareHistorySheet";
+import { PetLivingRoom } from "@/components/pet/PetLivingRoom";
 
 export const Route = createFileRoute("/meu-pet")({ component: MeuPetPage });
 
@@ -268,6 +269,19 @@ function Showcase({
   const [randomEvent, setRandomEvent] = useState<PetRandomEventPayload | null>(null);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [activeExpedition, setActiveExpedition] = useState<ActiveExpedition | null>(null);
+  const [viewMode, setViewMode] = useState<"scene" | "list">(() => {
+    if (typeof window === "undefined") return "scene";
+    return (window.localStorage.getItem("meuPet:viewMode") as "scene" | "list") ?? "scene";
+  });
+
+  function setViewModeAndPersist(m: "scene" | "list") {
+    setViewMode(m);
+    try {
+      window.localStorage.setItem("meuPet:viewMode", m);
+    } catch {
+      /* ignore */
+    }
+  }
 
   async function reloadActiveExpedition() {
     try {
@@ -412,6 +426,105 @@ function Showcase({
 
   return (
     <div className="space-y-4">
+    {viewMode === "scene" ? (
+      <>
+        <PetLivingRoom
+          pet={pet}
+          petImage={image}
+          careValues={careValues}
+          isAway={isAway}
+          awayLabel={isAway ? `Volta em ${awayRemaining}` : undefined}
+          xpRefresh={xpRefresh}
+          scenery={scenery}
+          onCareAction={requestAction}
+          onSwitchToList={() => setViewModeAndPersist("list")}
+          onCareChanged={() => {
+            setXpRefresh((n) => n + 1);
+            void reloadCare();
+            void reloadActiveExpedition();
+          }}
+          onEvolved={() => {
+            setXpRefresh((n) => n + 1);
+            onUpdated();
+          }}
+          babyImage={
+            resolvePetDisplayImage(pet.variant, "baby") ||
+            resolvePetDisplayImage(pet.species, "baby") ||
+            null
+          }
+          adultImage={
+            resolvePetDisplayImage(pet.variant, "adult") ||
+            resolvePetDisplayImage(pet.species, "adult") ||
+            null
+          }
+        />
+        {/* Barra compacta de perfil: XP + ações */}
+        <section className="mx-auto w-full max-w-[520px] overflow-hidden rounded-2xl border border-neutral-200/80 bg-white shadow-sm">
+          <div className="p-3">
+            <PetXpBar refreshKey={xpRefresh} />
+          </div>
+          <div className="flex flex-wrap items-center gap-2 border-t border-neutral-100 px-3 py-2">
+            {renaming ? (
+              <div className="flex flex-1 items-center gap-2">
+                <Input
+                  autoFocus
+                  maxLength={30}
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="h-9 rounded-lg border-neutral-200 bg-white text-sm focus-visible:ring-neutral-900/10"
+                />
+                <Button
+                  size="sm"
+                  onClick={() => void saveName()}
+                  className="h-9 rounded-lg bg-neutral-900 px-3 text-white hover:bg-neutral-800"
+                >
+                  <Check className="h-4 w-4" />
+                </Button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setRenaming(true)}
+                className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-[11px] font-medium text-neutral-700 transition hover:border-neutral-300"
+              >
+                <Pencil className="h-3 w-3" /> Renomear
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => void toggleVisibility()}
+              className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-[11px] font-medium text-neutral-700 transition hover:border-neutral-300"
+            >
+              {pet.visibility === "public" ? (
+                <><Eye className="h-3 w-3" /> Público</>
+              ) : (
+                <><EyeOff className="h-3 w-3" /> Privado</>
+              )}
+            </button>
+            <button
+              type="button"
+              onClick={onChange}
+              className="ml-auto inline-flex items-center gap-1.5 rounded-full bg-neutral-900 px-3 py-1.5 text-[11px] font-medium text-white transition hover:bg-neutral-800"
+            >
+              Trocar pet
+              <ArrowRight className="h-3 w-3" />
+            </button>
+          </div>
+        </section>
+      </>
+    ) : null}
+    {viewMode === "list" ? (
+    <>
+    <div className="flex justify-end">
+      <button
+        type="button"
+        onClick={() => setViewModeAndPersist("scene")}
+        className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-[11px] font-medium text-neutral-700 transition hover:border-neutral-300 hover:bg-neutral-50"
+        aria-label="Voltar para o Quarto Vivo"
+      >
+        Voltar para o quarto
+      </button>
+    </div>
     <section className="overflow-hidden rounded-3xl border border-neutral-200/80 bg-white shadow-[0_1px_0_rgba(0,0,0,0.02),0_24px_60px_-30px_rgba(0,0,0,0.12)]">
       {/* HUD full-width no desktop para barras legíveis */}
       <div className="hidden border-b border-neutral-100 bg-neutral-50/60 p-4 sm:block">
@@ -683,6 +796,8 @@ function Showcase({
         onChanged={scenery.reload}
       />
     )}
+    </>
+    ) : null}
     {pet.category?.id && (
       <PetCareActionSheet
         open={actionKind !== null}
