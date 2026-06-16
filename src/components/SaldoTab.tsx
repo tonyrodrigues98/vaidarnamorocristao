@@ -339,10 +339,15 @@ function TxRow({ tx }: { tx: CoinTx }) {
   // 3) Anything else is treated as a pets-bucket storage path and signed.
   const isAbsolute = !!tx.icon_url && /^(https?:|data:|blob:|\/)/i.test(tx.icon_url);
   const decorationAsset = tx.icon_url ? DECORATION_ASSETS[tx.icon_url] : undefined;
-  const needsSign = !!tx.icon_url && !decorationAsset && !isAbsolute;
+  const grabAsset =
+    tx.icon_url && tx.icon_url.startsWith("grab:")
+      ? GRAB_BOX_IMAGES[tx.icon_url.slice(5)]
+      : undefined;
+  const needsSign = !!tx.icon_url && !decorationAsset && !grabAsset && !isAbsolute;
   const signed = useSignedPetUrl(needsSign ? tx.icon_url : null);
   const resolvedIcon =
     decorationAsset ??
+    grabAsset ??
     (isAbsolute ? tx.icon_url : null) ??
     signed ??
     null;
