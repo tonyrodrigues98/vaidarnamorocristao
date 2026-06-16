@@ -85,6 +85,13 @@ import { BookOpen, Clock, MessageCircle, Compass } from "lucide-react";
 import { PetCareHistorySheet } from "@/components/pet/PetCareHistorySheet";
 import { PetLivingRoom } from "@/components/pet/PetLivingRoom";
 import { recordLastAction, saveCareSnapshot } from "@/lib/petLocalCache";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from "@/components/ui/sheet";
 
 export const Route = createFileRoute("/meu-pet")({ component: MeuPetPage });
 
