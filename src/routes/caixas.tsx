@@ -35,7 +35,8 @@ export const Route = createFileRoute("/caixas")({
       { title: "Caixas — Meu Pet" },
       {
         name: "description",
-        content: "Abra caixas temáticas: moedas, XP, cenários, decorações e itens lendários para o seu pet.",
+        content:
+          "Abra caixas temáticas: moedas, XP, cenários, decorações e itens lendários para o seu pet.",
       },
     ],
   }),
@@ -113,10 +114,7 @@ function CaixasPage() {
     unlockGrabAudio();
     setPendingPoolId(poolId);
     try {
-      const [prizes, res] = await Promise.all([
-        listPoolPrizeMetas(poolId),
-        performGrab(poolId),
-      ]);
+      const [prizes, res] = await Promise.all([listPoolPrizeMetas(poolId), performGrab(poolId)]);
       const winnerMeta = await resolvePrize(res.prize_kind, res.prize_ref_id);
       const winner: PrizeMeta = {
         ...(winnerMeta ?? { name: GRAB_PRIZE_KIND_LABEL[res.prize_kind], image_url: null }),
@@ -259,8 +257,7 @@ function CaixasPage() {
                 <span
                   className="rounded-full px-1.5 text-[10px] font-bold text-[#1a1410]"
                   style={{
-                    background:
-                      "linear-gradient(135deg, #F1DDA1 0%, #C9A24A 100%)",
+                    background: "linear-gradient(135deg, #F1DDA1 0%, #C9A24A 100%)",
                   }}
                 >
                   {totalInv}
@@ -281,12 +278,18 @@ function CaixasPage() {
             </span>
             <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-2.5 py-1 text-[#3a3328] ring-1 ring-[#ece3d0]">
               <CoinIcon className="size-3" />
-              {state.recent.length > 0 ? `${state.recent.length} aberturas recentes` : "Nenhuma abertura ainda"}
+              {state.recent.length > 0
+                ? `${state.recent.length} aberturas recentes`
+                : "Nenhuma abertura ainda"}
             </span>
           </div>
         )}
         {groups?.featured && (
-          <FeaturedBanner pool={groups.featured} onOpen={() => void open(groups.featured!.id)} busy={pendingPoolId === groups.featured.id} />
+          <FeaturedBanner
+            pool={groups.featured}
+            onOpen={() => void open(groups.featured!.id)}
+            busy={pendingPoolId === groups.featured.id}
+          />
         )}
       </section>
 
