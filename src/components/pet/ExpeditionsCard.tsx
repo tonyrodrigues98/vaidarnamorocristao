@@ -50,10 +50,14 @@ export function ExpeditionsCard({
   userPetId,
   onChanged,
   className,
+  petImage,
+  petName,
 }: {
   userPetId: string;
   onChanged?: () => void;
   className?: string;
+  petImage?: string | null;
+  petName?: string;
 }) {
   const [today, setToday] = useState<TodayExpedition[] | null>(null);
   const [active, setActive] = useState<ActiveExpedition | null>(null);
@@ -171,6 +175,8 @@ export function ExpeditionsCard({
         active={active}
         busy={!!active && busy === active.run_id}
         onClose={() => setSceneOpen(false)}
+        petImage={petImage ?? null}
+        petName={petName ?? "Seu pet"}
         onClaim={async () => {
           await handleClaim();
           setSceneOpen(false);

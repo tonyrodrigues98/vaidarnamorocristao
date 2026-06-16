@@ -77,12 +77,16 @@ export function ExpeditionLiveSceneModal({
   onClose,
   onClaim,
   busy,
+  petImage,
+  petName,
 }: {
   open: boolean;
   active: ActiveExpedition | null;
   onClose: () => void;
   onClaim: () => void;
   busy: boolean;
+  petImage: string | null;
+  petName: string;
 }) {
   const [now, setNow] = useState(() => Date.now());
   const img = useSignedExpeditionUrl(active?.image_url ?? null);
@@ -114,24 +118,20 @@ export function ExpeditionLiveSceneModal({
     };
     // Show last 3 events; if none yet, show a "departure" pseudo-event.
     const visible: { id: string; text: string; icon: StoryIcon; agoMs: number }[] = [];
-    if (eventsHappened === 0) {
-      visible.push({
-        id: "departure",
-        text: "Seu pet partiu cheio de coragem. A aventura está começando.",
-        icon: "footprints",
-        agoMs: elapsed,
-      });
-    } else {
-      const start = Math.max(0, eventsHappened - 3);
-      for (let i = start; i < eventsHappened; i++) {
-        const ev = getEventAt(active.run_id, i, ctx);
-        const agoMs = elapsed - ev.at;
-        visible.push({ id: `${active.run_id}:${i}`, text: ev.text, icon: ev.icon, agoMs });
-      }
-      visible.reverse(); // newest first
+    visible.push({
+      id: "departure",
+      text: `${petName} partiu cheio de coragem. A aventura está começando.`,
+      icon: "footprints",
+      agoMs: elapsed,
+    });
+    for (let i = 0; i < eventsHappened; i++) {
+      const ev = getEventAt(active.run_id, i, ctx);
+      const agoMs = Math.max(0, elapsed - ev.at);
+      visible.push({ id: `${active.run_id}:${i}`, text: ev.text, icon: ev.icon, agoMs });
     }
+    visible.reverse(); // newest first
     return { pct, ready, remaining, biome, weather, phase, visible };
-  }, [active, now]);
+  }, [active, now, petName]);
 
   if (!active || !data) {
     return (
@@ -144,21 +144,18 @@ export function ExpeditionLiveSceneModal({
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogContent
-        className="h-[92vh] max-h-[92vh] w-full max-w-md overflow-hidden border-0 bg-black p-0 [&>button]:hidden"
+        className="flex h-[92vh] max-h-[92vh] w-full max-w-md flex-col overflow-hidden border-0 bg-neutral-950 p-0 [&>button]:hidden"
       >
         <DialogTitle className="sr-only">{active.title}</DialogTitle>
 
-        {/* Background scene */}
-        <div className="absolute inset-0">
+        {/* ===== SCENE (top half) ===== */}
+        <div className="relative h-[46%] w-full shrink-0 overflow-hidden bg-black">
           {img ? (
             <img
               src={img}
               alt=""
               className="size-full object-cover"
-              style={{
-                animation: `scene-zoom ${Math.max(60, active.duration_minutes * 60)}s linear forwards`,
-                animationDelay: `-${Math.max(0, ((data.pct / 100) * Math.max(60, active.duration_minutes * 60)) | 0)}s`,
-              }}
+              style={{ objectPosition: "center 40%" }}
             />
           ) : (
             <div className="size-full bg-gradient-to-b from-indigo-900 to-black" />
@@ -166,66 +163,85 @@ export function ExpeditionLiveSceneModal({
           {/* Day-phase tonal overlay */}
           <div
             className="pointer-events-none absolute inset-0 transition-[background] duration-1000"
-            style={{ background: PHASE_OVERLAY[data.phase], mixBlendMode: "soft-light" }}
+            style={{ background: PHASE_OVERLAY[data.phase], mixBlendMode: "overlay" }}
           />
-          {/* Top vignette + bottom darkening for legibility */}
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/55 via-transparent to-black/80" />
+          {/* Soft top vignette */}
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-black/60 to-transparent" />
+          {/* Bottom fade into feed */}
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-b from-transparent to-neutral-950" />
           {/* Weather particles */}
           <SceneWeatherLayer weather={data.weather} />
-        </div>
 
-        {/* HUD top */}
-        <div className="relative z-10 flex items-start justify-between gap-2 p-4 pt-5">
-          <div className="min-w-0">
-            <div className="text-[10px] font-medium uppercase tracking-wider text-white/70">
-              Expedição ativa
+          {/* HUD top (absolute over scene) */}
+          <div className="absolute inset-x-0 top-0 z-10 flex items-start justify-between gap-2 p-4 pt-5">
+            <div className="min-w-0">
+              <div className="text-[10px] font-medium uppercase tracking-wider text-white/80 drop-shadow">
+                Expedição ativa
+              </div>
+              <h2 className="mt-0.5 text-[17px] font-semibold leading-tight text-white drop-shadow-[0_2px_6px_rgba(0,0,0,0.8)]">
+                {active.title}
+              </h2>
+              <div className="mt-1 inline-flex items-center gap-1.5 rounded-full bg-black/40 px-2 py-0.5 text-[11px] font-medium text-white backdrop-blur">
+                <span className="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                {data.ready ? "Pronto para coletar" : `Volta em ${fmtRemaining(data.remaining)}`}
+              </div>
             </div>
-            <h2 className="mt-0.5 text-[17px] font-semibold leading-tight text-white drop-shadow">
-              {active.title}
-            </h2>
-            <div className="mt-1 inline-flex items-center gap-1.5 rounded-full bg-white/10 px-2 py-0.5 text-[11px] font-medium text-white backdrop-blur">
-              <span className="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              {data.ready ? "Pronto para coletar" : `Volta em ${fmtRemaining(data.remaining)}`}
+            <button
+              type="button"
+              onClick={onClose}
+              className="grid size-9 shrink-0 place-items-center rounded-full bg-black/50 text-white backdrop-blur transition hover:bg-black/70"
+              aria-label="Fechar"
+            >
+              <X className="size-4" />
+            </button>
+          </div>
+
+          {/* Walking pet — bottom of the scene */}
+          <div className="pointer-events-none absolute inset-x-0 bottom-3 z-10 flex justify-center">
+            <div
+              className="relative"
+              style={{ animation: "scene-walk 1.4s ease-in-out infinite" }}
+            >
+              {petImage ? (
+                <img
+                  src={petImage}
+                  alt={petName}
+                  className="h-20 w-20 object-contain drop-shadow-[0_6px_12px_rgba(0,0,0,0.7)]"
+                />
+              ) : (
+                <div className="grid h-16 w-16 place-items-center rounded-full bg-black/40 text-white backdrop-blur">
+                  <Footprints className="size-7" />
+                </div>
+              )}
+              {/* Shadow under pet */}
+              <div className="mx-auto mt-1 h-1.5 w-12 rounded-full bg-black/40 blur-[3px]" />
             </div>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="grid size-9 shrink-0 place-items-center rounded-full bg-white/15 text-white backdrop-blur transition hover:bg-white/25"
-            aria-label="Fechar"
-          >
-            <X className="size-4" />
-          </button>
         </div>
 
-        {/* Progress bar */}
-        <div className="relative z-10 px-4">
-          <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/15 backdrop-blur">
+        {/* ===== Progress bar (between scene and feed) ===== */}
+        <div className="shrink-0 border-b border-white/10 bg-neutral-950 px-4 py-3">
+          <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/10">
             <div
               className="h-full rounded-full bg-gradient-to-r from-indigo-400 via-fuchsia-400 to-amber-300 transition-[width] duration-1000"
               style={{ width: `${data.pct}%` }}
             />
           </div>
-          <div className="mt-1 flex justify-between text-[10px] tabular-nums text-white/70">
-            <span>{Math.round(data.pct)}%</span>
-            <span className="capitalize">{data.phase === "dawn" ? "amanhecer" : data.phase === "day" ? "dia" : data.phase === "dusk" ? "entardecer" : "noite"}</span>
+          <div className="mt-1.5 flex justify-between text-[10.5px] tabular-nums text-white/60">
+            <span>{Math.round(data.pct)}% concluído</span>
+            <span className="capitalize">
+              {data.phase === "dawn" ? "amanhecer" : data.phase === "day" ? "dia" : data.phase === "dusk" ? "entardecer" : "noite"}
+            </span>
           </div>
         </div>
 
-        {/* Walking pet silhouette */}
-        <div className="pointer-events-none absolute inset-x-0 bottom-44 z-10 flex justify-center">
-          <div
-            className="text-white/80"
-            style={{ animation: "scene-walk 1.4s ease-in-out infinite" }}
-          >
-            <Footprints className="size-7 drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]" />
-          </div>
-        </div>
-
-        {/* Floating event cards */}
-        <div className="absolute inset-x-0 bottom-0 z-10 space-y-2 p-4">
+        {/* ===== Feed (scrollable bottom half) ===== */}
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain bg-neutral-950 px-4 pt-3">
           {!data.ready && (
-            <div className="space-y-2">
+            <div className="space-y-2 pb-4">
+              <p className="px-1 pb-1 text-[10.5px] font-medium uppercase tracking-wider text-white/40">
+                Diário da jornada
+              </p>
               {data.visible.map((ev, idx) => {
                 const Icon = ICON_MAP[ev.icon] ?? Sparkles;
                 const isLatest = idx === 0;
@@ -233,38 +249,37 @@ export function ExpeditionLiveSceneModal({
                   <div
                     key={ev.id}
                     className={cn(
-                      "flex items-start gap-2.5 rounded-2xl border p-3 backdrop-blur-md transition-all",
+                      "flex items-start gap-2.5 rounded-2xl border p-3 transition-all",
                       isLatest
-                        ? "border-white/30 bg-white/15 text-white shadow-lg animate-fade-in"
-                        : "border-white/15 bg-white/10 text-white/70",
+                        ? "border-indigo-400/40 bg-neutral-900 text-white shadow-lg animate-fade-in"
+                        : "border-white/10 bg-neutral-900/70 text-white/85",
                     )}
-                    style={{ opacity: isLatest ? 1 : 0.7 - idx * 0.15 }}
                   >
                     <div className={cn(
-                      "grid size-7 shrink-0 place-items-center rounded-full",
-                      isLatest ? "bg-white/25" : "bg-white/10",
+                      "grid size-8 shrink-0 place-items-center rounded-full",
+                      isLatest ? "bg-indigo-500/25 text-indigo-200" : "bg-white/10 text-white/70",
                     )}>
-                      <Icon className="size-3.5" />
+                      <Icon className="size-4" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-[12.5px] leading-snug">{ev.text}</p>
-                      <p className="mt-0.5 text-[10px] text-white/55">{fmtAgo(ev.agoMs)}</p>
+                      <p className="text-[13px] leading-snug">{ev.text}</p>
+                      <p className="mt-0.5 text-[10.5px] text-white/45">{fmtAgo(ev.agoMs)}</p>
                     </div>
                   </div>
                 );
               })}
-              <p className="pt-1 text-center text-[10.5px] text-white/50">
-                Volte mais tarde — sua aventura continua.
+              <p className="pt-2 text-center text-[10.5px] text-white/40">
+                Volte mais tarde — a aventura continua.
               </p>
             </div>
           )}
 
           {data.ready && (
-            <div className="space-y-2">
-              <div className="rounded-2xl border border-amber-300/40 bg-amber-200/15 p-4 text-center text-white backdrop-blur-md animate-scale-in">
+            <div className="space-y-3 pb-4">
+              <div className="rounded-2xl border border-amber-300/40 bg-amber-500/10 p-4 text-center text-white animate-scale-in">
                 <Sparkles className="mx-auto size-5 text-amber-200" />
-                <p className="mt-1 text-[13px] font-semibold">Seu pet voltou!</p>
-                <p className="text-[11px] text-white/75">Recompensas prontas pra serem reveladas.</p>
+                <p className="mt-1 text-[14px] font-semibold">{petName} voltou!</p>
+                <p className="text-[11.5px] text-white/75">Recompensas prontas pra serem reveladas.</p>
               </div>
               <Button
                 size="lg"
@@ -279,6 +294,27 @@ export function ExpeditionLiveSceneModal({
                 )}
                 Coletar recompensas
               </Button>
+              {data.visible.length > 0 && (
+                <div className="space-y-2 pt-2">
+                  <p className="px-1 text-[10.5px] font-medium uppercase tracking-wider text-white/40">
+                    Resumo da jornada
+                  </p>
+                  {data.visible.map((ev) => {
+                    const Icon = ICON_MAP[ev.icon] ?? Sparkles;
+                    return (
+                      <div
+                        key={ev.id}
+                        className="flex items-start gap-2.5 rounded-2xl border border-white/10 bg-neutral-900/70 p-3 text-white/85"
+                      >
+                        <div className="grid size-7 shrink-0 place-items-center rounded-full bg-white/10">
+                          <Icon className="size-3.5" />
+                        </div>
+                        <p className="text-[12.5px] leading-snug">{ev.text}</p>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           )}
         </div>
