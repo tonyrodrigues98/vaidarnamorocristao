@@ -165,8 +165,11 @@ export function ExpeditionLiveSceneModal({
             className="pointer-events-none absolute inset-0 transition-[background] duration-1000"
             style={{ background: PHASE_OVERLAY[data.phase], mixBlendMode: "overlay" }}
           />
-          {/* Soft top vignette */}
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-black/60 to-transparent" />
+          {/* Soft top vignette (covers status bar / URL chrome area) */}
+          <div
+            className="pointer-events-none absolute inset-x-0 top-0 bg-gradient-to-b from-black/75 to-transparent"
+            style={{ height: "calc(env(safe-area-inset-top, 0px) + 7rem)" }}
+          />
           {/* Bottom fade into feed */}
           <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-b from-transparent to-neutral-950" />
           {/* Weather particles */}
