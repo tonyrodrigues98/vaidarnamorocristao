@@ -128,10 +128,10 @@ export function GrabPoolCard({ pool, freeRemaining, busy, onOpen }: Props) {
       </div>
 
       {/* pity bar */}
-      {pool.pity_threshold > 0 && (
+      {pool.pity_threshold > 0 && pool.pity_eligible !== false && (
         <div className="relative z-10 mt-2">
           <div className="flex items-center justify-between text-[9px] uppercase tracking-[0.12em] text-[#9a7626]">
-            <span>Pity</span>
+            <span>Garantia {pool.pity_tier ?? "rare"}</span>
             <span>
               {pool.pity_count}/{pool.pity_threshold}
             </span>

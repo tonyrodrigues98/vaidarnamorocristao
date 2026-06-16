@@ -1039,6 +1039,7 @@ export type Database = {
           id: string
           name: string
           pity_threshold: number
+          pity_tier: string
           rarity: string
           slug: string
           sort_order: number
@@ -1057,6 +1058,7 @@ export type Database = {
           id?: string
           name: string
           pity_threshold?: number
+          pity_tier?: string
           rarity?: string
           slug: string
           sort_order?: number
@@ -1075,6 +1077,7 @@ export type Database = {
           id?: string
           name?: string
           pity_threshold?: number
+          pity_tier?: string
           rarity?: string
           slug?: string
           sort_order?: number
@@ -5584,6 +5587,7 @@ export type Database = {
         }
         Returns: string
       }
+      grab_rarity_rank: { Args: { _r: string }; Returns: number }
       grant_coin_event: {
         Args: { _amount: number; _ref: string; _user: string }
         Returns: undefined
