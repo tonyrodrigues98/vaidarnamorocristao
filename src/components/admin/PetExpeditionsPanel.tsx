@@ -148,6 +148,7 @@ export function PetExpeditionsPanel() {
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {rows.map((row) => (
             <div key={row.id} className="space-y-2 rounded-2xl border border-border bg-card p-4">
+              <RowPreview imagePath={row.image_url} />
               <div className="flex items-start justify-between gap-2">
                 <div className="flex items-center gap-2">
                   <Compass className="size-4 text-muted-foreground" />
@@ -411,6 +412,19 @@ function formatDuration(minutes: number): string {
   const h = Math.floor(minutes / 60);
   const m = minutes % 60;
   return m ? `${h}h ${m}min` : `${h}h`;
+}
+
+function RowPreview({ imagePath }: { imagePath: string | null }) {
+  const url = useSignedExpeditionUrl(imagePath);
+  return (
+    <div className="grid aspect-[16/9] w-full place-items-center overflow-hidden rounded-xl border border-border bg-muted">
+      {url ? (
+        <img src={url} alt="" className="size-full object-cover" loading="lazy" />
+      ) : (
+        <ImageOff className="size-5 text-muted-foreground" />
+      )}
+    </div>
+  );
 }
 
 function ImageUploader({
