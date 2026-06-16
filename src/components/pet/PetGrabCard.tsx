@@ -892,7 +892,7 @@ export function GrabRouletteModal({
                     <div className="flex items-center gap-2">
                       <CoinIcon className="size-8" />
                       <span className="text-3xl font-extrabold tracking-tight text-amber-300">
-                        {res.prize_amount}
+                        <AnimatedCounter value={res.prize_amount} />
                       </span>
                       <span className="text-base font-medium text-neutral-200">
                         {res.prize_amount === 1 ? "moeda" : "moedas"}
@@ -906,7 +906,7 @@ export function GrabRouletteModal({
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-3xl font-extrabold tracking-tight text-sky-300">
-                        +{res.prize_amount}
+                        +<AnimatedCounter value={res.prize_amount} />
                       </span>
                       <span className="text-base font-medium text-neutral-200">XP</span>
                     </div>
@@ -924,7 +924,7 @@ export function GrabRouletteModal({
                         backgroundClip: "text",
                       }}
                     >
-                      {winner.name}
+                      <Typewriter text={winner.name} />
                     </div>
                     <div
                       className="h-2 w-32 rounded-full"
@@ -933,7 +933,7 @@ export function GrabRouletteModal({
                   </div>
                 ) : (
                   <div className="text-lg font-semibold tracking-tight">
-                    {winner.name}
+                    <Typewriter text={winner.name} />
                     {res.prize_amount > 1 && (
                       <span className="ml-1.5 rounded-md bg-amber-400/20 px-1.5 py-0.5 text-sm text-amber-300">
                         x{res.prize_amount}
@@ -953,22 +953,43 @@ export function GrabRouletteModal({
                     <span className="text-amber-300">grátis · {res.free_remaining} restantes</span>
                   )}
                 </div>
-                <Button
-                  className="relative mt-5 w-full overflow-hidden bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 text-neutral-950 hover:from-amber-400 hover:to-amber-400"
-                  onClick={handleClose}
-                >
-                  <span className="relative z-10 font-semibold">Continuar</span>
-                  <span
-                    aria-hidden
-                    className="pointer-events-none absolute inset-0"
-                    style={{
-                      background:
-                        "linear-gradient(110deg, transparent 30%, rgba(255,255,255,0.5) 50%, transparent 70%)",
-                      backgroundSize: "200% 100%",
-                      animation: "grab-title-shine 2.4s linear infinite",
-                    }}
-                  />
-                </Button>
+                <div className="mt-5 flex flex-col gap-2">
+                  {canOpenAgain && onOpenAgain && (
+                    <Button
+                      className="relative w-full overflow-hidden bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 text-neutral-950 hover:from-amber-400 hover:to-amber-400"
+                      onClick={() => {
+                        unlockGrabAudio();
+                        onOpenAgain();
+                      }}
+                    >
+                      <span className="relative z-10 inline-flex items-center gap-1.5 font-semibold">
+                        <Sparkles className="size-4" /> Abrir outra
+                      </span>
+                      <span
+                        aria-hidden
+                        className="pointer-events-none absolute inset-0"
+                        style={{
+                          background:
+                            "linear-gradient(110deg, transparent 30%, rgba(255,255,255,0.5) 50%, transparent 70%)",
+                          backgroundSize: "200% 100%",
+                          animation: "grab-title-shine 2.4s linear infinite",
+                        }}
+                      />
+                    </Button>
+                  )}
+                  <Button
+                    variant={canOpenAgain ? "ghost" : "default"}
+                    className={cn(
+                      "w-full",
+                      !canOpenAgain &&
+                        "bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 text-neutral-950 hover:from-amber-400 hover:to-amber-400",
+                      canOpenAgain && "text-neutral-300 hover:bg-white/5 hover:text-white",
+                    )}
+                    onClick={handleClose}
+                  >
+                    {canOpenAgain ? "Sair" : "Continuar"}
+                  </Button>
+                </div>
               </div>
             ) : (
               <p className="pt-5 text-xs text-neutral-400">
