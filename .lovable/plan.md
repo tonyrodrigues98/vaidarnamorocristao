@@ -1,110 +1,93 @@
-# Expedições de Pet
+## O que vamos construir
 
-Sistema novo, separado das "missões diárias" existentes (que são tarefas de progresso). Aqui o pet é **enviado** por um tempo real e volta com loot.
+Quando o usuário tocar no card da expedição em andamento (`ActiveRunCard` em `ExpeditionsCard.tsx`), abrir um modal full-screen cinematográfico que mostra o pet vivendo a aventura em tempo real — não um log de texto, mas uma cena viva.
 
-## Conceito
+### Anatomia do modal
 
-- 3 expedições sorteadas por dia (rotação à meia-noite, igual missões diárias).
-- Apenas 1 ativa por vez — escolha estratégica.
-- Enquanto ativa: tudo do pet vira read-only com grayscale + blur + contador de tempo restante.
-- Decaimento das necessidades **1.5×** mais rápido durante a viagem (cria pressão pós-retorno).
-- Custo de envio: energia (escala com dificuldade) + nível mínimo do pet.
-- Resultado revelado ao "Coletar": **Sucesso normal / Crítico (2× recompensa, ~10%) / Falha (recompensa parcial 30%)** — chances variam por dificuldade.
+1. **Cena de fundo** — a imagem da expedição preenche o modal inteiro com:
+   - Vinheta escura nas bordas pra dar profundidade
+   - **Parallax sutil**: imagem amplia ~5% conforme o progresso avança (zoom cinematográfico lento)
+   - **Camada de clima** sobreposta conforme o bioma da expedição (derivado do slug/nome):
+     - Neve/montanha → flocos caindo
+     - Deserto → poeira dourada flutuando
+     - Floresta/jardim → folhas/pólen suaves
+     - Caverna/santuário → partículas de luz subindo
+     - Noite/aurora → estrelas piscando
+   - **Ciclo dia→noite**: tonalização da cena muda do amanhecer (azul-laranja) → meio-dia (claro) → entardecer (âmbar) → noite (azul-índigo) conforme % de progresso
+   - Avatar do pet em silhueta no canto inferior, com micro-animação de respiração/caminhada
 
-## Modelo de dados
+2. **HUD superior** (overlay sobre a cena)
+   - Título da expedição + badge de dificuldade
+   - Barra de progresso fina e elegante (gradient indigo→fuchsia) com tempo restante tabular
+   - Botão fechar
 
-Duas tabelas novas:
+3. **Cards flutuantes de eventos** — sobrepostos na parte inferior central:
+   - 3 cards visíveis máximo, empilhados com leve transparência (o mais recente em destaque)
+   - Cada evento entra com `fade-in` de baixo, vive ~8s, depois desliza pra trás e desaparece
+   - Cada card tem: ícone lucide pequeno, frase do evento (1-2 linhas), e timestamp relativo ("agora", "12min atrás")
+   - Novo evento aparece a cada ~30-60s reais (ritmo varia por dificuldade — mais eventos em hard/extreme)
 
-`**pet_expeditions**` (catálogo, admin)
+4. **Rodapé** — quando `ready === true`, substitui os cards flutuantes pelo botão grande "Coletar recompensas" com pulse sutil. Antes disso, mostra discreto "Volte mais tarde — sua aventura continua".
 
-- `id`, `slug`, `title`, `description`, `icon` (nome lucide), `image_url` (opcional)
-- `difficulty`: `easy | medium | hard | extreme`
-- `duration_minutes` (ex.: 240 = 4h)
-- `energy_cost`, `min_pet_level`
-- `xp_reward`, `coin_reward`, `item_reward_id` (nullable, FK futura)
-- `success_rate`, `crit_rate` (0–100) — preenchido por default da dificuldade no admin, editável
-- `active`, `sort_order`, `created_at`, `updated_at`
+### Como os 500+ eventos funcionam (pool combinatório)
 
-`**user_pet_expedition_runs**` (ativas + histórico)
+Em vez de 500 frases hard-coded, geramos via templates com slots — manutenção mínima, variedade altíssima, controle editorial total.
 
-- `id`, `user_id`, `user_pet_id` (FK `user_pets_v2`), `expedition_id`
-- `started_at`, `ends_at`, `claimed_at` (null = ativa ou pendente claim)
-- `outcome`: `pending | success | crit | fail` (calculado no claim)
-- `xp_awarded`, `coin_awarded`, `item_awarded_id`
-- Index parcial `WHERE claimed_at IS NULL` para garantir 1 ativa por pet.
+**Estrutura** (`src/lib/expeditionStoryEngine.ts`):
 
-`**user_daily_expeditions**` (sorteio diário de 3)
+```ts
+// Pools temáticos
+const BIOMES = {
+  mountain: { creatures: [...20], places: [...20], actions: [...20], discoveries: [...20] },
+  desert:   { creatures: [...20], places: [...20], actions: [...20], discoveries: [...20] },
+  forest:   { ... },
+  sanctuary:{ ... },
+  market:   { ... },
+  night:    { ... },
+  // ~6 biomas
+};
 
-- `id`, `user_id`, `day`, `expedition_id`, `sent_at` (null = ainda disponível pra enviar)
+// ~25 templates por categoria de fase × 4 fases = ~100 templates
+// Ex: "Seu pet {action} perto de {place} e {discovery}."
+//     "{creature} cruzou o caminho. Seu pet {reaction}."
+```
 
-## RPCs (server-side, transacional)
+Cada slot tem 15-25 opções → milhares de combinações únicas por bioma. Os eventos são determinísticos por `(expedition_id, run_id, event_index)` usando um seed PRNG, então o usuário vê a mesma sequência se reabrir o modal (continuidade narrativa), mas cada expedição tem sequência única.
 
-- `roll_daily_expeditions()` — idempotente por usuário+dia, sorteia 3 de `pet_expeditions` ativas.
-- `get_today_expeditions()` — retorna as 3 do dia + estado (disponível / esta foi enviada).
-- `start_expedition(_expedition_id, _user_pet_id)` — valida: nenhuma ativa, energia suficiente, nível mínimo, foi sorteada hoje, ainda não enviada. Debita energia, cria run, marca `sent_at`.
-- `claim_expedition(_run_id)` — valida `now() >= ends_at`, sorteia outcome via `success_rate`/`crit_rate`, credita XP (via `xp_events`) + moedas (via `coin_transactions`) + item, marca `claimed_at`.
-- Trigger / função auxiliar para o **decaimento 1.5×**: registrar buff temporário em `user_pet_buffs` com `decay_mult: 1.5, kind: 'all', source: 'expedition'`, expirando junto com `ends_at`. Reaproveita o pipeline atual de buffs (já aparece no HUD de buffs).
+**Mapeamento bioma**: derivamos do slug atual (`cume-da-alianca` → mountain, `travessia-do-deserto` → desert, etc.) via tabela simples — sem mudanças no DB.
 
-## UI
+**Eventos especiais raros (~5% dos slots)**:
+- Achado de item ("Encontrou {item_reward_label} brilhando entre as folhas") — só aparece se a expedição tem item_reward
+- Momento de oração/reflexão wholesome ("Parou e contemplou {place}")
+- Pequeno susto que vira aprendizado
 
-`**/admin/pets` — nova aba "Expedições"**
-CRUD igual às outras abas (`PetCareItemsPanel` como referência estrutural):
+### Detalhes técnicos
 
-- Lista com título, dificuldade, duração, recompensas, ativo, ordem.
-- Form: título, descrição, ícone (lucide picker), imagem opcional, dificuldade (select com presets de duração/energia/min level/taxas — editáveis após), recompensas, ativo.
+- **Sem mudanças de schema**: tudo client-side. O modal calcula quantos eventos já "aconteceram" baseado em `(now - started_at) / event_interval` e renderiza os últimos 3.
+- **Performance**: partículas são divs CSS com `transform` + `animation` (sem canvas). 15-25 partículas no máximo, animadas via keyframes.
+- **Determinismo**: usar `mulberry32(hashStringToInt(run_id + event_index))` pra escolher slots, garantindo mesma narrativa em reaberturas.
+- **Mobile-first**: modal usa `Dialog` do shadcn com `max-w-md` e altura quase full, design pensado pra 393x697.
 
-`**/meu-pet` — novo card "Expedições" abaixo de "Missões diárias"**
+### Estrutura de arquivos
 
-- Header: "Expedições — 1/3 enviada hoje" + contador de reset.
-- 3 kistas ( como em missões pra fácil leitura ) com ícone/imagem, título, badge de dificuldade colorida, duração, recompensas e botão **Enviar** (ou "Indisponível: energia/nível").
-- Se uma run está ativa: card grande no topo com barra de progresso + tempo restante; outros 2 cards bloqueados.
-- Quando termina: card vira **Coletar recompensa** com animação de revelação (success/crit/fail) usando padrão do `PetRandomEventModal` existente.
+**Novos:**
+- `src/lib/expeditionStoryEngine.ts` — biomas, pools, templates, função `getEventAt(runId, index, context)`, mapping slug→bioma
+- `src/components/pet/ExpeditionLiveSceneModal.tsx` — o modal completo (cena + HUD + partículas + cards de evento)
+- `src/components/pet/SceneWeatherLayer.tsx` — partículas animadas por bioma (reutilizável)
 
-**Overlay "Pet em missão"**
-Quando há run ativa:
+**Editados:**
+- `src/components/pet/ExpeditionsCard.tsx` — `ActiveRunCard` vira clicável (`role=button`), abre o modal; passa props necessárias (`active`, `now`, `onClaim`, `busy`)
 
-- `<PetArtwork>` ganha classe `grayscale blur-[2px]` + overlay translúcido com ícone da expedição + countdown grande.
-- `PetRadialMenu`, `PetCareActionSheet`, `PetNeedsHud` (cliques) ficam desabilitados (botões com `disabled`, tooltip "Em missão — volta em Xh Xm").
-- Badge sticky pequena no header: "Em missão: Caverna de Tundra • 3h 12min".
+### Fora do escopo
 
-## Melhorias sugeridas (incluídas no plano)
+- Sem persistir eventos no DB (são deterministicamente recalculáveis)
+- Sem áudio/som (pode ser fase 2)
+- Sem mudar o card listado (só o ativo abre modal)
+- Sem editor admin para os pools (texto fica no código por ora)
 
-1. **Buff de retorno**: ao completar com sucesso/crítico, aplicar buff curto (ex.: +20% restore em "affection" por 1h) — reaproveita `user_pet_buffs`/HUD.
-2. **Sinergia com personalidade**: pet com personalidade compatível ganha +5% crit_rate (campo opcional `personality_bonus_id` na expedição).
-3. **Histórico**: aba no card mostrando últimas 5 expedições com outcome — gera identidade.
-4. **Push opcional**: quando faltar 5min ou ao terminar, dispara notificação (reusar `push_queue`). Default off, toggle em conta.
-5. **Defaults inteligentes no admin** por dificuldade:
-  - Fácil: 1h, energia 20, lvl 1, sucesso 100%, crit 10%
-  - Média: 4h, energia 40, lvl 3, sucesso 85%, crit 12%
-  - Difícil: 8h, energia 60, lvl 5, sucesso 70%, crit 15%
-  - Extrema: 16h, energia 80, lvl 10, sucesso 50%, crit 20%
+### Quality bar
 
-## Detalhes técnicos
-
-- **RLS**: catálogo `pet_expeditions` leitura `authenticated`, escrita só admin via `has_role`. Tabelas de usuário com policies escopadas em `auth.uid()`. GRANTs explícitos.
-- **Server fns** (`src/lib/petExpeditions.functions.ts`): `getTodayExpeditions`, `startExpedition`, `claimExpedition`, `getActiveRun` — todas com `requireSupabaseAuth`.
-- **Catálogo admin** (`src/lib/petExpeditionsAdmin.ts`): CRUD direto via supabase com policy admin.
-- **Hook `useActiveExpedition(petId)**`: polling de 30s + tick local de 1s pro countdown.
-- **Item reward**: por ora `item_reward_id` é nullable; sistema de itens fica no campo de texto livre + flag — quando inventário for criado, vira FK real.
-- **Atomicidade**: `start_expedition` e `claim_expedition` em transação SQL (RPC) — evita double-claim e race com energia.
-
-## Arquivos novos
-
-- `supabase` migration (tabelas, GRANTs, RLS, RPCs, trigger de buff)
-- `src/types/petExpedition.ts`
-- `src/lib/petExpeditions.functions.ts`
-- `src/lib/petExpeditionsAdmin.ts`
-- `src/components/admin/PetExpeditionsPanel.tsx`
-- `src/components/pet/ExpeditionsCard.tsx`
-- `src/components/pet/ActiveExpeditionOverlay.tsx`
-
-## Arquivos editados
-
-- `src/routes/admin/pets.tsx` — nova aba.
-- `src/routes/meu-pet.tsx` — render do card + overlay + disable das ações quando ativa.
-- `src/components/pet/PetCareActionSheet.tsx` e `PetRadialMenu.tsx` — respeitar prop `disabled`.
-
-## Fora do escopo (deixa pra depois)
-
-- Sistema de inventário/itens reais (campo já fica preparado).
-- Expedições em grupo / convite de amigos.
+- Abrir o modal numa expedição de 1h e voltar 20min depois mostra os 3 últimos eventos coerentes (não os mesmos primeiros)
+- Trocar de expedição = clima e eventos visivelmente diferentes (montanha gelada ≠ deserto)
+- Animações suaves a 60fps em mobile (transform/opacity only)
+- Botão "Coletar" só aparece quando `ready === true`
