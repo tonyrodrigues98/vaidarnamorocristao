@@ -281,6 +281,7 @@ function Showcase({
     if (typeof window === "undefined") return "scene";
     return (window.localStorage.getItem("meuPet:viewMode") as "scene" | "list") ?? "scene";
   });
+  const [profileOpen, setProfileOpen] = useState(false);
 
   function setViewModeAndPersist(m: "scene" | "list") {
     setViewMode(m);
