@@ -24,7 +24,7 @@ import {
   type GrabStatePool,
 } from "@/types/petGrab";
 import { unlockGrabAudio } from "@/lib/grabAudio";
-import { GrabRouletteModal } from "@/components/pet/PetGrabCard";
+import { GrabRouletteModal, InventoryDialog } from "@/components/pet/PetGrabCard";
 import { GrabPoolCard } from "@/components/pet/grab/GrabPoolCard";
 import { CAIXAS_BANNER, caixaArtFor } from "@/lib/caixaArt";
 
@@ -81,6 +81,7 @@ function CaixasPage() {
   const [inv, setInv] = useState<GrabInventoryItem[]>([]);
   const [pendingPoolId, setPendingPoolId] = useState<string | null>(null);
   const [filter, setFilter] = useState<FamilyKey>("all");
+  const [showInv, setShowInv] = useState(false);
   const [roulette, setRoulette] = useState<{
     res: GrabResult;
     winner: PrizeMeta;
@@ -196,9 +197,10 @@ function CaixasPage() {
 
           <div className="flex items-end justify-between gap-3">
             <div className="min-w-0" />
-            <Link
-              to="/meu-pet"
-              className="inline-flex items-center gap-1.5 rounded-full bg-white/95 px-3 py-1.5 text-xs font-medium text-[#1a1410] ring-1 ring-[#e6cf8a] backdrop-blur hover:ring-[#c9a24a]"
+            <button
+              type="button"
+              onClick={() => setShowInv(true)}
+              className="inline-flex items-center gap-1.5 rounded-full bg-white/95 px-3 py-1.5 text-xs font-medium text-[#1a1410] ring-1 ring-[#e6cf8a] backdrop-blur transition hover:ring-[#c9a24a]"
             >
               <Package className="size-3.5" />
               Estoque
@@ -213,7 +215,7 @@ function CaixasPage() {
                   {totalInv}
                 </span>
               )}
-            </Link>
+            </button>
           </div>
         </div>
       </section>
@@ -324,6 +326,9 @@ function CaixasPage() {
             void reload();
           }}
         />
+      )}
+      {showInv && (
+        <InventoryDialog inventory={inv} onClose={() => setShowInv(false)} />
       )}
     </div>
   );
