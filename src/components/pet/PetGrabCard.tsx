@@ -22,7 +22,11 @@ import {
 import { cn } from "@/lib/utils";
 import {
   playGrabFinalDing,
+  playGrabLegendaryReveal,
   playGrabTick,
+  setGrabRumbleSpeed,
+  startGrabRumble,
+  stopGrabRumble,
   unlockGrabAudio,
 } from "@/lib/grabAudio";
 
@@ -92,6 +96,8 @@ export function PetGrabCard({ refreshKey, onChanged }: Props) {
     res: GrabResult;
     winner: PrizeMeta;
     prizes: PrizeMeta[];
+    poolId: string;
+    poolCost: number;
   } | null>(null);
   const [showInv, setShowInv] = useState(false);
 
@@ -120,7 +126,8 @@ export function PetGrabCard({ refreshKey, onChanged }: Props) {
         kind: res.prize_kind,
         amount: res.prize_amount,
       };
-      setRoulette({ res, winner, prizes });
+      const pool = state?.pools.find((p) => p.id === poolId);
+      setRoulette({ res, winner, prizes, poolId, poolCost: pool?.cost_coins ?? 0 });
       await reload();
       onChanged?.();
     } catch (e) {
@@ -317,6 +324,18 @@ export function PetGrabCard({ refreshKey, onChanged }: Props) {
           res={roulette.res}
           winner={roulette.winner}
           prizes={roulette.prizes}
+          canOpenAgain={(() => {
+            const pool = state?.pools.find((p) => p.id === roulette.poolId);
+            if (!pool) return false;
+            if (pool.prize_count === 0) return false;
+            const freeRemaining = Math.max(0, pool.free_daily - state!.free_used);
+            return freeRemaining > 0 || (roulette.res.new_balance ?? 0) >= pool.cost_coins;
+          })()}
+          onOpenAgain={() => {
+            const id = roulette.poolId;
+            setRoulette(null);
+            void grab(id);
+          }}
           onClose={() => {
             // Defensivo: sempre re-sincroniza o inventário ao fechar o
             // modal — independente de o usuário clicar em "Continuar" ou
