@@ -367,16 +367,22 @@ export function GrabRouletteModal({
   res,
   winner,
   prizes,
+  canOpenAgain = false,
+  onOpenAgain,
   onClose,
 }: {
   res: GrabResult;
   winner: PrizeMeta;
   prizes: PrizeMeta[];
+  canOpenAgain?: boolean;
+  onOpenAgain?: () => void;
   onClose: () => void;
 }) {
   const [phase, setPhase] = useState<"intro" | "spin" | "settle" | "done">("intro");
   const [translate, setTranslate] = useState(0);
   const [blur, setBlur] = useState(true);
+  const [colorPreview, setColorPreview] = useState(false);
+  const [shake, setShake] = useState(false);
   const rafRef = useRef<number | null>(null);
   const tickRafRef = useRef<number | null>(null);
   // Persisted across StrictMode double-invocations / re-renders so the same
@@ -394,6 +400,16 @@ export function GrabRouletteModal({
     closedRef.current = true;
     onClose();
   };
+
+  // Winner rarity drives both the color-preview overlay and the legendary
+  // cinematic. Fall back to "common" when metadata didn't carry rarity.
+  const winnerRarity = ((winner as { rarity?: string }).rarity ?? "common") as
+    | "common" | "rare" | "epic" | "legendary";
+  const isLegendary = winnerRarity === "legendary";
+  const rarityHex =
+    winnerRarity === "legendary" ? "#fbbf24" :
+    winnerRarity === "epic" ? "#a855f7" :
+    winnerRarity === "rare" ? "#38bdf8" : "#ffffff";
 
   const { items, winnerIndex } = useMemo(() => {
     const base = prizes.length > 0 ? prizes : [winner];
@@ -443,6 +459,10 @@ export function GrabRouletteModal({
       // Start tick loop only once per modal mount, even under StrictMode.
       if (tickStartedRef.current) return;
       tickStartedRef.current = true;
+      // Rolling-ball rumble bed under the ticks. Volume + cutoff are
+      // modulated from inside the tick loop based on visual speed so the
+      // audio tracks the deceleration smoothly.
+      startGrabRumble();
       const spinStart = performance.now();
       // Tick when an item's CENTER (not its left edge) crosses the selector.
       // `centerIndex` = floor of how many full items have already passed center.
@@ -451,6 +471,14 @@ export function GrabRouletteModal({
         const t = Math.min(1, elapsed / ROULETTE_SPIN_MS);
         const eased = easeProgress(t);
         const currentX = targetX * eased;
+        // Drive the rumble bed from the same instantaneous speed used for
+        // ticks. Quadratic curve falls off harder near the end.
+        {
+          const dt = 1 / ROULETTE_SPIN_MS;
+          const next = easeProgress(Math.min(1, t + dt));
+          const speedNow = Math.min(1, (next - eased) * ROULETTE_SPIN_MS * 0.6);
+          setGrabRumbleSpeed(speedNow);
+        }
         const centerIndex = Math.floor(
           (-currentX + ROULETTE_VIEW / 2 - ROULETTE_ITEM / 2) / ROULETTE_ITEM,
         );
@@ -482,12 +510,26 @@ export function GrabRouletteModal({
     }, ROULETTE_INTRO_MS));
     // unblur ~40% of the spin
     timers.push(setTimeout(() => setBlur(false), ROULETTE_INTRO_MS + ROULETTE_SPIN_MS * 0.45));
+    // ~1.5s before settle, project a vertical light column of the winner's
+    // rarity color through the anchor — CS:GO-style "you can tell it's
+    // gold before it lands" tease.
+    timers.push(setTimeout(
+      () => setColorPreview(true),
+      ROULETTE_INTRO_MS + ROULETTE_SPIN_MS - 1500,
+    ));
     // spin finished → settle (burst + pop)
     timers.push(setTimeout(() => {
       setPhase("settle");
+      stopGrabRumble();
       if (!dingPlayedRef.current) {
         dingPlayedRef.current = true;
-        playGrabFinalDing();
+        if (isLegendary) {
+          playGrabLegendaryReveal();
+          setShake(true);
+          setTimeout(() => setShake(false), 220);
+        } else {
+          playGrabFinalDing();
+        }
       }
     }, ROULETTE_INTRO_MS + ROULETTE_SPIN_MS + 80));
     // settle done → reveal details
@@ -497,24 +539,33 @@ export function GrabRouletteModal({
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       if (tickRafRef.current) cancelAnimationFrame(tickRafRef.current);
       timers.forEach(clearTimeout);
+      stopGrabRumble();
     };
-  }, [targetX, easeProgress]);
+  }, [targetX, easeProgress, isLegendary]);
 
-  const sparkles = useMemo(() => Array.from({ length: SPARKLE_COUNT }, (_, i) => {
-    const angle = (Math.PI * 2 * i) / SPARKLE_COUNT + Math.random() * 0.3;
-    const dist = 90 + Math.random() * 70;
+  // Legendary drops get a denser, brighter burst (CS:GO knife reveal vibes).
+  const sparkleCount = isLegendary ? 60 : SPARKLE_COUNT;
+  const sparkles = useMemo(() => Array.from({ length: sparkleCount }, (_, i) => {
+    const angle = (Math.PI * 2 * i) / sparkleCount + Math.random() * 0.3;
+    const dist = (isLegendary ? 110 : 90) + Math.random() * (isLegendary ? 110 : 70);
+    const palette = isLegendary
+      ? ["#fbbf24", "#fde68a", "#f59e0b", "#fffbeb", "#fbbf24"]
+      : ["#fbbf24", "#f97316", "#ec4899", "#a855f7", "#22d3ee"];
     return {
       tx: Math.cos(angle) * dist,
       ty: Math.sin(angle) * dist,
-      delay: Math.random() * 120,
-      hue: ["#fbbf24", "#f97316", "#ec4899", "#a855f7", "#22d3ee"][i % 5],
-      size: 6 + Math.random() * 6,
+      delay: Math.random() * (isLegendary ? 220 : 120),
+      hue: palette[i % palette.length],
+      size: (isLegendary ? 5 : 6) + Math.random() * (isLegendary ? 8 : 6),
     };
-  }), []);
+  }), [sparkleCount, isLegendary]);
 
   return (
     <Dialog open onOpenChange={(o) => { if (!o) handleClose(); }}>
-      <DialogContent className="max-w-md overflow-hidden border-neutral-800 bg-neutral-950 p-0 text-white">
+      <DialogContent
+        className="max-w-md overflow-hidden border-neutral-800 bg-neutral-950 p-0 text-white"
+        style={shake ? { animation: "grab-screen-shake 220ms cubic-bezier(.36,.07,.19,.97) both" } : undefined}
+      >
         <style>{`
           @keyframes grab-spin-conic { to { transform: rotate(360deg); } }
           @keyframes grab-spark-burst {
@@ -528,6 +579,12 @@ export function GrabRouletteModal({
             70%  { transform: scale(0.96); }
             100% { transform: scale(1.04); }
           }
+          @keyframes grab-pop-legendary {
+            0%   { transform: scale(1); }
+            45%  { transform: scale(1.95); }
+            70%  { transform: scale(1.55); }
+            100% { transform: scale(1.7); }
+          }
           @keyframes grab-bg-pulse {
             0%,100% { opacity: 0.55; }
             50%     { opacity: 0.95; }
@@ -535,6 +592,20 @@ export function GrabRouletteModal({
           @keyframes grab-title-shine {
             0%   { background-position: -200% 0; }
             100% { background-position: 200% 0; }
+          }
+          @keyframes grab-anchor-pulse {
+            0%,100% { opacity: 0.85; }
+            50%     { opacity: 1; }
+          }
+          @keyframes grab-color-preview-in {
+            0%   { opacity: 0; transform: translateX(-50%) scaleY(0.6); }
+            100% { opacity: 0.85; transform: translateX(-50%) scaleY(1); }
+          }
+          @keyframes grab-screen-shake {
+            10%, 90% { transform: translate3d(-2px, 0, 0); }
+            20%, 80% { transform: translate3d(3px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
           }
         `}</style>
 
@@ -548,6 +619,14 @@ export function GrabRouletteModal({
               animation: "grab-bg-pulse 4s ease-in-out infinite",
             }}
           />
+          {/* Legendary cinematic darken: kills competing background and
+              focuses the eye on the central item, CS:GO knife-reveal style. */}
+          {isLegendary && (phase === "settle" || phase === "done") && (
+            <div
+              className="absolute inset-0 bg-black/70 transition-opacity duration-500"
+              style={{ animation: "grab-bg-pulse 2.4s ease-in-out infinite" }}
+            />
+          )}
         </div>
 
         <div className="relative z-10 px-6 pb-6 pt-5">
@@ -616,6 +695,38 @@ export function GrabRouletteModal({
                 transition: "box-shadow 350ms ease-out",
               }}
             />
+
+            {/* CS:GO-style vertical anchor line — always present, indicates
+                exactly where the wheel will stop. Glow intensifies on settle. */}
+            <div
+              aria-hidden
+              className="pointer-events-none absolute left-1/2 top-0 z-30 h-full -translate-x-1/2"
+              style={{
+                width: 2,
+                background: "linear-gradient(180deg, transparent, #fbbf24 18%, #fbbf24 82%, transparent)",
+                boxShadow: "0 0 8px rgba(251,191,36,0.9), 0 0 16px rgba(251,191,36,0.55)",
+                animation: "grab-anchor-pulse 1.4s ease-in-out infinite",
+              }}
+            />
+
+            {/* Rarity color preview — a vertical light column in the winner's
+                color, revealed ~1.5s before the wheel settles. Lets the player
+                feel the rarity coming. */}
+            {colorPreview && phase === "spin" && (
+              <div
+                aria-hidden
+                className="pointer-events-none absolute left-1/2 top-1/2 z-20 -translate-y-1/2"
+                style={{
+                  width: 56,
+                  height: ROULETTE_VIEW_H * 1.1,
+                  background: `linear-gradient(180deg, transparent, ${rarityHex}aa 30%, ${rarityHex}cc 50%, ${rarityHex}aa 70%, transparent)`,
+                  filter: "blur(10px)",
+                  mixBlendMode: "screen",
+                  transformOrigin: "center",
+                  animation: "grab-color-preview-in 600ms ease-out forwards",
+                }}
+              />
+            )}
 
             {/* strip viewport */}
             <div
