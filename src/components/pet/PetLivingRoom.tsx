@@ -173,6 +173,7 @@ export function PetLivingRoom({
   }
 
   return (
+    <TooltipProvider delayDuration={200} skipDelayDuration={300}>
     <section
       key="room"
       className="relative mx-auto w-full max-w-[520px] overflow-hidden rounded-3xl border border-neutral-200/80 bg-amber-50/40 shadow-[0_2px_0_rgba(0,0,0,0.02),0_30px_70px_-35px_rgba(0,0,0,0.18)]"
@@ -400,6 +401,7 @@ export function PetLivingRoom({
         refreshKey={diaryRefresh}
       />
     </section>
+    </TooltipProvider>
   );
 }
 
