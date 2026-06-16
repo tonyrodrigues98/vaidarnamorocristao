@@ -21,7 +21,14 @@ type AudioCtorLike = typeof AudioContext;
 
 let ctx: AudioContext | null = null;
 let noiseBuffer: AudioBuffer | null = null;
+let rumbleBuffer: AudioBuffer | null = null;
 let unlocked = false;
+
+// State for the continuous "wheel + ball rolling" bed that plays under the
+// ticks. Tracked at module scope so the modal can stop it from cleanup.
+let rumbleSource: AudioBufferSourceNode | null = null;
+let rumbleGain: GainNode | null = null;
+let rumbleFilter: BiquadFilterNode | null = null;
 
 function getCtor(): AudioCtorLike | null {
   if (typeof window === "undefined") return null;
@@ -53,6 +60,126 @@ function getNoiseBuffer(ac: AudioContext): AudioBuffer {
   for (let i = 0; i < len; i++) data[i] = Math.random() * 2 - 1;
   noiseBuffer = buf;
   return buf;
+}
+
+// Pink-ish noise loop (~2s) shaped to feel like a metal ball rolling on a
+// wooden wheel. We pre-filter the random data with a simple low-pass IIR so
+// the buffer itself sounds warm; runtime `BiquadFilterNode` then modulates
+// brightness based on wheel speed. 2s is long enough to mask the loop seam.
+function getRumbleBuffer(ac: AudioContext): AudioBuffer {
+  if (rumbleBuffer) return rumbleBuffer;
+  const len = Math.floor(ac.sampleRate * 2);
+  const buf = ac.createBuffer(1, len, ac.sampleRate);
+  const data = buf.getChannelData(0);
+  // Voss-McCartney-ish pink noise approximation
+  let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
+  for (let i = 0; i < len; i++) {
+    const white = Math.random() * 2 - 1;
+    b0 = 0.99886 * b0 + white * 0.0555179;
+    b1 = 0.99332 * b1 + white * 0.0750759;
+    b2 = 0.96900 * b2 + white * 0.1538520;
+    b3 = 0.86650 * b3 + white * 0.3104856;
+    b4 = 0.55000 * b4 + white * 0.5329522;
+    b5 = -0.7616 * b5 - white * 0.0168980;
+    const pink = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362) * 0.11;
+    b6 = white * 0.115926;
+    data[i] = pink;
+  }
+  // Smooth window at both ends so the loop seam is inaudible
+  const fade = Math.floor(ac.sampleRate * 0.05);
+  for (let i = 0; i < fade; i++) {
+    const k = i / fade;
+    data[i] *= k;
+    data[len - 1 - i] *= k;
+  }
+  rumbleBuffer = buf;
+  return buf;
+}
+
+/**
+ * Start the continuous rolling-ball rumble bed. Safe to call multiple times —
+ * subsequent calls are ignored until `stopGrabRumble` runs.
+ */
+export function startGrabRumble(): void {
+  if (rumbleSource) return;
+  const ac = getOrCreateCtx();
+  if (!ac) return;
+  ensureRunning(ac);
+  try {
+    const src = ac.createBufferSource();
+    src.buffer = getRumbleBuffer(ac);
+    src.loop = true;
+
+    // Band-shape the noise: low-pass roll + slight resonance peak around
+    // 600Hz to evoke the bearing/wood cavity.
+    const lp = ac.createBiquadFilter();
+    lp.type = "lowpass";
+    lp.frequency.value = 900;
+    lp.Q.value = 0.7;
+
+    const peak = ac.createBiquadFilter();
+    peak.type = "peaking";
+    peak.frequency.value = 600;
+    peak.gain.value = 6;
+    peak.Q.value = 1.2;
+
+    const g = ac.createGain();
+    g.gain.value = 0.0001; // start silent; setGrabRumbleSpeed ramps it up
+
+    src.connect(lp).connect(peak).connect(g).connect(ac.destination);
+    src.start();
+
+    rumbleSource = src;
+    rumbleGain = g;
+    rumbleFilter = lp;
+  } catch {
+    /* noop */
+  }
+}
+
+/**
+ * Drive the rumble's volume + brightness from the current wheel speed (0..1).
+ * Called every animation frame by the modal — uses short ramps so the audio
+ * tracks visual deceleration smoothly without zipper noise.
+ */
+export function setGrabRumbleSpeed(speed: number): void {
+  const ac = ctx;
+  if (!ac || !rumbleGain || !rumbleFilter) return;
+  const s = Math.min(1, Math.max(0, speed));
+  const now = ac.currentTime;
+  // Quadratic curve so the bed fades out hard at the end (matches the
+  // "ball dropping into a pocket" feel)
+  const targetVol = 0.04 + s * s * 0.22;
+  const targetFreq = 500 + s * 1800;
+  try {
+    rumbleGain.gain.cancelScheduledValues(now);
+    rumbleGain.gain.setTargetAtTime(targetVol, now, 0.05);
+    rumbleFilter.frequency.cancelScheduledValues(now);
+    rumbleFilter.frequency.setTargetAtTime(targetFreq, now, 0.05);
+  } catch {
+    /* noop */
+  }
+}
+
+/** Fade out + stop the rumble bed. Idempotent. */
+export function stopGrabRumble(): void {
+  const ac = ctx;
+  const src = rumbleSource;
+  const g = rumbleGain;
+  rumbleSource = null;
+  rumbleGain = null;
+  rumbleFilter = null;
+  if (!ac || !src) return;
+  try {
+    const now = ac.currentTime;
+    if (g) {
+      g.gain.cancelScheduledValues(now);
+      g.gain.setTargetAtTime(0.0001, now, 0.06);
+    }
+    src.stop(now + 0.35);
+  } catch {
+    /* noop */
+  }
 }
 
 /**
