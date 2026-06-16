@@ -579,7 +579,14 @@ function Showcase({
       </div>
     </section>
     <MissionsTodayCard refreshKey={xpRefresh} />
-    <ExpeditionsCard userPetId={pet.id} onChanged={() => { setXpRefresh((n) => n + 1); void reloadCare(); }} />
+    <ExpeditionsCard
+      userPetId={pet.id}
+      onChanged={() => {
+        setXpRefresh((n) => n + 1);
+        void reloadCare();
+        void reloadActiveExpedition();
+      }}
+    />
     <PetStreakCard refreshKey={xpRefresh} />
     <PetWeeklyChestCard refreshKey={xpRefresh} onClaimed={() => setXpRefresh((n) => n + 1)} />
     <PetEvolutionCard
