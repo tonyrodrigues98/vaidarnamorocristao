@@ -771,6 +771,26 @@ export function GrabRouletteModal({
                       <span className="text-base font-medium text-neutral-200">XP</span>
                     </div>
                   </div>
+                ) : res.prize_kind === "name_gradient" && winner.gradient_css ? (
+                  <div className="flex flex-col items-center gap-2">
+                    <div className="text-xs uppercase tracking-[0.18em] text-neutral-400">
+                      Você ganhou um gradiente
+                    </div>
+                    <div
+                      className="rounded-xl px-4 py-2 text-lg font-extrabold tracking-tight text-transparent ring-1 ring-white/15"
+                      style={{
+                        backgroundImage: winner.gradient_css,
+                        WebkitBackgroundClip: "text",
+                        backgroundClip: "text",
+                      }}
+                    >
+                      {winner.name}
+                    </div>
+                    <div
+                      className="h-2 w-32 rounded-full"
+                      style={{ background: winner.gradient_css }}
+                    />
+                  </div>
                 ) : (
                   <div className="text-lg font-semibold tracking-tight">
                     {winner.name}
