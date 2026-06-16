@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import {
   Sheet,
   SheetContent,
@@ -6,6 +6,7 @@ import {
   SheetTitle,
   SheetDescription,
 } from "@/components/ui/sheet";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import type { PetCareKind } from "@/types/petCare";
 import type { UserPetV2Full } from "@/types/petCatalog";
 
@@ -13,11 +14,11 @@ import { MapBackground } from "./MapBackground";
 import { MapClouds } from "./MapClouds";
 import { KingdomHUD } from "./KingdomHUD";
 import { RegionHotspot } from "./RegionHotspot";
-import { MissionsTodayCard } from "./MissionsTodayCard";
 import { ExpeditionsCard } from "./ExpeditionsCard";
-import { PetEvolutionCard } from "./PetEvolutionCard";
+import { PetWeeklyChestCard } from "./PetWeeklyChestCard";
+import { PetCaixasEntryCard } from "./grab/PetCaixasEntryCard";
 
-type SheetKind = null | "missions" | "expeditions" | "evolution";
+type SheetKind = null | "expeditions" | "caixas" | "weekly";
 
 type Props = {
   pet: UserPetV2Full;
@@ -37,130 +38,131 @@ type Props = {
 };
 
 /**
- * Mapa do Reino (Z2). Zoom-out cinematográfico do Quarto Vivo.
- * 5 regiões: Casa (volta pro quarto), Floresta (expedições),
- * Vale (missões), Lago (dormir), Torre (evolução).
+ * Mapa do Reino (Z2) — **Mundo externo**: ações que tiram o pet do quarto.
+ * 4 regiões úteis + a Casa central (volta pro quarto):
+ * - Floresta = Expedições
+ * - Mercado (Vale) = Vitrine de caixas
+ * - Lago = Quiz Bíblico do dia
+ * - Torre = Caixa semanal
+ *
+ * Dia-a-dia (cuidado, missões, streak, diário) fica no Quarto (Z1).
+ * Memória (evolução, progressão, histórico) fica na Constelação (Z3).
  */
 export function PetKingdomMap({
   pet,
-  careValues,
   isAway,
   xpRefresh,
   streakDays,
   missionsDoneToday,
-  babyImage,
-  adultImage,
-  onCareAction,
   onCareChanged,
-  onEvolved,
   onBackToRoom,
   onOpenConstellation,
 }: Props) {
   const [sheet, setSheet] = useState<SheetKind>(null);
 
   // Sinais de atenção por região — a paisagem inteira "respira" sem texto.
-  const forestAttention = isAway ? 2 : 1; // expedição em curso = urgente
-  const valleyAttention: 0 | 1 | 2 = missionsDoneToday >= 3 ? 0 : 2;
-  const lakeAttention: 0 | 1 | 2 = (careValues.sleep ?? 100) < 40 ? 2 : 1;
-  const towerAttention: 0 | 1 | 2 = 1;
+  const forestAttention: 0 | 1 | 2 = isAway ? 2 : 1;
+  const valleyAttention: 0 | 1 | 2 = 1;
+  const lakeAttention: 0 | 1 | 2 = 1;
+  const towerAttention: 0 | 1 | 2 = missionsDoneToday >= 3 ? 2 : 1;
 
   return (
-    <section
-      className="relative mx-auto w-full max-w-[520px] overflow-hidden rounded-3xl border border-neutral-200/80 bg-amber-50/40 shadow-[0_2px_0_rgba(0,0,0,0.02),0_30px_70px_-35px_rgba(0,0,0,0.18)]"
-      aria-label="Mapa do reino"
-    >
-      <div className="relative aspect-[2/3] w-full">
-        <MapBackground />
-        <MapClouds />
-
-        <KingdomHUD
-          petName={pet.custom_name}
-          streakDays={streakDays}
-          level={null}
-          onBack={onBackToRoom}
-          onOpenConstellation={onOpenConstellation}
-        />
-
-        {/* CASA — volta pro quarto */}
-        <RegionHotspot
-          x={32} y={50} width={32} height={26}
-          label="Casa do pet — voltar pro quarto"
-          attention={0}
-          onClick={onBackToRoom}
-        />
-
-        {/* FLORESTA — expedições */}
-        <RegionHotspot
-          x={1} y={32} width={34} height={28}
-          label="Floresta das Expedições"
-          attention={forestAttention}
-          onClick={() => setSheet("expeditions")}
-        />
-
-        {/* VALE — missões */}
-        <RegionHotspot
-          x={54} y={26} width={45} height={30}
-          label="Vale das Missões"
-          attention={valleyAttention}
-          onClick={() => setSheet("missions")}
-        />
-
-        {/* LAGO — dormir */}
-        <RegionHotspot
-          x={2} y={70} width={42} height={24}
-          label="Lago do Descanso"
-          attention={lakeAttention}
-          onClick={() => onCareAction("sleep")}
-        />
-
-        {/* TORRE — evolução */}
-        <RegionHotspot
-          x={65} y={56} width={32} height={32}
-          label="Torre da Evolução"
-          attention={towerAttention}
-          onClick={() => setSheet("evolution")}
-        />
-      </div>
-
-      {/* SHEETS reusam os cards existentes */}
-      <KingdomSheet
-        open={sheet === "missions"}
-        onClose={() => setSheet(null)}
-        title="Vale das Missões"
-        description="Pergaminhos com tarefas do dia flutuam sobre o trigo."
+    <TooltipProvider delayDuration={200} skipDelayDuration={300}>
+      <section
+        className="relative mx-auto w-full max-w-[520px] overflow-hidden rounded-3xl border border-neutral-200/80 bg-amber-50/40 shadow-[0_2px_0_rgba(0,0,0,0.02),0_30px_70px_-35px_rgba(0,0,0,0.18)]"
+        aria-label="Mapa do reino"
       >
-        <MissionsTodayCard refreshKey={xpRefresh} onCompletedChange={onCareChanged} />
-      </KingdomSheet>
+        <div className="relative aspect-[2/3] w-full">
+          <MapBackground />
+          <MapClouds />
 
-      <KingdomSheet
-        open={sheet === "expeditions"}
-        onClose={() => setSheet(null)}
-        title="Floresta das Expedições"
-        description="A trilha leva pra fora do reino."
-      >
-        <ExpeditionsCard
-          userPetId={pet.id}
-          petImage={null}
-          petName={pet.custom_name}
-          onChanged={onCareChanged}
-        />
-      </KingdomSheet>
+          <KingdomHUD
+            petName={pet.custom_name}
+            streakDays={streakDays}
+            level={null}
+            onBack={onBackToRoom}
+            onOpenConstellation={onOpenConstellation}
+          />
 
-      <KingdomSheet
-        open={sheet === "evolution"}
-        onClose={() => setSheet(null)}
-        title="Torre da Evolução"
-        description="O caminho do pet é guardado no alto da torre."
-      >
-        <PetEvolutionCard
-          refreshKey={xpRefresh}
-          petName={pet.custom_name}
-          babyImage={babyImage}
-          adultImage={adultImage}
-          onEvolved={onEvolved}
-        />
-      </KingdomSheet>
-    </section>
+          {/* CASA — volta pro quarto */}
+          <RegionHotspot
+            x={32} y={50} width={32} height={26}
+            label="Casa do pet"
+            tooltip="Voltar pro Quarto · onde mora o cuidado do dia-a-dia."
+            attention={0}
+            onClick={onBackToRoom}
+          />
+
+          {/* FLORESTA — expedições */}
+          <RegionHotspot
+            x={1} y={32} width={34} height={28}
+            label="Floresta das Expedições"
+            tooltip="Mundo · enviar o pet em expedição pra trazer recompensas."
+            attention={forestAttention}
+            onClick={() => setSheet("expeditions")}
+          />
+
+          {/* MERCADO — caixas */}
+          <RegionHotspot
+            x={54} y={26} width={45} height={30}
+            label="Mercado de Caixas"
+            tooltip="Mundo · abrir caixas surpresa com itens raros."
+            attention={valleyAttention}
+            onClick={() => setSheet("caixas")}
+          />
+
+          {/* LAGO — quiz */}
+          <RegionHotspot
+            x={2} y={70} width={42} height={24}
+            label="Lago do Conhecimento"
+            tooltip="Mundo · responder o Quiz Bíblico do dia."
+            attention={lakeAttention}
+            onClick={() => { window.location.assign("/quiz-biblico"); }}
+          />
+
+          {/* TORRE — caixa semanal */}
+          <RegionHotspot
+            x={65} y={56} width={32} height={32}
+            label="Torre do Tesouro"
+            tooltip="Mundo · caixa semanal que enche conforme você completa missões."
+            attention={towerAttention}
+            onClick={() => setSheet("weekly")}
+          />
+        </div>
+
+        <KingdomSheet
+          open={sheet === "expeditions"}
+          onClose={() => setSheet(null)}
+          title="Floresta das Expedições"
+          description="A trilha leva pra fora do reino."
+        >
+          <ExpeditionsCard
+            userPetId={pet.id}
+            petImage={null}
+            petName={pet.custom_name}
+            onChanged={onCareChanged}
+          />
+        </KingdomSheet>
+
+        <KingdomSheet
+          open={sheet === "caixas"}
+          onClose={() => setSheet(null)}
+          title="Mercado de Caixas"
+          description="Caixas surpresa com pets, itens e raridades."
+        >
+          <PetCaixasEntryCard />
+        </KingdomSheet>
+
+        <KingdomSheet
+          open={sheet === "weekly"}
+          onClose={() => setSheet(null)}
+          title="Torre do Tesouro"
+          description="A caixa semanal recheia a cada missão concluída."
+        >
+          <PetWeeklyChestCard refreshKey={xpRefresh} onClaimed={onCareChanged} />
+        </KingdomSheet>
+      </section>
+    </TooltipProvider>
   );
 }
 

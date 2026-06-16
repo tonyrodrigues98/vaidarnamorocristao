@@ -1,5 +1,10 @@
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 type Props = {
   /** Posição em % do container (0-100) */
@@ -8,6 +13,8 @@ type Props = {
   width: number;
   height: number;
   label: string;
+  /** Texto curto explicando a categoria + ação (ex: "Mundo · expedições"). */
+  tooltip?: string;
   onClick: () => void;
   /** Intensidade do glow ambiente (0 = nenhum, 1 = pulse forte de atenção). */
   attention?: 0 | 1 | 2;
@@ -25,11 +32,12 @@ export function RegionHotspot({
   width,
   height,
   label,
+  tooltip,
   onClick,
   attention = 1,
   children,
 }: Props) {
-  return (
+  const btn = (
     <button
       type="button"
       onClick={onClick}
@@ -69,5 +77,20 @@ export function RegionHotspot({
       />
       {children}
     </button>
+  );
+  if (!tooltip) return btn;
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>{btn}</TooltipTrigger>
+      <TooltipContent
+        side="top"
+        className="max-w-[240px] border border-amber-200/40 bg-neutral-900/95 text-amber-50 shadow-lg backdrop-blur"
+      >
+        <div className="flex flex-col gap-0.5">
+          <span className="text-[11px] font-semibold">{label}</span>
+          <span className="text-[10px] text-amber-100/85">{tooltip}</span>
+        </div>
+      </TooltipContent>
+    </Tooltip>
   );
 }
