@@ -411,7 +411,7 @@ export function GrabRouletteModal({
     winnerRarity === "epic" ? "#a855f7" :
     winnerRarity === "rare" ? "#38bdf8" : "#ffffff";
 
-  const { items, winnerIndex } = useMemo(() => {
+  const { items, winnerIndex, winnerOffset } = useMemo(() => {
     const base = prizes.length > 0 ? prizes : [winner];
     const list: PrizeMeta[] = [];
     const TOTAL = 48;
@@ -420,11 +420,18 @@ export function GrabRouletteModal({
     }
     const idx = TOTAL - 4;
     list[idx] = winner;
-    return { items: list, winnerIndex: idx };
+    // CS:GO-style near-miss: stop anywhere inside the winning card instead of
+    // dead center. Random offset within ±40% of item width — anchor still
+    // touches the winner, but sometimes lands near an edge so the player
+    // feels "almost got the next one".
+    const offset = (Math.random() - 0.5) * 2 * (ROULETTE_ITEM * 0.4);
+    return { items: list, winnerIndex: idx, winnerOffset: offset };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const targetX = -(winnerIndex * ROULETTE_ITEM + ROULETTE_ITEM / 2 - ROULETTE_VIEW / 2);
+  const targetX = -(
+    winnerIndex * ROULETTE_ITEM + ROULETTE_ITEM / 2 - ROULETTE_VIEW / 2 + winnerOffset
+  );
 
   // cubic-bezier(0.08, 0.82, 0.18, 1) — same easing the CSS transition uses
   const easeProgress = useMemo(() => {
