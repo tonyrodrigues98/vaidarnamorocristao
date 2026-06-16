@@ -6,6 +6,7 @@ import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { MissionsTodayCard } from "@/components/pet/MissionsTodayCard";
 import { getActiveCommitmentByUser } from "@/lib/commitments";
 import commitmentRing from "@/assets/commitment-ring.webp";
 import {
@@ -965,6 +966,8 @@ function InicioPage() {
           )}
 
           {/* MISSÃO DE HOJE */}
+          {isApproved && <MissionsTodayCard />}
+
           {!isBanned && !isRejected && nextActions.length > 0 && (
             <section>
               <div className="mb-2.5 flex items-baseline justify-between px-1">
