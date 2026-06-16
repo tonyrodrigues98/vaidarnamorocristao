@@ -12,6 +12,7 @@ const FOOTER_HIDDEN_PREFIXES = [
   "/onboarding",
   "/auth",
   "/notificacoes",
+  "/meu-pet",
 ];
 
 function startsWithPrefix(pathname: string, prefix: string) {
