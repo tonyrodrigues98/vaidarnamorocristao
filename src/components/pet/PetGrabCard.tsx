@@ -679,6 +679,20 @@ export function GrabRouletteModal({
                             className="size-full object-cover"
                             draggable={false}
                           />
+                        ) : it?.kind === "coins" ? (
+                          <div className="flex flex-col items-center justify-center gap-0.5">
+                            <CoinIcon className="size-10" />
+                            <span className="text-sm font-bold text-amber-300">
+                              +{it.amount ?? 1}
+                            </span>
+                          </div>
+                        ) : it?.kind === "xp" ? (
+                          <div className="flex flex-col items-center justify-center">
+                            <span className="text-base font-extrabold text-sky-300">XP</span>
+                            <span className="text-sm font-bold text-sky-200">
+                              +{it.amount ?? 1}
+                            </span>
+                          </div>
                         ) : (
                           <Gift className="size-9 text-neutral-500" />
                         )}
