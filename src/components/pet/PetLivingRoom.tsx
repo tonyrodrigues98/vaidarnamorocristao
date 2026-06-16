@@ -6,7 +6,7 @@ import {
   SheetTitle,
   SheetDescription,
 } from "@/components/ui/sheet";
-import { PawPrint, LayoutList, Compass, Image as ImageIcon, BookHeart } from "lucide-react";
+import { PawPrint, LayoutList, Compass, Image as ImageIcon, BookHeart, Map as MapIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { usePetDayNight } from "@/lib/petDayNight";
 import type { PetCareKind } from "@/types/petCare";
@@ -25,6 +25,7 @@ import { PetCareHistorySheet } from "./PetCareHistorySheet";
 import { PetSceneryPanel, type usePetScenery } from "./PetSceneryPanel";
 import { PetDiaryBubble } from "./PetDiaryBubble";
 import { PetDiarySheet } from "./PetDiarySheet";
+import { PetKingdomMap } from "./PetKingdomMap";
 
 import sceneAsset from "@/assets/pet-room/pet-room-scene.png.asset.json";
 
