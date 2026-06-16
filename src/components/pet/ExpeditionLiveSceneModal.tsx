@@ -25,11 +25,16 @@ import { cn } from "@/lib/utils";
 import { useSignedExpeditionUrl } from "@/lib/expeditionImageUrl";
 import {
   PHASE_OVERLAY,
+  PHASE_TINT,
+  PHASE_AMBIENT,
+  PHASE_DENSITY,
+  PHASE_ORDER,
   eventIntervalMs,
   getEventAt,
   phaseAtProgress,
   resolveBiome,
   type StoryIcon,
+  type DayPhase,
 } from "@/lib/expeditionStoryEngine";
 import type { ActiveExpedition } from "@/types/petExpedition";
 import { SceneWeatherLayer } from "./SceneWeatherLayer";
@@ -160,11 +165,30 @@ export function ExpeditionLiveSceneModal({
           ) : (
             <div className="size-full bg-gradient-to-b from-indigo-900 to-black" />
           )}
-          {/* Day-phase tonal overlay */}
-          <div
-            className="pointer-events-none absolute inset-0 transition-[background] duration-1000"
-            style={{ background: PHASE_OVERLAY[data.phase], mixBlendMode: "overlay" }}
-          />
+          {/* Day-phase tonal overlay — crossfade between all 4 phases (gradients are not interpolable) */}
+          {PHASE_ORDER.map((p) => (
+            <div
+              key={`ov-${p}`}
+              className="pointer-events-none absolute inset-0 transition-opacity duration-[2500ms] ease-in-out"
+              style={{
+                background: PHASE_OVERLAY[p],
+                mixBlendMode: "overlay",
+                opacity: data.phase === p ? 1 : 0,
+              }}
+            />
+          ))}
+          {/* Day-phase color wash (temperature) */}
+          {PHASE_ORDER.map((p) => (
+            <div
+              key={`tint-${p}`}
+              className="pointer-events-none absolute inset-0 transition-opacity duration-[2500ms] ease-in-out"
+              style={{
+                background: PHASE_TINT[p],
+                mixBlendMode: "soft-light",
+                opacity: data.phase === p ? 1 : 0,
+              }}
+            />
+          ))}
           {/* Soft top vignette (covers status bar / URL chrome area) */}
           <div
             className="pointer-events-none absolute inset-x-0 top-0 bg-gradient-to-b from-black/75 to-transparent"
@@ -172,8 +196,23 @@ export function ExpeditionLiveSceneModal({
           />
           {/* Bottom fade into feed */}
           <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-b from-transparent to-neutral-950" />
-          {/* Weather particles */}
-          <SceneWeatherLayer weather={data.weather} />
+          {/* Base weather particles (biome) — density modulates per phase */}
+          <div className="pointer-events-none absolute inset-0 transition-opacity duration-[2000ms]">
+            <SceneWeatherLayer
+              weather={data.weather}
+              densityMul={PHASE_DENSITY[data.phase]}
+            />
+          </div>
+          {/* Phase ambient particles — crossfade between phases without remount */}
+          {PHASE_ORDER.map((p) => (
+            <div
+              key={`amb-${p}`}
+              className="pointer-events-none absolute inset-0 transition-opacity duration-[2500ms] ease-in-out"
+              style={{ opacity: data.phase === p ? 0.95 : 0 }}
+            >
+              <SceneWeatherLayer weather={PHASE_AMBIENT[p]} densityMul={0.65} />
+            </div>
+          ))}
 
           {/* HUD top (absolute over scene) */}
           <div
