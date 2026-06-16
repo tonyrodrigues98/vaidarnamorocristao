@@ -341,6 +341,8 @@ function GrabRouletteModal({
   const [translate, setTranslate] = useState(0);
   const [blur, setBlur] = useState(true);
   const rafRef = useRef<number | null>(null);
+  const tickRafRef = useRef<number | null>(null);
+  const audioCtxRef = useRef<AudioContext | null>(null);
 
   const { items, winnerIndex } = useMemo(() => {
     const base = prizes.length > 0 ? prizes : [winner];
@@ -357,6 +359,88 @@ function GrabRouletteModal({
 
   const targetX = -(winnerIndex * ROULETTE_ITEM + ROULETTE_ITEM / 2 - ROULETTE_VIEW / 2);
 
+  // cubic-bezier(0.08, 0.82, 0.18, 1) — same easing the CSS transition uses
+  const easeProgress = useMemo(() => {
+    const cx1 = 0.08, cy1 = 0.82, cx2 = 0.18, cy2 = 1;
+    const bz = (t: number, a: number, b: number) =>
+      3 * t * (1 - t) * (1 - t) * a + 3 * t * t * (1 - t) * b + t * t * t;
+    return (x: number) => {
+      let t = x;
+      for (let i = 0; i < 8; i++) {
+        const xt = bz(t, cx1, cx2) - x;
+        const dx =
+          3 * (1 - t) * (1 - t) * cx1 +
+          6 * (1 - t) * t * (cx2 - cx1) +
+          3 * t * t * (1 - cx2);
+        if (Math.abs(dx) < 1e-6) break;
+        t -= xt / dx;
+        if (t < 0) t = 0;
+        else if (t > 1) t = 1;
+      }
+      return bz(t, cy1, cy2);
+    };
+  }, []);
+
+  // Synthesize a short tick using Web Audio (volume + pitch scale with speed)
+  const playTick = (speed: number) => {
+    try {
+      const Ctor =
+        window.AudioContext ||
+        (window as unknown as { webkitAudioContext?: typeof AudioContext })
+          .webkitAudioContext;
+      if (!Ctor) return;
+      if (!audioCtxRef.current) audioCtxRef.current = new Ctor();
+      const ctx = audioCtxRef.current;
+      if (ctx.state === "suspended") void ctx.resume();
+      const now = ctx.currentTime;
+      // speed in [0, 1] — fast→higher pitch & louder
+      const s = Math.min(1, Math.max(0, speed));
+      const freq = 1200 + s * 1600;
+      const vol = 0.05 + s * 0.18;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "square";
+      osc.frequency.setValueAtTime(freq, now);
+      osc.frequency.exponentialRampToValueAtTime(Math.max(120, freq * 0.5), now + 0.04);
+      gain.gain.setValueAtTime(0.0001, now);
+      gain.gain.exponentialRampToValueAtTime(vol, now + 0.003);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.05);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.06);
+    } catch {
+      /* noop */
+    }
+  };
+
+  const playFinalDing = () => {
+    try {
+      const Ctor =
+        window.AudioContext ||
+        (window as unknown as { webkitAudioContext?: typeof AudioContext })
+          .webkitAudioContext;
+      if (!Ctor) return;
+      if (!audioCtxRef.current) audioCtxRef.current = new Ctor();
+      const ctx = audioCtxRef.current;
+      if (ctx.state === "suspended") void ctx.resume();
+      const now = ctx.currentTime;
+      [880, 1320, 1760].forEach((f, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = "triangle";
+        osc.frequency.setValueAtTime(f, now + i * 0.06);
+        gain.gain.setValueAtTime(0.0001, now + i * 0.06);
+        gain.gain.exponentialRampToValueAtTime(0.18, now + i * 0.06 + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.06 + 0.45);
+        osc.connect(gain).connect(ctx.destination);
+        osc.start(now + i * 0.06);
+        osc.stop(now + i * 0.06 + 0.5);
+      });
+    } catch {
+      /* noop */
+    }
+  };
+
   useEffect(() => {
     const timers: ReturnType<typeof setTimeout>[] = [];
     // intro → spin
@@ -365,19 +449,53 @@ function GrabRouletteModal({
       rafRef.current = requestAnimationFrame(() => {
         rafRef.current = requestAnimationFrame(() => setTranslate(targetX));
       });
+      // start tick loop synced with the eased translate
+      const spinStart = performance.now();
+      let lastIndex = -1;
+      const tickLoop = (now: number) => {
+        const elapsed = now - spinStart;
+        const t = Math.min(1, elapsed / ROULETTE_SPIN_MS);
+        const eased = easeProgress(t);
+        const currentX = targetX * eased;
+        // which item is under the center selector
+        const idx = Math.floor((-currentX + ROULETTE_VIEW / 2) / ROULETTE_ITEM);
+        if (idx !== lastIndex && idx >= 0) {
+          if (lastIndex >= 0) {
+            // derivative of bezier ≈ instantaneous speed; map to [0,1]
+            const dt = 1 / ROULETTE_SPIN_MS;
+            const next = easeProgress(Math.min(1, t + dt));
+            const speed = Math.min(1, (next - eased) * ROULETTE_SPIN_MS * 0.6);
+            playTick(speed);
+          }
+          lastIndex = idx;
+        }
+        if (t < 1) {
+          tickRafRef.current = requestAnimationFrame(tickLoop);
+        }
+      };
+      tickRafRef.current = requestAnimationFrame(tickLoop);
     }, ROULETTE_INTRO_MS));
     // unblur ~40% of the spin
     timers.push(setTimeout(() => setBlur(false), ROULETTE_INTRO_MS + ROULETTE_SPIN_MS * 0.45));
     // spin finished → settle (burst + pop)
-    timers.push(setTimeout(() => setPhase("settle"), ROULETTE_INTRO_MS + ROULETTE_SPIN_MS + 80));
+    timers.push(setTimeout(() => {
+      setPhase("settle");
+      playFinalDing();
+    }, ROULETTE_INTRO_MS + ROULETTE_SPIN_MS + 80));
     // settle done → reveal details
     timers.push(setTimeout(() => setPhase("done"),
       ROULETTE_INTRO_MS + ROULETTE_SPIN_MS + ROULETTE_BURST_MS));
     return () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      if (tickRafRef.current) cancelAnimationFrame(tickRafRef.current);
+      const ctx = audioCtxRef.current;
+      if (ctx) {
+        ctx.close().catch(() => {});
+        audioCtxRef.current = null;
+      }
       timers.forEach(clearTimeout);
     };
-  }, [targetX]);
+  }, [targetX, easeProgress]);
 
   const sparkles = useMemo(() => Array.from({ length: SPARKLE_COUNT }, (_, i) => {
     const angle = (Math.PI * 2 * i) / SPARKLE_COUNT + Math.random() * 0.3;
