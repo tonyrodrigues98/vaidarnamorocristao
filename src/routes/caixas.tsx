@@ -203,6 +203,9 @@ function CaixasPage() {
   if (!user) return <Navigate to="/auth/login" />;
 
   const totalInv = inv.reduce((s, x) => s + x.quantity, 0);
+  const totalFreeRemaining = state
+    ? state.pools.reduce((sum, pool) => sum + Math.max(0, pool.free_daily - pool.free_used), 0)
+    : 0;
 
   return (
     <div className="min-h-screen bg-[#FAF7EF] text-[#1a1410]">
@@ -274,7 +277,7 @@ function CaixasPage() {
           <div className="flex flex-wrap gap-2 text-[11px]">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-2.5 py-1 text-[#3a3328] ring-1 ring-[#ece3d0]">
               <Sparkles className="size-3 text-[#c9a24a]" />
-              {Math.max(0, state.default_free_daily - state.free_used)} grátis hoje
+              {totalFreeRemaining} grátis nas caixas hoje
             </span>
             <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-2.5 py-1 text-[#3a3328] ring-1 ring-[#ece3d0]">
               <CoinIcon className="size-3" />
