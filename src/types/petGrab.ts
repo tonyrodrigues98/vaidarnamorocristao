@@ -55,7 +55,22 @@ export type GrabStatePool = {
   cost_coins: number;
   free_daily: number;
   prize_count: number;
+  rarity: GrabPoolRarity;
+  cooldown_hours: number;
+  cooldown_seconds: number;
+  icon_key: string | null;
+  featured_until: string | null;
+  pity_threshold: number;
+  pity_count: number;
 };
+
+export type GrabPoolRarity =
+  | "starter"
+  | "common"
+  | "rare"
+  | "epic"
+  | "legendary"
+  | "special";
 
 export type GrabRecentRoll = {
   prize_kind: GrabPrizeKind;
