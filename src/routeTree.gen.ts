@@ -31,6 +31,7 @@ import { Route as ContaRouteImport } from './routes/conta'
 import { Route as ConquistasRouteImport } from './routes/conquistas'
 import { Route as ComunidadeRouteImport } from './routes/comunidade'
 import { Route as ComoFuncionaRouteImport } from './routes/como-funciona'
+import { Route as CaixasRouteImport } from './routes/caixas'
 import { Route as BloqueadosRouteImport } from './routes/bloqueados'
 import { Route as AvatarRouteImport } from './routes/avatar'
 import { Route as IndexRouteImport } from './routes/index'
@@ -180,6 +181,11 @@ const ComunidadeRoute = ComunidadeRouteImport.update({
 const ComoFuncionaRoute = ComoFuncionaRouteImport.update({
   id: '/como-funciona',
   path: '/como-funciona',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CaixasRoute = CaixasRouteImport.update({
+  id: '/caixas',
+  path: '/caixas',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BloqueadosRoute = BloqueadosRouteImport.update({
@@ -388,6 +394,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/avatar': typeof AvatarRouteWithChildren
   '/bloqueados': typeof BloqueadosRoute
+  '/caixas': typeof CaixasRoute
   '/como-funciona': typeof ComoFuncionaRoute
   '/comunidade': typeof ComunidadeRoute
   '/conquistas': typeof ConquistasRoute
@@ -452,6 +459,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/avatar': typeof AvatarRouteWithChildren
   '/bloqueados': typeof BloqueadosRoute
+  '/caixas': typeof CaixasRoute
   '/como-funciona': typeof ComoFuncionaRoute
   '/comunidade': typeof ComunidadeRoute
   '/conquistas': typeof ConquistasRoute
@@ -517,6 +525,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/avatar': typeof AvatarRouteWithChildren
   '/bloqueados': typeof BloqueadosRoute
+  '/caixas': typeof CaixasRoute
   '/como-funciona': typeof ComoFuncionaRoute
   '/comunidade': typeof ComunidadeRoute
   '/conquistas': typeof ConquistasRoute
@@ -583,6 +592,7 @@ export interface FileRouteTypes {
     | '/'
     | '/avatar'
     | '/bloqueados'
+    | '/caixas'
     | '/como-funciona'
     | '/comunidade'
     | '/conquistas'
@@ -647,6 +657,7 @@ export interface FileRouteTypes {
     | '/'
     | '/avatar'
     | '/bloqueados'
+    | '/caixas'
     | '/como-funciona'
     | '/comunidade'
     | '/conquistas'
@@ -711,6 +722,7 @@ export interface FileRouteTypes {
     | '/'
     | '/avatar'
     | '/bloqueados'
+    | '/caixas'
     | '/como-funciona'
     | '/comunidade'
     | '/conquistas'
@@ -776,6 +788,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AvatarRoute: typeof AvatarRouteWithChildren
   BloqueadosRoute: typeof BloqueadosRoute
+  CaixasRoute: typeof CaixasRoute
   ComoFuncionaRoute: typeof ComoFuncionaRoute
   ComunidadeRoute: typeof ComunidadeRoute
   ConquistasRoute: typeof ConquistasRoute
@@ -990,6 +1003,13 @@ declare module '@tanstack/react-router' {
       path: '/como-funciona'
       fullPath: '/como-funciona'
       preLoaderRoute: typeof ComoFuncionaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/caixas': {
+      id: '/caixas'
+      path: '/caixas'
+      fullPath: '/caixas'
+      preLoaderRoute: typeof CaixasRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/bloqueados': {
@@ -1290,6 +1310,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AvatarRoute: AvatarRouteWithChildren,
   BloqueadosRoute: BloqueadosRoute,
+  CaixasRoute: CaixasRoute,
   ComoFuncionaRoute: ComoFuncionaRoute,
   ComunidadeRoute: ComunidadeRoute,
   ConquistasRoute: ConquistasRoute,
