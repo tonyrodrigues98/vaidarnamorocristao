@@ -89,23 +89,39 @@ export function PetLivingRoom({
   const [diaryOpen, setDiaryOpen] = useState(false);
   const [diaryRefresh, setDiaryRefresh] = useState(0);
   const { dayOpacity } = usePetDayNight();
-  // Zoom level Z1 (quarto) <-> Z2 (mapa). Persistido em localStorage.
-  const [zoomLevel, setZoomLevel] = useState<"room" | "kingdom">(() => {
-    if (typeof window === "undefined") return "room";
+  // Zoom level Z1 (quarto) <-> Z2 (mapa) <-> Z3 (constelação). Persistidos.
+  const initialZoom = (() => {
+    if (typeof window === "undefined") return { level: "room" as const, constellation: false };
     const v = window.localStorage.getItem("pet:last-zoom") as
       | "room"
       | "kingdom"
       | "constellation"
       | null;
-    // "constellation" não é restaurada — sempre cai pro kingdom no reload.
-    return v === "constellation" ? "kingdom" : (v ?? "room");
-  });
-  const [constellationOpen, setConstellationOpen] = useState(false);
+    if (v === "constellation") return { level: "kingdom" as const, constellation: true };
+    if (v === "kingdom") return { level: "kingdom" as const, constellation: false };
+    return { level: "room" as const, constellation: false };
+  })();
+  const [zoomLevel, setZoomLevel] = useState<"room" | "kingdom">(initialZoom.level);
+  const [constellationOpen, setConstellationOpen] = useState(initialZoom.constellation);
+
+  function persistZoom(value: "room" | "kingdom" | "constellation") {
+    try { window.localStorage.setItem("pet:last-zoom", value); } catch { /* ignore */ }
+  }
 
   function goTo(level: "room" | "kingdom") {
     setZoomLevel(level);
     setConstellationOpen(false);
-    try { window.localStorage.setItem("pet:last-zoom", level); } catch { /* ignore */ }
+    persistZoom(level);
+  }
+
+  function openConstellation() {
+    setConstellationOpen(true);
+    persistZoom("constellation");
+  }
+
+  function closeConstellation() {
+    setConstellationOpen(false);
+    persistZoom("kingdom");
   }
 
   // Glow dourado nos hotspots de cuidado quando a stat estiver baixa.
@@ -140,7 +156,7 @@ export function PetLivingRoom({
               adultImage={adultImage}
               onCareChanged={onCareChanged}
               onEvolved={onEvolved}
-              onBackToKingdom={() => setConstellationOpen(false)}
+              onBackToKingdom={closeConstellation}
             />
           </div>
         ) : (
@@ -159,7 +175,7 @@ export function PetLivingRoom({
               onCareChanged={onCareChanged}
               onEvolved={onEvolved}
               onBackToRoom={() => goTo("room")}
-              onOpenConstellation={() => setConstellationOpen(true)}
+              onOpenConstellation={openConstellation}
             />
           </div>
         )}
