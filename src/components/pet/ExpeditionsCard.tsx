@@ -394,7 +394,13 @@ function ActiveRunCard({
           )}
         </div>
         <div className="min-w-0 flex-1">
-          <p className="truncate text-[13px] font-semibold text-neutral-900">{active.title}</p>
+          <div className="flex items-center gap-2">
+            <p className="truncate text-[13px] font-semibold text-neutral-900">{active.title}</p>
+            <StatusBadge
+              status={ready ? "ready" : "in_progress"}
+              className="shrink-0 px-2 py-0.5 text-[10px] shadow-none"
+            />
+          </div>
           <div className="mt-0.5 flex items-center gap-1 text-[11px] text-neutral-500">
             <Clock className="size-3" />
             <span className="tabular-nums">
