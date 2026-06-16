@@ -259,10 +259,11 @@ export function PetExpeditionsPanel() {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label>Imagem (URL)</Label>
-                  <Input
-                    value={draft.image_url ?? ""}
-                    onChange={(e) => setDraft({ ...draft, image_url: e.target.value || null })}
+                  <Label>Imagem</Label>
+                  <ImageUploader
+                    value={draft.image_url}
+                    slugHint={draft.slug || slugify(draft.title)}
+                    onChange={(path) => setDraft({ ...draft, image_url: path })}
                   />
                 </div>
                 <div className="space-y-1.5">
