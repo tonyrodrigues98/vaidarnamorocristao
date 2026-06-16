@@ -20,6 +20,7 @@ import {
 } from "@/types/petExpedition";
 import { cn } from "@/lib/utils";
 import { ExpeditionRewardModal } from "@/components/pet/ExpeditionRewardModal";
+import { useSignedExpeditionUrl } from "@/lib/expeditionImageUrl";
 
 function fmtRemaining(ms: number): string {
   if (ms <= 0) return "pronto";
@@ -141,23 +142,61 @@ export function ExpeditionsCard({
       ) : (
         <ul className="space-y-2">
           {today.map((m) => {
-            const Icon = iconFor(m.icon);
             const sent = !!m.sent_at;
             const disabled = sent || !!busy;
             return (
-              <li
+              <ExpeditionRow
                 key={m.id}
-                className={cn(
-                  "flex items-center gap-3 rounded-xl border p-3 transition",
-                  sent
-                    ? "border-neutral-200 bg-neutral-50 opacity-60"
-                    : "border-neutral-200 bg-white",
-                )}
-              >
-                <div className="grid size-10 shrink-0 place-items-center rounded-lg bg-indigo-50 text-indigo-600">
-                  <Icon className="size-4" />
-                </div>
-                <div className="min-w-0 flex-1">
+                exp={m}
+                sent={sent}
+                disabled={disabled}
+                busy={busy === m.id}
+                onStart={() => void handleStart(m)}
+              />
+            );
+          })}
+        </ul>
+      )}
+      <ExpeditionRewardModal
+        open={!!reveal}
+        result={reveal?.result ?? null}
+        expeditionTitle={reveal?.title ?? ""}
+        onClose={() => setReveal(null)}
+      />
+    </section>
+  );
+}
+
+function ExpeditionRow({
+  exp: m,
+  sent,
+  disabled,
+  busy,
+  onStart,
+}: {
+  exp: TodayExpedition;
+  sent: boolean;
+  disabled: boolean;
+  busy: boolean;
+  onStart: () => void;
+}) {
+  const Icon = iconFor(m.icon);
+  const img = useSignedExpeditionUrl(m.image_url);
+  return (
+    <li
+      className={cn(
+        "flex items-center gap-3 rounded-xl border p-3 transition",
+        sent ? "border-neutral-200 bg-neutral-50 opacity-60" : "border-neutral-200 bg-white",
+      )}
+    >
+      <div className="relative grid size-12 shrink-0 place-items-center overflow-hidden rounded-lg bg-indigo-50 text-indigo-600 ring-1 ring-indigo-100">
+        {img ? (
+          <img src={img} alt="" className="size-full object-cover" loading="lazy" />
+        ) : (
+          <Icon className="size-4" />
+        )}
+      </div>
+      <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
                     <p className="truncate text-[13px] font-medium text-neutral-900">{m.title}</p>
                     <span
@@ -196,9 +235,9 @@ export function ExpeditionsCard({
                   variant="outline"
                   className="shrink-0"
                   disabled={disabled}
-                  onClick={() => void handleStart(m)}
+                  onClick={onStart}
                 >
-                  {busy === m.id ? (
+                  {busy ? (
                     <Loader2 className="size-3.5 animate-spin" />
                   ) : sent ? (
                     <Lock className="size-3.5" />
@@ -209,18 +248,7 @@ export function ExpeditionsCard({
                     </>
                   )}
                 </Button>
-              </li>
-            );
-          })}
-        </ul>
-      )}
-      <ExpeditionRewardModal
-        open={!!reveal}
-        result={reveal?.result ?? null}
-        expeditionTitle={reveal?.title ?? ""}
-        onClose={() => setReveal(null)}
-      />
-    </section>
+    </li>
   );
 }
 
