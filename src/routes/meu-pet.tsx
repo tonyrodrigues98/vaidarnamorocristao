@@ -443,7 +443,7 @@ function Showcase({
   return (
     <div className="space-y-4">
     {viewMode === "scene" ? (
-      <>
+      <div className="fixed inset-0 z-50 overflow-hidden bg-neutral-950">
         <PetLivingRoom
           pet={pet}
           petImage={image}
@@ -454,6 +454,7 @@ function Showcase({
           scenery={scenery}
           onCareAction={requestAction}
           onSwitchToList={() => setViewModeAndPersist("list")}
+          onOpenProfile={() => setProfileOpen(true)}
           onCareChanged={() => {
             setXpRefresh((n) => n + 1);
             void reloadCare();
@@ -474,60 +475,66 @@ function Showcase({
             null
           }
         />
-        {/* Barra compacta de perfil: XP + ações */}
-        <section className="mx-auto w-full max-w-[520px] overflow-hidden rounded-2xl border border-neutral-200/80 bg-white shadow-sm">
-          <div className="p-3">
-            <PetXpBar refreshKey={xpRefresh} />
-          </div>
-          <div className="flex flex-wrap items-center gap-2 border-t border-neutral-100 px-3 py-2">
-            {renaming ? (
-              <div className="flex flex-1 items-center gap-2">
-                <Input
-                  autoFocus
-                  maxLength={30}
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="h-9 rounded-lg border-neutral-200 bg-white text-sm focus-visible:ring-neutral-900/10"
-                />
-                <Button
-                  size="sm"
-                  onClick={() => void saveName()}
-                  className="h-9 rounded-lg bg-neutral-900 px-3 text-white hover:bg-neutral-800"
+        {/* Perfil — XP + nome + visibilidade + trocar pet — em sheet pra não poluir a cena */}
+        <Sheet open={profileOpen} onOpenChange={setProfileOpen}>
+          <SheetContent side="bottom" className="max-h-[80vh] overflow-y-auto rounded-t-3xl">
+            <SheetHeader className="text-left">
+              <SheetTitle>Perfil do pet</SheetTitle>
+              <SheetDescription>XP, nome, visibilidade e trocar de pet.</SheetDescription>
+            </SheetHeader>
+            <div className="mt-4 space-y-4">
+              <PetXpBar refreshKey={xpRefresh} />
+              <div className="flex flex-wrap items-center gap-2">
+                {renaming ? (
+                  <div className="flex flex-1 items-center gap-2">
+                    <Input
+                      autoFocus
+                      maxLength={30}
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      className="h-9 rounded-lg border-neutral-200 bg-white text-sm focus-visible:ring-neutral-900/10"
+                    />
+                    <Button
+                      size="sm"
+                      onClick={() => void saveName()}
+                      className="h-9 rounded-lg bg-neutral-900 px-3 text-white hover:bg-neutral-800"
+                    >
+                      <Check className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setRenaming(true)}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-[12px] font-medium text-neutral-700 transition hover:border-neutral-300"
+                  >
+                    <Pencil className="h-3.5 w-3.5" /> Renomear
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => void toggleVisibility()}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-[12px] font-medium text-neutral-700 transition hover:border-neutral-300"
                 >
-                  <Check className="h-4 w-4" />
-                </Button>
+                  {pet.visibility === "public" ? (
+                    <><Eye className="h-3.5 w-3.5" /> Público</>
+                  ) : (
+                    <><EyeOff className="h-3.5 w-3.5" /> Privado</>
+                  )}
+                </button>
+                <button
+                  type="button"
+                  onClick={onChange}
+                  className="ml-auto inline-flex items-center gap-1.5 rounded-full bg-neutral-900 px-3 py-1.5 text-[12px] font-medium text-white transition hover:bg-neutral-800"
+                >
+                  Trocar pet
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </button>
               </div>
-            ) : (
-              <button
-                type="button"
-                onClick={() => setRenaming(true)}
-                className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-[11px] font-medium text-neutral-700 transition hover:border-neutral-300"
-              >
-                <Pencil className="h-3 w-3" /> Renomear
-              </button>
-            )}
-            <button
-              type="button"
-              onClick={() => void toggleVisibility()}
-              className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-[11px] font-medium text-neutral-700 transition hover:border-neutral-300"
-            >
-              {pet.visibility === "public" ? (
-                <><Eye className="h-3 w-3" /> Público</>
-              ) : (
-                <><EyeOff className="h-3 w-3" /> Privado</>
-              )}
-            </button>
-            <button
-              type="button"
-              onClick={onChange}
-              className="ml-auto inline-flex items-center gap-1.5 rounded-full bg-neutral-900 px-3 py-1.5 text-[11px] font-medium text-white transition hover:bg-neutral-800"
-            >
-              Trocar pet
-              <ArrowRight className="h-3 w-3" />
-            </button>
-          </div>
-        </section>
-      </>
+            </div>
+          </SheetContent>
+        </Sheet>
+      </div>
     ) : null}
     {viewMode === "list" ? (
     <>
