@@ -386,7 +386,20 @@ function GrabRouletteModal({
     };
   }, []);
 
-  // Synthesize a short tick using Web Audio (volume + pitch scale with speed)
+  // Realistic casino-roulette click: a tiny noise burst (the "tac" of the ball
+  // hitting a metal fret) blended with a short wood/ivory body resonance.
+  // Slight randomization per hit prevents the machine-gun feel.
+  const noiseBufferRef = useRef<AudioBuffer | null>(null);
+  const getNoiseBuffer = (ctx: AudioContext) => {
+    if (noiseBufferRef.current) return noiseBufferRef.current;
+    const len = Math.floor(ctx.sampleRate * 0.08);
+    const buf = ctx.createBuffer(1, len, ctx.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) data[i] = Math.random() * 2 - 1;
+    noiseBufferRef.current = buf;
+    return buf;
+  };
+
   const playTick = (speed: number) => {
     try {
       const Ctor =
@@ -398,21 +411,43 @@ function GrabRouletteModal({
       const ctx = audioCtxRef.current;
       if (ctx.state === "suspended") void ctx.resume();
       const now = ctx.currentTime;
-      // speed in [0, 1] — fast→higher pitch & louder
       const s = Math.min(1, Math.max(0, speed));
-      const freq = 1200 + s * 1600;
-      const vol = 0.05 + s * 0.18;
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = "square";
-      osc.frequency.setValueAtTime(freq, now);
-      osc.frequency.exponentialRampToValueAtTime(Math.max(120, freq * 0.5), now + 0.04);
-      gain.gain.setValueAtTime(0.0001, now);
-      gain.gain.exponentialRampToValueAtTime(vol, now + 0.003);
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.05);
-      osc.connect(gain).connect(ctx.destination);
-      osc.start(now);
-      osc.stop(now + 0.06);
+      // Per-hit randomization (avoids repetitive timbre)
+      const jitter = 0.85 + Math.random() * 0.3;
+
+      // --- 1) Noise transient: the bright "tac" of ball-on-fret
+      const noise = ctx.createBufferSource();
+      noise.buffer = getNoiseBuffer(ctx);
+      const bp = ctx.createBiquadFilter();
+      bp.type = "bandpass";
+      bp.frequency.value = (2200 + s * 2800) * jitter;
+      bp.Q.value = 6 + s * 4;
+      const hp = ctx.createBiquadFilter();
+      hp.type = "highpass";
+      hp.frequency.value = 1200;
+      const nGain = ctx.createGain();
+      const nVol = (0.18 + s * 0.32) * jitter;
+      nGain.gain.setValueAtTime(0.0001, now);
+      nGain.gain.exponentialRampToValueAtTime(nVol, now + 0.0015);
+      nGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.035);
+      noise.connect(bp).connect(hp).connect(nGain).connect(ctx.destination);
+      noise.start(now);
+      noise.stop(now + 0.05);
+
+      // --- 2) Body resonance: short wooden "tock" under the click
+      const body = ctx.createOscillator();
+      const bodyGain = ctx.createGain();
+      body.type = "triangle";
+      const bodyFreq = (520 + s * 380) * jitter;
+      body.frequency.setValueAtTime(bodyFreq * 1.6, now);
+      body.frequency.exponentialRampToValueAtTime(bodyFreq, now + 0.012);
+      const bVol = 0.06 + s * 0.1;
+      bodyGain.gain.setValueAtTime(0.0001, now);
+      bodyGain.gain.exponentialRampToValueAtTime(bVol, now + 0.004);
+      bodyGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.07);
+      body.connect(bodyGain).connect(ctx.destination);
+      body.start(now);
+      body.stop(now + 0.08);
     } catch {
       /* noop */
     }
