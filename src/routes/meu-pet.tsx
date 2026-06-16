@@ -429,7 +429,7 @@ function Showcase({
             <div
               className={
                 isAway
-                  ? "transition duration-500 [filter:grayscale(1)_blur(2px)_brightness(0.85)]"
+                  ? "opacity-50 transition duration-500 [filter:grayscale(1)_blur(8px)_brightness(0.8)]"
                   : ""
               }
             >
