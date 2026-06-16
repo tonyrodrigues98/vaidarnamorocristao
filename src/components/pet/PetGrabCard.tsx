@@ -5,10 +5,10 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { CoinIcon } from "@/components/icons/CoinIcon";
-import grabComumImg from "@/assets/grab-comum.jpg";
-import grabRaraImg from "@/assets/grab-rara.jpg";
-import grabEpicaImg from "@/assets/grab-epica.jpg";
-import grabLendariaImg from "@/assets/grab-lendaria.jpg";
+import grabComumImg from "@/assets/grab-comum.png";
+import grabRaraImg from "@/assets/grab-rara.png";
+import grabEpicaImg from "@/assets/grab-epica.png";
+import grabLendariaImg from "@/assets/grab-lendaria.png";
 import {
   getGrabState, listMyGrabInventory, listPoolPrizeMetas, performGrab, resolvePrize,
   type PrizeMeta,
@@ -23,9 +23,9 @@ import { cn } from "@/lib/utils";
 
 type GrabTier = {
   image: string;
-  accent: string;
-  ring: string;
+  label: string;
   glow: string;
+  dot: string;
 };
 
 function tierFor(name: string): GrabTier {
@@ -33,29 +33,29 @@ function tierFor(name: string): GrabTier {
   if (n.includes("lend"))
     return {
       image: grabLendariaImg,
-      accent: "from-amber-200/0 via-amber-100/10 to-amber-950/80",
-      ring: "ring-amber-200/40",
-      glow: "shadow-[0_20px_60px_-20px_rgba(217,160,48,0.45)]",
+      label: "Lendária",
+      glow: "bg-[radial-gradient(circle_at_50%_65%,rgba(217,160,48,0.28),transparent_60%)]",
+      dot: "bg-amber-400",
     };
   if (n.includes("ép") || n.includes("ep"))
     return {
       image: grabEpicaImg,
-      accent: "from-violet-200/0 via-violet-500/10 to-neutral-950/85",
-      ring: "ring-violet-300/30",
-      glow: "shadow-[0_20px_60px_-20px_rgba(139,92,246,0.45)]",
+      label: "Épica",
+      glow: "bg-[radial-gradient(circle_at_50%_65%,rgba(139,92,246,0.28),transparent_60%)]",
+      dot: "bg-violet-500",
     };
   if (n.includes("rar"))
     return {
       image: grabRaraImg,
-      accent: "from-cyan-200/0 via-cyan-500/10 to-slate-950/80",
-      ring: "ring-cyan-200/30",
-      glow: "shadow-[0_20px_60px_-20px_rgba(20,184,166,0.4)]",
+      label: "Rara",
+      glow: "bg-[radial-gradient(circle_at_50%_65%,rgba(20,184,166,0.22),transparent_60%)]",
+      dot: "bg-teal-500",
     };
   return {
     image: grabComumImg,
-    accent: "from-rose-100/0 via-rose-100/10 to-neutral-900/70",
-    ring: "ring-rose-200/40",
-    glow: "shadow-[0_20px_60px_-20px_rgba(244,114,182,0.35)]",
+    label: "Comum",
+    glow: "bg-[radial-gradient(circle_at_50%_65%,rgba(244,114,182,0.20),transparent_60%)]",
+    dot: "bg-rose-400",
   };
 }
 
