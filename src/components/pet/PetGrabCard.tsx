@@ -738,7 +738,7 @@ function GrabRouletteModal({
                 </div>
                 <Button
                   className="relative mt-5 w-full overflow-hidden bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 text-neutral-950 hover:from-amber-400 hover:to-amber-400"
-                  onClick={onClose}
+                  onClick={handleClose}
                 >
                   <span className="relative z-10 font-semibold">Continuar</span>
                   <span
