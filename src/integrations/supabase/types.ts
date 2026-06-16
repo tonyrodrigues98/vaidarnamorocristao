@@ -5262,6 +5262,7 @@ export type Database = {
         Args: { _message_id: string }
         Returns: undefined
       }
+      unlock_adult_pet_with_coins: { Args: { _cost?: number }; Returns: Json }
       unlock_pet_background: {
         Args: { _background_id: string }
         Returns: string
