@@ -191,7 +191,14 @@ export function PetConstellation({
             })}
           </svg>
 
-          <div className="pointer-events-none absolute inset-x-0 top-0 z-30 flex items-start justify-between gap-2 p-3">
+          <div
+            className="pointer-events-none absolute inset-x-0 top-0 z-30 flex items-start justify-between gap-2 p-3"
+            style={{
+              paddingTop: "max(0.75rem, env(safe-area-inset-top))",
+              paddingLeft: "max(0.75rem, env(safe-area-inset-left))",
+              paddingRight: "max(0.75rem, env(safe-area-inset-right))",
+            }}
+          >
             <span
               className="text-[15px] font-semibold tracking-tight text-amber-50"
               style={{ textShadow: "0 1px 6px rgba(0,0,0,0.5)" }}
@@ -227,7 +234,14 @@ export function PetConstellation({
             ))}
           </div>
 
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 z-30 px-4 pb-3 text-center text-[10px] font-medium tracking-wide text-amber-100/80">
+          <div
+            className="pointer-events-none absolute inset-x-0 bottom-0 z-30 px-4 pb-3 text-center text-[10px] font-medium tracking-wide text-amber-100/80"
+            style={{
+              paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))",
+              paddingLeft: "max(1rem, env(safe-area-inset-left))",
+              paddingRight: "max(1rem, env(safe-area-inset-right))",
+            }}
+          >
             Memória do pet · só leitura. Ações do dia ficam no Quarto, jornadas no Reino.
           </div>
 
