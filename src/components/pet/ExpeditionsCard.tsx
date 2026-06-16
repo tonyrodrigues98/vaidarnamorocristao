@@ -235,8 +235,8 @@ function ExpeditionRow({
         </h4>
         {sent && (
           <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/45 backdrop-blur-[3px]">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/95 px-3 py-1.5 text-[12px] font-semibold text-white shadow-lg ring-1 ring-white/20">
-              <CheckCircle2 className="size-4" />
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-[12px] font-semibold text-emerald-600 shadow-lg ring-1 ring-emerald-200">
+              <CheckCircle2 className="size-4 text-emerald-600" />
               Concluída
             </span>
           </div>
