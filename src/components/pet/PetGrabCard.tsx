@@ -5,10 +5,10 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { CoinIcon } from "@/components/icons/CoinIcon";
-import grabComumImg from "@/assets/grab-comum.jpg";
-import grabRaraImg from "@/assets/grab-rara.jpg";
-import grabEpicaImg from "@/assets/grab-epica.jpg";
-import grabLendariaImg from "@/assets/grab-lendaria.jpg";
+import grabComumImg from "@/assets/grab-comum.png";
+import grabRaraImg from "@/assets/grab-rara.png";
+import grabEpicaImg from "@/assets/grab-epica.png";
+import grabLendariaImg from "@/assets/grab-lendaria.png";
 import {
   getGrabState, listMyGrabInventory, listPoolPrizeMetas, performGrab, resolvePrize,
   type PrizeMeta,
@@ -23,9 +23,9 @@ import { cn } from "@/lib/utils";
 
 type GrabTier = {
   image: string;
-  accent: string;
-  ring: string;
+  label: string;
   glow: string;
+  dot: string;
 };
 
 function tierFor(name: string): GrabTier {
@@ -33,29 +33,29 @@ function tierFor(name: string): GrabTier {
   if (n.includes("lend"))
     return {
       image: grabLendariaImg,
-      accent: "from-amber-200/0 via-amber-100/10 to-amber-950/80",
-      ring: "ring-amber-200/40",
-      glow: "shadow-[0_20px_60px_-20px_rgba(217,160,48,0.45)]",
+      label: "Lendária",
+      glow: "bg-[radial-gradient(circle_at_50%_65%,rgba(217,160,48,0.28),transparent_60%)]",
+      dot: "bg-amber-400",
     };
   if (n.includes("ép") || n.includes("ep"))
     return {
       image: grabEpicaImg,
-      accent: "from-violet-200/0 via-violet-500/10 to-neutral-950/85",
-      ring: "ring-violet-300/30",
-      glow: "shadow-[0_20px_60px_-20px_rgba(139,92,246,0.45)]",
+      label: "Épica",
+      glow: "bg-[radial-gradient(circle_at_50%_65%,rgba(139,92,246,0.28),transparent_60%)]",
+      dot: "bg-violet-500",
     };
   if (n.includes("rar"))
     return {
       image: grabRaraImg,
-      accent: "from-cyan-200/0 via-cyan-500/10 to-slate-950/80",
-      ring: "ring-cyan-200/30",
-      glow: "shadow-[0_20px_60px_-20px_rgba(20,184,166,0.4)]",
+      label: "Rara",
+      glow: "bg-[radial-gradient(circle_at_50%_65%,rgba(20,184,166,0.22),transparent_60%)]",
+      dot: "bg-teal-500",
     };
   return {
     image: grabComumImg,
-    accent: "from-rose-100/0 via-rose-100/10 to-neutral-900/70",
-    ring: "ring-rose-200/40",
-    glow: "shadow-[0_20px_60px_-20px_rgba(244,114,182,0.35)]",
+    label: "Comum",
+    glow: "bg-[radial-gradient(circle_at_50%_65%,rgba(244,114,182,0.20),transparent_60%)]",
+    dot: "bg-rose-400",
   };
 }
 
@@ -145,7 +145,7 @@ export function PetGrabCard({ refreshKey, onChanged }: Props) {
           </Button>
         </div>
 
-        <div className="space-y-3">
+        <div className="grid grid-cols-2 gap-3">
           {state.pools.map((pool) => {
             const freeRemaining = Math.max(0, pool.free_daily - state.free_used);
             const isFree = freeRemaining > 0;
@@ -157,52 +157,51 @@ export function PetGrabCard({ refreshKey, onChanged }: Props) {
                 onClick={() => void grab(pool.id)}
                 disabled={busy || pool.prize_count === 0}
                 className={cn(
-                  "group relative w-full overflow-hidden rounded-2xl text-left ring-1 transition",
-                  "h-24 sm:h-28",
-                  tier.ring,
-                  tier.glow,
-                  "hover:-translate-y-0.5 hover:shadow-xl disabled:opacity-60 disabled:hover:translate-y-0",
+                  "group relative flex flex-col items-center overflow-hidden rounded-2xl border border-neutral-200/80 bg-white p-3 transition",
+                  "hover:-translate-y-0.5 hover:border-neutral-300 hover:shadow-[0_12px_32px_-12px_rgba(0,0,0,0.12)]",
+                  "disabled:opacity-60 disabled:hover:translate-y-0",
                 )}
               >
-                <img
-                  src={tier.image}
-                  alt=""
-                  loading="lazy"
-                  width={1024}
-                  height={1024}
-                  className="absolute inset-0 size-full object-cover transition-transform duration-700 group-hover:scale-105"
-                />
-                <div className={cn("absolute inset-0 bg-gradient-to-r", tier.accent)} />
-                <div className="absolute inset-0 bg-gradient-to-r from-black/55 via-black/20 to-transparent" />
+                {/* tier glow behind the box */}
+                <div className={cn("pointer-events-none absolute inset-0", tier.glow)} />
 
-                <div className="relative flex h-full items-center gap-3 px-4">
-                  <div className="min-w-0 flex-1">
-                    <div className="truncate text-[15px] font-semibold tracking-tight text-white drop-shadow">
-                      {pool.name}
-                    </div>
-                    <div className="mt-0.5 text-[11px] font-medium text-white/85">
-                      {isFree
-                        ? `${freeRemaining} grátis hoje`
-                        : <span className="inline-flex items-center gap-1">
-                            <CoinIcon className="size-3" /> {pool.cost_coins} por sorteio
-                          </span>}
-                    </div>
+                {/* the box IS the visual */}
+                <div className="relative flex aspect-square w-full items-center justify-center">
+                  <img
+                    src={tier.image}
+                    alt={pool.name}
+                    loading="lazy"
+                    width={1024}
+                    height={1024}
+                    className="size-[88%] object-contain drop-shadow-[0_18px_18px_rgba(0,0,0,0.12)] transition-transform duration-500 group-hover:-translate-y-1 group-hover:scale-[1.03]"
+                  />
+                </div>
+
+                {/* meta */}
+                <div className="relative mt-2 flex w-full flex-col items-center gap-1.5">
+                  <div className="inline-flex items-center gap-1.5">
+                    <span className={cn("size-1.5 rounded-full", tier.dot)} />
+                    <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-neutral-500">
+                      {tier.label}
+                    </span>
                   </div>
-
+                  <div className="truncate text-[13px] font-semibold tracking-tight text-neutral-900">
+                    {pool.name}
+                  </div>
                   <div
                     className={cn(
-                      "pointer-events-none inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold backdrop-blur",
+                      "mt-0.5 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold",
                       isFree
-                        ? "bg-white text-neutral-900 ring-1 ring-white/60"
-                        : "bg-white/15 text-white ring-1 ring-white/30",
+                        ? "bg-neutral-900 text-white"
+                        : "bg-neutral-100 text-neutral-700",
                     )}
                   >
                     {busy ? (
-                      <Loader2 className="size-3.5 animate-spin" />
+                      <Loader2 className="size-3 animate-spin" />
                     ) : isFree ? (
-                      <>Sortear <Sparkles className="size-3.5" /></>
+                      <>Sortear grátis <Sparkles className="size-3" /></>
                     ) : (
-                      <><CoinIcon className="size-3.5" />{pool.cost_coins}</>
+                      <><CoinIcon className="size-3" />{pool.cost_coins}</>
                     )}
                   </div>
                 </div>
