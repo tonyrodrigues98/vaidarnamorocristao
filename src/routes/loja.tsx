@@ -1003,6 +1003,12 @@ function LojaPage() {
                 const isEquipped = equipped[d.type] === d.id;
                 const busy = busyId === d.id;
                 const canAfford = balance >= d.price_coins;
+                const decoCategory: FreebieCategory | null =
+                  d.type === "frame" ? "decoration_frame" : d.type === "aura" ? "decoration_aura" : null;
+                const isFreebie =
+                  !isOwned &&
+                  !!decoCategory &&
+                  canClaimFreebie(freebieStatuses, decoCategory, d.rarity);
 
                 return (
                   <article
@@ -1019,9 +1025,15 @@ function LojaPage() {
                       </span>
                     )}
                     {!isOwned && (
-                      <span className="absolute left-3 top-3 z-10 inline-flex items-center gap-1 rounded-full bg-background/80 px-2 py-0.5 text-[10px] font-medium text-muted-foreground backdrop-blur">
-                        <CoinIcon className="h-3 w-3" /> {d.price_coins}
-                      </span>
+                      isFreebie ? (
+                        <span className="absolute left-3 top-3 z-10 inline-flex items-center gap-1 rounded-full bg-emerald-500 px-2 py-0.5 text-[10px] font-semibold text-white shadow">
+                          <Gift className="h-3 w-3" /> Brinde
+                        </span>
+                      ) : (
+                        <span className="absolute left-3 top-3 z-10 inline-flex items-center gap-1 rounded-full bg-background/80 px-2 py-0.5 text-[10px] font-medium text-muted-foreground backdrop-blur">
+                          <CoinIcon className="h-3 w-3" /> {d.price_coins}
+                        </span>
+                      )
                     )}
 
                     <div className="relative mx-auto flex h-32 w-32 items-center justify-center sm:h-36 sm:w-36">
@@ -1075,6 +1087,23 @@ function LojaPage() {
                           onClick={() => handleEquip(d)}
                         >
                           {busy ? <Loader2 className="h-3 w-3 animate-spin" /> : "Equipar"}
+                        </Button>
+                      ) : isFreebie && decoCategory ? (
+                        <Button
+                          size="sm"
+                          className="w-full bg-emerald-600 text-xs text-white hover:bg-emerald-700"
+                          disabled={busy || !isOnline}
+                          onClick={() =>
+                            handleClaimFreebie(decoCategory, d.rarity as FreebieRarity, d.id, d.name)
+                          }
+                        >
+                          {busy ? (
+                            <Loader2 className="h-3 w-3 animate-spin" />
+                          ) : (
+                            <span className="inline-flex items-center gap-1.5">
+                              <Gift className="h-3 w-3" /> Resgatar grátis
+                            </span>
+                          )}
                         </Button>
                       ) : (
                         <Button
