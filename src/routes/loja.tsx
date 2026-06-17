@@ -836,6 +836,9 @@ function LojaPage() {
                   const busy = busyId === background.id;
                   const canAfford = balance >= background.price;
                   const rarity = BACKGROUND_RARITY_STYLE[background.rarity];
+                  const isFreebie =
+                    !isOwned &&
+                    canClaimFreebie(freebieStatuses, "profile_background", background.rarity);
 
                   return (
                     <article
@@ -873,9 +876,15 @@ function LojaPage() {
                           )}
                         </div>
                         {!isOwned && (
-                          <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-background/85 px-2 py-0.5 text-[10px] font-medium text-foreground backdrop-blur">
-                            <CoinIcon className="h-3 w-3" /> {background.price}
-                          </span>
+                          isFreebie ? (
+                            <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-emerald-500 px-2 py-0.5 text-[10px] font-semibold text-white shadow">
+                              <Gift className="h-3 w-3" /> Brinde
+                            </span>
+                          ) : (
+                            <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-background/85 px-2 py-0.5 text-[10px] font-medium text-foreground backdrop-blur">
+                              <CoinIcon className="h-3 w-3" /> {background.price}
+                            </span>
+                          )
                         )}
                       </div>
 
@@ -910,6 +919,28 @@ function LojaPage() {
                               onClick={() => handleEquipBackground(background)}
                             >
                               {busy ? <Loader2 className="h-3 w-3 animate-spin" /> : "Equipar"}
+                            </Button>
+                          ) : isFreebie ? (
+                            <Button
+                              size="sm"
+                              className="w-full bg-emerald-600 text-xs text-white hover:bg-emerald-700"
+                              disabled={busy || !isOnline}
+                              onClick={() =>
+                                handleClaimFreebie(
+                                  "profile_background",
+                                  background.rarity as FreebieRarity,
+                                  background.id,
+                                  background.name,
+                                )
+                              }
+                            >
+                              {busy ? (
+                                <Loader2 className="h-3 w-3 animate-spin" />
+                              ) : (
+                                <span className="inline-flex items-center gap-1.5">
+                                  <Gift className="h-3 w-3" /> Resgatar grátis
+                                </span>
+                              )}
                             </Button>
                           ) : (
                             <Button
