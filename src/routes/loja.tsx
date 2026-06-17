@@ -67,6 +67,14 @@ import {
   unequipNameGradient,
   type NameGradient,
 } from "@/lib/nameGradients";
+import {
+  canClaimFreebie,
+  claimFreebie,
+  freebieStatusQueryOptions,
+  type FreebieCategory,
+  type FreebieRarity,
+} from "@/lib/freebies";
+import { Gift } from "lucide-react";
 
 export const Route = createFileRoute("/loja")({
   component: LojaPage,
