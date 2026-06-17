@@ -101,40 +101,8 @@ function getRumbleBuffer(ac: AudioContext): AudioBuffer {
  * subsequent calls are ignored until `stopGrabRumble` runs.
  */
 export function startGrabRumble(): void {
-  if (rumbleSource) return;
-  const ac = getOrCreateCtx();
-  if (!ac) return;
-  ensureRunning(ac);
-  try {
-    const src = ac.createBufferSource();
-    src.buffer = getRumbleBuffer(ac);
-    src.loop = true;
-
-    // Band-shape the noise: low-pass roll + slight resonance peak around
-    // 600Hz to evoke the bearing/wood cavity.
-    const lp = ac.createBiquadFilter();
-    lp.type = "lowpass";
-    lp.frequency.value = 900;
-    lp.Q.value = 0.7;
-
-    const peak = ac.createBiquadFilter();
-    peak.type = "peaking";
-    peak.frequency.value = 600;
-    peak.gain.value = 6;
-    peak.Q.value = 1.2;
-
-    const g = ac.createGain();
-    g.gain.value = 0.0001; // start silent; setGrabRumbleSpeed ramps it up
-
-    src.connect(lp).connect(peak).connect(g).connect(ac.destination);
-    src.start();
-
-    rumbleSource = src;
-    rumbleGain = g;
-    rumbleFilter = lp;
-  } catch {
-    /* noop */
-  }
+  // Disabled by user request — only the dry tick should play, no wind/rumble bed.
+  return;
 }
 
 /**
