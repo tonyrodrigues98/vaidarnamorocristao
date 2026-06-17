@@ -210,6 +210,9 @@ export function PetSceneryPanel({
             const isEquipped = equipped?.id === bg.id;
             const busy = busyId === bg.id;
             const locked = !owned && level < (bg.min_level ?? 1);
+            const isFreebie =
+              !owned && !locked &&
+              canClaimFreebie(freebieStatuses, "pet_background", bg.rarity);
             return (
               <button
                 key={bg.id}
@@ -247,13 +250,24 @@ export function PetSceneryPanel({
                     </div>
                   )}
                   {!locked && !owned && bg.is_exclusive && (
-                    <div className="absolute left-1.5 top-1.5 inline-flex items-center gap-1 rounded-full bg-amber-500 px-2 py-0.5 text-[10px] font-semibold text-white">
-                      <CoinIcon className="h-3 w-3" /> {bg.price_coins}
-                    </div>
+                    isFreebie ? (
+                      <div className="absolute left-1.5 top-1.5 inline-flex items-center gap-1 rounded-full bg-emerald-500 px-2 py-0.5 text-[10px] font-semibold text-white">
+                        <Gift className="h-3 w-3" /> Brinde
+                      </div>
+                    ) : (
+                      <div className="absolute left-1.5 top-1.5 inline-flex items-center gap-1 rounded-full bg-amber-500 px-2 py-0.5 text-[10px] font-semibold text-white">
+                        <CoinIcon className="h-3 w-3" /> {bg.price_coins}
+                      </div>
+                    )
                   )}
-                  {!locked && !owned && !bg.is_exclusive && (
+                  {!locked && !owned && !bg.is_exclusive && !isFreebie && (
                     <div className="absolute left-1.5 top-1.5 inline-flex items-center gap-1 rounded-full bg-white/95 px-2 py-0.5 text-[10px] font-semibold text-neutral-700 ring-1 ring-neutral-200">
                       <Lock className="h-3 w-3" /> Grátis
+                    </div>
+                  )}
+                  {!locked && !owned && !bg.is_exclusive && isFreebie && (
+                    <div className="absolute left-1.5 top-1.5 inline-flex items-center gap-1 rounded-full bg-emerald-500 px-2 py-0.5 text-[10px] font-semibold text-white">
+                      <Gift className="h-3 w-3" /> Brinde
                     </div>
                   )}
                   {busy && (
