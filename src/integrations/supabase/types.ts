@@ -4324,6 +4324,30 @@ export type Database = {
         }
         Relationships: []
       }
+      user_freebie_claims: {
+        Row: {
+          category: string
+          claimed_at: string
+          item_id: string
+          rarity: string
+          user_id: string
+        }
+        Insert: {
+          category: string
+          claimed_at?: string
+          item_id: string
+          rarity: string
+          user_id: string
+        }
+        Update: {
+          category?: string
+          claimed_at?: string
+          item_id?: string
+          rarity?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_grab_inventory: {
         Row: {
           created_at: string
@@ -5358,6 +5382,10 @@ export type Database = {
       }
       claim_expedition: { Args: { _run_id: string }; Returns: Json }
       claim_free_frame: { Args: { _decoration_id: string }; Returns: Json }
+      claim_freebie: {
+        Args: { _category: string; _item_id: string; _rarity: string }
+        Returns: Json
+      }
       claim_pet_weekly_chest: { Args: never; Returns: Json }
       claim_starter_bundle: { Args: never; Returns: Json }
       cleanup_photo_moderation_rejects: { Args: never; Returns: number }
@@ -5403,6 +5431,10 @@ export type Database = {
       equip_user_pet_v2: { Args: { _user_pet_id: string }; Returns: undefined }
       evolve_my_pet: { Args: never; Returns: Json }
       expire_anonymous_messages: { Args: never; Returns: number }
+      freebie_required_level: {
+        Args: { _category: string; _rarity: string }
+        Returns: number
+      }
       get_active_expedition: {
         Args: { _user_pet_id: string }
         Returns: {
@@ -5655,6 +5687,17 @@ export type Database = {
       is_staff: { Args: { _user_id: string }; Returns: boolean }
       is_support_staff: { Args: { _user_id: string }; Returns: boolean }
       level_from_xp: { Args: { _xp: number }; Returns: number }
+      list_my_freebie_status: {
+        Args: never
+        Returns: {
+          category: string
+          claimed: boolean
+          claimed_item_id: string
+          rarity: string
+          required_level: number
+          unlocked: boolean
+        }[]
+      }
       log_coin_tx: {
         Args: {
           _amount: number

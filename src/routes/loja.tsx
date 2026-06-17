@@ -67,6 +67,14 @@ import {
   unequipNameGradient,
   type NameGradient,
 } from "@/lib/nameGradients";
+import {
+  canClaimFreebie,
+  claimFreebie,
+  freebieStatusQueryOptions,
+  type FreebieCategory,
+  type FreebieRarity,
+} from "@/lib/freebies";
+import { Gift } from "lucide-react";
 
 export const Route = createFileRoute("/loja")({
   component: LojaPage,
@@ -287,6 +295,36 @@ function LojaPage() {
   const equippedBackground = equippedData.equipped_background_id;
   const equippedNameGradient = equippedData.equipped_name_gradient_id;
   const photoUrl = equippedData.photo_url;
+
+  // Brindes por nível — 1 escolha grátis por raridade desbloqueada
+  const freebieStatusQuery = useQuery(freebieStatusQueryOptions(user?.id));
+  const freebieStatuses = freebieStatusQuery.data;
+  const invalidateFreebies = useCallback(() => {
+    if (!user?.id) return;
+    queryClient.invalidateQueries({ queryKey: ["freebie-status", user.id] });
+  }, [queryClient, user?.id]);
+
+  const claimFreebieMutation = useMutation({
+    mutationFn: (args: { category: FreebieCategory; rarity: FreebieRarity; itemId: string; label: string }) =>
+      claimFreebie(args.category, args.rarity, args.itemId).then(() => args),
+    onSuccess: (args) => {
+      invalidateFreebies();
+      if (args.category === "profile_background") invalidateBalanceAndBackgroundInventory();
+      else if (args.category === "name_gradient") invalidateBalanceAndNameGradientInventory();
+      else invalidateBalanceAndDecorationInventory();
+      toast.success(`Brinde resgatado: ${args.label}`);
+      setConfirm(null);
+      setConfirmBackground(null);
+    },
+    onError: (e) => {
+      const msg = e instanceof Error ? e.message : "";
+      if (msg.includes("já foi resgatado")) toast.error("Você já resgatou um brinde dessa raridade.");
+      else if (msg.includes("Nível")) toast.error(msg);
+      else toast.error("Não foi possível resgatar o brinde.");
+    },
+  });
+  const handleClaimFreebie = (category: FreebieCategory, rarity: FreebieRarity, itemId: string, label: string) =>
+    runMutation(itemId, offlineBuyToast, () => claimFreebieMutation.mutateAsync({ category, rarity, itemId, label }));
 
   // Pull-to-refresh resolver: when all user-scoped queries settle, release the promise.
   useEffect(() => {
@@ -692,6 +730,8 @@ function LojaPage() {
                   const isEquipped = equippedNameGradient === gradient.id;
                   const busy = busyId === gradient.id;
                   const canAfford = balance >= gradient.price;
+                  const isFreebie =
+                    !isOwned && canClaimFreebie(freebieStatuses, "name_gradient", "legendary");
                   return (
                     <article
                       key={gradient.id}
@@ -712,11 +752,15 @@ function LojaPage() {
                           <h3 className="font-black">{gradient.name}</h3>
                           <p className="text-xs text-muted-foreground">{gradient.price} moedas</p>
                         </div>
-                        {isEquipped && (
+                        {isEquipped ? (
                           <span className="inline-flex items-center gap-1 rounded-full bg-[var(--rose)] px-2 py-0.5 text-[10px] font-semibold text-white">
                             <Check className="h-3 w-3" /> Equipado
                           </span>
-                        )}
+                        ) : isFreebie ? (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500 px-2 py-0.5 text-[10px] font-semibold text-white">
+                            <Gift className="h-3 w-3" /> Brinde
+                          </span>
+                        ) : null}
                       </div>
                       <div className="mt-4">
                         {isEquipped ? (
@@ -737,6 +781,23 @@ function LojaPage() {
                             onClick={() => handleEquipNameGradient(gradient)}
                           >
                             {busy ? <Loader2 className="h-3 w-3 animate-spin" /> : "Equipar"}
+                          </Button>
+                        ) : isFreebie ? (
+                          <Button
+                            size="sm"
+                            className="w-full bg-emerald-600 text-xs text-white hover:bg-emerald-700"
+                            disabled={busy || !isOnline}
+                            onClick={() =>
+                              handleClaimFreebie("name_gradient", "legendary", gradient.id, gradient.name)
+                            }
+                          >
+                            {busy ? (
+                              <Loader2 className="h-3 w-3 animate-spin" />
+                            ) : (
+                              <span className="inline-flex items-center gap-1.5">
+                                <Gift className="h-3 w-3" /> Resgatar grátis
+                              </span>
+                            )}
                           </Button>
                         ) : (
                           <Button
@@ -798,6 +859,9 @@ function LojaPage() {
                   const busy = busyId === background.id;
                   const canAfford = balance >= background.price;
                   const rarity = BACKGROUND_RARITY_STYLE[background.rarity];
+                  const isFreebie =
+                    !isOwned &&
+                    canClaimFreebie(freebieStatuses, "profile_background", background.rarity);
 
                   return (
                     <article
@@ -835,9 +899,15 @@ function LojaPage() {
                           )}
                         </div>
                         {!isOwned && (
-                          <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-background/85 px-2 py-0.5 text-[10px] font-medium text-foreground backdrop-blur">
-                            <CoinIcon className="h-3 w-3" /> {background.price}
-                          </span>
+                          isFreebie ? (
+                            <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-emerald-500 px-2 py-0.5 text-[10px] font-semibold text-white shadow">
+                              <Gift className="h-3 w-3" /> Brinde
+                            </span>
+                          ) : (
+                            <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-background/85 px-2 py-0.5 text-[10px] font-medium text-foreground backdrop-blur">
+                              <CoinIcon className="h-3 w-3" /> {background.price}
+                            </span>
+                          )
                         )}
                       </div>
 
@@ -872,6 +942,28 @@ function LojaPage() {
                               onClick={() => handleEquipBackground(background)}
                             >
                               {busy ? <Loader2 className="h-3 w-3 animate-spin" /> : "Equipar"}
+                            </Button>
+                          ) : isFreebie ? (
+                            <Button
+                              size="sm"
+                              className="w-full bg-emerald-600 text-xs text-white hover:bg-emerald-700"
+                              disabled={busy || !isOnline}
+                              onClick={() =>
+                                handleClaimFreebie(
+                                  "profile_background",
+                                  background.rarity as FreebieRarity,
+                                  background.id,
+                                  background.name,
+                                )
+                              }
+                            >
+                              {busy ? (
+                                <Loader2 className="h-3 w-3 animate-spin" />
+                              ) : (
+                                <span className="inline-flex items-center gap-1.5">
+                                  <Gift className="h-3 w-3" /> Resgatar grátis
+                                </span>
+                              )}
                             </Button>
                           ) : (
                             <Button
@@ -934,6 +1026,12 @@ function LojaPage() {
                 const isEquipped = equipped[d.type] === d.id;
                 const busy = busyId === d.id;
                 const canAfford = balance >= d.price_coins;
+                const decoCategory: FreebieCategory | null =
+                  d.type === "frame" ? "decoration_frame" : d.type === "aura" ? "decoration_aura" : null;
+                const isFreebie =
+                  !isOwned &&
+                  !!decoCategory &&
+                  canClaimFreebie(freebieStatuses, decoCategory, d.rarity);
 
                 return (
                   <article
@@ -950,9 +1048,15 @@ function LojaPage() {
                       </span>
                     )}
                     {!isOwned && (
-                      <span className="absolute left-3 top-3 z-10 inline-flex items-center gap-1 rounded-full bg-background/80 px-2 py-0.5 text-[10px] font-medium text-muted-foreground backdrop-blur">
-                        <CoinIcon className="h-3 w-3" /> {d.price_coins}
-                      </span>
+                      isFreebie ? (
+                        <span className="absolute left-3 top-3 z-10 inline-flex items-center gap-1 rounded-full bg-emerald-500 px-2 py-0.5 text-[10px] font-semibold text-white shadow">
+                          <Gift className="h-3 w-3" /> Brinde
+                        </span>
+                      ) : (
+                        <span className="absolute left-3 top-3 z-10 inline-flex items-center gap-1 rounded-full bg-background/80 px-2 py-0.5 text-[10px] font-medium text-muted-foreground backdrop-blur">
+                          <CoinIcon className="h-3 w-3" /> {d.price_coins}
+                        </span>
+                      )
                     )}
 
                     <div className="relative mx-auto flex h-32 w-32 items-center justify-center sm:h-36 sm:w-36">
@@ -1006,6 +1110,23 @@ function LojaPage() {
                           onClick={() => handleEquip(d)}
                         >
                           {busy ? <Loader2 className="h-3 w-3 animate-spin" /> : "Equipar"}
+                        </Button>
+                      ) : isFreebie && decoCategory ? (
+                        <Button
+                          size="sm"
+                          className="w-full bg-emerald-600 text-xs text-white hover:bg-emerald-700"
+                          disabled={busy || !isOnline}
+                          onClick={() =>
+                            handleClaimFreebie(decoCategory, d.rarity as FreebieRarity, d.id, d.name)
+                          }
+                        >
+                          {busy ? (
+                            <Loader2 className="h-3 w-3 animate-spin" />
+                          ) : (
+                            <span className="inline-flex items-center gap-1.5">
+                              <Gift className="h-3 w-3" /> Resgatar grátis
+                            </span>
+                          )}
                         </Button>
                       ) : (
                         <Button
