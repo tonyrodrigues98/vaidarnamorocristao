@@ -730,6 +730,8 @@ function LojaPage() {
                   const isEquipped = equippedNameGradient === gradient.id;
                   const busy = busyId === gradient.id;
                   const canAfford = balance >= gradient.price;
+                  const isFreebie =
+                    !isOwned && canClaimFreebie(freebieStatuses, "name_gradient", "legendary");
                   return (
                     <article
                       key={gradient.id}
@@ -750,11 +752,15 @@ function LojaPage() {
                           <h3 className="font-black">{gradient.name}</h3>
                           <p className="text-xs text-muted-foreground">{gradient.price} moedas</p>
                         </div>
-                        {isEquipped && (
+                        {isEquipped ? (
                           <span className="inline-flex items-center gap-1 rounded-full bg-[var(--rose)] px-2 py-0.5 text-[10px] font-semibold text-white">
                             <Check className="h-3 w-3" /> Equipado
                           </span>
-                        )}
+                        ) : isFreebie ? (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500 px-2 py-0.5 text-[10px] font-semibold text-white">
+                            <Gift className="h-3 w-3" /> Brinde
+                          </span>
+                        ) : null}
                       </div>
                       <div className="mt-4">
                         {isEquipped ? (
@@ -775,6 +781,23 @@ function LojaPage() {
                             onClick={() => handleEquipNameGradient(gradient)}
                           >
                             {busy ? <Loader2 className="h-3 w-3 animate-spin" /> : "Equipar"}
+                          </Button>
+                        ) : isFreebie ? (
+                          <Button
+                            size="sm"
+                            className="w-full bg-emerald-600 text-xs text-white hover:bg-emerald-700"
+                            disabled={busy || !isOnline}
+                            onClick={() =>
+                              handleClaimFreebie("name_gradient", "legendary", gradient.id, gradient.name)
+                            }
+                          >
+                            {busy ? (
+                              <Loader2 className="h-3 w-3 animate-spin" />
+                            ) : (
+                              <span className="inline-flex items-center gap-1.5">
+                                <Gift className="h-3 w-3" /> Resgatar grátis
+                              </span>
+                            )}
                           </Button>
                         ) : (
                           <Button
