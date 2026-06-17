@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { toast } from "sonner";
-import { useQueries, useQueryClient } from "@tanstack/react-query";
-import { Check, Loader2, Lock, Sparkles } from "lucide-react";
+import { useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Check, Gift, Loader2, Lock, Sparkles } from "lucide-react";
 import { CoinIcon } from "@/components/icons/CoinIcon";
 
 import {
@@ -15,6 +15,13 @@ import {
   petSceneryUnlocksQueryOptions,
   petXpStateQueryOptions,
 } from "@/lib/petQueries";
+import {
+  canClaimFreebie,
+  claimFreebie,
+  freebieStatusQueryOptions,
+  type FreebieRarity,
+} from "@/lib/freebies";
+import { useAuth } from "@/lib/auth";
 import { PET_RARITY_COLOR, PET_RARITY_LABEL } from "@/types/pet";
 import type { PetBackground, UserPetBackground } from "@/types/petBackground";
 import { cn } from "@/lib/utils";
@@ -74,10 +81,28 @@ export function PetSceneryPanel({
 }) {
   const [busyId, setBusyId] = useState<string | null>(null);
   const ownedIds = new Set(unlocks.map((u) => u.background_id));
+  const { user } = useAuth();
+  const qc = useQueryClient();
+  const freebieStatusQuery = useQuery(freebieStatusQueryOptions(user?.id));
+  const freebieStatuses = freebieStatusQuery.data;
 
   async function handleClick(bg: PetBackground) {
     if (!ownedIds.has(bg.id) && level < (bg.min_level ?? 1)) {
       toast.error(`Disponível a partir do nível ${bg.min_level}. Você está no nível ${level}.`);
+      return;
+    }
+    // Brinde grátis por raridade desbloqueada
+    const canFreebie =
+      !ownedIds.has(bg.id) &&
+      canClaimFreebie(freebieStatuses, "pet_background", bg.rarity);
+    if (canFreebie) {
+      toast(`Resgatar "${bg.name}" grátis?`, {
+        description: `Você pode escolher 1 cenário ${bg.rarity} de graça nesse tier.`,
+        action: {
+          label: "Resgatar",
+          onClick: () => void claimAndEquip(bg),
+        },
+      });
       return;
     }
     // Confirmação para itens pagos (sem window.confirm — usa toast com ação).
@@ -92,6 +117,21 @@ export function PetSceneryPanel({
       return;
     }
     await applyUnlockAndEquip(bg);
+  }
+
+  async function claimAndEquip(bg: PetBackground) {
+    setBusyId(bg.id);
+    try {
+      await claimFreebie("pet_background", bg.rarity as FreebieRarity, bg.id);
+      await equipPetBackground(bg.id);
+      if (user?.id) qc.invalidateQueries({ queryKey: ["freebie-status", user.id] });
+      toast.success("Cenário resgatado e aplicado");
+      onChanged();
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setBusyId(null);
+    }
   }
 
   async function applyUnlockAndEquip(bg: PetBackground) {
