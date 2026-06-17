@@ -296,6 +296,36 @@ function LojaPage() {
   const equippedNameGradient = equippedData.equipped_name_gradient_id;
   const photoUrl = equippedData.photo_url;
 
+  // Brindes por nível — 1 escolha grátis por raridade desbloqueada
+  const freebieStatusQuery = useQuery(freebieStatusQueryOptions(user?.id));
+  const freebieStatuses = freebieStatusQuery.data;
+  const invalidateFreebies = useCallback(() => {
+    if (!user?.id) return;
+    queryClient.invalidateQueries({ queryKey: ["freebie-status", user.id] });
+  }, [queryClient, user?.id]);
+
+  const claimFreebieMutation = useMutation({
+    mutationFn: (args: { category: FreebieCategory; rarity: FreebieRarity; itemId: string; label: string }) =>
+      claimFreebie(args.category, args.rarity, args.itemId).then(() => args),
+    onSuccess: (args) => {
+      invalidateFreebies();
+      if (args.category === "profile_background") invalidateBalanceAndBackgroundInventory();
+      else if (args.category === "name_gradient") invalidateBalanceAndNameGradientInventory();
+      else invalidateBalanceAndDecorationInventory();
+      toast.success(`Brinde resgatado: ${args.label}`);
+      setConfirm(null);
+      setConfirmBackground(null);
+    },
+    onError: (e) => {
+      const msg = e instanceof Error ? e.message : "";
+      if (msg.includes("já foi resgatado")) toast.error("Você já resgatou um brinde dessa raridade.");
+      else if (msg.includes("Nível")) toast.error(msg);
+      else toast.error("Não foi possível resgatar o brinde.");
+    },
+  });
+  const handleClaimFreebie = (category: FreebieCategory, rarity: FreebieRarity, itemId: string, label: string) =>
+    runMutation(itemId, offlineBuyToast, () => claimFreebieMutation.mutateAsync({ category, rarity, itemId, label }));
+
   // Pull-to-refresh resolver: when all user-scoped queries settle, release the promise.
   useEffect(() => {
     if (!refreshResolveRef.current) return;
