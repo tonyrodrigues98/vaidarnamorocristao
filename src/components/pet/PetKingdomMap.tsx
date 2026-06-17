@@ -69,17 +69,10 @@ export function PetKingdomMap({
   return (
     <TooltipProvider delayDuration={200} skipDelayDuration={300}>
       <section
-        className="relative grid h-full w-full place-items-center overflow-hidden bg-neutral-950"
+        className="relative h-full w-full overflow-hidden bg-neutral-950"
         aria-label="Mapa do reino"
       >
-        <div
-          className="relative shadow-[0_30px_60px_-20px_rgba(0,0,0,0.6)] ring-1 ring-white/5"
-          style={{
-            width: "min(100%, calc(100dvh * 2 / 3))",
-            height: "min(100%, calc(100dvw * 3 / 2))",
-            aspectRatio: "2 / 3",
-          }}
-        >
+        <div className="relative h-full w-full">
           <MapBackground />
           <MapClouds />
 
