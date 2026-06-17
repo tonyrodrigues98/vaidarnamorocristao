@@ -186,20 +186,12 @@ export function PetLivingRoom({
     <TooltipProvider delayDuration={200} skipDelayDuration={300}>
     <section
       key="room"
-      className="relative grid h-full w-full place-items-center overflow-hidden bg-neutral-950"
+      className="relative h-full w-full overflow-hidden bg-neutral-950"
       aria-label="Quarto do pet"
       style={{ animation: "zoom-in-room 600ms ease-out" }}
     >
-      {/* Frame 2:3 cinematográfico — preenche a tela sem cortar a cena.
-          Usa min() pra que largura e altura caibam na viewport mantendo a proporção. */}
-      <div
-        className="relative shadow-[0_30px_60px_-20px_rgba(0,0,0,0.6)] ring-1 ring-white/5"
-        style={{
-          width: "min(100%, calc(100dvh * 2 / 3))",
-          height: "min(100%, calc(100dvw * 3 / 2))",
-          aspectRatio: "2 / 3",
-        }}
-      >
+      {/* Full-bleed: a cena preenche a viewport inteira (object-cover corta o excedente). */}
+      <div className="relative h-full w-full">
         {/* Fundo: a cena */}
         <img
           src={sceneAsset.url}
