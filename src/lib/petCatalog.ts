@@ -40,7 +40,10 @@ function extractStoragePath(value: string | null | undefined): string | null {
 const signedCache = new Map<string, { url: string; expiresAt: number }>();
 const SIGN_TTL_MS = (SIGNED_TTL - 60 * 60) * 1000; // refresh 1h before expiry
 
-export async function resolvePetImage(value: string | null): Promise<string | null> {
+export async function resolvePetImage(
+  value: string | null | undefined,
+  forceRefresh = false,
+): Promise<string | null> {
   if (!value) return null;
   // Lovable CDN assets — usar direto, não passa pelo Storage
   if (value.startsWith("/__l5e/")) return value;
@@ -48,7 +51,7 @@ export async function resolvePetImage(value: string | null): Promise<string | nu
   if (!path) return value; // external https URL we don't own — return as-is
   const now = Date.now();
   const hit = signedCache.get(path);
-  if (hit && hit.expiresAt > now) return hit.url;
+  if (!forceRefresh && hit && hit.expiresAt > now) return hit.url;
   const { data } = await supabase.storage.from(BUCKET).createSignedUrl(path, SIGNED_TTL);
   const url = data?.signedUrl ?? null;
   if (url) signedCache.set(path, { url, expiresAt: now + SIGN_TTL_MS });

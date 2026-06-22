@@ -3,6 +3,7 @@ import { Brain, PawPrint, RotateCcw } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 
+import { PetImg } from "@/components/pet/PetImg";
 import {
   getArcadeErrorMessage,
   revealMemoryCard,
@@ -159,7 +160,7 @@ export function MemoryGame({
                       </div>
                       <div className="absolute inset-0 overflow-hidden rounded-2xl border-2 border-white bg-white [backface-visibility:hidden] [transform:rotateY(180deg)]">
                         {card?.image_url ? (
-                          <img
+                          <PetImg
                             src={card.image_url}
                             alt={card.name ?? "Pet"}
                             className="size-full object-contain p-1"

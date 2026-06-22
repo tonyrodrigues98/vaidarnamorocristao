@@ -25,6 +25,7 @@ import {
 
 import { Header } from "@/components/layout/Header";
 import { CoinIcon } from "@/components/icons/CoinIcon";
+import { PetImg } from "@/components/pet/PetImg";
 import { TreasureAdventure } from "@/components/pet/arcade/TreasureAdventure";
 import { StellarFlight } from "@/components/pet/arcade/StellarFlight";
 import { PlinkoGame } from "@/components/pet/arcade/PlinkoGame";
@@ -240,7 +241,7 @@ function PetArcadePage() {
           <div className="flex items-center gap-4">
             <div className="grid size-20 shrink-0 place-items-center overflow-hidden rounded-3xl bg-gradient-to-br from-rose-100 to-sky-100">
               {petImage ? (
-                <img
+                <PetImg
                   src={petImage}
                   alt={pet?.custom_name ?? "Pet"}
                   className="size-full object-contain p-1"

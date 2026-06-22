@@ -3,6 +3,8 @@ import { motion } from "framer-motion";
 import { Gauge, Loader2, Rocket, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
+import { PetImg } from "@/components/pet/PetImg";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
@@ -252,7 +254,7 @@ export function StellarFlight({
               transition={{ duration: 0.2, ease: "linear" }}
             >
               {petImage ? (
-                <img
+                <PetImg
                   src={petImage}
                   alt="Pet no Voo Estelar"
                   className="h-16 w-16 object-contain drop-shadow-xl"

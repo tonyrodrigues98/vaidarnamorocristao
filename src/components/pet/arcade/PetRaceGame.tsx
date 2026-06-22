@@ -3,6 +3,7 @@ import { Flag, PawPrint, Trophy } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 
+import { PetImg } from "@/components/pet/PetImg";
 import { getArcadeErrorMessage, startPetRace, type ArcadeGameResult } from "@/lib/petArcade";
 import {
   ArcadePanel,
@@ -127,7 +128,7 @@ export function PetRaceGame({
                       className={`grid size-10 place-items-center overflow-hidden rounded-full border-2 bg-white shadow ${racer.is_user ? "border-rose-500" : "border-cyan-300"}`}
                     >
                       {racer.image_url ? (
-                        <img
+                        <PetImg
                           src={racer.image_url}
                           alt={racer.name}
                           className="size-full object-contain"
