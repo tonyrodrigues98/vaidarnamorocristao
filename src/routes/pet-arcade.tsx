@@ -5,8 +5,10 @@ import {
   ArrowLeft,
   ArrowRight,
   Brain,
+  BookOpen,
   Building2,
   CircleDollarSign,
+  CircleDot,
   Coins,
   Cookie,
   Dices,
@@ -15,6 +17,7 @@ import {
   Gamepad2,
   Gem,
   Grid3X3,
+  Egg,
   Layers3,
   Loader2,
   PawPrint,
@@ -23,6 +26,7 @@ import {
   ShieldCheck,
   Sparkles,
   Wrench,
+  ListChecks,
 } from "lucide-react";
 
 import { Header } from "@/components/layout/Header";
@@ -40,6 +44,13 @@ import { PetRaceGame } from "@/components/pet/arcade/PetRaceGame";
 import { MemoryGame } from "@/components/pet/arcade/MemoryGame";
 import { PiggyBankGame } from "@/components/pet/arcade/PiggyBankGame";
 import { ArcadeHistoryV2 } from "@/components/pet/arcade/ArcadeHistoryV2";
+import {
+  CapsuleGame,
+  DailyMissionsGame,
+  PetAlbumGame,
+  ScratchGame,
+  SurpriseEggGame,
+} from "@/components/pet/arcade/PetArcadeCollections";
 import { useAuth } from "@/lib/auth";
 import { getMyCoins } from "@/lib/coins";
 import { deriveCurrentValue, getCareConfig, listCareState } from "@/lib/petCare";
@@ -79,6 +90,11 @@ const GAME_ICONS: Record<ArcadeGameType, ComponentType<{ className?: string }>> 
   memory: Brain,
   piggybank: PiggyBank,
   dice: Dices,
+  scratch: Sparkles,
+  egg: Egg,
+  album: BookOpen,
+  capsule: CircleDot,
+  missions: ListChecks,
 };
 
 const FILTERS: { key: "all" | ArcadeCategory; label: string }[] = [
@@ -171,6 +187,36 @@ const GAME_VISUALS: Record<
     icon: "bg-blue-300 text-blue-950 shadow-blue-950/40",
     glow: "bg-blue-400/20",
     kicker: "Acima ou abaixo",
+  },
+  scratch: {
+    surface: "from-zinc-800 via-neutral-950 to-rose-950",
+    icon: "bg-zinc-200 text-zinc-900 shadow-black/40",
+    glow: "bg-white/15",
+    kicker: "Revele a combinação",
+  },
+  egg: {
+    surface: "from-violet-950 via-indigo-950 to-amber-900",
+    icon: "bg-violet-200 text-violet-950 shadow-violet-950/40",
+    glow: "bg-violet-300/20",
+    kicker: "Uma descoberta incubando",
+  },
+  album: {
+    surface: "from-indigo-950 via-slate-950 to-rose-900",
+    icon: "bg-indigo-200 text-indigo-950 shadow-indigo-950/40",
+    glow: "bg-indigo-300/20",
+    kicker: "Complete sua coleção",
+  },
+  capsule: {
+    surface: "from-rose-950 via-neutral-950 to-sky-900",
+    icon: "bg-rose-200 text-rose-950 shadow-rose-950/40",
+    glow: "bg-rose-300/20",
+    kicker: "Cuidado em uma cápsula",
+  },
+  missions: {
+    surface: "from-emerald-950 via-neutral-950 to-teal-900",
+    icon: "bg-emerald-200 text-emerald-950 shadow-emerald-950/40",
+    glow: "bg-emerald-300/20",
+    kicker: "Objetivos de hoje",
   },
 };
 
@@ -640,5 +686,15 @@ function GameStage(props: GameStageProps) {
       return <PiggyBankGame {...common} />;
     case "dice":
       return <DiceGame {...common} />;
+    case "scratch":
+      return <ScratchGame {...common} />;
+    case "egg":
+      return <SurpriseEggGame {...common} />;
+    case "album":
+      return <PetAlbumGame {...common} />;
+    case "capsule":
+      return <CapsuleGame {...common} />;
+    case "missions":
+      return <DailyMissionsGame {...common} />;
   }
 }

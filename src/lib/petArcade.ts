@@ -12,7 +12,12 @@ export type ArcadeGameType =
   | "race"
   | "memory"
   | "piggybank"
-  | "dice";
+  | "dice"
+  | "scratch"
+  | "egg"
+  | "album"
+  | "capsule"
+  | "missions";
 export type ArcadeRoundStatus = "active" | "collected" | "lost" | "cancelled";
 export type TreasureDifficulty = "leve" | "aventureiro" | "radical";
 
@@ -204,6 +209,60 @@ export type ArcadeAdminMetric = {
   total_entries: number;
   total_rewards: number;
   net_coins: number;
+};
+
+export type PetAlbumSticker = {
+  id: string;
+  name: string;
+  image_path: string;
+  rarity: "common" | "uncommon" | "rare" | "epic" | "legendary";
+  category: string;
+  quantity: number;
+  is_new?: boolean;
+};
+
+export type PetArcadeEgg = {
+  id: string;
+  game_id: string;
+  status: "waiting" | "ready" | "opened" | "cancelled";
+  open_after: string;
+  rarity: string;
+};
+
+export type PetAlbumState = {
+  stickers: PetAlbumSticker[];
+  claimed: string[];
+  egg: PetArcadeEgg | null;
+};
+
+export type PetArcadeMission = {
+  id: string;
+  mission_id: string;
+  title: string;
+  description: string;
+  progress: number;
+  target_value: number;
+  status: "active" | "completed" | "claimed" | "expired";
+  reward_config: { coins?: number; xp?: number };
+};
+
+export type PetArcadeMissionDefinition = {
+  id: string;
+  mission_key: string;
+  title: string;
+  description: string;
+  event_key: string;
+  target_value: number;
+  reward_config: {
+    coins?: number;
+    xp?: number;
+    care_item_quantity?: number;
+    item?: Record<string, unknown>;
+  };
+  is_active: boolean;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
 };
 
 async function callRpc<T>(name: string, args?: Record<string, unknown>): Promise<T> {
@@ -435,6 +494,103 @@ export function getPetArcadeUsageToday() {
   return callRpc<ArcadeUsageToday>("get_pet_arcade_usage_today");
 }
 
+export function startPetScratch(entryCoins: number, clientSeed: string) {
+  return callRpc<ArcadeGameResult>("start_pet_scratch", {
+    _entry_coins: entryCoins,
+    _client_seed: clientSeed,
+  });
+}
+
+export function startPetSurpriseEgg(entryCoins: number) {
+  return callRpc<PetArcadeEgg & { new_balance?: number }>("start_pet_surprise_egg", {
+    _entry_coins: entryCoins,
+  });
+}
+
+export function claimPetSurpriseEgg(eggId: string, instant = false) {
+  return callRpc<ArcadeGameResult>("claim_pet_surprise_egg", {
+    _egg_id: eggId,
+    _instant: instant,
+  });
+}
+
+export function getPetAlbumState() {
+  return callRpc<PetAlbumState>("get_pet_album_state");
+}
+
+export function openPetAlbumPack(packSize: 3 | 5 | 10, clientSeed: string) {
+  return callRpc<ArcadeGameResult>("open_pet_album_pack", {
+    _pack_size: packSize,
+    _client_seed: clientSeed,
+  });
+}
+
+export function claimPetAlbumCategory(category: string) {
+  return callRpc<{ coins: number; xp: number; new_balance: number }>("claim_pet_album_category", {
+    _category: category,
+  });
+}
+
+export function startPetCapsule(entryCoins: number, clientSeed: string) {
+  return callRpc<ArcadeGameResult>("start_pet_capsule", {
+    _entry_coins: entryCoins,
+    _client_seed: clientSeed,
+  });
+}
+
+export function getPetArcadeDailyMissions() {
+  return callRpc<PetArcadeMission[]>("get_pet_arcade_daily_missions");
+}
+
+export function claimPetArcadeMission(assignmentId: string) {
+  return callRpc<{ coins: number; xp: number; new_balance: number }>("claim_pet_arcade_mission", {
+    _assignment_id: assignmentId,
+  });
+}
+
+export async function listPetArcadeMissionsAdmin() {
+  const { data, error } = await supabase
+    .from("pet_arcade_daily_missions" as never)
+    .select("*")
+    .order("sort_order", { ascending: true });
+  if (error) throw error;
+  return (data ?? []) as PetArcadeMissionDefinition[];
+}
+
+export async function savePetArcadeMissionAdmin(
+  mission: Omit<PetArcadeMissionDefinition, "id" | "created_at" | "updated_at"> & {
+    id?: string;
+  },
+) {
+  const payload = {
+    ...(mission.id ? { id: mission.id } : {}),
+    mission_key: mission.mission_key,
+    title: mission.title,
+    description: mission.description,
+    event_key: mission.event_key,
+    target_value: mission.target_value,
+    reward_config: mission.reward_config,
+    is_active: mission.is_active,
+    sort_order: mission.sort_order,
+    updated_at: new Date().toISOString(),
+  };
+  const { data, error } = await supabase
+    .from("pet_arcade_daily_missions" as never)
+    .upsert(payload as never, { onConflict: "id" })
+    .select("*")
+    .single();
+  if (error) throw error;
+  return data as PetArcadeMissionDefinition;
+}
+
+export async function deletePetArcadeMissionAdmin(id: string) {
+  const { error } = await supabase
+    .from("pet_arcade_daily_missions" as never)
+    .delete()
+    .eq("id", id);
+  if (error) throw error;
+}
+
 export function getArcadeErrorMessage(error: unknown): string {
   const message = extractArcadeErrorText(error);
   const normalized = message.toLowerCase();
@@ -455,6 +611,14 @@ export function getArcadeErrorMessage(error: unknown): string {
     return "Esta ação já foi processada. O estado da rodada foi atualizado.";
   if (normalized.includes("piggybank_not_ready"))
     return "O cofrinho ainda está crescendo. Aguarde o tempo indicado.";
+  if (normalized.includes("egg_not_ready"))
+    return "O ovo ainda está incubando. Aguarde o tempo indicado.";
+  if (normalized.includes("egg_already_active")) return "Você já possui um Ovo Surpresa incubando.";
+  if (normalized.includes("mission_not_claimable"))
+    return "Esta missão ainda não pode ser resgatada.";
+  if (normalized.includes("reward_already_claimed")) return "Esta recompensa já foi resgatada.";
+  if (normalized.includes("album_category_incomplete"))
+    return "Complete esta categoria antes de resgatar a recompensa.";
   if (normalized.includes("insufficient_pet_images"))
     return "Ainda não há pets suficientes desta fase para esta aventura.";
   if (normalized.includes("position_already_revealed")) return "Essa casa já foi revelada.";

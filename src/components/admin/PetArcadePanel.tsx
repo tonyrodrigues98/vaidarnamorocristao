@@ -5,10 +5,13 @@ import {
   ChevronDown,
   Coins,
   Gamepad2,
+  ListChecks,
   Loader2,
+  Plus,
   Save,
   ShieldCheck,
   SlidersHorizontal,
+  Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -18,17 +21,32 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import {
+  deletePetArcadeMissionAdmin,
   getAdminArcadeRounds,
   getAdminArcadeSignals,
   getPetArcadeAdminMetrics,
   getPetArcadeCatalog,
   getPetArcadeConfig,
+  listPetArcadeMissionsAdmin,
+  savePetArcadeMissionAdmin,
   updatePetArcadeGameConfig,
   updatePetArcadeSettings,
   updatePetArcadeConfig,
   type ArcadeGameConfig,
   type ArcadeGlobalSettings,
   type PetArcadeConfig,
+  type PetArcadeMissionDefinition,
 } from "@/lib/petArcade";
 
 export function PetArcadePanel() {
@@ -139,44 +157,123 @@ export function PetArcadePanel() {
             </span>
             <div>
               <h2 className="text-lg font-semibold">Limites gerais</h2>
-              <p className="text-sm text-muted-foreground">Regras saudáveis aplicadas a todos os jogos.</p>
+              <p className="text-sm text-muted-foreground">
+                Regras saudáveis aplicadas a todos os jogos.
+              </p>
               <p className="mt-1 text-xs text-muted-foreground">
-                Ao alterar o limite geral, jogos ainda no valor padrão são sincronizados automaticamente.
+                Ao alterar o limite geral, jogos ainda no valor padrão são sincronizados
+                automaticamente.
               </p>
             </div>
           </div>
           <div className="mb-4 grid gap-3 sm:grid-cols-2">
-            <ToggleRow label="Pet Arcade ativo" checked={settingsDraft.is_enabled} onCheckedChange={(value) => setSettingsDraft({ ...settingsDraft, is_enabled: value })} />
+            <ToggleRow
+              label="Pet Arcade ativo"
+              checked={settingsDraft.is_enabled}
+              onCheckedChange={(value) => setSettingsDraft({ ...settingsDraft, is_enabled: value })}
+            />
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <NumberField label="Partidas por dia" value={settingsDraft.daily_play_limit} onChange={(value) => setSettingsDraft({ ...settingsDraft, daily_play_limit: value })} />
-            <NumberField label="Recompensa diária" value={settingsDraft.daily_win_limit} onChange={(value) => setSettingsDraft({ ...settingsDraft, daily_win_limit: value })} />
-            <NumberField label="Entrada mínima geral" value={settingsDraft.global_min_entry} onChange={(value) => setSettingsDraft({ ...settingsDraft, global_min_entry: value })} />
-            <NumberField label="Entrada máxima geral" value={settingsDraft.global_max_entry} onChange={(value) => setSettingsDraft({ ...settingsDraft, global_max_entry: value })} />
+            <NumberField
+              label="Partidas por dia"
+              value={settingsDraft.daily_play_limit}
+              onChange={(value) => setSettingsDraft({ ...settingsDraft, daily_play_limit: value })}
+            />
+            <NumberField
+              label="Recompensa diária"
+              value={settingsDraft.daily_win_limit}
+              onChange={(value) => setSettingsDraft({ ...settingsDraft, daily_win_limit: value })}
+            />
+            <NumberField
+              label="Entrada mínima geral"
+              value={settingsDraft.global_min_entry}
+              onChange={(value) => setSettingsDraft({ ...settingsDraft, global_min_entry: value })}
+            />
+            <NumberField
+              label="Entrada máxima geral"
+              value={settingsDraft.global_max_entry}
+              onChange={(value) => setSettingsDraft({ ...settingsDraft, global_max_entry: value })}
+            />
           </div>
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
-            <div><Label>Mensagem de manutenção</Label><Textarea value={settingsDraft.maintenance_message} onChange={(event) => setSettingsDraft({ ...settingsDraft, maintenance_message: event.target.value })} className="mt-2 min-h-24 rounded-2xl" /></div>
-            <div><Label>Aviso de equilíbrio</Label><Textarea value={settingsDraft.healthy_play_message} onChange={(event) => setSettingsDraft({ ...settingsDraft, healthy_play_message: event.target.value })} className="mt-2 min-h-24 rounded-2xl" /></div>
+            <div>
+              <Label>Mensagem de manutenção</Label>
+              <Textarea
+                value={settingsDraft.maintenance_message}
+                onChange={(event) =>
+                  setSettingsDraft({ ...settingsDraft, maintenance_message: event.target.value })
+                }
+                className="mt-2 min-h-24 rounded-2xl"
+              />
+            </div>
+            <div>
+              <Label>Aviso de equilíbrio</Label>
+              <Textarea
+                value={settingsDraft.healthy_play_message}
+                onChange={(event) =>
+                  setSettingsDraft({ ...settingsDraft, healthy_play_message: event.target.value })
+                }
+                className="mt-2 min-h-24 rounded-2xl"
+              />
+            </div>
           </div>
-          <Button onClick={() => void saveSettings()} disabled={saving} className="mt-5 h-11 rounded-xl"><Save className="h-4 w-4" /> Salvar limites gerais</Button>
+          <Button
+            onClick={() => void saveSettings()}
+            disabled={saving}
+            className="mt-5 h-11 rounded-xl"
+          >
+            <Save className="h-4 w-4" /> Salvar limites gerais
+          </Button>
         </section>
       ) : null}
 
       {metrics.length ? (
         <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {metrics.map((metric) => (
-            <div key={metric.game_type} className="rounded-2xl border border-border bg-card p-4 shadow-sm">
-              <div className="flex items-center gap-2"><Coins className="size-4 text-amber-500" /><p className="truncate text-sm font-semibold">{games.find((game) => game.game_type === metric.game_type)?.display_name ?? metric.game_type}</p></div>
-              <div className="mt-3 grid grid-cols-3 gap-2 text-[11px]"><span><b className="block text-base">{metric.rounds}</b>rodadas</span><span><b className="block text-base">{metric.total_entries}</b>entradas</span><span><b className="block text-base">{metric.total_rewards}</b>pagas</span></div>
+            <div
+              key={metric.game_type}
+              className="rounded-2xl border border-border bg-card p-4 shadow-sm"
+            >
+              <div className="flex items-center gap-2">
+                <Coins className="size-4 text-amber-500" />
+                <p className="truncate text-sm font-semibold">
+                  {games.find((game) => game.game_type === metric.game_type)?.display_name ??
+                    metric.game_type}
+                </p>
+              </div>
+              <div className="mt-3 grid grid-cols-3 gap-2 text-[11px]">
+                <span>
+                  <b className="block text-base">{metric.rounds}</b>rodadas
+                </span>
+                <span>
+                  <b className="block text-base">{metric.total_entries}</b>entradas
+                </span>
+                <span>
+                  <b className="block text-base">{metric.total_rewards}</b>pagas
+                </span>
+              </div>
             </div>
           ))}
         </section>
       ) : null}
 
       <section className="space-y-3">
-        <div><h2 className="text-lg font-semibold">Configuração por jogo</h2><p className="text-sm text-muted-foreground">Ative, ordene e ajuste economia, dificuldades e recompensas.</p></div>
-        {games.map((game) => <GameConfigEditor key={game.id} game={game} onSaved={() => queryClient.invalidateQueries({ queryKey: ["pet-arcade"] })} />)}
+        <div>
+          <h2 className="text-lg font-semibold">Configuração por jogo</h2>
+          <p className="text-sm text-muted-foreground">
+            Ative, ordene e ajuste economia, dificuldades e recompensas.
+          </p>
+        </div>
+        {games.map((game) => (
+          <GameConfigEditor
+            key={game.id}
+            game={game}
+            onSaved={() => queryClient.invalidateQueries({ queryKey: ["pet-arcade"] })}
+          />
+        ))}
       </section>
+
+      <MissionAdminSection />
 
       <section className="rounded-3xl border border-border bg-card p-5 shadow-sm sm:p-6">
         <div className="mb-5 flex items-start gap-3">
@@ -313,6 +410,254 @@ export function PetArcadePanel() {
   );
 }
 
+const EMPTY_MISSION: Omit<PetArcadeMissionDefinition, "id" | "created_at" | "updated_at"> = {
+  mission_key: "",
+  title: "",
+  description: "",
+  event_key: "game_played",
+  target_value: 1,
+  reward_config: { coins: 25, xp: 10 },
+  is_active: true,
+  sort_order: 0,
+};
+
+function MissionAdminSection() {
+  const queryClient = useQueryClient();
+  const missionsQuery = useQuery({
+    queryKey: ["pet-arcade", "admin", "missions"],
+    queryFn: listPetArcadeMissionsAdmin,
+  });
+  const [creating, setCreating] = useState(false);
+
+  async function refresh() {
+    await queryClient.invalidateQueries({ queryKey: ["pet-arcade", "admin", "missions"] });
+  }
+
+  return (
+    <section className="space-y-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 className="flex items-center gap-2 text-lg font-semibold">
+            <ListChecks className="size-5 text-violet-600" /> Missões diárias
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Metas e recompensas vinculadas aos eventos reais do Pet Arcade.
+          </p>
+        </div>
+        <Button variant="outline" className="rounded-xl" onClick={() => setCreating(true)}>
+          <Plus className="size-4" /> Nova missão
+        </Button>
+      </div>
+
+      {creating ? (
+        <MissionEditor
+          mission={EMPTY_MISSION}
+          onCancel={() => setCreating(false)}
+          onSaved={async () => {
+            setCreating(false);
+            await refresh();
+          }}
+        />
+      ) : null}
+
+      {missionsQuery.isLoading ? (
+        <div className="grid min-h-28 place-items-center rounded-2xl border border-border bg-card">
+          <Loader2 className="size-5 animate-spin" />
+        </div>
+      ) : null}
+      {missionsQuery.data?.map((mission) => (
+        <MissionEditor key={mission.id} mission={mission} onSaved={refresh} />
+      ))}
+      {missionsQuery.isError ? (
+        <p className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800">
+          A migration das missões precisa ser aplicada para liberar este gerenciamento.
+        </p>
+      ) : null}
+    </section>
+  );
+}
+
+function MissionEditor({
+  mission,
+  onSaved,
+  onCancel,
+}: {
+  mission: PetArcadeMissionDefinition | typeof EMPTY_MISSION;
+  onSaved: () => void | Promise<unknown>;
+  onCancel?: () => void;
+}) {
+  const [draft, setDraft] = useState(mission);
+  const [saving, setSaving] = useState(false);
+  const existingId = "id" in mission ? mission.id : undefined;
+
+  async function saveMission() {
+    if (!draft.mission_key.trim() || !draft.title.trim()) {
+      toast.error("Informe a chave e o título da missão.");
+      return;
+    }
+    setSaving(true);
+    try {
+      await savePetArcadeMissionAdmin({
+        ...(existingId ? { id: existingId } : {}),
+        mission_key: draft.mission_key.trim(),
+        title: draft.title.trim(),
+        description: draft.description.trim(),
+        event_key: draft.event_key.trim(),
+        target_value: draft.target_value,
+        reward_config: draft.reward_config,
+        is_active: draft.is_active,
+        sort_order: draft.sort_order,
+      });
+      await onSaved();
+      toast.success("Missão salva");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Não foi possível salvar a missão.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function removeMission() {
+    if (!existingId) return;
+    try {
+      await deletePetArcadeMissionAdmin(existingId);
+      await onSaved();
+      toast.success("Missão removida");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Não foi possível remover a missão.");
+    }
+  }
+
+  return (
+    <details
+      open={!existingId}
+      className="group rounded-2xl border border-border bg-card shadow-sm"
+    >
+      <summary className="flex cursor-pointer list-none items-center gap-3 p-4">
+        <span
+          className={`size-2 rounded-full ${draft.is_active ? "bg-emerald-500" : "bg-neutral-300"}`}
+        />
+        <div className="min-w-0 flex-1">
+          <p className="truncate font-semibold">{draft.title || "Nova missão"}</p>
+          <p className="truncate text-xs text-muted-foreground">
+            {draft.event_key} · meta {draft.target_value}
+          </p>
+        </div>
+        <ChevronDown className="size-4 transition group-open:rotate-180" />
+      </summary>
+      <div className="border-t border-border p-4 sm:p-5">
+        <div className="mb-4">
+          <ToggleRow
+            label="Missão ativa"
+            checked={draft.is_active}
+            onCheckedChange={(is_active) => setDraft({ ...draft, is_active })}
+          />
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <Label>Chave única</Label>
+            <Input
+              className="mt-2"
+              value={draft.mission_key}
+              onChange={(event) => setDraft({ ...draft, mission_key: event.target.value })}
+            />
+          </div>
+          <div>
+            <Label>Evento</Label>
+            <Input
+              className="mt-2"
+              value={draft.event_key}
+              onChange={(event) => setDraft({ ...draft, event_key: event.target.value })}
+            />
+          </div>
+          <div>
+            <Label>Título</Label>
+            <Input
+              className="mt-2"
+              value={draft.title}
+              onChange={(event) => setDraft({ ...draft, title: event.target.value })}
+            />
+          </div>
+          <NumberField
+            label="Meta"
+            value={draft.target_value}
+            onChange={(target_value) => setDraft({ ...draft, target_value })}
+          />
+          <div className="sm:col-span-2">
+            <Label>Descrição</Label>
+            <Textarea
+              className="mt-2"
+              value={draft.description}
+              onChange={(event) => setDraft({ ...draft, description: event.target.value })}
+            />
+          </div>
+          <NumberField
+            label="Moedas"
+            value={Number(draft.reward_config.coins ?? 0)}
+            onChange={(coins) =>
+              setDraft({ ...draft, reward_config: { ...draft.reward_config, coins } })
+            }
+          />
+          <NumberField
+            label="XP"
+            value={Number(draft.reward_config.xp ?? 0)}
+            onChange={(xp) => setDraft({ ...draft, reward_config: { ...draft.reward_config, xp } })}
+          />
+          <NumberField
+            label="Quantidade de item de cuidado"
+            value={Number(draft.reward_config.care_item_quantity ?? 0)}
+            onChange={(care_item_quantity) =>
+              setDraft({
+                ...draft,
+                reward_config: { ...draft.reward_config, care_item_quantity },
+              })
+            }
+          />
+          <NumberField
+            label="Ordem"
+            value={draft.sort_order}
+            onChange={(sort_order) => setDraft({ ...draft, sort_order })}
+          />
+        </div>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <Button onClick={() => void saveMission()} disabled={saving} className="rounded-xl">
+            {saving ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}{" "}
+            Salvar missão
+          </Button>
+          {onCancel ? (
+            <Button variant="ghost" onClick={onCancel}>
+              Cancelar
+            </Button>
+          ) : null}
+          {existingId ? (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive" className="ml-auto rounded-xl">
+                  <Trash2 className="size-4" /> Remover
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Remover esta missão?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    O histórico diário associado será removido pelo banco.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                  <AlertDialogAction onClick={() => void removeMission()}>
+                    Remover
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          ) : null}
+        </div>
+      </div>
+    </details>
+  );
+}
+
 function GameConfigEditor({
   game,
   onSaved,
@@ -321,7 +666,9 @@ function GameConfigEditor({
   onSaved: () => void | Promise<unknown>;
 }) {
   const [draft, setDraft] = useState(game);
-  const [difficultyJson, setDifficultyJson] = useState(() => JSON.stringify(game.difficulty_config, null, 2));
+  const [difficultyJson, setDifficultyJson] = useState(() =>
+    JSON.stringify(game.difficulty_config, null, 2),
+  );
   const [rewardJson, setRewardJson] = useState(() => JSON.stringify(game.reward_config, null, 2));
   const [saving, setSaving] = useState(false);
 
@@ -370,30 +717,105 @@ function GameConfigEditor({
   return (
     <details className="group rounded-2xl border border-border bg-card shadow-sm">
       <summary className="flex cursor-pointer list-none items-center gap-3 p-4">
-        <span className={`size-2 rounded-full ${draft.is_enabled ? "bg-emerald-500" : "bg-neutral-300"}`} />
-        <div className="min-w-0 flex-1"><p className="truncate font-semibold">{draft.display_name}</p><p className="text-xs text-muted-foreground">{draft.game_type} · ordem {draft.sort_order}</p></div>
+        <span
+          className={`size-2 rounded-full ${draft.is_enabled ? "bg-emerald-500" : "bg-neutral-300"}`}
+        />
+        <div className="min-w-0 flex-1">
+          <p className="truncate font-semibold">{draft.display_name}</p>
+          <p className="text-xs text-muted-foreground">
+            {draft.game_type} · ordem {draft.sort_order}
+          </p>
+        </div>
         <ChevronDown className="size-4 transition group-open:rotate-180" />
       </summary>
       <div className="border-t border-border p-4 sm:p-5">
-        <div className="mb-4"><ToggleRow label="Jogo ativo" checked={draft.is_enabled} onCheckedChange={(value) => setDraft({ ...draft, is_enabled: value })} /></div>
+        <div className="mb-4">
+          <ToggleRow
+            label="Jogo ativo"
+            checked={draft.is_enabled}
+            onCheckedChange={(value) => setDraft({ ...draft, is_enabled: value })}
+          />
+        </div>
         <div className="grid gap-4 sm:grid-cols-2">
-          <div><Label>Nome exibido</Label><Input value={draft.display_name} onChange={(event) => setDraft({ ...draft, display_name: event.target.value })} className="mt-2 h-11 rounded-xl" /></div>
-          <NumberField label="Ordem" value={draft.sort_order} onChange={(value) => setDraft({ ...draft, sort_order: value })} />
-          <div className="sm:col-span-2"><Label>Descrição</Label><Textarea value={draft.description} onChange={(event) => setDraft({ ...draft, description: event.target.value })} className="mt-2 rounded-xl" /></div>
+          <div>
+            <Label>Nome exibido</Label>
+            <Input
+              value={draft.display_name}
+              onChange={(event) => setDraft({ ...draft, display_name: event.target.value })}
+              className="mt-2 h-11 rounded-xl"
+            />
+          </div>
+          <NumberField
+            label="Ordem"
+            value={draft.sort_order}
+            onChange={(value) => setDraft({ ...draft, sort_order: value })}
+          />
+          <div className="sm:col-span-2">
+            <Label>Descrição</Label>
+            <Textarea
+              value={draft.description}
+              onChange={(event) => setDraft({ ...draft, description: event.target.value })}
+              className="mt-2 rounded-xl"
+            />
+          </div>
         </div>
         <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <NumberField label="Entrada mínima" value={draft.min_entry} onChange={(value) => setDraft({ ...draft, min_entry: value })} />
-          <NumberField label="Entrada máxima" value={draft.max_entry} onChange={(value) => setDraft({ ...draft, max_entry: value })} />
-          <NumberField label="Cooldown (segundos)" value={draft.cooldown_seconds} onChange={(value) => setDraft({ ...draft, cooldown_seconds: value })} />
-          <NumberField label="Partidas por dia neste jogo" value={draft.daily_play_limit} onChange={(value) => setDraft({ ...draft, daily_play_limit: value })} />
-          <NumberField label="Recompensa diária" value={draft.daily_win_limit} onChange={(value) => setDraft({ ...draft, daily_win_limit: value })} />
-          <NumberField label="Multiplicador máximo" value={Number(draft.max_multiplier)} step={0.05} onChange={(value) => setDraft({ ...draft, max_multiplier: value })} />
+          <NumberField
+            label="Entrada mínima"
+            value={draft.min_entry}
+            onChange={(value) => setDraft({ ...draft, min_entry: value })}
+          />
+          <NumberField
+            label="Entrada máxima"
+            value={draft.max_entry}
+            onChange={(value) => setDraft({ ...draft, max_entry: value })}
+          />
+          <NumberField
+            label="Cooldown (segundos)"
+            value={draft.cooldown_seconds}
+            onChange={(value) => setDraft({ ...draft, cooldown_seconds: value })}
+          />
+          <NumberField
+            label="Partidas por dia neste jogo"
+            value={draft.daily_play_limit}
+            onChange={(value) => setDraft({ ...draft, daily_play_limit: value })}
+          />
+          <NumberField
+            label="Recompensa diária"
+            value={draft.daily_win_limit}
+            onChange={(value) => setDraft({ ...draft, daily_win_limit: value })}
+          />
+          <NumberField
+            label="Multiplicador máximo"
+            value={Number(draft.max_multiplier)}
+            step={0.05}
+            onChange={(value) => setDraft({ ...draft, max_multiplier: value })}
+          />
         </div>
         <div className="mt-4 grid gap-4 lg:grid-cols-2">
-          <div><Label>Dificuldades e mecânica (JSON)</Label><Textarea value={difficultyJson} onChange={(event) => setDifficultyJson(event.target.value)} spellCheck={false} className="mt-2 min-h-56 rounded-xl font-mono text-xs" /></div>
-          <div><Label>Recompensas (JSON)</Label><Textarea value={rewardJson} onChange={(event) => setRewardJson(event.target.value)} spellCheck={false} className="mt-2 min-h-56 rounded-xl font-mono text-xs" /></div>
+          <div>
+            <Label>Dificuldades e mecânica (JSON)</Label>
+            <Textarea
+              value={difficultyJson}
+              onChange={(event) => setDifficultyJson(event.target.value)}
+              spellCheck={false}
+              className="mt-2 min-h-56 rounded-xl font-mono text-xs"
+            />
+          </div>
+          <div>
+            <Label>Recompensas (JSON)</Label>
+            <Textarea
+              value={rewardJson}
+              onChange={(event) => setRewardJson(event.target.value)}
+              spellCheck={false}
+              className="mt-2 min-h-56 rounded-xl font-mono text-xs"
+            />
+          </div>
         </div>
-        <Button onClick={() => void saveGame()} disabled={saving} className="mt-4 h-11 rounded-xl">{saving ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />} Salvar jogo</Button>
+        <Button onClick={() => void saveGame()} disabled={saving} className="mt-4 h-11 rounded-xl">
+          {saving ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}{" "}
+          Salvar jogo
+        </Button>
       </div>
     </details>
   );
