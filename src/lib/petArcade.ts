@@ -460,6 +460,10 @@ export function getArcadeErrorMessage(error: unknown): string {
   if (normalized.includes("position_already_revealed")) return "Essa casa já foi revelada.";
   if (normalized.includes("invalid_entry"))
     return "Escolha uma entrada dentro dos limites permitidos.";
+  if (normalized.includes("invalid_game_config"))
+    return "A configuração desta aventura precisa ser revisada no painel administrativo.";
+  if (normalized.includes("function") && normalized.includes("does not exist"))
+    return "A atualização do Pet Arcade ainda não foi aplicada completamente no servidor.";
   return "Não foi possível concluir esta ação. Tente novamente.";
 }
 
