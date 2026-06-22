@@ -48,6 +48,7 @@ import {
   getPetArcadeConfig,
   getPetArcadeHistory,
   getPetArcadeHistoryV2,
+  getPetArcadeUsageToday,
   type ArcadeCategory,
   type ArcadeGameConfig,
   type ArcadeGameType,
@@ -124,6 +125,11 @@ function PetArcadePage() {
     queryFn: () => getPetArcadeHistoryV2(30),
     enabled: !!user,
   });
+  const usageQuery = useQuery({
+    queryKey: ["pet-arcade", "usage-today"],
+    queryFn: getPetArcadeUsageToday,
+    enabled: !!user,
+  });
   const legacyHistoryQuery = useQuery({
     queryKey: ["pet-arcade", "history"],
     queryFn: () => getPetArcadeHistory(20),
@@ -185,6 +191,7 @@ function PetArcadePage() {
   const catalog = catalogQuery.data;
   const legacyConfig = legacyConfigQuery.data;
   const history = historyQuery.data ?? [];
+  const usage = usageQuery.data;
   const legacyHistory = legacyHistoryQuery.data ?? [];
   const activeRounds = activeQuery.data ?? [];
   const activeTreasure = activeRounds.find((round) => round.game_type === "treasure");
@@ -349,6 +356,8 @@ function PetArcadePage() {
                     key={game.id}
                     game={game}
                     active={activeRounds.some((round) => round.game_type === game.game_type)}
+                    usedToday={usage?.by_game[game.game_type] ?? 0}
+                    globalLimit={catalog.settings.daily_play_limit}
                     onOpen={() => setSelectedGame(game.game_type)}
                   />
                 ))}
@@ -367,8 +376,10 @@ function PetArcadePage() {
                 </div>
                 <div className="mt-4 grid grid-cols-2 gap-2 text-xs">
                   <div className="rounded-xl bg-neutral-50 p-3">
-                    <p className="text-neutral-400">Limite geral</p>
-                    <p className="mt-1 font-bold">{catalog.settings.daily_play_limit}/dia</p>
+                    <p className="text-neutral-400">Partidas hoje</p>
+                    <p className="mt-1 font-bold">
+                      {usage?.total_used ?? 0}/{catalog.settings.daily_play_limit}
+                    </p>
                   </div>
                   <div className="rounded-xl bg-neutral-50 p-3">
                     <p className="text-neutral-400">Pet ativo</p>
@@ -396,10 +407,14 @@ function PetArcadePage() {
 function GameCard({
   game,
   active,
+  usedToday,
+  globalLimit,
   onOpen,
 }: {
   game: ArcadeGameConfig;
   active: boolean;
+  usedToday: number;
+  globalLimit: number;
   onOpen: () => void;
 }) {
   const Icon = GAME_ICONS[game.game_type];
@@ -428,7 +443,9 @@ function GameCard({
         <span>
           Entrada {game.min_entry}–{game.max_entry}
         </span>
-        <span>{game.cooldown_seconds}s</span>
+        <span>
+          {usedToday}/{Math.min(game.daily_play_limit, globalLimit)} hoje
+        </span>
       </div>
     </button>
   );

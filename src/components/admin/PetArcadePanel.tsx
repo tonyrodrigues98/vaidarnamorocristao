@@ -80,7 +80,6 @@ export function PetArcadePanel() {
         maintenance: draft.maintenance,
         min_entry: draft.min_entry,
         max_entry: draft.max_entry,
-        daily_round_limit: draft.daily_round_limit,
         daily_reward_limit: draft.daily_reward_limit,
         max_multiplier: draft.max_multiplier,
         explanatory_text: draft.explanatory_text,
@@ -142,6 +141,9 @@ export function PetArcadePanel() {
             <div>
               <h2 className="text-lg font-semibold">Limites gerais</h2>
               <p className="text-sm text-muted-foreground">Regras saudáveis aplicadas a todos os jogos.</p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Ao alterar o limite geral, jogos ainda no valor padrão são sincronizados automaticamente.
+              </p>
             </div>
           </div>
           <div className="mb-4 grid gap-3 sm:grid-cols-2">
@@ -209,7 +211,7 @@ export function PetArcadePanel() {
           />
         </div>
 
-        <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <NumberField
             label="Entrada mínima"
             value={draft.min_entry}
@@ -219,11 +221,6 @@ export function PetArcadePanel() {
             label="Entrada máxima"
             value={draft.max_entry}
             onChange={(value) => update("max_entry", value)}
-          />
-          <NumberField
-            label="Rodadas por dia"
-            value={draft.daily_round_limit}
-            onChange={(value) => update("daily_round_limit", value)}
           />
           <NumberField
             label="Recompensa diária"
@@ -394,7 +391,7 @@ function GameConfigEditor({
           <NumberField label="Entrada mínima" value={draft.min_entry} onChange={(value) => setDraft({ ...draft, min_entry: value })} />
           <NumberField label="Entrada máxima" value={draft.max_entry} onChange={(value) => setDraft({ ...draft, max_entry: value })} />
           <NumberField label="Cooldown (segundos)" value={draft.cooldown_seconds} onChange={(value) => setDraft({ ...draft, cooldown_seconds: value })} />
-          <NumberField label="Partidas por dia" value={draft.daily_play_limit} onChange={(value) => setDraft({ ...draft, daily_play_limit: value })} />
+          <NumberField label="Partidas por dia neste jogo" value={draft.daily_play_limit} onChange={(value) => setDraft({ ...draft, daily_play_limit: value })} />
           <NumberField label="Recompensa diária" value={draft.daily_win_limit} onChange={(value) => setDraft({ ...draft, daily_win_limit: value })} />
           <NumberField label="Multiplicador máximo" value={Number(draft.max_multiplier)} step={0.05} onChange={(value) => setDraft({ ...draft, max_multiplier: value })} />
         </div>

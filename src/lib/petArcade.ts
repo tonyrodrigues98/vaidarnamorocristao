@@ -163,6 +163,12 @@ export type ArcadeCatalog = {
   games: ArcadeGameConfig[];
 };
 
+export type ArcadeUsageToday = {
+  total_used: number;
+  by_game: Partial<Record<ArcadeGameType, number>>;
+  day: string;
+};
+
 export type ArcadeGameResult = ArcadeVerification & {
   game_id: string;
   round_id?: string;
@@ -425,8 +431,12 @@ export function getPetArcadeAdminMetrics() {
   return callRpc<ArcadeAdminMetric[]>("pet_arcade_admin_metrics");
 }
 
+export function getPetArcadeUsageToday() {
+  return callRpc<ArcadeUsageToday>("get_pet_arcade_usage_today");
+}
+
 export function getArcadeErrorMessage(error: unknown): string {
-  const message = error instanceof Error ? error.message : String(error ?? "");
+  const message = extractArcadeErrorText(error);
   const normalized = message.toLowerCase();
   if (normalized.includes("insufficient_coins")) return "Saldo insuficiente para esta entrada.";
   if (normalized.includes("pet_required")) return "Escolha um pet antes de entrar no Pet Arcade.";
@@ -451,4 +461,13 @@ export function getArcadeErrorMessage(error: unknown): string {
   if (normalized.includes("invalid_entry"))
     return "Escolha uma entrada dentro dos limites permitidos.";
   return "Não foi possível concluir esta ação. Tente novamente.";
+}
+
+function extractArcadeErrorText(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  if (!error || typeof error !== "object") return String(error ?? "");
+  const record = error as Record<string, unknown>;
+  return [record.message, record.details, record.hint, record.code]
+    .filter((value): value is string => typeof value === "string")
+    .join(" ");
 }
