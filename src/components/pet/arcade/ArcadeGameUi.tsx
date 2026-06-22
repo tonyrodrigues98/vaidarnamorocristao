@@ -203,6 +203,11 @@ export function ResultCard({
               </span>
             ) : null}
           </div>
+          {result.reward_limited ? (
+            <p className="mt-2 text-xs leading-relaxed text-amber-800">
+              A recompensa foi limitada pelo teto diário configurado no Pet Arcade.
+            </p>
+          ) : null}
         </div>
       </div>
       <button

@@ -80,7 +80,6 @@ export function PetArcadePanel() {
         maintenance: draft.maintenance,
         min_entry: draft.min_entry,
         max_entry: draft.max_entry,
-        daily_reward_limit: draft.daily_reward_limit,
         max_multiplier: draft.max_multiplier,
         explanatory_text: draft.explanatory_text,
       });
@@ -211,7 +210,7 @@ export function PetArcadePanel() {
           />
         </div>
 
-        <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <NumberField
             label="Entrada mínima"
             value={draft.min_entry}
@@ -221,11 +220,6 @@ export function PetArcadePanel() {
             label="Entrada máxima"
             value={draft.max_entry}
             onChange={(value) => update("max_entry", value)}
-          />
-          <NumberField
-            label="Recompensa diária"
-            value={draft.daily_reward_limit}
-            onChange={(value) => update("daily_reward_limit", value)}
           />
           <NumberField
             label="Multiplicador máximo"
