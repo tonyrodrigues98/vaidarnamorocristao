@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useState, type ComponentType } from "r
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeft,
+  ArrowRight,
   Brain,
   Building2,
   CircleDollarSign,
@@ -20,6 +21,7 @@ import {
   PiggyBank,
   Rocket,
   ShieldCheck,
+  Sparkles,
   Wrench,
 } from "lucide-react";
 
@@ -86,6 +88,91 @@ const FILTERS: { key: "all" | ArcadeCategory; label: string }[] = [
   { key: "luck", label: "Sorte" },
   { key: "care", label: "Cuidado" },
 ];
+
+const CATEGORY_LABELS: Record<ArcadeCategory, string> = {
+  quick: "Rápido",
+  strategy: "Estratégia",
+  luck: "Sorte",
+  care: "Cuidado",
+};
+
+const GAME_VISUALS: Record<
+  ArcadeGameType,
+  { surface: string; icon: string; glow: string; kicker: string }
+> = {
+  treasure: {
+    surface: "from-amber-950 via-stone-900 to-emerald-950",
+    icon: "bg-amber-400 text-amber-950 shadow-amber-950/40",
+    glow: "bg-amber-400/20",
+    kicker: "Mapa secreto",
+  },
+  flight: {
+    surface: "from-indigo-950 via-slate-950 to-sky-900",
+    icon: "bg-sky-300 text-sky-950 shadow-sky-950/40",
+    glow: "bg-sky-400/20",
+    kicker: "Rumo às estrelas",
+  },
+  plinko: {
+    surface: "from-orange-950 via-stone-950 to-amber-800",
+    icon: "bg-orange-300 text-orange-950 shadow-orange-950/40",
+    glow: "bg-orange-400/20",
+    kicker: "Queda premiada",
+  },
+  keno: {
+    surface: "from-violet-950 via-slate-950 to-fuchsia-900",
+    icon: "bg-violet-300 text-violet-950 shadow-violet-950/40",
+    glow: "bg-violet-400/20",
+    kicker: "Escolha sua sequência",
+  },
+  wheel: {
+    surface: "from-rose-950 via-neutral-950 to-orange-900",
+    icon: "bg-rose-300 text-rose-950 shadow-rose-950/40",
+    glow: "bg-rose-400/20",
+    kicker: "A roda vai girar",
+  },
+  hilo: {
+    surface: "from-indigo-950 via-neutral-950 to-purple-900",
+    icon: "bg-indigo-300 text-indigo-950 shadow-indigo-950/40",
+    glow: "bg-indigo-400/20",
+    kicker: "Leia a próxima carta",
+  },
+  towers: {
+    surface: "from-emerald-950 via-neutral-950 to-teal-900",
+    icon: "bg-emerald-300 text-emerald-950 shadow-emerald-950/40",
+    glow: "bg-emerald-400/20",
+    kicker: "Suba com cuidado",
+  },
+  coinflip: {
+    surface: "from-pink-950 via-neutral-950 to-amber-900",
+    icon: "bg-pink-300 text-pink-950 shadow-pink-950/40",
+    glow: "bg-pink-400/20",
+    kicker: "Patinha ou coração",
+  },
+  race: {
+    surface: "from-cyan-950 via-slate-950 to-emerald-900",
+    icon: "bg-cyan-300 text-cyan-950 shadow-cyan-950/40",
+    glow: "bg-cyan-400/20",
+    kicker: "Prepare seu campeão",
+  },
+  memory: {
+    surface: "from-teal-950 via-neutral-950 to-cyan-900",
+    icon: "bg-teal-300 text-teal-950 shadow-teal-950/40",
+    glow: "bg-teal-400/20",
+    kicker: "Encontre os pares",
+  },
+  piggybank: {
+    surface: "from-amber-950 via-rose-950 to-stone-950",
+    icon: "bg-amber-300 text-amber-950 shadow-amber-950/40",
+    glow: "bg-amber-400/20",
+    kicker: "Cultive sua reserva",
+  },
+  dice: {
+    surface: "from-blue-950 via-slate-950 to-indigo-900",
+    icon: "bg-blue-300 text-blue-950 shadow-blue-950/40",
+    glow: "bg-blue-400/20",
+    kicker: "Acima ou abaixo",
+  },
+};
 
 const CARE_LABELS: Record<string, string> = {
   feed: "Fome",
@@ -216,10 +303,10 @@ function PetArcadePage() {
     activeQuery.isLoading;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-rose-50/70 via-white to-sky-50/60 text-neutral-950">
+    <div className="min-h-screen max-w-full overflow-x-clip bg-gradient-to-b from-rose-50/70 via-white to-sky-50/60 text-neutral-950">
       <Header />
-      <main className="mx-auto max-w-6xl px-4 pb-28 pt-5 sm:px-6 sm:pb-12 sm:pt-8">
-        <div className="mb-5 flex items-center justify-between gap-3">
+      <main className="mx-auto w-full min-w-0 max-w-6xl px-4 pb-28 pt-5 sm:px-6 sm:pb-12 sm:pt-8">
+        <div className="mb-5 grid grid-cols-[44px_minmax(0,1fr)_auto] items-center gap-2 sm:gap-3">
           <Link
             to="/meu-pet"
             className="app-pressable grid size-11 place-items-center rounded-full border border-neutral-200 bg-white text-neutral-700 shadow-sm"
@@ -231,15 +318,15 @@ function PetArcadePage() {
             <p className="text-[10px] font-semibold uppercase text-rose-500">Aventuras do pet</p>
             <h1 className="truncate text-xl font-black">Pet Arcade</h1>
           </div>
-          <div className="inline-flex h-11 items-center gap-2 rounded-full border border-amber-200 bg-white px-3 shadow-sm">
+          <div className="inline-flex h-11 max-w-28 shrink-0 items-center gap-2 rounded-full border border-amber-200 bg-white px-3 shadow-sm">
             <CoinIcon className="size-5" />
-            <span className="font-black">{balance}</span>
+            <span className="truncate font-black">{balance}</span>
           </div>
         </div>
 
         <section className="mb-5 overflow-hidden rounded-3xl border border-white bg-white/88 p-5 shadow-[0_20px_60px_rgba(15,23,42,0.08)] backdrop-blur sm:p-6">
-          <div className="flex items-center gap-4">
-            <div className="grid size-20 shrink-0 place-items-center overflow-hidden rounded-3xl bg-gradient-to-br from-rose-100 to-sky-100">
+          <div className="grid min-w-0 grid-cols-[72px_minmax(0,1fr)] items-center gap-3 sm:grid-cols-[80px_minmax(0,1fr)] sm:gap-4">
+            <div className="grid size-[72px] shrink-0 place-items-center overflow-hidden rounded-3xl bg-gradient-to-br from-rose-100 to-sky-100 sm:size-20">
               {petImage ? (
                 <PetImg
                   src={petImage}
@@ -251,14 +338,14 @@ function PetArcadePage() {
               )}
             </div>
             <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2">
+              <div className="flex min-w-0 flex-wrap items-center gap-2">
                 <Gamepad2 className="size-4 text-rose-500" />
                 <p className="text-sm font-black">{pet?.custom_name ?? "Seu pet"}</p>
                 <span className="rounded-full bg-emerald-50 px-2 py-1 text-[10px] font-bold text-emerald-700">
                   Cuidado {careScore}%
                 </span>
               </div>
-              <p className="mt-1 text-sm leading-relaxed text-neutral-600">
+              <p className="mt-1 break-words text-sm leading-relaxed text-neutral-600">
                 Aventuras rápidas, progressão e cuidado usando apenas moedas internas.
               </p>
               {careValues.length ? (
@@ -332,16 +419,25 @@ function PetArcadePage() {
             />
           </div>
         ) : (
-          <div className="grid gap-5 lg:grid-cols-[minmax(0,1.55fr)_minmax(280px,0.65fr)]">
-            <div>
-              <div className="mb-4 flex gap-2 overflow-x-auto pb-1">
+          <div className="grid min-w-0 gap-5 lg:grid-cols-[minmax(0,1.55fr)_minmax(280px,0.65fr)]">
+            <div className="min-w-0">
+              <div className="mb-4 flex min-w-0 items-end justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-[10px] font-bold uppercase text-rose-500">Pet Arcade</p>
+                  <h2 className="mt-1 text-xl font-black text-neutral-950">Escolha sua aventura</h2>
+                </div>
+                <span className="shrink-0 rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-[10px] font-bold text-neutral-500 shadow-sm">
+                  {filteredGames.length} jogos
+                </span>
+              </div>
+              <div className="-mx-4 mb-5 flex touch-pan-x snap-x snap-mandatory gap-2 overflow-x-auto overscroll-x-contain px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:px-0">
                 {FILTERS.map((item) => (
                   <button
                     key={item.key}
                     type="button"
                     onClick={() => setFilter(item.key)}
                     className={cn(
-                      "h-10 shrink-0 rounded-full px-4 text-xs font-bold transition",
+                      "h-10 shrink-0 snap-start rounded-full px-4 text-xs font-bold transition",
                       filter === item.key
                         ? "bg-neutral-950 text-white"
                         : "border border-neutral-200 bg-white text-neutral-600",
@@ -351,7 +447,7 @@ function PetArcadePage() {
                   </button>
                 ))}
               </div>
-              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+              <div className="grid min-w-0 gap-4 sm:grid-cols-2 xl:grid-cols-3">
                 {filteredGames.map((game) => (
                   <GameCard
                     key={game.id}
@@ -365,7 +461,7 @@ function PetArcadePage() {
               </div>
             </div>
             <div className="space-y-4">
-              <div className="rounded-3xl border border-neutral-200 bg-white p-5 shadow-sm">
+              <div className="overflow-hidden rounded-3xl border border-amber-100 bg-gradient-to-br from-white via-amber-50/60 to-rose-50/50 p-5 shadow-[0_18px_50px_rgba(120,53,15,0.08)]">
                 <div className="flex items-center gap-3">
                   <span className="grid size-10 place-items-center rounded-2xl bg-amber-50 text-amber-600">
                     <Coins className="size-5" />
@@ -419,33 +515,57 @@ function GameCard({
   onOpen: () => void;
 }) {
   const Icon = GAME_ICONS[game.game_type];
+  const visual = GAME_VISUALS[game.game_type];
+  const limit = Math.min(game.daily_play_limit, globalLimit);
   return (
     <button
       type="button"
       disabled={!game.is_enabled}
       onClick={onOpen}
-      className="group min-h-48 overflow-hidden rounded-3xl border border-white bg-white p-5 text-left shadow-[0_16px_45px_rgba(15,23,42,0.07)] transition hover:-translate-y-1 hover:shadow-xl disabled:opacity-50"
+      className={cn(
+        "group relative min-h-[218px] w-full min-w-0 overflow-hidden rounded-[28px] border border-white/10 bg-gradient-to-br p-5 text-left text-white shadow-[0_22px_55px_rgba(15,23,42,0.20)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_28px_65px_rgba(15,23,42,0.28)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 focus-visible:ring-offset-2 disabled:opacity-50",
+        visual.surface,
+      )}
     >
-      <div className="flex items-start justify-between">
-        <span className="grid size-12 place-items-center rounded-2xl bg-gradient-to-br from-rose-500 to-orange-400 text-white shadow-lg shadow-rose-100">
+      <span
+        aria-hidden
+        className={cn(
+          "absolute -right-12 -top-12 size-40 rounded-full blur-3xl transition duration-500 group-hover:scale-125",
+          visual.glow,
+        )}
+      />
+      <Icon
+        aria-hidden
+        className="absolute -right-5 top-12 size-32 rotate-[-8deg] text-white opacity-[0.07] transition duration-500 group-hover:rotate-0 group-hover:scale-110"
+      />
+      <div className="relative z-10 flex min-w-0 items-start justify-between gap-3">
+        <span
+          className={cn(
+            "grid size-12 shrink-0 place-items-center rounded-2xl shadow-xl",
+            visual.icon,
+          )}
+        >
           <Icon className="size-6" />
         </span>
-        {active ? (
-          <span className="rounded-full bg-emerald-50 px-2 py-1 text-[10px] font-bold text-emerald-700">
-            Em andamento
-          </span>
-        ) : null}
+        <span className="min-w-0 rounded-full border border-white/15 bg-white/10 px-2.5 py-1 text-[9px] font-bold uppercase text-white/80 backdrop-blur-sm">
+          {active ? "Em andamento" : CATEGORY_LABELS[game.category]}
+        </span>
       </div>
-      <h2 className="mt-5 font-black tracking-tight text-neutral-950">{game.display_name}</h2>
-      <p className="mt-2 line-clamp-2 text-xs leading-relaxed text-neutral-500">
+      <div className="relative z-10 mt-5 min-w-0">
+        <p className="flex items-center gap-1.5 text-[9px] font-bold uppercase text-white/55">
+          <Sparkles className="size-3" /> {visual.kicker}
+        </p>
+        <h2 className="mt-1 break-words text-lg font-black text-white">{game.display_name}</h2>
+      </div>
+      <p className="relative z-10 mt-2 line-clamp-2 break-words text-xs leading-relaxed text-white/65">
         {game.description}
       </p>
-      <div className="mt-4 flex items-center justify-between text-[10px] font-bold uppercase text-neutral-400">
-        <span>
+      <div className="relative z-10 mt-4 grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-end gap-3 border-t border-white/10 pt-3 text-[9px] font-bold uppercase text-white/55">
+        <span className="min-w-0 truncate">
           Entrada {game.min_entry}–{game.max_entry}
         </span>
-        <span>
-          {usedToday}/{Math.min(game.daily_play_limit, globalLimit)} hoje
+        <span className="inline-flex shrink-0 items-center gap-1 text-white/75">
+          {usedToday}/{limit} hoje <ArrowRight className="size-3.5" />
         </span>
       </div>
     </button>
@@ -484,7 +604,6 @@ function GameStage(props: GameStageProps) {
           config={props.legacyConfig}
           balance={props.balance}
           activeRound={props.activeTreasure}
-          cooldownSeconds={props.config.cooldown_seconds}
           onBalanceChange={props.onBalanceChange}
           onFinished={props.onFinished}
         />

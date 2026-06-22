@@ -7,19 +7,13 @@ type AutoPlayControlsProps = {
   cooldownSeconds: number;
   disabled?: boolean;
   onRound: () => Promise<boolean>;
-  onRunningChange?: (running: boolean) => void;
 };
 
 function wait(ms: number) {
   return new Promise<void>((resolve) => window.setTimeout(resolve, ms));
 }
 
-export function AutoPlayControls({
-  cooldownSeconds,
-  disabled,
-  onRound,
-  onRunningChange,
-}: AutoPlayControlsProps) {
+export function AutoPlayControls({ cooldownSeconds, disabled, onRound }: AutoPlayControlsProps) {
   const [roundLimit, setRoundLimit] = useState(5);
   const [completed, setCompleted] = useState(0);
   const [running, setRunning] = useState(false);
@@ -37,7 +31,6 @@ export function AutoPlayControls({
     stopRequested.current = false;
     setCompleted(0);
     setRunning(true);
-    onRunningChange?.(true);
     let count = 0;
     const delay = Math.max(500, cooldownSeconds * 1000 + 150);
 
@@ -52,7 +45,6 @@ export function AutoPlayControls({
       }
     } finally {
       setRunning(false);
-      onRunningChange?.(false);
     }
   }
 
