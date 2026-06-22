@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { CoinIcon } from "@/components/icons/CoinIcon";
+import flightArtwork from "@/assets/pet-arcade/flight-card.webp";
 import {
   collectFlightReward,
   finalizeFlightRound,
@@ -159,7 +160,10 @@ export function StellarFlight({
   return (
     <section className="overflow-hidden rounded-[32px] border border-sky-100 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(239,246,255,0.94))] shadow-[0_28px_80px_rgba(14,165,233,0.12)]">
       <div className="relative bg-gradient-to-br from-sky-50 via-white to-rose-50 p-5 sm:p-6">
-        <span aria-hidden className="absolute -right-12 top-0 size-36 rounded-full bg-sky-200/40 blur-3xl" />
+        <span
+          aria-hidden
+          className="absolute -right-12 top-0 size-36 rounded-full bg-sky-200/40 blur-3xl"
+        />
         <div className="flex items-start gap-3">
           <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-sky-500 text-white shadow-lg shadow-sky-200">
             <Rocket className="h-5 w-5" />
@@ -231,6 +235,11 @@ export function StellarFlight({
       ) : (
         <div className="p-4 sm:p-6">
           <div className="relative h-72 overflow-hidden rounded-[30px] bg-gradient-to-b from-sky-950 via-indigo-900 to-sky-400">
+            <img
+              src={flightArtwork}
+              alt=""
+              className="absolute inset-0 size-full object-cover opacity-45"
+            />
             <div className="absolute inset-0 opacity-40 [background-image:radial-gradient(circle_at_20%_20%,white_0_2px,transparent_3px),radial-gradient(circle_at_75%_35%,white_0_1.5px,transparent_2.5px)] [background-size:90px_90px,120px_120px]" />
             <div className="absolute inset-x-0 top-7 z-10 text-center">
               <p className="text-[11px] font-semibold uppercase text-white/75">

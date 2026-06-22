@@ -16,6 +16,7 @@ import {
 } from "./ArcadeGameUi";
 import { createArcadeClientSeed, validateEntry } from "./arcadeUiUtils";
 import { AutoPlayControls } from "./AutoPlayControls";
+import wheelArtwork from "@/assets/pet-arcade/wheel-card.webp";
 
 type WheelSegment = { m: number; w: number };
 
@@ -74,40 +75,55 @@ export function WheelGame({ config, balance, onBalanceChange, onFinished }: Arca
       icon={<Disc3 className="size-5" />}
     >
       <div className="space-y-5">
-        <ArcadeStage className="border-rose-200/60 bg-gradient-to-br from-rose-950 via-orange-900 to-amber-700" glowClassName="bg-rose-300/20">
-        <div className="relative mx-auto size-64 max-w-full">
-          <Triangle className="absolute left-1/2 top-0 z-10 size-8 -translate-x-1/2 rotate-180 fill-neutral-950 text-neutral-950" />
-          <motion.div
-            animate={{ rotate: rotation }}
-            transition={{ duration: 2.35, ease: [0.12, 0.7, 0.15, 1] }}
-            className="absolute inset-5 rounded-full border-8 border-white shadow-[0_15px_45px_rgba(15,23,42,0.2)]"
-            style={{ background: wheelGradient }}
-          >
-            {resultSegments.map((segment, index) => {
-              const angle = index * (360 / resultSegments.length) + 360 / resultSegments.length / 2;
-              return (
-                <span
-                  key={`${segment.m}-${index}`}
-                  className="absolute left-1/2 top-1/2 text-xs font-black text-white drop-shadow"
-                  style={{
-                    transform: `rotate(${angle}deg) translateY(-86px) rotate(${-angle}deg)`,
-                  }}
-                >
-                  {segment.m}x
-                </span>
-              );
-            })}
-            <span className="absolute left-1/2 top-1/2 grid size-12 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-white shadow-lg">
-              <Disc3 className="size-6 text-rose-500" />
-            </span>
-          </motion.div>
-        </div>
+        <ArcadeStage
+          className="border-rose-200/60 bg-gradient-to-br from-rose-950 via-orange-900 to-amber-700"
+          glowClassName="bg-rose-300/20"
+        >
+          <img
+            src={wheelArtwork}
+            alt=""
+            className="absolute inset-0 size-full object-cover opacity-25"
+          />
+          <div className="relative mx-auto size-64 max-w-full">
+            <Triangle className="absolute left-1/2 top-0 z-10 size-8 -translate-x-1/2 rotate-180 fill-neutral-950 text-neutral-950" />
+            <motion.div
+              animate={{ rotate: rotation }}
+              transition={{ duration: 2.35, ease: [0.12, 0.7, 0.15, 1] }}
+              className="absolute inset-5 rounded-full border-8 border-white shadow-[0_15px_45px_rgba(15,23,42,0.2)]"
+              style={{ background: wheelGradient }}
+            >
+              {resultSegments.map((segment, index) => {
+                const angle =
+                  index * (360 / resultSegments.length) + 360 / resultSegments.length / 2;
+                return (
+                  <span
+                    key={`${segment.m}-${index}`}
+                    className="absolute left-1/2 top-1/2 text-xs font-black text-white drop-shadow"
+                    style={{
+                      transform: `rotate(${angle}deg) translateY(-86px) rotate(${-angle}deg)`,
+                    }}
+                  >
+                    {segment.m}x
+                  </span>
+                );
+              })}
+              <span className="absolute left-1/2 top-1/2 grid size-12 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-white shadow-lg">
+                <Disc3 className="size-6 text-rose-500" />
+              </span>
+            </motion.div>
+          </div>
         </ArcadeStage>
         <div className="grid grid-cols-2 gap-2">
           <ArcadeMetric label="Entrada" value={`${entry} moedas`} tone="dark" />
           <ArcadeMetric
             label="Modo"
-            value={difficulty === "leve" ? "Leve" : difficulty === "aventureiro" ? "Aventureiro" : "Radical"}
+            value={
+              difficulty === "leve"
+                ? "Leve"
+                : difficulty === "aventureiro"
+                  ? "Aventureiro"
+                  : "Radical"
+            }
           />
         </div>
 

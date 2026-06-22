@@ -46,6 +46,8 @@ import {
   ResultCard,
 } from "./ArcadeGameUi";
 import { createArcadeClientSeed, validateEntry } from "./arcadeUiUtils";
+import albumArtwork from "@/assets/pet-arcade/album-card.webp";
+import capsuleArtwork from "@/assets/pet-arcade/capsule-card.webp";
 
 const RARITY_STYLE: Record<string, string> = {
   common: "border-neutral-200 bg-white",
@@ -86,43 +88,46 @@ export function ScratchGame({ config, balance, onBalanceChange, onFinished }: Ar
       icon={<Sparkles className="size-5" />}
     >
       <div className="space-y-4">
-        <ArcadeStage className="bg-gradient-to-br from-zinc-800 via-slate-900 to-zinc-950 p-3" glowClassName="bg-slate-200/20">
-        <div className="mb-3 flex items-center justify-between text-xs font-bold text-white/80">
-          <span>Revele os nove espaços</span>
-          <span>{revealed.length}/9</span>
-        </div>
-        <div className="grid grid-cols-3 gap-2 rounded-[24px] bg-white/8 p-2 shadow-inner">
-          {Array.from({ length: 9 }, (_, index) => {
-            const open = revealed.includes(index);
-            const tile = tiles[index];
-            return (
-              <motion.button
-                key={index}
-                type="button"
-                whileTap={{ scale: 0.96 }}
-                disabled={!result || open}
-                onClick={() => setRevealed((current) => [...current, index])}
-                className="relative aspect-square overflow-hidden rounded-2xl border border-white bg-white shadow-sm"
-              >
-                {tile ? (
-                  <PetImg
-                    src={tile.image_path}
-                    alt={tile.name}
-                    className="size-full object-contain p-1"
-                  />
-                ) : null}
-                {!open ? (
-                  <motion.span
-                    exit={{ opacity: 0, scale: 1.2 }}
-                    className="absolute inset-0 grid place-items-center bg-[linear-gradient(135deg,#d4d4d8,#fafafa_48%,#a1a1aa)] text-neutral-600 after:absolute after:inset-0 after:bg-[repeating-linear-gradient(135deg,transparent_0_8px,rgba(255,255,255,.35)_8px_10px)]"
-                  >
-                    <Sparkles className="size-6" />
-                  </motion.span>
-                ) : null}
-              </motion.button>
-            );
-          })}
-        </div>
+        <ArcadeStage
+          className="bg-gradient-to-br from-zinc-800 via-slate-900 to-zinc-950 p-3"
+          glowClassName="bg-slate-200/20"
+        >
+          <div className="mb-3 flex items-center justify-between text-xs font-bold text-white/80">
+            <span>Revele os nove espaços</span>
+            <span>{revealed.length}/9</span>
+          </div>
+          <div className="grid grid-cols-3 gap-2 rounded-[24px] bg-white/8 p-2 shadow-inner">
+            {Array.from({ length: 9 }, (_, index) => {
+              const open = revealed.includes(index);
+              const tile = tiles[index];
+              return (
+                <motion.button
+                  key={index}
+                  type="button"
+                  whileTap={{ scale: 0.96 }}
+                  disabled={!result || open}
+                  onClick={() => setRevealed((current) => [...current, index])}
+                  className="relative aspect-square overflow-hidden rounded-2xl border border-white bg-white shadow-sm"
+                >
+                  {tile ? (
+                    <PetImg
+                      src={tile.image_path}
+                      alt={tile.name}
+                      className="size-full object-contain p-1"
+                    />
+                  ) : null}
+                  {!open ? (
+                    <motion.span
+                      exit={{ opacity: 0, scale: 1.2 }}
+                      className="absolute inset-0 grid place-items-center bg-[linear-gradient(135deg,#d4d4d8,#fafafa_48%,#a1a1aa)] text-neutral-600 after:absolute after:inset-0 after:bg-[repeating-linear-gradient(135deg,transparent_0_8px,rgba(255,255,255,.35)_8px_10px)]"
+                    >
+                      <Sparkles className="size-6" />
+                    </motion.span>
+                  ) : null}
+                </motion.button>
+              );
+            })}
+          </div>
         </ArcadeStage>
         {!result ? (
           <>
@@ -227,7 +232,10 @@ export function SurpriseEggGame({ config, balance, onBalanceChange, onFinished }
       icon={<Egg className="size-5" />}
     >
       <div className="space-y-4">
-        <ArcadeStage className="grid min-h-80 place-items-center bg-gradient-to-b from-violet-950 via-indigo-950 to-amber-200" glowClassName="bg-violet-300/30">
+        <ArcadeStage
+          className="grid min-h-80 place-items-center bg-gradient-to-b from-violet-950 via-indigo-950 to-amber-200"
+          glowClassName="bg-violet-300/30"
+        >
           <span className="absolute size-52 rounded-full bg-white/15 blur-3xl" />
           <motion.div
             animate={
@@ -348,7 +356,15 @@ export function PetAlbumGame({ config, balance, onBalanceChange, onFinished }: A
     >
       <div className="space-y-4">
         {opened.length ? (
-          <ArcadeStage className="overflow-x-auto bg-gradient-to-br from-indigo-950 via-slate-950 to-rose-950 p-4" glowClassName="bg-indigo-400/25">
+          <ArcadeStage
+            className="overflow-x-auto bg-gradient-to-br from-indigo-950 via-slate-950 to-rose-950 p-4"
+            glowClassName="bg-indigo-400/25"
+          >
+            <img
+              src={albumArtwork}
+              alt=""
+              className="absolute inset-0 size-full object-cover opacity-20"
+            />
             <div className="flex min-w-max gap-3">
               {opened.map((s, i) => (
                 <motion.div
@@ -359,7 +375,10 @@ export function PetAlbumGame({ config, balance, onBalanceChange, onFinished }: A
                       ? { opacity: 1, y: 0, rotateY: 0 }
                       : { opacity: 0, y: 30, rotateY: 90 }
                   }
-                  className={cn("w-36 rounded-[22px] border-2 p-2 shadow-2xl", RARITY_STYLE[s.rarity])}
+                  className={cn(
+                    "w-36 rounded-[22px] border-2 p-2 shadow-2xl",
+                    RARITY_STYLE[s.rarity],
+                  )}
                 >
                   <PetImg
                     src={s.image_path}
@@ -482,7 +501,15 @@ export function CapsuleGame({ config, balance, onBalanceChange, onFinished }: Ar
       icon={<CircleDot className="size-5" />}
     >
       <div className="space-y-4">
-        <ArcadeStage className="grid min-h-80 place-items-center bg-gradient-to-b from-rose-500 via-fuchsia-950 to-sky-950" glowClassName="bg-rose-300/30">
+        <ArcadeStage
+          className="grid min-h-80 place-items-center bg-gradient-to-b from-rose-500 via-fuchsia-950 to-sky-950"
+          glowClassName="bg-rose-300/30"
+        >
+          <img
+            src={capsuleArtwork}
+            alt=""
+            className="absolute inset-0 size-full object-cover opacity-35"
+          />
           <button
             onClick={() => setSound((v) => !v)}
             className="absolute right-3 top-3 grid size-10 place-items-center rounded-full bg-white/80"
@@ -558,7 +585,10 @@ export function DailyMissionsGame({ onBalanceChange, onFinished }: ArcadeGamePro
       icon={<Check className="size-5" />}
     >
       <div className="space-y-3">
-        <ArcadeStage className="bg-gradient-to-br from-emerald-950 via-teal-950 to-slate-950 p-4" glowClassName="bg-emerald-400/25">
+        <ArcadeStage
+          className="bg-gradient-to-br from-emerald-950 via-teal-950 to-slate-950 p-4"
+          glowClassName="bg-emerald-400/25"
+        >
           <div className="flex justify-between text-xs font-bold">
             <span>Progresso do dia</span>
             <span>
