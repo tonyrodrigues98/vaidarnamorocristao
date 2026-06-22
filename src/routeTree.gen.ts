@@ -14,6 +14,7 @@ import { Route as TermosRouteImport } from './routes/termos'
 import { Route as SobreRouteImport } from './routes/sobre'
 import { Route as RecadosRouteImport } from './routes/recados'
 import { Route as QuizBiblicoRouteImport } from './routes/quiz-biblico'
+import { Route as PetArcadeRouteImport } from './routes/pet-arcade'
 import { Route as PerfilRouteImport } from './routes/perfil'
 import { Route as OracoesRouteImport } from './routes/oracoes'
 import { Route as NotificacoesRouteImport } from './routes/notificacoes'
@@ -96,6 +97,11 @@ const RecadosRoute = RecadosRouteImport.update({
 const QuizBiblicoRoute = QuizBiblicoRouteImport.update({
   id: '/quiz-biblico',
   path: '/quiz-biblico',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PetArcadeRoute = PetArcadeRouteImport.update({
+  id: '/pet-arcade',
+  path: '/pet-arcade',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PerfilRoute = PerfilRouteImport.update({
@@ -412,6 +418,7 @@ export interface FileRoutesByFullPath {
   '/notificacoes': typeof NotificacoesRoute
   '/oracoes': typeof OracoesRoute
   '/perfil': typeof PerfilRoute
+  '/pet-arcade': typeof PetArcadeRoute
   '/quiz-biblico': typeof QuizBiblicoRoute
   '/recados': typeof RecadosRoute
   '/sobre': typeof SobreRoute
@@ -477,6 +484,7 @@ export interface FileRoutesByTo {
   '/notificacoes': typeof NotificacoesRoute
   '/oracoes': typeof OracoesRoute
   '/perfil': typeof PerfilRoute
+  '/pet-arcade': typeof PetArcadeRoute
   '/quiz-biblico': typeof QuizBiblicoRoute
   '/recados': typeof RecadosRoute
   '/sobre': typeof SobreRoute
@@ -543,6 +551,7 @@ export interface FileRoutesById {
   '/notificacoes': typeof NotificacoesRoute
   '/oracoes': typeof OracoesRoute
   '/perfil': typeof PerfilRoute
+  '/pet-arcade': typeof PetArcadeRoute
   '/quiz-biblico': typeof QuizBiblicoRoute
   '/recados': typeof RecadosRoute
   '/sobre': typeof SobreRoute
@@ -610,6 +619,7 @@ export interface FileRouteTypes {
     | '/notificacoes'
     | '/oracoes'
     | '/perfil'
+    | '/pet-arcade'
     | '/quiz-biblico'
     | '/recados'
     | '/sobre'
@@ -675,6 +685,7 @@ export interface FileRouteTypes {
     | '/notificacoes'
     | '/oracoes'
     | '/perfil'
+    | '/pet-arcade'
     | '/quiz-biblico'
     | '/recados'
     | '/sobre'
@@ -740,6 +751,7 @@ export interface FileRouteTypes {
     | '/notificacoes'
     | '/oracoes'
     | '/perfil'
+    | '/pet-arcade'
     | '/quiz-biblico'
     | '/recados'
     | '/sobre'
@@ -806,6 +818,7 @@ export interface RootRouteChildren {
   NotificacoesRoute: typeof NotificacoesRoute
   OracoesRoute: typeof OracoesRoute
   PerfilRoute: typeof PerfilRoute
+  PetArcadeRoute: typeof PetArcadeRoute
   QuizBiblicoRoute: typeof QuizBiblicoRoute
   RecadosRoute: typeof RecadosRoute
   SobreRoute: typeof SobreRoute
@@ -884,6 +897,13 @@ declare module '@tanstack/react-router' {
       path: '/quiz-biblico'
       fullPath: '/quiz-biblico'
       preLoaderRoute: typeof QuizBiblicoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pet-arcade': {
+      id: '/pet-arcade'
+      path: '/pet-arcade'
+      fullPath: '/pet-arcade'
+      preLoaderRoute: typeof PetArcadeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/perfil': {
@@ -1328,6 +1348,7 @@ const rootRouteChildren: RootRouteChildren = {
   NotificacoesRoute: NotificacoesRoute,
   OracoesRoute: OracoesRoute,
   PerfilRoute: PerfilRoute,
+  PetArcadeRoute: PetArcadeRoute,
   QuizBiblicoRoute: QuizBiblicoRoute,
   RecadosRoute: RecadosRoute,
   SobreRoute: SobreRoute,
@@ -1373,3 +1394,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

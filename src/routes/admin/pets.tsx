@@ -25,6 +25,7 @@ import {
   EyeOff,
   Image as ImageLucide,
   Heart,
+  Gamepad2,
 } from "lucide-react";
 
 import { useAuth } from "@/lib/auth";
@@ -93,6 +94,7 @@ import { PetCareItemsPanel } from "@/components/admin/PetCareItemsPanel";
 import { PetPersonalityEffectsPanel } from "@/components/admin/PetPersonalityEffectsPanel";
 import { PetExpeditionsPanel } from "@/components/admin/PetExpeditionsPanel";
 import { PetGrabPanel } from "@/components/admin/PetGrabPanel";
+import { PetArcadePanel } from "@/components/admin/PetArcadePanel";
 
 export const Route = createFileRoute("/admin/pets")({ component: PetsAdmin });
 
@@ -104,6 +106,7 @@ type TabKey =
   | "care"
   | "expeditions"
   | "grab"
+  | "arcade"
   | PetCatalogTable;
 
 const TABS: { key: TabKey; label: string; icon: ComponentType<{ className?: string }> }[] = [
@@ -118,6 +121,7 @@ const TABS: { key: TabKey; label: string; icon: ComponentType<{ className?: stri
   { key: "care", label: "Cuidados", icon: Heart },
   { key: "expeditions", label: "Expedições", icon: Sparkles },
   { key: "grab", label: "Grab", icon: Gift },
+  { key: "arcade", label: "Pet Arcade", icon: Gamepad2 },
   { key: "legacy", label: "Pets (legado)", icon: Star },
 ];
 
@@ -185,6 +189,8 @@ function PetsAdmin() {
           <PetExpeditionsPanel />
         ) : tab === "grab" ? (
           <PetGrabPanel />
+        ) : tab === "arcade" ? (
+          <PetArcadePanel />
         ) : (
           <CatalogPanel table={tab} />
         )}

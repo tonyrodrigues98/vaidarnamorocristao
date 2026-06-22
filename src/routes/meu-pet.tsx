@@ -12,6 +12,7 @@ import {
   Pencil,
   Sparkles,
   Lock,
+  Gamepad2,
 } from "lucide-react";
 
 import { useAuth } from "@/lib/auth";
@@ -84,6 +85,7 @@ import { Link as RouterLink } from "@tanstack/react-router";
 import { BookOpen, Clock, MessageCircle, Compass } from "lucide-react";
 import { PetCareHistorySheet } from "@/components/pet/PetCareHistorySheet";
 import { PetLivingRoom } from "@/components/pet/PetLivingRoom";
+import { PetArcadeEntryCard } from "@/components/pet/arcade/PetArcadeEntryCard";
 import { recordLastAction, saveCareSnapshot } from "@/lib/petLocalCache";
 import {
   Sheet,
@@ -531,6 +533,13 @@ function Showcase({
                   <ArrowRight className="h-3.5 w-3.5" />
                 </button>
               </div>
+              <RouterLink
+                to="/pet-arcade"
+                className="app-pressable flex h-11 w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-rose-500 to-amber-500 text-sm font-bold text-white shadow-lg shadow-rose-100"
+              >
+                <Gamepad2 className="h-4 w-4" />
+                Abrir Pet Arcade
+              </RouterLink>
             </div>
           </SheetContent>
         </Sheet>
@@ -750,6 +759,7 @@ function Showcase({
         void reloadActiveExpedition();
       }}
     />
+    <PetArcadeEntryCard />
     <PetCaixasEntryCard />
     <PetStreakCard refreshKey={xpRefresh} />
     <PetWeeklyChestCard refreshKey={xpRefresh} onClaimed={() => setXpRefresh((n) => n + 1)} />
