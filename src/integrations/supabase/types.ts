@@ -1507,63 +1507,176 @@ export type Database = {
           },
         ]
       }
+      pet_arcade_game_configs: {
+        Row: {
+          category: string
+          cooldown_seconds: number
+          created_at: string
+          daily_play_limit: number
+          daily_win_limit: number
+          description: string
+          difficulty_config: Json
+          display_name: string
+          game_type: string
+          id: string
+          is_enabled: boolean
+          max_entry: number
+          max_multiplier: number
+          min_entry: number
+          reward_config: Json
+          sort_order: number
+          updated_at: string
+          visual_config: Json
+        }
+        Insert: {
+          category?: string
+          cooldown_seconds?: number
+          created_at?: string
+          daily_play_limit?: number
+          daily_win_limit?: number
+          description?: string
+          difficulty_config?: Json
+          display_name: string
+          game_type: string
+          id?: string
+          is_enabled?: boolean
+          max_entry?: number
+          max_multiplier?: number
+          min_entry?: number
+          reward_config?: Json
+          sort_order?: number
+          updated_at?: string
+          visual_config?: Json
+        }
+        Update: {
+          category?: string
+          cooldown_seconds?: number
+          created_at?: string
+          daily_play_limit?: number
+          daily_win_limit?: number
+          description?: string
+          difficulty_config?: Json
+          display_name?: string
+          game_type?: string
+          id?: string
+          is_enabled?: boolean
+          max_entry?: number
+          max_multiplier?: number
+          min_entry?: number
+          reward_config?: Json
+          sort_order?: number
+          updated_at?: string
+          visual_config?: Json
+        }
+        Relationships: []
+      }
+      pet_arcade_game_events: {
+        Row: {
+          created_at: string
+          event_type: string
+          game_id: string
+          id: string
+          payload: Json
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          game_id: string
+          id?: string
+          payload?: Json
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          game_id?: string
+          id?: string
+          payload?: Json
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pet_arcade_game_events_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "pet_arcade_rounds"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pet_arcade_rounds: {
         Row: {
           client_seed: string
           created_at: string
           current_multiplier: number
           day: string
+          difficulty: string | null
           ended_at: string | null
           entry_coins: number
+          final_multiplier: number | null
           game_type: string
           id: string
           metadata: Json
           nonce: number
+          result_summary: Json
           reward_coins: number
           server_seed: string
           server_seed_hash: string
           started_at: string
           status: string
+          updated_at: string
           user_id: string
           user_pet_id: string
+          xp_reward: number
         }
         Insert: {
           client_seed: string
           created_at?: string
           current_multiplier?: number
           day?: string
+          difficulty?: string | null
           ended_at?: string | null
           entry_coins: number
+          final_multiplier?: number | null
           game_type: string
           id?: string
           metadata?: Json
           nonce: number
+          result_summary?: Json
           reward_coins?: number
           server_seed: string
           server_seed_hash: string
           started_at?: string
           status?: string
+          updated_at?: string
           user_id: string
           user_pet_id: string
+          xp_reward?: number
         }
         Update: {
           client_seed?: string
           created_at?: string
           current_multiplier?: number
           day?: string
+          difficulty?: string | null
           ended_at?: string | null
           entry_coins?: number
+          final_multiplier?: number | null
           game_type?: string
           id?: string
           metadata?: Json
           nonce?: number
+          result_summary?: Json
           reward_coins?: number
           server_seed?: string
           server_seed_hash?: string
           started_at?: string
           status?: string
+          updated_at?: string
           user_id?: string
           user_pet_id?: string
+          xp_reward?: number
         }
         Relationships: [
           {
@@ -1574,6 +1687,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      pet_arcade_settings: {
+        Row: {
+          created_at: string
+          daily_play_limit: number
+          daily_win_limit: number
+          global_max_entry: number
+          global_min_entry: number
+          healthy_play_message: string
+          id: number
+          is_enabled: boolean
+          maintenance_message: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          daily_play_limit?: number
+          daily_win_limit?: number
+          global_max_entry?: number
+          global_min_entry?: number
+          healthy_play_message?: string
+          id?: number
+          is_enabled?: boolean
+          maintenance_message?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          daily_play_limit?: number
+          daily_win_limit?: number
+          global_max_entry?: number
+          global_min_entry?: number
+          healthy_play_message?: string
+          id?: number
+          is_enabled?: boolean
+          maintenance_message?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       pet_arcade_treasure_rounds: {
         Row: {
@@ -5455,6 +5607,61 @@ export type Database = {
       }
     }
     Functions: {
+      _pet_arcade_add_event: {
+        Args: { _event_type: string; _game_id: string; _payload: Json }
+        Returns: undefined
+      }
+      _pet_arcade_begin: {
+        Args: {
+          _client_seed: string
+          _difficulty: string
+          _entry: number
+          _game_type: string
+          _metadata?: Json
+        }
+        Returns: {
+          client_seed: string
+          created_at: string
+          current_multiplier: number
+          day: string
+          difficulty: string | null
+          ended_at: string | null
+          entry_coins: number
+          final_multiplier: number | null
+          game_type: string
+          id: string
+          metadata: Json
+          nonce: number
+          result_summary: Json
+          reward_coins: number
+          server_seed: string
+          server_seed_hash: string
+          started_at: string
+          status: string
+          updated_at: string
+          user_id: string
+          user_pet_id: string
+          xp_reward: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "pet_arcade_rounds"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      _pet_arcade_finish: {
+        Args: {
+          _game_id: string
+          _multiplier: number
+          _reward_override?: number
+          _status: string
+          _summary: Json
+          _xp?: number
+        }
+        Returns: Json
+      }
+      _pet_arcade_result: { Args: { _game_id: string }; Returns: Json }
       _pet_streak_grant: {
         Args: {
           _coins: number
@@ -5555,7 +5762,18 @@ export type Database = {
         Returns: boolean
       }
       cancel_account_deletion: { Args: never; Returns: undefined }
+      cancel_pet_piggybank: { Args: { _game_id: string }; Returns: Json }
+      cashout_pet_hilo: { Args: { _game_id: string }; Returns: Json }
+      cashout_pet_towers: { Args: { _game_id: string }; Returns: Json }
       check_text_restricted: { Args: { _text: string }; Returns: string }
+      choose_pet_hilo: {
+        Args: { _choice: string; _expected_step?: number; _game_id: string }
+        Returns: Json
+      }
+      choose_pet_tower_tile: {
+        Args: { _expected_floor?: number; _game_id: string; _tile: number }
+        Returns: Json
+      }
       claim_daily_coins: {
         Args: never
         Returns: {
@@ -5569,6 +5787,7 @@ export type Database = {
         Args: { _category: string; _item_id: string; _rarity: string }
         Returns: Json
       }
+      claim_pet_piggybank: { Args: { _game_id: string }; Returns: Json }
       claim_pet_weekly_chest: { Args: never; Returns: Json }
       claim_starter_bundle: { Args: never; Returns: Json }
       cleanup_photo_moderation_rejects: { Args: never; Returns: number }
@@ -5620,6 +5839,13 @@ export type Database = {
       evolve_my_pet: { Args: never; Returns: Json }
       expire_anonymous_messages: { Args: never; Returns: number }
       finalize_pet_arcade_flight: { Args: { _round_id: string }; Returns: Json }
+      finish_pet_coinflip: { Args: { _game_id: string }; Returns: Json }
+      finish_pet_dice: { Args: { _game_id: string }; Returns: Json }
+      finish_pet_keno: { Args: { _game_id: string }; Returns: Json }
+      finish_pet_memory: { Args: { _game_id: string }; Returns: Json }
+      finish_pet_plinko: { Args: { _game_id: string }; Returns: Json }
+      finish_pet_race: { Args: { _game_id: string }; Returns: Json }
+      finish_pet_wheel: { Args: { _game_id: string }; Returns: Json }
       freebie_required_level: {
         Args: { _category: string; _rarity: string }
         Returns: number
@@ -5742,8 +5968,10 @@ export type Database = {
         }[]
       }
       get_pet_arcade_active_rounds: { Args: never; Returns: Json }
+      get_pet_arcade_catalog: { Args: never; Returns: Json }
       get_pet_arcade_config: { Args: never; Returns: Json }
       get_pet_arcade_history: { Args: { _limit?: number }; Returns: Json }
+      get_pet_arcade_history_v2: { Args: { _limit?: number }; Returns: Json }
       get_pet_dream_match: {
         Args: never
         Returns: {
@@ -5912,6 +6140,7 @@ export type Database = {
         Args: { _count: number; _pool_id: string }
         Returns: Json
       }
+      pet_arcade_admin_metrics: { Args: never; Returns: Json }
       pet_arcade_admin_recent_rounds: {
         Args: { _limit?: number }
         Returns: {
@@ -5919,19 +6148,24 @@ export type Database = {
           created_at: string
           current_multiplier: number
           day: string
+          difficulty: string | null
           ended_at: string | null
           entry_coins: number
+          final_multiplier: number | null
           game_type: string
           id: string
           metadata: Json
           nonce: number
+          result_summary: Json
           reward_coins: number
           server_seed: string
           server_seed_hash: string
           started_at: string
           status: string
+          updated_at: string
           user_id: string
           user_pet_id: string
+          xp_reward: number
         }[]
         SetofOptions: {
           from: "*"
@@ -5941,6 +6175,14 @@ export type Database = {
         }
       }
       pet_arcade_admin_update_config: { Args: { _patch: Json }; Returns: Json }
+      pet_arcade_admin_update_game_config: {
+        Args: { _game_type: string; _patch: Json }
+        Returns: Json
+      }
+      pet_arcade_admin_update_settings: {
+        Args: { _patch: Json }
+        Returns: Json
+      }
       pet_arcade_admin_user_signals: {
         Args: never
         Returns: {
@@ -6037,8 +6279,13 @@ export type Database = {
         Returns: string
       }
       request_reverification: { Args: { _message: string }; Returns: string }
+      resume_pet_arcade_game: { Args: { _game_id: string }; Returns: Json }
       reveal_pet_arcade_treasure: {
         Args: { _position: number; _round_id: string }
+        Returns: Json
+      }
+      reveal_pet_memory_card: {
+        Args: { _game_id: string; _position: number }
         Returns: Json
       }
       roll_daily_expeditions: { Args: never; Returns: undefined }
@@ -6101,6 +6348,71 @@ export type Database = {
         Returns: Json
       }
       start_pet_arcade_treasure: {
+        Args: {
+          _client_seed?: string
+          _difficulty: string
+          _entry_coins: number
+        }
+        Returns: Json
+      }
+      start_pet_coinflip: {
+        Args: { _client_seed?: string; _entry_coins: number; _side: string }
+        Returns: Json
+      }
+      start_pet_dice: {
+        Args: {
+          _client_seed?: string
+          _condition: string
+          _entry_coins: number
+          _target: number
+        }
+        Returns: Json
+      }
+      start_pet_hilo: {
+        Args: { _client_seed?: string; _entry_coins: number }
+        Returns: Json
+      }
+      start_pet_keno: {
+        Args: {
+          _chosen_numbers: number[]
+          _client_seed?: string
+          _entry_coins: number
+        }
+        Returns: Json
+      }
+      start_pet_memory: {
+        Args: {
+          _client_seed?: string
+          _difficulty: string
+          _entry_coins: number
+        }
+        Returns: Json
+      }
+      start_pet_piggybank: {
+        Args: { _deposit: number; _hours?: number }
+        Returns: Json
+      }
+      start_pet_plinko: {
+        Args: {
+          _client_seed?: string
+          _difficulty: string
+          _entry_coins: number
+        }
+        Returns: Json
+      }
+      start_pet_race: {
+        Args: { _client_seed?: string; _entry_coins: number }
+        Returns: Json
+      }
+      start_pet_towers: {
+        Args: {
+          _client_seed?: string
+          _difficulty: string
+          _entry_coins: number
+        }
+        Returns: Json
+      }
+      start_pet_wheel: {
         Args: {
           _client_seed?: string
           _difficulty: string
