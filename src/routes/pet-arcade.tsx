@@ -484,6 +484,7 @@ function GameStage(props: GameStageProps) {
           config={props.legacyConfig}
           balance={props.balance}
           activeRound={props.activeTreasure}
+          cooldownSeconds={props.config.cooldown_seconds}
           onBalanceChange={props.onBalanceChange}
           onFinished={props.onFinished}
         />

@@ -16,6 +16,7 @@ import {
   type TreasureDifficulty,
   type TreasureRound,
 } from "@/lib/petArcade";
+import { AutoPlayControls } from "./AutoPlayControls";
 
 const DIFFICULTIES: { id: TreasureDifficulty; label: string; note: string }[] = [
   { id: "leve", label: "Leve", note: "Menos armadilhas" },
@@ -27,6 +28,7 @@ type Props = {
   config: PetArcadeConfig;
   balance: number;
   activeRound?: ActiveArcadeRound;
+  cooldownSeconds: number;
   onBalanceChange: (balance: number) => void;
   onFinished: () => void;
 };
@@ -35,6 +37,7 @@ export function TreasureAdventure({
   config,
   balance,
   activeRound,
+  cooldownSeconds,
   onBalanceChange,
   onFinished,
 }: Props) {
@@ -42,6 +45,8 @@ export function TreasureAdventure({
   const [difficulty, setDifficulty] = useState<TreasureDifficulty>("leve");
   const [round, setRound] = useState<TreasureRound | null>(null);
   const [busy, setBusy] = useState(false);
+  const [autoRunning, setAutoRunning] = useState(false);
+  const [autoPositions, setAutoPositions] = useState<number[]>([0, 1, 2]);
 
   useEffect(() => {
     if (!activeRound || activeRound.game_type !== "treasure") return;
@@ -119,6 +124,68 @@ export function TreasureAdventure({
       onFinished();
     } catch (error) {
       toast.error(getArcadeErrorMessage(error));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function toggleAutoPosition(position: number) {
+    if (autoRunning) return;
+    setAutoPositions((current) =>
+      current.includes(position)
+        ? current.filter((item) => item !== position)
+        : [...current, position],
+    );
+  }
+
+  async function runAutomaticRound(): Promise<boolean> {
+    if (!autoPositions.length) {
+      toast.error("Selecione pelo menos uma casa para o modo automático.");
+      return false;
+    }
+    if (entry > balance) {
+      toast.error("Saldo insuficiente para esta entrada.");
+      return false;
+    }
+
+    setBusy(true);
+    try {
+      const started = await startTreasureRound({
+        entryCoins: entry,
+        difficulty,
+        clientSeed: crypto.randomUUID(),
+      });
+      let current: TreasureRound = { ...started, revealed_positions: [] };
+      setRound(current);
+      if (typeof started.new_balance === "number") onBalanceChange(started.new_balance);
+
+      for (const position of autoPositions) {
+        if (current.status !== "active") break;
+        await new Promise<void>((resolve) => window.setTimeout(resolve, 500));
+        const revealedCell = await revealTreasureCell(current.round_id, position);
+        current = {
+          ...current,
+          ...revealedCell,
+          revealed_positions: [...(current.revealed_positions ?? []), position],
+        };
+        setRound(current);
+      }
+
+      if (current.status === "active" && (current.safe_reveals ?? 0) > 0) {
+        const collected = await collectTreasureReward(current.round_id);
+        current = { ...current, ...collected };
+        setRound(current);
+        if (typeof collected.new_balance === "number") onBalanceChange(collected.new_balance);
+      }
+
+      onFinished();
+      const resultingBalance = Number(
+        current.new_balance ?? started.new_balance ?? balance - entry,
+      );
+      return resultingBalance >= entry;
+    } catch (error) {
+      toast.error(getArcadeErrorMessage(error));
+      return false;
     } finally {
       setBusy(false);
     }
@@ -203,6 +270,41 @@ export function TreasureAdventure({
                 </button>
               ))}
             </div>
+          </div>
+
+          <div>
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-xs font-semibold uppercase text-neutral-500">
+                Casas do modo automático
+              </p>
+              <span className="text-[10px] font-bold text-amber-700">
+                {autoPositions.length} selecionadas
+              </span>
+            </div>
+            <div className="mt-2 grid grid-cols-6 gap-1.5">
+              {Array.from({ length: config.treasure_grid_size }, (_, position) => {
+                const selected = autoPositions.includes(position);
+                return (
+                  <button
+                    key={position}
+                    type="button"
+                    disabled={autoRunning}
+                    onClick={() => toggleAutoPosition(position)}
+                    className={`aspect-square rounded-xl border text-[10px] font-black transition ${
+                      selected
+                        ? "border-amber-500 bg-amber-500 text-white"
+                        : "border-amber-200 bg-amber-50 text-amber-700"
+                    }`}
+                    aria-label={`${selected ? "Remover" : "Selecionar"} casa ${position + 1}`}
+                  >
+                    {position + 1}
+                  </button>
+                );
+              })}
+            </div>
+            <p className="mt-2 text-[10px] leading-relaxed text-neutral-500">
+              As casas são abertas nesta ordem em cada aventura. As armadilhas mudam a cada rodada.
+            </p>
           </div>
 
           <Button
@@ -294,6 +396,20 @@ export function TreasureAdventure({
           )}
         </div>
       )}
+      <div className="border-t border-amber-100 p-4 sm:px-6">
+        <AutoPlayControls
+          cooldownSeconds={cooldownSeconds}
+          disabled={
+            busy ||
+            round?.status === "active" ||
+            !autoPositions.length ||
+            entry < config.min_entry ||
+            entry > config.max_entry
+          }
+          onRound={runAutomaticRound}
+          onRunningChange={setAutoRunning}
+        />
+      </div>
     </section>
   );
 }
