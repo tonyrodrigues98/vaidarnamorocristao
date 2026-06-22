@@ -53,7 +53,7 @@ export function AutoPlayControls({ cooldownSeconds, disabled, onRound }: AutoPla
   }
 
   return (
-    <div className="rounded-2xl border border-neutral-200 bg-neutral-50 p-3">
+    <div className="rounded-[26px] border border-neutral-200 bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(248,250,252,0.94))] p-3 shadow-[0_16px_36px_rgba(15,23,42,0.06)]">
       <div className="mb-2 flex items-center justify-between gap-3">
         <div>
           <p className="text-xs font-black text-neutral-800">Modo automático</p>
@@ -62,7 +62,7 @@ export function AutoPlayControls({ cooldownSeconds, disabled, onRound }: AutoPla
           </p>
         </div>
         {running ? (
-          <span className="inline-flex items-center gap-1 text-[10px] font-bold text-rose-600">
+          <span className="inline-flex items-center gap-1 rounded-full bg-rose-50 px-2 py-1 text-[10px] font-bold text-rose-600">
             <Loader2 className="size-3 animate-spin" /> {completed} concluídas
           </span>
         ) : null}

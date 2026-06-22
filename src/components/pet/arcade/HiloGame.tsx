@@ -12,7 +12,9 @@ import {
   type ArcadeGameResult,
 } from "@/lib/petArcade";
 import {
+  ArcadeMetric,
   ArcadePanel,
+  ArcadeStage,
   EntryControl,
   type ArcadeGameProps,
   ResultCard,
@@ -102,7 +104,7 @@ export function HiloGame({
       icon={<Layers3 className="size-5" />}
     >
       <div className="space-y-5">
-        <div className="relative grid min-h-72 place-items-center overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-950 via-violet-900 to-rose-900 p-6 text-white">
+        <ArcadeStage className="grid min-h-80 place-items-center bg-gradient-to-br from-indigo-950 via-violet-950 to-rose-950 p-6" glowClassName="bg-violet-400/30">
           <div className="absolute inset-0 opacity-20 [background-image:radial-gradient(circle_at_30%_30%,white_0,transparent_35%),radial-gradient(circle_at_70%_70%,#fb7185_0,transparent_35%)]" />
           <AnimatePresence mode="wait">
             <motion.div
@@ -113,7 +115,7 @@ export function HiloGame({
               className="relative flex h-48 w-36 flex-col justify-between rounded-3xl border border-white/60 bg-white p-4 text-indigo-950 shadow-2xl"
             >
               <span className="text-2xl font-black">{CARD_LABELS[Math.max(0, card - 1)]}</span>
-              <span className="self-center text-5xl font-black text-rose-500">V</span>
+              <span className="self-center grid size-16 place-items-center rounded-full bg-gradient-to-br from-rose-100 to-amber-100 text-4xl font-black text-rose-500 shadow-inner">V</span>
               <span className="self-end rotate-180 text-2xl font-black">
                 {CARD_LABELS[Math.max(0, card - 1)]}
               </span>
@@ -129,7 +131,11 @@ export function HiloGame({
               </span>
             </div>
           ) : null}
-        </div>
+          <div className="relative mt-4 grid w-full grid-cols-2 gap-2">
+            <ArcadeMetric label="Sequência" value={step} />
+            <ArcadeMetric label="Multiplicador" value={`${Number(round?.multiplier ?? 1).toFixed(2)}x`} tone="warning" />
+          </div>
+        </ArcadeStage>
 
         {!round && !result ? (
           <>
@@ -150,7 +156,7 @@ export function HiloGame({
               type="button"
               disabled={busy}
               onClick={() => void choose("higher")}
-              className="flex h-14 items-center justify-center gap-2 rounded-2xl bg-emerald-500 font-black text-white disabled:opacity-50"
+              className="flex h-14 items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 font-black text-white shadow-lg shadow-emerald-200 transition active:scale-[0.98] disabled:opacity-50"
             >
               <ArrowUp className="size-5" /> Maior
             </button>
@@ -158,7 +164,7 @@ export function HiloGame({
               type="button"
               disabled={busy}
               onClick={() => void choose("lower")}
-              className="flex h-14 items-center justify-center gap-2 rounded-2xl bg-sky-500 font-black text-white disabled:opacity-50"
+              className="flex h-14 items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-sky-500 to-indigo-500 font-black text-white shadow-lg shadow-sky-200 transition active:scale-[0.98] disabled:opacity-50"
             >
               <ArrowDown className="size-5" /> Menor
             </button>

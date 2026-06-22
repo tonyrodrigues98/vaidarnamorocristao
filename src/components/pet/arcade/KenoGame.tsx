@@ -6,6 +6,8 @@ import { getArcadeErrorMessage, startKeno, type ArcadeGameResult } from "@/lib/p
 import { cn } from "@/lib/utils";
 import {
   ArcadePanel,
+  ArcadeStage,
+  ArcadeMetric,
   EntryControl,
   type ArcadeGameProps,
   ResultCard,
@@ -81,17 +83,15 @@ export function KenoGame({ config, balance, onBalanceChange, onFinished }: Arcad
       icon={<Grid3X3 className="size-5" />}
     >
       <div className="space-y-4">
-        <div className="flex items-center justify-between rounded-2xl bg-violet-50 px-4 py-3 text-xs font-bold text-violet-800">
-          <span>
-            Escolhas: {selected.length}/{pickCount}
-          </span>
-          {result ? (
-            <span>Acertos: {Number(data.hits ?? 0)}</span>
-          ) : (
-            <span>Grade com {gridSize} números</span>
-          )}
+        <div className="grid grid-cols-2 gap-2">
+          <ArcadeMetric label="Escolhas" value={`${selected.length}/${pickCount}`} tone="dark" />
+          <ArcadeMetric
+            label={result ? "Acertos" : "Grade"}
+            value={result ? Number(data.hits ?? 0) : `${gridSize} números`}
+          />
         </div>
-        <div className="grid grid-cols-8 gap-1.5 sm:grid-cols-10">
+        <ArcadeStage className="border-violet-200/60 bg-gradient-to-b from-violet-950 via-indigo-900 to-fuchsia-900" glowClassName="bg-violet-300/20">
+          <div className="grid grid-cols-8 gap-1.5 sm:grid-cols-10">
           {Array.from({ length: gridSize }, (_, index) => index + 1).map((number) => {
             const picked = selected.includes(number);
             const drawnNow = revealed.includes(number);
@@ -103,19 +103,20 @@ export function KenoGame({ config, balance, onBalanceChange, onFinished }: Arcad
                 className={cn(
                   "aspect-square rounded-lg border text-[11px] font-black transition",
                   drawnNow && picked
-                    ? "border-emerald-500 bg-emerald-500 text-white"
+                    ? "border-emerald-300 bg-emerald-400 text-emerald-950 shadow-lg"
                     : drawnNow
-                      ? "border-amber-400 bg-amber-100 text-amber-800"
+                      ? "border-amber-200 bg-amber-100 text-amber-900"
                       : picked
-                        ? "border-violet-500 bg-violet-500 text-white"
-                        : "border-neutral-200 bg-white text-neutral-600",
+                        ? "border-violet-300 bg-white text-violet-700 shadow-lg"
+                        : "border-white/15 bg-white/10 text-white/78 backdrop-blur-sm",
                 )}
               >
                 {drawnNow && picked ? <Check className="mx-auto size-3" /> : number}
               </button>
             );
           })}
-        </div>
+          </div>
+        </ArcadeStage>
         {!result ? (
           <>
             <EntryControl

@@ -120,7 +120,8 @@ export function PiggyBankGame({
       icon={<PiggyBank className="size-5" />}
     >
       <div className="space-y-5">
-        <div className="relative grid min-h-64 place-items-center overflow-hidden rounded-3xl bg-gradient-to-br from-amber-50 via-orange-50 to-rose-100">
+        <div className="relative grid min-h-64 place-items-center overflow-hidden rounded-[30px] bg-gradient-to-br from-amber-100 via-white to-rose-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]">
+          <span aria-hidden className="absolute -right-10 top-0 size-36 rounded-full bg-amber-200/55 blur-3xl" />
           <motion.div
             animate={{ scale: round ? 1 + progress / 500 : 1 }}
             className="relative grid size-40 place-items-center rounded-full bg-white/70 shadow-xl backdrop-blur"

@@ -6,7 +6,9 @@ import { toast } from "sonner";
 import { PetImg } from "@/components/pet/PetImg";
 import { getArcadeErrorMessage, startPetRace, type ArcadeGameResult } from "@/lib/petArcade";
 import {
+  ArcadeMetric,
   ArcadePanel,
+  ArcadeStage,
   EntryControl,
   type ArcadeGameProps,
   ResultCard,
@@ -73,8 +75,8 @@ export function PetRaceGame({
       icon={<Flag className="size-5" />}
     >
       <div className="space-y-4">
-        <div className="overflow-hidden rounded-3xl border border-cyan-100 bg-gradient-to-r from-cyan-50 via-white to-emerald-50 p-3">
-          <div className="mb-3 flex items-center justify-between rounded-xl bg-white px-3 py-2 text-xs font-bold shadow-sm">
+        <ArcadeStage className="bg-gradient-to-br from-sky-950 via-cyan-950 to-emerald-950 p-3" glowClassName="bg-cyan-300/25">
+          <div className="mb-3 flex items-center justify-between rounded-2xl border border-white/20 bg-white/10 px-3 py-2 text-xs font-bold text-white backdrop-blur">
             <span>Cuidado geral: {displayCareScore}%</span>
             <span>
               {racing
@@ -105,7 +107,7 @@ export function PetRaceGame({
               return (
                 <div
                   key={racer.id}
-                  className="relative h-14 overflow-hidden rounded-2xl border border-white bg-white/75 shadow-sm"
+                  className="relative h-14 overflow-hidden rounded-2xl border border-white/20 bg-white/10 shadow-sm backdrop-blur-sm"
                 >
                   <div className="absolute inset-y-0 right-3 border-r-2 border-dashed border-rose-300" />
                   <motion.div
@@ -138,14 +140,18 @@ export function PetRaceGame({
                       )}
                     </div>
                   </motion.div>
-                  <span className="absolute left-2 top-1 text-[9px] font-bold text-neutral-500">
+                  <span className="absolute left-2 top-1 text-[9px] font-bold text-white/75">
                     {racer.name}
                   </span>
                 </div>
               );
             })}
           </div>
-        </div>
+          <div className="mt-3 grid grid-cols-2 gap-2">
+            <ArcadeMetric label="Cuidado" value={`${displayCareScore}%`} tone="success" />
+            <ArcadeMetric label="Chance aproximada" value={`${approximateChance}%`} />
+          </div>
+        </ArcadeStage>
 
         {!result || racing ? (
           <>

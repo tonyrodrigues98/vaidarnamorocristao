@@ -114,109 +114,126 @@ const CATEGORY_LABELS: Record<ArcadeCategory, string> = {
 
 const GAME_VISUALS: Record<
   ArcadeGameType,
-  { surface: string; icon: string; glow: string; kicker: string }
+  { surface: string; icon: string; glow: string; kicker: string; mesh: string }
 > = {
   treasure: {
     surface: "from-amber-950 via-stone-900 to-emerald-950",
     icon: "bg-amber-400 text-amber-950 shadow-amber-950/40",
     glow: "bg-amber-400/20",
     kicker: "Mapa secreto",
+    mesh: "bg-[radial-gradient(circle_at_15%_15%,rgba(251,191,36,0.22),transparent_26%),radial-gradient(circle_at_90%_10%,rgba(16,185,129,0.18),transparent_28%),linear-gradient(160deg,rgba(255,255,255,0.08),transparent_45%)]",
   },
   flight: {
     surface: "from-indigo-950 via-slate-950 to-sky-900",
     icon: "bg-sky-300 text-sky-950 shadow-sky-950/40",
     glow: "bg-sky-400/20",
     kicker: "Rumo às estrelas",
+    mesh: "bg-[radial-gradient(circle_at_20%_18%,rgba(125,211,252,0.22),transparent_24%),radial-gradient(circle_at_82%_8%,rgba(255,255,255,0.14),transparent_18%),linear-gradient(180deg,rgba(255,255,255,0.06),transparent_42%)]",
   },
   plinko: {
     surface: "from-orange-950 via-stone-950 to-amber-800",
     icon: "bg-orange-300 text-orange-950 shadow-orange-950/40",
     glow: "bg-orange-400/20",
     kicker: "Queda premiada",
+    mesh: "bg-[radial-gradient(circle_at_18%_18%,rgba(251,146,60,0.24),transparent_24%),radial-gradient(circle_at_85%_18%,rgba(251,191,36,0.18),transparent_24%),linear-gradient(160deg,rgba(255,255,255,0.06),transparent_46%)]",
   },
   keno: {
     surface: "from-violet-950 via-slate-950 to-fuchsia-900",
     icon: "bg-violet-300 text-violet-950 shadow-violet-950/40",
     glow: "bg-violet-400/20",
     kicker: "Escolha sua sequência",
+    mesh: "bg-[radial-gradient(circle_at_15%_12%,rgba(196,181,253,0.24),transparent_24%),radial-gradient(circle_at_85%_14%,rgba(236,72,153,0.16),transparent_26%),linear-gradient(165deg,rgba(255,255,255,0.08),transparent_45%)]",
   },
   wheel: {
     surface: "from-rose-950 via-neutral-950 to-orange-900",
     icon: "bg-rose-300 text-rose-950 shadow-rose-950/40",
     glow: "bg-rose-400/20",
     kicker: "A roda vai girar",
+    mesh: "bg-[radial-gradient(circle_at_15%_18%,rgba(251,113,133,0.24),transparent_24%),radial-gradient(circle_at_88%_16%,rgba(251,146,60,0.18),transparent_24%),linear-gradient(150deg,rgba(255,255,255,0.08),transparent_45%)]",
   },
   hilo: {
     surface: "from-indigo-950 via-neutral-950 to-purple-900",
     icon: "bg-indigo-300 text-indigo-950 shadow-indigo-950/40",
     glow: "bg-indigo-400/20",
     kicker: "Leia a próxima carta",
+    mesh: "bg-[radial-gradient(circle_at_15%_18%,rgba(129,140,248,0.24),transparent_24%),radial-gradient(circle_at_84%_12%,rgba(168,85,247,0.16),transparent_26%),linear-gradient(155deg,rgba(255,255,255,0.08),transparent_44%)]",
   },
   towers: {
     surface: "from-emerald-950 via-neutral-950 to-teal-900",
     icon: "bg-emerald-300 text-emerald-950 shadow-emerald-950/40",
     glow: "bg-emerald-400/20",
     kicker: "Suba com cuidado",
+    mesh: "bg-[radial-gradient(circle_at_15%_18%,rgba(110,231,183,0.24),transparent_24%),radial-gradient(circle_at_84%_12%,rgba(34,197,94,0.16),transparent_26%),linear-gradient(155deg,rgba(255,255,255,0.08),transparent_44%)]",
   },
   coinflip: {
     surface: "from-pink-950 via-neutral-950 to-amber-900",
     icon: "bg-pink-300 text-pink-950 shadow-pink-950/40",
     glow: "bg-pink-400/20",
     kicker: "Patinha ou coração",
+    mesh: "bg-[radial-gradient(circle_at_16%_14%,rgba(251,113,133,0.24),transparent_24%),radial-gradient(circle_at_86%_16%,rgba(253,186,116,0.18),transparent_24%),linear-gradient(155deg,rgba(255,255,255,0.08),transparent_44%)]",
   },
   race: {
     surface: "from-cyan-950 via-slate-950 to-emerald-900",
     icon: "bg-cyan-300 text-cyan-950 shadow-cyan-950/40",
     glow: "bg-cyan-400/20",
     kicker: "Prepare seu campeão",
+    mesh: "bg-[radial-gradient(circle_at_16%_15%,rgba(103,232,249,0.24),transparent_24%),radial-gradient(circle_at_84%_16%,rgba(52,211,153,0.16),transparent_26%),linear-gradient(155deg,rgba(255,255,255,0.08),transparent_44%)]",
   },
   memory: {
     surface: "from-teal-950 via-neutral-950 to-cyan-900",
     icon: "bg-teal-300 text-teal-950 shadow-teal-950/40",
     glow: "bg-teal-400/20",
     kicker: "Encontre os pares",
+    mesh: "bg-[radial-gradient(circle_at_15%_16%,rgba(94,234,212,0.24),transparent_24%),radial-gradient(circle_at_82%_18%,rgba(96,165,250,0.16),transparent_26%),linear-gradient(155deg,rgba(255,255,255,0.08),transparent_44%)]",
   },
   piggybank: {
     surface: "from-amber-950 via-rose-950 to-stone-950",
     icon: "bg-amber-300 text-amber-950 shadow-amber-950/40",
     glow: "bg-amber-400/20",
     kicker: "Cultive sua reserva",
+    mesh: "bg-[radial-gradient(circle_at_16%_15%,rgba(252,211,77,0.24),transparent_24%),radial-gradient(circle_at_84%_16%,rgba(251,113,133,0.14),transparent_24%),linear-gradient(155deg,rgba(255,255,255,0.08),transparent_44%)]",
   },
   dice: {
     surface: "from-blue-950 via-slate-950 to-indigo-900",
     icon: "bg-blue-300 text-blue-950 shadow-blue-950/40",
     glow: "bg-blue-400/20",
     kicker: "Acima ou abaixo",
+    mesh: "bg-[radial-gradient(circle_at_15%_15%,rgba(147,197,253,0.24),transparent_24%),radial-gradient(circle_at_84%_18%,rgba(129,140,248,0.16),transparent_26%),linear-gradient(155deg,rgba(255,255,255,0.08),transparent_44%)]",
   },
   scratch: {
     surface: "from-zinc-800 via-neutral-950 to-rose-950",
     icon: "bg-zinc-200 text-zinc-900 shadow-black/40",
     glow: "bg-white/15",
     kicker: "Revele a combinação",
+    mesh: "bg-[radial-gradient(circle_at_15%_15%,rgba(255,255,255,0.16),transparent_24%),radial-gradient(circle_at_84%_18%,rgba(251,113,133,0.14),transparent_26%),linear-gradient(155deg,rgba(255,255,255,0.08),transparent_44%)]",
   },
   egg: {
     surface: "from-violet-950 via-indigo-950 to-amber-900",
     icon: "bg-violet-200 text-violet-950 shadow-violet-950/40",
     glow: "bg-violet-300/20",
     kicker: "Uma descoberta incubando",
+    mesh: "bg-[radial-gradient(circle_at_15%_15%,rgba(221,214,254,0.22),transparent_24%),radial-gradient(circle_at_84%_18%,rgba(251,191,36,0.14),transparent_26%),linear-gradient(155deg,rgba(255,255,255,0.08),transparent_44%)]",
   },
   album: {
     surface: "from-indigo-950 via-slate-950 to-rose-900",
     icon: "bg-indigo-200 text-indigo-950 shadow-indigo-950/40",
     glow: "bg-indigo-300/20",
     kicker: "Complete sua coleção",
+    mesh: "bg-[radial-gradient(circle_at_15%_15%,rgba(199,210,254,0.22),transparent_24%),radial-gradient(circle_at_84%_18%,rgba(251,113,133,0.14),transparent_26%),linear-gradient(155deg,rgba(255,255,255,0.08),transparent_44%)]",
   },
   capsule: {
     surface: "from-rose-950 via-neutral-950 to-sky-900",
     icon: "bg-rose-200 text-rose-950 shadow-rose-950/40",
     glow: "bg-rose-300/20",
     kicker: "Cuidado em uma cápsula",
+    mesh: "bg-[radial-gradient(circle_at_15%_15%,rgba(254,205,211,0.22),transparent_24%),radial-gradient(circle_at_84%_18%,rgba(125,211,252,0.14),transparent_26%),linear-gradient(155deg,rgba(255,255,255,0.08),transparent_44%)]",
   },
   missions: {
     surface: "from-emerald-950 via-neutral-950 to-teal-900",
     icon: "bg-emerald-200 text-emerald-950 shadow-emerald-950/40",
     glow: "bg-emerald-300/20",
     kicker: "Objetivos de hoje",
+    mesh: "bg-[radial-gradient(circle_at_15%_15%,rgba(167,243,208,0.22),transparent_24%),radial-gradient(circle_at_84%_18%,rgba(16,185,129,0.14),transparent_26%),linear-gradient(155deg,rgba(255,255,255,0.08),transparent_44%)]",
   },
 };
 
@@ -349,7 +366,7 @@ function PetArcadePage() {
     activeQuery.isLoading;
 
   return (
-    <div className="min-h-screen max-w-full overflow-x-clip bg-gradient-to-b from-rose-50/70 via-white to-sky-50/60 text-neutral-950">
+    <div className="min-h-screen max-w-full overflow-x-clip bg-[radial-gradient(circle_at_top,_rgba(251,113,133,0.12),_transparent_32%),radial-gradient(circle_at_100%_0,_rgba(125,211,252,0.12),_transparent_30%),linear-gradient(180deg,rgba(255,251,251,1),rgba(255,255,255,1),rgba(247,250,255,1))] text-neutral-950">
       <Header />
       <main className="mx-auto w-full min-w-0 max-w-6xl px-4 pb-28 pt-5 sm:px-6 sm:pb-12 sm:pt-8">
         <div className="mb-5 grid grid-cols-[44px_minmax(0,1fr)_auto] items-center gap-2 sm:gap-3">
@@ -370,7 +387,9 @@ function PetArcadePage() {
           </div>
         </div>
 
-        <section className="mb-5 overflow-hidden rounded-3xl border border-white bg-white/88 p-5 shadow-[0_20px_60px_rgba(15,23,42,0.08)] backdrop-blur sm:p-6">
+        <section className="relative mb-5 overflow-hidden rounded-[32px] border border-white/90 bg-[linear-gradient(135deg,rgba(255,255,255,0.96),rgba(255,245,247,0.94),rgba(240,249,255,0.92))] p-5 shadow-[0_28px_80px_rgba(15,23,42,0.1)] backdrop-blur sm:p-6">
+          <span aria-hidden className="absolute -left-10 top-0 size-40 rounded-full bg-rose-200/40 blur-3xl" />
+          <span aria-hidden className="absolute right-0 top-0 size-36 rounded-full bg-sky-200/35 blur-3xl" />
           <div className="grid min-w-0 grid-cols-[72px_minmax(0,1fr)] items-center gap-3 sm:grid-cols-[80px_minmax(0,1fr)] sm:gap-4">
             <div className="grid size-[72px] shrink-0 place-items-center overflow-hidden rounded-3xl bg-gradient-to-br from-rose-100 to-sky-100 sm:size-20">
               {petImage ? (
@@ -485,8 +504,8 @@ function PetArcadePage() {
                     className={cn(
                       "h-10 shrink-0 snap-start rounded-full px-4 text-xs font-bold transition",
                       filter === item.key
-                        ? "bg-neutral-950 text-white"
-                        : "border border-neutral-200 bg-white text-neutral-600",
+                        ? "bg-neutral-950 text-white shadow-[0_18px_30px_rgba(15,23,42,0.16)]"
+                        : "border border-neutral-200 bg-white/90 text-neutral-600 shadow-sm",
                     )}
                   >
                     {item.label}
@@ -507,7 +526,7 @@ function PetArcadePage() {
               </div>
             </div>
             <div className="space-y-4">
-              <div className="overflow-hidden rounded-3xl border border-amber-100 bg-gradient-to-br from-white via-amber-50/60 to-rose-50/50 p-5 shadow-[0_18px_50px_rgba(120,53,15,0.08)]">
+              <div className="overflow-hidden rounded-[30px] border border-amber-100 bg-[linear-gradient(145deg,rgba(255,255,255,0.98),rgba(255,248,235,0.92),rgba(255,241,242,0.9))] p-5 shadow-[0_22px_55px_rgba(120,53,15,0.1)]">
                 <div className="flex items-center gap-3">
                   <span className="grid size-10 place-items-center rounded-2xl bg-amber-50 text-amber-600">
                     <Coins className="size-5" />
@@ -569,10 +588,11 @@ function GameCard({
       disabled={!game.is_enabled}
       onClick={onOpen}
       className={cn(
-        "group relative min-h-[218px] w-full min-w-0 overflow-hidden rounded-[28px] border border-white/10 bg-gradient-to-br p-5 text-left text-white shadow-[0_22px_55px_rgba(15,23,42,0.20)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_28px_65px_rgba(15,23,42,0.28)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 focus-visible:ring-offset-2 disabled:opacity-50",
+        "group relative min-h-[240px] w-full min-w-0 overflow-hidden rounded-[30px] border border-white/10 bg-gradient-to-br p-5 text-left text-white shadow-[0_24px_60px_rgba(15,23,42,0.22)] transition duration-300 hover:-translate-y-1.5 hover:shadow-[0_32px_72px_rgba(15,23,42,0.28)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 focus-visible:ring-offset-2 disabled:opacity-50",
         visual.surface,
       )}
     >
+      <span aria-hidden className={cn("absolute inset-0", visual.mesh)} />
       <span
         aria-hidden
         className={cn(
@@ -603,9 +623,17 @@ function GameCard({
         </p>
         <h2 className="mt-1 break-words text-lg font-black text-white">{game.display_name}</h2>
       </div>
-      <p className="relative z-10 mt-2 line-clamp-2 break-words text-xs leading-relaxed text-white/65">
+      <p className="relative z-10 mt-2 line-clamp-3 break-words text-xs leading-relaxed text-white/65">
         {game.description}
       </p>
+      <div className="relative z-10 mt-4 flex flex-wrap gap-2">
+        <span className="rounded-full border border-white/12 bg-white/10 px-2.5 py-1 text-[10px] font-semibold text-white/82 backdrop-blur-sm">
+          {game.min_entry}-{game.max_entry} moedas
+        </span>
+        <span className="rounded-full border border-white/12 bg-white/10 px-2.5 py-1 text-[10px] font-semibold text-white/82 backdrop-blur-sm">
+          {usedToday}/{limit} hoje
+        </span>
+      </div>
       <div className="relative z-10 mt-4 grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-end gap-3 border-t border-white/10 pt-3 text-[9px] font-bold uppercase text-white/55">
         <span className="min-w-0 truncate">
           Entrada {game.min_entry}–{game.max_entry}

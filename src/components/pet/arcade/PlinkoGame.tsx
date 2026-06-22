@@ -6,8 +6,10 @@ import { toast } from "sonner";
 import { getArcadeErrorMessage, startPlinko, type ArcadeGameResult } from "@/lib/petArcade";
 import {
   ArcadePanel,
+  ArcadeStage,
   DifficultyButtons,
   EntryControl,
+  ArcadeMetric,
   type ArcadeGameProps,
   ResultCard,
   StartButton,
@@ -58,10 +60,11 @@ export function PlinkoGame({ config, balance, onBalanceChange, onFinished }: Arc
       icon={<Cookie className="size-5" />}
     >
       <div className="space-y-4">
-        <div className="relative h-72 overflow-hidden rounded-3xl border border-orange-100 bg-gradient-to-b from-orange-50 via-white to-amber-50">
+        <ArcadeStage className="h-72 border-orange-200/60 bg-gradient-to-b from-orange-950 via-amber-900 to-orange-700" glowClassName="bg-orange-300/20">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.2),_transparent_35%),linear-gradient(180deg,rgba(255,255,255,0.08),transparent_34%)]" />
           <div className="absolute inset-x-5 top-8 grid grid-cols-7 gap-x-5 gap-y-4 opacity-55">
             {Array.from({ length: 42 }, (_, index) => (
-              <Circle key={index} className="size-2 fill-orange-300 text-orange-300" />
+              <Circle key={index} className="size-2 fill-orange-200 text-orange-200/90" />
             ))}
           </div>
           {result ? (
@@ -86,15 +89,22 @@ export function PlinkoGame({ config, balance, onBalanceChange, onFinished }: Arc
           <div className="absolute inset-x-2 bottom-2 flex gap-1">
             {(slots.length ? slots : [2, 1.5, 1.2, 0.8, 0.6, 0.8, 1.2, 1.5, 2]).map(
               (value, index) => (
-                <div
+              <div
                   key={`${value}-${index}`}
-                  className={`flex h-9 min-w-0 flex-1 items-center justify-center rounded-lg text-[10px] font-black ${result && index === slot && !animating ? "bg-orange-500 text-white" : "bg-white text-orange-700 shadow-sm"}`}
+                  className={`flex h-9 min-w-0 flex-1 items-center justify-center rounded-xl text-[10px] font-black ${result && index === slot && !animating ? "bg-white text-orange-700 shadow-lg" : "bg-white/12 text-white backdrop-blur-sm"}`}
                 >
                   {Number(value).toFixed(Number(value) % 1 ? 1 : 0)}x
                 </div>
               ),
             )}
           </div>
+        </ArcadeStage>
+        <div className="grid grid-cols-2 gap-2">
+          <ArcadeMetric label="Entrada atual" value={`${entry} moedas`} tone="dark" />
+          <ArcadeMetric
+            label="Dificuldade"
+            value={difficulty === "leve" ? "Leve" : difficulty === "aventureiro" ? "Aventureiro" : "Radical"}
+          />
         </div>
 
         {!result || animating ? (

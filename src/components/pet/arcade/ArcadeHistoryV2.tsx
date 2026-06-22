@@ -19,9 +19,9 @@ const LABELS: Record<ArcadeGameType, string> = {
 
 export function ArcadeHistoryV2({ items }: { items: ArcadeHistoryV2Item[] }) {
   return (
-    <section className="rounded-3xl border border-neutral-200 bg-white p-4 shadow-sm sm:p-5">
+    <section className="overflow-hidden rounded-[30px] border border-neutral-200 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,250,252,0.94))] p-4 shadow-[0_22px_60px_rgba(15,23,42,0.08)] sm:p-5">
       <div className="mb-4 flex items-center gap-3">
-        <span className="grid size-10 place-items-center rounded-2xl bg-neutral-100 text-neutral-700">
+        <span className="grid size-10 place-items-center rounded-2xl bg-neutral-950 text-white shadow-lg shadow-neutral-950/10">
           <Clock3 className="size-5" />
         </span>
         <div>
@@ -37,7 +37,7 @@ export function ArcadeHistoryV2({ items }: { items: ArcadeHistoryV2Item[] }) {
         <div className="divide-y divide-neutral-100">
           {items.slice(0, 15).map((item) => (
             <div key={item.id} className="flex items-center gap-3 py-3">
-              <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-rose-50 text-rose-600">
+              <span className="grid size-10 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-rose-50 to-orange-50 text-rose-600 shadow-sm">
                 <PawPrint className="size-4" />
               </span>
               <div className="min-w-0 flex-1">

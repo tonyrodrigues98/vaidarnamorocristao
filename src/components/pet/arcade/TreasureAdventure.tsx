@@ -131,8 +131,9 @@ export function TreasureAdventure({
   const canCollect = round?.status === "active" && (round.safe_reveals ?? 0) > 0;
 
   return (
-    <section className="overflow-hidden rounded-3xl border border-amber-100 bg-white shadow-[0_24px_70px_rgba(180,83,9,0.10)]">
-      <div className="bg-gradient-to-br from-amber-50 via-white to-emerald-50 p-5 sm:p-6">
+    <section className="overflow-hidden rounded-[32px] border border-amber-100 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(255,251,235,0.94))] shadow-[0_28px_80px_rgba(180,83,9,0.12)]">
+      <div className="relative bg-gradient-to-br from-amber-50 via-white to-emerald-50 p-5 sm:p-6">
+        <span aria-hidden className="absolute -left-12 top-0 size-36 rounded-full bg-amber-200/45 blur-3xl" />
         <div className="flex items-start gap-3">
           <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-amber-500 text-white shadow-lg shadow-amber-200">
             <Gem className="h-5 w-5" />
@@ -229,6 +230,7 @@ export function TreasureAdventure({
             </div>
           </div>
 
+          <div className="rounded-[28px] border border-amber-100 bg-[linear-gradient(180deg,rgba(120,53,15,0.96),rgba(68,64,60,0.98))] p-3 shadow-[0_22px_60px_rgba(120,53,15,0.2)]" aria-label="Campo de casas fechadas">
           <div className="grid grid-cols-4 gap-2" aria-label="Campo de casas fechadas">
             {Array.from({ length: round.grid_size }).map((_, position) => {
               const isRevealed = revealed.has(position);
@@ -245,7 +247,7 @@ export function TreasureAdventure({
                       ? "border-rose-200 bg-rose-100 text-rose-600"
                       : isRevealed
                         ? "border-emerald-200 bg-emerald-100 text-emerald-600"
-                        : "border-amber-200 bg-gradient-to-br from-amber-100 to-amber-50 text-amber-700 shadow-sm"
+                        : "border-amber-200/30 bg-gradient-to-br from-amber-50 to-amber-200 text-amber-900 shadow-sm"
                   }`}
                   aria-label={
                     isRevealed ? `Casa ${position + 1} revelada` : `Revelar casa ${position + 1}`
@@ -261,6 +263,7 @@ export function TreasureAdventure({
                 </motion.button>
               );
             })}
+          </div>
           </div>
 
           {round.status === "active" ? (

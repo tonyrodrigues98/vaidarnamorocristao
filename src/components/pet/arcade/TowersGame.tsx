@@ -13,7 +13,9 @@ import {
 } from "@/lib/petArcade";
 import { cn } from "@/lib/utils";
 import {
+  ArcadeMetric,
   ArcadePanel,
+  ArcadeStage,
   DifficultyButtons,
   EntryControl,
   type ArcadeGameProps,
@@ -112,14 +114,14 @@ export function TowersGame({
       icon={<Building2 className="size-5" />}
     >
       <div className="space-y-4">
-        <div className="rounded-3xl bg-gradient-to-b from-emerald-950 to-teal-900 p-4 text-white">
+        <ArcadeStage className="bg-gradient-to-b from-emerald-950 via-teal-950 to-slate-950 p-4" glowClassName="bg-emerald-400/25">
           <div className="mb-4 flex items-center justify-between text-xs font-bold">
             <span>
               Andar {Math.min(floor + 1, floors)} de {floors}
             </span>
             <span>{Number(round?.multiplier ?? 1).toFixed(2)}x</span>
           </div>
-          <div className="space-y-2">
+          <div className="space-y-2 [perspective:700px]">
             {Array.from({ length: floors }, (_, index) => floors - index).map((level) => (
               <div
                 key={level}
@@ -136,7 +138,11 @@ export function TowersGame({
               </div>
             ))}
           </div>
-        </div>
+          <div className="mt-4 grid grid-cols-2 gap-2">
+            <ArcadeMetric label="Andar atual" value={`${Math.min(floor + 1, floors)}/${floors}`} />
+            <ArcadeMetric label="Multiplicador" value={`${Number(round?.multiplier ?? 1).toFixed(2)}x`} tone="success" />
+          </div>
+        </ArcadeStage>
 
         {!round && !result ? (
           <>
@@ -172,14 +178,14 @@ export function TowersGame({
                     disabled={busy || revealed}
                     onClick={() => void choose(tile)}
                     className={cn(
-                      "grid aspect-[0.8] place-items-center rounded-2xl border-2 transition",
+                      "grid aspect-[0.8] place-items-center rounded-2xl border-2 shadow-lg transition duration-300",
                       revealed
                         ? safe
                           ? "border-emerald-500 bg-emerald-100 text-emerald-700"
                           : lastChoice?.tile === tile
                             ? "border-rose-400 bg-rose-100 text-rose-700"
                             : "border-neutral-200 bg-neutral-50 text-neutral-300"
-                        : "border-amber-300 bg-gradient-to-b from-amber-100 to-orange-100 text-amber-700",
+                        : "border-amber-300 bg-gradient-to-b from-amber-50 via-amber-100 to-orange-200 text-amber-700 shadow-amber-100",
                     )}
                   >
                     {revealed ? (

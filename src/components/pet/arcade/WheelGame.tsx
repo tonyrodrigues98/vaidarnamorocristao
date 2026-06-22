@@ -6,6 +6,8 @@ import { toast } from "sonner";
 import { getArcadeErrorMessage, startWheel, type ArcadeGameResult } from "@/lib/petArcade";
 import {
   ArcadePanel,
+  ArcadeStage,
+  ArcadeMetric,
   DifficultyButtons,
   EntryControl,
   type ArcadeGameProps,
@@ -72,6 +74,7 @@ export function WheelGame({ config, balance, onBalanceChange, onFinished }: Arca
       icon={<Disc3 className="size-5" />}
     >
       <div className="space-y-5">
+        <ArcadeStage className="border-rose-200/60 bg-gradient-to-br from-rose-950 via-orange-900 to-amber-700" glowClassName="bg-rose-300/20">
         <div className="relative mx-auto size-64 max-w-full">
           <Triangle className="absolute left-1/2 top-0 z-10 size-8 -translate-x-1/2 rotate-180 fill-neutral-950 text-neutral-950" />
           <motion.div
@@ -98,6 +101,14 @@ export function WheelGame({ config, balance, onBalanceChange, onFinished }: Arca
               <Disc3 className="size-6 text-rose-500" />
             </span>
           </motion.div>
+        </div>
+        </ArcadeStage>
+        <div className="grid grid-cols-2 gap-2">
+          <ArcadeMetric label="Entrada" value={`${entry} moedas`} tone="dark" />
+          <ArcadeMetric
+            label="Modo"
+            value={difficulty === "leve" ? "Leve" : difficulty === "aventureiro" ? "Aventureiro" : "Radical"}
+          />
         </div>
 
         {!result || spinning ? (

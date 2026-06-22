@@ -37,7 +37,14 @@ import {
 } from "@/lib/petArcade";
 import { playGrabFinalDing, playGrabTick, unlockGrabAudio } from "@/lib/grabAudio";
 import { cn } from "@/lib/utils";
-import { ArcadePanel, EntryControl, type ArcadeGameProps, ResultCard } from "./ArcadeGameUi";
+import {
+  ArcadeMetric,
+  ArcadePanel,
+  ArcadeStage,
+  EntryControl,
+  type ArcadeGameProps,
+  ResultCard,
+} from "./ArcadeGameUi";
 import { createArcadeClientSeed, validateEntry } from "./arcadeUiUtils";
 
 const RARITY_STYLE: Record<string, string> = {
@@ -79,7 +86,12 @@ export function ScratchGame({ config, balance, onBalanceChange, onFinished }: Ar
       icon={<Sparkles className="size-5" />}
     >
       <div className="space-y-4">
-        <div className="grid grid-cols-3 gap-2 rounded-3xl bg-gradient-to-br from-neutral-200 via-white to-neutral-300 p-3 shadow-inner">
+        <ArcadeStage className="bg-gradient-to-br from-zinc-800 via-slate-900 to-zinc-950 p-3" glowClassName="bg-slate-200/20">
+        <div className="mb-3 flex items-center justify-between text-xs font-bold text-white/80">
+          <span>Revele os nove espaços</span>
+          <span>{revealed.length}/9</span>
+        </div>
+        <div className="grid grid-cols-3 gap-2 rounded-[24px] bg-white/8 p-2 shadow-inner">
           {Array.from({ length: 9 }, (_, index) => {
             const open = revealed.includes(index);
             const tile = tiles[index];
@@ -102,7 +114,7 @@ export function ScratchGame({ config, balance, onBalanceChange, onFinished }: Ar
                 {!open ? (
                   <motion.span
                     exit={{ opacity: 0, scale: 1.2 }}
-                    className="absolute inset-0 grid place-items-center bg-gradient-to-br from-neutral-300 via-neutral-100 to-neutral-400 text-neutral-600"
+                    className="absolute inset-0 grid place-items-center bg-[linear-gradient(135deg,#d4d4d8,#fafafa_48%,#a1a1aa)] text-neutral-600 after:absolute after:inset-0 after:bg-[repeating-linear-gradient(135deg,transparent_0_8px,rgba(255,255,255,.35)_8px_10px)]"
                   >
                     <Sparkles className="size-6" />
                   </motion.span>
@@ -111,6 +123,7 @@ export function ScratchGame({ config, balance, onBalanceChange, onFinished }: Ar
             );
           })}
         </div>
+        </ArcadeStage>
         {!result ? (
           <>
             <EntryControl
@@ -214,7 +227,7 @@ export function SurpriseEggGame({ config, balance, onBalanceChange, onFinished }
       icon={<Egg className="size-5" />}
     >
       <div className="space-y-4">
-        <div className="relative grid min-h-72 place-items-center overflow-hidden rounded-3xl bg-gradient-to-b from-violet-950 via-indigo-900 to-amber-100">
+        <ArcadeStage className="grid min-h-80 place-items-center bg-gradient-to-b from-violet-950 via-indigo-950 to-amber-200" glowClassName="bg-violet-300/30">
           <span className="absolute size-52 rounded-full bg-white/15 blur-3xl" />
           <motion.div
             animate={
@@ -223,7 +236,7 @@ export function SurpriseEggGame({ config, balance, onBalanceChange, onFinished }
                 : { y: [0, -6, 0] }
             }
             transition={{ repeat: Infinity, duration: 1.8 }}
-            className="relative grid size-36 place-items-center rounded-[48%_52%_45%_55%] bg-gradient-to-br from-amber-100 via-rose-200 to-violet-400 shadow-2xl"
+            className="relative grid size-40 place-items-center rounded-[48%_52%_45%_55%] border border-white/60 bg-gradient-to-br from-amber-100 via-rose-200 to-violet-400 shadow-[0_30px_80px_rgba(139,92,246,.45)]"
           >
             <Egg className="size-16 text-white drop-shadow" />
           </motion.div>
@@ -234,7 +247,7 @@ export function SurpriseEggGame({ config, balance, onBalanceChange, onFinished }
                 : `Pronto em ${Math.ceil(remaining / 60000)} min`}
             </span>
           ) : null}
-        </div>
+        </ArcadeStage>
         {result ? (
           <ResultCard result={result} title="Ovo aberto" onAgain={() => setResult(null)} />
         ) : egg ? (
@@ -335,7 +348,7 @@ export function PetAlbumGame({ config, balance, onBalanceChange, onFinished }: A
     >
       <div className="space-y-4">
         {opened.length ? (
-          <div className="overflow-x-auto rounded-3xl bg-neutral-950 p-4">
+          <ArcadeStage className="overflow-x-auto bg-gradient-to-br from-indigo-950 via-slate-950 to-rose-950 p-4" glowClassName="bg-indigo-400/25">
             <div className="flex min-w-max gap-3">
               {opened.map((s, i) => (
                 <motion.div
@@ -346,7 +359,7 @@ export function PetAlbumGame({ config, balance, onBalanceChange, onFinished }: A
                       ? { opacity: 1, y: 0, rotateY: 0 }
                       : { opacity: 0, y: 30, rotateY: 90 }
                   }
-                  className={cn("w-36 rounded-2xl border-2 p-2", RARITY_STYLE[s.rarity])}
+                  className={cn("w-36 rounded-[22px] border-2 p-2 shadow-2xl", RARITY_STYLE[s.rarity])}
                 >
                   <PetImg
                     src={s.image_path}
@@ -360,7 +373,7 @@ export function PetAlbumGame({ config, balance, onBalanceChange, onFinished }: A
                 </motion.div>
               ))}
             </div>
-          </div>
+          </ArcadeStage>
         ) : null}
         <div className="flex gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {categories.map((c) => (
@@ -376,7 +389,7 @@ export function PetAlbumGame({ config, balance, onBalanceChange, onFinished }: A
             </button>
           ))}
         </div>
-        <div className="rounded-[28px] border border-indigo-100 bg-gradient-to-br from-indigo-50 via-white to-rose-50 p-3">
+        <div className="rounded-[28px] border border-indigo-100 bg-[linear-gradient(135deg,#eef2ff,#fff_48%,#fff1f2)] p-3 shadow-inner">
           <div className="grid grid-cols-3 gap-2">
             {page.map((s) => (
               <div
@@ -469,7 +482,7 @@ export function CapsuleGame({ config, balance, onBalanceChange, onFinished }: Ar
       icon={<CircleDot className="size-5" />}
     >
       <div className="space-y-4">
-        <div className="relative grid min-h-72 place-items-center overflow-hidden rounded-3xl bg-gradient-to-b from-rose-400 via-rose-100 to-sky-100">
+        <ArcadeStage className="grid min-h-80 place-items-center bg-gradient-to-b from-rose-500 via-fuchsia-950 to-sky-950" glowClassName="bg-rose-300/30">
           <button
             onClick={() => setSound((v) => !v)}
             className="absolute right-3 top-3 grid size-10 place-items-center rounded-full bg-white/80"
@@ -479,11 +492,15 @@ export function CapsuleGame({ config, balance, onBalanceChange, onFinished }: Ar
           <motion.div
             animate={busy ? { rotate: [0, -8, 8, 0], y: [0, -4, 0] } : { y: [0, -3, 0] }}
             transition={{ repeat: Infinity, duration: 0.7 }}
-            className="grid size-44 place-items-center rounded-[45%_45%_30%_30%] border-8 border-white/70 bg-white/35 shadow-2xl backdrop-blur"
+            className="grid size-48 place-items-center rounded-[45%_45%_30%_30%] border-8 border-white/70 bg-white/25 shadow-[0_28px_70px_rgba(244,63,94,.35)] backdrop-blur"
           >
             <CircleDot className="size-24 text-rose-600" />
           </motion.div>
-        </div>
+          <div className="absolute bottom-4 left-4 right-4 grid grid-cols-2 gap-2">
+            <ArcadeMetric label="Custo" value={`${config.min_entry}`} />
+            <ArcadeMetric label="Estado" value={busy ? "Girando" : "Pronta"} tone="warning" />
+          </div>
+        </ArcadeStage>
         {item ? (
           <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-center">
             {item.image_path ? (
@@ -541,7 +558,7 @@ export function DailyMissionsGame({ onBalanceChange, onFinished }: ArcadeGamePro
       icon={<Check className="size-5" />}
     >
       <div className="space-y-3">
-        <div className="rounded-2xl bg-emerald-950 p-4 text-white">
+        <ArcadeStage className="bg-gradient-to-br from-emerald-950 via-teal-950 to-slate-950 p-4" glowClassName="bg-emerald-400/25">
           <div className="flex justify-between text-xs font-bold">
             <span>Progresso do dia</span>
             <span>
@@ -554,7 +571,7 @@ export function DailyMissionsGame({ onBalanceChange, onFinished }: ArcadeGamePro
               className="h-full rounded-full bg-emerald-300"
             />
           </div>
-        </div>
+        </ArcadeStage>
         {missions.map((m) => {
           const progress = Math.min(100, (m.progress / m.target_value) * 100);
           return (
