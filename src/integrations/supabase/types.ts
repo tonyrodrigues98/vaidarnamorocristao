@@ -1430,6 +1430,189 @@ export type Database = {
         }
         Relationships: []
       }
+      pet_arcade_config: {
+        Row: {
+          daily_reward_limit: number
+          daily_round_limit: number
+          explanatory_text: string
+          flight_active: boolean
+          id: number
+          maintenance: boolean
+          max_entry: number
+          max_multiplier: number
+          min_entry: number
+          treasure_active: boolean
+          treasure_difficulties: Json
+          treasure_grid_size: number
+          updated_at: string
+        }
+        Insert: {
+          daily_reward_limit?: number
+          daily_round_limit?: number
+          explanatory_text?: string
+          flight_active?: boolean
+          id?: number
+          maintenance?: boolean
+          max_entry?: number
+          max_multiplier?: number
+          min_entry?: number
+          treasure_active?: boolean
+          treasure_difficulties?: Json
+          treasure_grid_size?: number
+          updated_at?: string
+        }
+        Update: {
+          daily_reward_limit?: number
+          daily_round_limit?: number
+          explanatory_text?: string
+          flight_active?: boolean
+          id?: number
+          maintenance?: boolean
+          max_entry?: number
+          max_multiplier?: number
+          min_entry?: number
+          treasure_active?: boolean
+          treasure_difficulties?: Json
+          treasure_grid_size?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      pet_arcade_flight_rounds: {
+        Row: {
+          auto_collect_multiplier: number | null
+          ends_at: string
+          final_multiplier: number
+          round_id: string
+        }
+        Insert: {
+          auto_collect_multiplier?: number | null
+          ends_at: string
+          final_multiplier: number
+          round_id: string
+        }
+        Update: {
+          auto_collect_multiplier?: number | null
+          ends_at?: string
+          final_multiplier?: number
+          round_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pet_arcade_flight_rounds_round_id_fkey"
+            columns: ["round_id"]
+            isOneToOne: true
+            referencedRelation: "pet_arcade_rounds"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pet_arcade_rounds: {
+        Row: {
+          client_seed: string
+          created_at: string
+          current_multiplier: number
+          day: string
+          ended_at: string | null
+          entry_coins: number
+          game_type: string
+          id: string
+          metadata: Json
+          nonce: number
+          reward_coins: number
+          server_seed: string
+          server_seed_hash: string
+          started_at: string
+          status: string
+          user_id: string
+          user_pet_id: string
+        }
+        Insert: {
+          client_seed: string
+          created_at?: string
+          current_multiplier?: number
+          day?: string
+          ended_at?: string | null
+          entry_coins: number
+          game_type: string
+          id?: string
+          metadata?: Json
+          nonce: number
+          reward_coins?: number
+          server_seed: string
+          server_seed_hash: string
+          started_at?: string
+          status?: string
+          user_id: string
+          user_pet_id: string
+        }
+        Update: {
+          client_seed?: string
+          created_at?: string
+          current_multiplier?: number
+          day?: string
+          ended_at?: string | null
+          entry_coins?: number
+          game_type?: string
+          id?: string
+          metadata?: Json
+          nonce?: number
+          reward_coins?: number
+          server_seed?: string
+          server_seed_hash?: string
+          started_at?: string
+          status?: string
+          user_id?: string
+          user_pet_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pet_arcade_rounds_user_pet_id_fkey"
+            columns: ["user_pet_id"]
+            isOneToOne: false
+            referencedRelation: "user_pets_v2"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pet_arcade_treasure_rounds: {
+        Row: {
+          difficulty: string
+          grid_size: number
+          revealed_positions: number[]
+          round_id: string
+          safe_reveals: number
+          trap_count: number
+          trap_positions: number[]
+        }
+        Insert: {
+          difficulty: string
+          grid_size: number
+          revealed_positions?: number[]
+          round_id: string
+          safe_reveals?: number
+          trap_count: number
+          trap_positions: number[]
+        }
+        Update: {
+          difficulty?: string
+          grid_size?: number
+          revealed_positions?: number[]
+          round_id?: string
+          safe_reveals?: number
+          trap_count?: number
+          trap_positions?: number[]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pet_arcade_treasure_rounds_round_id_fkey"
+            columns: ["round_id"]
+            isOneToOne: true
+            referencedRelation: "pet_arcade_rounds"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pet_background_compat: {
         Row: {
           background_id: string
@@ -5389,6 +5572,11 @@ export type Database = {
       claim_pet_weekly_chest: { Args: never; Returns: Json }
       claim_starter_bundle: { Args: never; Returns: Json }
       cleanup_photo_moderation_rejects: { Args: never; Returns: number }
+      collect_pet_arcade_flight: { Args: { _round_id: string }; Returns: Json }
+      collect_pet_arcade_treasure: {
+        Args: { _round_id: string }
+        Returns: Json
+      }
       collect_pet_reward: {
         Args: never
         Returns: {
@@ -5431,6 +5619,7 @@ export type Database = {
       equip_user_pet_v2: { Args: { _user_pet_id: string }; Returns: undefined }
       evolve_my_pet: { Args: never; Returns: Json }
       expire_anonymous_messages: { Args: never; Returns: number }
+      finalize_pet_arcade_flight: { Args: { _round_id: string }; Returns: Json }
       freebie_required_level: {
         Args: { _category: string; _rarity: string }
         Returns: number
@@ -5552,6 +5741,9 @@ export type Database = {
           text: string
         }[]
       }
+      get_pet_arcade_active_rounds: { Args: never; Returns: Json }
+      get_pet_arcade_config: { Args: never; Returns: Json }
+      get_pet_arcade_history: { Args: { _limit?: number }; Returns: Json }
       get_pet_dream_match: {
         Args: never
         Returns: {
@@ -5720,6 +5912,72 @@ export type Database = {
         Args: { _count: number; _pool_id: string }
         Returns: Json
       }
+      pet_arcade_admin_recent_rounds: {
+        Args: { _limit?: number }
+        Returns: {
+          client_seed: string
+          created_at: string
+          current_multiplier: number
+          day: string
+          ended_at: string | null
+          entry_coins: number
+          game_type: string
+          id: string
+          metadata: Json
+          nonce: number
+          reward_coins: number
+          server_seed: string
+          server_seed_hash: string
+          started_at: string
+          status: string
+          user_id: string
+          user_pet_id: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "pet_arcade_rounds"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      pet_arcade_admin_update_config: { Args: { _patch: Json }; Returns: Json }
+      pet_arcade_admin_user_signals: {
+        Args: never
+        Returns: {
+          high_activity: boolean
+          net_coins: number
+          rounds_7d: number
+          total_entries: number
+          total_rewards: number
+          user_id: string
+        }[]
+      }
+      pet_arcade_flight_multiplier_at: {
+        Args: { _at: string; _max: number; _started_at: string }
+        Returns: number
+      }
+      pet_arcade_seed_unit: {
+        Args: {
+          _client_seed: string
+          _counter: number
+          _nonce: number
+          _server_seed: string
+        }
+        Returns: number
+      }
+      pet_arcade_settle_reward: {
+        Args: { _multiplier: number; _round_id: string; _title: string }
+        Returns: Json
+      }
+      pet_arcade_treasure_multiplier: {
+        Args: {
+          _grid_size: number
+          _max: number
+          _safe_reveals: number
+          _trap_count: number
+        }
+        Returns: number
+      }
       pet_care_uses_today: {
         Args: { _item_id: string; _user_pet_id: string }
         Returns: number
@@ -5779,6 +6037,10 @@ export type Database = {
         Returns: string
       }
       request_reverification: { Args: { _message: string }; Returns: string }
+      reveal_pet_arcade_treasure: {
+        Args: { _position: number; _round_id: string }
+        Returns: Json
+      }
       roll_daily_expeditions: { Args: never; Returns: undefined }
       roll_daily_missions: {
         Args: never
@@ -5829,6 +6091,22 @@ export type Database = {
       start_expedition: {
         Args: { _expedition_id: string; _user_pet_id: string }
         Returns: string
+      }
+      start_pet_arcade_flight: {
+        Args: {
+          _auto_collect_multiplier?: number
+          _client_seed?: string
+          _entry_coins: number
+        }
+        Returns: Json
+      }
+      start_pet_arcade_treasure: {
+        Args: {
+          _client_seed?: string
+          _difficulty: string
+          _entry_coins: number
+        }
+        Returns: Json
       }
       sync_level_achievements: {
         Args: { _level: number; _user_id: string }
