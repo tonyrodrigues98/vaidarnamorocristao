@@ -1,0 +1,119 @@
+import { useState } from "react";
+import { Cookie, Circle } from "lucide-react";
+import { motion } from "framer-motion";
+import { toast } from "sonner";
+
+import { getArcadeErrorMessage, startPlinko, type ArcadeGameResult } from "@/lib/petArcade";
+import {
+  ArcadePanel,
+  DifficultyButtons,
+  EntryControl,
+  type ArcadeGameProps,
+  ResultCard,
+  StartButton,
+} from "./ArcadeGameUi";
+import { createArcadeClientSeed, validateEntry } from "./arcadeUiUtils";
+
+export function PlinkoGame({ config, balance, onBalanceChange, onFinished }: ArcadeGameProps) {
+  const [entry, setEntry] = useState(config.min_entry);
+  const [difficulty, setDifficulty] = useState("leve");
+  const [busy, setBusy] = useState(false);
+  const [result, setResult] = useState<ArcadeGameResult | null>(null);
+  const [animating, setAnimating] = useState(false);
+
+  async function start() {
+    if (!validateEntry(entry, config, balance))
+      return toast.error("Revise a quantidade de moedas.");
+    setBusy(true);
+    setResult(null);
+    try {
+      const next = await startPlinko(entry, difficulty, createArcadeClientSeed());
+      setResult(next);
+      setAnimating(true);
+      if (typeof next.new_balance === "number") onBalanceChange(next.new_balance);
+      window.setTimeout(() => {
+        setAnimating(false);
+        onFinished();
+      }, 1800);
+    } catch (error) {
+      toast.error(getArcadeErrorMessage(error));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const data = result?.result ?? {};
+  const slots = Array.isArray(data.slots) ? (data.slots as number[]) : [];
+  const slot = Number(data.slot ?? 0);
+
+  return (
+    <ArcadePanel
+      title={config.display_name}
+      description={config.description}
+      icon={<Cookie className="size-5" />}
+    >
+      <div className="space-y-4">
+        <div className="relative h-72 overflow-hidden rounded-3xl border border-orange-100 bg-gradient-to-b from-orange-50 via-white to-amber-50">
+          <div className="absolute inset-x-5 top-8 grid grid-cols-7 gap-x-5 gap-y-4 opacity-55">
+            {Array.from({ length: 42 }, (_, index) => (
+              <Circle key={index} className="size-2 fill-orange-300 text-orange-300" />
+            ))}
+          </div>
+          {result ? (
+            <motion.div
+              key={result.game_id}
+              initial={{ left: "50%", top: 10, rotate: 0 }}
+              animate={{
+                left: `${((slot + 0.5) / Math.max(slots.length, 1)) * 100}%`,
+                top: 220,
+                rotate: 720,
+              }}
+              transition={{ duration: 1.65, ease: [0.22, 0.8, 0.3, 1] }}
+              className="absolute z-10 -ml-4 grid size-8 place-items-center rounded-full bg-orange-500 text-white shadow-lg"
+            >
+              <Cookie className="size-5" />
+            </motion.div>
+          ) : (
+            <div className="absolute left-1/2 top-3 -ml-4 grid size-8 place-items-center rounded-full bg-orange-200 text-orange-600">
+              <Cookie className="size-5" />
+            </div>
+          )}
+          <div className="absolute inset-x-2 bottom-2 flex gap-1">
+            {(slots.length ? slots : [2, 1.5, 1.2, 0.8, 0.6, 0.8, 1.2, 1.5, 2]).map(
+              (value, index) => (
+                <div
+                  key={`${value}-${index}`}
+                  className={`flex h-9 min-w-0 flex-1 items-center justify-center rounded-lg text-[10px] font-black ${result && index === slot && !animating ? "bg-orange-500 text-white" : "bg-white text-orange-700 shadow-sm"}`}
+                >
+                  {Number(value).toFixed(Number(value) % 1 ? 1 : 0)}x
+                </div>
+              ),
+            )}
+          </div>
+        </div>
+
+        {!result || animating ? (
+          <>
+            <EntryControl
+              value={entry}
+              onChange={setEntry}
+              config={config}
+              balance={balance}
+              disabled={busy || animating}
+            />
+            <DifficultyButtons
+              value={difficulty}
+              onChange={setDifficulty}
+              disabled={busy || animating}
+            />
+            <StartButton busy={busy || animating} onClick={() => void start()}>
+              Começar queda
+            </StartButton>
+          </>
+        ) : (
+          <ResultCard result={result} onAgain={() => setResult(null)} />
+        )}
+      </div>
+    </ArcadePanel>
+  );
+}

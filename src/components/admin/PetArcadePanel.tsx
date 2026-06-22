@@ -1,6 +1,15 @@
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { AlertTriangle, Gamepad2, Loader2, Save, ShieldCheck } from "lucide-react";
+import {
+  AlertTriangle,
+  ChevronDown,
+  Coins,
+  Gamepad2,
+  Loader2,
+  Save,
+  ShieldCheck,
+  SlidersHorizontal,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -11,14 +20,21 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   getAdminArcadeRounds,
   getAdminArcadeSignals,
+  getPetArcadeAdminMetrics,
+  getPetArcadeCatalog,
   getPetArcadeConfig,
+  updatePetArcadeGameConfig,
+  updatePetArcadeSettings,
   updatePetArcadeConfig,
+  type ArcadeGameConfig,
+  type ArcadeGlobalSettings,
   type PetArcadeConfig,
 } from "@/lib/petArcade";
 
 export function PetArcadePanel() {
   const queryClient = useQueryClient();
   const [draft, setDraft] = useState<PetArcadeConfig | null>(null);
+  const [settingsDraft, setSettingsDraft] = useState<ArcadeGlobalSettings | null>(null);
   const [saving, setSaving] = useState(false);
 
   const configQuery = useQuery({
@@ -33,10 +49,22 @@ export function PetArcadePanel() {
     queryKey: ["pet-arcade", "admin", "signals"],
     queryFn: getAdminArcadeSignals,
   });
+  const catalogQuery = useQuery({
+    queryKey: ["pet-arcade", "admin", "catalog"],
+    queryFn: getPetArcadeCatalog,
+  });
+  const metricsQuery = useQuery({
+    queryKey: ["pet-arcade", "admin", "metrics"],
+    queryFn: getPetArcadeAdminMetrics,
+  });
 
   useEffect(() => {
     if (configQuery.data) setDraft(configQuery.data);
   }, [configQuery.data]);
+
+  useEffect(() => {
+    if (catalogQuery.data) setSettingsDraft(catalogQuery.data.settings);
+  }, [catalogQuery.data]);
 
   function update<K extends keyof PetArcadeConfig>(key: K, value: PetArcadeConfig[K]) {
     setDraft((current) => (current ? { ...current, [key]: value } : current));
@@ -67,6 +95,21 @@ export function PetArcadePanel() {
     }
   }
 
+  async function saveSettings() {
+    if (!settingsDraft) return;
+    setSaving(true);
+    try {
+      const saved = await updatePetArcadeSettings(settingsDraft);
+      setSettingsDraft(saved);
+      await queryClient.invalidateQueries({ queryKey: ["pet-arcade"] });
+      toast.success("Limites gerais atualizados");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Não foi possível salvar.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
   if (configQuery.isLoading) {
     return (
       <div className="grid min-h-56 place-items-center">
@@ -85,9 +128,55 @@ export function PetArcadePanel() {
 
   const rounds = roundsQuery.data ?? [];
   const signals = signalsQuery.data ?? [];
+  const games = catalogQuery.data?.games ?? [];
+  const metrics = metricsQuery.data ?? [];
 
   return (
     <div className="space-y-6">
+      {settingsDraft ? (
+        <section className="rounded-3xl border border-border bg-card p-5 shadow-sm sm:p-6">
+          <div className="mb-5 flex items-start gap-3">
+            <span className="grid h-11 w-11 place-items-center rounded-2xl bg-neutral-950 text-white">
+              <SlidersHorizontal className="h-5 w-5" />
+            </span>
+            <div>
+              <h2 className="text-lg font-semibold">Limites gerais</h2>
+              <p className="text-sm text-muted-foreground">Regras saudáveis aplicadas a todos os jogos.</p>
+            </div>
+          </div>
+          <div className="mb-4 grid gap-3 sm:grid-cols-2">
+            <ToggleRow label="Pet Arcade ativo" checked={settingsDraft.is_enabled} onCheckedChange={(value) => setSettingsDraft({ ...settingsDraft, is_enabled: value })} />
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <NumberField label="Partidas por dia" value={settingsDraft.daily_play_limit} onChange={(value) => setSettingsDraft({ ...settingsDraft, daily_play_limit: value })} />
+            <NumberField label="Recompensa diária" value={settingsDraft.daily_win_limit} onChange={(value) => setSettingsDraft({ ...settingsDraft, daily_win_limit: value })} />
+            <NumberField label="Entrada mínima geral" value={settingsDraft.global_min_entry} onChange={(value) => setSettingsDraft({ ...settingsDraft, global_min_entry: value })} />
+            <NumberField label="Entrada máxima geral" value={settingsDraft.global_max_entry} onChange={(value) => setSettingsDraft({ ...settingsDraft, global_max_entry: value })} />
+          </div>
+          <div className="mt-4 grid gap-4 sm:grid-cols-2">
+            <div><Label>Mensagem de manutenção</Label><Textarea value={settingsDraft.maintenance_message} onChange={(event) => setSettingsDraft({ ...settingsDraft, maintenance_message: event.target.value })} className="mt-2 min-h-24 rounded-2xl" /></div>
+            <div><Label>Aviso de equilíbrio</Label><Textarea value={settingsDraft.healthy_play_message} onChange={(event) => setSettingsDraft({ ...settingsDraft, healthy_play_message: event.target.value })} className="mt-2 min-h-24 rounded-2xl" /></div>
+          </div>
+          <Button onClick={() => void saveSettings()} disabled={saving} className="mt-5 h-11 rounded-xl"><Save className="h-4 w-4" /> Salvar limites gerais</Button>
+        </section>
+      ) : null}
+
+      {metrics.length ? (
+        <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {metrics.map((metric) => (
+            <div key={metric.game_type} className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+              <div className="flex items-center gap-2"><Coins className="size-4 text-amber-500" /><p className="truncate text-sm font-semibold">{games.find((game) => game.game_type === metric.game_type)?.display_name ?? metric.game_type}</p></div>
+              <div className="mt-3 grid grid-cols-3 gap-2 text-[11px]"><span><b className="block text-base">{metric.rounds}</b>rodadas</span><span><b className="block text-base">{metric.total_entries}</b>entradas</span><span><b className="block text-base">{metric.total_rewards}</b>pagas</span></div>
+            </div>
+          ))}
+        </section>
+      ) : null}
+
+      <section className="space-y-3">
+        <div><h2 className="text-lg font-semibold">Configuração por jogo</h2><p className="text-sm text-muted-foreground">Ative, ordene e ajuste economia, dificuldades e recompensas.</p></div>
+        {games.map((game) => <GameConfigEditor key={game.id} game={game} onSaved={() => queryClient.invalidateQueries({ queryKey: ["pet-arcade"] })} />)}
+      </section>
+
       <section className="rounded-3xl border border-border bg-card p-5 shadow-sm sm:p-6">
         <div className="mb-5 flex items-start gap-3">
           <span className="grid h-11 w-11 place-items-center rounded-2xl bg-rose-500 text-white">
@@ -230,6 +319,92 @@ export function PetArcadePanel() {
         </div>
       </section>
     </div>
+  );
+}
+
+function GameConfigEditor({
+  game,
+  onSaved,
+}: {
+  game: ArcadeGameConfig;
+  onSaved: () => void | Promise<unknown>;
+}) {
+  const [draft, setDraft] = useState(game);
+  const [difficultyJson, setDifficultyJson] = useState(() => JSON.stringify(game.difficulty_config, null, 2));
+  const [rewardJson, setRewardJson] = useState(() => JSON.stringify(game.reward_config, null, 2));
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    setDraft(game);
+    setDifficultyJson(JSON.stringify(game.difficulty_config, null, 2));
+    setRewardJson(JSON.stringify(game.reward_config, null, 2));
+  }, [game]);
+
+  async function saveGame() {
+    let difficultyConfig: Record<string, unknown>;
+    let rewardConfig: Record<string, unknown>;
+    try {
+      difficultyConfig = JSON.parse(difficultyJson) as Record<string, unknown>;
+      rewardConfig = JSON.parse(rewardJson) as Record<string, unknown>;
+    } catch {
+      toast.error("Revise o JSON de dificuldades e recompensas.");
+      return;
+    }
+    setSaving(true);
+    try {
+      const saved = await updatePetArcadeGameConfig(game.game_type, {
+        display_name: draft.display_name,
+        description: draft.description,
+        is_enabled: draft.is_enabled,
+        min_entry: draft.min_entry,
+        max_entry: draft.max_entry,
+        daily_play_limit: draft.daily_play_limit,
+        daily_win_limit: draft.daily_win_limit,
+        cooldown_seconds: draft.cooldown_seconds,
+        max_multiplier: draft.max_multiplier,
+        difficulty_config: difficultyConfig,
+        reward_config: rewardConfig,
+        sort_order: draft.sort_order,
+      });
+      setDraft(saved);
+      await onSaved();
+      toast.success(`${saved.display_name} atualizado`);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Não foi possível salvar o jogo.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <details className="group rounded-2xl border border-border bg-card shadow-sm">
+      <summary className="flex cursor-pointer list-none items-center gap-3 p-4">
+        <span className={`size-2 rounded-full ${draft.is_enabled ? "bg-emerald-500" : "bg-neutral-300"}`} />
+        <div className="min-w-0 flex-1"><p className="truncate font-semibold">{draft.display_name}</p><p className="text-xs text-muted-foreground">{draft.game_type} · ordem {draft.sort_order}</p></div>
+        <ChevronDown className="size-4 transition group-open:rotate-180" />
+      </summary>
+      <div className="border-t border-border p-4 sm:p-5">
+        <div className="mb-4"><ToggleRow label="Jogo ativo" checked={draft.is_enabled} onCheckedChange={(value) => setDraft({ ...draft, is_enabled: value })} /></div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div><Label>Nome exibido</Label><Input value={draft.display_name} onChange={(event) => setDraft({ ...draft, display_name: event.target.value })} className="mt-2 h-11 rounded-xl" /></div>
+          <NumberField label="Ordem" value={draft.sort_order} onChange={(value) => setDraft({ ...draft, sort_order: value })} />
+          <div className="sm:col-span-2"><Label>Descrição</Label><Textarea value={draft.description} onChange={(event) => setDraft({ ...draft, description: event.target.value })} className="mt-2 rounded-xl" /></div>
+        </div>
+        <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <NumberField label="Entrada mínima" value={draft.min_entry} onChange={(value) => setDraft({ ...draft, min_entry: value })} />
+          <NumberField label="Entrada máxima" value={draft.max_entry} onChange={(value) => setDraft({ ...draft, max_entry: value })} />
+          <NumberField label="Cooldown (segundos)" value={draft.cooldown_seconds} onChange={(value) => setDraft({ ...draft, cooldown_seconds: value })} />
+          <NumberField label="Partidas por dia" value={draft.daily_play_limit} onChange={(value) => setDraft({ ...draft, daily_play_limit: value })} />
+          <NumberField label="Recompensa diária" value={draft.daily_win_limit} onChange={(value) => setDraft({ ...draft, daily_win_limit: value })} />
+          <NumberField label="Multiplicador máximo" value={Number(draft.max_multiplier)} step={0.05} onChange={(value) => setDraft({ ...draft, max_multiplier: value })} />
+        </div>
+        <div className="mt-4 grid gap-4 lg:grid-cols-2">
+          <div><Label>Dificuldades e mecânica (JSON)</Label><Textarea value={difficultyJson} onChange={(event) => setDifficultyJson(event.target.value)} spellCheck={false} className="mt-2 min-h-56 rounded-xl font-mono text-xs" /></div>
+          <div><Label>Recompensas (JSON)</Label><Textarea value={rewardJson} onChange={(event) => setRewardJson(event.target.value)} spellCheck={false} className="mt-2 min-h-56 rounded-xl font-mono text-xs" /></div>
+        </div>
+        <Button onClick={() => void saveGame()} disabled={saving} className="mt-4 h-11 rounded-xl">{saving ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />} Salvar jogo</Button>
+      </div>
+    </details>
   );
 }
 
