@@ -12,6 +12,7 @@ import {
   StartButton,
 } from "./ArcadeGameUi";
 import { createArcadeClientSeed, validateEntry } from "./arcadeUiUtils";
+import { AutoPlayControls } from "./AutoPlayControls";
 
 export function KenoGame({ config, balance, onBalanceChange, onFinished }: ArcadeGameProps) {
   const cfg = config.difficulty_config as { grid_size?: number; pick_count?: number };
@@ -45,10 +46,15 @@ export function KenoGame({ config, balance, onBalanceChange, onFinished }: Arcad
     );
   }
 
-  async function start() {
-    if (!validateEntry(entry, config, balance))
-      return toast.error("Revise a quantidade de moedas.");
-    if (selected.length !== pickCount) return toast.error(`Escolha ${pickCount} números.`);
+  async function start(): Promise<boolean> {
+    if (!validateEntry(entry, config, balance)) {
+      toast.error("Revise a quantidade de moedas.");
+      return false;
+    }
+    if (selected.length !== pickCount) {
+      toast.error(`Escolha ${pickCount} números.`);
+      return false;
+    }
     setBusy(true);
     try {
       const next = await startKeno(entry, selected, createArcadeClientSeed());
@@ -56,8 +62,10 @@ export function KenoGame({ config, balance, onBalanceChange, onFinished }: Arcad
       setRevealCount(0);
       if (typeof next.new_balance === "number") onBalanceChange(next.new_balance);
       onFinished();
+      return Number(next.new_balance ?? balance) >= entry;
     } catch (error) {
       toast.error(getArcadeErrorMessage(error));
+      return false;
     } finally {
       setBusy(false);
     }
@@ -140,6 +148,11 @@ export function KenoGame({ config, balance, onBalanceChange, onFinished }: Arcad
             Revelando a sequência...
           </div>
         )}
+        <AutoPlayControls
+          cooldownSeconds={config.cooldown_seconds}
+          disabled={busy || selected.length !== pickCount}
+          onRound={start}
+        />
       </div>
     </ArcadePanel>
   );

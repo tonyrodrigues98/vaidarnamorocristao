@@ -13,6 +13,7 @@ import {
   StartButton,
 } from "./ArcadeGameUi";
 import { createArcadeClientSeed, validateEntry } from "./arcadeUiUtils";
+import { AutoPlayControls } from "./AutoPlayControls";
 
 type WheelSegment = { m: number; w: number };
 
@@ -28,9 +29,11 @@ export function WheelGame({ config, balance, onBalanceChange, onFinished }: Arca
   )?.segments ?? []) as WheelSegment[];
   const resultSegments = (result?.result?.segments as WheelSegment[] | undefined) ?? defaults;
 
-  async function start() {
-    if (!validateEntry(entry, config, balance))
-      return toast.error("Revise a quantidade de moedas.");
+  async function start(): Promise<boolean> {
+    if (!validateEntry(entry, config, balance)) {
+      toast.error("Revise a quantidade de moedas.");
+      return false;
+    }
     setBusy(true);
     setResult(null);
     try {
@@ -48,8 +51,10 @@ export function WheelGame({ config, balance, onBalanceChange, onFinished }: Arca
         setSpinning(false);
         onFinished();
       }, 2500);
+      return Number(next.new_balance ?? balance) >= entry;
     } catch (error) {
       toast.error(getArcadeErrorMessage(error));
+      return false;
     } finally {
       setBusy(false);
     }
@@ -116,6 +121,11 @@ export function WheelGame({ config, balance, onBalanceChange, onFinished }: Arca
         ) : (
           <ResultCard result={result} onAgain={() => setResult(null)} />
         )}
+        <AutoPlayControls
+          cooldownSeconds={config.cooldown_seconds}
+          disabled={busy || spinning}
+          onRound={start}
+        />
       </div>
     </ArcadePanel>
   );

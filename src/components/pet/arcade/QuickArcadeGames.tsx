@@ -18,6 +18,7 @@ import {
   StartButton,
 } from "./ArcadeGameUi";
 import { createArcadeClientSeed, validateEntry } from "./arcadeUiUtils";
+import { AutoPlayControls } from "./AutoPlayControls";
 
 export function CoinFlipGame({ config, balance, onBalanceChange, onFinished }: ArcadeGameProps) {
   const [entry, setEntry] = useState(config.min_entry);
@@ -26,9 +27,11 @@ export function CoinFlipGame({ config, balance, onBalanceChange, onFinished }: A
   const [flipping, setFlipping] = useState(false);
   const [result, setResult] = useState<ArcadeGameResult | null>(null);
 
-  async function start() {
-    if (!validateEntry(entry, config, balance))
-      return toast.error("Revise a quantidade de moedas.");
+  async function start(): Promise<boolean> {
+    if (!validateEntry(entry, config, balance)) {
+      toast.error("Revise a quantidade de moedas.");
+      return false;
+    }
     setBusy(true);
     setResult(null);
     try {
@@ -40,8 +43,10 @@ export function CoinFlipGame({ config, balance, onBalanceChange, onFinished }: A
         setFlipping(false);
         onFinished();
       }, 1500);
+      return Number(next.new_balance ?? balance) >= entry;
     } catch (error) {
       toast.error(getArcadeErrorMessage(error));
+      return false;
     } finally {
       setBusy(false);
     }
@@ -111,6 +116,11 @@ export function CoinFlipGame({ config, balance, onBalanceChange, onFinished }: A
         ) : (
           <ResultCard result={result} onAgain={() => setResult(null)} />
         )}
+        <AutoPlayControls
+          cooldownSeconds={config.cooldown_seconds}
+          disabled={busy || flipping}
+          onRound={start}
+        />
       </div>
     </ArcadePanel>
   );
@@ -129,9 +139,11 @@ export function DiceGame({ config, balance, onBalanceChange, onFinished }: Arcad
     [chance, config.max_multiplier],
   );
 
-  async function start() {
-    if (!validateEntry(entry, config, balance))
-      return toast.error("Revise a quantidade de moedas.");
+  async function start(): Promise<boolean> {
+    if (!validateEntry(entry, config, balance)) {
+      toast.error("Revise a quantidade de moedas.");
+      return false;
+    }
     setBusy(true);
     setResult(null);
     try {
@@ -143,8 +155,10 @@ export function DiceGame({ config, balance, onBalanceChange, onFinished }: Arcad
         setRolling(false);
         onFinished();
       }, 1300);
+      return Number(next.new_balance ?? balance) >= entry;
     } catch (error) {
       toast.error(getArcadeErrorMessage(error));
+      return false;
     } finally {
       setBusy(false);
     }
@@ -232,6 +246,11 @@ export function DiceGame({ config, balance, onBalanceChange, onFinished }: Arcad
             onAgain={() => setResult(null)}
           />
         )}
+        <AutoPlayControls
+          cooldownSeconds={config.cooldown_seconds}
+          disabled={busy || rolling}
+          onRound={start}
+        />
       </div>
     </ArcadePanel>
   );
