@@ -407,30 +407,36 @@ export function SurpriseEggGame({
             {/* Pedestal + egg */}
             <div className="absolute inset-x-0 bottom-0 flex flex-col items-center">
               <div className="relative flex flex-col items-center">
-                <LightBurst active={burstActive} />
-                {phase !== "revealed" || !result ? (
-                  <CinematicEgg
-                    state={phase}
-                    reduceMotion={reduceMotion}
-                    onTap={() => void open(false)}
-                  />
-                ) : null}
-                <AnimatePresence>
-                  {phase === "revealed" && result ? (
-                    <RewardOrb
-                      key="reward"
-                      reduceMotion={reduceMotion}
-                      coins={rewardCoins}
-                      xp={rewardXp}
-                    />
-                  ) : null}
-                </AnimatePresence>
+                {/* Pedestal first so the egg overlaps in front of it */}
                 <img
                   src={pedestalImage}
                   alt=""
                   draggable={false}
-                  className="pointer-events-none -mt-10 w-72 max-w-[80%] select-none object-contain drop-shadow-[0_28px_24px_rgba(0,0,0,0.55)]"
+                  className="pointer-events-none relative z-10 w-72 max-w-[80%] select-none object-contain drop-shadow-[0_28px_24px_rgba(0,0,0,0.55)]"
                 />
+                {/* Egg sits in front of the pedestal, anchored over its top */}
+                <div className="pointer-events-none absolute inset-x-0 bottom-16 z-20 flex justify-center">
+                  <div className="pointer-events-auto relative">
+                    <LightBurst active={burstActive} />
+                    {phase !== "revealed" || !result ? (
+                      <CinematicEgg
+                        state={phase}
+                        reduceMotion={reduceMotion}
+                        onTap={() => void open(false)}
+                      />
+                    ) : null}
+                    <AnimatePresence>
+                      {phase === "revealed" && result ? (
+                        <RewardOrb
+                          key="reward"
+                          reduceMotion={reduceMotion}
+                          coins={rewardCoins}
+                          xp={rewardXp}
+                        />
+                      ) : null}
+                    </AnimatePresence>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
