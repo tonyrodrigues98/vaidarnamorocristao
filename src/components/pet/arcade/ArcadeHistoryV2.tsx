@@ -15,6 +15,11 @@ const LABELS: Record<ArcadeGameType, string> = {
   memory: "Memória dos Pets",
   piggybank: "Cofrinho do Pet",
   dice: "Dados da Sorte",
+  album: "Álbum de Figurinhas",
+  capsule: "Máquina de Bolinha",
+  egg: "Ovo Surpresa",
+  missions: "Missões Diárias",
+  scratch: "Raspadinha do Pet",
 };
 
 export function ArcadeHistoryV2({ items }: { items: ArcadeHistoryV2Item[] }) {

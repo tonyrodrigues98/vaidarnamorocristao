@@ -22,14 +22,12 @@ import { Button } from "@/components/ui/button";
 import {
   claimPetAlbumCategory,
   claimPetArcadeMission,
-  claimPetSurpriseEgg,
   getArcadeErrorMessage,
   getPetAlbumState,
   getPetArcadeDailyMissions,
   openPetAlbumPack,
   startPetCapsule,
   startPetScratch,
-  startPetSurpriseEgg,
   type ArcadeGameResult,
   type PetAlbumState,
   type PetAlbumSticker,
@@ -171,126 +169,7 @@ export function ScratchGame({ config, balance, onBalanceChange, onFinished }: Ar
   );
 }
 
-export function SurpriseEggGame({ config, balance, onBalanceChange, onFinished }: ArcadeGameProps) {
-  const [state, setState] = useState<PetAlbumState | null>(null);
-  const [busy, setBusy] = useState(false);
-  const [result, setResult] = useState<ArcadeGameResult | null>(null);
-  const [now, setNow] = useState(Date.now());
-
-  async function load() {
-    try {
-      setState(await getPetAlbumState());
-    } catch {
-      setState(null);
-    }
-  }
-  useEffect(() => {
-    void load();
-  }, []);
-  useEffect(() => {
-    const timer = window.setInterval(() => setNow(Date.now()), 1000);
-    return () => window.clearInterval(timer);
-  }, []);
-  const egg = state?.egg;
-  const remaining = egg ? Math.max(0, new Date(egg.open_after).getTime() - now) : 0;
-  const instantEnabled = Boolean(config.difficulty_config.instant_open_enabled);
-  const instantCost = Number(config.difficulty_config.instant_open_cost ?? 0);
-
-  async function buy() {
-    setBusy(true);
-    try {
-      const next = await startPetSurpriseEgg(config.min_entry);
-      if (typeof next.new_balance === "number") onBalanceChange(next.new_balance);
-      await load();
-      onFinished();
-    } catch (error) {
-      toast.error(getArcadeErrorMessage(error));
-    } finally {
-      setBusy(false);
-    }
-  }
-  async function open(instant = false) {
-    if (!egg) return;
-    setBusy(true);
-    try {
-      const next = await claimPetSurpriseEgg(egg.id, instant);
-      setResult(next);
-      if (typeof next.new_balance === "number") onBalanceChange(next.new_balance);
-      await load();
-      onFinished();
-    } catch (error) {
-      toast.error(getArcadeErrorMessage(error));
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  return (
-    <ArcadePanel
-      title={config.display_name}
-      description={config.description}
-      icon={<Egg className="size-5" />}
-    >
-      <div className="space-y-4">
-        <ArcadeStage
-          className="grid min-h-80 place-items-center bg-gradient-to-b from-violet-950 via-indigo-950 to-amber-200"
-          glowClassName="bg-violet-300/30"
-        >
-          <span className="absolute size-52 rounded-full bg-white/15 blur-3xl" />
-          <motion.div
-            animate={
-              egg && remaining === 0
-                ? { rotate: [-3, 3, -3], scale: [1, 1.04, 1] }
-                : { y: [0, -6, 0] }
-            }
-            transition={{ repeat: Infinity, duration: 1.8 }}
-            className="relative grid size-40 place-items-center rounded-[48%_52%_45%_55%] border border-white/60 bg-gradient-to-br from-amber-100 via-rose-200 to-violet-400 shadow-[0_30px_80px_rgba(139,92,246,.45)]"
-          >
-            <Egg className="size-16 text-white drop-shadow" />
-          </motion.div>
-          {egg ? (
-            <span className="absolute bottom-5 rounded-full bg-black/35 px-4 py-2 text-xs font-bold text-white backdrop-blur">
-              {remaining === 0
-                ? "Pronto para abrir"
-                : `Pronto em ${Math.ceil(remaining / 60000)} min`}
-            </span>
-          ) : null}
-        </ArcadeStage>
-        {result ? (
-          <ResultCard result={result} title="Ovo aberto" onAgain={() => setResult(null)} />
-        ) : egg ? (
-          <div className="grid gap-2">
-            <Button
-              onClick={() => void open(false)}
-              disabled={busy || remaining > 0}
-              className="h-12 w-full rounded-2xl bg-violet-600 text-white"
-            >
-              <PackageOpen className="size-4" /> Abrir ovo
-            </Button>
-            {remaining > 0 && instantEnabled ? (
-              <Button
-                variant="outline"
-                onClick={() => void open(true)}
-                disabled={busy || balance < instantCost}
-                className="h-11 rounded-2xl border-violet-200"
-              >
-                Abrir agora · {instantCost} moedas
-              </Button>
-            ) : null}
-          </div>
-        ) : (
-          <Button
-            onClick={() => void buy()}
-            disabled={busy || balance < config.min_entry}
-            className="h-12 w-full rounded-2xl bg-violet-600 text-white"
-          >
-            <Egg className="size-4" /> Comprar ovo · {config.min_entry} moedas
-          </Button>
-        )}
-      </div>
-    </ArcadePanel>
-  );
-}
+export { SurpriseEggGame } from "./SurpriseEggScene";
 
 export function PetAlbumGame({ config, balance, onBalanceChange, onFinished }: ArcadeGameProps) {
   const [state, setState] = useState<PetAlbumState | null>(null);
