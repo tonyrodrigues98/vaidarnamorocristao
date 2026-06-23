@@ -279,7 +279,7 @@ export function SurpriseEggGame({
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<ArcadeGameResult | null>(null);
   const [now, setNow] = useState(Date.now());
-  const [phase, setPhase] = useState<SceneState>("empty");
+  const [overridePhase, setOverridePhase] = useState<"opening" | "revealed" | null>(null);
   const phaseTimer = useRef<number | null>(null);
 
   const load = useCallback(async () => {
@@ -311,14 +311,15 @@ export function SurpriseEggGame({
   const instantEnabled = Boolean(config.difficulty_config.instant_open_enabled);
   const instantCost = Number(config.difficulty_config.instant_open_cost ?? 0);
 
-  // Sync visual phase with backend state (except during local opening/revealed
-  // transitions that we drive ourselves).
-  useEffect(() => {
-    if (phase === "opening" || phase === "revealed") return;
-    if (!egg) setPhase("empty");
-    else if (remaining === 0) setPhase("ready");
-    else setPhase("incubating");
-  }, [egg, remaining, phase]);
+  // Derive the visual phase from state every render. Only "opening" and
+  // "revealed" are local UI overrides we drive imperatively.
+  const phase: SceneState = overridePhase
+    ? overridePhase
+    : !egg
+      ? "empty"
+      : remaining === 0
+        ? "ready"
+        : "incubating";
 
   async function buy() {
     setBusy(true);
@@ -337,7 +338,7 @@ export function SurpriseEggGame({
   async function open(instant = false) {
     if (!egg || busy) return;
     setBusy(true);
-    setPhase("opening");
+    setOverridePhase("opening");
     try {
       const next = await claimPetSurpriseEgg(egg.id, instant);
       // Hold the opening animation briefly so the burst reads.
@@ -345,13 +346,13 @@ export function SurpriseEggGame({
         phaseTimer.current = window.setTimeout(() => resolve(), 850);
       });
       setResult(next);
-      setPhase("revealed");
+      setOverridePhase("revealed");
       if (typeof next.new_balance === "number") onBalanceChange(next.new_balance);
       await load();
       onFinished();
     } catch (error) {
       toast.error(getArcadeErrorMessage(error));
-      setPhase(egg ? (remaining === 0 ? "ready" : "incubating") : "empty");
+      setOverridePhase(null);
     } finally {
       setBusy(false);
     }
@@ -359,7 +360,7 @@ export function SurpriseEggGame({
 
   function resetReveal() {
     setResult(null);
-    setPhase(egg ? (remaining === 0 ? "ready" : "incubating") : "empty");
+    setOverridePhase(null);
   }
 
   const burstActive = phase === "opening" || phase === "revealed";
