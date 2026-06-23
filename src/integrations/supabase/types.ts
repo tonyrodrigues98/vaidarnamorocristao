@@ -1430,6 +1430,115 @@ export type Database = {
         }
         Relationships: []
       }
+      pet_album_pack_openings: {
+        Row: {
+          cost: number
+          created_at: string
+          game_id: string
+          id: string
+          pack_size: number
+          results: Json
+          user_id: string
+        }
+        Insert: {
+          cost: number
+          created_at?: string
+          game_id: string
+          id?: string
+          pack_size: number
+          results?: Json
+          user_id: string
+        }
+        Update: {
+          cost?: number
+          created_at?: string
+          game_id?: string
+          id?: string
+          pack_size?: number
+          results?: Json
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pet_album_pack_openings_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: true
+            referencedRelation: "pet_arcade_rounds"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pet_album_rewards_claimed: {
+        Row: {
+          claimed_at: string
+          reward_key: string
+          reward_payload: Json
+          user_id: string
+        }
+        Insert: {
+          claimed_at?: string
+          reward_key: string
+          reward_payload?: Json
+          user_id: string
+        }
+        Update: {
+          claimed_at?: string
+          reward_key?: string
+          reward_payload?: Json
+          user_id?: string
+        }
+        Relationships: []
+      }
+      pet_album_stickers: {
+        Row: {
+          catalog_id: string
+          catalog_type: string
+          category_id: string | null
+          category_name: string
+          created_at: string
+          id: string
+          image_path: string
+          is_active: boolean
+          name: string
+          rarity: string
+          sort_order: number
+        }
+        Insert: {
+          catalog_id: string
+          catalog_type: string
+          category_id?: string | null
+          category_name: string
+          created_at?: string
+          id?: string
+          image_path: string
+          is_active?: boolean
+          name: string
+          rarity?: string
+          sort_order?: number
+        }
+        Update: {
+          catalog_id?: string
+          catalog_type?: string
+          category_id?: string | null
+          category_name?: string
+          created_at?: string
+          id?: string
+          image_path?: string
+          is_active?: boolean
+          name?: string
+          rarity?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pet_album_stickers_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "pet_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pet_arcade_config: {
         Row: {
           daily_reward_limit: number
@@ -1474,6 +1583,48 @@ export type Database = {
           treasure_active?: boolean
           treasure_difficulties?: Json
           treasure_grid_size?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      pet_arcade_daily_missions: {
+        Row: {
+          created_at: string
+          description: string
+          event_key: string
+          id: string
+          is_active: boolean
+          mission_key: string
+          reward_config: Json
+          sort_order: number
+          target_value: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          event_key: string
+          id?: string
+          is_active?: boolean
+          mission_key: string
+          reward_config?: Json
+          sort_order?: number
+          target_value: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          event_key?: string
+          id?: string
+          is_active?: boolean
+          mission_key?: string
+          reward_config?: Json
+          sort_order?: number
+          target_value?: number
+          title?: string
           updated_at?: string
         }
         Relationships: []
@@ -1726,6 +1877,69 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      pet_arcade_surprise_eggs: {
+        Row: {
+          cost_amount: number
+          created_at: string
+          game_id: string
+          id: string
+          open_after: string
+          opened_at: string | null
+          pet_id: string
+          rarity: string
+          reward_amount: number
+          reward_payload: Json
+          reward_type: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          cost_amount: number
+          created_at?: string
+          game_id: string
+          id?: string
+          open_after: string
+          opened_at?: string | null
+          pet_id: string
+          rarity?: string
+          reward_amount?: number
+          reward_payload?: Json
+          reward_type: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          cost_amount?: number
+          created_at?: string
+          game_id?: string
+          id?: string
+          open_after?: string
+          opened_at?: string | null
+          pet_id?: string
+          rarity?: string
+          reward_amount?: number
+          reward_payload?: Json
+          reward_type?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pet_arcade_surprise_eggs_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: true
+            referencedRelation: "pet_arcade_rounds"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pet_arcade_surprise_eggs_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
+            referencedRelation: "user_pets_v2"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       pet_arcade_treasure_rounds: {
         Row: {
@@ -4783,6 +4997,95 @@ export type Database = {
           },
         ]
       }
+      user_pet_album_stickers: {
+        Row: {
+          first_collected_at: string
+          quantity: number
+          sticker_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          first_collected_at?: string
+          quantity?: number
+          sticker_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          first_collected_at?: string
+          quantity?: number
+          sticker_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_pet_album_stickers_sticker_id_fkey"
+            columns: ["sticker_id"]
+            isOneToOne: false
+            referencedRelation: "pet_album_stickers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_pet_arcade_daily_missions: {
+        Row: {
+          assigned_date: string
+          claimed_at: string | null
+          completed_at: string | null
+          created_at: string
+          id: string
+          mission_id: string
+          pet_id: string
+          progress: number
+          status: string
+          target_value: number
+          user_id: string
+        }
+        Insert: {
+          assigned_date: string
+          claimed_at?: string | null
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          mission_id: string
+          pet_id: string
+          progress?: number
+          status?: string
+          target_value: number
+          user_id: string
+        }
+        Update: {
+          assigned_date?: string
+          claimed_at?: string | null
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          mission_id?: string
+          pet_id?: string
+          progress?: number
+          status?: string
+          target_value?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_pet_arcade_daily_missions_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "pet_arcade_daily_missions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_pet_arcade_daily_missions_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
+            referencedRelation: "user_pets_v2"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_pet_backgrounds: {
         Row: {
           acquired_at: string
@@ -5661,6 +5964,10 @@ export type Database = {
         }
         Returns: Json
       }
+      _pet_arcade_progress_event: {
+        Args: { _amount?: number; _event_key: string }
+        Returns: undefined
+      }
       _pet_arcade_result: { Args: { _game_id: string }; Returns: Json }
       _pet_streak_grant: {
         Args: {
@@ -5787,7 +6094,16 @@ export type Database = {
         Args: { _category: string; _item_id: string; _rarity: string }
         Returns: Json
       }
+      claim_pet_album_category: { Args: { _category: string }; Returns: Json }
+      claim_pet_arcade_mission: {
+        Args: { _assignment_id: string }
+        Returns: Json
+      }
       claim_pet_piggybank: { Args: { _game_id: string }; Returns: Json }
+      claim_pet_surprise_egg: {
+        Args: { _egg_id: string; _instant?: boolean }
+        Returns: Json
+      }
       claim_pet_weekly_chest: { Args: never; Returns: Json }
       claim_starter_bundle: { Args: never; Returns: Json }
       cleanup_photo_moderation_rejects: { Args: never; Returns: number }
@@ -5967,11 +6283,14 @@ export type Database = {
           text: string
         }[]
       }
+      get_pet_album_state: { Args: never; Returns: Json }
       get_pet_arcade_active_rounds: { Args: never; Returns: Json }
       get_pet_arcade_catalog: { Args: never; Returns: Json }
       get_pet_arcade_config: { Args: never; Returns: Json }
+      get_pet_arcade_daily_missions: { Args: never; Returns: Json }
       get_pet_arcade_history: { Args: { _limit?: number }; Returns: Json }
       get_pet_arcade_history_v2: { Args: { _limit?: number }; Returns: Json }
+      get_pet_arcade_usage_today: { Args: never; Returns: Json }
       get_pet_dream_match: {
         Args: never
         Returns: {
@@ -6135,6 +6454,10 @@ export type Database = {
       mark_all_notifications_read: { Args: never; Returns: number }
       mark_message_read: { Args: { _message_id: string }; Returns: undefined }
       medal_for_prestige: { Args: { _level: number }; Returns: string }
+      open_pet_album_pack: {
+        Args: { _client_seed?: string; _pack_size: number }
+        Returns: Json
+      }
       perform_grab: { Args: { _pool_id: string }; Returns: Json }
       perform_grab_multi: {
         Args: { _count: number; _pool_id: string }
@@ -6355,6 +6678,10 @@ export type Database = {
         }
         Returns: Json
       }
+      start_pet_capsule: {
+        Args: { _client_seed?: string; _entry_coins: number }
+        Returns: Json
+      }
       start_pet_coinflip: {
         Args: { _client_seed?: string; _entry_coins: number; _side: string }
         Returns: Json
@@ -6404,6 +6731,11 @@ export type Database = {
         Args: { _client_seed?: string; _entry_coins: number }
         Returns: Json
       }
+      start_pet_scratch: {
+        Args: { _client_seed?: string; _entry_coins: number }
+        Returns: Json
+      }
+      start_pet_surprise_egg: { Args: { _entry_coins: number }; Returns: Json }
       start_pet_towers: {
         Args: {
           _client_seed?: string
