@@ -170,8 +170,9 @@ export function ScratchGame({ config, balance, onBalanceChange, onFinished }: Ar
 }
 
 export { SurpriseEggGame } from "./SurpriseEggScene";
+export { PetAlbumGame } from "./PetAlbumScene";
 
-export function PetAlbumGame({ config, balance, onBalanceChange, onFinished }: ArcadeGameProps) {
+function PetAlbumGameLegacy_unused({ config, balance, onBalanceChange, onFinished }: ArcadeGameProps) {
   const [state, setState] = useState<PetAlbumState | null>(null);
   const [category, setCategory] = useState("");
   const [busy, setBusy] = useState(false);
