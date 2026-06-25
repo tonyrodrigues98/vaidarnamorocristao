@@ -3,6 +3,8 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import {
   BookOpen,
   Check,
+  ChevronLeft,
+  ChevronRight,
   Gift,
   Loader2,
   PackageOpen,
@@ -25,10 +27,11 @@ import { ArcadePanel, type ArcadeGameProps } from "./ArcadeGameUi";
 import { createArcadeClientSeed } from "./arcadeUiUtils";
 
 import bgImage from "@/assets/pet-arcade/album-scene/album-bg.jpg";
-import albumImage from "@/assets/pet-arcade/album-scene/album-main.png";
-import lecternImage from "@/assets/pet-arcade/album-scene/album-lectern.png";
+import bookImage from "@/assets/pet-arcade/album-scene/open-book.png";
+import packImage from "@/assets/pet-arcade/album-scene/card-pack.png";
 
-type ScenePhase = "idle" | "opening" | "revealing";
+type ScenePhase = "idle" | "tearing" | "revealing";
+const SLOTS_PER_SPREAD = 6;
 
 const RARITY_STYLE: Record<string, { ring: string; bg: string; glow: string; label: string }> = {
   common: {
