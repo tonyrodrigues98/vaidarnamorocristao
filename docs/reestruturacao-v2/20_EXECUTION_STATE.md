@@ -66,7 +66,11 @@
 - Migration local não aplicada adiciona claim atômico do push com
   `FOR UPDATE SKIP LOCKED`, lease por token, retries exponenciais, TTL e dead
   letter. O adapter deixou de registrar endpoint, resposta do provedor ou stack.
-- Rate limit distribuído de fotos continua em lote posterior da V2-008.
+- Moderação de fotos possui limite local; rate limit distribuído continua como
+  gate operacional da V2-008.
+- Reparo administrativo agora fecha por flag server-only, exige Origin e
+  confirmação, oferece dry-run, valida bytes JPEG e registra eventos em tabela
+  append-only preparada por migration não aplicada.
 - `.env` rastreado foi retirado; o exemplo contém somente placeholders públicos.
 - HTML do blog passa por allowlist SSR-safe; previews administrativos exigem
   origem exata, HTTPS, sandbox e política de referrer.
@@ -76,7 +80,7 @@
 ## Evidência de validação
 
 - Instalação congelada e TypeScript: aprovados.
-- Suíte segura: 32 arquivos e 235 testes aprovados.
+- Suíte segura: 33 arquivos e 251 testes aprovados.
 - ESLint e Prettier focados: aprovados.
 - Build TanStack/Vite cliente e SSR: aprovado; warnings de dependências são
   baseline.

@@ -325,16 +325,24 @@
       "id": "SEG-018",
       "priority": "P2",
       "title": "Endpoint administrativo de reparo de fotos",
-      "state": "confirmed_in_head",
+      "state": "locally_mitigated",
       "headEvidence": [
-        "endpoint exige bearer e papel administrativo antes de operações service-role"
+        "endpoint exige bearer e papel administrativo antes de operações service-role",
+        "kill switch server-only, Origin exata, confirmação, dry-run e rate limit por ator",
+        "JPEG validado por tamanho, MIME e magic bytes; paths limitados ao alvo",
+        "erros e logs são categóricos e não incluem URL, token, ator ou alvo"
       ],
       "typesEvidence": ["opera sobre perfis, fotos e storage existentes"],
-      "migrationEvidence": [],
-      "productionGate": "confirmar papel, rate limit e trilha de auditoria efetivos",
-      "provingTests": ["autorização server-side e limites operacionais ainda pendentes"],
-      "localChange": "adicionar limite, dry-run e auditoria categórica em PR administrativo",
-      "rollbackOrForwardFix": "kill switch da operação; preservar arquivos e registros"
+      "migrationEvidence": [
+        "20260723000003_v2_photo_repair_audit.sql cria trilha append-only aditiva; não aplicada"
+      ],
+      "productionGate": "validar/aplicar migration em descartável, configurar rate limit distribuído e habilitar flag somente após dry-run",
+      "provingTests": [
+        "tests/photo-repair-security-v2.test.ts",
+        "teste de grants/RLS/trigger em Supabase descartável ainda pendente"
+      ],
+      "localChange": "limite local, dry-run, confirmação, validação JPEG/path, staging e auditoria append-only implementados",
+      "rollbackOrForwardFix": "desabilitar PHOTO_REPAIR_ENABLED; preservar arquivos, registros e eventos para reconciliação"
     },
     {
       "id": "SEG-019",
