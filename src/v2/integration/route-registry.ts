@@ -153,10 +153,10 @@ const V2_RUNTIME_ROUTES = Object.freeze([
     navigationId: "settings",
     label: "Configurações",
     title: "Configurações",
-    subtitle: "Controle sua experiência, privacidade e preferências.",
+    subtitle: "Controle sua experiência, privacidade e estado da conta.",
     eyebrow: "Conta",
     description:
-      "As configurações reais permanecem no fluxo legado até a integração específica desse domínio.",
+      "Configurações reais integradas aos contratos atuais, com o legado preservado como fallback.",
     icon: Settings,
     primary: false,
   },

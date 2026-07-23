@@ -30,9 +30,9 @@ idênticos.
 
 - Há **67 file routes**: 13 administrativas, 35 autenticadas, 13 públicas/visitante, 3 endpoints e
   3 cuja proteção é herdada da raiz.
-- Foram inventariadas **445 referências tipadas**: 392 rotas, 36 assets, 4 endpoints, 8 URLs
-  externas, 3 deep links e 2 destinos dinâmicos. As fontes são `src` (404), testes (8), manifest
-  (14), sitemap (11), service worker/public (8), configuração (0) e outras (0). Das 392 rotas, 391
+- Foram inventariadas **465 referências tipadas**: 411 rotas, 37 assets, 4 endpoints, 8 URLs
+  externas, 3 deep links e 2 destinos dinâmicos. As fontes são `src` (424), testes (8), manifest
+  (14), sitemap (11), service worker/public (8), configuração (0) e outras (0). Das 411 rotas, 410
   resolvem e uma não resolve no estado atual: `src/v2/app-shell/navigation.ts` declara `/membros`;
   o runtime integrado usa `/v2/explorar-pessoas`. O achado é resultado atual, não contrato
   permanente de teste.
@@ -48,7 +48,8 @@ idênticos.
 - A análise estática encontrou **31 arquivos-fonte potencialmente órfãos**, **2 contratos usados
   somente por testes**, **146 assets sem referência por basename** e **10 dependências sem uso
   direto/configurado detectável**. Nenhum deles é declarado seguro para excluir nesta etapa.
-- O grafo de 436 módulos tem um ciclo conhecido entre `router.tsx` e `routeTree.gen.ts`, causado
+- O grafo de 449 módulos e 2.616 imports tem um ciclo conhecido entre `router.tsx` e
+  `routeTree.gen.ts`, causado
   pelo registro de tipos gerado. Não há ciclos em `src/v2`.
 - O código referencia **70 tabelas/views**, **91 RPCs**, **6 buckets** e **10 nomes de canais
   Realtime**. Isso é inventário de uso do código, não prova de existência ou ACL no banco

@@ -47,6 +47,7 @@ import {
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { EnableNotificationsCard } from "@/components/EnableNotificationsCard";
+import { sanitizeInternalDestination } from "@/v2/platform/navigation/internal-destination";
 
 export const Route = createFileRoute("/notificacoes")({
   head: () => ({
@@ -76,8 +77,11 @@ const stripEmoji = (s: string) => s.replace(EMOJI_RE, "").replace(/\s+/g, " ").t
 function rewriteNotificationLink(link: string | null): string | null {
   if (!link) return link;
   // /dashboard is a valid live route (Analytics Center). Do not rewrite it.
-  if (link === "/comunidade" || link.startsWith("/comunidade/")) return "/conversas";
-  return link;
+  const rewritten = link === "/comunidade" || link.startsWith("/comunidade/") ? "/conversas" : link;
+  return sanitizeInternalDestination(rewritten, {
+    origin: typeof window === "undefined" ? "https://vaidarnamoro.com" : window.location.origin,
+    fallback: null,
+  });
 }
 
 function iconMeta(type: string): { icon: React.ReactNode; bg: string; fg: string } {

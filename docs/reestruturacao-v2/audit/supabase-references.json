@@ -178,7 +178,8 @@
       "src/routes/pretendentes/index.tsx",
       "src/routes/proposito/$matchId.tsx",
       "src/routes/suporte/$id.tsx",
-      "src/routes/verificacao.tsx"
+      "src/routes/verificacao.tsx",
+      "src/v2/features/account/data/supabase-account-repository.ts"
     ],
     "push_queue": ["src/lib/pushDispatchBatch.server.ts"],
     "push_subscriptions": [
@@ -259,7 +260,10 @@
     "award_contributor_badge": ["src/routes/admin/index.tsx"],
     "award_xp": ["src/lib/xp.ts"],
     "buy_anonymous_extra": ["src/components/anonymous/AnonymousExtrasCard.tsx"],
-    "cancel_account_deletion": ["src/components/AccountDangerZone.tsx"],
+    "cancel_account_deletion": [
+      "src/components/AccountDangerZone.tsx",
+      "src/v2/features/account/data/supabase-account-repository.ts"
+    ],
     "check_text_restricted": ["src/lib/profanity.tsx"],
     "claim_daily_coins": ["src/lib/coins.ts"],
     "claim_expedition": ["src/lib/petExpeditions.ts"],
@@ -314,9 +318,18 @@
     "redeem_virtual_gift": ["src/lib/gifts.ts"],
     "reply_anonymous_message": ["src/routes/recados.tsx"],
     "report_anonymous_message": ["src/routes/recados.tsx"],
-    "request_account_deactivation": ["src/components/AccountDangerZone.tsx"],
-    "request_account_deletion": ["src/components/AccountDangerZone.tsx"],
-    "request_account_reactivation": ["src/components/AccountDangerZone.tsx"],
+    "request_account_deactivation": [
+      "src/components/AccountDangerZone.tsx",
+      "src/v2/features/account/data/supabase-account-repository.ts"
+    ],
+    "request_account_deletion": [
+      "src/components/AccountDangerZone.tsx",
+      "src/v2/features/account/data/supabase-account-repository.ts"
+    ],
+    "request_account_reactivation": [
+      "src/components/AccountDangerZone.tsx",
+      "src/v2/features/account/data/supabase-account-repository.ts"
+    ],
     "request_anonymous_hint": ["src/routes/recados.tsx"],
     "request_anonymous_reveal": ["src/routes/recados.tsx"],
     "request_reverification": ["src/routes/inicio.tsx"],
