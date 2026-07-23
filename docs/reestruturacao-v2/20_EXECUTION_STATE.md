@@ -10,12 +10,16 @@
 - V2-007 foi publicada no Draft PR #8, branch
   `rebuild/v2-007-account-foundation`, commit
   `249b4c8aca9ea8f82a3e6e68f55894c780b0e182`.
-- V2-008 usa a branch empilhada `rebuild/v2-008-security-baseline`.
+- V2-008 foi dividida em Draft PRs empilhados de baseline, capabilities, push,
+  aplicação e reparo administrativo.
 
 ## Concluído
 
 - V2-001 a V2-005 estão na `main`.
 - V2-006 produziu auditoria, inventário, plano de desativação e testes read-only.
+- V2-007 está concluída no Draft PR empilhado de Conta.
+- V2-008 está concluída localmente: todo P0/P1 possui estado explícito,
+  evidência, gate publicado e rollback/forward-fix.
 - Contexto permanente instalado em `AGENTS.md`.
 
 ## V2-007 concluída no branch
@@ -80,7 +84,7 @@
 ## Evidência de validação
 
 - Instalação congelada e TypeScript: aprovados.
-- Suíte segura: 33 arquivos e 251 testes aprovados.
+- Suíte segura: 34 arquivos e 259 testes aprovados.
 - ESLint e Prettier focados: aprovados.
 - Build TanStack/Vite cliente e SSR: aprovado; warnings de dependências são
   baseline.
@@ -91,10 +95,11 @@
 - Bundle público: nenhum segredo server-only ou `service_role`; o único JWT
   embutido é a chave pública legada com papel `anon`.
 
-## Próximo gate
+## Próximo lote
 
-- Publicar o primeiro Draft PR empilhado da V2-008 sem merge.
 - Validar as migrations de capabilities e push em Supabase descartável antes de
   qualquer rollout.
 - Manter qualquer conclusão sobre ACL/RLS publicado como não verificada até
   existir snapshot autenticado e ambiente Supabase descartável.
+- Iniciar V2-009 — Perfis Modulares e Identidade Pública a partir da pilha
+  validada, mantendo integrações reais atrás de adapters e flags.
