@@ -34,15 +34,20 @@
       "title": "RPC de moedas chamável diretamente",
       "state": "production_verification_required",
       "headEvidence": [
-        "não há chamador direto localizado em src; a assinatura permanece nos tipos gerados"
+        "não há chamador direto localizado em src; a assinatura permanece nos tipos gerados",
+        "migration local revoga PUBLIC, anon e authenticated e preserva somente service_role"
       ],
       "typesEvidence": ["grant_coin_event aceita usuário, quantidade e razão"],
       "migrationEvidence": [
-        "migrations históricas definem SECURITY DEFINER e grants para authenticated"
+        "migrations históricas definem SECURITY DEFINER e grants para authenticated",
+        "20260723000001_v2_trusted_reward_capabilities.sql contém preflight, search_path e ACL mínima"
       ],
       "productionGate": "capturar assinatura, definição, owner, ACL e default privileges publicados",
-      "provingTests": ["teste RPC owner/outro/replay/extremos em Supabase descartável pendente"],
-      "localChange": "capability server-side idempotente e revogação explícita serão propostas em migration aditiva",
+      "provingTests": [
+        "tests/trusted-capabilities-v2.test.ts",
+        "tests/trusted-capabilities-rls.test.ts preparado para Supabase descartável"
+      ],
+      "localChange": "revogação explícita da função genérica em migration local não aplicada",
       "rollbackOrForwardFix": "forward-fix por capability versionada; não reabrir a função genérica ao cliente"
     },
     {
@@ -50,14 +55,21 @@
       "priority": "P0",
       "title": "XP arbitrário por usuário autenticado",
       "state": "production_verification_required",
-      "headEvidence": ["src/lib/xp.ts envia source, amount, daily_cap e metadata do browser"],
+      "headEvidence": [
+        "src/lib/xp.ts envia somente userPetId à capability award_my_care_xp",
+        "o browser não envia source, amount, daily_cap ou metadata"
+      ],
       "typesEvidence": ["award_xp mantém parâmetros controláveis pelo chamador"],
-      "migrationEvidence": ["histórico cria SECURITY DEFINER e concede execução a authenticated"],
+      "migrationEvidence": [
+        "histórico cria SECURITY DEFINER e concede execução a authenticated",
+        "migration local revoga a RPC genérica e cria ledger idempotente server-owned"
+      ],
       "productionGate": "confirmar overloads, ACL, chamadores e regras publicadas",
       "provingTests": [
-        "teste RPC adulteração/replay/concorrência em Supabase descartável pendente"
+        "tests/trusted-capabilities-v2.test.ts",
+        "tests/trusted-capabilities-rls.test.ts preparado para adulteração, outro usuário e concorrência"
       ],
-      "localChange": "substituir chamada genérica por catálogo confiável de eventos e valores server-side",
+      "localChange": "award_my_care_xp deriva identidade, evento, valor, cap e metadata no servidor",
       "rollbackOrForwardFix": "feature flag no adapter e forward-fix; saldo e histórico nunca são revertidos"
     },
     {
@@ -66,13 +78,20 @@
       "title": "Conquistas e missões aceitam identidade e progresso fornecidos",
       "state": "production_verification_required",
       "headEvidence": [
-        "assinaturas continuam representadas nos tipos; gatilhos históricos também as chamam"
+        "assinaturas continuam representadas nos tipos; gatilhos históricos também as chamam",
+        "nenhum chamador RPC direto existe em src fora dos tipos gerados"
       ],
       "typesEvidence": ["track_achievement e progress_mission_action aceitam usuário e incremento"],
-      "migrationEvidence": ["há overloads, drops parciais e grant histórico a authenticated"],
+      "migrationEvidence": [
+        "há overloads, drops parciais e grant histórico a authenticated",
+        "migration local fecha as assinaturas finais de track_achievement e progress_mission_action"
+      ],
       "productionGate": "reconciliar overloads e ACL finais no banco publicado",
-      "provingTests": ["matriz anon/owner/outro/replay/concorrência descartável pendente"],
-      "localChange": "tornar helpers internos e derivar identidade e incremento de evento confiável",
+      "provingTests": [
+        "tests/trusted-capabilities-v2.test.ts",
+        "tests/trusted-capabilities-rls.test.ts preparado para papéis e valores extremos"
+      ],
+      "localChange": "helpers internos ficam restritos a owner/SECURITY DEFINER e service_role",
       "rollbackOrForwardFix": "forward-fix por wrappers versionados; preservar progresso legítimo existente"
     },
     {
@@ -85,11 +104,15 @@
       ],
       "typesEvidence": ["tipos provam assinaturas, não ACL, owner ou search_path"],
       "migrationEvidence": [
-        "recriações e overloads tornam o estado final não dedutível com segurança"
+        "recriações e overloads tornam o estado final não dedutível com segurança",
+        "migration local usa preflight de assinatura, search_path explícito, revoke e default privilege"
       ],
       "productionGate": "snapshot de proacl, owner, prosecdef, proconfig e default privileges",
-      "provingTests": ["assertions SQL de grants mínimos em Supabase descartável pendentes"],
-      "localChange": "template de função com search_path explícito, revoke PUBLIC e grants mínimos",
+      "provingTests": [
+        "tests/trusted-capabilities-v2.test.ts",
+        "assertions de ACL no teste descartável tests/trusted-capabilities-rls.test.ts"
+      ],
+      "localChange": "template aplicado às cinco funções críticas e à nova capability",
       "rollbackOrForwardFix": "migration corretiva por função; nunca restaurar default amplo"
     },
     {
@@ -98,13 +121,20 @@
       "title": "Helper genérico de notificação exposto",
       "state": "production_verification_required",
       "headEvidence": [
-        "assinatura genérica continua nos tipos e alimenta fluxo de notificação/push"
+        "assinatura genérica continua nos tipos e alimenta fluxo de notificação/push",
+        "nenhum chamador RPC direto existe em src fora dos tipos gerados"
       ],
       "typesEvidence": ["create_notification aceita destinatário, tipo, título, corpo e metadados"],
-      "migrationEvidence": ["migration posterior concede execução a authenticated"],
+      "migrationEvidence": [
+        "migration posterior concede execução a authenticated",
+        "migration local revoga PUBLIC, anon e authenticated e preserva chamadas internas"
+      ],
       "productionGate": "confirmar ACL e chamadores publicados antes de revogar",
-      "provingTests": ["teste de execução por anon/owner/outro em Supabase descartável pendente"],
-      "localChange": "privatizar helper e expor capabilities específicas com catálogo de templates",
+      "provingTests": [
+        "tests/trusted-capabilities-v2.test.ts",
+        "tests/trusted-capabilities-rls.test.ts preparado para execução por usuário"
+      ],
+      "localChange": "helper genérico privatizado na migration local; capabilities específicas futuras usam catálogo",
       "rollbackOrForwardFix": "forward-fix por capability; preservar linhas e fila legítimas"
     },
     {

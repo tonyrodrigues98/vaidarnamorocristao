@@ -31,40 +31,18 @@ export async function getMyXpState(): Promise<XpState> {
   return data as XpState;
 }
 
-/**
- * Concede XP via RPC. Respeita cap diário por fonte quando informado.
- * Falhas são silenciosas (XP é side-effect, não bloqueia ações).
- */
-export async function awardXp(
-  source: string,
-  amount: number,
-  dailyCap?: number,
-  meta?: Record<string, unknown>,
-): Promise<AwardResult | null> {
+/** Reivindica XP de um evento de cuidado já persistido e pertencente ao usuário. */
+export async function awardCareXp(userPetId: string): Promise<AwardResult | null> {
   try {
-    const { data, error } = await supabase.rpc("award_xp" as never, {
-      _source: source,
-      _amount: amount,
-      _daily_cap: dailyCap ?? null,
-      _meta: meta ?? null,
-    } as never);
+    const { data, error } = await supabase.rpc(
+      "award_my_care_xp" as never,
+      {
+        _user_pet_id: userPetId,
+      } as never,
+    );
     if (error) return null;
     return (data as AwardResult) ?? null;
   } catch {
     return null;
   }
 }
-
-/** Fontes oficiais de XP — mantém os strings consistentes pelo app inteiro. */
-export const XP_SOURCES = {
-  CARE_LOW: { source: "care_low", amount: 8, cap: 6 }, // barra < 50%
-  CARE_RESCUE: { source: "care_rescue", amount: 15, cap: 4 }, // barra < 20%
-  DAILY_LOGIN: { source: "daily_login", amount: 20, cap: 1 },
-  MISSION_DONE: { source: "mission_done", amount: 30, cap: 3 },
-  QUIZ_CORRECT: { source: "quiz_correct", amount: 10, cap: 9 },
-  MATCH_RECEIVED: { source: "match_received", amount: 25, cap: 5 },
-  FIRST_MSG: { source: "first_msg", amount: 15, cap: 3 },
-  DEVOTIONAL: { source: "devotional", amount: 20, cap: 1 },
-  PRAYED_FOR: { source: "prayed_for", amount: 5, cap: 5 },
-  PROFILE_COMPLETE: { source: "profile_complete", amount: 50, cap: 1 },
-} as const;
