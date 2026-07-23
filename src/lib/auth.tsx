@@ -1,27 +1,62 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { pickPrimaryRole, type AppRole, type RoleColor } from "@/lib/roles";
+import {
+  createAuthSessionCoordinator,
+  createInitialAuthSessionSnapshot,
+  type AuthSessionCoordinator,
+  type AuthSessionSnapshot,
+  type AuthSessionStatus,
+  type SanitizedAuthError,
+} from "@/v2/app/auth/session-state";
+import { isolatePrivateQueryCache } from "@/v2/app/auth/private-cache";
+
+type ProfileStatus = "pending" | "approved" | "rejected" | "banned" | null;
 
 type AuthCtx = {
   user: User | null;
   session: Session | null;
+  status: AuthSessionStatus;
+  error: SanitizedAuthError | null;
+  initialResolutionFinished: boolean;
   loading: boolean;
   isAdmin: boolean;
   role: AppRole;
   badgeColor: RoleColor | null;
   publicListing: boolean;
   isSupportAgent: boolean;
-  profileStatus: "pending" | "approved" | "rejected" | "banned" | null;
+  profileStatus: ProfileStatus;
   isApproved: boolean;
   rolesLoaded: boolean;
   refreshRole: () => Promise<void>;
+  signInWithPassword: (credentials: {
+    email: string;
+    password: string;
+  }) => Promise<{ error: SanitizedAuthError | null }>;
   signOut: () => Promise<void>;
+};
+
+const DEFAULT_ERROR: SanitizedAuthError = {
+  code: "sign_in_failed",
+  message: "Não foi possível entrar. Verifique os dados e tente novamente.",
 };
 
 const Ctx = createContext<AuthCtx>({
   user: null,
   session: null,
+  status: "initializing",
+  error: null,
+  initialResolutionFinished: false,
   loading: true,
   isAdmin: false,
   role: "user",
@@ -32,97 +67,153 @@ const Ctx = createContext<AuthCtx>({
   isApproved: false,
   rolesLoaded: false,
   refreshRole: async () => {},
+  signInWithPassword: async () => ({ error: DEFAULT_ERROR }),
   signOut: async () => {},
 });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
+  const [auth, setAuth] = useState<AuthSessionSnapshot<Session>>(createInitialAuthSessionSnapshot);
   const [role, setRole] = useState<AppRole>("user");
   const [badgeColor, setBadgeColor] = useState<RoleColor | null>(null);
   const [publicListing, setPublicListing] = useState(false);
   const [isSupportAgent, setIsSupportAgent] = useState(false);
-  const [profileStatus, setProfileStatus] = useState<AuthCtx["profileStatus"]>(null);
+  const [profileStatus, setProfileStatus] = useState<ProfileStatus>(null);
   const [rolesLoaded, setRolesLoaded] = useState(false);
+  const coordinator = useRef<AuthSessionCoordinator<Session> | null>(null);
+  const currentUserId = useRef<string | null>(null);
+  const roleRequest = useRef(0);
 
-  async function loadRoles(uid: string) {
+  const publishAuthSnapshot = useCallback(
+    (next: AuthSessionSnapshot<Session>) => {
+      const nextUserId = next.user?.id ?? null;
+      if (currentUserId.current !== nextUserId) {
+        isolatePrivateQueryCache(queryClient);
+        currentUserId.current = nextUserId;
+      }
+      setAuth(next);
+    },
+    [queryClient],
+  );
+
+  useEffect(() => {
+    const authCoordinator = createAuthSessionCoordinator<Session>({
+      source: {
+        getSession: async () => {
+          const { data, error } = await supabase.auth.getSession();
+          return { session: data.session, error };
+        },
+        subscribe: (listener) => {
+          const { data } = supabase.auth.onAuthStateChange((_event, session) => {
+            listener(session);
+          });
+          return {
+            unsubscribe: () => data.subscription.unsubscribe(),
+          };
+        },
+      },
+      onSnapshot: publishAuthSnapshot,
+    });
+    coordinator.current = authCoordinator;
+    authCoordinator.start();
+
+    return () => {
+      coordinator.current = null;
+      authCoordinator.stop();
+    };
+  }, [publishAuthSnapshot]);
+
+  const loadRoles = useCallback(async (uid: string) => {
+    const request = ++roleRequest.current;
     const { data } = await supabase
       .from("user_roles")
       .select("role, badge_color, public_listing, is_support_agent")
       .eq("user_id", uid);
+    if (request !== roleRequest.current || currentUserId.current !== uid) return;
+
     const rows = data ?? [];
-    const primary = pickPrimaryRole(rows.map((r) => r.role as AppRole));
-    const primaryRow = rows.find((r) => r.role === primary);
-    setRole(primary);
-    setBadgeColor((primaryRow?.badge_color as RoleColor | null) ?? null);
-    setPublicListing(!!primaryRow?.public_listing);
-    setIsSupportAgent(
-      rows.some((r) => (r as { is_support_agent?: boolean }).is_support_agent === true),
-    );
-    const { data: prof } = await supabase
+    const primary = pickPrimaryRole(rows.map((row) => row.role as AppRole));
+    const primaryRow = rows.find((row) => row.role === primary);
+    const { data: profile } = await supabase
       .from("profiles")
       .select("status")
       .eq("id", uid)
       .maybeSingle();
-    setProfileStatus((prof?.status as AuthCtx["profileStatus"]) ?? null);
+    if (request !== roleRequest.current || currentUserId.current !== uid) return;
+
+    setRole(primary);
+    setBadgeColor((primaryRow?.badge_color as RoleColor | null) ?? null);
+    setPublicListing(!!primaryRow?.public_listing);
+    setIsSupportAgent(
+      rows.some((row) => (row as { is_support_agent?: boolean }).is_support_agent === true),
+    );
+    setProfileStatus((profile?.status as ProfileStatus) ?? null);
     setRolesLoaded(true);
-  }
+  }, []);
 
   useEffect(() => {
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, s) => {
-      setSession(s);
-      setLoading(false);
-      if (s?.user) {
-        setTimeout(() => {
-          loadRoles(s.user.id);
-        }, 0);
-      } else {
-        setRole("user");
-        setBadgeColor(null);
-        setPublicListing(false);
-        setIsSupportAgent(false);
-        setProfileStatus(null);
-        setRolesLoaded(true);
-      }
-    });
+    const uid = auth.user?.id;
+    roleRequest.current += 1;
+    setRole("user");
+    setBadgeColor(null);
+    setPublicListing(false);
+    setIsSupportAgent(false);
+    setProfileStatus(null);
 
-    supabase.auth.getSession().then(({ data: { session: s } }) => {
-      setSession(s);
-      setLoading(false);
-      if (s?.user) loadRoles(s.user.id);
-      else setRolesLoaded(true);
-    });
+    if (!uid) {
+      setRolesLoaded(auth.status !== "initializing");
+      return;
+    }
 
-    return () => sub.subscription.unsubscribe();
+    setRolesLoaded(false);
+    void loadRoles(uid);
+  }, [auth.user?.id, auth.status, loadRoles]);
+
+  const signOut = useCallback(async () => {
+    coordinator.current?.acceptSession(null);
+    await supabase.auth.signOut();
   }, []);
+
+  const signInWithPassword = useCallback(
+    async (credentials: { email: string; password: string }) => {
+      const { data, error } = await supabase.auth.signInWithPassword(credentials);
+      if (error || !data.session) return { error: DEFAULT_ERROR };
+      coordinator.current?.acceptSession(data.session);
+      return { error: null };
+    },
+    [],
+  );
 
   // If the user's profile is hard-deleted by an admin, sign them out automatically.
   useEffect(() => {
-    const uid = session?.user?.id;
+    const uid = auth.user?.id;
     if (!uid) return;
-    const ch = supabase
+    const channel = supabase
       .channel(`profile-self-delete-${uid}`)
       .on(
         "postgres_changes" as never,
         { event: "DELETE", schema: "public", table: "profiles", filter: `id=eq.${uid}` },
         () => {
-          supabase.auth.signOut();
+          void signOut();
         },
       )
       .subscribe();
     return () => {
-      supabase.removeChannel(ch);
+      void supabase.removeChannel(channel);
     };
-  }, [session?.user?.id]);
+  }, [auth.user?.id, signOut]);
 
   const isAdmin = role === "admin" || role === "super_admin";
   const isStaff = isAdmin || role === "apresentador" || role === "moderador";
   const isApproved = profileStatus === "approved" || isStaff;
 
   const value: AuthCtx = {
-    user: session?.user ?? null,
-    session,
-    loading,
+    user: auth.user,
+    session: auth.session,
+    status: auth.status,
+    error: auth.error,
+    initialResolutionFinished: auth.initialResolutionFinished,
+    loading: auth.status === "initializing",
     isAdmin,
     role,
     badgeColor,
@@ -132,11 +223,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     isApproved,
     rolesLoaded,
     refreshRole: async () => {
-      if (session?.user) await loadRoles(session.user.id);
+      if (auth.user) await loadRoles(auth.user.id);
     },
-    signOut: async () => {
-      await supabase.auth.signOut();
-    },
+    signInWithPassword,
+    signOut,
   };
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
