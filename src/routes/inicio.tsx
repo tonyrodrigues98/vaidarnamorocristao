@@ -1,8 +1,10 @@
 import { PhotoImg } from "@/components/PhotoImg";
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
+import type { User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
+import { AuthenticatedRouteGate } from "@/v2/app/AuthenticatedRouteGate";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -48,7 +50,7 @@ import {
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/inicio")({
-  component: InicioPage,
+  component: InicioRoute,
   head: () => ({
     meta: [
       { title: "Início — VaiDarNamoro" },
@@ -57,6 +59,33 @@ export const Route = createFileRoute("/inicio")({
     ],
   }),
 });
+
+function InicioLoadingState() {
+  return (
+    <div className="min-h-[100dvh] bg-background">
+      <Header />
+      <main className="mx-auto w-full max-w-2xl px-4 pt-4 pb-24">
+        <div className="h-[58dvh] animate-pulse rounded-3xl bg-muted/40" />
+        <div className="mt-4 h-24 animate-pulse rounded-2xl bg-muted/30" />
+        <div className="mt-3 h-40 animate-pulse rounded-2xl bg-muted/30" />
+      </main>
+    </div>
+  );
+}
+
+function InicioRoute() {
+  const { user, loading } = useAuth();
+
+  return (
+    <AuthenticatedRouteGate
+      loading={loading}
+      authenticated={Boolean(user)}
+      fallback={<InicioLoadingState />}
+    >
+      {user ? <InicioPage user={user} /> : null}
+    </AuthenticatedRouteGate>
+  );
+}
 
 type Profile = {
   id: string;
@@ -242,8 +271,7 @@ function actionSearch(id: string): Record<string, unknown> | undefined {
   }
 }
 
-function InicioPage() {
-  const { user, loading } = useAuth();
+function InicioPage({ user }: { user: User }) {
   const [profile, setProfile] = useState<Profile | null | undefined>(undefined);
   const [advanced, setAdvanced] = useState<StrengthAdvanced>(null);
   const [prefs, setPrefs] = useState<StrengthPreferences>(null);
@@ -487,19 +515,8 @@ function InicioPage() {
     [profile, advanced, prefs, photosCount, frameClaimed, ownsAnyFrame, hasSpent, suggestion],
   );
 
-  if (!loading && !user) return <Navigate to="/auth/login" />;
-
   if (profile === undefined) {
-    return (
-      <div className="min-h-[100dvh] bg-background">
-        <Header />
-        <main className="mx-auto w-full max-w-2xl px-4 pt-4 pb-24">
-          <div className="h-[58dvh] animate-pulse rounded-3xl bg-muted/40" />
-          <div className="mt-4 h-24 animate-pulse rounded-2xl bg-muted/30" />
-          <div className="mt-3 h-40 animate-pulse rounded-2xl bg-muted/30" />
-        </main>
-      </div>
-    );
+    return <InicioLoadingState />;
   }
   if (!profile) return <Navigate to="/onboarding" />;
 
@@ -1286,4 +1303,3 @@ function ActivityChip({
     </Link>
   );
 }
-
