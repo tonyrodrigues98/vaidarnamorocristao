@@ -1,0 +1,328 @@
+{
+  "schemaVersion": 1,
+  "auditedSourceCommit": "249b4c8aca9ea8f82a3e6e68f55894c780b0e182",
+  "productionSnapshot": "not_captured",
+  "priorityDefinitions": {
+    "P0": "risco de acesso indevido, fraude, exposição ou perda de dados",
+    "P1": "contenção de segurança ou disponibilidade necessária antes de ampliar o domínio",
+    "P2": "dívida ou controle incompleto que aumenta o risco operacional",
+    "P3": "higiene, manutenção ou evidência incompleta sem exploração direta confirmada",
+    "P4": "melhoria defensiva opcional"
+  },
+  "findings": [
+    {
+      "id": "SEG-001",
+      "priority": "P0",
+      "title": "Processamento público da fila de push",
+      "state": "locally_contained",
+      "headEvidence": [
+        "src/routes/api/public/hooks/push-dispatch.ts aceita somente POST e delega autenticação antes do import administrativo",
+        "src/lib/pushDispatchAuth.server.ts exige kill switch e segredo dedicado"
+      ],
+      "typesEvidence": [
+        "push_queue e push_subscriptions constam em src/integrations/supabase/types.ts"
+      ],
+      "migrationEvidence": ["histórico contém criação da fila e trigger de push"],
+      "productionGate": "revalidar scheduler, segredo e resposta HTTP após cada publicação",
+      "provingTests": ["tests/push-dispatch-auth.test.ts"],
+      "localChange": "contenção HTTP já presente; claim atômico tratado em mudança separada",
+      "rollbackOrForwardFix": "desabilitar PUSH_DISPATCH_ENABLED; forward-fix preserva POST e autenticação"
+    },
+    {
+      "id": "SEG-002",
+      "priority": "P0",
+      "title": "RPC de moedas chamável diretamente",
+      "state": "production_verification_required",
+      "headEvidence": [
+        "não há chamador direto localizado em src; a assinatura permanece nos tipos gerados"
+      ],
+      "typesEvidence": ["grant_coin_event aceita usuário, quantidade e razão"],
+      "migrationEvidence": [
+        "migrations históricas definem SECURITY DEFINER e grants para authenticated"
+      ],
+      "productionGate": "capturar assinatura, definição, owner, ACL e default privileges publicados",
+      "provingTests": ["teste RPC owner/outro/replay/extremos em Supabase descartável pendente"],
+      "localChange": "capability server-side idempotente e revogação explícita serão propostas em migration aditiva",
+      "rollbackOrForwardFix": "forward-fix por capability versionada; não reabrir a função genérica ao cliente"
+    },
+    {
+      "id": "SEG-003",
+      "priority": "P0",
+      "title": "XP arbitrário por usuário autenticado",
+      "state": "production_verification_required",
+      "headEvidence": ["src/lib/xp.ts envia source, amount, daily_cap e metadata do browser"],
+      "typesEvidence": ["award_xp mantém parâmetros controláveis pelo chamador"],
+      "migrationEvidence": ["histórico cria SECURITY DEFINER e concede execução a authenticated"],
+      "productionGate": "confirmar overloads, ACL, chamadores e regras publicadas",
+      "provingTests": [
+        "teste RPC adulteração/replay/concorrência em Supabase descartável pendente"
+      ],
+      "localChange": "substituir chamada genérica por catálogo confiável de eventos e valores server-side",
+      "rollbackOrForwardFix": "feature flag no adapter e forward-fix; saldo e histórico nunca são revertidos"
+    },
+    {
+      "id": "SEG-004",
+      "priority": "P0",
+      "title": "Conquistas e missões aceitam identidade e progresso fornecidos",
+      "state": "production_verification_required",
+      "headEvidence": [
+        "assinaturas continuam representadas nos tipos; gatilhos históricos também as chamam"
+      ],
+      "typesEvidence": ["track_achievement e progress_mission_action aceitam usuário e incremento"],
+      "migrationEvidence": ["há overloads, drops parciais e grant histórico a authenticated"],
+      "productionGate": "reconciliar overloads e ACL finais no banco publicado",
+      "provingTests": ["matriz anon/owner/outro/replay/concorrência descartável pendente"],
+      "localChange": "tornar helpers internos e derivar identidade e incremento de evento confiável",
+      "rollbackOrForwardFix": "forward-fix por wrappers versionados; preservar progresso legítimo existente"
+    },
+    {
+      "id": "SEG-005",
+      "priority": "P0",
+      "title": "Deriva de permissões em SECURITY DEFINER",
+      "state": "production_verification_required",
+      "headEvidence": [
+        "múltiplas funções históricas não possuem política local uniforme de grants e search_path"
+      ],
+      "typesEvidence": ["tipos provam assinaturas, não ACL, owner ou search_path"],
+      "migrationEvidence": [
+        "recriações e overloads tornam o estado final não dedutível com segurança"
+      ],
+      "productionGate": "snapshot de proacl, owner, prosecdef, proconfig e default privileges",
+      "provingTests": ["assertions SQL de grants mínimos em Supabase descartável pendentes"],
+      "localChange": "template de função com search_path explícito, revoke PUBLIC e grants mínimos",
+      "rollbackOrForwardFix": "migration corretiva por função; nunca restaurar default amplo"
+    },
+    {
+      "id": "SEG-006",
+      "priority": "P0",
+      "title": "Helper genérico de notificação exposto",
+      "state": "production_verification_required",
+      "headEvidence": [
+        "assinatura genérica continua nos tipos e alimenta fluxo de notificação/push"
+      ],
+      "typesEvidence": ["create_notification aceita destinatário, tipo, título, corpo e metadados"],
+      "migrationEvidence": ["migration posterior concede execução a authenticated"],
+      "productionGate": "confirmar ACL e chamadores publicados antes de revogar",
+      "provingTests": ["teste de execução por anon/owner/outro em Supabase descartável pendente"],
+      "localChange": "privatizar helper e expor capabilities específicas com catálogo de templates",
+      "rollbackOrForwardFix": "forward-fix por capability; preservar linhas e fila legítimas"
+    },
+    {
+      "id": "SEG-007",
+      "priority": "P1",
+      "title": "Moderação por IA sem rate limit",
+      "state": "locally_mitigated",
+      "headEvidence": [
+        "src/routes/api/verify-photo.ts aplica limite fixo por usuário antes de settings e provedor",
+        "src/lib/photoModerationPolicy.server.ts limita seis requisições por minuto por instância"
+      ],
+      "typesEvidence": [],
+      "migrationEvidence": [],
+      "productionGate": "limite distribuído ainda requer capability durável ou binding no runtime publicado",
+      "provingTests": ["tests/photo-moderation-security-v2.test.ts"],
+      "localChange": "contenção local, limite de corpo e classificação 429 sem PII",
+      "rollbackOrForwardFix": "reduzir limite ou desabilitar upload; forward-fix adiciona contador distribuído"
+    },
+    {
+      "id": "SEG-008",
+      "priority": "P1",
+      "title": "Falha da IA libera foto sem revisão",
+      "state": "locally_contained",
+      "headEvidence": [
+        "endpoint retorna erro fail-closed em timeout, indisponibilidade, limite e parse",
+        "src/lib/verifyPhoto.ts bloqueia upload quando a moderação falha tecnicamente"
+      ],
+      "typesEvidence": [],
+      "migrationEvidence": [],
+      "productionGate": "validar capacidade operacional e UX em ambiente isolado antes de publicar",
+      "provingTests": ["tests/photo-moderation-security-v2.test.ts"],
+      "localChange": "remoção do caminho soft:true, timeout e resposta retryable sem aprovação",
+      "rollbackOrForwardFix": "kill switch de upload ou forward-fix; nunca restaurar aprovação silenciosa"
+    },
+    {
+      "id": "SEG-009",
+      "priority": "P1",
+      "title": "Fotos de perfil em bucket público",
+      "state": "production_verification_required",
+      "headEvidence": ["código usa getPublicUrl para profile-photos e persiste URLs públicas"],
+      "typesEvidence": ["profiles.photo_url e profile_photos.url são persistidos"],
+      "migrationEvidence": [
+        "migration mais recente localizada volta a declarar profile-photos público"
+      ],
+      "productionGate": "snapshot de buckets, policies, objetos e URLs persistidas sem PII",
+      "provingTests": ["matriz bucket público/privado/signed em projeto descartável pendente"],
+      "localChange": "planejar expansão de delivery assinado sem tornar objetos existentes inacessíveis",
+      "rollbackOrForwardFix": "dupla leitura de URL pública/assinada e rollback de delivery, não de dados"
+    },
+    {
+      "id": "SEG-010",
+      "priority": "P1",
+      "title": ".env versionado",
+      "state": "confirmed_in_head",
+      "headEvidence": [
+        ".env é rastreado e contém apenas nomes de configuração pública inspecionados sem valores"
+      ],
+      "typesEvidence": [],
+      "migrationEvidence": [],
+      "productionGate": "auditoria de histórico e rotação dependem do operador; valores não entram no artefato",
+      "provingTests": ["scanner de bundle e nomes privilegiados na validação do lote"],
+      "localChange": "classificar e retirar arquivo rastreado em mudança própria após confirmar consumidores",
+      "rollbackOrForwardFix": "restaurar somente placeholders documentados; secrets ficam no runtime"
+    },
+    {
+      "id": "SEG-011",
+      "priority": "P1",
+      "title": "Cabeçalhos defensivos não verificáveis",
+      "state": "production_verification_required",
+      "headEvidence": ["não há política CSP/headers completa comprovável no repositório"],
+      "typesEvidence": [],
+      "migrationEvidence": [],
+      "productionGate": "capturar headers efetivos do domínio publicado sem alterar deploy",
+      "provingTests": ["teste local de configuração e smoke HTTP futuro"],
+      "localChange": "definir CSP e headers compatíveis em PR operacional isolado",
+      "rollbackOrForwardFix": "report-only antes de enforcement e rollback de diretiva individual"
+    },
+    {
+      "id": "SEG-012",
+      "priority": "P2",
+      "title": "Sessão persistida no navegador",
+      "state": "confirmed_in_head",
+      "headEvidence": [
+        "cliente Supabase mantém a estratégia existente de persistência; V2 não duplica tokens"
+      ],
+      "typesEvidence": [],
+      "migrationEvidence": [],
+      "productionGate": null,
+      "provingTests": ["tests/auth-session-v2.test.ts", "tests/auth-cache-isolation-v2.test.ts"],
+      "localChange": "reduzir superfície XSS e preservar limpeza imediata de cache no logout/troca",
+      "rollbackOrForwardFix": "forward-fix de armazenamento exige rollout de autenticação separado"
+    },
+    {
+      "id": "SEG-013",
+      "priority": "P1",
+      "title": "HTML do blog inserido diretamente",
+      "state": "confirmed_in_head",
+      "headEvidence": ["src/routes/blog.$slug.tsx usa dangerouslySetInnerHTML para post.body"],
+      "typesEvidence": [],
+      "migrationEvidence": [],
+      "productionGate": "confirmar origem e sanitização anterior do conteúdo publicado",
+      "provingTests": ["fixtures XSS e sanitização ainda pendentes"],
+      "localChange": "sanitizar em fronteira confiável com allowlist e preservar conteúdo compatível",
+      "rollbackOrForwardFix": "modo de visualização textual seguro e forward-fix de regras"
+    },
+    {
+      "id": "SEG-014",
+      "priority": "P1",
+      "title": "URLs e iframes administráveis",
+      "state": "confirmed_in_head",
+      "headEvidence": [
+        "src/routes/admin/verificacoes.tsx renderiza iframe a partir de URL de dados"
+      ],
+      "typesEvidence": [],
+      "migrationEvidence": [],
+      "productionGate": "inventariar origens legítimas publicadas antes de restringir allowlist",
+      "provingTests": ["classificador same-origin e allowlist de mídia ainda pendente"],
+      "localChange": "normalizar protocolos, sandbox e allowlist por capacidade",
+      "rollbackOrForwardFix": "desabilitar preview e preservar link seguro como fallback"
+    },
+    {
+      "id": "SEG-015",
+      "priority": "P1",
+      "title": "Policies de leitura potencialmente amplas",
+      "state": "production_verification_required",
+      "headEvidence": [
+        "migrations históricas contêm policies sobrepostas; código não prova enforcement"
+      ],
+      "typesEvidence": ["tipos não representam policies"],
+      "migrationEvidence": [
+        "histórico possui criação e substituição de policies em múltiplos domínios"
+      ],
+      "productionGate": "snapshot autenticado de pg_policies e testes por papel",
+      "provingTests": ["matriz RLS em Supabase descartável pendente"],
+      "localChange": "migrations pequenas por policy após reconciliação",
+      "rollbackOrForwardFix": "policy paralela versionada e forward-fix; nunca desabilitar RLS"
+    },
+    {
+      "id": "SEG-016",
+      "priority": "P1",
+      "title": "Realtime potencialmente amplo",
+      "state": "production_verification_required",
+      "headEvidence": [
+        "providers e hooks assinam mudanças; escopo final depende de publicação e RLS"
+      ],
+      "typesEvidence": ["tipos não representam publication membership"],
+      "migrationEvidence": [
+        "histórico altera supabase_realtime para tabelas de mensagens e presença"
+      ],
+      "productionGate": "snapshot de publication e teste participante/não participante",
+      "provingTests": ["Realtime autorizado/não autorizado em Supabase descartável pendente"],
+      "localChange": "escopar canais e policies por participante sem duplicar subscriptions",
+      "rollbackOrForwardFix": "desabilitar feature consumidora e forward-fix de policy"
+    },
+    {
+      "id": "SEG-017",
+      "priority": "P3",
+      "title": "Logs operacionais excessivos",
+      "state": "locally_mitigated",
+      "headEvidence": [
+        "push usa logs agregados; moderação agora remove corpo de erro e exceções dos logs"
+      ],
+      "typesEvidence": [],
+      "migrationEvidence": [],
+      "productionGate": "revisar retenção e sinks do runtime publicado",
+      "provingTests": [
+        "tests/push-dispatch-auth.test.ts",
+        "tests/photo-moderation-security-v2.test.ts"
+      ],
+      "localChange": "eventos categóricos sem token, endpoint push, imagem, usuário ou resposta do provedor",
+      "rollbackOrForwardFix": "aumentar métricas agregadas, nunca restaurar payload sensível"
+    },
+    {
+      "id": "SEG-018",
+      "priority": "P2",
+      "title": "Endpoint administrativo de reparo de fotos",
+      "state": "confirmed_in_head",
+      "headEvidence": [
+        "endpoint exige bearer e papel administrativo antes de operações service-role"
+      ],
+      "typesEvidence": ["opera sobre perfis, fotos e storage existentes"],
+      "migrationEvidence": [],
+      "productionGate": "confirmar papel, rate limit e trilha de auditoria efetivos",
+      "provingTests": ["autorização server-side e limites operacionais ainda pendentes"],
+      "localChange": "adicionar limite, dry-run e auditoria categórica em PR administrativo",
+      "rollbackOrForwardFix": "kill switch da operação; preservar arquivos e registros"
+    },
+    {
+      "id": "SEG-019",
+      "priority": "P1",
+      "title": "Fila push sem claim atômico",
+      "state": "confirmed_in_head",
+      "headEvidence": [
+        "src/lib/pushDispatchBatch.server.ts seleciona e só depois atualiza push_queue"
+      ],
+      "typesEvidence": [
+        "push_queue possui attempts, processed_at e last_error, sem contrato de lease nos tipos"
+      ],
+      "migrationEvidence": ["histórico de fila não fornece claim SKIP LOCKED comprovado"],
+      "productionGate": "snapshot de schema e Job antes de rollout da migration aditiva",
+      "provingTests": ["concorrência e replay em Supabase descartável pendentes"],
+      "localChange": "claim transacional com lease, retry/backoff e token de execução em mudança separada",
+      "rollbackOrForwardFix": "kill switch do dispatch; liberar leases expirados sem desfazer envios legítimos"
+    },
+    {
+      "id": "SEG-020",
+      "priority": "P2",
+      "title": "Dependências e locks inconsistentes",
+      "state": "confirmed_in_head",
+      "headEvidence": [
+        "bun.lock, bun.lockb e package-lock.json coexistem; bun.lock é o lock oficial dos comandos atuais"
+      ],
+      "typesEvidence": [],
+      "migrationEvidence": [],
+      "productionGate": null,
+      "provingTests": ["bun install --frozen-lockfile e builds cliente/SSR"],
+      "localChange": "manter frozen install e remover locks legados apenas em PR mecânico comprovado",
+      "rollbackOrForwardFix": "restaurar lock oficial exato; não atualizar dependências junto com remoção"
+    }
+  ]
+}
