@@ -263,7 +263,10 @@ function AdminFotos() {
       form.set("file", jpeg);
       const resp = await fetch("/api/photo-repair", {
         method: "POST",
-        headers,
+        headers: {
+          ...headers,
+          "X-Photo-Repair-Confirm": "execute",
+        },
         body: form,
       });
       const json = await resp.json().catch(() => ({}));
@@ -291,6 +294,7 @@ function AdminFotos() {
       const headers = {
         ...(await authHeaders()),
         "Content-Type": "application/json",
+        "X-Photo-Repair-Confirm": "execute",
       };
       const resp = await fetch("/api/photo-repair", {
         method: "POST",
@@ -1041,7 +1045,8 @@ function ThresholdField({
     <div className="space-y-1.5">
       <Label className="text-sm">{label}</Label>
       <Input
-        type="text" inputMode="decimal"
+        type="text"
+        inputMode="decimal"
         min={0}
         max={1}
         step={0.05}
