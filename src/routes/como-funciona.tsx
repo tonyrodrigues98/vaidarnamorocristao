@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { PublicNav } from "@/components/PublicNav";
-import { UserPlus, ShieldCheck, Heart, MessageCircle } from "lucide-react";
+import { UserPlus, ShieldCheck, HeartHandshake, MessageCircle, UsersRound } from "lucide-react";
 
 const FAQS = [
   {
@@ -13,11 +13,11 @@ const FAQS = [
   },
   {
     q: "Por que aprovação manual?",
-    a: "Para garantir que cada pessoa aqui é real, cristã e está buscando um relacionamento sério. Reduz fakes e aumenta a qualidade dos matches.",
+    a: "Para cuidar da confiança e da convivência. A revisão ajuda a reduzir perfis falsos e protege tanto a participação comunitária quanto as áreas opcionais.",
   },
   {
-    q: "Posso me cadastrar sendo divorciado?",
-    a: "Sim. Acreditamos no recomeço. Solteiros, viúvos e divorciados são bem-vindos.",
+    q: "Preciso estar procurando namoro para participar?",
+    a: "Não. A comunidade é para convivência, fé, amizade e conteúdo. O Modo Namoro é separado e opcional.",
   },
   {
     q: "Meus dados ficam públicos?",
@@ -29,17 +29,17 @@ export const Route = createFileRoute("/como-funciona")({
   component: ComoFuncionaPage,
   head: () => ({
     meta: [
-      { title: "Como Funciona o VaiDarNamoro — Namoro Seguro" },
+      { title: "Como funciona — Comunidade Vai Dar Namoro" },
       {
         name: "description",
         content:
-          "Em 4 passos: cadastro, aprovação manual, conheça pretendentes verificados e converse com propósito. Saiba como o VaiDarNamoro funciona.",
+          "Conheça a comunidade Vai Dar Namoro: cadastro, cuidado, convivência e um Modo Namoro separado e opcional.",
       },
       { property: "og:title", content: "Como funciona o VaiDarNamoro" },
       {
         property: "og:description",
         content:
-          "Cadastro, aprovação manual, conexões intencionais. Conheça o passo a passo da plataforma cristã de relacionamentos sérios.",
+          "Cadastro, cuidado e convivência em uma comunidade cristã. O Namoro permanece disponível como modo opcional.",
       },
       { property: "og:url", content: "https://vaidarnamoro.com/como-funciona" },
     ],
@@ -64,23 +64,28 @@ export const Route = createFileRoute("/como-funciona")({
 const STEPS = [
   {
     icon: UserPlus,
-    title: "1. Crie seu perfil",
-    text: "Cadastro rápido e gratuito. Compartilhe sua história, sua fé e o que você busca.",
+    title: "1. Crie sua identidade",
+    text: "Comece com as informações necessárias para segurança e participação comunitária.",
   },
   {
     icon: ShieldCheck,
-    title: "2. Aprovação manual",
-    text: "Nossa equipe revisa seu perfil em até 48h. Garantimos um ambiente real e seguro.",
+    title: "2. Passe pelo cuidado",
+    text: "A equipe revisa os dados necessários para manter um ambiente mais humano e confiável.",
   },
   {
-    icon: Heart,
-    title: "3. Demonstre interesse",
-    text: "Conheça pretendentes aprovados. Demonstre interesse — sem swipe, sem ansiedade.",
+    icon: UsersRound,
+    title: "3. Participe da comunidade",
+    text: "Acompanhe conteúdo, conversas e atividades sem precisar parecer romanticamente disponível.",
   },
   {
     icon: MessageCircle,
-    title: "4. Converse com propósito",
-    text: "Quando o interesse é recíproco, vocês conversam. Cada conexão tem intenção real.",
+    title: "4. Crie vínculos",
+    text: "Converse e conheça pessoas em contextos sociais, espirituais e comunitários.",
+  },
+  {
+    icon: HeartHandshake,
+    title: "Opcional: ative o Namoro",
+    text: "Se quiser, configure disponibilidade e preferências em uma área separada e reversível.",
   },
 ];
 
@@ -94,11 +99,12 @@ function ComoFuncionaPage() {
             Como <span className="text-gradient">funciona</span>
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
-            Quatro passos simples até a sua próxima história começar.
+            Entre pela comunidade. Escolha depois, com clareza, quais experiências fazem sentido
+            para você.
           </p>
         </header>
 
-        <section className="mt-16 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <section className="mt-16 grid gap-6 md:grid-cols-2 xl:grid-cols-5">
           {STEPS.map((s, i) => (
             <div key={i} className="rounded-3xl border border-border bg-card p-7 shadow-soft">
               <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[var(--petal)]">
@@ -115,13 +121,14 @@ function ComoFuncionaPage() {
             Por que aprovação manual?
           </h2>
           <p className="mt-4 text-base leading-relaxed text-muted-foreground">
-            Apps tradicionais permitem qualquer pessoa criar perfil em segundos. O resultado: bots,
-            fakes, pessoas que não compartilham os mesmos valores. Nós escolhemos o caminho mais
-            difícil — revisar cada perfil — porque acreditamos que sua confiança vale o esforço.
+            Plataformas sociais precisam equilibrar entrada simples e confiança. Nós escolhemos
+            revisar as informações necessárias porque convivência, conteúdo e conversas também
+            exigem cuidado.
           </p>
           <p className="mt-4 text-base leading-relaxed text-muted-foreground">
-            Quando você está aqui, você sabe: cada pessoa do outro lado é real, cristã, e está
-            buscando algo sério. Não é promessa de marketing. É processo.
+            Aprovação comunitária não significa disponibilidade romântica. O Modo Namoro possui
+            configuração própria, e participar dele nunca é requisito para fazer parte da
+            comunidade.
           </p>
         </section>
 
@@ -147,7 +154,7 @@ function ComoFuncionaPage() {
             to="/auth/signup"
             className="inline-flex h-12 items-center justify-center rounded-full bg-[var(--rose)] px-8 font-semibold text-white shadow-glow hover:opacity-90"
           >
-            Começar agora
+            Acessar comunidade
           </Link>
         </section>
       </main>

@@ -2,6 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 
 import { CarenLiveHero, TIKTOK_LIVE_URL } from "@/components/home/CarenLiveHero";
+import { CommunityAcquisitionLanding } from "@/components/home/CommunityAcquisitionLanding";
+import { PublicNav } from "@/components/PublicNav";
 import {
   CommunityPlatformSection,
   FinalLiveCtaSection,
@@ -22,29 +24,29 @@ export const Route = createFileRoute("/")({
   component: Home,
   head: () => ({
     meta: [
-      { title: "Caren | Vai Dar Namoro Cristão" },
+      { title: "Vai Dar Namoro — Comunidade cristã para caminhar junto" },
       {
         name: "description",
         content:
-          "Página oficial da live Vai Dar Namoro Cristão da Caren. Uma comunidade real, feita de pessoas reais.",
+          "Comunidade cristã para fé, amizades, conteúdo, conversas e experiências compartilhadas. Conheça também a live da Caren e o Modo Namoro opcional.",
       },
       {
         name: "keywords",
         content:
-          "Caren, Vai Dar Namoro Cristão, live cristã TikTok, comunidade cristã, relacionamento cristão",
+          "comunidade cristã, fé, amizades cristãs, Caren, live cristã TikTok, Vai Dar Namoro Cristão",
       },
-      { property: "og:title", content: "Caren | Vai Dar Namoro Cristão" },
+      { property: "og:title", content: "Vai Dar Namoro — Comunidade cristã para caminhar junto" },
       {
         property: "og:description",
         content:
-          "A página oficial da live da Caren no TikTok. Uma comunidade real, feita de pessoas reais.",
+          "Uma comunidade cristã para fé, amizades, conteúdo e experiências compartilhadas. Namoro é uma área opcional.",
       },
       { property: "og:image", content: "https://vaidarnamoro.com/og-image.jpg" },
       { property: "og:url", content: "https://vaidarnamoro.com/" },
-      { name: "twitter:title", content: "Caren | Vai Dar Namoro Cristão" },
+      { name: "twitter:title", content: "Vai Dar Namoro — Comunidade cristã" },
       {
         name: "twitter:description",
-        content: "Página oficial da live Vai Dar Namoro Cristão da Caren.",
+        content: "Comunidade cristã para fé, amizades, conteúdo e experiências compartilhadas.",
       },
       { name: "twitter:image", content: "https://vaidarnamoro.com/og-image.jpg" },
     ],
@@ -80,15 +82,19 @@ function Home() {
   }, []);
 
   return (
-    <main className="min-h-dvh overflow-hidden bg-[#0f0f10] font-sans text-white">
-      <CarenLiveHero />
-      <LiveHowItWorksSection />
-      <LiveTeamSection members={members} />
-      <LiveParticipationSection />
-      <LiveMonthlyTop3Section highlights={highlights} />
-      <CommunityPlatformSection />
-      <LiveFaqSection />
-      <FinalLiveCtaSection />
-    </main>
+    <>
+      <PublicNav />
+      <main className="min-h-dvh overflow-hidden bg-[#0f0f10] font-sans text-white">
+        <CommunityAcquisitionLanding />
+        <CarenLiveHero embedded />
+        <LiveHowItWorksSection />
+        <LiveTeamSection members={members} />
+        <LiveParticipationSection />
+        <LiveMonthlyTop3Section highlights={highlights} />
+        <CommunityPlatformSection />
+        <LiveFaqSection />
+        <FinalLiveCtaSection />
+      </main>
+    </>
   );
 }

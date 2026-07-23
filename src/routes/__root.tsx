@@ -59,7 +59,7 @@ export const Route = createRootRouteWithContext<AppRouterContext>()({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
-      { name: "theme-color", content: "#fff7f8", media: "(prefers-color-scheme: light)" },
+      { name: "theme-color", content: "#f7f7f5", media: "(prefers-color-scheme: light)" },
       { name: "theme-color", content: "#0b0b0d", media: "(prefers-color-scheme: dark)" },
       { name: "format-detection", content: "telephone=no" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
@@ -67,18 +67,18 @@ export const Route = createRootRouteWithContext<AppRouterContext>()({
       { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
       { name: "apple-mobile-web-app-title", content: "VaiDarNamoro" },
       { name: "application-name", content: "VaiDarNamoro" },
-      { name: "msapplication-TileColor", content: "#ff4f68" },
+      { name: "msapplication-TileColor", content: "#5b21b6" },
       { name: "vdn-build-commit", content: appBuildInfo.commit },
       { name: "vdn-build-channel", content: appBuildInfo.channel },
       {
         name: "google-site-verification",
         content: "PXzDRZhAILyhetuReW3wOrUOPfeN11JyBmm0bVeO0Hg",
       },
-      { title: "VaiDarNamoro — Namoro cristão sério com propósito" },
+      { title: "Vai Dar Namoro — Comunidade cristã para caminhar junto" },
       {
         name: "description",
         content:
-          "VaiDarNamoro é a plataforma cristã de relacionamentos sérios. Conheça pretendentes aprovados manualmente que vivem e compartilham a sua fé.",
+          "Comunidade cristã para fé, amizades, conteúdo, conversas e experiências compartilhadas. O Namoro é uma área opcional.",
       },
       { name: "author", content: "VaiDarNamoro" },
       { name: "robots", content: "index, follow, max-image-preview:large, max-snippet:-1" },
@@ -86,11 +86,19 @@ export const Route = createRootRouteWithContext<AppRouterContext>()({
       { property: "og:locale", content: "pt_BR" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { property: "og:title", content: "VaiDarNamoro — Namoro cristão sério com propósito" },
-      { name: "twitter:title", content: "VaiDarNamoro — Namoro cristão sério com propósito" },
-      { name: "description", content: "Namoro cristão sério com propósito" },
-      { property: "og:description", content: "Namoro cristão sério com propósito" },
-      { name: "twitter:description", content: "Namoro cristão sério com propósito" },
+      {
+        property: "og:title",
+        content: "Vai Dar Namoro — Comunidade cristã para caminhar junto",
+      },
+      { name: "twitter:title", content: "Vai Dar Namoro — Comunidade cristã" },
+      {
+        property: "og:description",
+        content: "Fé, amizades, conteúdo e experiências compartilhadas em uma só comunidade.",
+      },
+      {
+        name: "twitter:description",
+        content: "Fé, amizades, conteúdo e experiências compartilhadas em uma só comunidade.",
+      },
       {
         property: "og:image",
         content:

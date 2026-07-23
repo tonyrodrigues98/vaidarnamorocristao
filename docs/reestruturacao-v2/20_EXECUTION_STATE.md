@@ -12,10 +12,11 @@
   `249b4c8aca9ea8f82a3e6e68f55894c780b0e182`.
 - V2-008 foi dividida em Draft PRs empilhados de baseline, capabilities, push,
   aplicação e reparo administrativo.
-- Lote ativo: V2-009A em `rebuild/v2-009-identity-capabilities`, um commit sobre
-  `6297b30e245be92ccc2050c415ef9fa98c5e26ba`.
-- Draft PR #15 tem base `rebuild/v2-008-security-closure`; nenhum PR da pilha
-  foi mesclado ou publicado.
+- V2-009A está no Draft PR #15, branch
+  `rebuild/v2-009-identity-capabilities`, commit
+  `feac4d40c3f5fce10ba30e11c1bb273bb01a5cd7`.
+- Lote ativo: V2-009B em `rebuild/v2-009-community-acquisition`, empilhado sobre
+  a identidade canônica. Nenhum PR da pilha foi mesclado ou publicado.
 
 ## Concluído
 
@@ -109,7 +110,21 @@
   capability.
 - Namoro permanece `inactive` por padrão; nenhum dado legado é interpretado
   como consentimento.
-- Aquisição pública e onboarding serão entregues em Draft PRs separados.
+- Aquisição pública e onboarding são entregues em Draft PRs separados.
+
+## V2-009B — aquisição pública
+
+- A entrada `/` apresenta primeiro a comunidade, com CTA para `/inicio` e
+  cadastro, e mantém a experiência completa da live logo abaixo.
+- A live da Caren conserva link, equipe, destaques, dinâmica, FAQ e CTA; o modo
+  `embedded` remove somente a navegação duplicada na composição da home.
+- Navegação, páginas institucionais, blog, cadastro, metadados e manifesto PWA
+  usam posicionamento community-first.
+- Pretendentes saiu dos atalhos universais do manifesto, sem remoção da rota ou
+  dos dados do domínio.
+- Namoro é descrito como opcional e não é ativado por cadastro ou participação
+  comunitária.
+- Termos e manual permanecem intactos até revisão jurídica/operacional própria.
 
 ## Próximo lote
 
@@ -117,6 +132,6 @@
   qualquer rollout.
 - Manter qualquer conclusão sobre ACL/RLS publicado como não verificada até
   existir snapshot autenticado e ambiente Supabase descartável.
-- Concluir V2-009B — aquisição pública community-first — e V2-009C —
-  onboarding comunitário com trilha romântica opt-in — a partir da pilha
-  validada, mantendo integrações reais atrás de adapters e flags.
+- Publicar o Draft PR da V2-009B e concluir V2-009C — onboarding comunitário
+  com trilha romântica opt-in — a partir da pilha validada, mantendo
+  integrações reais atrás de adapters e flags.
