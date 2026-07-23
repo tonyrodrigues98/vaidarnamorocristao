@@ -12,6 +12,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import type { V2ShellNavigationId, V2ShellNavigationItem, V2ShellPageConfig } from "@/v2/app-shell";
+import type { PlatformDomain } from "@/v2/platform/identity";
 
 export const V2_RUNTIME_SLUGS = [
   "inicio",
@@ -38,6 +39,7 @@ export interface V2RuntimeRouteDescriptor {
   readonly description: string;
   readonly icon: LucideIcon;
   readonly primary: boolean;
+  readonly requiredDomain: PlatformDomain;
   readonly width?: V2ShellPageConfig["width"];
 }
 
@@ -53,6 +55,7 @@ const V2_RUNTIME_ROUTES = Object.freeze([
       "O feed comunitário chegará em uma etapa própria. Esta página valida apenas a navegação real e o novo shell.",
     icon: Home,
     primary: true,
+    requiredDomain: "community",
   },
   {
     slug: "comunidade",
@@ -65,6 +68,7 @@ const V2_RUNTIME_ROUTES = Object.freeze([
       "Grupos e publicações ainda não estão ativos. Nenhum conteúdo exibido aqui é persistido.",
     icon: UsersRound,
     primary: true,
+    requiredDomain: "community",
   },
   {
     slug: "conversas",
@@ -77,6 +81,7 @@ const V2_RUNTIME_ROUTES = Object.freeze([
       "A integração com mensagens reais permanece no aplicativo legado até a reconstrução dedicada.",
     icon: MessageCircle,
     primary: true,
+    requiredDomain: "messaging",
     width: "wide",
   },
   {
@@ -90,6 +95,7 @@ const V2_RUNTIME_ROUTES = Object.freeze([
       "A personalização modular será integrada progressivamente, preservando o perfil e as fotos existentes.",
     icon: CircleUserRound,
     primary: true,
+    requiredDomain: "profile",
   },
   {
     slug: "pretendentes",
@@ -101,6 +107,7 @@ const V2_RUNTIME_ROUTES = Object.freeze([
     description: "As regras e os dados românticos existentes não foram alterados nesta etapa.",
     icon: HeartHandshake,
     primary: false,
+    requiredDomain: "dating",
   },
   {
     slug: "explorar-pessoas",
@@ -113,6 +120,7 @@ const V2_RUNTIME_ROUTES = Object.freeze([
       "A descoberta social será implementada com privacidade e moderação em uma etapa futura.",
     icon: Compass,
     primary: false,
+    requiredDomain: "community",
   },
   {
     slug: "loja",
@@ -124,6 +132,7 @@ const V2_RUNTIME_ROUTES = Object.freeze([
     description: "Saldos, compras e inventários permanecem intocados no sistema atual.",
     icon: ShoppingBag,
     primary: false,
+    requiredDomain: "economy",
   },
   {
     slug: "avatar",
@@ -135,6 +144,7 @@ const V2_RUNTIME_ROUTES = Object.freeze([
     description: "Nenhum item, foto ou personagem existente foi alterado por esta integração.",
     icon: Palette,
     primary: false,
+    requiredDomain: "profile",
   },
   {
     slug: "meu-pet",
@@ -147,6 +157,7 @@ const V2_RUNTIME_ROUTES = Object.freeze([
       "Pets, itens e progressão continuam disponíveis apenas na experiência legada por enquanto.",
     icon: PawPrint,
     primary: false,
+    requiredDomain: "economy",
   },
   {
     slug: "configuracoes",
@@ -159,6 +170,7 @@ const V2_RUNTIME_ROUTES = Object.freeze([
       "Configurações reais integradas aos contratos atuais, com o legado preservado como fallback.",
     icon: Settings,
     primary: false,
+    requiredDomain: "account",
   },
 ] satisfies readonly V2RuntimeRouteDescriptor[]);
 
@@ -182,6 +194,17 @@ export const V2_RUNTIME_PRIMARY_NAVIGATION = Object.freeze(
 export const V2_RUNTIME_SECONDARY_NAVIGATION = Object.freeze(
   V2_RUNTIME_ROUTES.filter((route) => !route.primary).map(toNavigationItem),
 );
+
+export function getV2RuntimeNavigation(canEnter: (domain: PlatformDomain) => boolean): Readonly<{
+  primary: readonly V2ShellNavigationItem[];
+  secondary: readonly V2ShellNavigationItem[];
+}> {
+  const available = V2_RUNTIME_ROUTES.filter((route) => canEnter(route.requiredDomain));
+  return Object.freeze({
+    primary: Object.freeze(available.filter((route) => route.primary).map(toNavigationItem)),
+    secondary: Object.freeze(available.filter((route) => !route.primary).map(toNavigationItem)),
+  });
+}
 
 export function isV2RuntimePath(pathname: string): boolean {
   return pathname === "/v2" || pathname.startsWith("/v2/");

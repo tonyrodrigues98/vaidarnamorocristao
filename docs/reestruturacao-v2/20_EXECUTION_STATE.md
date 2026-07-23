@@ -12,6 +12,10 @@
   `249b4c8aca9ea8f82a3e6e68f55894c780b0e182`.
 - V2-008 foi dividida em Draft PRs empilhados de baseline, capabilities, push,
   aplicação e reparo administrativo.
+- Lote ativo: V2-009A em `rebuild/v2-009-identity-capabilities`, um commit sobre
+  `6297b30e245be92ccc2050c415ef9fa98c5e26ba`.
+- Draft PR #15 tem base `rebuild/v2-008-security-closure`; nenhum PR da pilha
+  foi mesclado ou publicado.
 
 ## Concluído
 
@@ -95,11 +99,24 @@
 - Bundle público: nenhum segredo server-only ou `service_role`; o único JWT
   embutido é a chave pública legada com papel `anon`.
 
+## V2-009 em execução
+
+- A primeira fatia cria `accountStatus`, `primaryRole`, `capabilities`,
+  `canEnter(domain)`, `isApproved` e `isRestricted`.
+- A identidade canônica deriva somente de sessão, `user_roles`, perfil e termos
+  confirmados pelo código/tipos.
+- O runtime V2 declara o domínio exigido por rota e filtra a navegação por
+  capability.
+- Namoro permanece `inactive` por padrão; nenhum dado legado é interpretado
+  como consentimento.
+- Aquisição pública e onboarding serão entregues em Draft PRs separados.
+
 ## Próximo lote
 
 - Validar as migrations de capabilities e push em Supabase descartável antes de
   qualquer rollout.
 - Manter qualquer conclusão sobre ACL/RLS publicado como não verificada até
   existir snapshot autenticado e ambiente Supabase descartável.
-- Iniciar V2-009 — Perfis Modulares e Identidade Pública a partir da pilha
+- Concluir V2-009B — aquisição pública community-first — e V2-009C —
+  onboarding comunitário com trilha romântica opt-in — a partir da pilha
   validada, mantendo integrações reais atrás de adapters e flags.

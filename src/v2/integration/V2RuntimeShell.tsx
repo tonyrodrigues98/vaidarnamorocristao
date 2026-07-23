@@ -16,6 +16,8 @@ export interface V2RuntimeShellProps {
   readonly logoutLoading?: boolean;
   readonly statusMessage?: string;
   readonly content?: ReactNode;
+  readonly navigation?: readonly V2ShellNavigationItem[];
+  readonly secondaryNavigation?: readonly V2ShellNavigationItem[];
   readonly onNavigate: (item: V2ShellNavigationItem) => void;
   readonly onNavigateHome: () => void;
   readonly onBack: () => void;
@@ -30,6 +32,8 @@ export function V2RuntimeShell({
   logoutLoading,
   statusMessage,
   content,
+  navigation = V2_RUNTIME_PRIMARY_NAVIGATION,
+  secondaryNavigation = V2_RUNTIME_SECONDARY_NAVIGATION,
   onNavigate,
   onNavigateHome,
   onBack,
@@ -74,8 +78,8 @@ export function V2RuntimeShell({
     <V2AppShell
       page={page}
       activeNavigationId={route?.navigationId ?? null}
-      navigation={V2_RUNTIME_PRIMARY_NAVIGATION}
-      secondaryNavigation={V2_RUNTIME_SECONDARY_NAVIGATION}
+      navigation={navigation}
+      secondaryNavigation={secondaryNavigation}
       user={user}
       theme={theme}
       logoutLoading={logoutLoading}
