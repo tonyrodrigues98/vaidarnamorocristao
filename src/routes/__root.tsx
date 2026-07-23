@@ -7,7 +7,8 @@ import {
   useLocation,
 } from "@tanstack/react-router";
 import { QueryClientProvider } from "@tanstack/react-query";
-import type { AppRouterContext } from "@/router";
+import type { AppRouterContext } from "@/v2/app/router-context";
+import { appBuildInfo } from "@/v2/app/build-info";
 import { AuthProvider } from "@/lib/auth";
 import { Toaster } from "@/components/ui/sonner";
 import { NotificationsBridge } from "@/lib/useRealtimeNotifications";
@@ -62,6 +63,8 @@ export const Route = createRootRouteWithContext<AppRouterContext>()({
       { name: "apple-mobile-web-app-title", content: "VaiDarNamoro" },
       { name: "application-name", content: "VaiDarNamoro" },
       { name: "msapplication-TileColor", content: "#ff4f68" },
+      { name: "vdn-build-commit", content: appBuildInfo.commit },
+      { name: "vdn-build-channel", content: appBuildInfo.channel },
       {
         name: "google-site-verification",
         content: "PXzDRZhAILyhetuReW3wOrUOPfeN11JyBmm0bVeO0Hg",
