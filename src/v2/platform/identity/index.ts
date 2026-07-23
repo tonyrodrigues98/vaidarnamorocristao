@@ -1,0 +1,15 @@
+export {
+  createResolvingIdentity,
+  createUnauthenticatedIdentity,
+  resolveIdentityAccess,
+  type AccountStatus,
+  type DatingAccessState,
+  type IdentityAccessInput,
+  type IdentityAccessSnapshot,
+  type IdentityProfileRecord,
+  type IdentityResolutionStatus,
+  type PlatformCapability,
+  type PlatformDomain,
+  type TermsConsentRecord,
+  type TermsConsentStatus,
+} from "./identity-access";

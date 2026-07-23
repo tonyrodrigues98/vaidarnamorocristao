@@ -20,6 +20,13 @@ import {
   type SanitizedAuthError,
 } from "@/v2/app/auth/session-state";
 import { isolatePrivateQueryCache } from "@/v2/app/auth/private-cache";
+import {
+  createResolvingIdentity,
+  createUnauthenticatedIdentity,
+  resolveIdentityAccess,
+  type IdentityAccessSnapshot,
+  type TermsConsentRecord,
+} from "@/v2/platform/identity";
 
 type ProfileStatus = "pending" | "approved" | "rejected" | "banned" | null;
 
@@ -38,6 +45,7 @@ type AuthCtx = {
   profileStatus: ProfileStatus;
   isApproved: boolean;
   rolesLoaded: boolean;
+  identity: IdentityAccessSnapshot;
   refreshRole: () => Promise<void>;
   signInWithPassword: (credentials: {
     email: string;
@@ -66,6 +74,7 @@ const Ctx = createContext<AuthCtx>({
   profileStatus: null,
   isApproved: false,
   rolesLoaded: false,
+  identity: createUnauthenticatedIdentity(),
   refreshRole: async () => {},
   signInWithPassword: async () => ({ error: DEFAULT_ERROR }),
   signOut: async () => {},
@@ -79,7 +88,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [publicListing, setPublicListing] = useState(false);
   const [isSupportAgent, setIsSupportAgent] = useState(false);
   const [profileStatus, setProfileStatus] = useState<ProfileStatus>(null);
-  const [rolesLoaded, setRolesLoaded] = useState(false);
+  const [identity, setIdentity] = useState<IdentityAccessSnapshot>(createUnauthenticatedIdentity);
+  const [identityResolvedForUserId, setIdentityResolvedForUserId] = useState<string | null>(null);
   const coordinator = useRef<AuthSessionCoordinator<Session> | null>(null);
   const currentUserId = useRef<string | null>(null);
   const roleRequest = useRef(0);
@@ -90,6 +100,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (currentUserId.current !== nextUserId) {
         isolatePrivateQueryCache(queryClient);
         currentUserId.current = nextUserId;
+        setRole("user");
+        setBadgeColor(null);
+        setPublicListing(false);
+        setIsSupportAgent(false);
+        setProfileStatus(null);
+        setIdentity(nextUserId ? createResolvingIdentity() : createUnauthenticatedIdentity());
+        setIdentityResolvedForUserId(null);
       }
       setAuth(next);
     },
@@ -125,21 +142,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const loadRoles = useCallback(async (uid: string) => {
     const request = ++roleRequest.current;
-    const { data } = await supabase
-      .from("user_roles")
-      .select("role, badge_color, public_listing, is_support_agent")
-      .eq("user_id", uid);
+    const [rolesResult, profileResult, termsResult] = await Promise.all([
+      supabase
+        .from("user_roles")
+        .select("role, badge_color, public_listing, is_support_agent")
+        .eq("user_id", uid),
+      supabase
+        .from("profiles")
+        .select("status, deactivated_at, deletion_requested_at")
+        .eq("id", uid)
+        .maybeSingle(),
+      supabase.rpc("get_my_terms_status"),
+    ]);
     if (request !== roleRequest.current || currentUserId.current !== uid) return;
 
-    const rows = data ?? [];
-    const primary = pickPrimaryRole(rows.map((row) => row.role as AppRole));
+    const rows = rolesResult.data ?? [];
+    const roles = rows.map((row) => row.role as AppRole);
+    const primary = pickPrimaryRole(roles);
     const primaryRow = rows.find((row) => row.role === primary);
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("status")
-      .eq("id", uid)
-      .maybeSingle();
-    if (request !== roleRequest.current || currentUserId.current !== uid) return;
+    const profile = profileResult.data;
+    const termsRow = termsResult.data?.[0];
+    const terms: TermsConsentRecord | null | undefined = termsResult.error
+      ? undefined
+      : termsRow
+        ? {
+            accepted: termsRow.accepted,
+            currentVersion: termsRow.current_version,
+            acceptedVersion: termsRow.accepted_version,
+            acceptedAt: termsRow.accepted_at,
+          }
+        : null;
+    const resolution = rolesResult.error || profileResult.error ? "recoverable-error" : "ready";
 
     setRole(primary);
     setBadgeColor((primaryRow?.badge_color as RoleColor | null) ?? null);
@@ -148,7 +181,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       rows.some((row) => (row as { is_support_agent?: boolean }).is_support_agent === true),
     );
     setProfileStatus((profile?.status as ProfileStatus) ?? null);
-    setRolesLoaded(true);
+    setIdentity(
+      resolveIdentityAccess({
+        authenticated: true,
+        resolution,
+        roles,
+        isSupportAgent: rows.some(
+          (row) => (row as { is_support_agent?: boolean }).is_support_agent === true,
+        ),
+        profile: profileResult.error
+          ? undefined
+          : profile
+            ? {
+                status: profile.status,
+                deactivatedAt: profile.deactivated_at,
+                deletionRequestedAt: profile.deletion_requested_at,
+              }
+            : null,
+        terms,
+        datingState: "inactive",
+      }),
+    );
+    setIdentityResolvedForUserId(uid);
   }, []);
 
   useEffect(() => {
@@ -161,11 +215,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setProfileStatus(null);
 
     if (!uid) {
-      setRolesLoaded(auth.status !== "initializing");
+      setIdentity(createUnauthenticatedIdentity());
+      setIdentityResolvedForUserId(null);
       return;
     }
 
-    setRolesLoaded(false);
+    setIdentity(createResolvingIdentity());
+    setIdentityResolvedForUserId(null);
     void loadRoles(uid);
   }, [auth.user?.id, auth.status, loadRoles]);
 
@@ -203,9 +259,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, [auth.user?.id, signOut]);
 
+  const rolesLoaded = auth.user
+    ? identityResolvedForUserId === auth.user.id
+    : auth.status !== "initializing";
   const isAdmin = role === "admin" || role === "super_admin";
-  const isStaff = isAdmin || role === "apresentador" || role === "moderador";
-  const isApproved = profileStatus === "approved" || isStaff;
+  const isApproved = identity.isApproved;
 
   const value: AuthCtx = {
     user: auth.user,
@@ -222,6 +280,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     profileStatus,
     isApproved,
     rolesLoaded,
+    identity,
     refreshRole: async () => {
       if (auth.user) await loadRoles(auth.user.id);
     },

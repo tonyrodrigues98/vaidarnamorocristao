@@ -9,7 +9,7 @@ import {
 } from "@/v2/design-system";
 
 export interface V2RuntimeStateProps {
-  readonly kind: "loading" | "session-error" | "runtime-error";
+  readonly kind: "loading" | "session-error" | "runtime-error" | "access-restricted";
   readonly onRetry?: () => void;
 }
 
@@ -19,10 +19,14 @@ export function V2RuntimeState({ kind, onRetry }: V2RuntimeStateProps) {
     ? "Preparando sua comunidade"
     : kind === "session-error"
       ? "Sua sessão precisa de um instante"
-      : "Não foi possível abrir esta área";
+      : kind === "access-restricted"
+        ? "Esta área não está disponível"
+        : "Não foi possível abrir esta área";
   const description = loading
     ? "Estamos restaurando sua sessão com segurança."
-    : "Nada foi alterado. Tente novamente para continuar.";
+    : kind === "access-restricted"
+      ? "Sua conta continua segura. Volte para uma área disponível ou revise suas configurações."
+      : "Nada foi alterado. Tente novamente para continuar.";
 
   return (
     <V2ThemeScope className="vdn-v2-runtime-theme" data-vdn-v2-runtime-state="">
