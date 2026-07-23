@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { V2AppShell, type V2CreateAction, type V2ShellNavigationItem } from "@/v2/app-shell";
 import { V2Heading, V2Surface, V2Text, type V2ThemeName } from "@/v2/design-system";
 import type { V2ShellUser } from "@/v2/app-shell";
@@ -15,6 +15,7 @@ export interface V2RuntimeShellProps {
   readonly theme: V2ThemeName;
   readonly logoutLoading?: boolean;
   readonly statusMessage?: string;
+  readonly content?: ReactNode;
   readonly onNavigate: (item: V2ShellNavigationItem) => void;
   readonly onNavigateHome: () => void;
   readonly onBack: () => void;
@@ -28,6 +29,7 @@ export function V2RuntimeShell({
   theme,
   logoutLoading,
   statusMessage,
+  content,
   onNavigate,
   onNavigateHome,
   onBack,
@@ -87,7 +89,7 @@ export function V2RuntimeShell({
         {statusMessage || announcement}
       </div>
       {route ? (
-        <V2RuntimePage route={route} />
+        (content ?? <V2RuntimePage route={route} />)
       ) : (
         <V2Surface className="vdn-v2-runtime-not-found" elevation="one">
           <V2Heading level={2} size="medium">

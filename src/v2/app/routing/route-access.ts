@@ -1,4 +1,5 @@
 import type { AuthSessionStatus } from "@/v2/app/auth/session-state";
+import { sanitizeInternalDestination } from "@/v2/platform/navigation/internal-destination";
 
 export type RouteAccessKind =
   | "public"
@@ -49,41 +50,22 @@ export function normalizePathname(pathname: string): string {
   return pathname.length > 1 ? pathname.replace(/\/+$/, "") : pathname;
 }
 
-function containsControlCharacter(value: string): boolean {
-  return Array.from(value).some((character) => {
-    const code = character.charCodeAt(0);
-    return code <= 31 || code === 127;
-  });
-}
-
 export function sanitizeReturnTo(value: unknown, fallback = "/inicio"): string {
-  if (typeof value !== "string" || value.length === 0 || value.length > 2048) return fallback;
-  if (!value.startsWith("/") || value.startsWith("//") || value.includes("\\")) return fallback;
-  if (containsControlCharacter(value)) return fallback;
-
-  try {
-    const parsed = new URL(value, "https://return.local");
-    if (parsed.origin !== "https://return.local") return fallback;
-    const decodedPath = decodeURIComponent(parsed.pathname);
-    if (
-      decodedPath.startsWith("//") ||
-      decodedPath.includes("\\") ||
-      containsControlCharacter(decodedPath)
-    ) {
-      return fallback;
-    }
-    const normalizedPath = normalizePathname(decodedPath);
-    if (
-      AUTH_RETURN_ROUTES.has(normalizedPath) ||
-      normalizedPath.startsWith("/auth/") ||
-      normalizedPath.startsWith("/api/")
-    ) {
-      return fallback;
-    }
-    return `${parsed.pathname}${parsed.search}${parsed.hash}`;
-  } catch {
+  const destination = sanitizeInternalDestination(value, {
+    origin: "https://return.local",
+    fallback,
+    allowAbsoluteSameOrigin: false,
+  });
+  if (!destination) return fallback;
+  const pathname = normalizePathname(new URL(destination, "https://return.local").pathname);
+  if (
+    AUTH_RETURN_ROUTES.has(pathname) ||
+    pathname.startsWith("/auth/") ||
+    pathname.startsWith("/api/")
+  ) {
     return fallback;
   }
+  return destination;
 }
 
 export function readReturnTo(search: string, fallback = "/inicio"): string {

@@ -4,6 +4,7 @@ import { useAuth } from "@/lib/auth";
 import { useTheme } from "@/lib/theme";
 import { v2FeatureFlags } from "@/v2/platform/feature-flags";
 import type { V2ShellNavigationItem } from "@/v2/app-shell";
+import { V2AccountRuntimeFeature, type AccountNavigationTarget } from "@/v2/features/account";
 import { createV2ShellUser, performV2Logout, resolveV2RuntimeAccess } from "./contracts";
 import { getV2RuntimeRoute } from "./route-registry";
 import { V2RuntimeShell } from "./V2RuntimeShell";
@@ -44,6 +45,44 @@ export function V2ShellRuntimeRoute({ slug }: { readonly slug: string }) {
     }
   };
 
+  const handleAccountNavigation = (target: AccountNavigationTarget) => {
+    switch (target) {
+      case "profile":
+        void navigate({ to: "/perfil" });
+        return;
+      case "verification":
+        void navigate({ to: "/verificacao" });
+        return;
+      case "blocked":
+        void navigate({ to: "/bloqueados" });
+        return;
+      case "notifications":
+        void navigate({ to: "/notificacoes" });
+        return;
+      case "support":
+        void navigate({ to: "/suporte" });
+        return;
+      case "manual":
+        void navigate({ to: "/manual" });
+        return;
+      case "terms":
+        void navigate({ to: "/termos" });
+    }
+  };
+
+  const content =
+    route?.slug === "configuracoes" && user ? (
+      <V2AccountRuntimeFeature
+        userId={user.id}
+        theme={theme}
+        onThemeChange={setTheme}
+        onNavigate={handleAccountNavigation}
+        logoutLoading={logoutLoading}
+        onLogout={handleLogout}
+        onDeletionRequested={handleLogout}
+      />
+    ) : undefined;
+
   return (
     <V2RuntimeShell
       route={route}
@@ -51,6 +90,7 @@ export function V2ShellRuntimeRoute({ slug }: { readonly slug: string }) {
       theme={theme}
       logoutLoading={logoutLoading}
       statusMessage={logoutError}
+      content={content}
       onNavigate={handleNavigate}
       onNavigateHome={() => void navigate({ to: "/v2/$section", params: { section: "inicio" } })}
       onBack={() => router.history.back()}

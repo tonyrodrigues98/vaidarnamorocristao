@@ -362,7 +362,8 @@
         "src/routes/pet-arcade.tsx",
         "src/routes/pretendentes/index.tsx",
         "src/v2/app/auth/private-cache.ts",
-        "src/v2/app/router-context.ts"
+        "src/v2/app/router-context.ts",
+        "src/v2/features/account/remote/use-account-controller.ts"
       ],
       "testFiles": ["tests/auth-cache-isolation-v2.test.ts"],
       "configReferences": ["RELATORIO_LOJA_QUERY_PARTE1.md"],
@@ -550,7 +551,10 @@
       "name": "@vitejs/plugin-react",
       "version": "^5.0.4",
       "declaredAs": "devDependency",
-      "directFiles": ["src/v2/app-shell/showcase/vite.config.ts"],
+      "directFiles": [
+        "src/v2/app-shell/showcase/vite.config.ts",
+        "src/v2/features/account/showcase/vite.config.ts"
+      ],
       "testFiles": [],
       "configReferences": [],
       "classification": "directly-imported"
@@ -938,6 +942,8 @@
         "src/v2/app-shell/V2ProfileMenu.tsx",
         "src/v2/app-shell/V2ShellOverlaySurface.tsx",
         "src/v2/design-system/showcase/V2DesignSystemShowcase.tsx",
+        "src/v2/features/account/presentation/V2AccountSettings.tsx",
+        "src/v2/features/account/showcase/V2AccountShowcase.tsx",
         "src/v2/integration/route-registry.ts",
         "src/v2/integration/V2RuntimePage.tsx",
         "src/v2/integration/V2RuntimeState.tsx"
@@ -1215,6 +1221,10 @@
         "src/v2/design-system/V2Surface.tsx",
         "src/v2/design-system/V2ThemeScope.tsx",
         "src/v2/design-system/V2Typography.tsx",
+        "src/v2/features/account/presentation/V2AccountSettings.tsx",
+        "src/v2/features/account/remote/use-account-controller.ts",
+        "src/v2/features/account/showcase/main.tsx",
+        "src/v2/features/account/showcase/V2AccountShowcase.tsx",
         "src/v2/integration/V2RuntimeErrorBoundary.tsx",
         "src/v2/integration/V2RuntimeShell.tsx",
         "src/v2/integration/V2ShellRuntimeRoute.tsx"
@@ -1263,9 +1273,11 @@
         "src/components/pet/PetRandomEventModal.tsx",
         "src/routes/admin/economia.tsx",
         "src/v2/app-shell/showcase/main.tsx",
-        "src/v2/design-system/showcase/main.tsx"
+        "src/v2/design-system/showcase/main.tsx",
+        "src/v2/features/account/showcase/main.tsx"
       ],
       "testFiles": [
+        "tests/account-components-v2.test.tsx",
         "tests/app-shell-components-v2.test.tsx",
         "tests/app-shell-integration-components-v2.test.tsx",
         "tests/design-system-components-v2.test.tsx",
@@ -1465,7 +1477,10 @@
       "name": "vite",
       "version": "^7.3.1",
       "declaredAs": "devDependency",
-      "directFiles": ["src/v2/app-shell/showcase/vite.config.ts"],
+      "directFiles": [
+        "src/v2/app-shell/showcase/vite.config.ts",
+        "src/v2/features/account/showcase/vite.config.ts"
+      ],
       "testFiles": [],
       "configReferences": [
         "RELATORIO_CONSOLIDADO_OFFLINE.md",
@@ -1480,7 +1495,10 @@
       "name": "vite-tsconfig-paths",
       "version": "^6.0.2",
       "declaredAs": "dependency",
-      "directFiles": ["src/v2/app-shell/showcase/vite.config.ts"],
+      "directFiles": [
+        "src/v2/app-shell/showcase/vite.config.ts",
+        "src/v2/features/account/showcase/vite.config.ts"
+      ],
       "testFiles": [],
       "configReferences": [],
       "classification": "directly-imported"
@@ -1491,6 +1509,10 @@
       "declaredAs": "devDependency",
       "directFiles": [],
       "testFiles": [
+        "tests/account-boundaries-v2.test.ts",
+        "tests/account-components-v2.test.tsx",
+        "tests/account-domain-v2.test.ts",
+        "tests/account-repository-v2.test.ts",
         "tests/app-shell-boundaries-v2.test.ts",
         "tests/app-shell-components-v2.test.tsx",
         "tests/app-shell-contracts-v2.test.ts",
@@ -1512,6 +1534,7 @@
         "tests/legacy-route-characterization-v2.test.ts",
         "tests/messages-rls.test.ts",
         "tests/moderation-rls.test.ts",
+        "tests/navigation-security-v2.test.ts",
         "tests/pretendentes-eligibility.test.ts",
         "tests/push-dispatch-auth.test.ts",
         "tests/realtime-messages.test.ts",
@@ -1543,7 +1566,8 @@
         "src/routes/onboarding/etapa-2.tsx",
         "src/routes/perfil.tsx",
         "src/routes/presentes/index.tsx",
-        "src/routes/pretendentes/index.tsx"
+        "src/routes/pretendentes/index.tsx",
+        "src/v2/features/account/domain/account.ts"
       ],
       "testFiles": [],
       "configReferences": [],

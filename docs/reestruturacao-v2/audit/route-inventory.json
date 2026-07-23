@@ -66,6 +66,7 @@
         { "source": "src/routes/index.tsx", "origin": "src", "kind": "object-href", "target": "/" }
       ],
       "tests": [
+        "tests/account-boundaries-v2.test.ts",
         "tests/design-system-tokens-v2.test.ts",
         "tests/legacy-pwa-characterization-v2.test.ts",
         "tests/legacy-route-characterization-v2.test.ts",
@@ -712,6 +713,7 @@
       "linksIn": [],
       "tests": [
         "tests/legacy-route-characterization-v2.test.ts",
+        "tests/navigation-security-v2.test.ts",
         "tests/route-protection-v2.test.ts"
       ],
       "notes": []
@@ -1374,6 +1376,18 @@
           "origin": "src",
           "kind": "jsx-to",
           "target": "/bloqueados"
+        },
+        {
+          "source": "src/v2/integration/V2ShellRuntimeRoute.tsx",
+          "origin": "src",
+          "kind": "object-to",
+          "target": "/bloqueados"
+        },
+        {
+          "source": "src/v2/integration/V2ShellRuntimeRoute.tsx",
+          "origin": "src",
+          "kind": "navigate",
+          "target": "/bloqueados"
         }
       ],
       "tests": [],
@@ -1568,7 +1582,12 @@
           "target": "/conta"
         }
       ],
-      "tests": ["tests/design-system-tokens-v2.test.ts"],
+      "tests": [
+        "tests/account-boundaries-v2.test.ts",
+        "tests/account-components-v2.test.tsx",
+        "tests/design-system-tokens-v2.test.ts",
+        "tests/navigation-security-v2.test.ts"
+      ],
       "notes": []
     },
     {
@@ -2510,7 +2529,24 @@
           "kind": "jsx-to",
           "target": "/manual"
         },
-        { "source": "src/routes/conta.tsx", "origin": "src", "kind": "jsx-to", "target": "/manual" }
+        {
+          "source": "src/routes/conta.tsx",
+          "origin": "src",
+          "kind": "jsx-to",
+          "target": "/manual"
+        },
+        {
+          "source": "src/v2/integration/V2ShellRuntimeRoute.tsx",
+          "origin": "src",
+          "kind": "object-to",
+          "target": "/manual"
+        },
+        {
+          "source": "src/v2/integration/V2ShellRuntimeRoute.tsx",
+          "origin": "src",
+          "kind": "navigate",
+          "target": "/manual"
+        }
       ],
       "tests": [],
       "notes": []
@@ -2774,9 +2810,21 @@
           "origin": "src",
           "kind": "jsx-to",
           "target": "/notificacoes"
+        },
+        {
+          "source": "src/v2/integration/V2ShellRuntimeRoute.tsx",
+          "origin": "src",
+          "kind": "object-to",
+          "target": "/notificacoes"
+        },
+        {
+          "source": "src/v2/integration/V2ShellRuntimeRoute.tsx",
+          "origin": "src",
+          "kind": "navigate",
+          "target": "/notificacoes"
         }
       ],
-      "tests": [],
+      "tests": ["tests/navigation-security-v2.test.ts"],
       "notes": []
     },
     {
@@ -3219,6 +3267,7 @@
       "tests": [
         "tests/legacy-pwa-characterization-v2.test.ts",
         "tests/moderation-rls.test.ts",
+        "tests/navigation-security-v2.test.ts",
         "tests/pretendentes-eligibility.test.ts",
         "tests/route-protection-v2.test.ts"
       ],
@@ -3853,6 +3902,18 @@
           "origin": "src",
           "kind": "jsx-to",
           "target": "/suporte"
+        },
+        {
+          "source": "src/v2/integration/V2ShellRuntimeRoute.tsx",
+          "origin": "src",
+          "kind": "object-to",
+          "target": "/suporte"
+        },
+        {
+          "source": "src/v2/integration/V2ShellRuntimeRoute.tsx",
+          "origin": "src",
+          "kind": "navigate",
+          "target": "/suporte"
         }
       ],
       "tests": [],
@@ -3992,7 +4053,24 @@
           "kind": "jsx-to",
           "target": "/termos"
         },
-        { "source": "src/routes/conta.tsx", "origin": "src", "kind": "jsx-to", "target": "/termos" }
+        {
+          "source": "src/routes/conta.tsx",
+          "origin": "src",
+          "kind": "jsx-to",
+          "target": "/termos"
+        },
+        {
+          "source": "src/v2/integration/V2ShellRuntimeRoute.tsx",
+          "origin": "src",
+          "kind": "object-to",
+          "target": "/termos"
+        },
+        {
+          "source": "src/v2/integration/V2ShellRuntimeRoute.tsx",
+          "origin": "src",
+          "kind": "navigate",
+          "target": "/termos"
+        }
       ],
       "tests": ["tests/legacy-route-characterization-v2.test.ts"],
       "notes": []
@@ -4075,6 +4153,36 @@
           "origin": "src",
           "kind": "jsx-to",
           "target": "/v2/$section"
+        },
+        {
+          "source": "src/v2/features/account/showcase/V2AccountShowcase.tsx",
+          "origin": "src",
+          "kind": "object-href",
+          "target": "/v2/comunidade"
+        },
+        {
+          "source": "src/v2/features/account/showcase/V2AccountShowcase.tsx",
+          "origin": "src",
+          "kind": "object-href",
+          "target": "/v2/configuracoes"
+        },
+        {
+          "source": "src/v2/features/account/showcase/V2AccountShowcase.tsx",
+          "origin": "src",
+          "kind": "object-href",
+          "target": "/v2/conversas"
+        },
+        {
+          "source": "src/v2/features/account/showcase/V2AccountShowcase.tsx",
+          "origin": "src",
+          "kind": "object-href",
+          "target": "/v2/inicio"
+        },
+        {
+          "source": "src/v2/features/account/showcase/V2AccountShowcase.tsx",
+          "origin": "src",
+          "kind": "object-href",
+          "target": "/v2/perfil"
         },
         {
           "source": "src/v2/integration/V2RuntimeShell.tsx",
@@ -4173,6 +4281,18 @@
           "source": "src/routes/conta.tsx",
           "origin": "src",
           "kind": "jsx-to",
+          "target": "/verificacao"
+        },
+        {
+          "source": "src/v2/integration/V2ShellRuntimeRoute.tsx",
+          "origin": "src",
+          "kind": "object-to",
+          "target": "/verificacao"
+        },
+        {
+          "source": "src/v2/integration/V2ShellRuntimeRoute.tsx",
+          "origin": "src",
+          "kind": "navigate",
           "target": "/verificacao"
         }
       ],

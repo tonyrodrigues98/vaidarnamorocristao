@@ -139,13 +139,13 @@ do boundary global com guards locais, não de um ciclo literal identificado.
 
 ## Links e rotas quebradas
 
-O scan encontrou **445 referências tipadas**:
+O scan encontrou **465 referências tipadas**:
 
 | Dimensão      | Totais                                                                              |
 | ------------- | ----------------------------------------------------------------------------------- |
-| origem        | `src` 404; testes 8; manifest 14; sitemap 11; public 8; configuração 0; outras 0    |
-| classificação | rotas 392; assets 36; endpoints 4; externas 8; deep links 3; dinâmicas 2            |
-| estado        | resolvidas 391; não resolvida 1; exige investigação 2; não aplicável a resolução 51 |
+| origem        | `src` 424; testes 8; manifest 14; sitemap 11; public 8; configuração 0; outras 0    |
+| classificação | rotas 411; assets 37; endpoints 4; externas 8; deep links 3; dinâmicas 2            |
+| estado        | resolvidas 410; não resolvida 1; exige investigação 2; não aplicável a resolução 52 |
 
 O manifest contribui com `start_url`, `scope`, ícones e atalhos. O sitemap contribui com seus 11
 `<loc>`, normalizados de `https://vaidarnamoro.com` para pathnames internos. O service worker
