@@ -6,7 +6,7 @@ import { V2ShellOverlaySurface } from "./V2ShellOverlaySurface";
 export interface V2MoreMenuProps {
   readonly open: boolean;
   readonly items: readonly V2ShellNavigationItem[];
-  readonly activeId: V2ShellNavigationId;
+  readonly activeId: V2ShellNavigationId | null;
   readonly returnFocusRef: RefObject<HTMLElement | null>;
   readonly onClose: () => void;
   readonly onNavigate?: (item: V2ShellNavigationItem) => void;

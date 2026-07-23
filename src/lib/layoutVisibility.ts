@@ -13,6 +13,7 @@ const FOOTER_HIDDEN_PREFIXES = [
   "/auth",
   "/notificacoes",
   "/meu-pet",
+  "/v2",
 ];
 
 function startsWithPrefix(pathname: string, prefix: string) {

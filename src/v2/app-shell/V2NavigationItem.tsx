@@ -5,7 +5,7 @@ import type { V2ShellNavigationId, V2ShellNavigationItem } from "./types";
 
 export interface V2NavigationItemProps {
   readonly item: V2ShellNavigationItem;
-  readonly activeId: V2ShellNavigationId;
+  readonly activeId: V2ShellNavigationId | null;
   readonly presentation?: "sidebar" | "bottom" | "menu";
   readonly compact?: boolean;
   readonly onNavigate?: (item: V2ShellNavigationItem) => void;

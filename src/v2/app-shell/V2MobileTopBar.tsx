@@ -1,5 +1,5 @@
 import { Bell, Church, Search, X } from "lucide-react";
-import { forwardRef, useId, useState } from "react";
+import { forwardRef, useEffect, useId, useState } from "react";
 import { V2Button, V2IconButton, V2Text, V2TextField, V2VisuallyHidden } from "@/v2/design-system";
 import type { V2ShellUser } from "./types";
 
@@ -30,7 +30,14 @@ export const V2MobileTopBar = forwardRef<HTMLElement, V2MobileTopBarProps>(
   ) => {
     const [searchOpen, setSearchOpen] = useState(false);
     const [query, setQuery] = useState("");
+    const [avatarFailed, setAvatarFailed] = useState(false);
+    const [avatarLoaded, setAvatarLoaded] = useState(false);
     const searchId = useId();
+
+    useEffect(() => {
+      setAvatarFailed(false);
+      setAvatarLoaded(false);
+    }, [user.avatarUrl]);
 
     return (
       <header ref={ref} className="vdn-v2-shell-topbar" data-vdn-v2-shell-topbar="">
@@ -79,16 +86,27 @@ export const V2MobileTopBar = forwardRef<HTMLElement, V2MobileTopBarProps>(
               aria-controls="vdn-v2-profile-menu"
               onClick={(event) => onProfileOpen(event.currentTarget)}
             >
-              {user.avatarUrl ? (
-                <img src={user.avatarUrl} alt="" className="vdn-v2-shell-avatar" />
-              ) : (
-                <span
-                  className="vdn-v2-shell-avatar vdn-v2-shell-avatar--initials"
-                  aria-hidden="true"
-                >
-                  {user.initials}
-                </span>
-              )}
+              <span
+                className="vdn-v2-shell-avatar vdn-v2-shell-avatar--initials"
+                aria-hidden="true"
+              >
+                {user.initials}
+              </span>
+              {user.avatarUrl && !avatarFailed ? (
+                <img
+                  src={user.avatarUrl}
+                  alt=""
+                  className={[
+                    "vdn-v2-shell-avatar",
+                    "vdn-v2-shell-avatar--image",
+                    avatarLoaded ? "is-loaded" : "",
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
+                  onLoad={() => setAvatarLoaded(true)}
+                  onError={() => setAvatarFailed(true)}
+                />
+              ) : null}
               <V2VisuallyHidden>{user.displayName}</V2VisuallyHidden>
             </button>
           </div>

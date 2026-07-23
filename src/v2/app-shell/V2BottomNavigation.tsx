@@ -4,7 +4,7 @@ import { V2NavigationItem } from "./V2NavigationItem";
 
 export interface V2BottomNavigationProps {
   readonly items: readonly V2ShellNavigationItem[];
-  readonly activeId: V2ShellNavigationId;
+  readonly activeId: V2ShellNavigationId | null;
   readonly onNavigate?: (item: V2ShellNavigationItem) => void;
   readonly onCreateOpen: (trigger: HTMLElement) => void;
   readonly createOpen?: boolean;

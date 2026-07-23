@@ -35,6 +35,7 @@ import { Route as QuizBiblicoRouteImport } from './routes/quiz-biblico'
 import { Route as RecadosRouteImport } from './routes/recados'
 import { Route as SobreRouteImport } from './routes/sobre'
 import { Route as TermosRouteImport } from './routes/termos'
+import { Route as V2RouteImport } from './routes/v2'
 import { Route as VerificacaoRouteImport } from './routes/verificacao'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as AdminAurasRouteImport } from './routes/admin/auras'
@@ -72,6 +73,8 @@ import { Route as PropositoMatchIdRouteImport } from './routes/proposito/$matchI
 import { Route as SuporteIndexRouteImport } from './routes/suporte/index'
 import { Route as SuporteIdRouteImport } from './routes/suporte/$id'
 import { Route as SuporteAjudaRouteImport } from './routes/suporte/ajuda'
+import { Route as V2IndexRouteImport } from './routes/v2.index'
+import { Route as V2SectionRouteImport } from './routes/v2.$section'
 import { Route as ApiPublicHooksPushDispatchRouteImport } from './routes/api/public/hooks/push-dispatch'
 
 const IndexRoute = IndexRouteImport.update({
@@ -202,6 +205,11 @@ const SobreRoute = SobreRouteImport.update({
 const TermosRoute = TermosRouteImport.update({
   id: '/termos',
   path: '/termos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const V2Route = V2RouteImport.update({
+  id: '/v2',
+  path: '/v2',
   getParentRoute: () => rootRouteImport,
 } as any)
 const VerificacaoRoute = VerificacaoRouteImport.update({
@@ -389,6 +397,16 @@ const SuporteAjudaRoute = SuporteAjudaRouteImport.update({
   path: '/suporte/ajuda',
   getParentRoute: () => rootRouteImport,
 } as any)
+const V2IndexRoute = V2IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => V2Route,
+} as any)
+const V2SectionRoute = V2SectionRouteImport.update({
+  id: '/$section',
+  path: '/$section',
+  getParentRoute: () => V2Route,
+} as any)
 const ApiPublicHooksPushDispatchRoute =
   ApiPublicHooksPushDispatchRouteImport.update({
     id: '/api/public/hooks/push-dispatch',
@@ -423,6 +441,7 @@ export interface FileRoutesByFullPath {
   '/recados': typeof RecadosRoute
   '/sobre': typeof SobreRoute
   '/termos': typeof TermosRoute
+  '/v2': typeof V2RouteWithChildren
   '/verificacao': typeof VerificacaoRoute
   '/admin/auras': typeof AdminAurasRoute
   '/admin/avatar': typeof AdminAvatarRoute
@@ -452,6 +471,7 @@ export interface FileRoutesByFullPath {
   '/proposito/$matchId': typeof PropositoMatchIdRoute
   '/suporte/$id': typeof SuporteIdRoute
   '/suporte/ajuda': typeof SuporteAjudaRoute
+  '/v2/$section': typeof V2SectionRoute
   '/admin/': typeof AdminIndexRoute
   '/blog/': typeof BlogIndexRoute
   '/conversas/': typeof ConversasIndexRoute
@@ -460,6 +480,7 @@ export interface FileRoutesByFullPath {
   '/presentes/': typeof PresentesIndexRoute
   '/pretendentes/': typeof PretendentesIndexRoute
   '/suporte/': typeof SuporteIndexRoute
+  '/v2/': typeof V2IndexRoute
   '/api/public/hooks/push-dispatch': typeof ApiPublicHooksPushDispatchRoute
 }
 export interface FileRoutesByTo {
@@ -518,6 +539,7 @@ export interface FileRoutesByTo {
   '/proposito/$matchId': typeof PropositoMatchIdRoute
   '/suporte/$id': typeof SuporteIdRoute
   '/suporte/ajuda': typeof SuporteAjudaRoute
+  '/v2/$section': typeof V2SectionRoute
   '/admin': typeof AdminIndexRoute
   '/blog': typeof BlogIndexRoute
   '/conversas': typeof ConversasIndexRoute
@@ -526,6 +548,7 @@ export interface FileRoutesByTo {
   '/presentes': typeof PresentesIndexRoute
   '/pretendentes': typeof PretendentesIndexRoute
   '/suporte': typeof SuporteIndexRoute
+  '/v2': typeof V2IndexRoute
   '/api/public/hooks/push-dispatch': typeof ApiPublicHooksPushDispatchRoute
 }
 export interface FileRoutesById {
@@ -556,6 +579,7 @@ export interface FileRoutesById {
   '/recados': typeof RecadosRoute
   '/sobre': typeof SobreRoute
   '/termos': typeof TermosRoute
+  '/v2': typeof V2RouteWithChildren
   '/verificacao': typeof VerificacaoRoute
   '/admin/auras': typeof AdminAurasRoute
   '/admin/avatar': typeof AdminAvatarRoute
@@ -585,6 +609,7 @@ export interface FileRoutesById {
   '/proposito/$matchId': typeof PropositoMatchIdRoute
   '/suporte/$id': typeof SuporteIdRoute
   '/suporte/ajuda': typeof SuporteAjudaRoute
+  '/v2/$section': typeof V2SectionRoute
   '/admin/': typeof AdminIndexRoute
   '/blog/': typeof BlogIndexRoute
   '/conversas/': typeof ConversasIndexRoute
@@ -593,6 +618,7 @@ export interface FileRoutesById {
   '/presentes/': typeof PresentesIndexRoute
   '/pretendentes/': typeof PretendentesIndexRoute
   '/suporte/': typeof SuporteIndexRoute
+  '/v2/': typeof V2IndexRoute
   '/api/public/hooks/push-dispatch': typeof ApiPublicHooksPushDispatchRoute
 }
 export interface FileRouteTypes {
@@ -624,6 +650,7 @@ export interface FileRouteTypes {
     | '/recados'
     | '/sobre'
     | '/termos'
+    | '/v2'
     | '/verificacao'
     | '/admin/auras'
     | '/admin/avatar'
@@ -653,6 +680,7 @@ export interface FileRouteTypes {
     | '/proposito/$matchId'
     | '/suporte/$id'
     | '/suporte/ajuda'
+    | '/v2/$section'
     | '/admin/'
     | '/blog/'
     | '/conversas/'
@@ -661,6 +689,7 @@ export interface FileRouteTypes {
     | '/presentes/'
     | '/pretendentes/'
     | '/suporte/'
+    | '/v2/'
     | '/api/public/hooks/push-dispatch'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -719,6 +748,7 @@ export interface FileRouteTypes {
     | '/proposito/$matchId'
     | '/suporte/$id'
     | '/suporte/ajuda'
+    | '/v2/$section'
     | '/admin'
     | '/blog'
     | '/conversas'
@@ -727,6 +757,7 @@ export interface FileRouteTypes {
     | '/presentes'
     | '/pretendentes'
     | '/suporte'
+    | '/v2'
     | '/api/public/hooks/push-dispatch'
   id:
     | '__root__'
@@ -756,6 +787,7 @@ export interface FileRouteTypes {
     | '/recados'
     | '/sobre'
     | '/termos'
+    | '/v2'
     | '/verificacao'
     | '/admin/auras'
     | '/admin/avatar'
@@ -785,6 +817,7 @@ export interface FileRouteTypes {
     | '/proposito/$matchId'
     | '/suporte/$id'
     | '/suporte/ajuda'
+    | '/v2/$section'
     | '/admin/'
     | '/blog/'
     | '/conversas/'
@@ -793,6 +826,7 @@ export interface FileRouteTypes {
     | '/presentes/'
     | '/pretendentes/'
     | '/suporte/'
+    | '/v2/'
     | '/api/public/hooks/push-dispatch'
   fileRoutesById: FileRoutesById
 }
@@ -823,6 +857,7 @@ export interface RootRouteChildren {
   RecadosRoute: typeof RecadosRoute
   SobreRoute: typeof SobreRoute
   TermosRoute: typeof TermosRoute
+  V2Route: typeof V2RouteWithChildren
   VerificacaoRoute: typeof VerificacaoRoute
   AdminAurasRoute: typeof AdminAurasRoute
   AdminAvatarRoute: typeof AdminAvatarRoute
@@ -1044,6 +1079,13 @@ declare module '@tanstack/react-router' {
       path: '/termos'
       fullPath: '/termos'
       preLoaderRoute: typeof TermosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/v2': {
+      id: '/v2'
+      path: '/v2'
+      fullPath: '/v2'
+      preLoaderRoute: typeof V2RouteImport
       parentRoute: typeof rootRouteImport
     }
     '/verificacao': {
@@ -1305,6 +1347,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SuporteAjudaRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/v2/': {
+      id: '/v2/'
+      path: '/'
+      fullPath: '/v2/'
+      preLoaderRoute: typeof V2IndexRouteImport
+      parentRoute: typeof V2Route
+    }
+    '/v2/$section': {
+      id: '/v2/$section'
+      path: '/$section'
+      fullPath: '/v2/$section'
+      preLoaderRoute: typeof V2SectionRouteImport
+      parentRoute: typeof V2Route
+    }
     '/api/public/hooks/push-dispatch': {
       id: '/api/public/hooks/push-dispatch'
       path: '/api/public/hooks/push-dispatch'
@@ -1325,6 +1381,18 @@ const AvatarRouteChildren: AvatarRouteChildren = {
 
 const AvatarRouteWithChildren =
   AvatarRoute._addFileChildren(AvatarRouteChildren)
+
+interface V2RouteChildren {
+  V2SectionRoute: typeof V2SectionRoute
+  V2IndexRoute: typeof V2IndexRoute
+}
+
+const V2RouteChildren: V2RouteChildren = {
+  V2SectionRoute: V2SectionRoute,
+  V2IndexRoute: V2IndexRoute,
+}
+
+const V2RouteWithChildren = V2Route._addFileChildren(V2RouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -1353,6 +1421,7 @@ const rootRouteChildren: RootRouteChildren = {
   RecadosRoute: RecadosRoute,
   SobreRoute: SobreRoute,
   TermosRoute: TermosRoute,
+  V2Route: V2RouteWithChildren,
   VerificacaoRoute: VerificacaoRoute,
   AdminAurasRoute: AdminAurasRoute,
   AdminAvatarRoute: AdminAvatarRoute,

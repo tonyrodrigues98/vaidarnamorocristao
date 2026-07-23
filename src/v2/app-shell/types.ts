@@ -28,6 +28,7 @@ export interface V2ShellNavigationItem {
 export interface V2ShellBreadcrumb {
   readonly label: string;
   readonly href?: string;
+  readonly onSelect?: () => void;
 }
 
 export interface V2ShellAction {
@@ -79,7 +80,7 @@ export type V2ShellOverlay = "create" | "notifications" | "profile" | "more" | n
 export interface V2AppShellProps {
   readonly children: ReactNode;
   readonly page: V2ShellPageConfig;
-  readonly activeNavigationId: V2ShellNavigationId;
+  readonly activeNavigationId: V2ShellNavigationId | null;
   readonly navigation: readonly V2ShellNavigationItem[];
   readonly secondaryNavigation?: readonly V2ShellNavigationItem[];
   readonly user: V2ShellUser;
@@ -93,4 +94,6 @@ export interface V2AppShellProps {
   readonly onCreateAction?: (action: V2CreateAction) => void;
   readonly onThemeChange?: (theme: V2ThemeName) => void;
   readonly onSearch?: (query: string) => void;
+  readonly onLogout?: () => void | Promise<void>;
+  readonly logoutLoading?: boolean;
 }
