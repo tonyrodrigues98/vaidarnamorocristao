@@ -188,28 +188,38 @@
       "id": "SEG-010",
       "priority": "P1",
       "title": ".env versionado",
-      "state": "confirmed_in_head",
+      "state": "locally_contained",
       "headEvidence": [
-        ".env é rastreado e contém apenas nomes de configuração pública inspecionados sem valores"
+        ".env rastreado foi removido sem reproduzir valores no artefato",
+        ".env.example contém somente nomes públicos com valores vazios"
       ],
       "typesEvidence": [],
       "migrationEvidence": [],
       "productionGate": "auditoria de histórico e rotação dependem do operador; valores não entram no artefato",
-      "provingTests": ["scanner de bundle e nomes privilegiados na validação do lote"],
-      "localChange": "classificar e retirar arquivo rastreado em mudança própria após confirmar consumidores",
+      "provingTests": [
+        "tests/application-security-v2.test.ts",
+        "scanner de bundle e nomes privilegiados na validação do lote"
+      ],
+      "localChange": "arquivo rastreado removido e placeholder público vazio adicionado",
       "rollbackOrForwardFix": "restaurar somente placeholders documentados; secrets ficam no runtime"
     },
     {
       "id": "SEG-011",
       "priority": "P1",
       "title": "Cabeçalhos defensivos não verificáveis",
-      "state": "production_verification_required",
-      "headEvidence": ["não há política CSP/headers completa comprovável no repositório"],
+      "state": "locally_mitigated",
+      "headEvidence": [
+        "src/lib/securityHeaders.server.ts define CSP e headers no request middleware canônico",
+        "CSP mantém unsafe-inline apenas pela compatibilidade legada documentada"
+      ],
       "typesEvidence": [],
       "migrationEvidence": [],
       "productionGate": "capturar headers efetivos do domínio publicado sem alterar deploy",
-      "provingTests": ["teste local de configuração e smoke HTTP futuro"],
-      "localChange": "definir CSP e headers compatíveis em PR operacional isolado",
+      "provingTests": [
+        "tests/application-security-v2.test.ts",
+        "smoke HTTP publicado continua pendente"
+      ],
+      "localChange": "headers locais implementados; enforcement publicado continua não verificado",
       "rollbackOrForwardFix": "report-only antes de enforcement e rollback de diretiva individual"
     },
     {
@@ -231,28 +241,32 @@
       "id": "SEG-013",
       "priority": "P1",
       "title": "HTML do blog inserido diretamente",
-      "state": "confirmed_in_head",
-      "headEvidence": ["src/routes/blog.$slug.tsx usa dangerouslySetInnerHTML para post.body"],
+      "state": "locally_contained",
+      "headEvidence": [
+        "src/routes/blog.$slug.tsx sanitiza post.body antes do sink",
+        "src/lib/trustedContent.ts usa allowlist SSR-safe de tags, atributos e URLs"
+      ],
       "typesEvidence": [],
       "migrationEvidence": [],
       "productionGate": "confirmar origem e sanitização anterior do conteúdo publicado",
-      "provingTests": ["fixtures XSS e sanitização ainda pendentes"],
-      "localChange": "sanitizar em fronteira confiável com allowlist e preservar conteúdo compatível",
+      "provingTests": ["tests/application-security-v2.test.ts com fixtures XSS"],
+      "localChange": "allowlist aplicada preservando o vocabulário HTML atual do blog",
       "rollbackOrForwardFix": "modo de visualização textual seguro e forward-fix de regras"
     },
     {
       "id": "SEG-014",
       "priority": "P1",
       "title": "URLs e iframes administráveis",
-      "state": "confirmed_in_head",
+      "state": "locally_contained",
       "headEvidence": [
-        "src/routes/admin/verificacoes.tsx renderiza iframe a partir de URL de dados"
+        "preview administrativo exige origem exata, HTTPS, sandbox e no-referrer",
+        "URLs TikTok persistidas são normalizadas novamente antes de renderizar"
       ],
       "typesEvidence": [],
       "migrationEvidence": [],
       "productionGate": "inventariar origens legítimas publicadas antes de restringir allowlist",
-      "provingTests": ["classificador same-origin e allowlist de mídia ainda pendente"],
-      "localChange": "normalizar protocolos, sandbox e allowlist por capacidade",
+      "provingTests": ["tests/application-security-v2.test.ts"],
+      "localChange": "normalização de protocolos e allowlists por mídia/perfil implementada",
       "rollbackOrForwardFix": "desabilitar preview e preservar link seguro como fallback"
     },
     {
@@ -326,7 +340,7 @@
       "id": "SEG-019",
       "priority": "P1",
       "title": "Fila push sem claim atômico",
-      "state": "confirmed_in_head",
+      "state": "locally_mitigated",
       "headEvidence": [
         "src/lib/pushDispatchBatch.server.ts usa o adapter server-only de claim e conclusão",
         "src/lib/pushDispatchBatchCore.server.ts preserva o token do lease até a conclusão",

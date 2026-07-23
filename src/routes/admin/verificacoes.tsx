@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { ShieldCheck, ShieldAlert, Check, X, RefreshCw, Eye, ArrowLeft } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { normalizeTrustedUrl } from "@/lib/trustedContent";
 
 export const Route = createFileRoute("/admin/verificacoes")({ component: AdminVerifs });
 
@@ -27,6 +28,21 @@ type Req = {
   reviewed_at: string | null;
   profile?: { full_name: string | null; photo_url: string | null } | null;
 };
+
+function verificationMediaOrigins() {
+  const candidates = [
+    typeof window === "undefined" ? null : window.location.origin,
+    import.meta.env.VITE_SUPABASE_URL as string | undefined,
+  ];
+  return candidates.flatMap((candidate) => {
+    if (!candidate) return [];
+    try {
+      return [new URL(candidate).origin];
+    } catch {
+      return [];
+    }
+  });
+}
 
 function AdminVerifs() {
   const { user, isAdmin, role, loading } = useAuth();
@@ -113,13 +129,23 @@ function AdminVerifs() {
     return (
       <div className="min-h-screen">
         <Header />
-      <AdminTopNav compact />
+        <AdminTopNav compact />
         <main className="mx-auto max-w-md px-4 py-20 text-center">
           <ShieldAlert className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
           <h1 className="text-2xl">Acesso restrito</h1>
         </main>
       </div>
     );
+
+  const safePreviewUrl = previewing
+    ? normalizeTrustedUrl(previewing.url, {
+        allowRelative: false,
+        allowedOrigins: verificationMediaOrigins(),
+      })
+    : null;
+  const previewIsPdf = safePreviewUrl
+    ? new URL(safePreviewUrl).pathname.toLowerCase().endsWith(".pdf")
+    : false;
 
   return (
     <div className="min-h-screen">
@@ -250,14 +276,27 @@ function AdminVerifs() {
             <DialogTitle>{previewing?.title}</DialogTitle>
           </DialogHeader>
           {previewing &&
-            (previewing.url.toLowerCase().includes(".pdf") ? (
-              <iframe src={previewing.url} className="h-[70vh] w-full rounded-lg" />
+            (safePreviewUrl ? (
+              previewIsPdf ? (
+                <iframe
+                  src={safePreviewUrl}
+                  title={previewing.title}
+                  sandbox=""
+                  referrerPolicy="no-referrer"
+                  className="h-[70vh] w-full rounded-lg"
+                />
+              ) : (
+                <img
+                  src={safePreviewUrl}
+                  alt={previewing.title}
+                  referrerPolicy="no-referrer"
+                  className="max-h-[70vh] w-full rounded-lg object-contain"
+                />
+              )
             ) : (
-              <img
-                src={previewing.url}
-                alt={previewing.title}
-                className="max-h-[70vh] w-full rounded-lg object-contain"
-              />
+              <p role="alert" className="rounded-lg border border-destructive/30 p-4 text-sm">
+                A origem desta mídia não está autorizada para visualização.
+              </p>
             ))}
         </DialogContent>
       </Dialog>
