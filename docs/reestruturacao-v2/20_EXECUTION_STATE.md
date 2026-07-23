@@ -67,11 +67,16 @@
   `FOR UPDATE SKIP LOCKED`, lease por token, retries exponenciais, TTL e dead
   letter. O adapter deixou de registrar endpoint, resposta do provedor ou stack.
 - Rate limit distribuído de fotos continua em lote posterior da V2-008.
+- `.env` rastreado foi retirado; o exemplo contém somente placeholders públicos.
+- HTML do blog passa por allowlist SSR-safe; previews administrativos exigem
+  origem exata, HTTPS, sandbox e política de referrer.
+- Headers defensivos e CSP compatível com o legado foram registrados no request
+  middleware. O domínio publicado continua sem verificação.
 
 ## Evidência de validação
 
 - Instalação congelada e TypeScript: aprovados.
-- Suíte segura: 31 arquivos e 217 testes aprovados.
+- Suíte segura: 32 arquivos e 235 testes aprovados.
 - ESLint e Prettier focados: aprovados.
 - Build TanStack/Vite cliente e SSR: aprovado; warnings de dependências são
   baseline.
