@@ -7,7 +7,10 @@
 - PR #7 permanece Draft em `rebuild/v2-006-legacy-audit`.
 - O conteúdo auditado do PR #7 foi reaplicado sem alteração semântica sobre a
   documentação adicionada à `main`; o patch-id permaneceu idêntico.
-- V2-007 usa a branch empilhada `rebuild/v2-007-account-foundation`.
+- V2-007 foi publicada no Draft PR #8, branch
+  `rebuild/v2-007-account-foundation`, commit
+  `249b4c8aca9ea8f82a3e6e68f55894c780b0e182`.
+- V2-008 usa a branch empilhada `rebuild/v2-008-security-baseline`.
 
 ## Concluído
 
@@ -45,10 +48,24 @@
 - Não há merge, deploy, migration, secret, Vault, Job ou mutação externa
   autorizada.
 
+## V2-008 — checkpoint de segurança
+
+- Manifest tipado cobre `SEG-001` a `SEG-020` e diferencia HEAD, tipos,
+  migrations e verdade publicada.
+- Snapshot publicado não foi capturado; schema e runbook read-only estão
+  preparados sem PII ou segredos.
+- Moderação de foto valida corpo, base64, MIME e magic bytes, limita seis
+  requisições por minuto por usuário/instância e aborta a IA em 15 segundos.
+- Falha técnica agora bloqueia o upload; o caminho `soft:true` foi removido.
+- Logs de moderação são categóricos e não incluem identidade, imagem, token,
+  resposta do provedor ou exceção.
+- Rate limit distribuído, RPCs econômicas/progresso e claim atômico do push
+  continuam nos próximos lotes empilhados da V2-008.
+
 ## Evidência de validação
 
 - Instalação congelada e TypeScript: aprovados.
-- Suíte segura: 27 arquivos e 188 testes aprovados.
+- Suíte segura: 29 arquivos e 198 testes aprovados.
 - ESLint e Prettier focados: aprovados.
 - Build TanStack/Vite cliente e SSR: aprovado; warnings de dependências são
   baseline.
@@ -61,7 +78,8 @@
 
 ## Próximo gate
 
-- Publicar o Draft PR empilhado da V2-007 sem merge.
-- Iniciar V2-008 somente sobre a branch publicada e manter qualquer conclusão
-  sobre ACL/RLS publicado como não verificada até existir snapshot autenticado
-  e ambiente Supabase descartável.
+- Publicar o primeiro Draft PR empilhado da V2-008 sem merge.
+- Preparar capabilities e migrations pequenas para economia/progresso sem
+  aplicá-las.
+- Manter qualquer conclusão sobre ACL/RLS publicado como não verificada até
+  existir snapshot autenticado e ambiente Supabase descartável.

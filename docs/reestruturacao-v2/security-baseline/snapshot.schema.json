@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vaidarnamoro.com/schemas/security-snapshot-v1.json",
+  "title": "VDN Supabase security metadata snapshot",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "source",
+    "capturedAt",
+    "projectReferenceHash",
+    "relations",
+    "policies",
+    "functions",
+    "defaultPrivileges",
+    "triggers",
+    "realtime",
+    "buckets"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "source": { "const": "authenticated-read-only-inventory" },
+    "capturedAt": { "type": "string", "format": "date-time" },
+    "projectReferenceHash": {
+      "type": "string",
+      "description": "SHA-256 do identificador do projeto, nunca a URL ou chave",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "relations": { "$ref": "#/$defs/metadataRows" },
+    "policies": { "$ref": "#/$defs/metadataRows" },
+    "functions": { "$ref": "#/$defs/metadataRows" },
+    "defaultPrivileges": { "$ref": "#/$defs/metadataRows" },
+    "triggers": { "$ref": "#/$defs/metadataRows" },
+    "realtime": { "$ref": "#/$defs/metadataRows" },
+    "buckets": { "$ref": "#/$defs/metadataRows" }
+  },
+  "$defs": {
+    "metadataRows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "description": "Somente metadados de schema/ACL; sem linhas de negócio, PII ou valores de segredo"
+      }
+    }
+  }
+}

@@ -1,6 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import {
+  failClosedModerationBody,
+  fetchWithTimeout,
+  PerSubjectFixedWindowRateLimiter,
+  PHOTO_MODERATION_LIMITS,
+  validatePhotoModerationInput,
+} from "@/lib/photoModerationPolicy.server";
 
 type VerifyResult = {
   is_human: boolean;
@@ -9,6 +16,39 @@ type VerifyResult = {
   confidence: number;
   reason: string;
 };
+
+const moderationRateLimiter = new PerSubjectFixedWindowRateLimiter(
+  PHOTO_MODERATION_LIMITS.rateLimitMaxRequests,
+  PHOTO_MODERATION_LIMITS.rateLimitWindowMs,
+);
+
+function jsonResponse(
+  body: Record<string, unknown>,
+  status = 200,
+  extraHeaders?: Record<string, string>,
+) {
+  return Response.json(body, {
+    status,
+    headers: {
+      "Cache-Control": "no-store",
+      ...extraHeaders,
+    },
+  });
+}
+
+function logModerationEvent(
+  level: "info" | "warn" | "error",
+  event: string,
+  fields: Record<string, string | number> = {},
+) {
+  console[level](
+    JSON.stringify({
+      component: "photo_moderation",
+      event,
+      ...fields,
+    }),
+  );
+}
 
 const SYSTEM_PROMPT_MAIN = `Você analisa fotos de perfil para um app de relacionamento cristão.
 Devolva SOMENTE JSON com este formato exato:
@@ -38,9 +78,21 @@ export const Route = createFileRoute("/api/verify-photo")({
     handlers: {
       POST: async ({ request }) => {
         try {
+          const contentType = request.headers.get("content-type")?.split(";", 1)[0]?.trim();
+          if (contentType !== "application/json") {
+            return jsonResponse({ error: "unsupported_media_type" }, 415);
+          }
+          const contentLength = Number(request.headers.get("content-length") ?? 0);
+          if (
+            Number.isFinite(contentLength) &&
+            contentLength > PHOTO_MODERATION_LIMITS.maxRequestBytes
+          ) {
+            return jsonResponse({ error: "request_too_large" }, 413);
+          }
+
           const auth = request.headers.get("authorization") ?? "";
           if (!auth.toLowerCase().startsWith("bearer ")) {
-            return new Response(JSON.stringify({ error: "unauthorized" }), { status: 401 });
+            return jsonResponse({ error: "unauthorized" }, 401);
           }
           const token = auth.slice(7).trim();
 
@@ -48,7 +100,7 @@ export const Route = createFileRoute("/api/verify-photo")({
           const supabaseKey =
             process.env.SUPABASE_PUBLISHABLE_KEY ?? process.env.VITE_SUPABASE_PUBLISHABLE_KEY;
           if (!supabaseUrl || !supabaseKey) {
-            return new Response(JSON.stringify({ error: "server_misconfig" }), { status: 500 });
+            return jsonResponse({ error: "service_unavailable" }, 503);
           }
           const sb = createClient(supabaseUrl, supabaseKey, {
             global: { headers: { Authorization: `Bearer ${token}` } },
@@ -56,23 +108,23 @@ export const Route = createFileRoute("/api/verify-photo")({
           });
           const { data: userRes, error: userErr } = await sb.auth.getUser();
           if (userErr || !userRes.user) {
-            return new Response(JSON.stringify({ error: "unauthorized" }), { status: 401 });
+            return jsonResponse({ error: "unauthorized" }, 401);
+          }
+
+          const rateLimit = moderationRateLimiter.check(userRes.user.id);
+          if (!rateLimit.allowed) {
+            logModerationEvent("warn", "request_rate_limited", { status: 429 });
+            return jsonResponse(failClosedModerationBody("rate_limited"), 429, {
+              "Retry-After": String(rateLimit.retryAfterSeconds),
+            });
           }
 
           const body = await request.json().catch(() => null);
-          const imageBase64: string | undefined = body?.imageBase64;
-          const ALLOWED_MIMES = new Set([
-            "image/jpeg",
-            "image/png",
-            "image/webp",
-            "image/gif",
-            "image/heic",
-            "image/heif",
-          ]);
-          const rawMime = typeof body?.mimeType === "string" ? body.mimeType.toLowerCase() : "";
-          const mimeType: string = ALLOWED_MIMES.has(rawMime) ? rawMime : "image/jpeg";
-          const scope: "main" | "extra" = body?.scope === "extra" ? "extra" : "main";
-          const photoUrl: string | null = typeof body?.photoUrl === "string" ? body.photoUrl : null;
+          const input = validatePhotoModerationInput(body);
+          if (!input.ok) {
+            return jsonResponse({ error: input.error }, input.status);
+          }
+          const { imageBase64, mimeType, scope, photoUrl } = input;
           const dbScope = scope === "main" ? "avatar" : "extra";
 
           // Load admin-configured thresholds (singleton row).
@@ -109,7 +161,7 @@ export const Route = createFileRoute("/api/verify-photo")({
                 storage_path: extra?.storage_path ?? null,
               });
             } catch (err) {
-              console.error("photo log insert failed", err);
+              logModerationEvent("error", "audit_log_failed");
             }
           };
 
@@ -126,79 +178,66 @@ export const Route = createFileRoute("/api/verify-photo")({
                 .from("photo-moderation-rejects")
                 .upload(path, bytes, { contentType: mimeType, upsert: false });
               if (error) {
-                console.error("reject upload failed", error);
+                logModerationEvent("error", "evidence_upload_failed");
                 return null;
               }
               return { bucket: "photo-moderation-rejects", path };
             } catch (err) {
-              console.error("reject upload exception", err);
+              logModerationEvent("error", "evidence_upload_failed");
               return null;
             }
           };
 
-          if (!imageBase64 || typeof imageBase64 !== "string" || imageBase64.length < 100) {
-            return new Response(JSON.stringify({ error: "invalid_input" }), { status: 400 });
-          }
-          if (imageBase64.length > 8_000_000) {
-            return new Response(JSON.stringify({ error: "image_too_large" }), { status: 413 });
-          }
-
           const apiKey = process.env.LOVABLE_API_KEY;
           if (!apiKey) {
-            return new Response(JSON.stringify({ soft: true, error: "ai_unavailable" }), {
-              status: 200,
-              headers: { "Content-Type": "application/json" },
-            });
+            await logDecision("soft_fail", null, "ai_unavailable", {});
+            return jsonResponse(failClosedModerationBody("ai_unavailable"), 503);
           }
 
           const dataUrl = `data:${mimeType};base64,${imageBase64}`;
 
-          const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${apiKey}`,
-              "Content-Type": "application/json",
+          const aiResp = await fetchWithTimeout(
+            "https://ai.gateway.lovable.dev/v1/chat/completions",
+            {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${apiKey}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                model: "google/gemini-2.5-flash",
+                messages: [
+                  {
+                    role: "system",
+                    content: scope === "extra" ? SYSTEM_PROMPT_EXTRA : SYSTEM_PROMPT_MAIN,
+                  },
+                  {
+                    role: "user",
+                    content: [
+                      {
+                        type: "text",
+                        text:
+                          scope === "extra"
+                            ? "Analise esta foto adicional."
+                            : "Analise esta foto de perfil.",
+                      },
+                      { type: "image_url", image_url: { url: dataUrl } },
+                    ],
+                  },
+                ],
+                response_format: { type: "json_object" },
+              }),
             },
-            body: JSON.stringify({
-              model: "google/gemini-2.5-flash",
-              messages: [
-                {
-                  role: "system",
-                  content: scope === "extra" ? SYSTEM_PROMPT_EXTRA : SYSTEM_PROMPT_MAIN,
-                },
-                {
-                  role: "user",
-                  content: [
-                    {
-                      type: "text",
-                      text:
-                        scope === "extra"
-                          ? "Analise esta foto adicional."
-                          : "Analise esta foto de perfil.",
-                    },
-                    { type: "image_url", image_url: { url: dataUrl } },
-                  ],
-                },
-              ],
-              response_format: { type: "json_object" },
-            }),
-          });
+          );
 
           if (aiResp.status === 429 || aiResp.status === 402) {
             await logDecision("soft_fail", null, "ai_rate_limited", { status: aiResp.status });
-            return new Response(JSON.stringify({ soft: true, error: "ai_rate_limited" }), {
-              status: 200,
-              headers: { "Content-Type": "application/json" },
-            });
+            return jsonResponse(failClosedModerationBody("ai_rate_limited"), 503);
           }
           if (!aiResp.ok) {
-            const txt = await aiResp.text();
-            console.error("AI gateway error", aiResp.status, txt);
+            logModerationEvent("error", "provider_error", { status: aiResp.status });
             await logDecision("soft_fail", null, "ai_error", { status: aiResp.status });
-            return new Response(JSON.stringify({ soft: true, error: "ai_error" }), {
-              status: 200,
-              headers: { "Content-Type": "application/json" },
-            });
+            return jsonResponse(failClosedModerationBody("ai_error"), 502);
           }
 
           const aiJson = await aiResp.json();
@@ -210,11 +249,8 @@ export const Route = createFileRoute("/api/verify-photo")({
             parsed = null;
           }
           if (!parsed || typeof parsed !== "object") {
-            await logDecision("soft_fail", null, "ai_parse_error", { raw });
-            return new Response(JSON.stringify({ soft: true, error: "ai_parse_error" }), {
-              status: 200,
-              headers: { "Content-Type": "application/json" },
-            });
+            await logDecision("soft_fail", null, "ai_parse_error", {});
+            return jsonResponse(failClosedModerationBody("ai_parse_error"), 502);
           }
 
           if (scope === "extra") {
@@ -308,12 +344,15 @@ export const Route = createFileRoute("/api/verify-photo")({
             status: 200,
             headers: { "Content-Type": "application/json" },
           });
-        } catch (e) {
-          console.error("verify-photo error", e);
-          return new Response(JSON.stringify({ soft: true, error: "exception" }), {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
+        } catch (error) {
+          const timedOut = error instanceof Error && error.name === "AbortError";
+          logModerationEvent("error", timedOut ? "provider_timeout" : "request_failed", {
+            status: timedOut ? 504 : 500,
           });
+          return jsonResponse(
+            failClosedModerationBody(timedOut ? "ai_timeout" : "internal_error"),
+            timedOut ? 504 : 500,
+          );
         }
       },
     },

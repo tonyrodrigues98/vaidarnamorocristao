@@ -97,9 +97,7 @@ export function ProfilePhotosManager({ userId }: { userId: string }) {
     let aiConfidence: number | null = null;
     let needsReview = false;
     let aiReason = "";
-    if ("soft" in verdict && verdict.soft) {
-      // ok
-    } else if (verdict.approved) {
+    if (verdict.approved) {
       aiVerified = true;
       aiConfidence = verdict.confidence;
     } else if (verdict.needsReview) {
