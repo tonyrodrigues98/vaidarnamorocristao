@@ -12,10 +12,13 @@ O manifest cobre `SEG-001` a `SEG-020`, define P0–P4 e não chama uma hipótes
 histórica de vulnerabilidade publicada. O contrato tipado e seu validador ficam em
 `src/v2/platform/trust-security/security-evidence.ts`.
 
-## Resultado imediato
+## Resultado consolidado local
 
 - `SEG-001`: contenção HTTP do push permanece comprovada por teste; atomicidade
-  continua em `SEG-019`.
+  foi implementada localmente em `SEG-019`.
+- `SEG-002–006`: a migration local de capabilities revoga as cinco interfaces
+  genéricas e cria uma capability estreita e idempotente de XP de cuidado. A
+  migration não foi aplicada; ACLs publicadas continuam como gate.
 - `SEG-007`: limite de seis verificações por minuto por usuário e por instância,
   limite de corpo, MIME permitido e magic bytes foram adicionados.
 - `SEG-008`: timeout, indisponibilidade, limite, parse e exceção da IA passaram a
@@ -23,6 +26,16 @@ histórica de vulnerabilidade publicada. O contrato tipado e seu validador ficam
   moderação.
 - `SEG-017`: logs da moderação são categóricos, sem usuário, imagem, resposta do
   provedor, token ou exceção.
+- `SEG-010`, `SEG-013` e `SEG-014`: `.env` deixou de ser rastreado, HTML do blog
+  passa por allowlist e mídia/URLs administráveis têm origem e protocolo
+  explícitos.
+- `SEG-011`: headers defensivos, CSP intermediária e CSRF de server functions
+  estão registrados localmente; o domínio publicado não foi verificado.
+- `SEG-018`: o reparo administrativo fecha por flag, exige confirmação, oferece
+  dry-run, valida JPEG/path e possui migration append-only de auditoria não
+  aplicada.
+- `SEG-019`: claim transacional, lease, retry, TTL e dead letter foram preparados
+  em migration aditiva não aplicada.
 - RPCs, grants, RLS, Realtime, buckets e headers publicados continuam marcados
   `production_verification_required`.
 
@@ -49,22 +62,22 @@ contrato de dados e rollout de Storage próprios; não foi fingido neste lote.
 
 ## Matriz resumida
 
-| Achado      | Prioridade | Estado local                           | Gate publicado                             |
-| ----------- | ---------: | -------------------------------------- | ------------------------------------------ |
-| SEG-001     |         P0 | contido                                | revalidar scheduler/HTTP                   |
-| SEG-002–006 |         P0 | evidência histórica/tipos              | ACL, owner, definição e default privileges |
-| SEG-007     |         P1 | mitigado por instância                 | rate limit distribuído                     |
-| SEG-008     |         P1 | contido fail-closed                    | smoke isolado                              |
-| SEG-009     |         P1 | uso público no código/histórico        | bucket e URLs persistidas                  |
-| SEG-010     |         P1 | `.env` rastreado                       | histórico/rotação pelo operador            |
-| SEG-011     |         P1 | headers não comprovados                | resposta do domínio publicado              |
-| SEG-012     |         P2 | persistência existente isolada pela V2 | nenhum                                     |
-| SEG-013–014 |         P1 | sinks confirmados no HEAD              | origem dos conteúdos/URLs                  |
-| SEG-015–016 |         P1 | histórico insuficiente                 | policies e Realtime publicados             |
-| SEG-017     |         P3 | logs locais reduzidos                  | retenção e sinks                           |
-| SEG-018     |         P2 | autorização server-side existente      | limites e auditoria                        |
-| SEG-019     |         P1 | não atômico no HEAD                    | schema e Job publicados                    |
-| SEG-020     |         P2 | três locks confirmados                 | nenhum                                     |
+| Achado      | Prioridade | Estado local                            | Gate publicado                             |
+| ----------- | ---------: | --------------------------------------- | ------------------------------------------ |
+| SEG-001     |         P0 | contido                                 | revalidar scheduler/HTTP                   |
+| SEG-002–006 |         P0 | migration/capability local preparada    | ACL, owner, definição e default privileges |
+| SEG-007     |         P1 | mitigado por instância                  | rate limit distribuído                     |
+| SEG-008     |         P1 | contido fail-closed                     | smoke isolado                              |
+| SEG-009     |         P1 | uso público no código/histórico         | bucket e URLs persistidas                  |
+| SEG-010     |         P1 | `.env` retirado; exemplo vazio          | histórico/rotação pelo operador            |
+| SEG-011     |         P1 | middleware local e CSP intermediária    | resposta do domínio publicado              |
+| SEG-012     |         P2 | persistência existente isolada pela V2  | nenhum                                     |
+| SEG-013–014 |         P1 | sinks locais contidos                   | origem dos conteúdos/URLs                  |
+| SEG-015–016 |         P1 | histórico insuficiente                  | policies e Realtime publicados             |
+| SEG-017     |         P3 | logs locais reduzidos                   | retenção e sinks                           |
+| SEG-018     |         P2 | endpoint limitado e auditoria preparada | migration/edge/flag                        |
+| SEG-019     |         P1 | claim atômico local preparado           | schema, Job e concorrência publicados      |
+| SEG-020     |         P2 | três locks confirmados                  | decisão de remoção isolada                 |
 
 Detalhes, caminhos, testes e estratégia de correção estão no JSON, que é a fonte
 reproduzível desta matriz.
@@ -107,13 +120,18 @@ Se qualquer query exigir escrita, extensão, função auxiliar, bypass de RLS ou
 
 ## Testes
 
-`tests/photo-moderation-security-v2.test.ts` cobre magic bytes, MIME, tamanho,
-rate limit por identidade, reset da janela, timeout, corpo fail-closed e ausência
-do caminho `soft:true`. `tests/security-evidence-v2.test.ts` exige exatamente os
-20 achados, metadados P0–P4, rollback/forward-fix e gate explícito.
+Além do contrato inicial de moderação e evidências:
 
-Testes mutáveis de RPC/RLS/Realtime/Storage serão preparados nas próximas
-mudanças do V2-008 e só executados contra Supabase descartável autorizado.
+- `trusted-capabilities-v2.test.ts` cobre a migration e o adapter estreito;
+- `trusted-capabilities-rls.test.ts` está preparado para banco descartável;
+- `push-dispatch-atomic-v2.test.ts` cobre a máquina de estado da fila;
+- `push-dispatch-atomic-rls.test.ts` está preparado para concorrência descartável;
+- `application-security-v2.test.ts` cobre HTML, URLs, headers, CSRF e ambiente;
+- `photo-repair-security-v2.test.ts` cobre o endpoint administrativo;
+- `security-closure-v2.test.ts` impede P0/P1 sem estado e gate explícitos.
+
+Suítes mutáveis ou que exigem metadados publicados continuam proibidas contra
+produção.
 
 ## Rollback e forward-fix
 
@@ -121,14 +139,15 @@ mudanças do V2-008 e só executados contra Supabase descartável autorizado.
   `soft:true` não é rollback aceitável.
 - Rate limit: ajustar o limite por revisão; o forward-fix é contador distribuído.
 - Evidências: corrigir o manifest com nova prova e manter histórico no Git.
-- Banco: nenhuma migration deste lote foi aplicada ou criada.
+- Banco: três migrations locais, aditivas ou de grants, foram criadas e nenhuma
+  foi aplicada.
 
 ## Limitações e próximos gates
 
 - não há snapshot autenticado publicado;
-- não há ambiente Supabase descartável;
+- não há ambiente Supabase descartável autorizado;
 - rate limit não é distribuído;
-- `SEG-019` ainda exige claim atômico;
-- `SEG-002` a `SEG-006` exigem capabilities, migrations e matriz RPC;
+- `SEG-019` exige aplicação/teste concorrente e reconciliação com o Job;
+- `SEG-002` a `SEG-006` exigem snapshot, aplicação e matriz RPC descartável;
 - privacidade de `profile-photos` não pode mudar antes do inventário de URLs e
   rollout expandir → preencher → comparar → alternar → estabilizar → contrair.
