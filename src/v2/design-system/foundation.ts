@@ -1,13 +1,21 @@
+import { V2_TOKENS } from "./tokens";
+
 /**
- * Concrete acceptance constraints for V2 UI work. These values document the
- * shared baseline without changing the active legacy theme.
+ * Stable acceptance constraints shared by V2 UI work. Values are derived from
+ * the token source and do not mutate the active legacy theme.
  */
 export const V2_DESIGN_FOUNDATION = Object.freeze({
   fontFamily: "Poppins",
+  fontFamilyStack: V2_TOKENS.base.typography.fontFamily,
   iconLibrary: "lucide-react",
+  iconStrokeWidth: Number(V2_TOKENS.base.icon.strokeWidth),
   surfaceBackground: "off-white",
-  mobileInputMinFontSizePx: 16,
-  minimumTouchTargetPx: 44,
+  canvasLight: V2_TOKENS.themes.light.colors.canvas,
+  mobileInputMinFontSizePx: Number.parseInt(V2_TOKENS.base.control.inputFontSize, 10),
+  minimumTouchTargetPx: Number.parseInt(V2_TOKENS.base.control.minimumTouchTarget, 10),
+  minimumControlHeightPx: Number.parseInt(V2_TOKENS.base.control.minimumHeight, 10),
   respectsReducedMotion: true,
   respectsSafeAreas: true,
+  scopedSelector: "[data-vdn-v2]",
+  defaultTheme: "light",
 });
