@@ -14,6 +14,8 @@ export interface V2ProfileMenuProps {
   readonly onClose: () => void;
   readonly onNavigate?: (item: V2ShellNavigationItem) => void;
   readonly onThemeChange?: (theme: V2ThemeName) => void;
+  readonly onLogout?: () => void | Promise<void>;
+  readonly logoutLoading?: boolean;
 }
 
 export function V2ProfileMenu({
@@ -26,6 +28,8 @@ export function V2ProfileMenu({
   onClose,
   onNavigate,
   onThemeChange,
+  onLogout,
+  logoutLoading = false,
 }: V2ProfileMenuProps) {
   const nextTheme = theme === "light" ? "dark" : "light";
   const ThemeIcon = nextTheme === "dark" ? Moon : Sun;
@@ -76,9 +80,18 @@ export function V2ProfileMenu({
           <ThemeIcon aria-hidden="true" />
           <span>Usar tema {nextTheme === "dark" ? "escuro" : "claro"}</span>
         </button>
-        <button type="button" disabled title="Ação desativada no showcase">
+        <button
+          type="button"
+          disabled={!onLogout || logoutLoading}
+          aria-busy={logoutLoading || undefined}
+          title={onLogout ? undefined : "Ação desativada no showcase"}
+          onClick={() => {
+            if (!onLogout) return;
+            void onLogout();
+          }}
+        >
           <LogOut aria-hidden="true" />
-          <span>Sair</span>
+          <span>{logoutLoading ? "Saindo..." : "Sair"}</span>
         </button>
       </div>
     </V2ShellOverlaySurface>

@@ -29,7 +29,7 @@ export const V2_SECONDARY_NAVIGATION = Object.freeze([
 ] satisfies readonly V2ShellNavigationItem[]);
 
 export function isV2NavigationItemActive(
-  activeId: V2ShellNavigationId,
+  activeId: V2ShellNavigationId | null,
   item: Pick<V2ShellNavigationItem, "id">,
 ): boolean {
   return activeId === item.id;

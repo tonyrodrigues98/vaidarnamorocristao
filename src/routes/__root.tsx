@@ -5,6 +5,7 @@ import {
   HeadContent,
   Scripts,
   useLocation,
+  Navigate,
 } from "@tanstack/react-router";
 import { QueryClientProvider } from "@tanstack/react-query";
 import type { AppRouterContext } from "@/v2/app/router-context";
@@ -23,6 +24,8 @@ import { MobileRouteTransition } from "@/components/mobile/MobileRouteTransition
 import { isChatRoute, shouldShowFooter } from "@/lib/layoutVisibility";
 import { RouteProtectionBoundary } from "@/v2/app/routing/RouteProtectionBoundary";
 import { shouldMountPrivateProviders } from "@/v2/app/routing/route-access";
+import { v2FeatureFlags } from "@/v2/platform/feature-flags";
+import { isV2RuntimePath, V2RuntimeState } from "@/v2/integration";
 
 import appCss from "../styles.css?url";
 import coinPng from "@/assets/coin.webp";
@@ -194,6 +197,7 @@ function RootComponent() {
   const showFooter = shouldShowFooter(location.pathname);
   const chatRoute = isChatRoute(location.pathname);
   const isHome = location.pathname === "/";
+  const isV2Route = isV2RuntimePath(location.pathname);
 
   useEffect(() => {
     registerAppServiceWorker();
@@ -215,10 +219,8 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <AuthProvider>
-          <RouteProtectionBoundary>
+          <V2AwareRouteBoundary isV2Route={isV2Route}>
             <AuthenticatedProviderBoundary>
-              <NetworkStatusBanner />
-              <InstallPromptBanner />
               <MobileAppShell>
                 {isHome ? (
                   <Outlet />
@@ -255,11 +257,41 @@ function RootComponent() {
                 )}
               </MobileAppShell>
             </AuthenticatedProviderBoundary>
-          </RouteProtectionBoundary>
+          </V2AwareRouteBoundary>
           <Toaster richColors position="top-right" />
         </AuthProvider>
       </ThemeProvider>
     </QueryClientProvider>
+  );
+}
+
+function V2AwareRouteBoundary({
+  children,
+  isV2Route,
+}: {
+  children: React.ReactNode;
+  isV2Route: boolean;
+}) {
+  if (isV2Route && !v2FeatureFlags.appShell) return <Navigate to="/inicio" replace />;
+
+  return (
+    <RouteProtectionBoundary
+      waitingFallback={isV2Route ? <V2RuntimeState kind="loading" /> : undefined}
+      recoverableErrorFallback={
+        isV2Route ? (
+          <V2RuntimeState
+            kind="session-error"
+            onRetry={() => {
+              if (typeof window !== "undefined") window.location.reload();
+            }}
+          />
+        ) : undefined
+      }
+    >
+      <NetworkStatusBanner />
+      <InstallPromptBanner />
+      {isV2Route ? <Outlet /> : children}
+    </RouteProtectionBoundary>
   );
 }
 

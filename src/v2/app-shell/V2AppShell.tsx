@@ -34,6 +34,8 @@ export function V2AppShell({
   onCreateAction,
   onThemeChange,
   onSearch,
+  onLogout,
+  logoutLoading,
 }: V2AppShellProps) {
   const [internalSidebarMode, setInternalSidebarMode] = useState<V2SidebarMode>(defaultSidebarMode);
   const [overlay, setOverlay] = useState<V2ShellOverlay>(null);
@@ -137,6 +139,8 @@ export function V2AppShell({
           onClose={closeOverlay}
           onNavigate={handleNavigate}
           onThemeChange={onThemeChange}
+          onLogout={onLogout}
+          logoutLoading={logoutLoading}
         />
         <V2MoreMenu
           open={overlay === "more"}

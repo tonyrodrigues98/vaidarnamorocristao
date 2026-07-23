@@ -6,7 +6,7 @@ import { V2NavigationItem } from "./V2NavigationItem";
 export interface V2DesktopSidebarProps {
   readonly mode: V2SidebarMode;
   readonly items: readonly V2ShellNavigationItem[];
-  readonly activeId: V2ShellNavigationId;
+  readonly activeId: V2ShellNavigationId | null;
   readonly onModeChange: (mode: V2SidebarMode) => void;
   readonly onNavigate?: (item: V2ShellNavigationItem) => void;
   readonly onCreateOpen: (trigger: HTMLElement) => void;

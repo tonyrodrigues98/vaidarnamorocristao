@@ -9,7 +9,17 @@ import {
   resolveRouteRedirectDecision,
 } from "@/v2/app/routing/route-access";
 
-export function RouteProtectionBoundary({ children }: { children: ReactNode }) {
+export interface RouteProtectionBoundaryProps {
+  readonly children: ReactNode;
+  readonly waitingFallback?: ReactNode;
+  readonly recoverableErrorFallback?: ReactNode;
+}
+
+export function RouteProtectionBoundary({
+  children,
+  waitingFallback,
+  recoverableErrorFallback,
+}: RouteProtectionBoundaryProps) {
   const { status, rolesLoaded } = useAuth();
   const location = useLocation();
   const redirectTarget = useRef<string | null>(null);
@@ -41,6 +51,9 @@ export function RouteProtectionBoundary({ children }: { children: ReactNode }) {
     }
   }, [target]);
 
+  if (decision.action === "wait") {
+    return <>{status === "recoverable-error" ? recoverableErrorFallback : waitingFallback}</>;
+  }
   if (decision.action !== "mount") return null;
   return <>{children}</>;
 }

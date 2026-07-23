@@ -17,7 +17,16 @@ export function V2PageHeader({ page }: V2PageHeaderProps) {
             {page.breadcrumbs.map((breadcrumb, index) => (
               <li key={`${breadcrumb.label}-${index}`}>
                 {breadcrumb.href ? (
-                  <a href={breadcrumb.href}>{breadcrumb.label}</a>
+                  <a
+                    href={breadcrumb.href}
+                    onClick={(event) => {
+                      if (!breadcrumb.onSelect) return;
+                      event.preventDefault();
+                      breadcrumb.onSelect();
+                    }}
+                  >
+                    {breadcrumb.label}
+                  </a>
                 ) : (
                   breadcrumb.label
                 )}
