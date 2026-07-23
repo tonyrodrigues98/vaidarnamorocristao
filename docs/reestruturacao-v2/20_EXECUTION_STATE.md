@@ -63,13 +63,15 @@
   moeda/XP/missões/conquistas/notificações e cria uma capability idempotente para
   XP de cuidado.
 - O browser não envia mais source, quantidade, cap ou metadata de XP.
-- Rate limit distribuído e claim atômico do push continuam nos próximos lotes
-  empilhados da V2-008.
+- Migration local não aplicada adiciona claim atômico do push com
+  `FOR UPDATE SKIP LOCKED`, lease por token, retries exponenciais, TTL e dead
+  letter. O adapter deixou de registrar endpoint, resposta do provedor ou stack.
+- Rate limit distribuído de fotos continua em lote posterior da V2-008.
 
 ## Evidência de validação
 
 - Instalação congelada e TypeScript: aprovados.
-- Suíte segura: 30 arquivos e 205 testes aprovados.
+- Suíte segura: 31 arquivos e 217 testes aprovados.
 - ESLint e Prettier focados: aprovados.
 - Build TanStack/Vite cliente e SSR: aprovado; warnings de dependências são
   baseline.
@@ -83,6 +85,7 @@
 ## Próximo gate
 
 - Publicar o primeiro Draft PR empilhado da V2-008 sem merge.
-- Preparar claim atômico, lease e retries da fila push sem aplicar migration.
+- Validar as migrations de capabilities e push em Supabase descartável antes de
+  qualquer rollout.
 - Manter qualquer conclusão sobre ACL/RLS publicado como não verificada até
   existir snapshot autenticado e ambiente Supabase descartável.

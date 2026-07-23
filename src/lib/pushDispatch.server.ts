@@ -18,7 +18,7 @@ export type SendResult = {
   ok: boolean;
   status: number;
   removed?: boolean;
-  error?: string;
+  errorCode?: "subscription_gone" | "push_rejected" | "transport_error";
 };
 
 export async function sendPushToSubscription(
@@ -46,26 +46,18 @@ export async function sendPushToSubscription(
   } catch (err) {
     const status = err instanceof WebPushError ? err.statusCode : 0;
     const removed = status === 404 || status === 410;
-    const error =
-      err instanceof WebPushError
-        ? `${err.message}${err.body ? `: ${err.body}` : ""}`
-        : err instanceof Error
-          ? err.message
-          : String(err);
-
-    console.error("[push] send failed", {
-      status,
-      endpoint: sub.endpoint.slice(0, 60),
-      error,
-      stack: err instanceof Error ? err.stack?.slice(0, 500) : undefined,
-    });
+    const errorCode = removed
+      ? "subscription_gone"
+      : err instanceof WebPushError
+        ? "push_rejected"
+        : "transport_error";
 
     return {
       endpoint: sub.endpoint,
       ok: false,
       status,
       removed,
-      error: error.slice(0, 300),
+      errorCode,
     };
   }
 }

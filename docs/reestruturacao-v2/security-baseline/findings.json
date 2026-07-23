@@ -328,15 +328,23 @@
       "title": "Fila push sem claim atômico",
       "state": "confirmed_in_head",
       "headEvidence": [
-        "src/lib/pushDispatchBatch.server.ts seleciona e só depois atualiza push_queue"
+        "src/lib/pushDispatchBatch.server.ts usa o adapter server-only de claim e conclusão",
+        "src/lib/pushDispatchBatchCore.server.ts preserva o token do lease até a conclusão",
+        "migration local 20260723000002 usa FOR UPDATE SKIP LOCKED, TTL, backoff e dead letter"
       ],
       "typesEvidence": [
-        "push_queue possui attempts, processed_at e last_error, sem contrato de lease nos tipos"
+        "tipos publicados ainda mostram attempts, processed_at e last_error, sem as colunas locais de lease"
       ],
-      "migrationEvidence": ["histórico de fila não fornece claim SKIP LOCKED comprovado"],
-      "productionGate": "snapshot de schema e Job antes de rollout da migration aditiva",
-      "provingTests": ["concorrência e replay em Supabase descartável pendentes"],
-      "localChange": "claim transacional com lease, retry/backoff e token de execução em mudança separada",
+      "migrationEvidence": [
+        "histórico anterior não fornece claim SKIP LOCKED comprovado",
+        "migration local aditiva 20260723000002 não foi aplicada"
+      ],
+      "productionGate": "snapshot de schema e Job, aplicação em descartável e teste concorrente antes do rollout",
+      "provingTests": [
+        "tests/push-dispatch-atomic-v2.test.ts",
+        "tests/push-dispatch-atomic-rls.test.ts preparado e não executado sem Supabase descartável"
+      ],
+      "localChange": "claim transacional, lease, token, retry exponencial, TTL e logs categóricos implementados localmente",
       "rollbackOrForwardFix": "kill switch do dispatch; liberar leases expirados sem desfazer envios legítimos"
     },
     {
