@@ -7,6 +7,8 @@ on:
     branches: ["**"]
 
 jobs:
+  # Integration coverage must use a dedicated, disposable Supabase test project.
+  # Never point this job at the published production project.
   rls-tests:
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -29,3 +31,21 @@ jobs:
           fi
       - name: Run RLS / chat / moderation tests
         run: bun run test
+
+  push-dispatch-auth:
+    name: Push dispatch auth (no Supabase)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+      - name: Typecheck
+        run: bunx tsc --noEmit
+      - name: Test push dispatch authentication
+        run: bun run test -- tests/push-dispatch-auth.test.ts
+      - name: Build
+        run: bun run build
