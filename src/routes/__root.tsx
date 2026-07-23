@@ -9,7 +9,7 @@ import {
 import { QueryClientProvider } from "@tanstack/react-query";
 import type { AppRouterContext } from "@/v2/app/router-context";
 import { appBuildInfo } from "@/v2/app/build-info";
-import { AuthProvider } from "@/lib/auth";
+import { AuthProvider, useAuth } from "@/lib/auth";
 import { Toaster } from "@/components/ui/sonner";
 import { NotificationsBridge } from "@/lib/useRealtimeNotifications";
 import { ThemeProvider } from "@/lib/theme";
@@ -21,6 +21,8 @@ import { NetworkStatusBanner } from "@/components/mobile/NetworkStatusBanner";
 import { InstallPromptBanner } from "@/components/InstallPromptBanner";
 import { MobileRouteTransition } from "@/components/mobile/MobileRouteTransition";
 import { isChatRoute, shouldShowFooter } from "@/lib/layoutVisibility";
+import { RouteProtectionBoundary } from "@/v2/app/routing/RouteProtectionBoundary";
+import { shouldMountPrivateProviders } from "@/v2/app/routing/route-access";
 
 import appCss from "../styles.css?url";
 import coinPng from "@/assets/coin.webp";
@@ -213,50 +215,63 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <AuthProvider>
-        <PresenceProvider>
-          <NotificationsBridge />
-          <BanGuard />
-          <NetworkStatusBanner />
-          <InstallPromptBanner />
-          <MobileAppShell>
-            {isHome ? (
-              <Outlet />
-            ) : (
-            <div
-              className={
-                chatRoute
-                  ? "flex h-[var(--app-visual-height,100dvh)] flex-col overflow-hidden"
-                  : "flex min-h-screen flex-col"
-              }
-            >
-              <div className={chatRoute ? "min-h-0 flex-1 overflow-hidden" : "flex-1"}>
-                <MobileRouteTransition disabled={chatRoute}>
+          <RouteProtectionBoundary>
+            <AuthenticatedProviderBoundary>
+              <NetworkStatusBanner />
+              <InstallPromptBanner />
+              <MobileAppShell>
+                {isHome ? (
                   <Outlet />
-                </MobileRouteTransition>
-              </div>
-              {showFooter && (
-                <footer className="mt-8 border-t border-border/40 bg-card/60 py-4 text-muted-foreground">
-                  <div className="mx-auto flex max-w-7xl items-center justify-end gap-4 px-4 text-xs text-muted-foreground">
-                    <Link to="/termos" className="hover:text-[var(--rose)] hover:underline">
-                      Termos e Condições
-                    </Link>
-                    <span aria-hidden className="opacity-40">
-                      •
-                    </span>
-                    <Link to="/manual" className="hover:text-[var(--rose)] hover:underline">
-                      Manual do Usuário
-                    </Link>
-                    <SupportFooterButton />
+                ) : (
+                  <div
+                    className={
+                      chatRoute
+                        ? "flex h-[var(--app-visual-height,100dvh)] flex-col overflow-hidden"
+                        : "flex min-h-screen flex-col"
+                    }
+                  >
+                    <div className={chatRoute ? "min-h-0 flex-1 overflow-hidden" : "flex-1"}>
+                      <MobileRouteTransition disabled={chatRoute}>
+                        <Outlet />
+                      </MobileRouteTransition>
+                    </div>
+                    {showFooter && (
+                      <footer className="mt-8 border-t border-border/40 bg-card/60 py-4 text-muted-foreground">
+                        <div className="mx-auto flex max-w-7xl items-center justify-end gap-4 px-4 text-xs text-muted-foreground">
+                          <Link to="/termos" className="hover:text-[var(--rose)] hover:underline">
+                            Termos e Condições
+                          </Link>
+                          <span aria-hidden className="opacity-40">
+                            •
+                          </span>
+                          <Link to="/manual" className="hover:text-[var(--rose)] hover:underline">
+                            Manual do Usuário
+                          </Link>
+                          <SupportFooterButton />
+                        </div>
+                      </footer>
+                    )}
                   </div>
-                </footer>
-              )}
-            </div>
-            )}
-          </MobileAppShell>
-        </PresenceProvider>
-        <Toaster richColors position="top-right" />
+                )}
+              </MobileAppShell>
+            </AuthenticatedProviderBoundary>
+          </RouteProtectionBoundary>
+          <Toaster richColors position="top-right" />
         </AuthProvider>
       </ThemeProvider>
     </QueryClientProvider>
+  );
+}
+
+function AuthenticatedProviderBoundary({ children }: { children: React.ReactNode }) {
+  const { status, user } = useAuth();
+  if (!shouldMountPrivateProviders(status, !!user)) return <>{children}</>;
+
+  return (
+    <PresenceProvider>
+      <NotificationsBridge />
+      <BanGuard />
+      {children}
+    </PresenceProvider>
   );
 }
