@@ -64,7 +64,9 @@ function Signup() {
         <AuthBrand className="mb-6" />
         <div className="glass animate-fade-up rounded-3xl p-8 shadow-elegant">
           <h1 className="text-3xl font-semibold">Criar conta</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Comece sua jornada em poucos passos.</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Entre na comunidade em poucos passos. O Modo Namoro é opcional.
+          </p>
           <form onSubmit={handleSubmit} className="mt-6 space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>

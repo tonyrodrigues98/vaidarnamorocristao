@@ -4,13 +4,19 @@ import { ArrowRight, Clock, Heart, Music2, Radio } from "lucide-react";
 import { InstallAppButton } from "@/components/InstallAppButton";
 import { Button } from "@/components/ui/button";
 import carenHeroAsset from "@/assets/caren-hero.jpeg.asset.json";
+import { CAREN_TIKTOK_LIVE_URL, PUBLIC_COMMUNITY_ROUTE } from "@/lib/publicAcquisition";
 
-export const TIKTOK_LIVE_URL = "https://www.tiktok.com/@carenlayane6?_r=1&_t=ZS-96w3ETPtTl3";
-export const COMMUNITY_AUTH_ROUTE = "/inicio";
+export const TIKTOK_LIVE_URL = CAREN_TIKTOK_LIVE_URL;
+export const COMMUNITY_AUTH_ROUTE = PUBLIC_COMMUNITY_ROUTE;
 
-export function CarenLiveHero() {
+export function CarenLiveHero({ embedded = false }: { readonly embedded?: boolean }) {
   return (
-    <section className="relative isolate flex min-h-dvh flex-col overflow-hidden px-4 pb-8 pt-24 sm:px-6 lg:px-10">
+    <section
+      id={embedded ? "experiencia-live" : undefined}
+      className={`relative isolate flex min-h-dvh flex-col overflow-hidden px-4 pb-8 sm:px-6 lg:px-10 ${
+        embedded ? "pt-8" : "pt-24"
+      }`}
+    >
       <img
         src={carenHeroAsset.url}
         alt="Caren"
@@ -21,7 +27,7 @@ export function CarenLiveHero() {
       <div className="pointer-events-none absolute inset-0 -z-20 bg-gradient-to-b from-black/45 via-black/10 to-black/78" />
       <div className="pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-2/3 bg-gradient-to-t from-black via-black/45 to-transparent" />
 
-      <LiveTopNav />
+      {embedded ? null : <LiveTopNav />}
 
       <div className="relative mx-auto flex w-full max-w-[1440px] flex-1 items-center justify-center pt-4 lg:pt-0">
         <div className="relative grid min-h-[540px] w-full place-items-center sm:min-h-[calc(100dvh-128px)]">
