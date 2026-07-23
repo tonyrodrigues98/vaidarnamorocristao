@@ -59,13 +59,17 @@
 - Falha técnica agora bloqueia o upload; o caminho `soft:true` foi removido.
 - Logs de moderação são categóricos e não incluem identidade, imagem, token,
   resposta do provedor ou exceção.
-- Rate limit distribuído, RPCs econômicas/progresso e claim atômico do push
-  continuam nos próximos lotes empilhados da V2-008.
+- Migration local não aplicada fecha cinco RPCs genéricas de
+  moeda/XP/missões/conquistas/notificações e cria uma capability idempotente para
+  XP de cuidado.
+- O browser não envia mais source, quantidade, cap ou metadata de XP.
+- Rate limit distribuído e claim atômico do push continuam nos próximos lotes
+  empilhados da V2-008.
 
 ## Evidência de validação
 
 - Instalação congelada e TypeScript: aprovados.
-- Suíte segura: 29 arquivos e 198 testes aprovados.
+- Suíte segura: 30 arquivos e 205 testes aprovados.
 - ESLint e Prettier focados: aprovados.
 - Build TanStack/Vite cliente e SSR: aprovado; warnings de dependências são
   baseline.
@@ -79,7 +83,6 @@
 ## Próximo gate
 
 - Publicar o primeiro Draft PR empilhado da V2-008 sem merge.
-- Preparar capabilities e migrations pequenas para economia/progresso sem
-  aplicá-las.
+- Preparar claim atômico, lease e retries da fila push sem aplicar migration.
 - Manter qualquer conclusão sobre ACL/RLS publicado como não verificada até
   existir snapshot autenticado e ambiente Supabase descartável.
