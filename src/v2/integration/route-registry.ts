@@ -184,10 +184,10 @@ const V2_RUNTIME_ROUTES = Object.freeze([
     subtitle: "Companhia, progresso e cuidado preservados.",
     eyebrow: "Pets",
     description:
-      "Pets, itens e progressão continuam disponíveis apenas na experiência legada por enquanto.",
+      "Cuidados server-authoritative, tabelas preservadas e arcade carregado somente sob demanda.",
     icon: PawPrint,
     primary: false,
-    requiredDomain: "economy",
+    requiredDomain: "pets",
   },
   {
     slug: "configuracoes",

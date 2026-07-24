@@ -34,6 +34,7 @@ export type PlatformDomain =
   | "messaging"
   | "dating"
   | "economy"
+  | "pets"
   | "admin"
   | "moderation"
   | "support";
@@ -47,6 +48,7 @@ export type PlatformCapability =
   | "messaging:use"
   | "dating:enter"
   | "economy:use"
+  | "pets:use"
   | "admin:enter"
   | "moderation:enter"
   | "support:enter";
@@ -102,6 +104,7 @@ const DOMAIN_CAPABILITY: Readonly<Partial<Record<PlatformDomain, PlatformCapabil
   messaging: "messaging:use",
   dating: "dating:enter",
   economy: "economy:use",
+  pets: "pets:use",
   admin: "admin:enter",
   moderation: "moderation:enter",
   support: "support:enter",
@@ -181,6 +184,7 @@ function buildCapabilities({
     capabilities.add("community:enter");
     capabilities.add("messaging:use");
     capabilities.add("economy:use");
+    capabilities.add("pets:use");
     if (
       input.datingState === "active" ||
       input.datingState === "legacy-active-pending-confirmation"
