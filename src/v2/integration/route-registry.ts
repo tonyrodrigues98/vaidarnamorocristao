@@ -75,10 +75,10 @@ const V2_RUNTIME_ROUTES = Object.freeze([
     navigationId: "conversations",
     label: "Conversas",
     title: "Conversas",
-    subtitle: "Um espaço futuro para conversas privadas e coletivas.",
+    subtitle: "Mensagens sociais, comunitárias e românticas com contexto explícito.",
     eyebrow: "Mensagens",
     description:
-      "A integração com mensagens reais permanece no aplicativo legado até a reconstrução dedicada.",
+      "Inbox e thread V2 usam adapters sobre o histórico e escondem contextos românticos quando o Namoro está desligado.",
     icon: MessageCircle,
     primary: true,
     requiredDomain: "messaging",

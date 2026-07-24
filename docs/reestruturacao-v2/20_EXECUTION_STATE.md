@@ -22,7 +22,9 @@
   commit `f3de66cb72f092a0c8b15edede2525021c177975`.
 - V2-010 está no Draft PR #18, branch `rebuild/v2-010-social-home`, commit
   `68e6d4a8b42d0124bfb913f615cdae224a45f844`.
-- Lote ativo: V2-011 em `rebuild/v2-011-community-spaces`, empilhado sobre a V2-010.
+- V2-011 está no Draft PR #19, branch `rebuild/v2-011-community-spaces`, commit
+  `14d475a66daf78ff070fb799f193b8378aa47d06`.
+- Lote ativo: V2-012 em `rebuild/v2-012-conversations`, empilhado sobre a V2-011.
   Nenhum PR da pilha foi mesclado ou publicado.
 
 ## Concluído
@@ -96,7 +98,7 @@
 ## Evidência de validação
 
 - Instalação congelada e TypeScript: aprovados.
-- Suíte segura: 46 arquivos e 341 testes aprovados.
+- Suíte segura: 49 arquivos e 365 testes aprovados.
 - ESLint e Prettier focados: aprovados.
 - Build TanStack/Vite cliente e SSR: aprovado; warnings de dependências são
   baseline.
@@ -177,11 +179,27 @@
 - Migration local não aplicada exige validação RLS/RPC/Realtime em Supabase
   descartável antes de qualquer flag.
 
+## V2-012 — Conversas
+
+- `/v2/conversas` usa uma inbox contextual com paginação estável, envio
+  otimista, retry idempotente, leitura, rascunho segregado, preferências e
+  Realtime com cleanup.
+- `messages` e `global_messages` permanecem como fontes legadas por adapters;
+  novas conversas sociais usam estruturas canônicas aditivas.
+- Solicitações sociais respeitam bloqueio e `messages_from`; não dependem de
+  matches.
+- Matches aparecem somente com Namoro ativo. Durante Propósito Firmado, somente
+  o match comprometido permanece acessível.
+- Migration local não aplicada adiciona `client_message_id`, RLS, RPCs e
+  metadados/bucket privado de anexos. Upload de anexos ainda não foi exposto.
+- Edição, exclusão, reactions, typing, virtualização e telemetria operacional
+  permanecem gates explícitos; o legado não foi removido.
+
 ## Próximo lote
 
 - Validar as migrations de capabilities e push em Supabase descartável antes de
   qualquer rollout.
 - Manter qualquer conclusão sobre ACL/RLS publicado como não verificada até
   existir snapshot autenticado e ambiente Supabase descartável.
-- Validar e publicar o Draft PR da V2-011; depois iniciar a V2-012 em branch
+- Validar e publicar o Draft PR da V2-012; depois iniciar a V2-013 em branch
   empilhada, sem aplicar migrations ou ativar flags.
