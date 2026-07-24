@@ -10,6 +10,7 @@ import { V2ConversationsFeature } from "@/v2/features/conversations";
 import { V2DatingFeature } from "@/v2/features/dating";
 import { V2CommunityHomeFeature, V2PeopleDiscoveryFeature } from "@/v2/features/home";
 import { V2ProfileFeature } from "@/v2/features/profile";
+import { V2RomanticContextFeature } from "@/v2/features/romantic-context";
 import { createV2ShellUser, performV2Logout, resolveV2RuntimeAccess } from "./contracts";
 import { getV2RuntimeNavigation, getV2RuntimeRoute } from "./route-registry";
 import { V2RuntimeShell } from "./V2RuntimeShell";
@@ -126,6 +127,17 @@ export function V2ShellRuntimeRoute({ slug }: { readonly slug: string }) {
             await refreshRole();
             await navigate({ to: "/v2/$section", params: { section: "inicio" } });
           }}
+          onOpenConversations={() =>
+            void navigate({ to: "/v2/$section", params: { section: "conversas" } })
+          }
+        />
+      );
+    }
+    if (v2FeatureFlags.dating && (route?.slug === "proposito" || route?.slug === "recados")) {
+      return (
+        <V2RomanticContextFeature
+          area={route.slug === "proposito" ? "purpose" : "anonymous"}
+          userId={user.id}
           onOpenConversations={() =>
             void navigate({ to: "/v2/$section", params: { section: "conversas" } })
           }

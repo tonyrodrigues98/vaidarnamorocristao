@@ -10,6 +10,8 @@ export type V2ShellNavigationId =
   | "profile"
   | "explore"
   | "dating"
+  | "purpose"
+  | "anonymous"
   | "shop"
   | "avatar"
   | "pets"

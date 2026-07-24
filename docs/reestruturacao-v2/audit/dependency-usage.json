@@ -369,7 +369,9 @@
         "src/v2/features/dating/V2DatingMode.tsx",
         "src/v2/features/home/V2CommunityHome.tsx",
         "src/v2/features/home/V2PeopleDiscovery.tsx",
-        "src/v2/features/profile/V2Profile.tsx"
+        "src/v2/features/profile/V2Profile.tsx",
+        "src/v2/features/romantic-context/V2AnonymousNotes.tsx",
+        "src/v2/features/romantic-context/V2PurposeCenter.tsx"
       ],
       "testFiles": [
         "tests/auth-cache-isolation-v2.test.ts",
@@ -377,7 +379,8 @@
         "tests/community-hub-boundaries-v2.test.tsx",
         "tests/conversations-boundaries-v2.test.tsx",
         "tests/dating-mode-boundaries-v2.test.tsx",
-        "tests/profile-boundaries-v2.test.tsx"
+        "tests/profile-boundaries-v2.test.tsx",
+        "tests/romantic-context-boundaries-v2.test.tsx"
       ],
       "configReferences": ["RELATORIO_LOJA_QUERY_PARTE1.md"],
       "classification": "directly-imported"
@@ -972,6 +975,8 @@
         "src/v2/features/profile/V2Profile.tsx",
         "src/v2/features/profile/V2ProfileEditor.tsx",
         "src/v2/features/profile/V2ProfileModuleCard.tsx",
+        "src/v2/features/romantic-context/V2AnonymousNotes.tsx",
+        "src/v2/features/romantic-context/V2PurposeCenter.tsx",
         "src/v2/integration/route-registry.ts",
         "src/v2/integration/V2RuntimePage.tsx",
         "src/v2/integration/V2RuntimeState.tsx"
@@ -1261,6 +1266,8 @@
         "src/v2/features/onboarding/CommunityOnboardingFlow.tsx",
         "src/v2/features/onboarding/DatingOptInFlow.tsx",
         "src/v2/features/profile/V2Profile.tsx",
+        "src/v2/features/romantic-context/V2AnonymousNotes.tsx",
+        "src/v2/features/romantic-context/V2PurposeCenter.tsx",
         "src/v2/integration/V2RuntimeErrorBoundary.tsx",
         "src/v2/integration/V2RuntimeShell.tsx",
         "src/v2/integration/V2ShellRuntimeRoute.tsx"
@@ -1282,6 +1289,7 @@
         "supabase/migrations/20260514201403_31b51a2e-bcd4-487c-b732-ef0cd14f848e.sql",
         "supabase/migrations/20260514203656_830c7150-efbc-45ac-bd91-fdb3e0319c7d.sql",
         "supabase/migrations/20260723000005_v2_social_home_links_status.sql",
+        "supabase/migrations/20260723000010_v2_purpose_anonymous_contextual_gifts.sql",
         "tsconfig.json"
       ],
       "classification": "directly-imported"
@@ -1324,6 +1332,7 @@
         "tests/design-system-components-v2.test.tsx",
         "tests/onboarding-integration-v2.test.tsx",
         "tests/profile-boundaries-v2.test.tsx",
+        "tests/romantic-context-boundaries-v2.test.tsx",
         "tests/use-long-press.test.ts"
       ],
       "configReferences": [],
@@ -1608,6 +1617,9 @@
         "tests/push-dispatch-atomic-v2.test.ts",
         "tests/push-dispatch-auth.test.ts",
         "tests/realtime-messages.test.ts",
+        "tests/romantic-context-boundaries-v2.test.tsx",
+        "tests/romantic-context-core-v2.test.ts",
+        "tests/romantic-context-security-v2.test.ts",
         "tests/route-protection-v2.test.ts",
         "tests/security-closure-v2.test.ts",
         "tests/security-evidence-v2.test.ts",

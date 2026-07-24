@@ -96,6 +96,18 @@ const pageCopy: Record<
     subtitle: "Uma experiência opcional e separada da participação comunitária.",
     width: "standard",
   },
+  purpose: {
+    title: "Propósito Firmado",
+    eyebrow: "Modo Namoro",
+    subtitle: "Um compromisso bilateral sem interromper a vida comunitária.",
+    width: "standard",
+  },
+  anonymous: {
+    title: "Recados anônimos",
+    eyebrow: "Modo Namoro",
+    subtitle: "Contato consentido, moderável e protegido.",
+    width: "standard",
+  },
   shop: {
     title: "Loja",
     eyebrow: "Personalização",
