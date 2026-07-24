@@ -34,8 +34,10 @@
   `ed212229ba5ff5e13b7b700d65c1a32214f72cd1`.
 - V2-016 está no Draft PR #24, branch `rebuild/v2-016-economy-shop-inventory`,
   commit `6cf03449544b0d1751dc78557037d244ff321287`.
-- Lote ativo: V2-017 em `rebuild/v2-017-pets-arcade-games`, empilhado sobre a
-  V2-016.
+- V2-017 está no Draft PR #25, branch `rebuild/v2-017-pets-arcade-games`,
+  commit `7e9645769f64e8707b6c9ffd4c6bd0b3f474c070`.
+- Lote ativo: V2-018 em `rebuild/v2-018-christian-content-verbo`, empilhado
+  sobre a V2-017.
   Nenhum PR da pilha foi mesclado ou publicado.
 
 ## Concluído
@@ -274,8 +276,8 @@
   qualquer rollout.
 - Manter qualquer conclusão sobre ACL/RLS publicado como não verificada até
   existir snapshot autenticado e ambiente Supabase descartável.
-- Validar e publicar o Draft PR da V2-017; depois iniciar a V2-018 em branch
-  empilhada, sem aplicar migrations ou ativar flags.
+- Validar o Draft PR da V2-018; depois implementar a V2-019 — Sala de Cinema
+  em branch empilhada, sem aplicar migrations ou ativar flags.
 
 ## V2-017 — Pets e Pet Arcade
 
@@ -294,3 +296,19 @@
   rodadas continuam no runtime legado.
 - Migration local aditiva e não aplicada; nenhuma tabela, policy, saldo,
   inventário ou dado remoto foi alterado.
+
+## V2-018 — Conteúdo cristão e Verbo
+
+- `/v2/verbo` integra devocionais publicados e um leitor lazy sob flag e
+  capability próprias.
+- Fonte bíblica só pode ser habilitada com licença e revisão editorial
+  aprovadas; nenhuma tradução ou texto foi importado.
+- Notas, favoritos, progresso, estudos e desafios são privados por padrão e
+  protegidos por RLS owner-only no contrato local.
+- Notas usam versão e conflito otimista; não há sobrescrita silenciosa.
+- Oração, quiz, blog, notícias, interações, moderação e Admin legados permanecem
+  intactos.
+- Ranking espiritual, prova pública de fé, IA paga, offline e progresso social
+  permanecem fechados.
+- Migration local aditiva e não aplicada; nenhum conteúdo, dado ou ambiente
+  externo foi alterado.

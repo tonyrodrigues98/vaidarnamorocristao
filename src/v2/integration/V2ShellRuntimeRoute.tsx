@@ -6,6 +6,7 @@ import { v2FeatureFlags } from "@/v2/platform/feature-flags";
 import type { V2ShellNavigationItem } from "@/v2/app-shell";
 import { V2AccountRuntimeFeature, type AccountNavigationTarget } from "@/v2/features/account";
 import { V2CommunityHubFeature } from "@/v2/features/community";
+import { V2ChristianContentFeature } from "@/v2/features/content";
 import { V2ConversationsFeature } from "@/v2/features/conversations";
 import { V2DatingFeature } from "@/v2/features/dating";
 import { V2EconomyFeature } from "@/v2/features/economy";
@@ -125,6 +126,9 @@ export function V2ShellRuntimeRoute({ slug }: { readonly slug: string }) {
     }
     if (v2FeatureFlags.pets && route?.slug === "meu-pet") {
       return <V2PetsFeature userId={user.id} />;
+    }
+    if (v2FeatureFlags.content && route?.slug === "verbo") {
+      return <V2ChristianContentFeature userId={user.id} />;
     }
     if (v2FeatureFlags.dating && route?.slug === "pretendentes") {
       return (
