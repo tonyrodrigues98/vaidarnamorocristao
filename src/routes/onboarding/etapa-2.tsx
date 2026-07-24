@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Progress } from "@/components/ui/progress";
 import { BR_STATES } from "@/lib/constants";
+import { v2FeatureFlags } from "@/v2/platform/feature-flags";
 
 const schema = z
   .object({
@@ -28,7 +29,14 @@ const schema = z
     path: ["age_max"],
   });
 
-export const Route = createFileRoute("/onboarding/etapa-2")({ component: Etapa2 });
+export const Route = createFileRoute("/onboarding/etapa-2")({ component: Etapa2Route });
+
+function Etapa2Route() {
+  if (v2FeatureFlags.community) {
+    return <Navigate to={v2FeatureFlags.dating ? "/onboarding/namoro" : "/inicio"} />;
+  }
+  return <Etapa2 />;
+}
 
 function Etapa2() {
   const { user, loading } = useAuth();

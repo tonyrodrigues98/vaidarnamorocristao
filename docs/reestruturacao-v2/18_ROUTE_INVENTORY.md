@@ -22,18 +22,18 @@ substitui RLS.
 | Classe                         | Quantidade |
 | ------------------------------ | ---------: |
 | administrativa                 |         13 |
-| autenticada                    |         35 |
+| autenticada                    |         36 |
 | pública/exclusiva de visitante |         13 |
 | endpoint server-side           |          3 |
 | proteção herdada da raiz       |          3 |
-| **total**                      |     **67** |
+| **total**                      |     **68** |
 
 ### Árvore resumida
 
 ```text
 /
 ├─ auth/{login,signup,forgot-password,reset-password}
-├─ onboarding/{,etapa-1,etapa-2}
+├─ onboarding/{,etapa-1,etapa-2,namoro}
 ├─ admin/{,auras,avatar,economia,equipe-live,fotos,fundos,gradientes-nome,
 │         molduras,pets,presentes,stickers,verificacoes}
 ├─ api/{photo-repair,verify-photo,public/hooks/push-dispatch}
@@ -63,6 +63,7 @@ rota; helpers importados podem acrescentar recursos e estão em `audit/supabase-
 | `/onboarding/`                    | `onboarding/index.tsx` / OnboardingFlow | Auth                   | profiles, advanced, prefs, fotos/Storage                            | signup/profile; refresh restaura rascunho     | reconstruir perguntas / L3                  |
 | `/onboarding/etapa-1`             | `onboarding/etapa-1.tsx`                | Herd                   | —                                                                   | alias → `/onboarding`; sem entrada            | redirect compatível / L1                    |
 | `/onboarding/etapa-2`             | `onboarding/etapa-2.tsx` / Etapa2       | Auth                   | `profile_preferences`                                               | sem entrada estática; deep link possível      | investigar fluxo antigo / L2                |
+| `/onboarding/namoro`              | `onboarding/namoro.tsx` / DatingOptInRoute | Auth                | adapter V2; membership/RPC atrás de flag                            | entrada opt-in; refresh estável                | Namoro opcional V2 / L3                     |
 | `/inicio`                         | `inicio.tsx` / InicioRoute              | Auth                   | daily_posts, profiles, appeals, Realtime                            | nav/push; → onboarding se incompleto          | Início V2 após definição de feed / L3       |
 | `/dashboard`                      | `dashboard.tsx` / Dashboard             | Auth                   | posts, interests, matches, messages, views                          | Header; refresh reconsulta                    | fundir decisão com Início / L2              |
 | `/noticias/`                      | `noticias.index.tsx` / Noticias         | Auth                   | `daily_posts`, Realtime                                             | links internos                                | feed V2 / L2                                |
@@ -139,13 +140,13 @@ do boundary global com guards locais, não de um ciclo literal identificado.
 
 ## Links e rotas quebradas
 
-O scan encontrou **465 referências tipadas**:
+O scan encontrou **485 referências tipadas**:
 
 | Dimensão      | Totais                                                                              |
 | ------------- | ----------------------------------------------------------------------------------- |
-| origem        | `src` 424; testes 8; manifest 14; sitemap 11; public 8; configuração 0; outras 0    |
-| classificação | rotas 411; assets 37; endpoints 4; externas 8; deep links 3; dinâmicas 2            |
-| estado        | resolvidas 410; não resolvida 1; exige investigação 2; não aplicável a resolução 52 |
+| origem        | `src` 433; testes 17; manifest 16; sitemap 11; public 8; configuração 0; outras 0    |
+| classificação | rotas 424; assets 38; endpoints 4; externas 12; deep links 4; dinâmicas 3           |
+| estado        | resolvidas 423; não resolvida 1; exige investigação 3; não aplicável a resolução 58 |
 
 O manifest contribui com `start_url`, `scope`, ícones e atalhos. O sitemap contribui com seus 11
 `<loc>`, normalizados de `https://vaidarnamoro.com` para pathnames internos. O service worker
@@ -159,7 +160,7 @@ No estado atual, uma referência classificada como rota não resolve:
 | `src/v2/app-shell/navigation.ts` | `/membros` | sem file route | contrato padrão demonstrativo; o runtime real substitui por `/v2/explorar-pessoas` |
 
 Esse é um resultado regenerável, não um contrato de teste: corrigir `/membros` futuramente deve
-reduzir a contagem de não resolvidos para zero sem quebrar a suíte. Dois destinos dinâmicos
+reduzir a contagem de não resolvidos para zero sem quebrar a suíte. Três destinos dinâmicos
 (`/v2/${route.slug}` e a URL do `notificationclick`) exigem investigação. Isso não prova que
 payloads externos de push, registros já salvos no banco ou URLs produzidas por lógica arbitrária
 sejam válidos.

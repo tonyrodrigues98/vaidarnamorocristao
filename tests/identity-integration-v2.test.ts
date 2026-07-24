@@ -33,7 +33,11 @@ describe("V2-009 identity integration boundary", () => {
   });
 
   it("keeps romantic access closed until an explicit persisted opt-in exists", () => {
-    expect(authSource).toContain('datingState: "inactive"');
+    expect(authSource).toContain("v2FeatureFlags.dating");
+    expect(authSource).toContain('.from("dating_memberships")');
+    expect(authSource).toContain(": Promise.resolve({ data: null, error: null })");
+    expect(authSource).toContain('return "inactive"');
+    expect(authSource).toContain("datingResult.error");
     expect(identitySource).toContain('input.datingState ?? "inactive"');
     expect(identitySource).toContain('=== "active"');
     expect(identitySource).not.toMatch(/datingState\s*:\s*["']active["']/);

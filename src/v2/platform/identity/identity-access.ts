@@ -19,6 +19,7 @@ export type TermsConsentStatus = "unknown" | "missing" | "outdated" | "current";
 export type DatingAccessState =
   | "inactive"
   | "active"
+  | "legacy-active-pending-confirmation"
   | "paused"
   | "committed"
   | "restricted"
@@ -180,7 +181,10 @@ function buildCapabilities({
     capabilities.add("community:enter");
     capabilities.add("messaging:use");
     capabilities.add("economy:use");
-    if ((input.datingState ?? "inactive") === "active") {
+    if (
+      input.datingState === "active" ||
+      input.datingState === "legacy-active-pending-confirmation"
+    ) {
       capabilities.add("dating:enter");
     }
   }

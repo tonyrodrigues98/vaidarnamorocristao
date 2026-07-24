@@ -5,9 +5,9 @@
     "generatedFrom": "working-tree-derived-from-audited-base",
     "sourceState": "pre-commit-working-tree"
   },
-  "total": 465,
+  "total": 485,
   "totalsBySource": {
-    "public/manifest.webmanifest": 14,
+    "public/manifest.webmanifest": 16,
     "public/sitemap.xml": 11,
     "public/sw.js": 8,
     "src/components/admin/AdminTopNav.tsx": 14,
@@ -24,6 +24,7 @@
     "src/components/CustomizacaoTab.tsx": 4,
     "src/components/DecorationsCard.tsx": 1,
     "src/components/EquippedPetBadge.tsx": 1,
+    "src/components/home/CommunityAcquisitionLanding.tsx": 1,
     "src/components/InstallPromptBanner.tsx": 1,
     "src/components/layout/Header.tsx": 34,
     "src/components/mobile/MobileBottomNav.tsx": 5,
@@ -36,7 +37,7 @@
     "src/components/pretendentes/PretendenteFeaturedCard.tsx": 1,
     "src/components/profile/ProfileActionHub.tsx": 5,
     "src/components/ProfileCompletenessAlert.tsx": 1,
-    "src/components/PublicNav.tsx": 6,
+    "src/components/PublicNav.tsx": 5,
     "src/components/RequireApproved.tsx": 2,
     "src/components/StickersChatBanner.tsx": 1,
     "src/components/SupportFooterButton.tsx": 1,
@@ -55,7 +56,6 @@
     "src/routes/admin/pets.tsx": 2,
     "src/routes/admin/stickers.tsx": 3,
     "src/routes/admin/verificacoes.tsx": 3,
-    "src/routes/api/verify-photo.ts": 1,
     "src/routes/auth/forgot-password.tsx": 1,
     "src/routes/auth/login.tsx": 3,
     "src/routes/auth/reset-password.tsx": 2,
@@ -87,7 +87,8 @@
     "src/routes/notificacoes.tsx": 1,
     "src/routes/onboarding/etapa-1.tsx": 1,
     "src/routes/onboarding/etapa-2.tsx": 3,
-    "src/routes/onboarding/index.tsx": 5,
+    "src/routes/onboarding/index.tsx": 8,
+    "src/routes/onboarding/namoro.tsx": 6,
     "src/routes/oracoes.tsx": 2,
     "src/routes/perfil.tsx": 5,
     "src/routes/pet-arcade.tsx": 3,
@@ -110,37 +111,44 @@
     "src/v2/design-system/showcase/index.html": 1,
     "src/v2/features/account/showcase/index.html": 1,
     "src/v2/features/account/showcase/V2AccountShowcase.tsx": 5,
+    "src/v2/features/onboarding/repository.ts": 1,
     "src/v2/integration/route-registry.ts": 1,
     "src/v2/integration/V2RuntimeShell.tsx": 2,
     "src/v2/integration/V2ShellRuntimeRoute.tsx": 16,
     "tests/app-shell-components-v2.test.tsx": 2,
     "tests/app-shell-integration-boundaries-v2.test.ts": 1,
     "tests/app-shell-integration-components-v2.test.tsx": 1,
+    "tests/application-security-v2.test.ts": 3,
     "tests/design-system-components-v2.test.tsx": 3,
+    "tests/onboarding-integration-v2.test.tsx": 1,
+    "tests/photo-repair-security-v2.test.ts": 1,
+    "tests/public-acquisition-v2.test.ts": 2,
+    "tests/push-dispatch-atomic-rls.test.ts": 1,
+    "tests/push-dispatch-atomic-v2.test.ts": 1,
     "tests/push-dispatch-auth.test.ts": 1
   },
-  "totalsByFileType": { "html": 6, "js": 8, "ts": 28, "tsx": 398, "webmanifest": 14, "xml": 11 },
+  "totalsByFileType": { "html": 6, "js": 8, "ts": 36, "tsx": 408, "webmanifest": 16, "xml": 11 },
   "totalsByOrigin": {
     "configuration": 0,
-    "manifest": 14,
+    "manifest": 16,
     "other": 0,
     "public": 8,
     "sitemap": 11,
-    "src": 424,
-    "tests": 8
+    "src": 433,
+    "tests": 17
   },
   "totalsByClassification": {
-    "asset": 37,
-    "deep-link": 3,
-    "dynamic": 2,
+    "asset": 38,
+    "deep-link": 4,
+    "dynamic": 3,
     "endpoint": 4,
-    "external": 8,
-    "route": 411
+    "external": 12,
+    "route": 424
   },
   "totalsByStatus": {
-    "not-applicable": 52,
-    "requires-investigation": 2,
-    "resolved": 410,
+    "not-applicable": 58,
+    "requires-investigation": 3,
+    "resolved": 423,
     "unresolved": 1
   },
   "unresolved": [
@@ -171,6 +179,18 @@
       "evidence": { "locator": "clients.openWindow", "line": 226 }
     },
     {
+      "source": "src/v2/features/onboarding/repository.ts",
+      "origin": "src",
+      "fileType": "ts",
+      "kind": "template-url",
+      "target": "${data.publicUrl}?v=${Date.now()}",
+      "normalizedTarget": "${data.publicUrl}?v=${Date.now()}",
+      "classification": "dynamic",
+      "status": "requires-investigation",
+      "matchedRoutes": [],
+      "evidence": { "locator": "template-url", "line": 111 }
+    },
+    {
       "source": "src/v2/integration/route-registry.ts",
       "origin": "src",
       "fileType": "ts",
@@ -180,7 +200,7 @@
       "classification": "dynamic",
       "status": "requires-investigation",
       "matchedRoutes": [],
-      "evidence": { "locator": "template-href", "line": 173 }
+      "evidence": { "locator": "template-href", "line": 185 }
     }
   ],
   "links": [
@@ -296,13 +316,37 @@
       "source": "public/manifest.webmanifest",
       "origin": "manifest",
       "fileType": "webmanifest",
+      "kind": "manifest-shortcut-icon",
+      "target": "/icon-192.png",
+      "normalizedTarget": "/icon-192.png",
+      "classification": "asset",
+      "status": "not-applicable",
+      "matchedRoutes": [],
+      "evidence": { "locator": "shortcuts[4].icons[0].src", "line": null }
+    },
+    {
+      "source": "public/manifest.webmanifest",
+      "origin": "manifest",
+      "fileType": "webmanifest",
+      "kind": "manifest-shortcut",
+      "target": "/comunidade",
+      "normalizedTarget": "/comunidade",
+      "classification": "route",
+      "status": "resolved",
+      "matchedRoutes": ["/comunidade"],
+      "evidence": { "locator": "shortcuts[1].url", "line": null }
+    },
+    {
+      "source": "public/manifest.webmanifest",
+      "origin": "manifest",
+      "fileType": "webmanifest",
       "kind": "manifest-shortcut",
       "target": "/conversas",
       "normalizedTarget": "/conversas",
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/conversas/"],
-      "evidence": { "locator": "shortcuts[1].url", "line": null }
+      "evidence": { "locator": "shortcuts[2].url", "line": null }
     },
     {
       "source": "public/manifest.webmanifest",
@@ -314,7 +358,19 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/devocional"],
-      "evidence": { "locator": "shortcuts[2].url", "line": null }
+      "evidence": { "locator": "shortcuts[3].url", "line": null }
+    },
+    {
+      "source": "public/manifest.webmanifest",
+      "origin": "manifest",
+      "fileType": "webmanifest",
+      "kind": "manifest-shortcut",
+      "target": "/inicio",
+      "normalizedTarget": "/inicio",
+      "classification": "route",
+      "status": "resolved",
+      "matchedRoutes": ["/inicio"],
+      "evidence": { "locator": "shortcuts[0].url", "line": null }
     },
     {
       "source": "public/manifest.webmanifest",
@@ -326,19 +382,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/notificacoes"],
-      "evidence": { "locator": "shortcuts[3].url", "line": null }
-    },
-    {
-      "source": "public/manifest.webmanifest",
-      "origin": "manifest",
-      "fileType": "webmanifest",
-      "kind": "manifest-shortcut",
-      "target": "/pretendentes",
-      "normalizedTarget": "/pretendentes",
-      "classification": "route",
-      "status": "resolved",
-      "matchedRoutes": ["/pretendentes/"],
-      "evidence": { "locator": "shortcuts[0].url", "line": null }
+      "evidence": { "locator": "shortcuts[4].url", "line": null }
     },
     {
       "source": "public/manifest.webmanifest",
@@ -1037,6 +1081,18 @@
       "evidence": { "locator": "jsx-to", "line": 67 }
     },
     {
+      "source": "src/components/home/CommunityAcquisitionLanding.tsx",
+      "origin": "src",
+      "fileType": "tsx",
+      "kind": "jsx-href",
+      "target": "#experiencia-live",
+      "normalizedTarget": "#experiencia-live",
+      "classification": "deep-link",
+      "status": "not-applicable",
+      "matchedRoutes": [],
+      "evidence": { "locator": "jsx-href", "line": 157 }
+    },
+    {
       "source": "src/components/InstallPromptBanner.tsx",
       "origin": "src",
       "fileType": "tsx",
@@ -1694,19 +1750,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/auth/login"],
-      "evidence": { "locator": "jsx-to", "line": 44 }
-    },
-    {
-      "source": "src/components/PublicNav.tsx",
-      "origin": "src",
-      "fileType": "tsx",
-      "kind": "jsx-to",
-      "target": "/auth/signup",
-      "normalizedTarget": "/auth/signup",
-      "classification": "route",
-      "status": "resolved",
-      "matchedRoutes": ["/auth/signup"],
-      "evidence": { "locator": "jsx-to", "line": 50 }
+      "evidence": { "locator": "jsx-to", "line": 59 }
     },
     {
       "source": "src/components/PublicNav.tsx",
@@ -1718,7 +1762,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/blog/"],
-      "evidence": { "locator": "jsx-to", "line": 35 }
+      "evidence": { "locator": "jsx-to", "line": 41 }
     },
     {
       "source": "src/components/PublicNav.tsx",
@@ -1730,7 +1774,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/como-funciona"],
-      "evidence": { "locator": "jsx-to", "line": 21 }
+      "evidence": { "locator": "jsx-to", "line": 27 }
     },
     {
       "source": "src/components/PublicNav.tsx",
@@ -1742,7 +1786,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/depoimentos"],
-      "evidence": { "locator": "jsx-to", "line": 28 }
+      "evidence": { "locator": "jsx-to", "line": 34 }
     },
     {
       "source": "src/components/PublicNav.tsx",
@@ -1754,7 +1798,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/sobre"],
-      "evidence": { "locator": "jsx-to", "line": 14 }
+      "evidence": { "locator": "jsx-to", "line": 20 }
     },
     {
       "source": "src/components/RequireApproved.tsx",
@@ -2258,7 +2302,7 @@
       "classification": "endpoint",
       "status": "not-applicable",
       "matchedRoutes": [],
-      "evidence": { "locator": "fetch", "line": 68 }
+      "evidence": { "locator": "fetch", "line": 69 }
     },
     {
       "source": "src/routes/__root.tsx",
@@ -2270,7 +2314,7 @@
       "classification": "asset",
       "status": "not-applicable",
       "matchedRoutes": [],
-      "evidence": { "locator": "jsx-src", "line": 179 }
+      "evidence": { "locator": "jsx-src", "line": 187 }
     },
     {
       "source": "src/routes/__root.tsx",
@@ -2282,7 +2326,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/inicio"],
-      "evidence": { "locator": "jsx-to", "line": 275 }
+      "evidence": { "locator": "jsx-to", "line": 283 }
     },
     {
       "source": "src/routes/__root.tsx",
@@ -2294,7 +2338,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/manual"],
-      "evidence": { "locator": "jsx-to", "line": 249 }
+      "evidence": { "locator": "jsx-to", "line": 257 }
     },
     {
       "source": "src/routes/__root.tsx",
@@ -2306,7 +2350,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/termos"],
-      "evidence": { "locator": "jsx-to", "line": 243 }
+      "evidence": { "locator": "jsx-to", "line": 251 }
     },
     {
       "source": "src/routes/__root.tsx",
@@ -2318,7 +2362,7 @@
       "classification": "asset",
       "status": "not-applicable",
       "matchedRoutes": [],
-      "evidence": { "locator": "object-href", "line": 127 }
+      "evidence": { "locator": "object-href", "line": 135 }
     },
     {
       "source": "src/routes/__root.tsx",
@@ -2330,7 +2374,7 @@
       "classification": "asset",
       "status": "not-applicable",
       "matchedRoutes": [],
-      "evidence": { "locator": "object-href", "line": 126 }
+      "evidence": { "locator": "object-href", "line": 134 }
     },
     {
       "source": "src/routes/__root.tsx",
@@ -2342,7 +2386,7 @@
       "classification": "asset",
       "status": "not-applicable",
       "matchedRoutes": [],
-      "evidence": { "locator": "object-href", "line": 129 }
+      "evidence": { "locator": "object-href", "line": 137 }
     },
     {
       "source": "src/routes/__root.tsx",
@@ -2354,7 +2398,7 @@
       "classification": "asset",
       "status": "not-applicable",
       "matchedRoutes": [],
-      "evidence": { "locator": "object-href", "line": 130 }
+      "evidence": { "locator": "object-href", "line": 138 }
     },
     {
       "source": "src/routes/__root.tsx",
@@ -2366,7 +2410,7 @@
       "classification": "asset",
       "status": "not-applicable",
       "matchedRoutes": [],
-      "evidence": { "locator": "object-href", "line": 128 }
+      "evidence": { "locator": "object-href", "line": 136 }
     },
     {
       "source": "src/routes/__root.tsx",
@@ -2378,7 +2422,7 @@
       "classification": "asset",
       "status": "not-applicable",
       "matchedRoutes": [],
-      "evidence": { "locator": "object-href", "line": 140 }
+      "evidence": { "locator": "object-href", "line": 148 }
     },
     {
       "source": "src/routes/__root.tsx",
@@ -2390,7 +2434,7 @@
       "classification": "asset",
       "status": "not-applicable",
       "matchedRoutes": [],
-      "evidence": { "locator": "object-href", "line": 139 }
+      "evidence": { "locator": "object-href", "line": 147 }
     },
     {
       "source": "src/routes/__root.tsx",
@@ -2402,7 +2446,7 @@
       "classification": "asset",
       "status": "not-applicable",
       "matchedRoutes": [],
-      "evidence": { "locator": "object-href", "line": 138 }
+      "evidence": { "locator": "object-href", "line": 146 }
     },
     {
       "source": "src/routes/__root.tsx",
@@ -2414,7 +2458,7 @@
       "classification": "asset",
       "status": "not-applicable",
       "matchedRoutes": [],
-      "evidence": { "locator": "object-href", "line": 137 }
+      "evidence": { "locator": "object-href", "line": 145 }
     },
     {
       "source": "src/routes/__root.tsx",
@@ -2426,7 +2470,7 @@
       "classification": "asset",
       "status": "not-applicable",
       "matchedRoutes": [],
-      "evidence": { "locator": "object-href", "line": 136 }
+      "evidence": { "locator": "object-href", "line": 144 }
     },
     {
       "source": "src/routes/__root.tsx",
@@ -2438,7 +2482,7 @@
       "classification": "asset",
       "status": "not-applicable",
       "matchedRoutes": [],
-      "evidence": { "locator": "object-href", "line": 135 }
+      "evidence": { "locator": "object-href", "line": 143 }
     },
     {
       "source": "src/routes/__root.tsx",
@@ -2450,7 +2494,7 @@
       "classification": "asset",
       "status": "not-applicable",
       "matchedRoutes": [],
-      "evidence": { "locator": "object-href", "line": 134 }
+      "evidence": { "locator": "object-href", "line": 142 }
     },
     {
       "source": "src/routes/__root.tsx",
@@ -2462,7 +2506,7 @@
       "classification": "asset",
       "status": "not-applicable",
       "matchedRoutes": [],
-      "evidence": { "locator": "object-href", "line": 133 }
+      "evidence": { "locator": "object-href", "line": 141 }
     },
     {
       "source": "src/routes/__root.tsx",
@@ -2474,7 +2518,7 @@
       "classification": "asset",
       "status": "not-applicable",
       "matchedRoutes": [],
-      "evidence": { "locator": "object-href", "line": 143 }
+      "evidence": { "locator": "object-href", "line": 151 }
     },
     {
       "source": "src/routes/__root.tsx",
@@ -2486,7 +2530,7 @@
       "classification": "asset",
       "status": "not-applicable",
       "matchedRoutes": [],
-      "evidence": { "locator": "object-href", "line": 142 }
+      "evidence": { "locator": "object-href", "line": 150 }
     },
     {
       "source": "src/routes/__root.tsx",
@@ -2498,7 +2542,7 @@
       "classification": "asset",
       "status": "not-applicable",
       "matchedRoutes": [],
-      "evidence": { "locator": "object-href", "line": 141 }
+      "evidence": { "locator": "object-href", "line": 149 }
     },
     {
       "source": "src/routes/__root.tsx",
@@ -2510,7 +2554,7 @@
       "classification": "external",
       "status": "not-applicable",
       "matchedRoutes": [],
-      "evidence": { "locator": "object-href", "line": 117 }
+      "evidence": { "locator": "object-href", "line": 125 }
     },
     {
       "source": "src/routes/__root.tsx",
@@ -2522,7 +2566,7 @@
       "classification": "external",
       "status": "not-applicable",
       "matchedRoutes": [],
-      "evidence": { "locator": "object-href", "line": 146 }
+      "evidence": { "locator": "object-href", "line": 154 }
     },
     {
       "source": "src/routes/__root.tsx",
@@ -2534,7 +2578,7 @@
       "classification": "external",
       "status": "not-applicable",
       "matchedRoutes": [],
-      "evidence": { "locator": "object-href", "line": 118 }
+      "evidence": { "locator": "object-href", "line": 126 }
     },
     {
       "source": "src/routes/admin/avatar.tsx",
@@ -2642,7 +2686,7 @@
       "classification": "endpoint",
       "status": "not-applicable",
       "matchedRoutes": [],
-      "evidence": { "locator": "fetch", "line": 295 }
+      "evidence": { "locator": "fetch", "line": 299 }
     },
     {
       "source": "src/routes/admin/fotos.tsx",
@@ -2654,7 +2698,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/admin/"],
-      "evidence": { "locator": "jsx-to", "line": 475 }
+      "evidence": { "locator": "jsx-to", "line": 479 }
     },
     {
       "source": "src/routes/admin/fotos.tsx",
@@ -2666,7 +2710,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/auth/login"],
-      "evidence": { "locator": "jsx-to", "line": 465 }
+      "evidence": { "locator": "jsx-to", "line": 469 }
     },
     {
       "source": "src/routes/admin/fotos.tsx",
@@ -2678,7 +2722,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/inicio"],
-      "evidence": { "locator": "jsx-to", "line": 466 }
+      "evidence": { "locator": "jsx-to", "line": 470 }
     },
     {
       "source": "src/routes/admin/fotos.tsx",
@@ -2690,7 +2734,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/pretendentes/$id"],
-      "evidence": { "locator": "jsx-to", "line": 710 }
+      "evidence": { "locator": "jsx-to", "line": 714 }
     },
     {
       "source": "src/routes/admin/fotos.tsx",
@@ -2702,7 +2746,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/pretendentes/$id"],
-      "evidence": { "locator": "jsx-to", "line": 885 }
+      "evidence": { "locator": "jsx-to", "line": 889 }
     },
     {
       "source": "src/routes/admin/fotos.tsx",
@@ -2714,7 +2758,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/pretendentes/$id"],
-      "evidence": { "locator": "jsx-to", "line": 1001 }
+      "evidence": { "locator": "jsx-to", "line": 1005 }
     },
     {
       "source": "src/routes/admin/fundos.tsx",
@@ -3038,7 +3082,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/admin/"],
-      "evidence": { "locator": "jsx-to", "line": 130 }
+      "evidence": { "locator": "jsx-to", "line": 156 }
     },
     {
       "source": "src/routes/admin/verificacoes.tsx",
@@ -3050,7 +3094,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/auth/login"],
-      "evidence": { "locator": "jsx-to", "line": 111 }
+      "evidence": { "locator": "jsx-to", "line": 127 }
     },
     {
       "source": "src/routes/admin/verificacoes.tsx",
@@ -3062,19 +3106,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/pretendentes/$id"],
-      "evidence": { "locator": "jsx-to", "line": 175 }
-    },
-    {
-      "source": "src/routes/api/verify-photo.ts",
-      "origin": "src",
-      "fileType": "ts",
-      "kind": "fetch",
-      "target": "https://ai.gateway.lovable.dev/v1/chat/completions",
-      "normalizedTarget": "https://ai.gateway.lovable.dev/v1/chat/completions",
-      "classification": "external",
-      "status": "not-applicable",
-      "matchedRoutes": [],
-      "evidence": { "locator": "fetch", "line": 156 }
+      "evidence": { "locator": "jsx-to", "line": 201 }
     },
     {
       "source": "src/routes/auth/forgot-password.tsx",
@@ -3158,7 +3190,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/auth/login"],
-      "evidence": { "locator": "jsx-to", "line": 120 }
+      "evidence": { "locator": "jsx-to", "line": 122 }
     },
     {
       "source": "src/routes/auth/signup.tsx",
@@ -3170,7 +3202,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/termos"],
-      "evidence": { "locator": "jsx-to", "line": 101 }
+      "evidence": { "locator": "jsx-to", "line": 103 }
     },
     {
       "source": "src/routes/auth/signup.tsx",
@@ -3290,7 +3322,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/auth/signup"],
-      "evidence": { "locator": "jsx-to", "line": 109 }
+      "evidence": { "locator": "jsx-to", "line": 110 }
     },
     {
       "source": "src/routes/blog.$slug.tsx",
@@ -3302,7 +3334,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/blog/"],
-      "evidence": { "locator": "jsx-to", "line": 55 }
+      "evidence": { "locator": "jsx-to", "line": 56 }
     },
     {
       "source": "src/routes/blog.$slug.tsx",
@@ -3314,7 +3346,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/blog/"],
-      "evidence": { "locator": "jsx-to", "line": 72 }
+      "evidence": { "locator": "jsx-to", "line": 73 }
     },
     {
       "source": "src/routes/blog.$slug.tsx",
@@ -3326,7 +3358,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/blog/$slug"],
-      "evidence": { "locator": "jsx-to", "line": 123 }
+      "evidence": { "locator": "jsx-to", "line": 124 }
     },
     {
       "source": "src/routes/blog.$slug.tsx",
@@ -3338,7 +3370,7 @@
       "classification": "asset",
       "status": "not-applicable",
       "matchedRoutes": [],
-      "evidence": { "locator": "object-url", "line": 42 }
+      "evidence": { "locator": "object-url", "line": 43 }
     },
     {
       "source": "src/routes/blog.index.tsx",
@@ -3350,7 +3382,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/blog/$slug"],
-      "evidence": { "locator": "jsx-to", "line": 48 }
+      "evidence": { "locator": "jsx-to", "line": 47 }
     },
     {
       "source": "src/routes/blog.index.tsx",
@@ -3362,7 +3394,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/blog/"],
-      "evidence": { "locator": "object-href", "line": 24 }
+      "evidence": { "locator": "object-href", "line": 23 }
     },
     {
       "source": "src/routes/bloqueados.tsx",
@@ -3422,7 +3454,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/auth/signup"],
-      "evidence": { "locator": "jsx-to", "line": 147 }
+      "evidence": { "locator": "jsx-to", "line": 154 }
     },
     {
       "source": "src/routes/como-funciona.tsx",
@@ -3938,7 +3970,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/auth/signup"],
-      "evidence": { "locator": "jsx-to", "line": 106 }
+      "evidence": { "locator": "jsx-to", "line": 105 }
     },
     {
       "source": "src/routes/depoimentos.tsx",
@@ -3998,7 +4030,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/"],
-      "evidence": { "locator": "object-href", "line": 52 }
+      "evidence": { "locator": "object-href", "line": 54 }
     },
     {
       "source": "src/routes/inicio.tsx",
@@ -4598,7 +4630,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/auth/login"],
-      "evidence": { "locator": "jsx-to", "line": 69 }
+      "evidence": { "locator": "jsx-to", "line": 77 }
     },
     {
       "source": "src/routes/onboarding/etapa-2.tsx",
@@ -4610,7 +4642,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/inicio"],
-      "evidence": { "locator": "navigate", "line": 97 }
+      "evidence": { "locator": "navigate", "line": 105 }
     },
     {
       "source": "src/routes/onboarding/etapa-2.tsx",
@@ -4622,7 +4654,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/inicio"],
-      "evidence": { "locator": "object-to", "line": 97 }
+      "evidence": { "locator": "object-to", "line": 105 }
     },
     {
       "source": "src/routes/onboarding/index.tsx",
@@ -4634,7 +4666,19 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/auth/login"],
-      "evidence": { "locator": "jsx-to", "line": 178 }
+      "evidence": { "locator": "jsx-to", "line": 63 }
+    },
+    {
+      "source": "src/routes/onboarding/index.tsx",
+      "origin": "src",
+      "fileType": "tsx",
+      "kind": "jsx-to",
+      "target": "/auth/login",
+      "normalizedTarget": "/auth/login",
+      "classification": "route",
+      "status": "resolved",
+      "matchedRoutes": ["/auth/login"],
+      "evidence": { "locator": "jsx-to", "line": 211 }
     },
     {
       "source": "src/routes/onboarding/index.tsx",
@@ -4646,7 +4690,19 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/inicio"],
-      "evidence": { "locator": "navigate", "line": 513 }
+      "evidence": { "locator": "navigate", "line": 71 }
+    },
+    {
+      "source": "src/routes/onboarding/index.tsx",
+      "origin": "src",
+      "fileType": "tsx",
+      "kind": "navigate",
+      "target": "/inicio",
+      "normalizedTarget": "/inicio",
+      "classification": "route",
+      "status": "resolved",
+      "matchedRoutes": ["/inicio"],
+      "evidence": { "locator": "navigate", "line": 546 }
     },
     {
       "source": "src/routes/onboarding/index.tsx",
@@ -4658,7 +4714,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/perfil"],
-      "evidence": { "locator": "navigate", "line": 514 }
+      "evidence": { "locator": "navigate", "line": 547 }
     },
     {
       "source": "src/routes/onboarding/index.tsx",
@@ -4670,7 +4726,19 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/inicio"],
-      "evidence": { "locator": "object-to", "line": 513 }
+      "evidence": { "locator": "object-to", "line": 71 }
+    },
+    {
+      "source": "src/routes/onboarding/index.tsx",
+      "origin": "src",
+      "fileType": "tsx",
+      "kind": "object-to",
+      "target": "/inicio",
+      "normalizedTarget": "/inicio",
+      "classification": "route",
+      "status": "resolved",
+      "matchedRoutes": ["/inicio"],
+      "evidence": { "locator": "object-to", "line": 546 }
     },
     {
       "source": "src/routes/onboarding/index.tsx",
@@ -4682,7 +4750,79 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/perfil"],
-      "evidence": { "locator": "object-to", "line": 514 }
+      "evidence": { "locator": "object-to", "line": 547 }
+    },
+    {
+      "source": "src/routes/onboarding/namoro.tsx",
+      "origin": "src",
+      "fileType": "tsx",
+      "kind": "jsx-to",
+      "target": "/auth/login",
+      "normalizedTarget": "/auth/login",
+      "classification": "route",
+      "status": "resolved",
+      "matchedRoutes": ["/auth/login"],
+      "evidence": { "locator": "jsx-to", "line": 30 }
+    },
+    {
+      "source": "src/routes/onboarding/namoro.tsx",
+      "origin": "src",
+      "fileType": "tsx",
+      "kind": "jsx-to",
+      "target": "/inicio",
+      "normalizedTarget": "/inicio",
+      "classification": "route",
+      "status": "resolved",
+      "matchedRoutes": ["/inicio"],
+      "evidence": { "locator": "jsx-to", "line": 22 }
+    },
+    {
+      "source": "src/routes/onboarding/namoro.tsx",
+      "origin": "src",
+      "fileType": "tsx",
+      "kind": "navigate",
+      "target": "/inicio",
+      "normalizedTarget": "/inicio",
+      "classification": "route",
+      "status": "resolved",
+      "matchedRoutes": ["/inicio"],
+      "evidence": { "locator": "navigate", "line": 43 }
+    },
+    {
+      "source": "src/routes/onboarding/namoro.tsx",
+      "origin": "src",
+      "fileType": "tsx",
+      "kind": "navigate",
+      "target": "/inicio",
+      "normalizedTarget": "/inicio",
+      "classification": "route",
+      "status": "resolved",
+      "matchedRoutes": ["/inicio"],
+      "evidence": { "locator": "navigate", "line": 56 }
+    },
+    {
+      "source": "src/routes/onboarding/namoro.tsx",
+      "origin": "src",
+      "fileType": "tsx",
+      "kind": "object-to",
+      "target": "/inicio",
+      "normalizedTarget": "/inicio",
+      "classification": "route",
+      "status": "resolved",
+      "matchedRoutes": ["/inicio"],
+      "evidence": { "locator": "object-to", "line": 43 }
+    },
+    {
+      "source": "src/routes/onboarding/namoro.tsx",
+      "origin": "src",
+      "fileType": "tsx",
+      "kind": "object-to",
+      "target": "/inicio",
+      "normalizedTarget": "/inicio",
+      "classification": "route",
+      "status": "resolved",
+      "matchedRoutes": ["/inicio"],
+      "evidence": { "locator": "object-to", "line": 56 }
     },
     {
       "source": "src/routes/oracoes.tsx",
@@ -4730,7 +4870,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/inicio"],
-      "evidence": { "locator": "jsx-to", "line": 1694 }
+      "evidence": { "locator": "jsx-to", "line": 1692 }
     },
     {
       "source": "src/routes/perfil.tsx",
@@ -4742,7 +4882,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/loja"],
-      "evidence": { "locator": "jsx-to", "line": 841 }
+      "evidence": { "locator": "jsx-to", "line": 839 }
     },
     {
       "source": "src/routes/perfil.tsx",
@@ -4754,7 +4894,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/pretendentes/$id"],
-      "evidence": { "locator": "jsx-to", "line": 834 }
+      "evidence": { "locator": "jsx-to", "line": 832 }
     },
     {
       "source": "src/routes/perfil.tsx",
@@ -4766,7 +4906,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/proposito/$matchId"],
-      "evidence": { "locator": "jsx-to", "line": 931 }
+      "evidence": { "locator": "jsx-to", "line": 929 }
     },
     {
       "source": "src/routes/pet-arcade.tsx",
@@ -5006,7 +5146,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/auth/signup"],
-      "evidence": { "locator": "jsx-to", "line": 97 }
+      "evidence": { "locator": "jsx-to", "line": 96 }
     },
     {
       "source": "src/routes/sobre.tsx",
@@ -5441,6 +5581,18 @@
       "evidence": { "locator": "object-href", "line": 12 }
     },
     {
+      "source": "src/v2/features/onboarding/repository.ts",
+      "origin": "src",
+      "fileType": "ts",
+      "kind": "template-url",
+      "target": "${data.publicUrl}?v=${Date.now()}",
+      "normalizedTarget": "${data.publicUrl}?v=${Date.now()}",
+      "classification": "dynamic",
+      "status": "requires-investigation",
+      "matchedRoutes": [],
+      "evidence": { "locator": "template-url", "line": 111 }
+    },
+    {
       "source": "src/v2/integration/route-registry.ts",
       "origin": "src",
       "fileType": "ts",
@@ -5450,7 +5602,7 @@
       "classification": "dynamic",
       "status": "requires-investigation",
       "matchedRoutes": [],
-      "evidence": { "locator": "template-href", "line": 173 }
+      "evidence": { "locator": "template-href", "line": 185 }
     },
     {
       "source": "src/v2/integration/V2RuntimeShell.tsx",
@@ -5462,7 +5614,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/v2/$section"],
-      "evidence": { "locator": "object-href", "line": 53 }
+      "evidence": { "locator": "object-href", "line": 57 }
     },
     {
       "source": "src/v2/integration/V2RuntimeShell.tsx",
@@ -5474,7 +5626,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/v2/$section"],
-      "evidence": { "locator": "object-href", "line": 54 }
+      "evidence": { "locator": "object-href", "line": 58 }
     },
     {
       "source": "src/v2/integration/V2ShellRuntimeRoute.tsx",
@@ -5486,7 +5638,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/bloqueados"],
-      "evidence": { "locator": "navigate", "line": 57 }
+      "evidence": { "locator": "navigate", "line": 61 }
     },
     {
       "source": "src/v2/integration/V2ShellRuntimeRoute.tsx",
@@ -5498,7 +5650,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/manual"],
-      "evidence": { "locator": "navigate", "line": 66 }
+      "evidence": { "locator": "navigate", "line": 70 }
     },
     {
       "source": "src/v2/integration/V2ShellRuntimeRoute.tsx",
@@ -5510,7 +5662,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/notificacoes"],
-      "evidence": { "locator": "navigate", "line": 60 }
+      "evidence": { "locator": "navigate", "line": 64 }
     },
     {
       "source": "src/v2/integration/V2ShellRuntimeRoute.tsx",
@@ -5522,7 +5674,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/perfil"],
-      "evidence": { "locator": "navigate", "line": 51 }
+      "evidence": { "locator": "navigate", "line": 55 }
     },
     {
       "source": "src/v2/integration/V2ShellRuntimeRoute.tsx",
@@ -5534,7 +5686,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/suporte/"],
-      "evidence": { "locator": "navigate", "line": 63 }
+      "evidence": { "locator": "navigate", "line": 67 }
     },
     {
       "source": "src/v2/integration/V2ShellRuntimeRoute.tsx",
@@ -5546,7 +5698,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/termos"],
-      "evidence": { "locator": "navigate", "line": 69 }
+      "evidence": { "locator": "navigate", "line": 73 }
     },
     {
       "source": "src/v2/integration/V2ShellRuntimeRoute.tsx",
@@ -5558,7 +5710,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/v2/$section"],
-      "evidence": { "locator": "navigate", "line": 95 }
+      "evidence": { "locator": "navigate", "line": 101 }
     },
     {
       "source": "src/v2/integration/V2ShellRuntimeRoute.tsx",
@@ -5570,7 +5722,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/verificacao"],
-      "evidence": { "locator": "navigate", "line": 54 }
+      "evidence": { "locator": "navigate", "line": 58 }
     },
     {
       "source": "src/v2/integration/V2ShellRuntimeRoute.tsx",
@@ -5582,7 +5734,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/bloqueados"],
-      "evidence": { "locator": "object-to", "line": 57 }
+      "evidence": { "locator": "object-to", "line": 61 }
     },
     {
       "source": "src/v2/integration/V2ShellRuntimeRoute.tsx",
@@ -5594,7 +5746,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/manual"],
-      "evidence": { "locator": "object-to", "line": 66 }
+      "evidence": { "locator": "object-to", "line": 70 }
     },
     {
       "source": "src/v2/integration/V2ShellRuntimeRoute.tsx",
@@ -5606,7 +5758,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/notificacoes"],
-      "evidence": { "locator": "object-to", "line": 60 }
+      "evidence": { "locator": "object-to", "line": 64 }
     },
     {
       "source": "src/v2/integration/V2ShellRuntimeRoute.tsx",
@@ -5618,7 +5770,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/perfil"],
-      "evidence": { "locator": "object-to", "line": 51 }
+      "evidence": { "locator": "object-to", "line": 55 }
     },
     {
       "source": "src/v2/integration/V2ShellRuntimeRoute.tsx",
@@ -5630,7 +5782,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/suporte/"],
-      "evidence": { "locator": "object-to", "line": 63 }
+      "evidence": { "locator": "object-to", "line": 67 }
     },
     {
       "source": "src/v2/integration/V2ShellRuntimeRoute.tsx",
@@ -5642,7 +5794,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/termos"],
-      "evidence": { "locator": "object-to", "line": 69 }
+      "evidence": { "locator": "object-to", "line": 73 }
     },
     {
       "source": "src/v2/integration/V2ShellRuntimeRoute.tsx",
@@ -5654,7 +5806,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/v2/$section"],
-      "evidence": { "locator": "object-to", "line": 95 }
+      "evidence": { "locator": "object-to", "line": 101 }
     },
     {
       "source": "src/v2/integration/V2ShellRuntimeRoute.tsx",
@@ -5666,7 +5818,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/verificacao"],
-      "evidence": { "locator": "object-to", "line": 54 }
+      "evidence": { "locator": "object-to", "line": 58 }
     },
     {
       "source": "tests/app-shell-components-v2.test.tsx",
@@ -5717,6 +5869,42 @@
       "evidence": { "locator": "jsx-href", "line": 33 }
     },
     {
+      "source": "tests/application-security-v2.test.ts",
+      "origin": "tests",
+      "fileType": "ts",
+      "kind": "jsx-href",
+      "target": "https://example.org/read",
+      "normalizedTarget": "https://example.org/read",
+      "classification": "external",
+      "status": "not-applicable",
+      "matchedRoutes": [],
+      "evidence": { "locator": "jsx-href", "line": 62 }
+    },
+    {
+      "source": "tests/application-security-v2.test.ts",
+      "origin": "tests",
+      "fileType": "ts",
+      "kind": "jsx-href",
+      "target": "https://example.org/read",
+      "normalizedTarget": "https://example.org/read",
+      "classification": "external",
+      "status": "not-applicable",
+      "matchedRoutes": [],
+      "evidence": { "locator": "jsx-href", "line": 63 }
+    },
+    {
+      "source": "tests/application-security-v2.test.ts",
+      "origin": "tests",
+      "fileType": "ts",
+      "kind": "jsx-src",
+      "target": "https://attacker.test",
+      "normalizedTarget": "https://attacker.test",
+      "classification": "external",
+      "status": "not-applicable",
+      "matchedRoutes": [],
+      "evidence": { "locator": "jsx-src", "line": 53 }
+    },
+    {
       "source": "tests/design-system-components-v2.test.tsx",
       "origin": "tests",
       "fileType": "tsx",
@@ -5751,6 +5939,78 @@
       "status": "resolved",
       "matchedRoutes": ["/inicio"],
       "evidence": { "locator": "jsx-href", "line": 61 }
+    },
+    {
+      "source": "tests/onboarding-integration-v2.test.tsx",
+      "origin": "tests",
+      "fileType": "tsx",
+      "kind": "object-url",
+      "target": "https://example.test/photo.jpg",
+      "normalizedTarget": "https://example.test/photo.jpg",
+      "classification": "external",
+      "status": "not-applicable",
+      "matchedRoutes": [],
+      "evidence": { "locator": "object-url", "line": 14 }
+    },
+    {
+      "source": "tests/photo-repair-security-v2.test.ts",
+      "origin": "tests",
+      "fileType": "ts",
+      "kind": "request",
+      "target": "https://app.example/api/photo-repair",
+      "normalizedTarget": "https://app.example/api/photo-repair",
+      "classification": "external",
+      "status": "not-applicable",
+      "matchedRoutes": [],
+      "evidence": { "locator": "request", "line": 21 }
+    },
+    {
+      "source": "tests/public-acquisition-v2.test.ts",
+      "origin": "tests",
+      "fileType": "ts",
+      "kind": "object-url",
+      "target": "/comunidade",
+      "normalizedTarget": "/comunidade",
+      "classification": "route",
+      "status": "resolved",
+      "matchedRoutes": ["/comunidade"],
+      "evidence": { "locator": "object-url", "line": 82 }
+    },
+    {
+      "source": "tests/public-acquisition-v2.test.ts",
+      "origin": "tests",
+      "fileType": "ts",
+      "kind": "object-url",
+      "target": "/inicio",
+      "normalizedTarget": "/inicio",
+      "classification": "route",
+      "status": "resolved",
+      "matchedRoutes": ["/inicio"],
+      "evidence": { "locator": "object-url", "line": 81 }
+    },
+    {
+      "source": "tests/push-dispatch-atomic-rls.test.ts",
+      "origin": "tests",
+      "fileType": "ts",
+      "kind": "object-url",
+      "target": "/inicio",
+      "normalizedTarget": "/inicio",
+      "classification": "route",
+      "status": "resolved",
+      "matchedRoutes": ["/inicio"],
+      "evidence": { "locator": "object-url", "line": 25 }
+    },
+    {
+      "source": "tests/push-dispatch-atomic-v2.test.ts",
+      "origin": "tests",
+      "fileType": "ts",
+      "kind": "object-url",
+      "target": "/conversas/match-1",
+      "normalizedTarget": "/conversas/match-1",
+      "classification": "route",
+      "status": "resolved",
+      "matchedRoutes": ["/conversas/$matchId"],
+      "evidence": { "locator": "object-url", "line": 23 }
     },
     {
       "source": "tests/push-dispatch-auth.test.ts",

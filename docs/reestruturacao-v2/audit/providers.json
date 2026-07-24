@@ -101,7 +101,7 @@
         "supabase": true,
         "fetch": false,
         "query": true,
-        "rpc": false,
+        "rpc": true,
         "realtime": true,
         "subscriptions": true,
         "networkActivity": true,
