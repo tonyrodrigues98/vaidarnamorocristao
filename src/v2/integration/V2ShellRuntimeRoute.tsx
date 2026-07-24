@@ -7,6 +7,7 @@ import type { V2ShellNavigationItem } from "@/v2/app-shell";
 import { V2AccountRuntimeFeature, type AccountNavigationTarget } from "@/v2/features/account";
 import { V2CommunityHubFeature } from "@/v2/features/community";
 import { V2ConversationsFeature } from "@/v2/features/conversations";
+import { V2DatingFeature } from "@/v2/features/dating";
 import { V2CommunityHomeFeature, V2PeopleDiscoveryFeature } from "@/v2/features/home";
 import { V2ProfileFeature } from "@/v2/features/profile";
 import { createV2ShellUser, performV2Logout, resolveV2RuntimeAccess } from "./contracts";
@@ -15,7 +16,7 @@ import { V2RuntimeShell } from "./V2RuntimeShell";
 import { V2RuntimeState } from "./V2RuntimeState";
 
 export function V2ShellRuntimeRoute({ slug }: { readonly slug: string }) {
-  const { user, status, signOut, identity } = useAuth();
+  const { user, status, signOut, identity, refreshRole } = useAuth();
   const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
   const router = useRouter();
@@ -115,6 +116,21 @@ export function V2ShellRuntimeRoute({ slug }: { readonly slug: string }) {
     }
     if (v2FeatureFlags.profile && route?.slug === "perfil") {
       return <V2ProfileFeature userId={user.id} />;
+    }
+    if (v2FeatureFlags.dating && route?.slug === "pretendentes") {
+      return (
+        <V2DatingFeature
+          userId={user.id}
+          onReviewPreferences={() => void navigate({ to: "/onboarding/namoro" })}
+          onMembershipExit={async () => {
+            await refreshRole();
+            await navigate({ to: "/v2/$section", params: { section: "inicio" } });
+          }}
+          onOpenConversations={() =>
+            void navigate({ to: "/v2/$section", params: { section: "conversas" } })
+          }
+        />
+      );
     }
     return undefined;
   })();
