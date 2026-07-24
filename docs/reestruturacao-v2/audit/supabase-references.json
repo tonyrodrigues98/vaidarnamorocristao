@@ -33,7 +33,11 @@
       "src/routes/inicio.tsx",
       "src/routes/noticias.index.tsx"
     ],
-    "dating_memberships": ["src/lib/auth.tsx", "src/v2/features/onboarding/repository.ts"],
+    "dating_memberships": [
+      "src/lib/auth.tsx",
+      "src/v2/features/dating/repository.ts",
+      "src/v2/features/onboarding/repository.ts"
+    ],
     "devotional_comment_likes": ["src/routes/devocional.tsx"],
     "devotional_comment_reports": ["src/routes/devocional.tsx"],
     "devotional_comments": ["src/components/MissionsPanel.tsx", "src/routes/devocional.tsx"],

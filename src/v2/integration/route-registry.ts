@@ -104,7 +104,8 @@ const V2_RUNTIME_ROUTES = Object.freeze([
     title: "Pretendentes",
     subtitle: "Uma área opcional e separada da participação comunitária.",
     eyebrow: "Namoro",
-    description: "As regras e os dados românticos existentes não foram alterados nesta etapa.",
+    description:
+      "Descoberta opcional, server-authoritative e separada da comunidade, com interesses e matches legados preservados.",
     icon: HeartHandshake,
     primary: false,
     requiredDomain: "dating",

@@ -2707,6 +2707,7 @@
         "tests/community-hub-security-v2.test.ts",
         "tests/community-social-security-v2.test.ts",
         "tests/conversations-security-v2.test.ts",
+        "tests/dating-mode-security-v2.test.ts",
         "tests/dating-opt-in-v2.test.ts",
         "tests/foundation-v2.test.ts",
         "tests/helpers.ts",
@@ -3099,7 +3100,20 @@
       },
       "queryHooks": [],
       "realtimeSubscriptions": 0,
-      "linksIn": [],
+      "linksIn": [
+        {
+          "source": "src/v2/integration/V2ShellRuntimeRoute.tsx",
+          "origin": "src",
+          "kind": "object-to",
+          "target": "/onboarding/namoro"
+        },
+        {
+          "source": "src/v2/integration/V2ShellRuntimeRoute.tsx",
+          "origin": "src",
+          "kind": "navigate",
+          "target": "/onboarding/namoro"
+        }
+      ],
       "tests": ["tests/dating-opt-in-v2.test.ts"],
       "notes": []
     },
@@ -3610,6 +3624,7 @@
       ],
       "tests": [
         "tests/community-home-boundaries-v2.test.tsx",
+        "tests/dating-mode-security-v2.test.ts",
         "tests/legacy-pwa-characterization-v2.test.ts",
         "tests/pretendentes-eligibility.test.ts",
         "tests/public-acquisition-v2.test.ts"
@@ -4376,6 +4391,30 @@
           "source": "src/v2/integration/V2ShellRuntimeRoute.tsx",
           "origin": "src",
           "kind": "object-to",
+          "target": "/v2/$section"
+        },
+        {
+          "source": "src/v2/integration/V2ShellRuntimeRoute.tsx",
+          "origin": "src",
+          "kind": "object-to",
+          "target": "/v2/$section"
+        },
+        {
+          "source": "src/v2/integration/V2ShellRuntimeRoute.tsx",
+          "origin": "src",
+          "kind": "object-to",
+          "target": "/v2/$section"
+        },
+        {
+          "source": "src/v2/integration/V2ShellRuntimeRoute.tsx",
+          "origin": "src",
+          "kind": "navigate",
+          "target": "/v2/$section"
+        },
+        {
+          "source": "src/v2/integration/V2ShellRuntimeRoute.tsx",
+          "origin": "src",
+          "kind": "navigate",
           "target": "/v2/$section"
         },
         {

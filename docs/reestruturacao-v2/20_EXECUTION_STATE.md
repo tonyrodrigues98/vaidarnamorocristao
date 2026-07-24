@@ -26,7 +26,9 @@
   `14d475a66daf78ff070fb799f193b8378aa47d06`.
 - V2-012 está no Draft PR #20, branch `rebuild/v2-012-conversations`, commit
   `77f6c635c6a327adf4920c29d011957a2de1a6f8`.
-- Lote ativo: V2-013 em `rebuild/v2-013-modular-profile`, empilhado sobre a V2-012.
+- V2-013 está no Draft PR #21, branch `rebuild/v2-013-modular-profile`, commit
+  `15a8dacbaf9a4ffa406a15fbb4259956c73d8ae0`.
+- Lote ativo: V2-014 em `rebuild/v2-014-dating-mode`, empilhado sobre a V2-013.
   Nenhum PR da pilha foi mesclado ou publicado.
 
 ## Concluído
@@ -100,11 +102,11 @@
 ## Evidência de validação
 
 - Instalação congelada e TypeScript: aprovados.
-- Suíte segura: 52 arquivos e 386 testes aprovados.
+- Suíte segura: 55 arquivos e 407 testes aprovados.
 - ESLint e Prettier focados: aprovados.
 - Build TanStack/Vite cliente e SSR: aprovado; warnings de dependências são
   baseline.
-- Auditoria reproduzível: 69 rotas, 491 referências, 490 módulos, 2.755 imports,
+- Auditoria reproduzível: 69 rotas, 497 referências, 495 módulos, 2.772 imports,
   um ciclo gerado conhecido e zero ciclos em `src/v2`.
 - Smoke isolado aprovado em 320, 360, 390, 430, 768, 1024 e 1440 px, sem overflow
   horizontal; nenhum backend foi carregado.
@@ -210,11 +212,27 @@
   concorrência otimista.
 - Perfil legado e edição dos dados-base permanecem como fallback.
 
+## V2-014 — Modo Namoro opcional
+
+- `/v2/pretendentes` integra descoberta romântica somente com flag e capability
+  canônicas ativas; Comunidade não concede disponibilidade romântica.
+- Estados inativo, ativo, pausado, confirmação legada, comprometido e restrito
+  são distintos e falham fechados.
+- A regra atual foi encapsulada como `legacy-opposite-sex-v1`; qualquer mudança
+  bilateral futura exige decisão de produto explícita.
+- Descoberta server-authoritative aplica membership ativa nos dois lados,
+  preferências do observador, bloqueio bilateral, Propósito e staff oculto.
+- Paginação por cursor, histórico de impressão, interesse idempotente, lock por
+  dupla e match canônico são preparados por migration aditiva não aplicada.
+- Pausa, desativação, bloqueio e denúncia preservam interesses, matches,
+  conversas e histórico legítimo.
+- O legado `/pretendentes` permanece reversível e nenhum dado foi removido.
+
 ## Próximo lote
 
 - Validar as migrations de capabilities e push em Supabase descartável antes de
   qualquer rollout.
 - Manter qualquer conclusão sobre ACL/RLS publicado como não verificada até
   existir snapshot autenticado e ambiente Supabase descartável.
-- Validar e publicar o Draft PR da V2-013; depois iniciar a V2-014 em branch
+- Validar e publicar o Draft PR da V2-014; depois iniciar a V2-015 em branch
   empilhada, sem aplicar migrations ou ativar flags.
