@@ -65,7 +65,7 @@ const V2_RUNTIME_ROUTES = Object.freeze([
     subtitle: "Grupos, reflexões e atividades para caminhar junto.",
     eyebrow: "Convivência",
     description:
-      "Grupos e publicações ainda não estão ativos. Nenhum conteúdo exibido aqui é persistido.",
+      "Espaços, eventos, presença e o histórico do chat global em uma experiência comunitária independente do Namoro.",
     icon: UsersRound,
     primary: true,
     requiredDomain: "community",

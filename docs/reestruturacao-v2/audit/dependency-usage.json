@@ -364,12 +364,14 @@
         "src/v2/app/auth/private-cache.ts",
         "src/v2/app/router-context.ts",
         "src/v2/features/account/remote/use-account-controller.ts",
+        "src/v2/features/community/V2CommunityHub.tsx",
         "src/v2/features/home/V2CommunityHome.tsx",
         "src/v2/features/home/V2PeopleDiscovery.tsx"
       ],
       "testFiles": [
         "tests/auth-cache-isolation-v2.test.ts",
-        "tests/community-home-boundaries-v2.test.tsx"
+        "tests/community-home-boundaries-v2.test.tsx",
+        "tests/community-hub-boundaries-v2.test.tsx"
       ],
       "configReferences": ["RELATORIO_LOJA_QUERY_PARTE1.md"],
       "classification": "directly-imported"
@@ -954,6 +956,7 @@
         "src/v2/design-system/showcase/V2DesignSystemShowcase.tsx",
         "src/v2/features/account/presentation/V2AccountSettings.tsx",
         "src/v2/features/account/showcase/V2AccountShowcase.tsx",
+        "src/v2/features/community/V2CommunityHub.tsx",
         "src/v2/features/home/V2CommunityHome.tsx",
         "src/v2/features/home/V2PeopleDiscovery.tsx",
         "src/v2/features/onboarding/CommunityOnboardingFlow.tsx",
@@ -1239,6 +1242,7 @@
         "src/v2/features/account/remote/use-account-controller.ts",
         "src/v2/features/account/showcase/main.tsx",
         "src/v2/features/account/showcase/V2AccountShowcase.tsx",
+        "src/v2/features/community/V2CommunityHub.tsx",
         "src/v2/features/home/V2CommunityHome.tsx",
         "src/v2/features/home/V2PeopleDiscovery.tsx",
         "src/v2/features/onboarding/CommunityOnboardingFlow.tsx",
@@ -1300,6 +1304,7 @@
         "tests/app-shell-components-v2.test.tsx",
         "tests/app-shell-integration-components-v2.test.tsx",
         "tests/community-home-boundaries-v2.test.tsx",
+        "tests/community-hub-boundaries-v2.test.tsx",
         "tests/design-system-components-v2.test.tsx",
         "tests/onboarding-integration-v2.test.tsx",
         "tests/use-long-press.test.ts"
@@ -1507,6 +1512,7 @@
         "RELATORIO_CONSOLIDADO_OFFLINE.md",
         "scripts/audit-legacy.mjs",
         "supabase/migrations/20260504005517_cd901a08-cd44-4f2e-921a-0323fb426f53.sql",
+        "supabase/migrations/20260723000006_v2_community_spaces_events.sql",
         "tsconfig.json",
         "vite.config.ts"
       ],
@@ -1548,6 +1554,9 @@
         "tests/chat-e2e.test.ts",
         "tests/community-home-boundaries-v2.test.tsx",
         "tests/community-home-v2.test.ts",
+        "tests/community-hub-boundaries-v2.test.tsx",
+        "tests/community-hub-security-v2.test.ts",
+        "tests/community-hub-v2.test.ts",
         "tests/community-onboarding-v2.test.ts",
         "tests/community-social-security-v2.test.ts",
         "tests/dating-opt-in-v2.test.ts",

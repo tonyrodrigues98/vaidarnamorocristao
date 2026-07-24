@@ -1522,6 +1522,7 @@
         "tests/app-shell-integration-contracts-v2.test.ts",
         "tests/application-security-v2.test.ts",
         "tests/community-home-boundaries-v2.test.tsx",
+        "tests/community-hub-boundaries-v2.test.tsx",
         "tests/design-system-components-v2.test.tsx",
         "tests/legacy-route-characterization-v2.test.ts",
         "tests/public-acquisition-v2.test.ts"
@@ -2701,6 +2702,8 @@
       "tests": [
         "tests/chat-e2e.test.ts",
         "tests/community-home-v2.test.ts",
+        "tests/community-hub-boundaries-v2.test.tsx",
+        "tests/community-hub-security-v2.test.ts",
         "tests/community-social-security-v2.test.ts",
         "tests/dating-opt-in-v2.test.ts",
         "tests/foundation-v2.test.ts",

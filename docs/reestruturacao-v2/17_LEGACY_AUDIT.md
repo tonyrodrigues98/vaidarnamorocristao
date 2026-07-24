@@ -47,10 +47,10 @@ idênticos.
 - A análise estática encontrou **31 arquivos-fonte potencialmente órfãos**, **2 contratos usados
   somente por testes**, **146 assets sem referência por basename** e **10 dependências sem uso
   direto/configurado detectável**. Nenhum deles é declarado seguro para excluir nesta etapa.
-- O grafo de 472 módulos e 2.694 imports tem um ciclo conhecido entre `router.tsx` e
+- O grafo de 477 módulos e 2.710 imports tem um ciclo conhecido entre `router.tsx` e
   `routeTree.gen.ts`, causado
   pelo registro de tipos gerado. Não há ciclos em `src/v2`.
-- O código referencia **71 tabelas/views**, **98 RPCs**, **6 buckets** e **10 nomes de canais
+- O código referencia **71 tabelas/views**, **98 RPCs**, **6 buckets** e **11 nomes de canais
   Realtime**. Isso é inventário de uso do código, não prova de existência ou ACL no banco
   publicado.
 - Foram reconfirmados riscos de segurança já documentados: parâmetros de moedas/XP/progresso

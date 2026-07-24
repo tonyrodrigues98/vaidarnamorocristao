@@ -385,7 +385,8 @@
     "matches-list": ["src/routes/matches.tsx"],
     "message-flags": ["src/routes/conversas/comunidade.tsx"],
     "prayer-requests-live": ["src/routes/oracoes.tsx"],
-    "support_tickets_list": ["src/routes/suporte/index.tsx"]
+    "support_tickets_list": ["src/routes/suporte/index.tsx"],
+    "v2-community-global-messages": ["src/v2/features/community/repository.ts"]
   },
   "authFiles": [
     "src/components/SocialAuthButtons.tsx",
