@@ -26,10 +26,15 @@ import { RouteProtectionBoundary } from "@/v2/app/routing/RouteProtectionBoundar
 import { shouldMountPrivateProviders } from "@/v2/app/routing/route-access";
 import { v2FeatureFlags } from "@/v2/platform/feature-flags";
 import { isV2RuntimePath, V2RuntimeState } from "@/v2/integration";
+import {
+  configureSupabaseRuntime,
+  hasSupabaseRuntimeConfig,
+  type PublicSupabaseRuntimeConfig,
+} from "@/integrations/supabase/client";
 
 import appCss from "../styles.css?url";
 import coinPng from "@/assets/coin.webp";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { registerAppServiceWorker } from "@/lib/registerSW";
 
 function NotFoundComponent() {
@@ -218,7 +223,8 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        <AuthProvider>
+        <SupabaseRuntimeBoundary>
+          <AuthProvider>
           <V2AwareRouteBoundary isV2Route={isV2Route}>
             <AuthenticatedProviderBoundary>
               <MobileAppShell>
@@ -258,11 +264,82 @@ function RootComponent() {
               </MobileAppShell>
             </AuthenticatedProviderBoundary>
           </V2AwareRouteBoundary>
-          <Toaster richColors position="top-right" />
-        </AuthProvider>
+            <Toaster richColors position="top-right" />
+          </AuthProvider>
+        </SupabaseRuntimeBoundary>
       </ThemeProvider>
     </QueryClientProvider>
   );
+}
+
+function SupabaseRuntimeBoundary({ children }: { children: React.ReactNode }) {
+  const [attempt, setAttempt] = useState(0);
+  const [state, setState] = useState<"loading" | "ready" | "error">("loading");
+
+  useEffect(() => {
+    let active = true;
+
+    async function resolveRuntimeConfig() {
+      if (hasSupabaseRuntimeConfig()) {
+        if (active) setState("ready");
+        return;
+      }
+
+      try {
+        const response = await fetch("/api/public/runtime-config", {
+          credentials: "same-origin",
+          headers: { Accept: "application/json" },
+        });
+        if (!response.ok) throw new Error("Runtime configuration unavailable");
+
+        const config = (await response.json()) as PublicSupabaseRuntimeConfig;
+        configureSupabaseRuntime(config);
+        if (active) setState("ready");
+      } catch {
+        if (active) setState("error");
+      }
+    }
+
+    void resolveRuntimeConfig();
+    return () => {
+      active = false;
+    };
+  }, [attempt]);
+
+  if (state === "loading") {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-background px-4">
+        <p role="status" className="text-sm text-muted-foreground">
+          Carregando sua comunidade...
+        </p>
+      </main>
+    );
+  }
+
+  if (state === "error") {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-background px-4">
+        <div className="max-w-sm text-center">
+          <h1 className="text-xl font-semibold text-foreground">Não foi possível iniciar</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Verifique sua conexão e tente novamente.
+          </p>
+          <button
+            type="button"
+            className="mt-5 min-h-11 rounded-md bg-primary px-5 py-2 text-sm font-medium text-primary-foreground"
+            onClick={() => {
+              setState("loading");
+              setAttempt((value) => value + 1);
+            }}
+          >
+            Tentar novamente
+          </button>
+        </div>
+      </main>
+    );
+  }
+
+  return <>{children}</>;
 }
 
 function V2AwareRouteBoundary({
