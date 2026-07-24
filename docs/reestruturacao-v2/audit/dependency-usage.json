@@ -363,9 +363,14 @@
         "src/routes/pretendentes/index.tsx",
         "src/v2/app/auth/private-cache.ts",
         "src/v2/app/router-context.ts",
-        "src/v2/features/account/remote/use-account-controller.ts"
+        "src/v2/features/account/remote/use-account-controller.ts",
+        "src/v2/features/home/V2CommunityHome.tsx",
+        "src/v2/features/home/V2PeopleDiscovery.tsx"
       ],
-      "testFiles": ["tests/auth-cache-isolation-v2.test.ts"],
+      "testFiles": [
+        "tests/auth-cache-isolation-v2.test.ts",
+        "tests/community-home-boundaries-v2.test.tsx"
+      ],
       "configReferences": ["RELATORIO_LOJA_QUERY_PARTE1.md"],
       "classification": "directly-imported"
     },
@@ -456,6 +461,7 @@
         "src/routes/loja.tsx",
         "src/routes/manual.tsx",
         "src/routes/matches.tsx",
+        "src/routes/membros.tsx",
         "src/routes/meu-pet.tsx",
         "src/routes/noticias.index.tsx",
         "src/routes/notificacoes.tsx",
@@ -948,6 +954,8 @@
         "src/v2/design-system/showcase/V2DesignSystemShowcase.tsx",
         "src/v2/features/account/presentation/V2AccountSettings.tsx",
         "src/v2/features/account/showcase/V2AccountShowcase.tsx",
+        "src/v2/features/home/V2CommunityHome.tsx",
+        "src/v2/features/home/V2PeopleDiscovery.tsx",
         "src/v2/features/onboarding/CommunityOnboardingFlow.tsx",
         "src/v2/features/onboarding/DatingOptInFlow.tsx",
         "src/v2/integration/route-registry.ts",
@@ -1231,6 +1239,8 @@
         "src/v2/features/account/remote/use-account-controller.ts",
         "src/v2/features/account/showcase/main.tsx",
         "src/v2/features/account/showcase/V2AccountShowcase.tsx",
+        "src/v2/features/home/V2CommunityHome.tsx",
+        "src/v2/features/home/V2PeopleDiscovery.tsx",
         "src/v2/features/onboarding/CommunityOnboardingFlow.tsx",
         "src/v2/features/onboarding/DatingOptInFlow.tsx",
         "src/v2/integration/V2RuntimeErrorBoundary.tsx",
@@ -1253,6 +1263,7 @@
         "supabase/migrations/20260514145149_861821ce-92ca-4bac-a7a8-0948b75b7a77.sql",
         "supabase/migrations/20260514201403_31b51a2e-bcd4-487c-b732-ef0cd14f848e.sql",
         "supabase/migrations/20260514203656_830c7150-efbc-45ac-bd91-fdb3e0319c7d.sql",
+        "supabase/migrations/20260723000005_v2_social_home_links_status.sql",
         "tsconfig.json"
       ],
       "classification": "directly-imported"
@@ -1288,6 +1299,7 @@
         "tests/account-components-v2.test.tsx",
         "tests/app-shell-components-v2.test.tsx",
         "tests/app-shell-integration-components-v2.test.tsx",
+        "tests/community-home-boundaries-v2.test.tsx",
         "tests/design-system-components-v2.test.tsx",
         "tests/onboarding-integration-v2.test.tsx",
         "tests/use-long-press.test.ts"
@@ -1534,7 +1546,10 @@
         "tests/auth-navigation-v2.test.ts",
         "tests/auth-session-v2.test.ts",
         "tests/chat-e2e.test.ts",
+        "tests/community-home-boundaries-v2.test.tsx",
+        "tests/community-home-v2.test.ts",
         "tests/community-onboarding-v2.test.ts",
+        "tests/community-social-security-v2.test.ts",
         "tests/dating-opt-in-v2.test.ts",
         "tests/design-system-boundaries-v2.test.ts",
         "tests/design-system-components-v2.test.tsx",

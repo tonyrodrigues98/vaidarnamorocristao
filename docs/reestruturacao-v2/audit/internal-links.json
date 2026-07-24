@@ -5,7 +5,7 @@
     "generatedFrom": "working-tree-derived-from-audited-base",
     "sourceState": "pre-commit-working-tree"
   },
-  "total": 485,
+  "total": 489,
   "totalsBySource": {
     "public/manifest.webmanifest": 16,
     "public/sitemap.xml": 11,
@@ -82,6 +82,7 @@
     "src/routes/interesses.tsx": 4,
     "src/routes/loja.tsx": 1,
     "src/routes/matches.tsx": 5,
+    "src/routes/membros.tsx": 2,
     "src/routes/meu-pet.tsx": 3,
     "src/routes/noticias.index.tsx": 1,
     "src/routes/notificacoes.tsx": 1,
@@ -114,7 +115,7 @@
     "src/v2/features/onboarding/repository.ts": 1,
     "src/v2/integration/route-registry.ts": 1,
     "src/v2/integration/V2RuntimeShell.tsx": 2,
-    "src/v2/integration/V2ShellRuntimeRoute.tsx": 16,
+    "src/v2/integration/V2ShellRuntimeRoute.tsx": 18,
     "tests/app-shell-components-v2.test.tsx": 2,
     "tests/app-shell-integration-boundaries-v2.test.ts": 1,
     "tests/app-shell-integration-components-v2.test.tsx": 1,
@@ -127,14 +128,14 @@
     "tests/push-dispatch-atomic-v2.test.ts": 1,
     "tests/push-dispatch-auth.test.ts": 1
   },
-  "totalsByFileType": { "html": 6, "js": 8, "ts": 36, "tsx": 408, "webmanifest": 16, "xml": 11 },
+  "totalsByFileType": { "html": 6, "js": 8, "ts": 36, "tsx": 412, "webmanifest": 16, "xml": 11 },
   "totalsByOrigin": {
     "configuration": 0,
     "manifest": 16,
     "other": 0,
     "public": 8,
     "sitemap": 11,
-    "src": 433,
+    "src": 437,
     "tests": 17
   },
   "totalsByClassification": {
@@ -143,28 +144,15 @@
     "dynamic": 3,
     "endpoint": 4,
     "external": 12,
-    "route": 424
+    "route": 428
   },
   "totalsByStatus": {
     "not-applicable": 58,
     "requires-investigation": 3,
-    "resolved": 423,
-    "unresolved": 1
+    "resolved": 428,
+    "unresolved": 0
   },
-  "unresolved": [
-    {
-      "source": "src/v2/app-shell/navigation.ts",
-      "origin": "src",
-      "fileType": "ts",
-      "kind": "object-href",
-      "target": "/membros",
-      "normalizedTarget": "/membros",
-      "classification": "route",
-      "status": "unresolved",
-      "matchedRoutes": [],
-      "evidence": { "locator": "object-href", "line": 24 }
-    }
-  ],
+  "unresolved": [],
   "requiresInvestigation": [
     {
       "source": "public/sw.js",
@@ -4549,6 +4537,30 @@
       "evidence": { "locator": "jsx-to", "line": 234 }
     },
     {
+      "source": "src/routes/membros.tsx",
+      "origin": "src",
+      "fileType": "tsx",
+      "kind": "jsx-to",
+      "target": "/inicio",
+      "normalizedTarget": "/inicio",
+      "classification": "route",
+      "status": "resolved",
+      "matchedRoutes": ["/inicio"],
+      "evidence": { "locator": "jsx-to", "line": 18 }
+    },
+    {
+      "source": "src/routes/membros.tsx",
+      "origin": "src",
+      "fileType": "tsx",
+      "kind": "jsx-to",
+      "target": "/v2/$section",
+      "normalizedTarget": "/v2/$section",
+      "classification": "route",
+      "status": "resolved",
+      "matchedRoutes": ["/v2/$section"],
+      "evidence": { "locator": "jsx-to", "line": 16 }
+    },
+    {
       "source": "src/routes/meu-pet.tsx",
       "origin": "src",
       "fileType": "tsx",
@@ -5384,8 +5396,8 @@
       "target": "/membros",
       "normalizedTarget": "/membros",
       "classification": "route",
-      "status": "unresolved",
-      "matchedRoutes": [],
+      "status": "resolved",
+      "matchedRoutes": ["/membros"],
       "evidence": { "locator": "object-href", "line": 24 }
     },
     {
@@ -5638,7 +5650,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/bloqueados"],
-      "evidence": { "locator": "navigate", "line": 61 }
+      "evidence": { "locator": "navigate", "line": 62 }
     },
     {
       "source": "src/v2/integration/V2ShellRuntimeRoute.tsx",
@@ -5650,7 +5662,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/manual"],
-      "evidence": { "locator": "navigate", "line": 70 }
+      "evidence": { "locator": "navigate", "line": 71 }
     },
     {
       "source": "src/v2/integration/V2ShellRuntimeRoute.tsx",
@@ -5662,7 +5674,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/notificacoes"],
-      "evidence": { "locator": "navigate", "line": 64 }
+      "evidence": { "locator": "navigate", "line": 65 }
     },
     {
       "source": "src/v2/integration/V2ShellRuntimeRoute.tsx",
@@ -5674,7 +5686,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/perfil"],
-      "evidence": { "locator": "navigate", "line": 55 }
+      "evidence": { "locator": "navigate", "line": 56 }
     },
     {
       "source": "src/v2/integration/V2ShellRuntimeRoute.tsx",
@@ -5686,7 +5698,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/suporte/"],
-      "evidence": { "locator": "navigate", "line": 67 }
+      "evidence": { "locator": "navigate", "line": 68 }
     },
     {
       "source": "src/v2/integration/V2ShellRuntimeRoute.tsx",
@@ -5698,7 +5710,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/termos"],
-      "evidence": { "locator": "navigate", "line": 73 }
+      "evidence": { "locator": "navigate", "line": 74 }
     },
     {
       "source": "src/v2/integration/V2ShellRuntimeRoute.tsx",
@@ -5710,7 +5722,19 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/v2/$section"],
-      "evidence": { "locator": "navigate", "line": 101 }
+      "evidence": { "locator": "navigate", "line": 99 }
+    },
+    {
+      "source": "src/v2/integration/V2ShellRuntimeRoute.tsx",
+      "origin": "src",
+      "fileType": "tsx",
+      "kind": "navigate",
+      "target": "/v2/$section",
+      "normalizedTarget": "/v2/$section",
+      "classification": "route",
+      "status": "resolved",
+      "matchedRoutes": ["/v2/$section"],
+      "evidence": { "locator": "navigate", "line": 121 }
     },
     {
       "source": "src/v2/integration/V2ShellRuntimeRoute.tsx",
@@ -5722,7 +5746,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/verificacao"],
-      "evidence": { "locator": "navigate", "line": 58 }
+      "evidence": { "locator": "navigate", "line": 59 }
     },
     {
       "source": "src/v2/integration/V2ShellRuntimeRoute.tsx",
@@ -5734,7 +5758,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/bloqueados"],
-      "evidence": { "locator": "object-to", "line": 61 }
+      "evidence": { "locator": "object-to", "line": 62 }
     },
     {
       "source": "src/v2/integration/V2ShellRuntimeRoute.tsx",
@@ -5746,7 +5770,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/manual"],
-      "evidence": { "locator": "object-to", "line": 70 }
+      "evidence": { "locator": "object-to", "line": 71 }
     },
     {
       "source": "src/v2/integration/V2ShellRuntimeRoute.tsx",
@@ -5758,7 +5782,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/notificacoes"],
-      "evidence": { "locator": "object-to", "line": 64 }
+      "evidence": { "locator": "object-to", "line": 65 }
     },
     {
       "source": "src/v2/integration/V2ShellRuntimeRoute.tsx",
@@ -5770,7 +5794,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/perfil"],
-      "evidence": { "locator": "object-to", "line": 55 }
+      "evidence": { "locator": "object-to", "line": 56 }
     },
     {
       "source": "src/v2/integration/V2ShellRuntimeRoute.tsx",
@@ -5782,7 +5806,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/suporte/"],
-      "evidence": { "locator": "object-to", "line": 67 }
+      "evidence": { "locator": "object-to", "line": 68 }
     },
     {
       "source": "src/v2/integration/V2ShellRuntimeRoute.tsx",
@@ -5794,7 +5818,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/termos"],
-      "evidence": { "locator": "object-to", "line": 73 }
+      "evidence": { "locator": "object-to", "line": 74 }
     },
     {
       "source": "src/v2/integration/V2ShellRuntimeRoute.tsx",
@@ -5806,7 +5830,19 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/v2/$section"],
-      "evidence": { "locator": "object-to", "line": 101 }
+      "evidence": { "locator": "object-to", "line": 99 }
+    },
+    {
+      "source": "src/v2/integration/V2ShellRuntimeRoute.tsx",
+      "origin": "src",
+      "fileType": "tsx",
+      "kind": "object-to",
+      "target": "/v2/$section",
+      "normalizedTarget": "/v2/$section",
+      "classification": "route",
+      "status": "resolved",
+      "matchedRoutes": ["/v2/$section"],
+      "evidence": { "locator": "object-to", "line": 121 }
     },
     {
       "source": "src/v2/integration/V2ShellRuntimeRoute.tsx",
@@ -5818,7 +5854,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/verificacao"],
-      "evidence": { "locator": "object-to", "line": 58 }
+      "evidence": { "locator": "object-to", "line": 59 }
     },
     {
       "source": "tests/app-shell-components-v2.test.tsx",

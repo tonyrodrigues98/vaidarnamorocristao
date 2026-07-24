@@ -28,14 +28,13 @@ idênticos.
 
 ## Resumo executivo
 
-- Há **68 file routes** no estado atual da pilha: 13 administrativas, 36 autenticadas, 13 públicas/visitante, 3 endpoints e
-  3 cuja proteção é herdada da raiz.
-- Foram inventariadas **485 referências tipadas**: 424 rotas, 38 assets, 4 endpoints, 12 URLs
-  externas, 4 deep links e 3 destinos dinâmicos. As fontes são `src` (433), testes (17), manifest
-  (16), sitemap (11), service worker/public (8), configuração (0) e outras (0). Das 424 rotas, 423
-  resolvem e uma não resolve no estado atual: `src/v2/app-shell/navigation.ts` declara `/membros`;
-  o runtime integrado usa `/v2/explorar-pessoas`. O achado é resultado atual, não contrato
-  permanente de teste.
+- Há **69 file routes** no estado atual da pilha: 13 administrativas, 36 autenticadas, 13 públicas/visitante, 3 endpoints e
+  4 cuja proteção é herdada da raiz.
+- Foram inventariadas **489 referências tipadas**: 428 rotas, 38 assets, 4 endpoints, 12 URLs
+  externas, 4 deep links e 3 destinos dinâmicos. As fontes são `src` (437), testes (17), manifest
+  (16), sitemap (11), service worker/public (8), configuração (0) e outras (0). Todas as 428
+  referências de rota resolvem no estado atual. `/membros` agora é um alias controlado: com as
+  flags da V2 retorna para `/v2/explorar-pessoas`; sem elas retorna para `/inicio`.
 - Há três aliases/redirecionamentos intencionais: `/comunidade` →
   `/conversas/comunidade`, `/onboarding/etapa-1` → `/onboarding` e `/v2/` →
   `/v2/inicio` por parâmetro tipado.
@@ -48,7 +47,7 @@ idênticos.
 - A análise estática encontrou **31 arquivos-fonte potencialmente órfãos**, **2 contratos usados
   somente por testes**, **146 assets sem referência por basename** e **10 dependências sem uso
   direto/configurado detectável**. Nenhum deles é declarado seguro para excluir nesta etapa.
-- O grafo de 465 módulos e 2.666 imports tem um ciclo conhecido entre `router.tsx` e
+- O grafo de 472 módulos e 2.694 imports tem um ciclo conhecido entre `router.tsx` e
   `routeTree.gen.ts`, causado
   pelo registro de tipos gerado. Não há ciclos em `src/v2`.
 - O código referencia **71 tabelas/views**, **98 RPCs**, **6 buckets** e **10 nomes de canais
@@ -110,7 +109,7 @@ papel administrativo e o frontend não substitui RLS.
 | Comunidade/feed   | `/dashboard`, `/noticias`, `/devocional`, `/orações`, `/comunidade` | posts, interesses, mensagens, comentários, orações e Realtime                  | três superfícies de conteúdo e alias de “comunidade” para chat         | definir feed canônico antes de retirar aliases                            |
 | Perfil            | `/perfil`, `/bloqueados`, `/verificacao`                            | perfis, fotos, preferências, badges, roles, verificações                       | perfil concentra visualização, edição, economia e customização         | migrar por módulos, preservando foto e `avatar_url`                       |
 | Pretendentes      | `/pretendentes/*`, `/interesses`, `/matches`                        | profiles, preferences, interests, matches, commitments                         | lista/interesses/matches são experiências sobrepostas                  | manter dados; substituir descoberta somente com Namoro opt-in             |
-| Explorar pessoas  | Pretendentes e contrato V2 `explorar-pessoas`                       | atualmente reutiliza perfis/roles/bloqueios                                    | `/membros` existe só no shell demonstrativo                            | criar domínio comunitário sem filtro romântico                            |
+| Explorar pessoas  | `/membros` e contrato V2 `explorar-pessoas`                         | relações comunitárias aditivas; perfis/roles/bloqueios continuam preservados   | alias controlado por flags; implementação V2 não usa filtro romântico  | validar migration/RLS em ambiente descartável antes de ativar             |
 | Conversas         | `/conversas`, `$matchId`, `/conversas/comunidade`                   | messages, matches, blocks, profiles, global_messages, Realtime                 | chat 1:1, propósito e chat global possuem consultas/receipts paralelos | reconstrução própria após invariantes de mensagens                        |
 | Recados anônimos  | `/recados`                                                          | views/tabelas e 12 RPCs anônimas                                               | rota grande, domínio exclusivamente romântico                          | manter fechado ao Namoro e preservar histórico                            |
 | Propósito         | `/proposito/$matchId`                                               | matches, messages, gifts, profiles                                             | replica leitura/Realtime de mensagens do chat                          | separar pausa romântica de conversas sociais                              |
@@ -138,7 +137,7 @@ papel administrativo e o frontend não substitui RLS.
 | ID      | Classificação              | Evidência                                                                       | Risco                                            | Tratamento                                                      |
 | ------- | -------------------------- | ------------------------------------------------------------------------------- | ------------------------------------------------ | --------------------------------------------------------------- |
 | DUP-001 | migração em andamento      | `RouteProtectionBoundary` mais `<Navigate>` em várias páginas                   | redirects concorrentes ao mudar rotas            | retirar guard local somente quando a rota V2 assumir o contrato |
-| DUP-002 | dívida técnica             | `Header`, `MobileBottomNav`, manifest, SW e dois registries V2 definem destinos | links divergentes; `/membros` sem rota           | catálogo de navegação canônico por plataforma                   |
+| DUP-002 | dívida técnica             | `Header`, `MobileBottomNav`, manifest, SW e dois registries V2 definem destinos | catálogos ainda podem divergir por plataforma    | catálogo de navegação canônico por plataforma                   |
 | DUP-003 | compatibilidade necessária | `user_pets` e `user_pets_v2`, catálogos e históricos V1/V2                      | perda de progressão se consolidado               | preservar até reconciliação semântica                           |
 | DUP-004 | dívida técnica             | chat 1:1 e Propósito repetem messages/read receipts/Realtime                    | ordenação e subscriptions inconsistentes         | serviço de mensagens único na reconstrução                      |
 | DUP-005 | migração em andamento      | tokens/tema globais legados e DS V2 escopado                                    | vazamento visual se o escopo for removido        | manter `.vdn-v2[data-vdn-v2]`                                   |
@@ -271,7 +270,7 @@ assets carregados no Network. Nenhum candidato foi removido.
 | LEG-P1-001 |   P1 | moderação          | `/api/verify-photo` sem rate limit; `soft:true` permite upload sem review                                                          | custo e conteúdo não moderado                         | rate limit e quarentena fail-closed operacional                         | unitário do endpoint + integração local        |
 | LEG-P1-002 |   P1 | PWA/privacidade    | cache de pets autenticado não particionado, query assinada removida                                                                | mídia residual entre contas                           | versionar/particionar ou não cachear autenticado; limpar no logout      | SW browser test                                |
 | LEG-P1-003 |   P1 | push/deep link     | `notificationclick` abre URL absoluta sem same-origin allowlist                                                                    | navegação externa controlada por payload comprometido | sanitizar destino interno                                               | teste unitário do SW                           |
-| LEG-P1-004 |   P1 | navegação          | `/membros` não resolve no contrato público do App Shell                                                                            | clique quebrado se consumidor usar defaults           | trocar por destino canônico tipado                                      | caracterização de links; V2-007/008            |
+| LEG-P1-004 |   P1 | navegação          | resolvido na V2-010: `/membros` é alias tipado para descoberta comunitária ou fallback legado                                      | risco passa a ser paridade do destino e das flags     | manter caracterização e validar rollout                                 | V2-010 + ambiente descartável                  |
 | LEG-P2-001 |   P2 | providers          | Presence/notifications em toda rota legada autenticada                                                                             | rede/subscriptions desnecessárias                     | medir e escopar após shells canônicos                                   | métricas + testes de montagem                  |
 | LEG-P2-002 |   P2 | conversas          | chat e Propósito repetem messages/read/Realtime                                                                                    | duplicidade, ordenação instável                       | serviço de mensagens e paginação comum                                  | etapa de Conversas                             |
 | LEG-P2-003 |   P2 | rotas              | boundary canônico mais guards/redirects locais                                                                                     | loop/flash em futuras trocas                          | retirar por rota com teste                                              | cada migração vertical                         |

@@ -52,7 +52,7 @@ const V2_RUNTIME_ROUTES = Object.freeze([
     subtitle: "Um ponto de encontro para fé, amizade e vida em comunidade.",
     eyebrow: "Community Platform V2",
     description:
-      "O feed comunitário chegará em uma etapa própria. Esta página valida apenas a navegação real e o novo shell.",
+      "Feed, Status e vínculos sociais entram somente com a flag comunitária e preservam o Início legado como fallback.",
     icon: Home,
     primary: true,
     requiredDomain: "community",
@@ -117,7 +117,7 @@ const V2_RUNTIME_ROUTES = Object.freeze([
     subtitle: "Descoberta comunitária sem presumir disponibilidade romântica.",
     eyebrow: "Conexões",
     description:
-      "A descoberta social será implementada com privacidade e moderação em uma etapa futura.",
+      "Descoberta social por vínculos comunitários, sem usar matches ou disponibilidade romântica.",
     icon: Compass,
     primary: false,
     requiredDomain: "community",
