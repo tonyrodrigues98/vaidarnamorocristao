@@ -1,0 +1,95 @@
+.vdn-v2[data-vdn-v2] .vdn-v2-admin {
+  display: grid;
+  gap: var(--v2-space-lg);
+}
+
+.vdn-v2[data-vdn-v2] .vdn-v2-admin__hero {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--v2-space-md);
+}
+
+.vdn-v2[data-vdn-v2] .vdn-v2-admin__hero > svg,
+.vdn-v2[data-vdn-v2] .vdn-v2-admin__state > svg,
+.vdn-v2[data-vdn-v2] .vdn-v2-admin__guardrail > svg,
+.vdn-v2[data-vdn-v2] .vdn-v2-admin__audit-note > svg {
+  width: var(--v2-icon-size-large);
+  height: var(--v2-icon-size-large);
+  color: var(--v2-color-brand);
+}
+
+.vdn-v2[data-vdn-v2] .vdn-v2-admin__health {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--v2-space-sm);
+}
+
+.vdn-v2[data-vdn-v2] .vdn-v2-admin__health > * {
+  display: grid;
+  align-content: start;
+  gap: var(--v2-space-xs);
+}
+
+.vdn-v2[data-vdn-v2] .vdn-v2-admin__layout {
+  display: grid;
+  grid-template-columns: minmax(14rem, 0.35fr) minmax(0, 1fr);
+  gap: var(--v2-space-md);
+}
+
+.vdn-v2[data-vdn-v2] .vdn-v2-admin__navigation,
+.vdn-v2[data-vdn-v2] .vdn-v2-admin__navigation > div:last-child,
+.vdn-v2[data-vdn-v2] .vdn-v2-admin__module-panel {
+  display: grid;
+  align-content: start;
+  gap: var(--v2-space-sm);
+}
+
+.vdn-v2[data-vdn-v2] .vdn-v2-admin__navigation > div:last-child .vdn-v2-button {
+  width: 100%;
+  justify-content: flex-start;
+  text-align: start;
+}
+
+.vdn-v2[data-vdn-v2] .vdn-v2-admin__guardrail,
+.vdn-v2[data-vdn-v2] .vdn-v2-admin__audit-note {
+  display: flex;
+  align-items: center;
+  gap: var(--v2-space-sm);
+}
+
+.vdn-v2[data-vdn-v2] .vdn-v2-admin__state {
+  display: grid;
+  min-height: 14rem;
+  place-items: center;
+  align-content: center;
+  gap: var(--v2-space-sm);
+  text-align: center;
+}
+
+@media (max-width: 64rem) {
+  .vdn-v2[data-vdn-v2] .vdn-v2-admin__health {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 46rem) {
+  .vdn-v2[data-vdn-v2] .vdn-v2-admin__hero {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .vdn-v2[data-vdn-v2] .vdn-v2-admin__hero > .vdn-v2-badge {
+    grid-column: 1 / -1;
+  }
+
+  .vdn-v2[data-vdn-v2] .vdn-v2-admin__health,
+  .vdn-v2[data-vdn-v2] .vdn-v2-admin__layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vdn-v2[data-vdn-v2] .vdn-v2-admin * {
+    transition-duration: 0.01ms !important;
+  }
+}

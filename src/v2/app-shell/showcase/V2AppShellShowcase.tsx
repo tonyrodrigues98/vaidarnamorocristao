@@ -144,6 +144,12 @@ const pageCopy: Record<
     eyebrow: "Privacidade e cuidado",
     width: "wide",
   },
+  admin: {
+    title: "Administração",
+    subtitle: "Saúde e ação por domínio.",
+    eyebrow: "Operação segura",
+    width: "fluid",
+  },
   settings: {
     title: "Configurações",
     eyebrow: "Conta e privacidade",

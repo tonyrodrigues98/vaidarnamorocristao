@@ -9,6 +9,7 @@ import { V2CommunityHubFeature } from "@/v2/features/community";
 import { V2ChristianContentFeature } from "@/v2/features/content";
 import { V2CinemaFeature } from "@/v2/features/cinema";
 import { V2TrustCenterFeature } from "@/v2/features/trust";
+import { V2AdminFeature } from "@/v2/features/admin";
 import { V2ConversationsFeature } from "@/v2/features/conversations";
 import { V2DatingFeature } from "@/v2/features/dating";
 import { V2EconomyFeature } from "@/v2/features/economy";
@@ -22,7 +23,7 @@ import { V2RuntimeShell } from "./V2RuntimeShell";
 import { V2RuntimeState } from "./V2RuntimeState";
 
 export function V2ShellRuntimeRoute({ slug }: { readonly slug: string }) {
-  const { user, status, signOut, identity, refreshRole } = useAuth();
+  const { user, status, signOut, identity, refreshRole, role } = useAuth();
   const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
   const router = useRouter();
@@ -137,6 +138,9 @@ export function V2ShellRuntimeRoute({ slug }: { readonly slug: string }) {
     }
     if (v2FeatureFlags.trust && route?.slug === "central") {
       return <V2TrustCenterFeature userId={user.id} />;
+    }
+    if (v2FeatureFlags.admin && route?.slug === "admin") {
+      return <V2AdminFeature role={role} />;
     }
     if (v2FeatureFlags.dating && route?.slug === "pretendentes") {
       return (

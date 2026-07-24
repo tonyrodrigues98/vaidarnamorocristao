@@ -18,6 +18,7 @@ export type V2ShellNavigationId =
   | "verbo"
   | "cinema"
   | "trust"
+  | "admin"
   | "settings";
 
 export interface V2ShellNavigationItem {

@@ -10,6 +10,7 @@ import {
   Palette,
   PawPrint,
   Settings,
+  ShieldCheck,
   ShoppingBag,
   UsersRound,
   type LucideIcon,
@@ -32,6 +33,7 @@ export const V2_RUNTIME_SLUGS = [
   "verbo",
   "cinema",
   "central",
+  "admin",
   "configuracoes",
 ] as const;
 
@@ -236,6 +238,20 @@ const V2_RUNTIME_ROUTES = Object.freeze([
     primary: false,
     requiredDomain: "trust",
     width: "wide",
+  },
+  {
+    slug: "admin",
+    navigationId: "admin",
+    label: "Administração",
+    title: "Administração",
+    subtitle: "Saúde, filas e ações organizadas por capacidade.",
+    eyebrow: "Operação",
+    description:
+      "Console modular com autorização server-side e operações legadas preservadas durante a migração.",
+    icon: ShieldCheck,
+    primary: false,
+    requiredDomain: "admin",
+    width: "fluid",
   },
   {
     slug: "configuracoes",
