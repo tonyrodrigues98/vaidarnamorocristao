@@ -132,6 +132,12 @@ const pageCopy: Record<
     subtitle: "Leitura e anotações pessoais com privacidade por padrão.",
     width: "wide",
   },
+  cinema: {
+    title: "Sala de Cinema",
+    subtitle: "Sessões sincronizadas para assistir junto.",
+    eyebrow: "Assistir Juntos",
+    width: "wide",
+  },
   settings: {
     title: "Configurações",
     eyebrow: "Conta e privacidade",

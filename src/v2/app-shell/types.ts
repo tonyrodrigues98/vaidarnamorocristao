@@ -16,6 +16,7 @@ export type V2ShellNavigationId =
   | "avatar"
   | "pets"
   | "verbo"
+  | "cinema"
   | "settings";
 
 export interface V2ShellNavigationItem {

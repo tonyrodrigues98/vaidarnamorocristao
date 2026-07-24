@@ -1618,6 +1618,7 @@
       "tests": [
         "tests/account-boundaries-v2.test.ts",
         "tests/account-components-v2.test.tsx",
+        "tests/cinema-boundaries-v2.test.tsx",
         "tests/community-onboarding-v2.test.ts",
         "tests/design-system-tokens-v2.test.ts",
         "tests/navigation-security-v2.test.ts",

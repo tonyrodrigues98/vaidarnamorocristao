@@ -1,6 +1,7 @@
 import {
   BookHeart,
   CircleUserRound,
+  Clapperboard,
   Compass,
   HeartHandshake,
   Home,
@@ -28,6 +29,7 @@ export const V2_RUNTIME_SLUGS = [
   "avatar",
   "meu-pet",
   "verbo",
+  "cinema",
   "configuracoes",
 ] as const;
 
@@ -204,6 +206,20 @@ const V2_RUNTIME_ROUTES = Object.freeze([
     primary: false,
     requiredDomain: "content",
     width: "wide",
+  },
+  {
+    slug: "cinema",
+    navigationId: "cinema",
+    label: "Sala de Cinema",
+    title: "Sala de Cinema",
+    subtitle: "Assista a conteúdos autorizados em sessões sincronizadas.",
+    eyebrow: "Assistir Juntos",
+    description:
+      "Player, papéis e sincronização server-authoritative preparados sob gates jurídicos e operacionais fechados.",
+    icon: Clapperboard,
+    primary: false,
+    requiredDomain: "cinema",
+    width: "fluid",
   },
   {
     slug: "configuracoes",
