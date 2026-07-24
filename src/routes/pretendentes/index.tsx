@@ -43,6 +43,11 @@ import { AppEmptyState } from "@/components/ui/AppEmptyState";
 import { PullToRefresh } from "@/components/mobile/PullToRefresh";
 import { OfflineState } from "@/components/ui/OfflineState";
 import { useNetworkStatus } from "@/hooks/useNetworkStatus";
+import {
+  createLegacyRetirementEvent,
+  emitLegacyRetirementEvent,
+  legacyRetirementState,
+} from "@/v2/platform/legacy-retirement";
 
 type Profile = {
   id: string;
@@ -223,6 +228,28 @@ export const Route = createFileRoute("/pretendentes/")({
 });
 
 function List() {
+  if (legacyRetirementState.datingIndexRetired) {
+    return <LegacyDatingIndexRedirect />;
+  }
+
+  return <LegacyPretendentesList />;
+}
+
+function LegacyDatingIndexRedirect() {
+  useEffect(() => {
+    emitLegacyRetirementEvent(
+      createLegacyRetirementEvent({
+        name: "legacy-route-redirected",
+        surface: "dating-index",
+        routeFamily: "dating",
+      }),
+    );
+  }, []);
+
+  return <Navigate to="/v2/$section" params={{ section: "pretendentes" }} replace />;
+}
+
+function LegacyPretendentesList() {
   const { user, loading, role, rolesLoaded } = useAuth();
   const search = Route.useSearch();
   const navigate = useNavigate({ from: "/pretendentes/" });

@@ -7,6 +7,7 @@ import { PhotoImg } from "@/components/PhotoImg";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { cn } from "@/lib/utils";
+import { shouldShowLegacyDatingNavigation } from "@/v2/platform/legacy-retirement";
 
 type AppNavRoute = "/inicio" | "/devocional" | "/conversas" | "/pretendentes" | "/perfil";
 
@@ -21,7 +22,7 @@ type NavProfile = {
   photo_url: string | null;
 };
 
-const navItems: NavItem[] = [
+const legacyNavItems: NavItem[] = [
   { to: "/inicio", label: "Início", icon: Home },
   { to: "/devocional", label: "Devocional", icon: BookOpen },
   { to: "/conversas", label: "Conversas", icon: MessageCircle },
@@ -38,6 +39,9 @@ export function MobileBottomNav() {
   const location = useLocation();
   const [profile, setProfile] = useState<NavProfile | null>(null);
   const [mounted, setMounted] = useState(false);
+  const navItems = legacyNavItems.filter(
+    (item) => item.to !== "/pretendentes" || shouldShowLegacyDatingNavigation(),
+  );
 
   useEffect(() => {
     setMounted(true);
@@ -84,7 +88,10 @@ export function MobileBottomNav() {
       className="fixed inset-x-0 bottom-0 z-50 md:hidden"
     >
       <div className="mx-auto max-w-md px-3 pb-[max(env(safe-area-inset-bottom),0.5rem)]">
-        <div className="grid h-[72px] grid-cols-5 overflow-hidden rounded-[1.75rem] border border-border/70 bg-background/88 shadow-[0_-16px_48px_rgba(15,23,42,0.14)] backdrop-blur-2xl dark:border-white/10 dark:bg-card/88 dark:shadow-[0_-16px_48px_rgba(0,0,0,0.38)]">
+        <div
+          className="grid h-[72px] overflow-hidden rounded-[1.75rem] border border-border/70 bg-background/88 shadow-[0_-16px_48px_rgba(15,23,42,0.14)] backdrop-blur-2xl dark:border-white/10 dark:bg-card/88 dark:shadow-[0_-16px_48px_rgba(0,0,0,0.38)]"
+          style={{ gridTemplateColumns: `repeat(${navItems.length}, minmax(0, 1fr))` }}
+        >
           {navItems.map((item) => {
             const active = isActivePath(location.pathname, item.to);
             const Icon = item.icon;

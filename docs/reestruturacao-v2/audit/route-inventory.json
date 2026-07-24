@@ -216,7 +216,13 @@
           "kind": "jsx-to",
           "target": "/admin"
         },
-        { "source": "src/routes/conta.tsx", "origin": "src", "kind": "jsx-to", "target": "/admin" }
+        { "source": "src/routes/conta.tsx", "origin": "src", "kind": "jsx-to", "target": "/admin" },
+        {
+          "source": "src/v2/platform/legacy-retirement/LegacyQuarantineNotice.tsx",
+          "origin": "src",
+          "kind": "jsx-to",
+          "target": "/admin"
+        }
       ],
       "tests": [
         "tests/admin-console-boundaries-v2.test.tsx",
@@ -229,6 +235,9 @@
         "tests/helpers.ts",
         "tests/identity-capabilities-v2.test.ts",
         "tests/legacy-pwa-characterization-v2.test.ts",
+        "tests/legacy-retirement-boundaries-v2.test.ts",
+        "tests/legacy-retirement-core-v2.test.ts",
+        "tests/legacy-retirement-routing-v2.test.ts",
         "tests/messages-rls.test.ts",
         "tests/moderation-rls.test.ts",
         "tests/offline-outbox-v2.test.ts",
@@ -312,7 +321,10 @@
           "target": "/admin/avatar"
         }
       ],
-      "tests": [],
+      "tests": [
+        "tests/legacy-retirement-boundaries-v2.test.ts",
+        "tests/legacy-retirement-routing-v2.test.ts"
+      ],
       "notes": []
     },
     {
@@ -432,7 +444,11 @@
           "target": "/admin/fotos"
         }
       ],
-      "tests": ["tests/photo-repair-security-v2.test.ts", "tests/route-protection-v2.test.ts"],
+      "tests": [
+        "tests/legacy-retirement-routing-v2.test.ts",
+        "tests/photo-repair-security-v2.test.ts",
+        "tests/route-protection-v2.test.ts"
+      ],
       "notes": []
     },
     {
@@ -1225,6 +1241,9 @@
         "tests/economy-boundaries-v2.test.tsx",
         "tests/economy-core-v2.test.ts",
         "tests/economy-security-v2.test.ts",
+        "tests/legacy-retirement-boundaries-v2.test.ts",
+        "tests/legacy-retirement-core-v2.test.ts",
+        "tests/legacy-retirement-routing-v2.test.ts",
         "tests/photo-repair-security-v2.test.ts"
       ],
       "notes": []
@@ -1249,7 +1268,10 @@
       "queryHooks": [],
       "realtimeSubscriptions": 0,
       "linksIn": [],
-      "tests": [],
+      "tests": [
+        "tests/legacy-retirement-boundaries-v2.test.ts",
+        "tests/legacy-retirement-routing-v2.test.ts"
+      ],
       "notes": []
     },
     {
@@ -2736,6 +2758,7 @@
         "tests/dating-opt-in-v2.test.ts",
         "tests/foundation-v2.test.ts",
         "tests/helpers.ts",
+        "tests/legacy-retirement-core-v2.test.ts",
         "tests/messages-rls.test.ts",
         "tests/realtime-messages.test.ts",
         "tests/romantic-context-core-v2.test.ts"
@@ -3485,6 +3508,7 @@
       ],
       "tests": [
         "tests/legacy-pwa-characterization-v2.test.ts",
+        "tests/legacy-retirement-routing-v2.test.ts",
         "tests/moderation-rls.test.ts",
         "tests/navigation-security-v2.test.ts",
         "tests/pretendentes-eligibility.test.ts",
@@ -3573,7 +3597,7 @@
       "domain": "dating",
       "access": "authenticated",
       "parameters": [],
-      "redirects": ["/auth/login"],
+      "redirects": ["/auth/login", "/v2/$section"],
       "providers": [],
       "supabase": {
         "tables": [
@@ -3665,12 +3689,20 @@
           "origin": "src",
           "kind": "object-href",
           "target": "/pretendentes"
+        },
+        {
+          "source": "tests/legacy-retirement-boundaries-v2.test.ts",
+          "origin": "tests",
+          "kind": "jsx-to",
+          "target": "/pretendentes"
         }
       ],
       "tests": [
         "tests/community-home-boundaries-v2.test.tsx",
         "tests/dating-mode-security-v2.test.ts",
         "tests/legacy-pwa-characterization-v2.test.ts",
+        "tests/legacy-retirement-boundaries-v2.test.ts",
+        "tests/legacy-retirement-routing-v2.test.ts",
         "tests/pretendentes-eligibility.test.ts",
         "tests/public-acquisition-v2.test.ts"
       ],
@@ -4407,6 +4439,12 @@
           "target": "/v2/$section"
         },
         {
+          "source": "src/routes/pretendentes/index.tsx",
+          "origin": "src",
+          "kind": "jsx-to",
+          "target": "/v2/$section"
+        },
+        {
           "source": "src/routes/v2.index.tsx",
           "origin": "src",
           "kind": "jsx-to",
@@ -4512,6 +4550,12 @@
           "source": "src/v2/integration/V2ShellRuntimeRoute.tsx",
           "origin": "src",
           "kind": "navigate",
+          "target": "/v2/$section"
+        },
+        {
+          "source": "src/v2/platform/legacy-retirement/LegacyQuarantineNotice.tsx",
+          "origin": "src",
+          "kind": "jsx-to",
           "target": "/v2/$section"
         },
         {

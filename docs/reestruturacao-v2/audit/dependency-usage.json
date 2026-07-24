@@ -513,7 +513,8 @@
         "src/routes/v2.tsx",
         "src/routes/verificacao.tsx",
         "src/v2/app/routing/RouteProtectionBoundary.tsx",
-        "src/v2/integration/V2ShellRuntimeRoute.tsx"
+        "src/v2/integration/V2ShellRuntimeRoute.tsx",
+        "src/v2/platform/legacy-retirement/LegacyQuarantineNotice.tsx"
       ],
       "testFiles": [],
       "configReferences": [],
@@ -1003,7 +1004,8 @@
         "src/v2/features/trust/V2TrustCenter.tsx",
         "src/v2/integration/route-registry.ts",
         "src/v2/integration/V2RuntimePage.tsx",
-        "src/v2/integration/V2RuntimeState.tsx"
+        "src/v2/integration/V2RuntimeState.tsx",
+        "src/v2/platform/legacy-retirement/LegacyQuarantineNotice.tsx"
       ],
       "testFiles": [
         "tests/app-shell-integration-components-v2.test.tsx",
@@ -1303,6 +1305,7 @@
         "src/v2/integration/V2RuntimeErrorBoundary.tsx",
         "src/v2/integration/V2RuntimeShell.tsx",
         "src/v2/integration/V2ShellRuntimeRoute.tsx",
+        "src/v2/platform/legacy-retirement/LegacyQuarantineNotice.tsx",
         "src/v2/platform/resilience/V2ServiceWorkerUpdateNotice.tsx"
       ],
       "testFiles": ["tests/app-shell-components-v2.test.tsx", "tests/use-long-press.test.ts"],
@@ -1654,6 +1657,9 @@
         "tests/identity-integration-v2.test.ts",
         "tests/legacy-provider-characterization-v2.test.ts",
         "tests/legacy-pwa-characterization-v2.test.ts",
+        "tests/legacy-retirement-boundaries-v2.test.ts",
+        "tests/legacy-retirement-core-v2.test.ts",
+        "tests/legacy-retirement-routing-v2.test.ts",
         "tests/legacy-route-characterization-v2.test.ts",
         "tests/messages-rls.test.ts",
         "tests/moderation-rls.test.ts",

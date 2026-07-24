@@ -34,6 +34,7 @@ import { getLastSeen } from "@/lib/lastSeen";
 import { useTheme } from "@/lib/theme";
 import { useNotifications } from "@/lib/notifications";
 import { isMobileAppRoute } from "@/lib/layoutVisibility";
+import { shouldShowLegacyDatingNavigation } from "@/v2/platform/legacy-retirement";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -82,6 +83,7 @@ export function Header() {
   const [devotionalCount, setDevotionalCount] = useState(0);
   const [anonCount, setAnonCount] = useState(0);
   const [open, setOpen] = useState(false);
+  const showLegacyDatingNavigation = shouldShowLegacyDatingNavigation();
   const [profile, setProfile] = useState<{
     photo_url: string | null;
     full_name: string | null;
@@ -268,12 +270,14 @@ export function Header() {
                       Conexões
                     </DropdownMenuLabel>
                     <div className="grid grid-cols-2 gap-2">
-                      <MegaItem
-                        to="/pretendentes"
-                        icon={<Gem className="h-4 w-4" />}
-                        title="Pretendentes"
-                        desc="Descobrir perfis"
-                      />
+                      {showLegacyDatingNavigation && (
+                        <MegaItem
+                          to="/pretendentes"
+                          icon={<Gem className="h-4 w-4" />}
+                          title="Pretendentes"
+                          desc="Descobrir perfis"
+                        />
+                      )}
                       <MegaItem
                         to="/interesses"
                         icon={<Sparkles className="h-4 w-4" />}
@@ -501,11 +505,13 @@ export function Header() {
 
                 {isApproved && (
                   <MobileSection label="Relacionamento" defaultOpen>
-                    <MobileItem to="/pretendentes" onClick={close}>
-                      <span className="flex items-center gap-2">
-                        <Gem className="h-4 w-4" /> Pretendentes
-                      </span>
-                    </MobileItem>
+                    {showLegacyDatingNavigation && (
+                      <MobileItem to="/pretendentes" onClick={close}>
+                        <span className="flex items-center gap-2">
+                          <Gem className="h-4 w-4" /> Pretendentes
+                        </span>
+                      </MobileItem>
+                    )}
                     <MobileItem to="/interesses" onClick={close}>
                       <span className="flex items-center gap-2">
                         <Sparkles className="h-4 w-4" /> Interesses
