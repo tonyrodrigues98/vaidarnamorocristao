@@ -48,6 +48,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { toast } from "sonner";
+import { v2FeatureFlags } from "@/v2/platform/feature-flags";
 
 export const Route = createFileRoute("/inicio")({
   component: InicioRoute,
@@ -75,6 +76,10 @@ function InicioLoadingState() {
 
 function InicioRoute() {
   const { user, loading } = useAuth();
+
+  if (v2FeatureFlags.appShell) {
+    return <Navigate to="/v2/$section" params={{ section: "inicio" }} replace />;
+  }
 
   return (
     <AuthenticatedRouteGate

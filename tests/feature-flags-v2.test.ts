@@ -3,6 +3,7 @@ import {
   parseFeatureFlag,
   resolveV2FeatureFlags,
   V2_FEATURE_FLAG_ENV,
+  v2FeatureFlags,
 } from "../src/v2/platform/feature-flags";
 
 describe("V2 feature flags", () => {
@@ -25,5 +26,9 @@ describe("V2 feature flags", () => {
   it("enables only the exact boolean or string value true", () => {
     expect(parseFeatureFlag(true)).toBe(true);
     expect(parseFeatureFlag("true")).toBe(true);
+  });
+
+  it("keeps every V2 module enabled in the approved production release", () => {
+    expect(Object.values(v2FeatureFlags).every((enabled) => enabled === true)).toBe(true);
   });
 });

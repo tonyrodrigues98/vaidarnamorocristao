@@ -33,7 +33,17 @@ export function resolveV2FeatureFlags(environment: FeatureFlagEnvironment = impo
 }
 
 /**
- * All V2 experiences are closed unless their public, non-secret build flag is
- * explicitly set to the exact value "true".
+ * V2 is the production experience after the approved all-user launch.
+ * Explicit public build flags can still disable an individual module for an
+ * emergency roll-forward, while missing flags keep the released V2 enabled.
  */
-export const v2FeatureFlags = resolveV2FeatureFlags();
+const V2_RELEASE_DEFAULTS = Object.freeze(
+  Object.fromEntries(
+    Object.values(V2_FEATURE_FLAG_ENV).map((environmentName) => [environmentName, "true"]),
+  ),
+) as FeatureFlagEnvironment;
+
+export const v2FeatureFlags = resolveV2FeatureFlags({
+  ...V2_RELEASE_DEFAULTS,
+  ...import.meta.env,
+});
