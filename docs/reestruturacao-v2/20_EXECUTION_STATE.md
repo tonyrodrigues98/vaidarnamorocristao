@@ -18,8 +18,10 @@
 - V2-009B está no Draft PR #16, branch
   `rebuild/v2-009-community-acquisition`, commit
   `053b4d3c7f56bfdea174420d8f5fb0fe0fff2b3f`.
-- Lote ativo: V2-009C em `rebuild/v2-009-onboarding-opt-in`, empilhado sobre a
-  aquisição pública. Nenhum PR da pilha foi mesclado ou publicado.
+- V2-009C está no Draft PR #17, branch `rebuild/v2-009-onboarding-opt-in`,
+  commit `f3de66cb72f092a0c8b15edede2525021c177975`.
+- Lote ativo: V2-010 em `rebuild/v2-010-social-home`, empilhado sobre a V2-009C.
+  Nenhum PR da pilha foi mesclado ou publicado.
 
 ## Concluído
 
@@ -92,11 +94,11 @@
 ## Evidência de validação
 
 - Instalação congelada e TypeScript: aprovados.
-- Suíte segura: 40 arquivos e 304 testes aprovados.
+- Suíte segura: 43 arquivos e 324 testes aprovados.
 - ESLint e Prettier focados: aprovados.
 - Build TanStack/Vite cliente e SSR: aprovado; warnings de dependências são
   baseline.
-- Auditoria reproduzível: 68 rotas, 485 referências, 465 módulos, 2.666 imports,
+- Auditoria reproduzível: 69 rotas, 489 referências, 472 módulos, 2.694 imports,
   um ciclo gerado conhecido e zero ciclos em `src/v2`.
 - Smoke isolado aprovado em 320, 360, 390, 430, 768, 1024 e 1440 px, sem overflow
   horizontal; nenhum backend foi carregado.
@@ -143,11 +145,27 @@
 - TypeScript, 40 arquivos/304 testes seguros, lint e Prettier focados, build
   cliente/SSR e inspeção do bundle foram aprovados sem acesso remoto.
 
+## V2-010 — Início, vínculos e Status
+
+- `/v2/inicio` usa um agregador server-authoritative e cache segregado por
+  usuário; `/dashboard` continua independente.
+- Follow e conexão bilateral possuem comandos explícitos, privacidade,
+  bloqueio bidirecional e limites anti-spam no contrato SQL aditivo.
+- Feed, comentários e reações respeitam audiência, bloqueio e moderação.
+- Status usa mídia privada, URLs assinadas em lote, audiência, visualização e
+  expiração em 24 horas; o job de limpeza permanece gate operacional e não foi
+  criado.
+- `/membros` agora resolve por alias controlado para descoberta comunitária,
+  com fallback `/inicio` quando as flags estão desligadas.
+- Card romântico só aparece quando a capability `dating` está ativa.
+- Migration local não aplicada cria somente estruturas aditivas; não houve
+  acesso a banco publicado.
+
 ## Próximo lote
 
 - Validar as migrations de capabilities e push em Supabase descartável antes de
   qualquer rollout.
 - Manter qualquer conclusão sobre ACL/RLS publicado como não verificada até
   existir snapshot autenticado e ambiente Supabase descartável.
-- Validar e publicar o Draft PR da V2-009C; depois iniciar a V2-010 em branch
+- Validar e publicar o Draft PR da V2-010; depois iniciar a V2-011 em branch
   empilhada, sem aplicar migrations ou ativar flags.

@@ -5,6 +5,7 @@ import { useTheme } from "@/lib/theme";
 import { v2FeatureFlags } from "@/v2/platform/feature-flags";
 import type { V2ShellNavigationItem } from "@/v2/app-shell";
 import { V2AccountRuntimeFeature, type AccountNavigationTarget } from "@/v2/features/account";
+import { V2CommunityHomeFeature, V2PeopleDiscoveryFeature } from "@/v2/features/home";
 import { createV2ShellUser, performV2Logout, resolveV2RuntimeAccess } from "./contracts";
 import { getV2RuntimeNavigation, getV2RuntimeRoute } from "./route-registry";
 import { V2RuntimeShell } from "./V2RuntimeShell";
@@ -74,18 +75,37 @@ export function V2ShellRuntimeRoute({ slug }: { readonly slug: string }) {
     }
   };
 
-  const content =
-    route?.slug === "configuracoes" && user ? (
-      <V2AccountRuntimeFeature
-        userId={user.id}
-        theme={theme}
-        onThemeChange={setTheme}
-        onNavigate={handleAccountNavigation}
-        logoutLoading={logoutLoading}
-        onLogout={handleLogout}
-        onDeletionRequested={handleLogout}
-      />
-    ) : undefined;
+  const content = (() => {
+    if (!user || !route) return undefined;
+    if (route?.slug === "configuracoes") {
+      return (
+        <V2AccountRuntimeFeature
+          userId={user.id}
+          theme={theme}
+          onThemeChange={setTheme}
+          onNavigate={handleAccountNavigation}
+          logoutLoading={logoutLoading}
+          onLogout={handleLogout}
+          onDeletionRequested={handleLogout}
+        />
+      );
+    }
+    if (v2FeatureFlags.community && route?.slug === "inicio") {
+      return (
+        <V2CommunityHomeFeature
+          userId={user.id}
+          datingEnabled={identity.canEnter("dating")}
+          onOpenDating={() =>
+            void navigate({ to: "/v2/$section", params: { section: "pretendentes" } })
+          }
+        />
+      );
+    }
+    if (v2FeatureFlags.community && route?.slug === "explorar-pessoas") {
+      return <V2PeopleDiscoveryFeature userId={user.id} />;
+    }
+    return undefined;
+  })();
 
   return (
     <V2RuntimeShell

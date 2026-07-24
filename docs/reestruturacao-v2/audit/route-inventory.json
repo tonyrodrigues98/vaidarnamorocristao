@@ -5,7 +5,7 @@
     "generatedFrom": "working-tree-derived-from-audited-base",
     "sourceState": "pre-commit-working-tree"
   },
-  "count": 68,
+  "count": 69,
   "byDomain": {
     "administration": 13,
     "authentication": 4,
@@ -13,7 +13,7 @@
     "conversations": 3,
     "dating": 6,
     "economy": 1,
-    "miscellaneous": 1,
+    "miscellaneous": 2,
     "onboarding": 4,
     "personalization": 4,
     "pets-games": 4,
@@ -28,7 +28,7 @@
     "authenticated": 36,
     "endpoint": 3,
     "public-or-visitor": 13,
-    "root-guard-inherited": 3
+    "root-guard-inherited": 4
   },
   "routes": [
     {
@@ -1521,6 +1521,7 @@
         "tests/app-shell-integration-components-v2.test.tsx",
         "tests/app-shell-integration-contracts-v2.test.ts",
         "tests/application-security-v2.test.ts",
+        "tests/community-home-boundaries-v2.test.tsx",
         "tests/design-system-components-v2.test.tsx",
         "tests/legacy-route-characterization-v2.test.ts",
         "tests/public-acquisition-v2.test.ts"
@@ -2288,6 +2289,12 @@
           "target": "/inicio"
         },
         {
+          "source": "src/routes/membros.tsx",
+          "origin": "src",
+          "kind": "jsx-to",
+          "target": "/inicio"
+        },
+        {
           "source": "src/routes/notificacoes.tsx",
           "origin": "src",
           "kind": "jsx-to",
@@ -2403,12 +2410,6 @@
         },
         {
           "source": "tests/public-acquisition-v2.test.ts",
-          "origin": "tests",
-          "kind": "object-url",
-          "target": "/inicio"
-        },
-        {
-          "source": "tests/push-dispatch-atomic-rls.test.ts",
           "origin": "tests",
           "kind": "object-url",
           "target": "/inicio"
@@ -2699,12 +2700,44 @@
       ],
       "tests": [
         "tests/chat-e2e.test.ts",
+        "tests/community-home-v2.test.ts",
+        "tests/community-social-security-v2.test.ts",
         "tests/dating-opt-in-v2.test.ts",
         "tests/foundation-v2.test.ts",
         "tests/helpers.ts",
         "tests/messages-rls.test.ts",
         "tests/realtime-messages.test.ts"
       ],
+      "notes": []
+    },
+    {
+      "pathname": "/membros",
+      "file": "src/routes/membros.tsx",
+      "component": "CommunityMembersAlias",
+      "domain": "miscellaneous",
+      "access": "root-guard-inherited",
+      "parameters": [],
+      "redirects": ["/inicio", "/v2/$section"],
+      "providers": [],
+      "supabase": {
+        "tables": [],
+        "rpcs": [],
+        "functions": [],
+        "buckets": [],
+        "realtime": [],
+        "auth": false
+      },
+      "queryHooks": [],
+      "realtimeSubscriptions": 0,
+      "linksIn": [
+        {
+          "source": "src/v2/app-shell/navigation.ts",
+          "origin": "src",
+          "kind": "object-href",
+          "target": "/membros"
+        }
+      ],
+      "tests": ["tests/community-home-boundaries-v2.test.tsx"],
       "notes": []
     },
     {
@@ -3570,6 +3603,7 @@
         }
       ],
       "tests": [
+        "tests/community-home-boundaries-v2.test.tsx",
         "tests/legacy-pwa-characterization-v2.test.ts",
         "tests/pretendentes-eligibility.test.ts",
         "tests/public-acquisition-v2.test.ts"
@@ -4273,6 +4307,12 @@
       "realtimeSubscriptions": 0,
       "linksIn": [
         {
+          "source": "src/routes/membros.tsx",
+          "origin": "src",
+          "kind": "jsx-to",
+          "target": "/v2/$section"
+        },
+        {
           "source": "src/routes/v2.index.tsx",
           "origin": "src",
           "kind": "jsx-to",
@@ -4324,6 +4364,18 @@
           "source": "src/v2/integration/V2ShellRuntimeRoute.tsx",
           "origin": "src",
           "kind": "object-to",
+          "target": "/v2/$section"
+        },
+        {
+          "source": "src/v2/integration/V2ShellRuntimeRoute.tsx",
+          "origin": "src",
+          "kind": "object-to",
+          "target": "/v2/$section"
+        },
+        {
+          "source": "src/v2/integration/V2ShellRuntimeRoute.tsx",
+          "origin": "src",
+          "kind": "navigate",
           "target": "/v2/$section"
         },
         {
