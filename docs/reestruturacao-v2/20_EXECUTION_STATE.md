@@ -32,8 +32,10 @@
   `105e920c00b29e7e135fdcd6709cdcf79cd68eba`.
 - V2-015 está no Draft PR #23, branch `rebuild/v2-015-purpose-notes-gifts`, commit
   `ed212229ba5ff5e13b7b700d65c1a32214f72cd1`.
-- Lote ativo: V2-016 em `rebuild/v2-016-economy-shop-inventory`, empilhado sobre a
-  V2-015.
+- V2-016 está no Draft PR #24, branch `rebuild/v2-016-economy-shop-inventory`,
+  commit `6cf03449544b0d1751dc78557037d244ff321287`.
+- Lote ativo: V2-017 em `rebuild/v2-017-pets-arcade-games`, empilhado sobre a
+  V2-016.
   Nenhum PR da pilha foi mesclado ou publicado.
 
 ## Concluído
@@ -272,5 +274,23 @@
   qualquer rollout.
 - Manter qualquer conclusão sobre ACL/RLS publicado como não verificada até
   existir snapshot autenticado e ambiente Supabase descartável.
-- Validar e publicar o Draft PR da V2-016; depois iniciar a V2-017 em branch
+- Validar e publicar o Draft PR da V2-017; depois iniciar a V2-018 em branch
   empilhada, sem aplicar migrations ou ativar flags.
+
+## V2-017 — Pets e Pet Arcade
+
+- `/v2/meu-pet` monta o hub somente com flag e capability dedicadas; `/meu-pet`
+  e `/pet-arcade` permanecem fallbacks integrais.
+- `user_pets` e `user_pets_v2` continuam separados e aparecem como contagens de
+  preservação, sem backfill ou consolidação.
+- Decay/regeneração usam âncoras e `server_now`; a UI não grava tempo nem abre
+  timers concorrentes.
+- Cuidado usa UUID idempotente e envolve `apply_pet_care`, preservando locks,
+  compatibilidade, limites, economia e reward server-authoritative.
+- Os 17 jogos existentes permanecem no manifesto como
+  `awaiting-product-decision`; nenhum jogo, asset, progresso, odds ou reward foi
+  removido ou alterado.
+- Arcade é carregado de forma lazy e apenas consulta catálogo, uso e histórico;
+  rodadas continuam no runtime legado.
+- Migration local aditiva e não aplicada; nenhuma tabela, policy, saldo,
+  inventário ou dado remoto foi alterado.

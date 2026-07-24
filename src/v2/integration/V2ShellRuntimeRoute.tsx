@@ -10,6 +10,7 @@ import { V2ConversationsFeature } from "@/v2/features/conversations";
 import { V2DatingFeature } from "@/v2/features/dating";
 import { V2EconomyFeature } from "@/v2/features/economy";
 import { V2CommunityHomeFeature, V2PeopleDiscoveryFeature } from "@/v2/features/home";
+import { V2PetsFeature } from "@/v2/features/pets";
 import { V2ProfileFeature } from "@/v2/features/profile";
 import { V2RomanticContextFeature } from "@/v2/features/romantic-context";
 import { createV2ShellUser, performV2Logout, resolveV2RuntimeAccess } from "./contracts";
@@ -121,6 +122,9 @@ export function V2ShellRuntimeRoute({ slug }: { readonly slug: string }) {
     }
     if (v2FeatureFlags.economy && route?.slug === "loja") {
       return <V2EconomyFeature userId={user.id} />;
+    }
+    if (v2FeatureFlags.pets && route?.slug === "meu-pet") {
+      return <V2PetsFeature userId={user.id} />;
     }
     if (v2FeatureFlags.dating && route?.slug === "pretendentes") {
       return (

@@ -221,6 +221,7 @@
         "tests/legacy-pwa-characterization-v2.test.ts",
         "tests/messages-rls.test.ts",
         "tests/moderation-rls.test.ts",
+        "tests/pets-security-v2.test.ts",
         "tests/photo-repair-security-v2.test.ts",
         "tests/pretendentes-eligibility.test.ts",
         "tests/push-dispatch-atomic-rls.test.ts",
@@ -2818,9 +2819,15 @@
           "origin": "src",
           "kind": "object-href",
           "target": "/meu-pet"
+        },
+        {
+          "source": "src/v2/features/pets/V2PetsHub.tsx",
+          "origin": "src",
+          "kind": "jsx-href",
+          "target": "/meu-pet"
         }
       ],
-      "tests": [],
+      "tests": ["tests/pets-security-v2.test.ts"],
       "notes": []
     },
     {
@@ -3490,6 +3497,12 @@
           "source": "src/routes/meu-pet.tsx",
           "origin": "src",
           "kind": "jsx-to",
+          "target": "/pet-arcade"
+        },
+        {
+          "source": "src/v2/features/pets/V2ArcadeCatalog.tsx",
+          "origin": "src",
+          "kind": "jsx-href",
           "target": "/pet-arcade"
         }
       ],
