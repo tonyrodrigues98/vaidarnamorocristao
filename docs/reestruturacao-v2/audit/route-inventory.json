@@ -212,6 +212,9 @@
         { "source": "src/routes/conta.tsx", "origin": "src", "kind": "jsx-to", "target": "/admin" }
       ],
       "tests": [
+        "tests/admin-console-boundaries-v2.test.tsx",
+        "tests/admin-console-core-v2.test.ts",
+        "tests/admin-console-security-v2.test.ts",
         "tests/application-security-v2.test.ts",
         "tests/auth-cache-isolation-v2.test.ts",
         "tests/chat-e2e.test.ts",
@@ -2044,7 +2047,7 @@
           "target": "/dashboard"
         }
       ],
-      "tests": [],
+      "tests": ["tests/admin-console-security-v2.test.ts"],
       "notes": []
     },
     {

@@ -292,6 +292,7 @@
     "expire_anonymous_messages": ["src/routes/recados.tsx"],
     "get_active_expedition": ["src/lib/petExpeditions.ts"],
     "get_active_pet_perks": ["src/lib/petCatalog.ts"],
+    "get_admin_console_v2": ["src/v2/features/admin/repository.ts"],
     "get_anonymous_cooldown": ["src/components/anonymous/SendAnonymousButton.tsx"],
     "get_anonymous_quota": ["src/components/anonymous/AnonymousExtrasCard.tsx"],
     "get_grab_state": ["src/lib/petGrab.ts"],

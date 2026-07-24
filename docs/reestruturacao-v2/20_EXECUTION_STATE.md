@@ -344,6 +344,25 @@
 - Dispatch push, service worker, cron e secrets não foram alterados.
 - Migration local aditiva e não aplicada.
 
+## V2-021 — Administração e métricas
+
+- `/v2/admin` exige a flag Admin e a capability `admin:enter` existentes.
+- Console divide 17 áreas com matriz conservadora de papéis e destinos legados.
+- Módulos são lazy e não replicam saldo, match, Propósito, ownership, reward ou
+  moderação de arquivo.
+- Dashboard retorna somente filas acionáveis, sem PII, conteúdo, evidência ou
+  saldo.
+- Request/audit exigem motivo, request ID, UUID idempotente e digests mínimos;
+  o browser não recebe INSERT direto.
+- O monólito e todas as rotas Admin legadas permanecem preservados.
+- Migration local aditiva e não aplicada.
+
+## Próximo lote
+
+- Validar a matriz de papéis e a migration em Supabase descartável.
+- Implementar V2-022 — PWA, Offline, Performance e Acessibilidade sem alterar o
+  service worker em produção.
+
 ## Próximo lote
 
 - Validar migrations e policies em Supabase descartável antes de rollout.
