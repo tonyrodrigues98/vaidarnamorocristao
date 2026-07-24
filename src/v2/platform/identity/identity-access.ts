@@ -37,6 +37,7 @@ export type PlatformDomain =
   | "pets"
   | "content"
   | "cinema"
+  | "trust"
   | "admin"
   | "moderation"
   | "support";
@@ -53,6 +54,7 @@ export type PlatformCapability =
   | "pets:use"
   | "content:use"
   | "cinema:use"
+  | "trust:use"
   | "admin:enter"
   | "moderation:enter"
   | "support:enter";
@@ -111,6 +113,7 @@ const DOMAIN_CAPABILITY: Readonly<Partial<Record<PlatformDomain, PlatformCapabil
   pets: "pets:use",
   content: "content:use",
   cinema: "cinema:use",
+  trust: "trust:use",
   admin: "admin:enter",
   moderation: "moderation:enter",
   support: "support:enter",
@@ -193,6 +196,7 @@ function buildCapabilities({
     capabilities.add("pets:use");
     capabilities.add("content:use");
     capabilities.add("cinema:use");
+    capabilities.add("trust:use");
     if (
       input.datingState === "active" ||
       input.datingState === "legacy-active-pending-confirmation"

@@ -10,6 +10,7 @@ export const V2_FEATURE_FLAG_ENV = {
   content: "VITE_FF_V2_CONTENT",
   admin: "VITE_FF_V2_ADMIN",
   cinema: "VITE_FF_V2_CINEMA",
+  trust: "VITE_FF_V2_TRUST_CENTER",
 } as const;
 
 export type V2FeatureFlag = keyof typeof V2_FEATURE_FLAG_ENV;
