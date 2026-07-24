@@ -138,6 +138,12 @@ const pageCopy: Record<
     eyebrow: "Assistir Juntos",
     width: "wide",
   },
+  trust: {
+    title: "Sua Central",
+    subtitle: "Notificações, confiança e suporte.",
+    eyebrow: "Privacidade e cuidado",
+    width: "wide",
+  },
   settings: {
     title: "Configurações",
     eyebrow: "Conta e privacidade",

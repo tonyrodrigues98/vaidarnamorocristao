@@ -329,6 +329,27 @@
 - Migration local aditiva e não aplicada; Storage, CDN, Supabase e ambientes
   externos não foram alterados.
 
+## V2-020 — Notificações, confiança e suporte
+
+- `/v2/central` separa evento, inbox, preferência, delivery e push sob flag e
+  capability próprias.
+- Inbox de segurança é essencial; texto sensível é neutro e deep links são
+  same-origin.
+- `blocks` e `v2_community_users_blocked` continuam a autoridade global; mute e
+  denúncia não são equivalentes a bloquear.
+- Cinema e inbox recebem restrições adicionais para atores bloqueados, sem
+  apagar histórico/evidência.
+- Verificação permanece fail-closed e não expõe imagem ou PII.
+- Tickets, mensagens, anexos, protocolos e Realtime de suporte são preservados.
+- Dispatch push, service worker, cron e secrets não foram alterados.
+- Migration local aditiva e não aplicada.
+
+## Próximo lote
+
+- Validar migrations e policies em Supabase descartável antes de rollout.
+- Implementar V2-021 — Administração e Métricas em nova branch empilhada, sem
+  substituir permissões administrativas atuais.
+
 ## Próximo lote
 
 - Validar os Draft PRs empilhados e todas as migrations em Supabase descartável.

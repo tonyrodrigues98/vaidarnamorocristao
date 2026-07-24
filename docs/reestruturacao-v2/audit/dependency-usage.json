@@ -377,7 +377,8 @@
         "src/v2/features/pets/V2PetsHub.tsx",
         "src/v2/features/profile/V2Profile.tsx",
         "src/v2/features/romantic-context/V2AnonymousNotes.tsx",
-        "src/v2/features/romantic-context/V2PurposeCenter.tsx"
+        "src/v2/features/romantic-context/V2PurposeCenter.tsx",
+        "src/v2/features/trust/V2TrustCenter.tsx"
       ],
       "testFiles": [
         "tests/auth-cache-isolation-v2.test.ts",
@@ -390,7 +391,8 @@
         "tests/economy-boundaries-v2.test.tsx",
         "tests/pets-boundaries-v2.test.tsx",
         "tests/profile-boundaries-v2.test.tsx",
-        "tests/romantic-context-boundaries-v2.test.tsx"
+        "tests/romantic-context-boundaries-v2.test.tsx",
+        "tests/trust-center-boundaries-v2.test.tsx"
       ],
       "configReferences": ["RELATORIO_LOJA_QUERY_PARTE1.md"],
       "classification": "directly-imported"
@@ -994,6 +996,7 @@
         "src/v2/features/profile/V2ProfileModuleCard.tsx",
         "src/v2/features/romantic-context/V2AnonymousNotes.tsx",
         "src/v2/features/romantic-context/V2PurposeCenter.tsx",
+        "src/v2/features/trust/V2TrustCenter.tsx",
         "src/v2/integration/route-registry.ts",
         "src/v2/integration/V2RuntimePage.tsx",
         "src/v2/integration/V2RuntimeState.tsx"
@@ -1291,6 +1294,7 @@
         "src/v2/features/profile/V2Profile.tsx",
         "src/v2/features/romantic-context/V2AnonymousNotes.tsx",
         "src/v2/features/romantic-context/V2PurposeCenter.tsx",
+        "src/v2/features/trust/V2TrustCenter.tsx",
         "src/v2/integration/V2RuntimeErrorBoundary.tsx",
         "src/v2/integration/V2RuntimeShell.tsx",
         "src/v2/integration/V2ShellRuntimeRoute.tsx"
@@ -1360,6 +1364,7 @@
         "tests/pets-boundaries-v2.test.tsx",
         "tests/profile-boundaries-v2.test.tsx",
         "tests/romantic-context-boundaries-v2.test.tsx",
+        "tests/trust-center-boundaries-v2.test.tsx",
         "tests/use-long-press.test.ts"
       ],
       "configReferences": [],
@@ -1664,6 +1669,9 @@
         "tests/security-closure-v2.test.ts",
         "tests/security-evidence-v2.test.ts",
         "tests/starter-bundle.test.ts",
+        "tests/trust-center-boundaries-v2.test.tsx",
+        "tests/trust-center-core-v2.test.ts",
+        "tests/trust-center-security-v2.test.ts",
         "tests/trusted-capabilities-rls.test.ts",
         "tests/trusted-capabilities-v2.test.ts",
         "tests/use-long-press.test.ts"

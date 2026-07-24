@@ -8,6 +8,7 @@ import { V2AccountRuntimeFeature, type AccountNavigationTarget } from "@/v2/feat
 import { V2CommunityHubFeature } from "@/v2/features/community";
 import { V2ChristianContentFeature } from "@/v2/features/content";
 import { V2CinemaFeature } from "@/v2/features/cinema";
+import { V2TrustCenterFeature } from "@/v2/features/trust";
 import { V2ConversationsFeature } from "@/v2/features/conversations";
 import { V2DatingFeature } from "@/v2/features/dating";
 import { V2EconomyFeature } from "@/v2/features/economy";
@@ -133,6 +134,9 @@ export function V2ShellRuntimeRoute({ slug }: { readonly slug: string }) {
     }
     if (v2FeatureFlags.cinema && route?.slug === "cinema") {
       return <V2CinemaFeature userId={user.id} />;
+    }
+    if (v2FeatureFlags.trust && route?.slug === "central") {
+      return <V2TrustCenterFeature userId={user.id} />;
     }
     if (v2FeatureFlags.dating && route?.slug === "pretendentes") {
       return (

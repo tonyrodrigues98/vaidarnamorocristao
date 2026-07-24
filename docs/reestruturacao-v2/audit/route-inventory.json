@@ -1395,6 +1395,12 @@
           "target": "/bloqueados"
         },
         {
+          "source": "src/v2/features/trust/V2TrustCenter.tsx",
+          "origin": "src",
+          "kind": "jsx-href",
+          "target": "/bloqueados"
+        },
+        {
           "source": "src/v2/integration/V2ShellRuntimeRoute.tsx",
           "origin": "src",
           "kind": "object-to",
@@ -1758,7 +1764,8 @@
         "tests/legacy-pwa-characterization-v2.test.ts",
         "tests/legacy-route-characterization-v2.test.ts",
         "tests/push-dispatch-atomic-v2.test.ts",
-        "tests/route-protection-v2.test.ts"
+        "tests/route-protection-v2.test.ts",
+        "tests/trust-center-security-v2.test.ts"
       ],
       "notes": []
     },
@@ -4118,6 +4125,12 @@
           "target": "/suporte"
         },
         {
+          "source": "src/v2/features/trust/V2TrustCenter.tsx",
+          "origin": "src",
+          "kind": "jsx-href",
+          "target": "/suporte"
+        },
+        {
           "source": "src/v2/integration/V2ShellRuntimeRoute.tsx",
           "origin": "src",
           "kind": "object-to",
@@ -4130,7 +4143,7 @@
           "target": "/suporte"
         }
       ],
-      "tests": [],
+      "tests": ["tests/trust-center-core-v2.test.ts"],
       "notes": []
     },
     {
@@ -4194,6 +4207,12 @@
           "origin": "src",
           "kind": "jsx-to",
           "target": "/suporte/ajuda"
+        },
+        {
+          "source": "src/v2/features/trust/V2TrustCenter.tsx",
+          "origin": "src",
+          "kind": "jsx-href",
+          "target": "/suporte/ajuda"
         }
       ],
       "tests": [],
@@ -4223,6 +4242,12 @@
           "source": "src/routes/suporte/index.tsx",
           "origin": "src",
           "kind": "jsx-to",
+          "target": "/suporte/ajuda"
+        },
+        {
+          "source": "src/v2/features/trust/V2TrustCenter.tsx",
+          "origin": "src",
+          "kind": "jsx-href",
           "target": "/suporte/ajuda"
         }
       ],
@@ -4549,6 +4574,12 @@
           "source": "src/routes/conta.tsx",
           "origin": "src",
           "kind": "jsx-to",
+          "target": "/verificacao"
+        },
+        {
+          "source": "src/v2/features/trust/V2TrustCenter.tsx",
+          "origin": "src",
+          "kind": "jsx-href",
           "target": "/verificacao"
         },
         {

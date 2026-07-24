@@ -1,5 +1,6 @@
 import {
   BookHeart,
+  BellRing,
   CircleUserRound,
   Clapperboard,
   Compass,
@@ -30,6 +31,7 @@ export const V2_RUNTIME_SLUGS = [
   "meu-pet",
   "verbo",
   "cinema",
+  "central",
   "configuracoes",
 ] as const;
 
@@ -220,6 +222,20 @@ const V2_RUNTIME_ROUTES = Object.freeze([
     primary: false,
     requiredDomain: "cinema",
     width: "fluid",
+  },
+  {
+    slug: "central",
+    navigationId: "trust",
+    label: "Sua Central",
+    title: "Sua Central",
+    subtitle: "Notificações, privacidade, confiança e suporte em um só lugar.",
+    eyebrow: "Confiança",
+    description:
+      "Preferências por categoria, bloqueios globais, verificação e atendimento preservado.",
+    icon: BellRing,
+    primary: false,
+    requiredDomain: "trust",
+    width: "wide",
   },
   {
     slug: "configuracoes",
