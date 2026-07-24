@@ -441,3 +441,22 @@
 - Consolidar os gates de release e runbooks na V2-025.
 - Manter migrations, rollout e contração bloqueados até validação em ambiente
   descartável e autorização operacional separada.
+
+## V2-025 — Convergência e preparação de release
+
+- Inventário final consolida 69 rotas, 14 domínios, 21 flags e 16 migrations
+  versionadas/não aplicadas.
+- A matriz de paridade distingue código revisável de paridade operacional.
+- Dez gates locais e dez gates externos impedem promoção silenciosa.
+- O programa está apto para revisão técnica da pilha, não para staging ou
+  produção.
+- Runbook define owners, coortes, avanço, pausa, rollback, push, secrets por nome
+  e smoke pós-publicação.
+- Nenhum merge, deploy, migration, ativação de flag ou alteração externa foi
+  realizado.
+
+## Estado final do programa autônomo
+
+- V2-007 a V2-025 implementadas em Draft PRs empilhados.
+- Próxima ação exige revisão humana, ambiente descartável e autorização por
+  gate; nenhum novo lote é iniciado automaticamente.

@@ -339,6 +339,21 @@
       "removalSafety": "not-proven-safe"
     },
     {
+      "file": "src/v2/platform/release-readiness/index.ts",
+      "symbols": [
+        "EXTERNAL_RELEASE_GATES,\n  LOCAL_RELEASE_GATES,\n  RELEASE_INVARIANTS,\n  assessReleaseReadiness,\n  decideRollout,\n  type ExternalReleaseGateId,\n  type LocalReleaseGateId,\n  type ReleaseGate,\n  type ReleaseGateId,\n  type ReleaseGateScope,\n  type ReleaseGateStatus,\n  type ReleaseReadinessAssessment,\n  type RolloutDecision,\n  type RolloutDecisionInput,\n"
+      ],
+      "incomingStaticImports": 0,
+      "incomingTestImports": [
+        "tests/release-readiness-artifacts-v2.test.ts",
+        "tests/release-readiness-boundaries-v2.test.ts",
+        "tests/release-readiness-core-v2.test.ts"
+      ],
+      "possibleIndirectReferences": [],
+      "classification": "test-only-contract",
+      "removalSafety": "not-proven-safe"
+    },
+    {
       "file": "src/v2/platform/trust-security/security-evidence.ts",
       "symbols": [
         "SECURITY_EVIDENCE_STATES",

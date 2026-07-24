@@ -78,6 +78,7 @@
         "tests/legacy-route-characterization-v2.test.ts",
         "tests/public-acquisition-v2.test.ts",
         "tests/pwa-cache-v2.test.ts",
+        "tests/release-readiness-artifacts-v2.test.ts",
         "tests/route-protection-v2.test.ts"
       ],
       "notes": []
@@ -1665,6 +1666,8 @@
         "tests/public-acquisition-v2.test.ts",
         "tests/reconciliation-artifacts-v2.test.ts",
         "tests/reconciliation-boundaries-v2.test.ts",
+        "tests/release-readiness-artifacts-v2.test.ts",
+        "tests/release-readiness-boundaries-v2.test.ts",
         "tests/security-closure-v2.test.ts",
         "tests/security-evidence-v2.test.ts"
       ],
@@ -2765,6 +2768,7 @@
         "tests/messages-rls.test.ts",
         "tests/realtime-messages.test.ts",
         "tests/reconciliation-core-v2.test.ts",
+        "tests/release-readiness-artifacts-v2.test.ts",
         "tests/romantic-context-core-v2.test.ts"
       ],
       "notes": []
@@ -4043,6 +4047,7 @@
       ],
       "tests": [
         "tests/community-onboarding-v2.test.ts",
+        "tests/release-readiness-artifacts-v2.test.ts",
         "tests/romantic-context-boundaries-v2.test.tsx",
         "tests/romantic-context-security-v2.test.ts"
       ],
@@ -4192,7 +4197,10 @@
           "target": "/suporte"
         }
       ],
-      "tests": ["tests/trust-center-core-v2.test.ts"],
+      "tests": [
+        "tests/release-readiness-artifacts-v2.test.ts",
+        "tests/trust-center-core-v2.test.ts"
+      ],
       "notes": []
     },
     {
