@@ -363,6 +363,31 @@
 - Implementar V2-022 — PWA, Offline, Performance e Acessibilidade sem alterar o
   service worker em produção.
 
+## V2-022 — PWA, offline, performance e acessibilidade
+
+- Service worker v5 espera confirmação explícita para ativar uma atualização;
+  a V2 informa o usuário e recarrega somente após essa decisão.
+- Cache do worker permanece público; namespaces privados futuros exigem versão,
+  scope opaco por usuário e TTL. Logout/troca limpa cache, queries, mutations,
+  drafts e outbox prefixados.
+- URLs assinadas ou sensíveis não entram no contrato de cache público.
+- Matriz offline classifica 17 ações. Cinema, economia, Admin, upload e envio
+  permanecem bloqueados; outbox não persiste payload nem é habilitado sem
+  idempotência server-side confirmada.
+- Budgets foram derivados do build de produção com margem documentada, sem
+  inventar CWV ou latências.
+- Safe areas, input 16 px, toque 44 px, foco, teclado, reduced motion e update
+  acessível possuem regressões automatizadas.
+- Push dispatch, VAPID, subscriptions, cron, dados e ambientes não foram
+  alterados.
+
+## Próximo lote
+
+- Validar instalação, update, cache e acessibilidade em dispositivos reais antes
+  de rollout.
+- Implementar V2-023 em nova branch empilhada, mantendo flags fechadas e sem
+  alterações operacionais.
+
 ## Próximo lote
 
 - Validar migrations e policies em Supabase descartável antes de rollout.

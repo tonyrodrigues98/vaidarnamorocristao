@@ -1302,7 +1302,8 @@
         "src/v2/features/trust/V2TrustCenter.tsx",
         "src/v2/integration/V2RuntimeErrorBoundary.tsx",
         "src/v2/integration/V2RuntimeShell.tsx",
-        "src/v2/integration/V2ShellRuntimeRoute.tsx"
+        "src/v2/integration/V2ShellRuntimeRoute.tsx",
+        "src/v2/platform/resilience/V2ServiceWorkerUpdateNotice.tsx"
       ],
       "testFiles": ["tests/app-shell-components-v2.test.tsx", "tests/use-long-press.test.ts"],
       "configReferences": [
@@ -1370,6 +1371,7 @@
         "tests/pets-boundaries-v2.test.tsx",
         "tests/profile-boundaries-v2.test.tsx",
         "tests/romantic-context-boundaries-v2.test.tsx",
+        "tests/service-worker-update-v2.test.tsx",
         "tests/trust-center-boundaries-v2.test.tsx",
         "tests/use-long-press.test.ts"
       ],
@@ -1656,6 +1658,7 @@
         "tests/messages-rls.test.ts",
         "tests/moderation-rls.test.ts",
         "tests/navigation-security-v2.test.ts",
+        "tests/offline-outbox-v2.test.ts",
         "tests/onboarding-integration-v2.test.tsx",
         "tests/pets-boundaries-v2.test.tsx",
         "tests/pets-core-v2.test.ts",
@@ -1670,6 +1673,8 @@
         "tests/push-dispatch-atomic-rls.test.ts",
         "tests/push-dispatch-atomic-v2.test.ts",
         "tests/push-dispatch-auth.test.ts",
+        "tests/pwa-cache-v2.test.ts",
+        "tests/quality-accessibility-v2.test.ts",
         "tests/realtime-messages.test.ts",
         "tests/romantic-context-boundaries-v2.test.tsx",
         "tests/romantic-context-core-v2.test.ts",
@@ -1677,6 +1682,7 @@
         "tests/route-protection-v2.test.ts",
         "tests/security-closure-v2.test.ts",
         "tests/security-evidence-v2.test.ts",
+        "tests/service-worker-update-v2.test.tsx",
         "tests/starter-bundle.test.ts",
         "tests/trust-center-boundaries-v2.test.tsx",
         "tests/trust-center-core-v2.test.ts",

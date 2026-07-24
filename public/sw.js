@@ -1,9 +1,11 @@
 importScripts("/vdn-navigation-policy.js");
 
-const CACHE_VERSION = "vaidarnamoro-pwa-v4";
+const CACHE_VERSION = "vaidarnamoro-pwa-v5";
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const PET_PUBLIC_IMG_CACHE = `${CACHE_VERSION}-pet-public`;
 const CLEAR_PRIVATE_CACHES_MESSAGE = "VDN_CLEAR_PRIVATE_CACHES";
+const ACTIVATE_WAITING_MESSAGE = "VDN_ACTIVATE_WAITING_SERVICE_WORKER";
+const SERVICE_WORKER_ACTIVATED_MESSAGE = "VDN_SERVICE_WORKER_ACTIVATED";
 
 const STATIC_ASSETS = [
   "/offline.html",
@@ -37,12 +39,7 @@ const SENSITIVE_PATHS = [
 const STATIC_EXTENSIONS = [".css", ".js", ".ico", ".png", ".svg", ".webp", ".woff", ".woff2"];
 
 self.addEventListener("install", (event) => {
-  event.waitUntil(
-    caches
-      .open(STATIC_CACHE)
-      .then((cache) => cache.addAll(STATIC_ASSETS))
-      .then(() => self.skipWaiting()),
-  );
+  event.waitUntil(caches.open(STATIC_CACHE).then((cache) => cache.addAll(STATIC_ASSETS)));
 });
 
 self.addEventListener("activate", (event) => {
@@ -56,7 +53,13 @@ self.addEventListener("activate", (event) => {
             .map((key) => caches.delete(key)),
         ),
       )
-      .then(() => self.clients.claim()),
+      .then(() => self.clients.claim())
+      .then(() => self.clients.matchAll({ type: "window", includeUncontrolled: true }))
+      .then((windowClients) => {
+        for (const client of windowClients) {
+          client.postMessage({ type: SERVICE_WORKER_ACTIVATED_MESSAGE, version: CACHE_VERSION });
+        }
+      }),
   );
 });
 
@@ -149,6 +152,10 @@ self.addEventListener("fetch", (event) => {
 });
 
 self.addEventListener("message", (event) => {
+  if (event.data && event.data.type === ACTIVATE_WAITING_MESSAGE) {
+    event.waitUntil(self.skipWaiting());
+    return;
+  }
   if (!event.data || event.data.type !== CLEAR_PRIVATE_CACHES_MESSAGE) return;
   event.waitUntil(
     caches
