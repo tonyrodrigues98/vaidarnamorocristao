@@ -2712,7 +2712,8 @@
         "tests/foundation-v2.test.ts",
         "tests/helpers.ts",
         "tests/messages-rls.test.ts",
-        "tests/realtime-messages.test.ts"
+        "tests/realtime-messages.test.ts",
+        "tests/romantic-context-core-v2.test.ts"
       ],
       "notes": []
     },
@@ -3954,7 +3955,11 @@
           "target": "/recados"
         }
       ],
-      "tests": ["tests/community-onboarding-v2.test.ts"],
+      "tests": [
+        "tests/community-onboarding-v2.test.ts",
+        "tests/romantic-context-boundaries-v2.test.tsx",
+        "tests/romantic-context-security-v2.test.ts"
+      ],
       "notes": []
     },
     {
@@ -4403,6 +4408,18 @@
           "source": "src/v2/integration/V2ShellRuntimeRoute.tsx",
           "origin": "src",
           "kind": "object-to",
+          "target": "/v2/$section"
+        },
+        {
+          "source": "src/v2/integration/V2ShellRuntimeRoute.tsx",
+          "origin": "src",
+          "kind": "object-to",
+          "target": "/v2/$section"
+        },
+        {
+          "source": "src/v2/integration/V2ShellRuntimeRoute.tsx",
+          "origin": "src",
+          "kind": "navigate",
           "target": "/v2/$section"
         },
         {

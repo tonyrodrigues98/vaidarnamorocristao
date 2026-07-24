@@ -28,7 +28,9 @@
   `77f6c635c6a327adf4920c29d011957a2de1a6f8`.
 - V2-013 está no Draft PR #21, branch `rebuild/v2-013-modular-profile`, commit
   `15a8dacbaf9a4ffa406a15fbb4259956c73d8ae0`.
-- Lote ativo: V2-014 em `rebuild/v2-014-dating-mode`, empilhado sobre a V2-013.
+- V2-014 está no Draft PR #22, branch `rebuild/v2-014-dating-mode`, commit
+  `105e920c00b29e7e135fdcd6709cdcf79cd68eba`.
+- Lote ativo: V2-015 em `rebuild/v2-015-purpose-notes-gifts`, empilhado sobre a V2-014.
   Nenhum PR da pilha foi mesclado ou publicado.
 
 ## Concluído
@@ -106,7 +108,7 @@
 - ESLint e Prettier focados: aprovados.
 - Build TanStack/Vite cliente e SSR: aprovado; warnings de dependências são
   baseline.
-- Auditoria reproduzível: 69 rotas, 497 referências, 495 módulos, 2.772 imports,
+- Auditoria reproduzível: 69 rotas, 499 referências, 501 módulos, 2.795 imports,
   um ciclo gerado conhecido e zero ciclos em `src/v2`.
 - Smoke isolado aprovado em 320, 360, 390, 430, 768, 1024 e 1440 px, sem overflow
   horizontal; nenhum backend foi carregado.
@@ -228,11 +230,27 @@
   conversas e histórico legítimo.
 - O legado `/pretendentes` permanece reversível e nenhum dado foi removido.
 
+## V2-015 — Propósito, recados e presentes
+
+- `/v2/proposito` e `/v2/recados` exigem a flag e a capability canônicas de
+  Namoro; não aparecem para participantes comunitários fora do modo romântico.
+- Propósito usa máquina de estados explícita, lock, idempotência e eventos
+  append-only; rejeição/cancelamento não apagam dados.
+- Aceite pausa somente `dating_memberships`; encerramento não reativa Namoro.
+- Página do casal agrega linha do tempo, mensagens, cápsulas protegidas e
+  presentes sem criar uma segunda economia.
+- Recados exigem opt-in estrito, elegibilidade, bloqueio, limite/cooldown e
+  moderação; identidade não entra no payload antes da revelação mútua.
+- Presentes contextuais envelopam `send_virtual_gift` na mesma transação e não
+  reclassificam o histórico.
+- Migration local aditiva e não aplicada preserva compromissos, recados,
+  denúncias, transações, saldos, cápsulas e matches.
+
 ## Próximo lote
 
 - Validar as migrations de capabilities e push em Supabase descartável antes de
   qualquer rollout.
 - Manter qualquer conclusão sobre ACL/RLS publicado como não verificada até
   existir snapshot autenticado e ambiente Supabase descartável.
-- Validar e publicar o Draft PR da V2-014; depois iniciar a V2-015 em branch
+- Validar e publicar o Draft PR da V2-015; depois iniciar a V2-016 em branch
   empilhada, sem aplicar migrations ou ativar flags.
