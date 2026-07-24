@@ -30,7 +30,10 @@
   `15a8dacbaf9a4ffa406a15fbb4259956c73d8ae0`.
 - V2-014 está no Draft PR #22, branch `rebuild/v2-014-dating-mode`, commit
   `105e920c00b29e7e135fdcd6709cdcf79cd68eba`.
-- Lote ativo: V2-015 em `rebuild/v2-015-purpose-notes-gifts`, empilhado sobre a V2-014.
+- V2-015 está no Draft PR #23, branch `rebuild/v2-015-purpose-notes-gifts`, commit
+  `ed212229ba5ff5e13b7b700d65c1a32214f72cd1`.
+- Lote ativo: V2-016 em `rebuild/v2-016-economy-shop-inventory`, empilhado sobre a
+  V2-015.
   Nenhum PR da pilha foi mesclado ou publicado.
 
 ## Concluído
@@ -104,11 +107,11 @@
 ## Evidência de validação
 
 - Instalação congelada e TypeScript: aprovados.
-- Suíte segura: 55 arquivos e 407 testes aprovados.
+- Suíte segura: 61 arquivos e 448 testes aprovados.
 - ESLint e Prettier focados: aprovados.
 - Build TanStack/Vite cliente e SSR: aprovado; warnings de dependências são
   baseline.
-- Auditoria reproduzível: 69 rotas, 499 referências, 501 módulos, 2.795 imports,
+- Auditoria reproduzível: 69 rotas, 499 referências, 506 módulos, 2.810 imports,
   um ciclo gerado conhecido e zero ciclos em `src/v2`.
 - Smoke isolado aprovado em 320, 360, 390, 430, 768, 1024 e 1440 px, sem overflow
   horizontal; nenhum backend foi carregado.
@@ -246,11 +249,28 @@
 - Migration local aditiva e não aplicada preserva compromissos, recados,
   denúncias, transações, saldos, cápsulas e matches.
 
+## V2-016 — Economia, loja e inventário
+
+- `/v2/loja` monta o novo hub somente com flag e capability canônicas de
+  economia; `/loja` e todas as fontes legadas permanecem preservadas.
+- O browser envia somente intenção, item e UUID idempotente. Preço, saldo,
+  propriedade, slot e entrega permanecem server-authoritative.
+- Compras e equipamentos V2 envolvem as RPCs atômicas existentes e registram
+  recibos sem consolidar `user_decorations`, fundos ou gradientes.
+- Saldo, XP, ledger e equipamento possuem projeção de reconciliação sem
+  correção automática.
+- Badges, presentes, avatar legado e itens de pets permanecem em famílias
+  independentes, visíveis somente como contagens de preservação no hub.
+- Caixas de chance permanecem fechadas por gate server-only até decisão
+  jurídica/comercial e transparência de odds.
+- Migration local aditiva e não aplicada; nenhum saldo, inventário, policy ou
+  dado remoto foi alterado.
+
 ## Próximo lote
 
 - Validar as migrations de capabilities e push em Supabase descartável antes de
   qualquer rollout.
 - Manter qualquer conclusão sobre ACL/RLS publicado como não verificada até
   existir snapshot autenticado e ambiente Supabase descartável.
-- Validar e publicar o Draft PR da V2-015; depois iniciar a V2-016 em branch
+- Validar e publicar o Draft PR da V2-016; depois iniciar a V2-017 em branch
   empilhada, sem aplicar migrations ou ativar flags.

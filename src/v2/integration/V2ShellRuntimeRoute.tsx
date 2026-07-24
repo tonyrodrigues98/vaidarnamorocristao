@@ -8,6 +8,7 @@ import { V2AccountRuntimeFeature, type AccountNavigationTarget } from "@/v2/feat
 import { V2CommunityHubFeature } from "@/v2/features/community";
 import { V2ConversationsFeature } from "@/v2/features/conversations";
 import { V2DatingFeature } from "@/v2/features/dating";
+import { V2EconomyFeature } from "@/v2/features/economy";
 import { V2CommunityHomeFeature, V2PeopleDiscoveryFeature } from "@/v2/features/home";
 import { V2ProfileFeature } from "@/v2/features/profile";
 import { V2RomanticContextFeature } from "@/v2/features/romantic-context";
@@ -117,6 +118,9 @@ export function V2ShellRuntimeRoute({ slug }: { readonly slug: string }) {
     }
     if (v2FeatureFlags.profile && route?.slug === "perfil") {
       return <V2ProfileFeature userId={user.id} />;
+    }
+    if (v2FeatureFlags.economy && route?.slug === "loja") {
+      return <V2EconomyFeature userId={user.id} />;
     }
     if (v2FeatureFlags.dating && route?.slug === "pretendentes") {
       return (

@@ -215,6 +215,7 @@
         "tests/application-security-v2.test.ts",
         "tests/auth-cache-isolation-v2.test.ts",
         "tests/chat-e2e.test.ts",
+        "tests/economy-security-v2.test.ts",
         "tests/helpers.ts",
         "tests/identity-capabilities-v2.test.ts",
         "tests/legacy-pwa-characterization-v2.test.ts",
@@ -1209,6 +1210,9 @@
       "tests": [
         "tests/app-shell-contracts-v2.test.ts",
         "tests/app-shell-integration-contracts-v2.test.ts",
+        "tests/economy-boundaries-v2.test.tsx",
+        "tests/economy-core-v2.test.ts",
+        "tests/economy-security-v2.test.ts",
         "tests/photo-repair-security-v2.test.ts"
       ],
       "notes": []
@@ -2598,7 +2602,7 @@
           "target": "/loja"
         }
       ],
-      "tests": [],
+      "tests": ["tests/economy-boundaries-v2.test.tsx", "tests/economy-security-v2.test.ts"],
       "notes": []
     },
     {

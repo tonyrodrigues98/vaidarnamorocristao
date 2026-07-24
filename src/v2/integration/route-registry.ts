@@ -158,7 +158,8 @@ const V2_RUNTIME_ROUTES = Object.freeze([
     title: "Loja",
     subtitle: "Itens e expressões para personalizar sua presença.",
     eyebrow: "Economia",
-    description: "Saldos, compras e inventários permanecem intocados no sistema atual.",
+    description:
+      "Compras server-authoritative, inventários preservados e equipamento com propriedade validada.",
     icon: ShoppingBag,
     primary: false,
     requiredDomain: "economy",
