@@ -1,0 +1,87 @@
+{
+  "schemaVersion": 1,
+  "sourceState": "working-tree-derived-from-v2-024",
+  "containsPii": false,
+  "publishedSnapshotCaptured": false,
+  "domains": [
+    {
+      "id": "identity-profile",
+      "protectedSources": [
+        "auth.users",
+        "profiles",
+        "profile_advanced",
+        "profile_preferences",
+        "profile_photos",
+        "user_roles"
+      ],
+      "semanticKeys": [
+        "stable user id",
+        "profile ownership",
+        "privacy",
+        "photo order",
+        "verification"
+      ],
+      "tolerance": "zero-loss-zero-cross-owner"
+    },
+    {
+      "id": "dating-messaging-purpose",
+      "protectedSources": [
+        "dating_memberships",
+        "dating_preferences",
+        "interests",
+        "matches",
+        "messages",
+        "anonymous_messages",
+        "couple_commitments"
+      ],
+      "semanticKeys": [
+        "participants",
+        "context",
+        "author",
+        "stable order",
+        "read state",
+        "history"
+      ],
+      "tolerance": "zero-loss-zero-reassociation"
+    },
+    {
+      "id": "economy-inventory",
+      "protectedSources": [
+        "user_coins",
+        "coin_transactions",
+        "user_xp",
+        "user_inventory",
+        "gift_transactions",
+        "user_avatar_inventory"
+      ],
+      "semanticKeys": ["ledger balance", "ownership", "equipment", "purchase", "gift participants"],
+      "tolerance": "zero-loss-zero-duplication"
+    },
+    {
+      "id": "pets-games",
+      "protectedSources": ["user_pets", "user_pets_v2", "pet_arcade_rounds", "missions"],
+      "semanticKeys": ["owner", "instance", "stats", "server time", "progress", "reward claim"],
+      "tolerance": "zero-loss-zero-replay"
+    },
+    {
+      "id": "storage",
+      "protectedSources": ["profile-photos", "avatars", "avatar-items", "avatar-looks"],
+      "semanticKeys": ["bucket", "path", "owner", "hash", "size", "mime", "reference"],
+      "tolerance": "zero-missing-referenced-object"
+    },
+    {
+      "id": "character-avatar",
+      "protectedSources": [
+        "avatar_bases",
+        "avatar_categories",
+        "avatar_items",
+        "user_avatar_base",
+        "user_avatar_inventory",
+        "user_avatar_equipped",
+        "user_avatar_looks"
+      ],
+      "semanticKeys": ["owner", "exclusive item", "historical cost", "equipment", "saved look"],
+      "tolerance": "zero-ownership-loss"
+    }
+  ]
+}

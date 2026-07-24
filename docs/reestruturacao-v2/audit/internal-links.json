@@ -5070,7 +5070,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/auth/login"],
-      "evidence": { "locator": "jsx-to", "line": 414 }
+      "evidence": { "locator": "jsx-to", "line": 432 }
     },
     {
       "source": "src/routes/pretendentes/index.tsx",
@@ -5082,7 +5082,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/proposito/$matchId"],
-      "evidence": { "locator": "jsx-to", "line": 481 }
+      "evidence": { "locator": "jsx-to", "line": 499 }
     },
     {
       "source": "src/routes/pretendentes/index.tsx",
@@ -5094,7 +5094,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/v2/$section"],
-      "evidence": { "locator": "jsx-to", "line": 228 }
+      "evidence": { "locator": "jsx-to", "line": 249 }
     },
     {
       "source": "src/routes/proposito/$matchId.tsx",

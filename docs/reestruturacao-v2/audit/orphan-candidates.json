@@ -324,6 +324,21 @@
       "removalSafety": "not-proven-safe"
     },
     {
+      "file": "src/v2/platform/reconciliation/index.ts",
+      "symbols": [
+        "CONTRACTION_EVIDENCE_KEYS,\n  RECONCILIATION_DOMAINS,\n  assessContractionReadiness,\n  evaluateReconciliation,\n  planAvatarCompensation,\n  type AvatarCompensationDryRun,\n  type AvatarCompensationInputs,\n  type ContractionEvidence,\n  type ContractionEvidenceKey,\n  type ContractionReadiness,\n  type ExpectedDifference,\n  type ReconciliationDomain,\n  type ReconciliationMeasurement,\n  type ReconciliationResult,\n  type ReconciliationStatus,\n",
+        "createSemanticChecksum, createSemanticPayload, type SemanticRecord "
+      ],
+      "incomingStaticImports": 0,
+      "incomingTestImports": [
+        "tests/reconciliation-artifacts-v2.test.ts",
+        "tests/reconciliation-core-v2.test.ts"
+      ],
+      "possibleIndirectReferences": [],
+      "classification": "test-only-contract",
+      "removalSafety": "not-proven-safe"
+    },
+    {
       "file": "src/v2/platform/trust-security/security-evidence.ts",
       "symbols": [
         "SECURITY_EVIDENCE_STATES",

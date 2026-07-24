@@ -419,3 +419,25 @@
 - Produzir reconciliação read-only e gates objetivos da V2-024.
 - Não contrair schema, assets ou código sem snapshot publicado, backup testado,
   paridade, telemetria e decisão de compensação.
+
+## V2-024 — Reconciliação e preparação de contração
+
+- Seis domínios possuem contratos de contagem, checksum semântico, órfãos,
+  relacionamentos e diferenças esperadas aprovadas.
+- Doze evidências independentes falham fechadas antes de qualquer elegibilidade.
+- O estado atual é `NOT_ELIGIBLE`: todos os domínios permanecem em `REVIEW` e
+  nenhum alvo é seguro para remoção.
+- O SQL de inventário consulta apenas metadados, está fora de migrations e não
+  foi executado.
+- Compensação do avatar-personagem é somente dry-run, sem política escolhida,
+  grant ou mutation.
+- Nenhum SQL destrutivo foi preparado porque snapshot e alvos publicados não
+  foram confirmados.
+- Não houve acesso ao Supabase, migration, contração, compensação ou alteração
+  operacional.
+
+## Próximo lote
+
+- Consolidar os gates de release e runbooks na V2-025.
+- Manter migrations, rollout e contração bloqueados até validação em ambiente
+  descartável e autorização operacional separada.
