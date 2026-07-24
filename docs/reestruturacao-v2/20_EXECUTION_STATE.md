@@ -312,3 +312,25 @@
   permanecem fechados.
 - Migration local aditiva e não aplicada; nenhum conteúdo, dado ou ambiente
   externo foi alterado.
+
+## V2-019 — Sala de Cinema
+
+- `/v2/cinema` monta catálogo e player responsivo somente com flag e capability
+  próprias.
+- Upload, playback público, jurídico, retenção e custo falham fechados; nenhuma
+  mídia ou bucket foi adicionado.
+- Sessão possui estado, papéis, snapshot, sequência, timestamp de servidor e
+  controles idempotentes server-authoritative.
+- Drift é estimado pelo relógio do servidor e corrigido de forma limitada; o
+  relógio local nunca é a autoridade única.
+- Chat referencia `conversation_threads_v2`; nenhuma implementação paralela de
+  mensagens foi criada.
+- Direitos e moderação precisam estar aprovados antes de uma mídia ser entregue.
+- Migration local aditiva e não aplicada; Storage, CDN, Supabase e ambientes
+  externos não foram alterados.
+
+## Próximo lote
+
+- Validar os Draft PRs empilhados e todas as migrations em Supabase descartável.
+- Implementar V2-020 — Notificações, Confiança e Suporte em nova branch
+  empilhada, mantendo flags fechadas e sem alteração operacional.
