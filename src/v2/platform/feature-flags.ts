@@ -7,6 +7,7 @@ export const V2_FEATURE_FLAG_ENV = {
   economy: "VITE_FF_V2_ECONOMY",
   customization: "VITE_FF_V2_CUSTOMIZATION",
   pets: "VITE_FF_V2_PETS",
+  content: "VITE_FF_V2_CONTENT",
   admin: "VITE_FF_V2_ADMIN",
   cinema: "VITE_FF_V2_CINEMA",
 } as const;

@@ -1,4 +1,5 @@
 import {
+  BookHeart,
   CircleUserRound,
   Compass,
   HeartHandshake,
@@ -26,6 +27,7 @@ export const V2_RUNTIME_SLUGS = [
   "loja",
   "avatar",
   "meu-pet",
+  "verbo",
   "configuracoes",
 ] as const;
 
@@ -188,6 +190,20 @@ const V2_RUNTIME_ROUTES = Object.freeze([
     icon: PawPrint,
     primary: false,
     requiredDomain: "pets",
+  },
+  {
+    slug: "verbo",
+    navigationId: "verbo",
+    label: "Verbo",
+    title: "Verbo — Bíblia & Estudo",
+    subtitle: "Leitura, estudo e conteúdo cristão com privacidade por padrão.",
+    eyebrow: "Conteúdo cristão",
+    description:
+      "Fontes editoriais e licenças falham fechadas; anotações, favoritos e progresso são pessoais.",
+    icon: BookHeart,
+    primary: false,
+    requiredDomain: "content",
+    width: "wide",
   },
   {
     slug: "configuracoes",

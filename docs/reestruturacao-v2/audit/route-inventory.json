@@ -3183,6 +3183,12 @@
           "origin": "src",
           "kind": "jsx-to",
           "target": "/oracoes"
+        },
+        {
+          "source": "src/v2/features/content/V2ChristianContentHub.tsx",
+          "origin": "src",
+          "kind": "jsx-href",
+          "target": "/oracoes"
         }
       ],
       "tests": [],
@@ -3905,6 +3911,12 @@
           "source": "src/routes/meu-pet.tsx",
           "origin": "src",
           "kind": "jsx-to",
+          "target": "/quiz-biblico"
+        },
+        {
+          "source": "src/v2/features/content/V2ChristianContentHub.tsx",
+          "origin": "src",
+          "kind": "jsx-href",
           "target": "/quiz-biblico"
         }
       ],

@@ -126,6 +126,12 @@ const pageCopy: Record<
     subtitle: "Seu progresso e histórico continuam protegidos.",
     width: "standard",
   },
+  verbo: {
+    title: "Verbo",
+    eyebrow: "Bíblia & Estudo",
+    subtitle: "Leitura e anotações pessoais com privacidade por padrão.",
+    width: "wide",
+  },
   settings: {
     title: "Configurações",
     eyebrow: "Conta e privacidade",
