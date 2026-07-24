@@ -2,24 +2,51 @@
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "./types";
 
-function createSupabaseClient() {
-  // Use import.meta.env for client-side (Vite build-time replacement)
-  // Fall back to process.env for SSR (server-side rendering)
-  const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
-  const SUPABASE_PUBLISHABLE_KEY =
-    import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_PUBLISHABLE_KEY;
+export interface PublicSupabaseRuntimeConfig {
+  supabaseUrl: string;
+  publishableKey: string;
+}
 
-  if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
-    const missing = [
-      ...(!SUPABASE_URL ? ["SUPABASE_URL"] : []),
-      ...(!SUPABASE_PUBLISHABLE_KEY ? ["SUPABASE_PUBLISHABLE_KEY"] : []),
-    ];
-    const message = `Missing Supabase environment variable(s): ${missing.join(", ")}. Connect Supabase in Lovable Cloud.`;
+let runtimeConfig: PublicSupabaseRuntimeConfig | undefined;
+
+function resolveSupabaseConfig(): PublicSupabaseRuntimeConfig | undefined {
+  const supabaseUrl =
+    runtimeConfig?.supabaseUrl || import.meta.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
+  const publishableKey =
+    runtimeConfig?.publishableKey ||
+    import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
+    process.env.SUPABASE_PUBLISHABLE_KEY;
+
+  return supabaseUrl && publishableKey ? { supabaseUrl, publishableKey } : undefined;
+}
+
+export function hasSupabaseRuntimeConfig(): boolean {
+  return Boolean(resolveSupabaseConfig());
+}
+
+export function configureSupabaseRuntime(config: PublicSupabaseRuntimeConfig): void {
+  const url = new URL(config.supabaseUrl);
+  if (url.protocol !== "https:" || config.publishableKey.trim().length < 20) {
+    throw new Error("Invalid public Supabase runtime configuration");
+  }
+
+  runtimeConfig = {
+    supabaseUrl: url.toString().replace(/\/$/, ""),
+    publishableKey: config.publishableKey.trim(),
+  };
+}
+
+function createSupabaseClient() {
+  const config = resolveSupabaseConfig();
+
+  if (!config) {
+    const message =
+      "Missing public Supabase runtime configuration. Connect Supabase in Lovable Cloud.";
     console.error(`[Supabase] ${message}`);
     throw new Error(message);
   }
 
-  return createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+  return createClient<Database>(config.supabaseUrl, config.publishableKey, {
     auth: {
       storage: typeof window !== "undefined" ? localStorage : undefined,
       persistSession: true,

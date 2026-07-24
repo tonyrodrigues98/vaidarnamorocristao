@@ -77,6 +77,7 @@ import { Route as SuporteIdRouteImport } from './routes/suporte/$id'
 import { Route as SuporteAjudaRouteImport } from './routes/suporte/ajuda'
 import { Route as V2IndexRouteImport } from './routes/v2.index'
 import { Route as V2SectionRouteImport } from './routes/v2.$section'
+import { Route as ApiPublicRuntimeConfigRouteImport } from './routes/api/public/runtime-config'
 import { Route as ApiPublicHooksPushDispatchRouteImport } from './routes/api/public/hooks/push-dispatch'
 
 const IndexRoute = IndexRouteImport.update({
@@ -419,6 +420,11 @@ const V2SectionRoute = V2SectionRouteImport.update({
   path: '/$section',
   getParentRoute: () => V2Route,
 } as any)
+const ApiPublicRuntimeConfigRoute = ApiPublicRuntimeConfigRouteImport.update({
+  id: '/api/public/runtime-config',
+  path: '/api/public/runtime-config',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicHooksPushDispatchRoute =
   ApiPublicHooksPushDispatchRouteImport.update({
     id: '/api/public/hooks/push-dispatch',
@@ -495,6 +501,7 @@ export interface FileRoutesByFullPath {
   '/pretendentes/': typeof PretendentesIndexRoute
   '/suporte/': typeof SuporteIndexRoute
   '/v2/': typeof V2IndexRoute
+  '/api/public/runtime-config': typeof ApiPublicRuntimeConfigRoute
   '/api/public/hooks/push-dispatch': typeof ApiPublicHooksPushDispatchRoute
 }
 export interface FileRoutesByTo {
@@ -565,6 +572,7 @@ export interface FileRoutesByTo {
   '/pretendentes': typeof PretendentesIndexRoute
   '/suporte': typeof SuporteIndexRoute
   '/v2': typeof V2IndexRoute
+  '/api/public/runtime-config': typeof ApiPublicRuntimeConfigRoute
   '/api/public/hooks/push-dispatch': typeof ApiPublicHooksPushDispatchRoute
 }
 export interface FileRoutesById {
@@ -637,6 +645,7 @@ export interface FileRoutesById {
   '/pretendentes/': typeof PretendentesIndexRoute
   '/suporte/': typeof SuporteIndexRoute
   '/v2/': typeof V2IndexRoute
+  '/api/public/runtime-config': typeof ApiPublicRuntimeConfigRoute
   '/api/public/hooks/push-dispatch': typeof ApiPublicHooksPushDispatchRoute
 }
 export interface FileRouteTypes {
@@ -710,6 +719,7 @@ export interface FileRouteTypes {
     | '/pretendentes/'
     | '/suporte/'
     | '/v2/'
+    | '/api/public/runtime-config'
     | '/api/public/hooks/push-dispatch'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -780,6 +790,7 @@ export interface FileRouteTypes {
     | '/pretendentes'
     | '/suporte'
     | '/v2'
+    | '/api/public/runtime-config'
     | '/api/public/hooks/push-dispatch'
   id:
     | '__root__'
@@ -851,6 +862,7 @@ export interface FileRouteTypes {
     | '/pretendentes/'
     | '/suporte/'
     | '/v2/'
+    | '/api/public/runtime-config'
     | '/api/public/hooks/push-dispatch'
   fileRoutesById: FileRoutesById
 }
@@ -920,6 +932,7 @@ export interface RootRouteChildren {
   PresentesIndexRoute: typeof PresentesIndexRoute
   PretendentesIndexRoute: typeof PretendentesIndexRoute
   SuporteIndexRoute: typeof SuporteIndexRoute
+  ApiPublicRuntimeConfigRoute: typeof ApiPublicRuntimeConfigRoute
   ApiPublicHooksPushDispatchRoute: typeof ApiPublicHooksPushDispatchRoute
 }
 
@@ -1401,6 +1414,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof V2SectionRouteImport
       parentRoute: typeof V2Route
     }
+    '/api/public/runtime-config': {
+      id: '/api/public/runtime-config'
+      path: '/api/public/runtime-config'
+      fullPath: '/api/public/runtime-config'
+      preLoaderRoute: typeof ApiPublicRuntimeConfigRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/push-dispatch': {
       id: '/api/public/hooks/push-dispatch'
       path: '/api/public/hooks/push-dispatch'
@@ -1500,6 +1520,7 @@ const rootRouteChildren: RootRouteChildren = {
   PresentesIndexRoute: PresentesIndexRoute,
   PretendentesIndexRoute: PretendentesIndexRoute,
   SuporteIndexRoute: SuporteIndexRoute,
+  ApiPublicRuntimeConfigRoute: ApiPublicRuntimeConfigRoute,
   ApiPublicHooksPushDispatchRoute: ApiPublicHooksPushDispatchRoute,
 }
 export const routeTree = rootRouteImport
