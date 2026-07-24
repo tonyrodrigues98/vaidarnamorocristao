@@ -20,7 +20,9 @@
   `053b4d3c7f56bfdea174420d8f5fb0fe0fff2b3f`.
 - V2-009C está no Draft PR #17, branch `rebuild/v2-009-onboarding-opt-in`,
   commit `f3de66cb72f092a0c8b15edede2525021c177975`.
-- Lote ativo: V2-010 em `rebuild/v2-010-social-home`, empilhado sobre a V2-009C.
+- V2-010 está no Draft PR #18, branch `rebuild/v2-010-social-home`, commit
+  `68e6d4a8b42d0124bfb913f615cdae224a45f844`.
+- Lote ativo: V2-011 em `rebuild/v2-011-community-spaces`, empilhado sobre a V2-010.
   Nenhum PR da pilha foi mesclado ou publicado.
 
 ## Concluído
@@ -94,11 +96,11 @@
 ## Evidência de validação
 
 - Instalação congelada e TypeScript: aprovados.
-- Suíte segura: 43 arquivos e 324 testes aprovados.
+- Suíte segura: 46 arquivos e 341 testes aprovados.
 - ESLint e Prettier focados: aprovados.
 - Build TanStack/Vite cliente e SSR: aprovado; warnings de dependências são
   baseline.
-- Auditoria reproduzível: 69 rotas, 489 referências, 472 módulos, 2.694 imports,
+- Auditoria reproduzível: 69 rotas, 489 referências, 477 módulos, 2.710 imports,
   um ciclo gerado conhecido e zero ciclos em `src/v2`.
 - Smoke isolado aprovado em 320, 360, 390, 430, 768, 1024 e 1440 px, sem overflow
   horizontal; nenhum backend foi carregado.
@@ -161,11 +163,25 @@
 - Migration local não aplicada cria somente estruturas aditivas; não houve
   acesso a banco publicado.
 
+## V2-011 — Comunidade
+
+- `/v2/comunidade` integra espaços, memberships, eventos, presença e o
+  histórico existente de `global_messages`.
+- Namoro, saldo, inventário e sanção global permanecem fora das fronteiras do
+  domínio comunitário.
+- Papéis owner/moderator/member e decisões de membership são server-authoritative
+  e possuem auditoria append-only no contrato SQL aditivo.
+- Bloqueio global prevalece sobre descoberta, mensagens e presença.
+- O hub usa uma consulta agregada e uma subscription Realtime com cleanup.
+- `/comunidade` e o chat global legado continuam preservados como fallback.
+- Migration local não aplicada exige validação RLS/RPC/Realtime em Supabase
+  descartável antes de qualquer flag.
+
 ## Próximo lote
 
 - Validar as migrations de capabilities e push em Supabase descartável antes de
   qualquer rollout.
 - Manter qualquer conclusão sobre ACL/RLS publicado como não verificada até
   existir snapshot autenticado e ambiente Supabase descartável.
-- Validar e publicar o Draft PR da V2-010; depois iniciar a V2-011 em branch
+- Validar e publicar o Draft PR da V2-011; depois iniciar a V2-012 em branch
   empilhada, sem aplicar migrations ou ativar flags.

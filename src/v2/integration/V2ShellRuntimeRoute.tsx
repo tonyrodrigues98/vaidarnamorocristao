@@ -5,6 +5,7 @@ import { useTheme } from "@/lib/theme";
 import { v2FeatureFlags } from "@/v2/platform/feature-flags";
 import type { V2ShellNavigationItem } from "@/v2/app-shell";
 import { V2AccountRuntimeFeature, type AccountNavigationTarget } from "@/v2/features/account";
+import { V2CommunityHubFeature } from "@/v2/features/community";
 import { V2CommunityHomeFeature, V2PeopleDiscoveryFeature } from "@/v2/features/home";
 import { createV2ShellUser, performV2Logout, resolveV2RuntimeAccess } from "./contracts";
 import { getV2RuntimeNavigation, getV2RuntimeRoute } from "./route-registry";
@@ -103,6 +104,9 @@ export function V2ShellRuntimeRoute({ slug }: { readonly slug: string }) {
     }
     if (v2FeatureFlags.community && route?.slug === "explorar-pessoas") {
       return <V2PeopleDiscoveryFeature userId={user.id} />;
+    }
+    if (v2FeatureFlags.community && route?.slug === "comunidade") {
+      return <V2CommunityHubFeature userId={user.id} />;
     }
     return undefined;
   })();

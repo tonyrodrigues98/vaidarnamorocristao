@@ -5,8 +5,8 @@
     "generatedFrom": "working-tree-derived-from-audited-base",
     "sourceState": "pre-commit-working-tree"
   },
-  "sourceFileCount": 472,
-  "importCount": 2694,
+  "sourceFileCount": 477,
+  "importCount": 2710,
   "dynamicImportCount": 13,
   "cycles": [["src/routeTree.gen.ts", "src/router.tsx"]],
   "v2Cycles": []
