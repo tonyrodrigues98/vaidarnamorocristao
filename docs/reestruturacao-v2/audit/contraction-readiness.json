@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "sourceState": "working-tree-derived-from-v2-024",
+  "eligible": false,
+  "physicalDeletionAllowed": false,
+  "destructiveSqlPrepared": false,
+  "destructiveSqlApplied": false,
+  "compensationApplied": false,
+  "missingEvidence": [
+    "production-snapshot-captured",
+    "published-schema-reconciled",
+    "backup-verified",
+    "restore-rehearsed",
+    "logical-retirement-active",
+    "zero-use-window-observed",
+    "parity-confirmed",
+    "owners-reconciled",
+    "retention-satisfied",
+    "readers-removed",
+    "writers-removed",
+    "explicit-destructive-approval"
+  ],
+  "domainStatus": [
+    {
+      "domain": "identity-profile",
+      "status": "REVIEW",
+      "reason": "published snapshot unavailable"
+    },
+    {
+      "domain": "dating-messaging-purpose",
+      "status": "REVIEW",
+      "reason": "published snapshot unavailable"
+    },
+    {
+      "domain": "economy-inventory",
+      "status": "REVIEW",
+      "reason": "published snapshot and ledger reconciliation unavailable"
+    },
+    {
+      "domain": "pets-games",
+      "status": "REVIEW",
+      "reason": "published snapshot unavailable; user_pets structures remain separate"
+    },
+    {
+      "domain": "storage",
+      "status": "REVIEW",
+      "reason": "authenticated object inventory unavailable"
+    },
+    {
+      "domain": "character-avatar",
+      "status": "REVIEW",
+      "reason": "owner inventory and compensation decision unavailable"
+    }
+  ],
+  "safeForPhysicalRemoval": [],
+  "decisionsRequired": [
+    "avatar character compensation policy by Antonio",
+    "retention period by data class",
+    "minimum zero-use observation window",
+    "named destructive-change approver"
+  ]
+}

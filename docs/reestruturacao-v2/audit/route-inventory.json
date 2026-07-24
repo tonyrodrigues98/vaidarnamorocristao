@@ -1244,7 +1244,8 @@
         "tests/legacy-retirement-boundaries-v2.test.ts",
         "tests/legacy-retirement-core-v2.test.ts",
         "tests/legacy-retirement-routing-v2.test.ts",
-        "tests/photo-repair-security-v2.test.ts"
+        "tests/photo-repair-security-v2.test.ts",
+        "tests/reconciliation-core-v2.test.ts"
       ],
       "notes": []
     },
@@ -1662,6 +1663,8 @@
         "tests/design-system-tokens-v2.test.ts",
         "tests/navigation-security-v2.test.ts",
         "tests/public-acquisition-v2.test.ts",
+        "tests/reconciliation-artifacts-v2.test.ts",
+        "tests/reconciliation-boundaries-v2.test.ts",
         "tests/security-closure-v2.test.ts",
         "tests/security-evidence-v2.test.ts"
       ],
@@ -2761,6 +2764,7 @@
         "tests/legacy-retirement-core-v2.test.ts",
         "tests/messages-rls.test.ts",
         "tests/realtime-messages.test.ts",
+        "tests/reconciliation-core-v2.test.ts",
         "tests/romantic-context-core-v2.test.ts"
       ],
       "notes": []
