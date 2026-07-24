@@ -1,6 +1,7 @@
 import { useMemo, useState, type ReactNode } from "react";
 import { V2AppShell, type V2CreateAction, type V2ShellNavigationItem } from "@/v2/app-shell";
 import { V2Heading, V2Surface, V2Text, type V2ThemeName } from "@/v2/design-system";
+import { V2ServiceWorkerUpdateNotice } from "@/v2/platform/resilience";
 import type { V2ShellUser } from "@/v2/app-shell";
 import {
   V2_RUNTIME_PRIMARY_NAVIGATION,
@@ -89,6 +90,7 @@ export function V2RuntimeShell({
       onSearch={() => unavailable("A busca")}
       onCreateAction={(action: V2CreateAction) => unavailable(action.label)}
     >
+      <V2ServiceWorkerUpdateNotice />
       <div className="vdn-v2-runtime-announcement" role="status" aria-live="polite">
         {statusMessage || announcement}
       </div>

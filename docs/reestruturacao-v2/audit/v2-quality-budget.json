@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "sourceState": "working-tree-derived-from-v2-022",
+  "methodology": "production build byte size with 15 percent rollout headroom",
+  "headroomPercent": 15,
+  "metrics": {
+    "runtime-route-js": {
+      "observedBytes": 187231,
+      "budgetBytes": 216064,
+      "fileCount": 1
+    },
+    "v2-css": {
+      "observedBytes": 92228,
+      "budgetBytes": 106496,
+      "fileCount": 1
+    },
+    "v2-lazy-js-total": {
+      "observedBytes": 12292,
+      "budgetBytes": 14336,
+      "fileCount": 4
+    }
+  }
+}
