@@ -1,6 +1,7 @@
 
 -- Allow all authenticated users to view presence (needed for OnlineDot indicator)
 DROP POLICY IF EXISTS "users read own presence or staff reads all" ON public.presence_last_seen;
+DROP POLICY IF EXISTS "authenticated read presence" ON public.presence_last_seen;
 CREATE POLICY "authenticated read presence"
   ON public.presence_last_seen
   FOR SELECT

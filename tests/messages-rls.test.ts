@@ -52,6 +52,12 @@ async function createUser(label: string): Promise<Ctx> {
   });
   if (pErr) throw pErr;
 
+  const { error: termsError } = await admin.from("terms_acceptances").insert({
+    user_id: userId,
+    version: "2026-05-03",
+  });
+  if (termsError) throw termsError;
+
   const client = clientFor();
   const { error: sErr } = await client.auth.signInWithPassword({ email, password });
   if (sErr) throw sErr;
@@ -61,9 +67,14 @@ async function createUser(label: string): Promise<Ctx> {
 let A: Ctx, B: Ctx, C: Ctx;
 let matchId: string;
 let msgFromA: string;
+const restrictedTestWord = "vdn_test_blocked_term";
 
 beforeAll(async () => {
   [A, B, C] = await Promise.all([createUser("a"), createUser("b"), createUser("c")]);
+  const { error: restrictedWordError } = await admin
+    .from("restricted_words")
+    .insert({ word: restrictedTestWord });
+  if (restrictedWordError) throw restrictedWordError;
 
   // Create match A-B (ordered) using service role to bypass insert restrictions.
   const [u1, u2] = A.userId < B.userId ? [A.userId, B.userId] : [B.userId, A.userId];
@@ -86,6 +97,7 @@ beforeAll(async () => {
 }, 30000);
 
 afterAll(async () => {
+  await admin.from("restricted_words").delete().eq("word", restrictedTestWord);
   await admin.from("messages").delete().eq("match_id", matchId);
   await admin.from("matches").delete().eq("id", matchId);
   for (const u of [A, B, C]) {
@@ -192,7 +204,7 @@ describe("global_messages — moderação server-side de palavras restritas", ()
   it("trigger bloqueia inserção contendo palavra restrita", async () => {
     const { error } = await A.client
       .from("global_messages")
-      .insert({ sender_id: A.userId, content: "seu pinto é grande" });
+      .insert({ sender_id: A.userId, content: `texto ${restrictedTestWord} sintético` });
     expect(error).not.toBeNull();
   });
 

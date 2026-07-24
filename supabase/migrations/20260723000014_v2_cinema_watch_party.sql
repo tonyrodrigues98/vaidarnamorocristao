@@ -375,16 +375,20 @@ BEGIN
   FROM public.cinema_control_events_v2
   WHERE session_id = _session_id AND idempotency_key = _idempotency_key;
 
-  SELECT session, media.duration_ms
-  INTO _session, _duration_ms
+  SELECT session.*
+  INTO _session
   FROM public.cinema_sessions_v2 session
-  JOIN public.cinema_media_v2 media ON media.id = session.media_id
   WHERE session.id = _session_id
   FOR UPDATE OF session;
 
   IF NOT FOUND THEN
     RAISE EXCEPTION 'cinema_session_not_found' USING ERRCODE = '22023';
   END IF;
+
+  SELECT media.duration_ms
+  INTO _duration_ms
+  FROM public.cinema_media_v2 media
+  WHERE media.id = _session.media_id;
 
   IF _existing.id IS NOT NULL THEN
     RETURN jsonb_build_object(
