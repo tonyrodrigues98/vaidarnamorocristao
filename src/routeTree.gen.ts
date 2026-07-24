@@ -66,6 +66,7 @@ import { Route as NoticiasIndexRouteImport } from './routes/noticias.index'
 import { Route as OnboardingIndexRouteImport } from './routes/onboarding/index'
 import { Route as OnboardingEtapa1RouteImport } from './routes/onboarding/etapa-1'
 import { Route as OnboardingEtapa2RouteImport } from './routes/onboarding/etapa-2'
+import { Route as OnboardingNamoroRouteImport } from './routes/onboarding/namoro'
 import { Route as PresentesIndexRouteImport } from './routes/presentes/index'
 import { Route as PretendentesIndexRouteImport } from './routes/pretendentes/index'
 import { Route as PretendentesIdRouteImport } from './routes/pretendentes/$id'
@@ -362,6 +363,11 @@ const OnboardingEtapa2Route = OnboardingEtapa2RouteImport.update({
   path: '/onboarding/etapa-2',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OnboardingNamoroRoute = OnboardingNamoroRouteImport.update({
+  id: '/onboarding/namoro',
+  path: '/onboarding/namoro',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PresentesIndexRoute = PresentesIndexRouteImport.update({
   id: '/presentes/',
   path: '/presentes/',
@@ -467,6 +473,7 @@ export interface FileRoutesByFullPath {
   '/conversas/comunidade': typeof ConversasComunidadeRoute
   '/onboarding/etapa-1': typeof OnboardingEtapa1Route
   '/onboarding/etapa-2': typeof OnboardingEtapa2Route
+  '/onboarding/namoro': typeof OnboardingNamoroRoute
   '/pretendentes/$id': typeof PretendentesIdRoute
   '/proposito/$matchId': typeof PropositoMatchIdRoute
   '/suporte/$id': typeof SuporteIdRoute
@@ -535,6 +542,7 @@ export interface FileRoutesByTo {
   '/conversas/comunidade': typeof ConversasComunidadeRoute
   '/onboarding/etapa-1': typeof OnboardingEtapa1Route
   '/onboarding/etapa-2': typeof OnboardingEtapa2Route
+  '/onboarding/namoro': typeof OnboardingNamoroRoute
   '/pretendentes/$id': typeof PretendentesIdRoute
   '/proposito/$matchId': typeof PropositoMatchIdRoute
   '/suporte/$id': typeof SuporteIdRoute
@@ -605,6 +613,7 @@ export interface FileRoutesById {
   '/conversas/comunidade': typeof ConversasComunidadeRoute
   '/onboarding/etapa-1': typeof OnboardingEtapa1Route
   '/onboarding/etapa-2': typeof OnboardingEtapa2Route
+  '/onboarding/namoro': typeof OnboardingNamoroRoute
   '/pretendentes/$id': typeof PretendentesIdRoute
   '/proposito/$matchId': typeof PropositoMatchIdRoute
   '/suporte/$id': typeof SuporteIdRoute
@@ -676,6 +685,7 @@ export interface FileRouteTypes {
     | '/conversas/comunidade'
     | '/onboarding/etapa-1'
     | '/onboarding/etapa-2'
+    | '/onboarding/namoro'
     | '/pretendentes/$id'
     | '/proposito/$matchId'
     | '/suporte/$id'
@@ -744,6 +754,7 @@ export interface FileRouteTypes {
     | '/conversas/comunidade'
     | '/onboarding/etapa-1'
     | '/onboarding/etapa-2'
+    | '/onboarding/namoro'
     | '/pretendentes/$id'
     | '/proposito/$matchId'
     | '/suporte/$id'
@@ -813,6 +824,7 @@ export interface FileRouteTypes {
     | '/conversas/comunidade'
     | '/onboarding/etapa-1'
     | '/onboarding/etapa-2'
+    | '/onboarding/namoro'
     | '/pretendentes/$id'
     | '/proposito/$matchId'
     | '/suporte/$id'
@@ -882,6 +894,7 @@ export interface RootRouteChildren {
   ConversasComunidadeRoute: typeof ConversasComunidadeRoute
   OnboardingEtapa1Route: typeof OnboardingEtapa1Route
   OnboardingEtapa2Route: typeof OnboardingEtapa2Route
+  OnboardingNamoroRoute: typeof OnboardingNamoroRoute
   PretendentesIdRoute: typeof PretendentesIdRoute
   PropositoMatchIdRoute: typeof PropositoMatchIdRoute
   SuporteIdRoute: typeof SuporteIdRoute
@@ -1298,6 +1311,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OnboardingEtapa2RouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/onboarding/namoro': {
+      id: '/onboarding/namoro'
+      path: '/onboarding/namoro'
+      fullPath: '/onboarding/namoro'
+      preLoaderRoute: typeof OnboardingNamoroRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/presentes/': {
       id: '/presentes/'
       path: '/presentes'
@@ -1446,6 +1466,7 @@ const rootRouteChildren: RootRouteChildren = {
   ConversasComunidadeRoute: ConversasComunidadeRoute,
   OnboardingEtapa1Route: OnboardingEtapa1Route,
   OnboardingEtapa2Route: OnboardingEtapa2Route,
+  OnboardingNamoroRoute: OnboardingNamoroRoute,
   PretendentesIdRoute: PretendentesIdRoute,
   PropositoMatchIdRoute: PropositoMatchIdRoute,
   SuporteIdRoute: SuporteIdRoute,

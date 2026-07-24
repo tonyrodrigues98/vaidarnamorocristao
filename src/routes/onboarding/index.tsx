@@ -39,8 +39,41 @@ import {
   SEEKING,
   PACE,
 } from "@/lib/profileAdvanced";
+import { V2LoadingIndicator, V2ThemeScope } from "@/v2/design-system";
+import {
+  CommunityOnboardingFlow,
+  communityOnboardingRepository,
+} from "@/v2/features/onboarding";
+import { v2FeatureFlags } from "@/v2/platform/feature-flags";
 
-export const Route = createFileRoute("/onboarding/")({ component: OnboardingFlow });
+export const Route = createFileRoute("/onboarding/")({ component: OnboardingRouteEntry });
+
+function OnboardingRouteEntry() {
+  const { user, loading, refreshRole } = useAuth();
+  const navigate = useNavigate();
+
+  if (!v2FeatureFlags.community) return <OnboardingFlow />;
+  if (loading) {
+    return (
+      <V2ThemeScope className="grid min-h-dvh place-items-center">
+        <V2LoadingIndicator label="Restaurando sua sessão" visibleLabel />
+      </V2ThemeScope>
+    );
+  }
+  if (!user) return <Navigate to="/auth/login" />;
+
+  return (
+    <V2ThemeScope>
+      <CommunityOnboardingFlow
+        userId={user.id}
+        repository={communityOnboardingRepository}
+        onComplete={() => {
+          void refreshRole().finally(() => navigate({ to: "/inicio" }));
+        }}
+      />
+    </V2ThemeScope>
+  );
+}
 
 // 1-7 required, 8-12 optional, 13 = welcome
 type Step = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13;

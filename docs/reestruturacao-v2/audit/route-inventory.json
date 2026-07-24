@@ -5,7 +5,7 @@
     "generatedFrom": "working-tree-derived-from-audited-base",
     "sourceState": "pre-commit-working-tree"
   },
-  "count": 67,
+  "count": 68,
   "byDomain": {
     "administration": 13,
     "authentication": 4,
@@ -14,7 +14,7 @@
     "dating": 6,
     "economy": 1,
     "miscellaneous": 1,
-    "onboarding": 3,
+    "onboarding": 4,
     "personalization": 4,
     "pets-games": 4,
     "profile": 3,
@@ -25,7 +25,7 @@
   },
   "byAccess": {
     "administrative": 13,
-    "authenticated": 35,
+    "authenticated": 36,
     "endpoint": 3,
     "public-or-visitor": 13,
     "root-guard-inherited": 3
@@ -70,6 +70,7 @@
         "tests/design-system-tokens-v2.test.ts",
         "tests/legacy-pwa-characterization-v2.test.ts",
         "tests/legacy-route-characterization-v2.test.ts",
+        "tests/public-acquisition-v2.test.ts",
         "tests/route-protection-v2.test.ts"
       ],
       "notes": []
@@ -211,16 +212,21 @@
         { "source": "src/routes/conta.tsx", "origin": "src", "kind": "jsx-to", "target": "/admin" }
       ],
       "tests": [
+        "tests/application-security-v2.test.ts",
         "tests/auth-cache-isolation-v2.test.ts",
         "tests/chat-e2e.test.ts",
         "tests/helpers.ts",
+        "tests/identity-capabilities-v2.test.ts",
         "tests/legacy-pwa-characterization-v2.test.ts",
         "tests/messages-rls.test.ts",
         "tests/moderation-rls.test.ts",
+        "tests/photo-repair-security-v2.test.ts",
         "tests/pretendentes-eligibility.test.ts",
+        "tests/push-dispatch-atomic-rls.test.ts",
         "tests/realtime-messages.test.ts",
         "tests/route-protection-v2.test.ts",
-        "tests/starter-bundle.test.ts"
+        "tests/starter-bundle.test.ts",
+        "tests/trusted-capabilities-rls.test.ts"
       ],
       "notes": []
     },
@@ -413,7 +419,7 @@
           "target": "/admin/fotos"
         }
       ],
-      "tests": ["tests/route-protection-v2.test.ts"],
+      "tests": ["tests/photo-repair-security-v2.test.ts", "tests/route-protection-v2.test.ts"],
       "notes": []
     },
     {
@@ -665,13 +671,13 @@
           "target": "/admin/verificacoes"
         }
       ],
-      "tests": [],
+      "tests": ["tests/application-security-v2.test.ts"],
       "notes": []
     },
     {
       "pathname": "/api/photo-repair",
       "file": "src/routes/api/photo-repair.ts",
-      "component": "stripQueryAndHash",
+      "component": "jsonResponse",
       "domain": "server-endpoints",
       "access": "endpoint",
       "parameters": [],
@@ -688,7 +694,10 @@
       "queryHooks": [],
       "realtimeSubscriptions": 0,
       "linksIn": [],
-      "tests": ["tests/legacy-route-characterization-v2.test.ts"],
+      "tests": [
+        "tests/legacy-route-characterization-v2.test.ts",
+        "tests/photo-repair-security-v2.test.ts"
+      ],
       "notes": []
     },
     {
@@ -721,7 +730,7 @@
     {
       "pathname": "/api/verify-photo",
       "file": "src/routes/api/verify-photo.ts",
-      "component": "(inline/derived)",
+      "component": "jsonResponse",
       "domain": "server-endpoints",
       "access": "endpoint",
       "parameters": [],
@@ -740,6 +749,7 @@
       "linksIn": [],
       "tests": [
         "tests/legacy-route-characterization-v2.test.ts",
+        "tests/photo-moderation-security-v2.test.ts",
         "tests/route-protection-v2.test.ts"
       ],
       "notes": []
@@ -993,6 +1003,18 @@
           "target": "/auth/login"
         },
         {
+          "source": "src/routes/onboarding/index.tsx",
+          "origin": "src",
+          "kind": "jsx-to",
+          "target": "/auth/login"
+        },
+        {
+          "source": "src/routes/onboarding/namoro.tsx",
+          "origin": "src",
+          "kind": "jsx-to",
+          "target": "/auth/login"
+        },
+        {
           "source": "src/routes/oracoes.tsx",
           "origin": "src",
           "kind": "jsx-to",
@@ -1018,18 +1040,6 @@
         },
         {
           "source": "src/routes/pretendentes/$id.tsx",
-          "origin": "src",
-          "kind": "jsx-to",
-          "target": "/auth/login"
-        },
-        {
-          "source": "src/routes/pretendentes/index.tsx",
-          "origin": "src",
-          "kind": "jsx-to",
-          "target": "/auth/login"
-        },
-        {
-          "source": "src/routes/proposito/$matchId.tsx",
           "origin": "src",
           "kind": "jsx-to",
           "target": "/auth/login"
@@ -1098,12 +1108,6 @@
           "target": "/auth/signup"
         },
         {
-          "source": "src/components/PublicNav.tsx",
-          "origin": "src",
-          "kind": "jsx-to",
-          "target": "/auth/signup"
-        },
-        {
           "source": "src/routes/auth/login.tsx",
           "origin": "src",
           "kind": "jsx-to",
@@ -1134,7 +1138,10 @@
           "target": "/auth/signup"
         }
       ],
-      "tests": ["tests/legacy-route-characterization-v2.test.ts"],
+      "tests": [
+        "tests/legacy-route-characterization-v2.test.ts",
+        "tests/public-acquisition-v2.test.ts"
+      ],
       "notes": []
     },
     {
@@ -1201,7 +1208,8 @@
       ],
       "tests": [
         "tests/app-shell-contracts-v2.test.ts",
-        "tests/app-shell-integration-contracts-v2.test.ts"
+        "tests/app-shell-integration-contracts-v2.test.ts",
+        "tests/photo-repair-security-v2.test.ts"
       ],
       "notes": []
     },
@@ -1280,6 +1288,7 @@
         }
       ],
       "tests": [
+        "tests/application-security-v2.test.ts",
         "tests/legacy-route-characterization-v2.test.ts",
         "tests/route-protection-v2.test.ts"
       ],
@@ -1336,7 +1345,10 @@
           "target": "/blog/$slug"
         }
       ],
-      "tests": ["tests/legacy-route-characterization-v2.test.ts"],
+      "tests": [
+        "tests/application-security-v2.test.ts",
+        "tests/legacy-route-characterization-v2.test.ts"
+      ],
       "notes": []
     },
     {
@@ -1486,9 +1498,21 @@
       "realtimeSubscriptions": 0,
       "linksIn": [
         {
+          "source": "public/manifest.webmanifest",
+          "origin": "manifest",
+          "kind": "manifest-shortcut",
+          "target": "/comunidade"
+        },
+        {
           "source": "src/v2/app-shell/navigation.ts",
           "origin": "src",
           "kind": "object-href",
+          "target": "/comunidade"
+        },
+        {
+          "source": "tests/public-acquisition-v2.test.ts",
+          "origin": "tests",
+          "kind": "object-url",
           "target": "/comunidade"
         }
       ],
@@ -1496,8 +1520,10 @@
         "tests/app-shell-components-v2.test.tsx",
         "tests/app-shell-integration-components-v2.test.tsx",
         "tests/app-shell-integration-contracts-v2.test.ts",
+        "tests/application-security-v2.test.ts",
         "tests/design-system-components-v2.test.tsx",
-        "tests/legacy-route-characterization-v2.test.ts"
+        "tests/legacy-route-characterization-v2.test.ts",
+        "tests/public-acquisition-v2.test.ts"
       ],
       "notes": []
     },
@@ -1585,8 +1611,12 @@
       "tests": [
         "tests/account-boundaries-v2.test.ts",
         "tests/account-components-v2.test.tsx",
+        "tests/community-onboarding-v2.test.ts",
         "tests/design-system-tokens-v2.test.ts",
-        "tests/navigation-security-v2.test.ts"
+        "tests/navigation-security-v2.test.ts",
+        "tests/public-acquisition-v2.test.ts",
+        "tests/security-closure-v2.test.ts",
+        "tests/security-evidence-v2.test.ts"
       ],
       "notes": []
     },
@@ -1718,6 +1748,7 @@
         "tests/chat-e2e.test.ts",
         "tests/legacy-pwa-characterization-v2.test.ts",
         "tests/legacy-route-characterization-v2.test.ts",
+        "tests/push-dispatch-atomic-v2.test.ts",
         "tests/route-protection-v2.test.ts"
       ],
       "notes": []
@@ -1861,6 +1892,12 @@
           "origin": "src",
           "kind": "jsx-to",
           "target": "/conversas/$matchId"
+        },
+        {
+          "source": "tests/push-dispatch-atomic-v2.test.ts",
+          "origin": "tests",
+          "kind": "object-url",
+          "target": "/conversas/match-1"
         }
       ],
       "tests": [],
@@ -2143,6 +2180,12 @@
           "target": "/inicio"
         },
         {
+          "source": "public/manifest.webmanifest",
+          "origin": "manifest",
+          "kind": "manifest-shortcut",
+          "target": "/inicio"
+        },
+        {
           "source": "src/components/admin/AdminTopNav.tsx",
           "origin": "src",
           "kind": "jsx-to",
@@ -2271,6 +2314,48 @@
         {
           "source": "src/routes/onboarding/index.tsx",
           "origin": "src",
+          "kind": "object-to",
+          "target": "/inicio"
+        },
+        {
+          "source": "src/routes/onboarding/index.tsx",
+          "origin": "src",
+          "kind": "navigate",
+          "target": "/inicio"
+        },
+        {
+          "source": "src/routes/onboarding/index.tsx",
+          "origin": "src",
+          "kind": "navigate",
+          "target": "/inicio"
+        },
+        {
+          "source": "src/routes/onboarding/namoro.tsx",
+          "origin": "src",
+          "kind": "jsx-to",
+          "target": "/inicio"
+        },
+        {
+          "source": "src/routes/onboarding/namoro.tsx",
+          "origin": "src",
+          "kind": "object-to",
+          "target": "/inicio"
+        },
+        {
+          "source": "src/routes/onboarding/namoro.tsx",
+          "origin": "src",
+          "kind": "object-to",
+          "target": "/inicio"
+        },
+        {
+          "source": "src/routes/onboarding/namoro.tsx",
+          "origin": "src",
+          "kind": "navigate",
+          "target": "/inicio"
+        },
+        {
+          "source": "src/routes/onboarding/namoro.tsx",
+          "origin": "src",
           "kind": "navigate",
           "target": "/inicio"
         },
@@ -2315,6 +2400,18 @@
           "origin": "tests",
           "kind": "jsx-href",
           "target": "/inicio"
+        },
+        {
+          "source": "tests/public-acquisition-v2.test.ts",
+          "origin": "tests",
+          "kind": "object-url",
+          "target": "/inicio"
+        },
+        {
+          "source": "tests/push-dispatch-atomic-rls.test.ts",
+          "origin": "tests",
+          "kind": "object-url",
+          "target": "/inicio"
         }
       ],
       "tests": [
@@ -2322,9 +2419,13 @@
         "tests/app-shell-integration-boundaries-v2.test.ts",
         "tests/app-shell-integration-components-v2.test.tsx",
         "tests/app-shell-integration-contracts-v2.test.ts",
+        "tests/application-security-v2.test.ts",
         "tests/design-system-components-v2.test.tsx",
         "tests/legacy-route-characterization-v2.test.ts",
-        "tests/route-protection-v2.test.ts"
+        "tests/public-acquisition-v2.test.ts",
+        "tests/push-dispatch-atomic-rls.test.ts",
+        "tests/route-protection-v2.test.ts",
+        "tests/trusted-capabilities-rls.test.ts"
       ],
       "notes": []
     },
@@ -2598,6 +2699,7 @@
       ],
       "tests": [
         "tests/chat-e2e.test.ts",
+        "tests/dating-opt-in-v2.test.ts",
         "tests/foundation-v2.test.ts",
         "tests/helpers.ts",
         "tests/messages-rls.test.ts",
@@ -2830,7 +2932,7 @@
     {
       "pathname": "/onboarding/",
       "file": "src/routes/onboarding/index.tsx",
-      "component": "OnboardingFlow",
+      "component": "OnboardingRouteEntry",
       "domain": "onboarding",
       "access": "authenticated",
       "parameters": [],
@@ -2885,7 +2987,11 @@
         }
       ],
       "tests": [
+        "tests/community-onboarding-v2.test.ts",
+        "tests/dating-opt-in-v2.test.ts",
+        "tests/identity-capabilities-v2.test.ts",
         "tests/legacy-route-characterization-v2.test.ts",
+        "tests/onboarding-integration-v2.test.tsx",
         "tests/route-protection-v2.test.ts"
       ],
       "notes": []
@@ -2916,7 +3022,7 @@
     {
       "pathname": "/onboarding/etapa-2",
       "file": "src/routes/onboarding/etapa-2.tsx",
-      "component": "Etapa2",
+      "component": "Etapa2Route",
       "domain": "onboarding",
       "access": "authenticated",
       "parameters": [],
@@ -2934,6 +3040,29 @@
       "realtimeSubscriptions": 0,
       "linksIn": [],
       "tests": ["tests/route-protection-v2.test.ts"],
+      "notes": []
+    },
+    {
+      "pathname": "/onboarding/namoro",
+      "file": "src/routes/onboarding/namoro.tsx",
+      "component": "DatingOptInRoute",
+      "domain": "onboarding",
+      "access": "authenticated",
+      "parameters": [],
+      "redirects": ["/auth/login", "/inicio"],
+      "providers": [],
+      "supabase": {
+        "tables": [],
+        "rpcs": [],
+        "functions": [],
+        "buckets": [],
+        "realtime": [],
+        "auth": false
+      },
+      "queryHooks": [],
+      "realtimeSubscriptions": 0,
+      "linksIn": [],
+      "tests": ["tests/dating-opt-in-v2.test.ts"],
       "notes": []
     },
     {
@@ -3368,12 +3497,6 @@
       "realtimeSubscriptions": 0,
       "linksIn": [
         {
-          "source": "public/manifest.webmanifest",
-          "origin": "manifest",
-          "kind": "manifest-shortcut",
-          "target": "/pretendentes"
-        },
-        {
           "source": "src/components/layout/Header.tsx",
           "origin": "src",
           "kind": "jsx-to",
@@ -3448,7 +3571,8 @@
       ],
       "tests": [
         "tests/legacy-pwa-characterization-v2.test.ts",
-        "tests/pretendentes-eligibility.test.ts"
+        "tests/pretendentes-eligibility.test.ts",
+        "tests/public-acquisition-v2.test.ts"
       ],
       "notes": []
     },
@@ -3775,7 +3899,7 @@
           "target": "/recados"
         }
       ],
-      "tests": [],
+      "tests": ["tests/community-onboarding-v2.test.ts"],
       "notes": []
     },
     {

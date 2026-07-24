@@ -15,8 +15,11 @@
 - V2-009A está no Draft PR #15, branch
   `rebuild/v2-009-identity-capabilities`, commit
   `feac4d40c3f5fce10ba30e11c1bb273bb01a5cd7`.
-- Lote ativo: V2-009B em `rebuild/v2-009-community-acquisition`, empilhado sobre
-  a identidade canônica. Nenhum PR da pilha foi mesclado ou publicado.
+- V2-009B está no Draft PR #16, branch
+  `rebuild/v2-009-community-acquisition`, commit
+  `053b4d3c7f56bfdea174420d8f5fb0fe0fff2b3f`.
+- Lote ativo: V2-009C em `rebuild/v2-009-onboarding-opt-in`, empilhado sobre a
+  aquisição pública. Nenhum PR da pilha foi mesclado ou publicado.
 
 ## Concluído
 
@@ -89,11 +92,11 @@
 ## Evidência de validação
 
 - Instalação congelada e TypeScript: aprovados.
-- Suíte segura: 34 arquivos e 259 testes aprovados.
+- Suíte segura: 40 arquivos e 304 testes aprovados.
 - ESLint e Prettier focados: aprovados.
 - Build TanStack/Vite cliente e SSR: aprovado; warnings de dependências são
   baseline.
-- Auditoria reproduzível: 67 rotas, 465 referências, 449 módulos, 2.616 imports,
+- Auditoria reproduzível: 68 rotas, 485 referências, 465 módulos, 2.666 imports,
   um ciclo gerado conhecido e zero ciclos em `src/v2`.
 - Smoke isolado aprovado em 320, 360, 390, 430, 768, 1024 e 1440 px, sem overflow
   horizontal; nenhum backend foi carregado.
@@ -126,12 +129,25 @@
   comunitária.
 - Termos e manual permanecem intactos até revisão jurídica/operacional própria.
 
+## V2-009C — onboarding e opt-in
+
+- O onboarding comunitário versionado coleta identidade, maioridade, foto,
+  localização, apresentação, fé e privacidade.
+- Sexo, estado civil, altura e preferências foram isolados na rota opcional
+  `/onboarding/namoro`.
+- Namoro e recados anônimos começam desligados; somente RPC autenticada ativa a
+  membership.
+- Migration aditiva local, ainda não aplicada, expande perfis, progresso e
+  memberships com RLS owner-only e comandos server-authoritative.
+- O caminho legado permanece integral quando as flags estão desligadas.
+- TypeScript, 40 arquivos/304 testes seguros, lint e Prettier focados, build
+  cliente/SSR e inspeção do bundle foram aprovados sem acesso remoto.
+
 ## Próximo lote
 
 - Validar as migrations de capabilities e push em Supabase descartável antes de
   qualquer rollout.
 - Manter qualquer conclusão sobre ACL/RLS publicado como não verificada até
   existir snapshot autenticado e ambiente Supabase descartável.
-- Publicar o Draft PR da V2-009B e concluir V2-009C — onboarding comunitário
-  com trilha romântica opt-in — a partir da pilha validada, mantendo
-  integrações reais atrás de adapters e flags.
+- Validar e publicar o Draft PR da V2-009C; depois iniciar a V2-010 em branch
+  empilhada, sem aplicar migrations ou ativar flags.

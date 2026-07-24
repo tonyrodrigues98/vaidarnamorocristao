@@ -147,6 +147,10 @@ describe("V2-009 canonical identity and capabilities", () => {
     expect(identity().canEnter("dating")).toBe(false);
     expect(identity({ datingState: "unknown" }).canEnter("dating")).toBe(false);
     expect(identity({ datingState: "paused" }).canEnter("dating")).toBe(false);
+    expect(identity({ datingState: "committed" }).canEnter("dating")).toBe(false);
+    expect(identity({ datingState: "legacy-active-pending-confirmation" }).canEnter("dating")).toBe(
+      true,
+    );
     expect(identity({ datingState: "active" }).canEnter("dating")).toBe(true);
     expect(
       identity({

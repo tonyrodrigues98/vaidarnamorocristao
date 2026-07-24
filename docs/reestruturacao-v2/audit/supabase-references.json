@@ -23,6 +23,7 @@
       "src/routes/pretendentes/$id.tsx",
       "src/routes/pretendentes/index.tsx"
     ],
+    "community_onboarding_progress": ["src/v2/features/onboarding/repository.ts"],
     "couple_time_capsules": ["src/lib/timeCapsules.ts"],
     "daily_posts": [
       "src/components/layout/Header.tsx",
@@ -32,6 +33,7 @@
       "src/routes/inicio.tsx",
       "src/routes/noticias.index.tsx"
     ],
+    "dating_memberships": ["src/lib/auth.tsx", "src/v2/features/onboarding/repository.ts"],
     "devotional_comment_likes": ["src/routes/devocional.tsx"],
     "devotional_comment_reports": ["src/routes/devocional.tsx"],
     "devotional_comments": ["src/components/MissionsPanel.tsx", "src/routes/devocional.tsx"],
@@ -136,7 +138,8 @@
       "src/routes/admin/fotos.tsx",
       "src/routes/admin/index.tsx",
       "src/routes/onboarding/index.tsx",
-      "src/routes/perfil.tsx"
+      "src/routes/perfil.tsx",
+      "src/v2/features/onboarding/repository.ts"
     ],
     "profiles": [
       "src/components/AccountDangerZone.tsx",
@@ -181,7 +184,6 @@
       "src/routes/verificacao.tsx",
       "src/v2/features/account/data/supabase-account-repository.ts"
     ],
-    "push_queue": ["src/lib/pushDispatchBatch.server.ts"],
     "push_subscriptions": [
       "src/lib/push.functions.ts",
       "src/lib/pushDispatch.server.ts",
@@ -246,6 +248,7 @@
     "verifications": ["src/routes/admin/verificacoes.tsx", "src/routes/verificacao.tsx"]
   },
   "rpcs": {
+    "activate_dating_membership": ["src/v2/features/onboarding/repository.ts"],
     "admin_add_user_coins": ["src/routes/admin/index.tsx"],
     "admin_ban_user": ["src/routes/admin/index.tsx"],
     "admin_delete_user_photo": ["src/routes/admin/fotos.tsx"],
@@ -258,7 +261,7 @@
     "admin_user_economy": ["src/routes/admin/economia.tsx"],
     "apply_pet_care": ["src/lib/petCare.ts"],
     "award_contributor_badge": ["src/routes/admin/index.tsx"],
-    "award_xp": ["src/lib/xp.ts"],
+    "award_my_care_xp": ["src/lib/xp.ts"],
     "buy_anonymous_extra": ["src/components/anonymous/AnonymousExtrasCard.tsx"],
     "cancel_account_deletion": [
       "src/components/AccountDangerZone.tsx",
@@ -270,8 +273,12 @@
     "claim_free_frame": ["src/components/home/HomeStarterSection.tsx"],
     "claim_freebie": ["src/lib/freebies.ts"],
     "claim_pet_weekly_chest": ["src/lib/petStreak.ts"],
+    "claim_push_dispatch_batch": ["src/lib/pushDispatchBatch.server.ts"],
     "claim_starter_bundle": ["src/lib/petProgression.ts"],
     "collect_pet_reward": ["src/lib/petCatalog.ts"],
+    "complete_community_onboarding": ["src/v2/features/onboarding/repository.ts"],
+    "complete_push_dispatch_item": ["src/lib/pushDispatchBatch.server.ts"],
+    "deactivate_dating_membership": ["src/v2/features/onboarding/repository.ts"],
     "equip_decoration": ["src/lib/decorations.ts"],
     "equip_name_gradient": ["src/lib/nameGradients.ts"],
     "equip_pet": ["src/lib/pets.ts"],
@@ -290,6 +297,7 @@
     "get_my_prestige": ["src/lib/petProgression.ts"],
     "get_my_rebirth_history": ["src/lib/petProgression.ts"],
     "get_my_starter_bundle": ["src/lib/petProgression.ts"],
+    "get_my_terms_status": ["src/lib/auth.tsx"],
     "get_my_xp_state": ["src/lib/xp.ts"],
     "get_pet_dream_match": ["src/components/pet/PetConfessionBubble.tsx"],
     "get_pet_evolution_status": ["src/lib/petEvolution.ts"],
@@ -305,6 +313,7 @@
     "list_my_freebie_status": ["src/lib/freebies.ts"],
     "mark_all_notifications_read": ["src/lib/notifications.tsx"],
     "mark_message_read": ["src/routes/conversas/$matchId.tsx", "src/routes/proposito/$matchId.tsx"],
+    "pause_dating_membership": ["src/v2/features/onboarding/repository.ts"],
     "perform_grab": ["src/lib/petGrab.ts"],
     "perform_grab_multi": ["src/lib/petGrab.ts"],
     "pet_care_uses_today": ["src/lib/petCare.ts"],
@@ -360,7 +369,8 @@
       "src/routes/admin/fotos.tsx",
       "src/routes/admin/index.tsx",
       "src/routes/onboarding/index.tsx",
-      "src/routes/perfil.tsx"
+      "src/routes/perfil.tsx",
+      "src/v2/features/onboarding/repository.ts"
     ],
     "stickers": ["src/lib/stickers.ts"],
     "verifications": ["src/routes/verificacao.tsx"]

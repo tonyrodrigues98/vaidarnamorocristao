@@ -322,6 +322,20 @@
       "possibleIndirectReferences": [],
       "classification": "test-only-contract",
       "removalSafety": "not-proven-safe"
+    },
+    {
+      "file": "src/v2/platform/trust-security/security-evidence.ts",
+      "symbols": [
+        "SECURITY_EVIDENCE_STATES",
+        "SECURITY_FINDING_IDS",
+        "SECURITY_PRIORITIES",
+        "validateSecurityEvidenceManifest"
+      ],
+      "incomingStaticImports": 0,
+      "incomingTestImports": ["tests/security-evidence-v2.test.ts"],
+      "possibleIndirectReferences": [],
+      "classification": "test-only-contract",
+      "removalSafety": "not-proven-safe"
     }
   ],
   "assetCandidates": [

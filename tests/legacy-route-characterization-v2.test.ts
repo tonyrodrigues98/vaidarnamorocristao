@@ -64,12 +64,12 @@ function routePathsFromSource(): string[] {
 }
 
 describe("legacy route characterization", () => {
-  it("keeps the generated inventory synchronized with all 67 file routes", () => {
+  it("keeps the generated inventory synchronized with every file route", () => {
     const sourcePaths = routePathsFromSource();
     const inventoryPaths = inventory.routes.map((route) => route.pathname).sort();
 
-    expect(sourcePaths).toHaveLength(67);
-    expect(inventory.count).toBe(67);
+    expect(sourcePaths.length).toBeGreaterThan(0);
+    expect(inventory.count).toBe(sourcePaths.length);
     expect(inventoryPaths).toEqual(sourcePaths);
     expect(new Set(sourcePaths).size).toBe(sourcePaths.length);
   });

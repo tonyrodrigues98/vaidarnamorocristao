@@ -27,6 +27,7 @@ import {
   type IdentityAccessSnapshot,
   type TermsConsentRecord,
 } from "@/v2/platform/identity";
+import { v2FeatureFlags } from "@/v2/platform/feature-flags";
 
 type ProfileStatus = "pending" | "approved" | "rejected" | "banned" | null;
 
@@ -142,7 +143,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const loadRoles = useCallback(async (uid: string) => {
     const request = ++roleRequest.current;
-    const [rolesResult, profileResult, termsResult] = await Promise.all([
+    const datingResultPromise = v2FeatureFlags.dating
+      ? supabase.from("dating_memberships").select("status").eq("user_id", uid).maybeSingle()
+      : Promise.resolve({ data: null, error: null });
+    const [rolesResult, profileResult, termsResult, datingResult] = await Promise.all([
       supabase
         .from("user_roles")
         .select("role, badge_color, public_listing, is_support_agent")
@@ -153,6 +157,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .eq("id", uid)
         .maybeSingle(),
       supabase.rpc("get_my_terms_status"),
+      datingResultPromise,
     ]);
     if (request !== roleRequest.current || currentUserId.current !== uid) return;
 
@@ -172,7 +177,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             acceptedAt: termsRow.accepted_at,
           }
         : null;
-    const resolution = rolesResult.error || profileResult.error ? "recoverable-error" : "ready";
+    const resolution =
+      rolesResult.error || profileResult.error || datingResult.error
+        ? "recoverable-error"
+        : "ready";
+    const datingState = (() => {
+      switch (datingResult.data?.status) {
+        case "active":
+        case "paused":
+        case "restricted":
+          return datingResult.data.status;
+        case "legacy_active_pending_confirmation":
+          return "legacy-active-pending-confirmation";
+        case "paused_by_commitment":
+          return "committed";
+        default:
+          return "inactive";
+      }
+    })();
 
     setRole(primary);
     setBadgeColor((primaryRow?.badge_color as RoleColor | null) ?? null);
@@ -199,7 +221,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               }
             : null,
         terms,
-        datingState: "inactive",
+        datingState,
       }),
     );
     setIdentityResolvedForUserId(uid);

@@ -28,11 +28,11 @@ idênticos.
 
 ## Resumo executivo
 
-- Há **67 file routes**: 13 administrativas, 35 autenticadas, 13 públicas/visitante, 3 endpoints e
+- Há **68 file routes** no estado atual da pilha: 13 administrativas, 36 autenticadas, 13 públicas/visitante, 3 endpoints e
   3 cuja proteção é herdada da raiz.
-- Foram inventariadas **465 referências tipadas**: 411 rotas, 37 assets, 4 endpoints, 8 URLs
-  externas, 3 deep links e 2 destinos dinâmicos. As fontes são `src` (424), testes (8), manifest
-  (14), sitemap (11), service worker/public (8), configuração (0) e outras (0). Das 411 rotas, 410
+- Foram inventariadas **485 referências tipadas**: 424 rotas, 38 assets, 4 endpoints, 12 URLs
+  externas, 4 deep links e 3 destinos dinâmicos. As fontes são `src` (433), testes (17), manifest
+  (16), sitemap (11), service worker/public (8), configuração (0) e outras (0). Das 424 rotas, 423
   resolvem e uma não resolve no estado atual: `src/v2/app-shell/navigation.ts` declara `/membros`;
   o runtime integrado usa `/v2/explorar-pessoas`. O achado é resultado atual, não contrato
   permanente de teste.
@@ -48,10 +48,10 @@ idênticos.
 - A análise estática encontrou **31 arquivos-fonte potencialmente órfãos**, **2 contratos usados
   somente por testes**, **146 assets sem referência por basename** e **10 dependências sem uso
   direto/configurado detectável**. Nenhum deles é declarado seguro para excluir nesta etapa.
-- O grafo de 449 módulos e 2.616 imports tem um ciclo conhecido entre `router.tsx` e
+- O grafo de 465 módulos e 2.666 imports tem um ciclo conhecido entre `router.tsx` e
   `routeTree.gen.ts`, causado
   pelo registro de tipos gerado. Não há ciclos em `src/v2`.
-- O código referencia **70 tabelas/views**, **91 RPCs**, **6 buckets** e **10 nomes de canais
+- O código referencia **71 tabelas/views**, **98 RPCs**, **6 buckets** e **10 nomes de canais
   Realtime**. Isso é inventário de uso do código, não prova de existência ou ACL no banco
   publicado.
 - Foram reconfirmados riscos de segurança já documentados: parâmetros de moedas/XP/progresso
@@ -170,8 +170,8 @@ qualquer um deles existe. Assim, `PresenceProvider` registra corretamente `rpc: 
 O artefato `audit/supabase-references.json` lista cada nome e todos os arquivos consumidores.
 Resultados estáticos:
 
-- 70 tabelas/views referenciadas por `.from`;
-- 91 RPCs literais;
+- 71 tabelas/views referenciadas por `.from`;
+- 98 RPCs literais;
 - 6 buckets (`avatar-items`, `avatar-looks`, `gift-images`, `photo-moderation-rejects`,
   `profile-photos`, `verifications`);
 - 10 canais Realtime literais, além de canais construídos por template;
