@@ -5,7 +5,7 @@
     "generatedFrom": "working-tree-derived-from-audited-base",
     "sourceState": "pre-commit-working-tree"
   },
-  "total": 509,
+  "total": 513,
   "totalsBySource": {
     "public/manifest.webmanifest": 17,
     "public/sitemap.xml": 11,
@@ -95,7 +95,7 @@
     "src/routes/pet-arcade.tsx": 3,
     "src/routes/presentes/index.tsx": 2,
     "src/routes/pretendentes/$id.tsx": 5,
-    "src/routes/pretendentes/index.tsx": 2,
+    "src/routes/pretendentes/index.tsx": 3,
     "src/routes/proposito/$matchId.tsx": 3,
     "src/routes/quiz-biblico.tsx": 2,
     "src/routes/recados.tsx": 2,
@@ -120,11 +120,13 @@
     "src/v2/integration/route-registry.ts": 1,
     "src/v2/integration/V2RuntimeShell.tsx": 2,
     "src/v2/integration/V2ShellRuntimeRoute.tsx": 26,
+    "src/v2/platform/legacy-retirement/LegacyQuarantineNotice.tsx": 2,
     "tests/app-shell-components-v2.test.tsx": 2,
     "tests/app-shell-integration-boundaries-v2.test.ts": 1,
     "tests/app-shell-integration-components-v2.test.tsx": 1,
     "tests/application-security-v2.test.ts": 3,
     "tests/design-system-components-v2.test.tsx": 3,
+    "tests/legacy-retirement-boundaries-v2.test.ts": 1,
     "tests/onboarding-integration-v2.test.tsx": 1,
     "tests/photo-repair-security-v2.test.ts": 1,
     "tests/profile-modules-v2.test.ts": 2,
@@ -134,15 +136,15 @@
     "tests/push-dispatch-auth.test.ts": 1,
     "tests/quality-accessibility-v2.test.ts": 1
   },
-  "totalsByFileType": { "html": 6, "js": 8, "ts": 39, "tsx": 428, "webmanifest": 17, "xml": 11 },
+  "totalsByFileType": { "html": 6, "js": 8, "ts": 40, "tsx": 431, "webmanifest": 17, "xml": 11 },
   "totalsByOrigin": {
     "configuration": 0,
     "manifest": 17,
     "other": 0,
     "public": 8,
     "sitemap": 11,
-    "src": 453,
-    "tests": 20
+    "src": 456,
+    "tests": 21
   },
   "totalsByClassification": {
     "asset": 40,
@@ -150,12 +152,12 @@
     "dynamic": 3,
     "endpoint": 4,
     "external": 12,
-    "route": 445
+    "route": 449
   },
   "totalsByStatus": {
     "not-applicable": 61,
     "requires-investigation": 3,
-    "resolved": 445,
+    "resolved": 449,
     "unresolved": 0
   },
   "unresolved": [],
@@ -1120,7 +1122,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/admin/"],
-      "evidence": { "locator": "jsx-to", "line": 403 }
+      "evidence": { "locator": "jsx-to", "line": 407 }
     },
     {
       "source": "src/components/layout/Header.tsx",
@@ -1132,7 +1134,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/admin/"],
-      "evidence": { "locator": "jsx-to", "line": 582 }
+      "evidence": { "locator": "jsx-to", "line": 588 }
     },
     {
       "source": "src/components/layout/Header.tsx",
@@ -1144,7 +1146,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/auth/login"],
-      "evidence": { "locator": "jsx-to", "line": 430 }
+      "evidence": { "locator": "jsx-to", "line": 434 }
     },
     {
       "source": "src/components/layout/Header.tsx",
@@ -1156,7 +1158,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/auth/login"],
-      "evidence": { "locator": "jsx-to", "line": 609 }
+      "evidence": { "locator": "jsx-to", "line": 615 }
     },
     {
       "source": "src/components/layout/Header.tsx",
@@ -1168,7 +1170,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/auth/signup"],
-      "evidence": { "locator": "jsx-to", "line": 433 }
+      "evidence": { "locator": "jsx-to", "line": 437 }
     },
     {
       "source": "src/components/layout/Header.tsx",
@@ -1180,7 +1182,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/auth/signup"],
-      "evidence": { "locator": "jsx-to", "line": 612 }
+      "evidence": { "locator": "jsx-to", "line": 618 }
     },
     {
       "source": "src/components/layout/Header.tsx",
@@ -1192,7 +1194,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/bloqueados"],
-      "evidence": { "locator": "jsx-to", "line": 410 }
+      "evidence": { "locator": "jsx-to", "line": 414 }
     },
     {
       "source": "src/components/layout/Header.tsx",
@@ -1204,7 +1206,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/bloqueados"],
-      "evidence": { "locator": "jsx-to", "line": 589 }
+      "evidence": { "locator": "jsx-to", "line": 595 }
     },
     {
       "source": "src/components/layout/Header.tsx",
@@ -1216,7 +1218,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/conta"],
-      "evidence": { "locator": "jsx-to", "line": 385 }
+      "evidence": { "locator": "jsx-to", "line": 389 }
     },
     {
       "source": "src/components/layout/Header.tsx",
@@ -1228,7 +1230,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/conta"],
-      "evidence": { "locator": "jsx-to", "line": 564 }
+      "evidence": { "locator": "jsx-to", "line": 570 }
     },
     {
       "source": "src/components/layout/Header.tsx",
@@ -1240,7 +1242,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/conversas/"],
-      "evidence": { "locator": "jsx-to", "line": 291 }
+      "evidence": { "locator": "jsx-to", "line": 295 }
     },
     {
       "source": "src/components/layout/Header.tsx",
@@ -1252,222 +1254,6 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/conversas/"],
-      "evidence": { "locator": "jsx-to", "line": 520 }
-    },
-    {
-      "source": "src/components/layout/Header.tsx",
-      "origin": "src",
-      "fileType": "tsx",
-      "kind": "jsx-to",
-      "target": "/devocional",
-      "normalizedTarget": "/devocional",
-      "classification": "route",
-      "status": "resolved",
-      "matchedRoutes": ["/devocional"],
-      "evidence": { "locator": "jsx-to", "line": 317 }
-    },
-    {
-      "source": "src/components/layout/Header.tsx",
-      "origin": "src",
-      "fileType": "tsx",
-      "kind": "jsx-to",
-      "target": "/devocional",
-      "normalizedTarget": "/devocional",
-      "classification": "route",
-      "status": "resolved",
-      "matchedRoutes": ["/devocional"],
-      "evidence": { "locator": "jsx-to", "line": 536 }
-    },
-    {
-      "source": "src/components/layout/Header.tsx",
-      "origin": "src",
-      "fileType": "tsx",
-      "kind": "jsx-to",
-      "target": "/inicio",
-      "normalizedTarget": "/inicio",
-      "classification": "route",
-      "status": "resolved",
-      "matchedRoutes": ["/inicio"],
-      "evidence": { "locator": "jsx-to", "line": 255 }
-    },
-    {
-      "source": "src/components/layout/Header.tsx",
-      "origin": "src",
-      "fileType": "tsx",
-      "kind": "jsx-to",
-      "target": "/inicio",
-      "normalizedTarget": "/inicio",
-      "classification": "route",
-      "status": "resolved",
-      "matchedRoutes": ["/inicio"],
-      "evidence": { "locator": "jsx-to", "line": 489 }
-    },
-    {
-      "source": "src/components/layout/Header.tsx",
-      "origin": "src",
-      "fileType": "tsx",
-      "kind": "jsx-to",
-      "target": "/interesses",
-      "normalizedTarget": "/interesses",
-      "classification": "route",
-      "status": "resolved",
-      "matchedRoutes": ["/interesses"],
-      "evidence": { "locator": "jsx-to", "line": 278 }
-    },
-    {
-      "source": "src/components/layout/Header.tsx",
-      "origin": "src",
-      "fileType": "tsx",
-      "kind": "jsx-to",
-      "target": "/interesses",
-      "normalizedTarget": "/interesses",
-      "classification": "route",
-      "status": "resolved",
-      "matchedRoutes": ["/interesses"],
-      "evidence": { "locator": "jsx-to", "line": 509 }
-    },
-    {
-      "source": "src/components/layout/Header.tsx",
-      "origin": "src",
-      "fileType": "tsx",
-      "kind": "jsx-to",
-      "target": "/matches",
-      "normalizedTarget": "/matches",
-      "classification": "route",
-      "status": "resolved",
-      "matchedRoutes": ["/matches"],
-      "evidence": { "locator": "jsx-to", "line": 285 }
-    },
-    {
-      "source": "src/components/layout/Header.tsx",
-      "origin": "src",
-      "fileType": "tsx",
-      "kind": "jsx-to",
-      "target": "/matches",
-      "normalizedTarget": "/matches",
-      "classification": "route",
-      "status": "resolved",
-      "matchedRoutes": ["/matches"],
-      "evidence": { "locator": "jsx-to", "line": 515 }
-    },
-    {
-      "source": "src/components/layout/Header.tsx",
-      "origin": "src",
-      "fileType": "tsx",
-      "kind": "jsx-to",
-      "target": "/noticias",
-      "normalizedTarget": "/noticias",
-      "classification": "route",
-      "status": "resolved",
-      "matchedRoutes": ["/noticias/"],
-      "evidence": { "locator": "jsx-to", "line": 322 }
-    },
-    {
-      "source": "src/components/layout/Header.tsx",
-      "origin": "src",
-      "fileType": "tsx",
-      "kind": "jsx-to",
-      "target": "/noticias",
-      "normalizedTarget": "/noticias",
-      "classification": "route",
-      "status": "resolved",
-      "matchedRoutes": ["/noticias/"],
-      "evidence": { "locator": "jsx-to", "line": 541 }
-    },
-    {
-      "source": "src/components/layout/Header.tsx",
-      "origin": "src",
-      "fileType": "tsx",
-      "kind": "jsx-to",
-      "target": "/notificacoes",
-      "normalizedTarget": "/notificacoes",
-      "classification": "route",
-      "status": "resolved",
-      "matchedRoutes": ["/notificacoes"],
-      "evidence": { "locator": "jsx-to", "line": 346 }
-    },
-    {
-      "source": "src/components/layout/Header.tsx",
-      "origin": "src",
-      "fileType": "tsx",
-      "kind": "jsx-to",
-      "target": "/notificacoes",
-      "normalizedTarget": "/notificacoes",
-      "classification": "route",
-      "status": "resolved",
-      "matchedRoutes": ["/notificacoes"],
-      "evidence": { "locator": "jsx-to", "line": 495 }
-    },
-    {
-      "source": "src/components/layout/Header.tsx",
-      "origin": "src",
-      "fileType": "tsx",
-      "kind": "jsx-to",
-      "target": "/perfil",
-      "normalizedTarget": "/perfil",
-      "classification": "route",
-      "status": "resolved",
-      "matchedRoutes": ["/perfil"],
-      "evidence": { "locator": "jsx-to", "line": 380 }
-    },
-    {
-      "source": "src/components/layout/Header.tsx",
-      "origin": "src",
-      "fileType": "tsx",
-      "kind": "jsx-to",
-      "target": "/perfil",
-      "normalizedTarget": "/perfil",
-      "classification": "route",
-      "status": "resolved",
-      "matchedRoutes": ["/perfil"],
-      "evidence": { "locator": "jsx-to", "line": 559 }
-    },
-    {
-      "source": "src/components/layout/Header.tsx",
-      "origin": "src",
-      "fileType": "tsx",
-      "kind": "jsx-to",
-      "target": "/pretendentes",
-      "normalizedTarget": "/pretendentes",
-      "classification": "route",
-      "status": "resolved",
-      "matchedRoutes": ["/pretendentes/"],
-      "evidence": { "locator": "jsx-to", "line": 272 }
-    },
-    {
-      "source": "src/components/layout/Header.tsx",
-      "origin": "src",
-      "fileType": "tsx",
-      "kind": "jsx-to",
-      "target": "/pretendentes",
-      "normalizedTarget": "/pretendentes",
-      "classification": "route",
-      "status": "resolved",
-      "matchedRoutes": ["/pretendentes/"],
-      "evidence": { "locator": "jsx-to", "line": 504 }
-    },
-    {
-      "source": "src/components/layout/Header.tsx",
-      "origin": "src",
-      "fileType": "tsx",
-      "kind": "jsx-to",
-      "target": "/recados",
-      "normalizedTarget": "/recados",
-      "classification": "route",
-      "status": "resolved",
-      "matchedRoutes": ["/recados"],
-      "evidence": { "locator": "jsx-to", "line": 298 }
-    },
-    {
-      "source": "src/components/layout/Header.tsx",
-      "origin": "src",
-      "fileType": "tsx",
-      "kind": "jsx-to",
-      "target": "/recados",
-      "normalizedTarget": "/recados",
-      "classification": "route",
-      "status": "resolved",
-      "matchedRoutes": ["/recados"],
       "evidence": { "locator": "jsx-to", "line": 526 }
     },
     {
@@ -1475,12 +1261,216 @@
       "origin": "src",
       "fileType": "tsx",
       "kind": "jsx-to",
-      "target": "/suporte",
-      "normalizedTarget": "/suporte",
+      "target": "/devocional",
+      "normalizedTarget": "/devocional",
       "classification": "route",
       "status": "resolved",
-      "matchedRoutes": ["/suporte/"],
-      "evidence": { "locator": "jsx-to", "line": 397 }
+      "matchedRoutes": ["/devocional"],
+      "evidence": { "locator": "jsx-to", "line": 321 }
+    },
+    {
+      "source": "src/components/layout/Header.tsx",
+      "origin": "src",
+      "fileType": "tsx",
+      "kind": "jsx-to",
+      "target": "/devocional",
+      "normalizedTarget": "/devocional",
+      "classification": "route",
+      "status": "resolved",
+      "matchedRoutes": ["/devocional"],
+      "evidence": { "locator": "jsx-to", "line": 542 }
+    },
+    {
+      "source": "src/components/layout/Header.tsx",
+      "origin": "src",
+      "fileType": "tsx",
+      "kind": "jsx-to",
+      "target": "/inicio",
+      "normalizedTarget": "/inicio",
+      "classification": "route",
+      "status": "resolved",
+      "matchedRoutes": ["/inicio"],
+      "evidence": { "locator": "jsx-to", "line": 257 }
+    },
+    {
+      "source": "src/components/layout/Header.tsx",
+      "origin": "src",
+      "fileType": "tsx",
+      "kind": "jsx-to",
+      "target": "/inicio",
+      "normalizedTarget": "/inicio",
+      "classification": "route",
+      "status": "resolved",
+      "matchedRoutes": ["/inicio"],
+      "evidence": { "locator": "jsx-to", "line": 493 }
+    },
+    {
+      "source": "src/components/layout/Header.tsx",
+      "origin": "src",
+      "fileType": "tsx",
+      "kind": "jsx-to",
+      "target": "/interesses",
+      "normalizedTarget": "/interesses",
+      "classification": "route",
+      "status": "resolved",
+      "matchedRoutes": ["/interesses"],
+      "evidence": { "locator": "jsx-to", "line": 282 }
+    },
+    {
+      "source": "src/components/layout/Header.tsx",
+      "origin": "src",
+      "fileType": "tsx",
+      "kind": "jsx-to",
+      "target": "/interesses",
+      "normalizedTarget": "/interesses",
+      "classification": "route",
+      "status": "resolved",
+      "matchedRoutes": ["/interesses"],
+      "evidence": { "locator": "jsx-to", "line": 515 }
+    },
+    {
+      "source": "src/components/layout/Header.tsx",
+      "origin": "src",
+      "fileType": "tsx",
+      "kind": "jsx-to",
+      "target": "/matches",
+      "normalizedTarget": "/matches",
+      "classification": "route",
+      "status": "resolved",
+      "matchedRoutes": ["/matches"],
+      "evidence": { "locator": "jsx-to", "line": 289 }
+    },
+    {
+      "source": "src/components/layout/Header.tsx",
+      "origin": "src",
+      "fileType": "tsx",
+      "kind": "jsx-to",
+      "target": "/matches",
+      "normalizedTarget": "/matches",
+      "classification": "route",
+      "status": "resolved",
+      "matchedRoutes": ["/matches"],
+      "evidence": { "locator": "jsx-to", "line": 521 }
+    },
+    {
+      "source": "src/components/layout/Header.tsx",
+      "origin": "src",
+      "fileType": "tsx",
+      "kind": "jsx-to",
+      "target": "/noticias",
+      "normalizedTarget": "/noticias",
+      "classification": "route",
+      "status": "resolved",
+      "matchedRoutes": ["/noticias/"],
+      "evidence": { "locator": "jsx-to", "line": 326 }
+    },
+    {
+      "source": "src/components/layout/Header.tsx",
+      "origin": "src",
+      "fileType": "tsx",
+      "kind": "jsx-to",
+      "target": "/noticias",
+      "normalizedTarget": "/noticias",
+      "classification": "route",
+      "status": "resolved",
+      "matchedRoutes": ["/noticias/"],
+      "evidence": { "locator": "jsx-to", "line": 547 }
+    },
+    {
+      "source": "src/components/layout/Header.tsx",
+      "origin": "src",
+      "fileType": "tsx",
+      "kind": "jsx-to",
+      "target": "/notificacoes",
+      "normalizedTarget": "/notificacoes",
+      "classification": "route",
+      "status": "resolved",
+      "matchedRoutes": ["/notificacoes"],
+      "evidence": { "locator": "jsx-to", "line": 350 }
+    },
+    {
+      "source": "src/components/layout/Header.tsx",
+      "origin": "src",
+      "fileType": "tsx",
+      "kind": "jsx-to",
+      "target": "/notificacoes",
+      "normalizedTarget": "/notificacoes",
+      "classification": "route",
+      "status": "resolved",
+      "matchedRoutes": ["/notificacoes"],
+      "evidence": { "locator": "jsx-to", "line": 499 }
+    },
+    {
+      "source": "src/components/layout/Header.tsx",
+      "origin": "src",
+      "fileType": "tsx",
+      "kind": "jsx-to",
+      "target": "/perfil",
+      "normalizedTarget": "/perfil",
+      "classification": "route",
+      "status": "resolved",
+      "matchedRoutes": ["/perfil"],
+      "evidence": { "locator": "jsx-to", "line": 384 }
+    },
+    {
+      "source": "src/components/layout/Header.tsx",
+      "origin": "src",
+      "fileType": "tsx",
+      "kind": "jsx-to",
+      "target": "/perfil",
+      "normalizedTarget": "/perfil",
+      "classification": "route",
+      "status": "resolved",
+      "matchedRoutes": ["/perfil"],
+      "evidence": { "locator": "jsx-to", "line": 565 }
+    },
+    {
+      "source": "src/components/layout/Header.tsx",
+      "origin": "src",
+      "fileType": "tsx",
+      "kind": "jsx-to",
+      "target": "/pretendentes",
+      "normalizedTarget": "/pretendentes",
+      "classification": "route",
+      "status": "resolved",
+      "matchedRoutes": ["/pretendentes/"],
+      "evidence": { "locator": "jsx-to", "line": 275 }
+    },
+    {
+      "source": "src/components/layout/Header.tsx",
+      "origin": "src",
+      "fileType": "tsx",
+      "kind": "jsx-to",
+      "target": "/pretendentes",
+      "normalizedTarget": "/pretendentes",
+      "classification": "route",
+      "status": "resolved",
+      "matchedRoutes": ["/pretendentes/"],
+      "evidence": { "locator": "jsx-to", "line": 509 }
+    },
+    {
+      "source": "src/components/layout/Header.tsx",
+      "origin": "src",
+      "fileType": "tsx",
+      "kind": "jsx-to",
+      "target": "/recados",
+      "normalizedTarget": "/recados",
+      "classification": "route",
+      "status": "resolved",
+      "matchedRoutes": ["/recados"],
+      "evidence": { "locator": "jsx-to", "line": 302 }
+    },
+    {
+      "source": "src/components/layout/Header.tsx",
+      "origin": "src",
+      "fileType": "tsx",
+      "kind": "jsx-to",
+      "target": "/recados",
+      "normalizedTarget": "/recados",
+      "classification": "route",
+      "status": "resolved",
+      "matchedRoutes": ["/recados"],
+      "evidence": { "locator": "jsx-to", "line": 532 }
     },
     {
       "source": "src/components/layout/Header.tsx",
@@ -1492,31 +1482,43 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/suporte/"],
+      "evidence": { "locator": "jsx-to", "line": 401 }
+    },
+    {
+      "source": "src/components/layout/Header.tsx",
+      "origin": "src",
+      "fileType": "tsx",
+      "kind": "jsx-to",
+      "target": "/suporte",
+      "normalizedTarget": "/suporte",
+      "classification": "route",
+      "status": "resolved",
+      "matchedRoutes": ["/suporte/"],
+      "evidence": { "locator": "jsx-to", "line": 582 }
+    },
+    {
+      "source": "src/components/layout/Header.tsx",
+      "origin": "src",
+      "fileType": "tsx",
+      "kind": "jsx-to",
+      "target": "/verificacao",
+      "normalizedTarget": "/verificacao",
+      "classification": "route",
+      "status": "resolved",
+      "matchedRoutes": ["/verificacao"],
+      "evidence": { "locator": "jsx-to", "line": 395 }
+    },
+    {
+      "source": "src/components/layout/Header.tsx",
+      "origin": "src",
+      "fileType": "tsx",
+      "kind": "jsx-to",
+      "target": "/verificacao",
+      "normalizedTarget": "/verificacao",
+      "classification": "route",
+      "status": "resolved",
+      "matchedRoutes": ["/verificacao"],
       "evidence": { "locator": "jsx-to", "line": 576 }
-    },
-    {
-      "source": "src/components/layout/Header.tsx",
-      "origin": "src",
-      "fileType": "tsx",
-      "kind": "jsx-to",
-      "target": "/verificacao",
-      "normalizedTarget": "/verificacao",
-      "classification": "route",
-      "status": "resolved",
-      "matchedRoutes": ["/verificacao"],
-      "evidence": { "locator": "jsx-to", "line": 391 }
-    },
-    {
-      "source": "src/components/layout/Header.tsx",
-      "origin": "src",
-      "fileType": "tsx",
-      "kind": "jsx-to",
-      "target": "/verificacao",
-      "normalizedTarget": "/verificacao",
-      "classification": "route",
-      "status": "resolved",
-      "matchedRoutes": ["/verificacao"],
-      "evidence": { "locator": "jsx-to", "line": 570 }
     },
     {
       "source": "src/components/mobile/MobileBottomNav.tsx",
@@ -1528,7 +1530,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/conversas/"],
-      "evidence": { "locator": "object-to", "line": 27 }
+      "evidence": { "locator": "object-to", "line": 28 }
     },
     {
       "source": "src/components/mobile/MobileBottomNav.tsx",
@@ -1540,7 +1542,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/devocional"],
-      "evidence": { "locator": "object-to", "line": 26 }
+      "evidence": { "locator": "object-to", "line": 27 }
     },
     {
       "source": "src/components/mobile/MobileBottomNav.tsx",
@@ -1552,7 +1554,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/inicio"],
-      "evidence": { "locator": "object-to", "line": 25 }
+      "evidence": { "locator": "object-to", "line": 26 }
     },
     {
       "source": "src/components/mobile/MobileBottomNav.tsx",
@@ -1564,7 +1566,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/perfil"],
-      "evidence": { "locator": "object-to", "line": 29 }
+      "evidence": { "locator": "object-to", "line": 30 }
     },
     {
       "source": "src/components/mobile/MobileBottomNav.tsx",
@@ -1576,7 +1578,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/pretendentes/"],
-      "evidence": { "locator": "object-to", "line": 28 }
+      "evidence": { "locator": "object-to", "line": 29 }
     },
     {
       "source": "src/components/pet/arcade/PetArcadeEntryCard.tsx",
@@ -2596,7 +2598,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/auth/login"],
-      "evidence": { "locator": "jsx-to", "line": 215 }
+      "evidence": { "locator": "jsx-to", "line": 227 }
     },
     {
       "source": "src/routes/admin/avatar.tsx",
@@ -2608,7 +2610,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/inicio"],
-      "evidence": { "locator": "jsx-to", "line": 216 }
+      "evidence": { "locator": "jsx-to", "line": 228 }
     },
     {
       "source": "src/routes/admin/economia.tsx",
@@ -3244,7 +3246,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/auth/login"],
-      "evidence": { "locator": "jsx-to", "line": 172 }
+      "evidence": { "locator": "jsx-to", "line": 184 }
     },
     {
       "source": "src/routes/avatar.criar.tsx",
@@ -3256,7 +3258,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/avatar"],
-      "evidence": { "locator": "navigate", "line": 207 }
+      "evidence": { "locator": "navigate", "line": 219 }
     },
     {
       "source": "src/routes/avatar.criar.tsx",
@@ -3268,7 +3270,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/avatar"],
-      "evidence": { "locator": "navigate", "line": 218 }
+      "evidence": { "locator": "navigate", "line": 230 }
     },
     {
       "source": "src/routes/avatar.criar.tsx",
@@ -3280,7 +3282,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/avatar"],
-      "evidence": { "locator": "object-to", "line": 207 }
+      "evidence": { "locator": "object-to", "line": 219 }
     },
     {
       "source": "src/routes/avatar.criar.tsx",
@@ -3292,7 +3294,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/avatar"],
-      "evidence": { "locator": "object-to", "line": 218 }
+      "evidence": { "locator": "object-to", "line": 230 }
     },
     {
       "source": "src/routes/avatar.tsx",
@@ -3304,7 +3306,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/auth/login"],
-      "evidence": { "locator": "jsx-to", "line": 810 }
+      "evidence": { "locator": "jsx-to", "line": 822 }
     },
     {
       "source": "src/routes/avatar.tsx",
@@ -3316,7 +3318,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/inicio"],
-      "evidence": { "locator": "jsx-to", "line": 820 }
+      "evidence": { "locator": "jsx-to", "line": 832 }
     },
     {
       "source": "src/routes/blog.$slug.tsx",
@@ -5068,7 +5070,7 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/auth/login"],
-      "evidence": { "locator": "jsx-to", "line": 405 }
+      "evidence": { "locator": "jsx-to", "line": 414 }
     },
     {
       "source": "src/routes/pretendentes/index.tsx",
@@ -5080,7 +5082,19 @@
       "classification": "route",
       "status": "resolved",
       "matchedRoutes": ["/proposito/$matchId"],
-      "evidence": { "locator": "jsx-to", "line": 472 }
+      "evidence": { "locator": "jsx-to", "line": 481 }
+    },
+    {
+      "source": "src/routes/pretendentes/index.tsx",
+      "origin": "src",
+      "fileType": "tsx",
+      "kind": "jsx-to",
+      "target": "/v2/$section",
+      "normalizedTarget": "/v2/$section",
+      "classification": "route",
+      "status": "resolved",
+      "matchedRoutes": ["/v2/$section"],
+      "evidence": { "locator": "jsx-to", "line": 228 }
     },
     {
       "source": "src/routes/proposito/$matchId.tsx",
@@ -6067,6 +6081,30 @@
       "evidence": { "locator": "object-to", "line": 70 }
     },
     {
+      "source": "src/v2/platform/legacy-retirement/LegacyQuarantineNotice.tsx",
+      "origin": "src",
+      "fileType": "tsx",
+      "kind": "jsx-to",
+      "target": "/admin",
+      "normalizedTarget": "/admin",
+      "classification": "route",
+      "status": "resolved",
+      "matchedRoutes": ["/admin/"],
+      "evidence": { "locator": "jsx-to", "line": 32 }
+    },
+    {
+      "source": "src/v2/platform/legacy-retirement/LegacyQuarantineNotice.tsx",
+      "origin": "src",
+      "fileType": "tsx",
+      "kind": "jsx-to",
+      "target": "/v2/$section",
+      "normalizedTarget": "/v2/$section",
+      "classification": "route",
+      "status": "resolved",
+      "matchedRoutes": ["/v2/$section"],
+      "evidence": { "locator": "jsx-to", "line": 39 }
+    },
+    {
       "source": "tests/app-shell-components-v2.test.tsx",
       "origin": "tests",
       "fileType": "tsx",
@@ -6185,6 +6223,18 @@
       "status": "resolved",
       "matchedRoutes": ["/inicio"],
       "evidence": { "locator": "jsx-href", "line": 61 }
+    },
+    {
+      "source": "tests/legacy-retirement-boundaries-v2.test.ts",
+      "origin": "tests",
+      "fileType": "ts",
+      "kind": "jsx-to",
+      "target": "/pretendentes",
+      "normalizedTarget": "/pretendentes",
+      "classification": "route",
+      "status": "resolved",
+      "matchedRoutes": ["/pretendentes/"],
+      "evidence": { "locator": "jsx-to", "line": 69 }
     },
     {
       "source": "tests/onboarding-integration-v2.test.tsx",

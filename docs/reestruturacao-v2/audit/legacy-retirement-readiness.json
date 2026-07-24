@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "sourceState": "working-tree-derived-from-v2-023",
+  "physicalDeletionAllowed": false,
+  "surfaces": [
+    {
+      "id": "dating-index",
+      "ready": false,
+      "currentRoute": "/pretendentes",
+      "replacementRoute": "/v2/pretendentes",
+      "blockers": [
+        "migrations V2 not applied",
+        "published data reconciliation unavailable",
+        "cohort telemetry unavailable",
+        "parity evidence incomplete"
+      ],
+      "protectedData": [
+        "interests",
+        "matches",
+        "messages",
+        "dating_memberships",
+        "dating_preferences",
+        "anonymous_messages",
+        "couple_commitments"
+      ]
+    },
+    {
+      "id": "character-avatar",
+      "ready": false,
+      "currentRoutes": ["/avatar", "/avatar/criar", "/admin/avatar"],
+      "replacementRoute": "/v2/perfil",
+      "blockers": [
+        "owner inventory snapshot unavailable",
+        "usage telemetry unavailable",
+        "compensation decision pending Antonio",
+        "render parity unavailable",
+        "VITE_FF_V2_CHARACTER_AVATAR_PARITY_CONFIRMED is not enabled"
+      ],
+      "protectedData": [
+        "user_avatar_base",
+        "user_avatar_inventory",
+        "user_avatar_equipped",
+        "user_avatar_looks",
+        "avatar_items",
+        "avatar-items",
+        "avatar-looks"
+      ]
+    }
+  ],
+  "safeForPhysicalRemoval": []
+}

@@ -12,6 +12,10 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import type { AvatarAgeRange, AvatarPoseKey } from "@/types/avatar";
+import {
+  LegacyQuarantineNotice,
+  legacyRetirementState,
+} from "@/v2/platform/legacy-retirement";
 
 export const Route = createFileRoute("/avatar/criar")({
   component: AvatarCreatePage,
@@ -99,6 +103,14 @@ function findBase(
 }
 
 function AvatarCreatePage() {
+  if (legacyRetirementState.characterAvatarQuarantined) {
+    return <LegacyQuarantineNotice context="avatar" />;
+  }
+
+  return <LegacyAvatarCreatePage />;
+}
+
+function LegacyAvatarCreatePage() {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
 

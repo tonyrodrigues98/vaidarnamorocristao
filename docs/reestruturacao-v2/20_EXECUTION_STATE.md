@@ -399,3 +399,23 @@
 - Validar os Draft PRs empilhados e todas as migrations em Supabase descartável.
 - Implementar V2-020 — Notificações, Confiança e Suporte em nova branch
   empilhada, mantendo flags fechadas e sem alteração operacional.
+
+## V2-023 — Retirada lógica e quarentena do legado
+
+- O índice antigo de Pretendentes só sai da navegação e redireciona quando App
+  Shell, substituto, paridade, telemetria e reconciliação estiverem confirmados.
+- Detalhes, interesses, matches, mensagens, recados e propósito permanecem no
+  legado para compatibilidade e preservação.
+- O avatar-personagem só entra em quarentena quando Perfil, Personalização,
+  paridade, inventário, telemetria e compensação estiverem confirmados.
+- Foto, `avatar_url` legítimo, galeria, molduras, auras, fundos, presentes,
+  stickers, inventários compartilhados e ownership permanecem protegidos.
+- Todas as flags continuam fechadas; nenhum item foi classificado como seguro
+  para remoção física.
+- Não houve migration, contração, exclusão ou alteração operacional.
+
+## Próximo lote
+
+- Produzir reconciliação read-only e gates objetivos da V2-024.
+- Não contrair schema, assets ou código sem snapshot publicado, backup testado,
+  paridade, telemetria e decisão de compensação.
