@@ -1,0 +1,306 @@
+.vdn-v2[data-vdn-v2] .vdn-v2-profile {
+  position: relative;
+  display: grid;
+  gap: var(--v2-space-lg);
+}
+
+.vdn-v2[data-vdn-v2] .vdn-v2-profile__preview {
+  min-width: 0;
+}
+
+.vdn-v2[data-vdn-v2] .vdn-v2-profile-hero {
+  overflow: hidden;
+  border: var(--v2-border-width-default) solid var(--v2-color-border-default);
+  border-radius: var(--v2-shape-radius-large);
+  background: var(--v2-color-surface);
+  box-shadow: var(--v2-shadow-level-one);
+}
+
+.vdn-v2[data-vdn-v2] .vdn-v2-profile-hero__cover {
+  min-height: clamp(8rem, 28vw, 15rem);
+  background-color: var(--v2-color-brand);
+  background-image: linear-gradient(125deg, var(--v2-color-brand), var(--v2-color-accent));
+  background-position: center;
+  background-size: cover;
+}
+
+.vdn-v2[data-vdn-v2] .vdn-v2-profile-hero__content {
+  display: grid;
+  align-items: end;
+  gap: var(--v2-space-md);
+  padding: var(--v2-space-lg);
+}
+
+.vdn-v2[data-vdn-v2] .vdn-v2-profile-avatar {
+  position: relative;
+  width: 8rem;
+  height: 8rem;
+  margin-top: -5rem;
+}
+
+.vdn-v2[data-vdn-v2] .vdn-v2-profile-avatar__photo {
+  position: absolute;
+  inset: 1rem;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 0.25rem solid var(--v2-color-surface);
+  border-radius: var(--v2-shape-radius-pill);
+  color: var(--v2-color-text-inverse);
+  background: var(--v2-color-brand);
+  font-size: var(--v2-typography-size-heading-large);
+  font-weight: var(--v2-typography-weight-semibold);
+}
+
+.vdn-v2[data-vdn-v2] .vdn-v2-profile-avatar__photo img,
+.vdn-v2[data-vdn-v2] .vdn-v2-profile-avatar__frame,
+.vdn-v2[data-vdn-v2] .vdn-v2-profile-avatar__aura {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.vdn-v2[data-vdn-v2] .vdn-v2-profile-avatar__photo img {
+  object-fit: cover;
+}
+
+.vdn-v2[data-vdn-v2] .vdn-v2-profile-avatar__frame,
+.vdn-v2[data-vdn-v2] .vdn-v2-profile-avatar__aura {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.vdn-v2[data-vdn-v2] .vdn-v2-profile-avatar__aura {
+  z-index: 1;
+  transform: scale(1.18);
+}
+
+.vdn-v2[data-vdn-v2] .vdn-v2-profile-hero__identity {
+  display: grid;
+  min-width: 0;
+  gap: var(--v2-space-xs);
+}
+
+.vdn-v2[data-vdn-v2] .vdn-v2-profile-hero__name-row,
+.vdn-v2[data-vdn-v2] .vdn-v2-profile-hero__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--v2-space-xs);
+}
+
+.vdn-v2[data-vdn-v2] .vdn-v2-profile-hero__name-row svg {
+  color: var(--v2-color-info);
+}
+
+.vdn-v2[data-vdn-v2] .vdn-v2-profile-hero__meta > span {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--v2-space-xxs);
+  color: var(--v2-color-text-muted);
+}
+
+.vdn-v2[data-vdn-v2] .vdn-v2-profile-hero__meta svg {
+  width: var(--v2-icon-size-small);
+  height: var(--v2-icon-size-small);
+}
+
+.vdn-v2[data-vdn-v2] .vdn-v2-profile-gradient-name {
+  color: transparent;
+  background-clip: text;
+  -webkit-background-clip: text;
+}
+
+.vdn-v2[data-vdn-v2] .vdn-v2-profile__modules {
+  display: grid;
+  align-items: start;
+  gap: var(--v2-space-md);
+  margin-top: var(--v2-space-lg);
+}
+
+.vdn-v2[data-vdn-v2] .vdn-v2-profile-module {
+  display: grid;
+  gap: var(--v2-space-md);
+  min-width: 0;
+}
+
+.vdn-v2[data-vdn-v2] .vdn-v2-profile-gallery {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--v2-space-xs);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.vdn-v2[data-vdn-v2] .vdn-v2-profile-gallery img {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: var(--v2-shape-radius-medium);
+  object-fit: cover;
+}
+
+.vdn-v2[data-vdn-v2] .vdn-v2-profile-highlights {
+  display: grid;
+  gap: var(--v2-space-sm);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.vdn-v2[data-vdn-v2] .vdn-v2-profile-highlights li {
+  display: flex;
+  align-items: center;
+  gap: var(--v2-space-sm);
+}
+
+.vdn-v2[data-vdn-v2] .vdn-v2-profile-highlights img,
+.vdn-v2[data-vdn-v2] .vdn-v2-profile-highlights svg {
+  width: 2.75rem;
+  height: 2.75rem;
+  flex: 0 0 auto;
+  border-radius: var(--v2-shape-radius-medium);
+  object-fit: contain;
+}
+
+.vdn-v2[data-vdn-v2] .vdn-v2-profile-highlights span {
+  display: grid;
+  min-width: 0;
+}
+
+.vdn-v2[data-vdn-v2] .vdn-v2-profile-highlights small {
+  color: var(--v2-color-text-muted);
+}
+
+.vdn-v2[data-vdn-v2] .vdn-v2-profile-module__empty,
+.vdn-v2[data-vdn-v2] .vdn-v2-profile-state {
+  display: grid;
+  min-height: 12rem;
+  place-items: center;
+  align-content: center;
+  gap: var(--v2-space-sm);
+  text-align: center;
+}
+
+.vdn-v2[data-vdn-v2] .vdn-v2-profile-editor {
+  position: fixed;
+  inset: auto 0 0;
+  z-index: var(--v2-z-index-modal);
+  display: grid;
+  max-height: min(88dvh, 54rem);
+  gap: var(--v2-space-md);
+  padding: var(--v2-space-lg);
+  padding-bottom: calc(var(--v2-space-lg) + var(--v2-safe-area-bottom));
+  overflow-y: auto;
+  border-top: var(--v2-border-width-default) solid var(--v2-color-border-default);
+  border-radius: var(--v2-shape-radius-large) var(--v2-shape-radius-large) 0 0;
+  background: var(--v2-color-surface-elevated);
+  box-shadow: var(--v2-shadow-level-three);
+}
+
+.vdn-v2[data-vdn-v2] .vdn-v2-profile-editor > header,
+.vdn-v2[data-vdn-v2] .vdn-v2-profile-editor > footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--v2-space-sm);
+}
+
+.vdn-v2[data-vdn-v2] .vdn-v2-profile-editor__list {
+  display: grid;
+  gap: var(--v2-space-sm);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.vdn-v2[data-vdn-v2] .vdn-v2-profile-editor__list > li {
+  display: grid;
+  gap: var(--v2-space-xs);
+  padding: var(--v2-space-sm);
+  border: var(--v2-border-width-default) solid var(--v2-color-border-default);
+  border-radius: var(--v2-shape-radius-medium);
+}
+
+.vdn-v2[data-vdn-v2] .vdn-v2-profile-editor__controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: var(--v2-space-xs);
+}
+
+.vdn-v2[data-vdn-v2] .vdn-v2-profile-editor label {
+  display: grid;
+  gap: var(--v2-space-xxs);
+  min-width: 9rem;
+  color: var(--v2-color-text-secondary);
+  font-size: var(--v2-typography-size-caption);
+}
+
+.vdn-v2[data-vdn-v2] .vdn-v2-profile-editor select {
+  min-height: var(--v2-control-minimum-touch-target);
+  padding-inline: var(--v2-space-sm);
+  border: var(--v2-border-width-default) solid var(--v2-color-border-default);
+  border-radius: var(--v2-shape-radius-medium);
+  color: var(--v2-color-text-primary);
+  background: var(--v2-color-surface);
+  font: inherit;
+  font-size: max(1rem, var(--v2-control-input-font-size));
+}
+
+.vdn-v2[data-vdn-v2] .vdn-v2-profile-editor select:focus-visible {
+  outline: var(--v2-border-width-strong) solid var(--v2-color-focus-ring);
+  outline-offset: var(--v2-border-width-strong);
+}
+
+.vdn-v2[data-vdn-v2] .vdn-v2-profile__feedback {
+  position: fixed;
+  right: var(--v2-space-md);
+  bottom: calc(var(--v2-space-xl) + var(--v2-safe-area-bottom));
+  z-index: var(--v2-z-index-toast);
+  margin: 0;
+  padding: var(--v2-space-sm) var(--v2-space-md);
+  border-radius: var(--v2-shape-radius-medium);
+  color: var(--v2-color-text-inverse);
+  background: var(--v2-color-surface-inverse);
+}
+
+@media (min-width: 48rem) {
+  .vdn-v2[data-vdn-v2] .vdn-v2-profile-hero__content {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+
+  .vdn-v2[data-vdn-v2] .vdn-v2-profile__modules {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .vdn-v2[data-vdn-v2] .vdn-v2-profile-module--about,
+  .vdn-v2[data-vdn-v2] .vdn-v2-profile-module--gallery {
+    grid-column: span 2;
+  }
+}
+
+@media (min-width: 75rem) {
+  .vdn-v2[data-vdn-v2] .vdn-v2-profile--editing {
+    grid-template-columns: minmax(0, 1fr) minmax(20rem, 25rem);
+  }
+
+  .vdn-v2[data-vdn-v2] .vdn-v2-profile-editor {
+    position: sticky;
+    inset: auto;
+    top: calc(var(--v2-space-lg) + var(--v2-safe-area-top));
+    max-height: calc(100dvh - 2 * var(--v2-space-lg));
+    border: var(--v2-border-width-default) solid var(--v2-color-border-default);
+    border-radius: var(--v2-shape-radius-large);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vdn-v2[data-vdn-v2] .vdn-v2-profile * {
+    scroll-behavior: auto;
+    transition-duration: 0.01ms !important;
+  }
+}

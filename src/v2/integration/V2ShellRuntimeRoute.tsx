@@ -8,6 +8,7 @@ import { V2AccountRuntimeFeature, type AccountNavigationTarget } from "@/v2/feat
 import { V2CommunityHubFeature } from "@/v2/features/community";
 import { V2ConversationsFeature } from "@/v2/features/conversations";
 import { V2CommunityHomeFeature, V2PeopleDiscoveryFeature } from "@/v2/features/home";
+import { V2ProfileFeature } from "@/v2/features/profile";
 import { createV2ShellUser, performV2Logout, resolveV2RuntimeAccess } from "./contracts";
 import { getV2RuntimeNavigation, getV2RuntimeRoute } from "./route-registry";
 import { V2RuntimeShell } from "./V2RuntimeShell";
@@ -111,6 +112,9 @@ export function V2ShellRuntimeRoute({ slug }: { readonly slug: string }) {
     }
     if (v2FeatureFlags.messaging && route?.slug === "conversas") {
       return <V2ConversationsFeature userId={user.id} />;
+    }
+    if (v2FeatureFlags.profile && route?.slug === "perfil") {
+      return <V2ProfileFeature userId={user.id} />;
     }
     return undefined;
   })();
