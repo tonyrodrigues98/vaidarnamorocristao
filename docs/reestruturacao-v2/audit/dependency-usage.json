@@ -367,13 +367,15 @@
         "src/v2/features/community/V2CommunityHub.tsx",
         "src/v2/features/conversations/V2Conversations.tsx",
         "src/v2/features/home/V2CommunityHome.tsx",
-        "src/v2/features/home/V2PeopleDiscovery.tsx"
+        "src/v2/features/home/V2PeopleDiscovery.tsx",
+        "src/v2/features/profile/V2Profile.tsx"
       ],
       "testFiles": [
         "tests/auth-cache-isolation-v2.test.ts",
         "tests/community-home-boundaries-v2.test.tsx",
         "tests/community-hub-boundaries-v2.test.tsx",
-        "tests/conversations-boundaries-v2.test.tsx"
+        "tests/conversations-boundaries-v2.test.tsx",
+        "tests/profile-boundaries-v2.test.tsx"
       ],
       "configReferences": ["RELATORIO_LOJA_QUERY_PARTE1.md"],
       "classification": "directly-imported"
@@ -964,6 +966,9 @@
         "src/v2/features/home/V2PeopleDiscovery.tsx",
         "src/v2/features/onboarding/CommunityOnboardingFlow.tsx",
         "src/v2/features/onboarding/DatingOptInFlow.tsx",
+        "src/v2/features/profile/V2Profile.tsx",
+        "src/v2/features/profile/V2ProfileEditor.tsx",
+        "src/v2/features/profile/V2ProfileModuleCard.tsx",
         "src/v2/integration/route-registry.ts",
         "src/v2/integration/V2RuntimePage.tsx",
         "src/v2/integration/V2RuntimeState.tsx"
@@ -1251,6 +1256,7 @@
         "src/v2/features/home/V2PeopleDiscovery.tsx",
         "src/v2/features/onboarding/CommunityOnboardingFlow.tsx",
         "src/v2/features/onboarding/DatingOptInFlow.tsx",
+        "src/v2/features/profile/V2Profile.tsx",
         "src/v2/integration/V2RuntimeErrorBoundary.tsx",
         "src/v2/integration/V2RuntimeShell.tsx",
         "src/v2/integration/V2ShellRuntimeRoute.tsx"
@@ -1312,6 +1318,7 @@
         "tests/conversations-boundaries-v2.test.tsx",
         "tests/design-system-components-v2.test.tsx",
         "tests/onboarding-integration-v2.test.tsx",
+        "tests/profile-boundaries-v2.test.tsx",
         "tests/use-long-press.test.ts"
       ],
       "configReferences": [],
@@ -1585,6 +1592,9 @@
         "tests/photo-moderation-security-v2.test.ts",
         "tests/photo-repair-security-v2.test.ts",
         "tests/pretendentes-eligibility.test.ts",
+        "tests/profile-boundaries-v2.test.tsx",
+        "tests/profile-modules-v2.test.ts",
+        "tests/profile-security-v2.test.ts",
         "tests/public-acquisition-v2.test.ts",
         "tests/push-dispatch-atomic-rls.test.ts",
         "tests/push-dispatch-atomic-v2.test.ts",

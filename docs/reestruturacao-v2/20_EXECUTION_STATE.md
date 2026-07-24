@@ -24,7 +24,9 @@
   `68e6d4a8b42d0124bfb913f615cdae224a45f844`.
 - V2-011 está no Draft PR #19, branch `rebuild/v2-011-community-spaces`, commit
   `14d475a66daf78ff070fb799f193b8378aa47d06`.
-- Lote ativo: V2-012 em `rebuild/v2-012-conversations`, empilhado sobre a V2-011.
+- V2-012 está no Draft PR #20, branch `rebuild/v2-012-conversations`, commit
+  `77f6c635c6a327adf4920c29d011957a2de1a6f8`.
+- Lote ativo: V2-013 em `rebuild/v2-013-modular-profile`, empilhado sobre a V2-012.
   Nenhum PR da pilha foi mesclado ou publicado.
 
 ## Concluído
@@ -98,11 +100,11 @@
 ## Evidência de validação
 
 - Instalação congelada e TypeScript: aprovados.
-- Suíte segura: 49 arquivos e 365 testes aprovados.
+- Suíte segura: 52 arquivos e 386 testes aprovados.
 - ESLint e Prettier focados: aprovados.
 - Build TanStack/Vite cliente e SSR: aprovado; warnings de dependências são
   baseline.
-- Auditoria reproduzível: 69 rotas, 489 referências, 477 módulos, 2.710 imports,
+- Auditoria reproduzível: 69 rotas, 491 referências, 490 módulos, 2.755 imports,
   um ciclo gerado conhecido e zero ciclos em `src/v2`.
 - Smoke isolado aprovado em 320, 360, 390, 430, 768, 1024 e 1440 px, sem overflow
   horizontal; nenhum backend foi carregado.
@@ -195,11 +197,24 @@
 - Edição, exclusão, reactions, typing, virtualização e telemetria operacional
   permanecem gates explícitos; o legado não foi removido.
 
+## V2-013 — Perfil modular
+
+- `/v2/perfil` monta uma experiência comunitária modular somente com a flag
+  canônica de Perfil.
+- Ordem, visibilidade e audiência são configurações separadas dos dados-fonte.
+- Privacidade, bloqueios e propriedade de itens são aplicados no agregador
+  server-side; preferências românticas não entram no payload.
+- Foto, galeria, presentes, conquistas, pet e itens equipados continuam nas
+  estruturas existentes.
+- Migration local aditiva e não aplicada prepara configuração, RLS e RPCs com
+  concorrência otimista.
+- Perfil legado e edição dos dados-base permanecem como fallback.
+
 ## Próximo lote
 
 - Validar as migrations de capabilities e push em Supabase descartável antes de
   qualquer rollout.
 - Manter qualquer conclusão sobre ACL/RLS publicado como não verificada até
   existir snapshot autenticado e ambiente Supabase descartável.
-- Validar e publicar o Draft PR da V2-012; depois iniciar a V2-013 em branch
+- Validar e publicar o Draft PR da V2-013; depois iniciar a V2-014 em branch
   empilhada, sem aplicar migrations ou ativar flags.

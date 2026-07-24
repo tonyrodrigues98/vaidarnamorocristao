@@ -3436,6 +3436,7 @@
         "tests/moderation-rls.test.ts",
         "tests/navigation-security-v2.test.ts",
         "tests/pretendentes-eligibility.test.ts",
+        "tests/profile-boundaries-v2.test.tsx",
         "tests/route-protection-v2.test.ts"
       ],
       "notes": []
