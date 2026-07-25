@@ -1,5 +1,4 @@
 import { supabase } from "@/integrations/supabase/client";
-import { normalizeTikTokProfileUrl } from "@/lib/trustedContent";
 
 export const LIVE_TEAM_BUCKET = "live-team";
 
@@ -84,18 +83,22 @@ export function getCurrentHighlightPeriod() {
   return { month: now.getMonth() + 1, year: now.getFullYear() };
 }
 
+function normalizeTikTokUrl(value?: string | null) {
+  const trimmed = value?.trim();
+  if (!trimmed) return null;
+  if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) return trimmed;
+  if (trimmed.startsWith("@")) return `https://www.tiktok.com/${trimmed}`;
+  return `https://www.tiktok.com/@${trimmed.replace(/^@/, "")}`;
+}
+
 async function withDisplayUrls(members: LiveTeamMember[]) {
   return Promise.all(
     members.map(async (member) => {
-      const safeMember = {
-        ...member,
-        tiktok_url: normalizeTikTokProfileUrl(member.tiktok_url),
-      };
-      if (!member.storage_path) return safeMember;
+      if (!member.storage_path) return member;
       const { data } = await supabase.storage
         .from(LIVE_TEAM_BUCKET)
         .createSignedUrl(member.storage_path, SIGNED_IMAGE_TTL_SECONDS);
-      return data?.signedUrl ? { ...safeMember, photo_url: data.signedUrl } : safeMember;
+      return data?.signedUrl ? { ...member, photo_url: data.signedUrl } : member;
     }),
   );
 }
@@ -103,15 +106,11 @@ async function withDisplayUrls(members: LiveTeamMember[]) {
 async function withHighlightDisplayUrls(items: LiveMonthlyHighlight[]) {
   return Promise.all(
     items.map(async (item) => {
-      const safeItem = {
-        ...item,
-        tiktok_url: normalizeTikTokProfileUrl(item.tiktok_url),
-      };
-      if (!item.storage_path) return safeItem;
+      if (!item.storage_path) return item;
       const { data } = await supabase.storage
         .from(LIVE_TEAM_BUCKET)
         .createSignedUrl(item.storage_path, SIGNED_IMAGE_TTL_SECONDS);
-      return data?.signedUrl ? { ...safeItem, photo_url: data.signedUrl } : safeItem;
+      return data?.signedUrl ? { ...item, photo_url: data.signedUrl } : item;
     }),
   );
 }
@@ -122,7 +121,7 @@ export function prepareLiveTeamPayload(payload: LiveTeamPayload) {
     role_title: payload.role_title.trim(),
     category: payload.category,
     chip_text: payload.chip_text?.trim() || null,
-    tiktok_url: normalizeTikTokProfileUrl(payload.tiktok_url),
+    tiktok_url: normalizeTikTokUrl(payload.tiktok_url),
     photo_url: payload.photo_url.trim(),
     storage_path: payload.storage_path ?? null,
     sort_order: payload.sort_order ?? 0,
@@ -139,7 +138,7 @@ export function prepareLiveMonthlyHighlightPayload(payload: LiveMonthlyHighlight
     photo_url: payload.photo_url?.trim() || null,
     storage_path: payload.storage_path ?? null,
     chip_text: payload.chip_text?.trim() || null,
-    tiktok_url: normalizeTikTokProfileUrl(payload.tiktok_url),
+    tiktok_url: normalizeTikTokUrl(payload.tiktok_url),
     month: payload.month ?? current.month,
     year: payload.year ?? current.year,
     is_active: payload.is_active ?? true,
@@ -233,7 +232,7 @@ export async function updateLiveTeamMember(
     ...(payload.category !== undefined ? { category: payload.category } : {}),
     ...(payload.chip_text !== undefined ? { chip_text: payload.chip_text?.trim() || null } : {}),
     ...(payload.tiktok_url !== undefined
-      ? { tiktok_url: normalizeTikTokProfileUrl(payload.tiktok_url) }
+      ? { tiktok_url: normalizeTikTokUrl(payload.tiktok_url) }
       : {}),
     ...(payload.photo_url !== undefined ? { photo_url: payload.photo_url.trim() } : {}),
     ...(payload.storage_path !== undefined ? { storage_path: payload.storage_path ?? null } : {}),
@@ -264,7 +263,7 @@ export async function updateMonthlyHighlight(
     ...(payload.storage_path !== undefined ? { storage_path: payload.storage_path ?? null } : {}),
     ...(payload.chip_text !== undefined ? { chip_text: payload.chip_text?.trim() || null } : {}),
     ...(payload.tiktok_url !== undefined
-      ? { tiktok_url: normalizeTikTokProfileUrl(payload.tiktok_url) }
+      ? { tiktok_url: normalizeTikTokUrl(payload.tiktok_url) }
       : {}),
     ...(payload.month !== undefined ? { month: payload.month } : {}),
     ...(payload.year !== undefined ? { year: payload.year } : {}),

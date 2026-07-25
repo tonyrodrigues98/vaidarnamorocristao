@@ -10,15 +10,9 @@ export type V2ShellNavigationId =
   | "profile"
   | "explore"
   | "dating"
-  | "purpose"
-  | "anonymous"
   | "shop"
   | "avatar"
   | "pets"
-  | "verbo"
-  | "cinema"
-  | "trust"
-  | "admin"
   | "settings";
 
 export interface V2ShellNavigationItem {

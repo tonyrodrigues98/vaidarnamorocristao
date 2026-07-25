@@ -52,20 +52,9 @@ export async function createUser(label: string, opts?: { status?: string }): Pro
   });
   if (pErr) throw pErr;
 
-  const { error: termsError } = await admin.from("terms_acceptances").insert({
-    user_id: userId,
-    version: "2026-05-03",
-  });
-  if (termsError) throw termsError;
-
   const client = anonClient();
-  const {
-    data: { session },
-    error: sErr,
-  } = await client.auth.signInWithPassword({ email, password });
+  const { error: sErr } = await client.auth.signInWithPassword({ email, password });
   if (sErr) throw sErr;
-  if (!session) throw new Error("sign in returned no session");
-  await client.realtime.setAuth(session.access_token);
   return { userId, email, password, client };
 }
 

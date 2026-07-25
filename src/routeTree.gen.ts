@@ -26,7 +26,6 @@ import { Route as InteressesRouteImport } from './routes/interesses'
 import { Route as LojaRouteImport } from './routes/loja'
 import { Route as ManualRouteImport } from './routes/manual'
 import { Route as MatchesRouteImport } from './routes/matches'
-import { Route as MembrosRouteImport } from './routes/membros'
 import { Route as MeuPetRouteImport } from './routes/meu-pet'
 import { Route as NotificacoesRouteImport } from './routes/notificacoes'
 import { Route as OracoesRouteImport } from './routes/oracoes'
@@ -67,7 +66,6 @@ import { Route as NoticiasIndexRouteImport } from './routes/noticias.index'
 import { Route as OnboardingIndexRouteImport } from './routes/onboarding/index'
 import { Route as OnboardingEtapa1RouteImport } from './routes/onboarding/etapa-1'
 import { Route as OnboardingEtapa2RouteImport } from './routes/onboarding/etapa-2'
-import { Route as OnboardingNamoroRouteImport } from './routes/onboarding/namoro'
 import { Route as PresentesIndexRouteImport } from './routes/presentes/index'
 import { Route as PretendentesIndexRouteImport } from './routes/pretendentes/index'
 import { Route as PretendentesIdRouteImport } from './routes/pretendentes/$id'
@@ -77,7 +75,6 @@ import { Route as SuporteIdRouteImport } from './routes/suporte/$id'
 import { Route as SuporteAjudaRouteImport } from './routes/suporte/ajuda'
 import { Route as V2IndexRouteImport } from './routes/v2.index'
 import { Route as V2SectionRouteImport } from './routes/v2.$section'
-import { Route as ApiPublicRuntimeConfigRouteImport } from './routes/api/public/runtime-config'
 import { Route as ApiPublicHooksPushDispatchRouteImport } from './routes/api/public/hooks/push-dispatch'
 
 const IndexRoute = IndexRouteImport.update({
@@ -163,11 +160,6 @@ const ManualRoute = ManualRouteImport.update({
 const MatchesRoute = MatchesRouteImport.update({
   id: '/matches',
   path: '/matches',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MembrosRoute = MembrosRouteImport.update({
-  id: '/membros',
-  path: '/membros',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MeuPetRoute = MeuPetRouteImport.update({
@@ -370,11 +362,6 @@ const OnboardingEtapa2Route = OnboardingEtapa2RouteImport.update({
   path: '/onboarding/etapa-2',
   getParentRoute: () => rootRouteImport,
 } as any)
-const OnboardingNamoroRoute = OnboardingNamoroRouteImport.update({
-  id: '/onboarding/namoro',
-  path: '/onboarding/namoro',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const PresentesIndexRoute = PresentesIndexRouteImport.update({
   id: '/presentes/',
   path: '/presentes/',
@@ -420,11 +407,6 @@ const V2SectionRoute = V2SectionRouteImport.update({
   path: '/$section',
   getParentRoute: () => V2Route,
 } as any)
-const ApiPublicRuntimeConfigRoute = ApiPublicRuntimeConfigRouteImport.update({
-  id: '/api/public/runtime-config',
-  path: '/api/public/runtime-config',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ApiPublicHooksPushDispatchRoute =
   ApiPublicHooksPushDispatchRouteImport.update({
     id: '/api/public/hooks/push-dispatch',
@@ -450,7 +432,6 @@ export interface FileRoutesByFullPath {
   '/loja': typeof LojaRoute
   '/manual': typeof ManualRoute
   '/matches': typeof MatchesRoute
-  '/membros': typeof MembrosRoute
   '/meu-pet': typeof MeuPetRoute
   '/notificacoes': typeof NotificacoesRoute
   '/oracoes': typeof OracoesRoute
@@ -486,7 +467,6 @@ export interface FileRoutesByFullPath {
   '/conversas/comunidade': typeof ConversasComunidadeRoute
   '/onboarding/etapa-1': typeof OnboardingEtapa1Route
   '/onboarding/etapa-2': typeof OnboardingEtapa2Route
-  '/onboarding/namoro': typeof OnboardingNamoroRoute
   '/pretendentes/$id': typeof PretendentesIdRoute
   '/proposito/$matchId': typeof PropositoMatchIdRoute
   '/suporte/$id': typeof SuporteIdRoute
@@ -501,7 +481,6 @@ export interface FileRoutesByFullPath {
   '/pretendentes/': typeof PretendentesIndexRoute
   '/suporte/': typeof SuporteIndexRoute
   '/v2/': typeof V2IndexRoute
-  '/api/public/runtime-config': typeof ApiPublicRuntimeConfigRoute
   '/api/public/hooks/push-dispatch': typeof ApiPublicHooksPushDispatchRoute
 }
 export interface FileRoutesByTo {
@@ -522,7 +501,6 @@ export interface FileRoutesByTo {
   '/loja': typeof LojaRoute
   '/manual': typeof ManualRoute
   '/matches': typeof MatchesRoute
-  '/membros': typeof MembrosRoute
   '/meu-pet': typeof MeuPetRoute
   '/notificacoes': typeof NotificacoesRoute
   '/oracoes': typeof OracoesRoute
@@ -557,7 +535,6 @@ export interface FileRoutesByTo {
   '/conversas/comunidade': typeof ConversasComunidadeRoute
   '/onboarding/etapa-1': typeof OnboardingEtapa1Route
   '/onboarding/etapa-2': typeof OnboardingEtapa2Route
-  '/onboarding/namoro': typeof OnboardingNamoroRoute
   '/pretendentes/$id': typeof PretendentesIdRoute
   '/proposito/$matchId': typeof PropositoMatchIdRoute
   '/suporte/$id': typeof SuporteIdRoute
@@ -572,7 +549,6 @@ export interface FileRoutesByTo {
   '/pretendentes': typeof PretendentesIndexRoute
   '/suporte': typeof SuporteIndexRoute
   '/v2': typeof V2IndexRoute
-  '/api/public/runtime-config': typeof ApiPublicRuntimeConfigRoute
   '/api/public/hooks/push-dispatch': typeof ApiPublicHooksPushDispatchRoute
 }
 export interface FileRoutesById {
@@ -594,7 +570,6 @@ export interface FileRoutesById {
   '/loja': typeof LojaRoute
   '/manual': typeof ManualRoute
   '/matches': typeof MatchesRoute
-  '/membros': typeof MembrosRoute
   '/meu-pet': typeof MeuPetRoute
   '/notificacoes': typeof NotificacoesRoute
   '/oracoes': typeof OracoesRoute
@@ -630,7 +605,6 @@ export interface FileRoutesById {
   '/conversas/comunidade': typeof ConversasComunidadeRoute
   '/onboarding/etapa-1': typeof OnboardingEtapa1Route
   '/onboarding/etapa-2': typeof OnboardingEtapa2Route
-  '/onboarding/namoro': typeof OnboardingNamoroRoute
   '/pretendentes/$id': typeof PretendentesIdRoute
   '/proposito/$matchId': typeof PropositoMatchIdRoute
   '/suporte/$id': typeof SuporteIdRoute
@@ -645,7 +619,6 @@ export interface FileRoutesById {
   '/pretendentes/': typeof PretendentesIndexRoute
   '/suporte/': typeof SuporteIndexRoute
   '/v2/': typeof V2IndexRoute
-  '/api/public/runtime-config': typeof ApiPublicRuntimeConfigRoute
   '/api/public/hooks/push-dispatch': typeof ApiPublicHooksPushDispatchRoute
 }
 export interface FileRouteTypes {
@@ -668,7 +641,6 @@ export interface FileRouteTypes {
     | '/loja'
     | '/manual'
     | '/matches'
-    | '/membros'
     | '/meu-pet'
     | '/notificacoes'
     | '/oracoes'
@@ -704,7 +676,6 @@ export interface FileRouteTypes {
     | '/conversas/comunidade'
     | '/onboarding/etapa-1'
     | '/onboarding/etapa-2'
-    | '/onboarding/namoro'
     | '/pretendentes/$id'
     | '/proposito/$matchId'
     | '/suporte/$id'
@@ -719,7 +690,6 @@ export interface FileRouteTypes {
     | '/pretendentes/'
     | '/suporte/'
     | '/v2/'
-    | '/api/public/runtime-config'
     | '/api/public/hooks/push-dispatch'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -740,7 +710,6 @@ export interface FileRouteTypes {
     | '/loja'
     | '/manual'
     | '/matches'
-    | '/membros'
     | '/meu-pet'
     | '/notificacoes'
     | '/oracoes'
@@ -775,7 +744,6 @@ export interface FileRouteTypes {
     | '/conversas/comunidade'
     | '/onboarding/etapa-1'
     | '/onboarding/etapa-2'
-    | '/onboarding/namoro'
     | '/pretendentes/$id'
     | '/proposito/$matchId'
     | '/suporte/$id'
@@ -790,7 +758,6 @@ export interface FileRouteTypes {
     | '/pretendentes'
     | '/suporte'
     | '/v2'
-    | '/api/public/runtime-config'
     | '/api/public/hooks/push-dispatch'
   id:
     | '__root__'
@@ -811,7 +778,6 @@ export interface FileRouteTypes {
     | '/loja'
     | '/manual'
     | '/matches'
-    | '/membros'
     | '/meu-pet'
     | '/notificacoes'
     | '/oracoes'
@@ -847,7 +813,6 @@ export interface FileRouteTypes {
     | '/conversas/comunidade'
     | '/onboarding/etapa-1'
     | '/onboarding/etapa-2'
-    | '/onboarding/namoro'
     | '/pretendentes/$id'
     | '/proposito/$matchId'
     | '/suporte/$id'
@@ -862,7 +827,6 @@ export interface FileRouteTypes {
     | '/pretendentes/'
     | '/suporte/'
     | '/v2/'
-    | '/api/public/runtime-config'
     | '/api/public/hooks/push-dispatch'
   fileRoutesById: FileRoutesById
 }
@@ -884,7 +848,6 @@ export interface RootRouteChildren {
   LojaRoute: typeof LojaRoute
   ManualRoute: typeof ManualRoute
   MatchesRoute: typeof MatchesRoute
-  MembrosRoute: typeof MembrosRoute
   MeuPetRoute: typeof MeuPetRoute
   NotificacoesRoute: typeof NotificacoesRoute
   OracoesRoute: typeof OracoesRoute
@@ -919,7 +882,6 @@ export interface RootRouteChildren {
   ConversasComunidadeRoute: typeof ConversasComunidadeRoute
   OnboardingEtapa1Route: typeof OnboardingEtapa1Route
   OnboardingEtapa2Route: typeof OnboardingEtapa2Route
-  OnboardingNamoroRoute: typeof OnboardingNamoroRoute
   PretendentesIdRoute: typeof PretendentesIdRoute
   PropositoMatchIdRoute: typeof PropositoMatchIdRoute
   SuporteIdRoute: typeof SuporteIdRoute
@@ -932,7 +894,6 @@ export interface RootRouteChildren {
   PresentesIndexRoute: typeof PresentesIndexRoute
   PretendentesIndexRoute: typeof PretendentesIndexRoute
   SuporteIndexRoute: typeof SuporteIndexRoute
-  ApiPublicRuntimeConfigRoute: typeof ApiPublicRuntimeConfigRoute
   ApiPublicHooksPushDispatchRoute: typeof ApiPublicHooksPushDispatchRoute
 }
 
@@ -1055,13 +1016,6 @@ declare module '@tanstack/react-router' {
       path: '/matches'
       fullPath: '/matches'
       preLoaderRoute: typeof MatchesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/membros': {
-      id: '/membros'
-      path: '/membros'
-      fullPath: '/membros'
-      preLoaderRoute: typeof MembrosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/meu-pet': {
@@ -1344,13 +1298,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OnboardingEtapa2RouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/onboarding/namoro': {
-      id: '/onboarding/namoro'
-      path: '/onboarding/namoro'
-      fullPath: '/onboarding/namoro'
-      preLoaderRoute: typeof OnboardingNamoroRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/presentes/': {
       id: '/presentes/'
       path: '/presentes'
@@ -1414,13 +1361,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof V2SectionRouteImport
       parentRoute: typeof V2Route
     }
-    '/api/public/runtime-config': {
-      id: '/api/public/runtime-config'
-      path: '/api/public/runtime-config'
-      fullPath: '/api/public/runtime-config'
-      preLoaderRoute: typeof ApiPublicRuntimeConfigRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/api/public/hooks/push-dispatch': {
       id: '/api/public/hooks/push-dispatch'
       path: '/api/public/hooks/push-dispatch'
@@ -1472,7 +1412,6 @@ const rootRouteChildren: RootRouteChildren = {
   LojaRoute: LojaRoute,
   ManualRoute: ManualRoute,
   MatchesRoute: MatchesRoute,
-  MembrosRoute: MembrosRoute,
   MeuPetRoute: MeuPetRoute,
   NotificacoesRoute: NotificacoesRoute,
   OracoesRoute: OracoesRoute,
@@ -1507,7 +1446,6 @@ const rootRouteChildren: RootRouteChildren = {
   ConversasComunidadeRoute: ConversasComunidadeRoute,
   OnboardingEtapa1Route: OnboardingEtapa1Route,
   OnboardingEtapa2Route: OnboardingEtapa2Route,
-  OnboardingNamoroRoute: OnboardingNamoroRoute,
   PretendentesIdRoute: PretendentesIdRoute,
   PropositoMatchIdRoute: PropositoMatchIdRoute,
   SuporteIdRoute: SuporteIdRoute,
@@ -1520,9 +1458,18 @@ const rootRouteChildren: RootRouteChildren = {
   PresentesIndexRoute: PresentesIndexRoute,
   PretendentesIndexRoute: PretendentesIndexRoute,
   SuporteIndexRoute: SuporteIndexRoute,
-  ApiPublicRuntimeConfigRoute: ApiPublicRuntimeConfigRoute,
   ApiPublicHooksPushDispatchRoute: ApiPublicHooksPushDispatchRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

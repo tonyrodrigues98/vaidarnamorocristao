@@ -17,7 +17,6 @@ export {
   V2_RUNTIME_SECONDARY_NAVIGATION,
   V2_RUNTIME_SLUGS,
   getV2RuntimeDocumentTitle,
-  getV2RuntimeNavigation,
   getV2RuntimeRoute,
   isV2RuntimePath,
   type V2RuntimeRouteDescriptor,

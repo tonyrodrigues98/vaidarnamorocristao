@@ -37,16 +37,16 @@ export const Route = createFileRoute("/depoimentos")({
   component: DepoimentosPage,
   head: () => ({
     meta: [
-      { title: "Depoimentos — Histórias da comunidade Vai Dar Namoro" },
+      { title: "Depoimentos — Casais que se conheceram no VaiDarNamoro" },
       {
         name: "description",
         content:
-          "Histórias compartilhadas por pessoas da comunidade Vai Dar Namoro. Relacionamentos são uma parte da nossa história, não a única forma de participar.",
+          "Histórias reais de casais cristãos que se conheceram no VaiDarNamoro. Inspire-se com testemunhos de namoro, noivado e casamento com propósito.",
       },
       { property: "og:title", content: "Casais que se conheceram no VaiDarNamoro" },
       {
         property: "og:description",
-        content: "Histórias de vínculos e relacionamentos construídos na comunidade.",
+        content: "Histórias reais de relacionamentos cristãos sérios construídos na plataforma.",
       },
       { property: "og:url", content: "https://vaidarnamoro.com/depoimentos" },
     ],
@@ -81,8 +81,7 @@ function DepoimentosPage() {
             Histórias que <span className="text-gradient">Deus escreveu</span>
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
-            Relacionamentos fazem parte da nossa história. A nova comunidade também abre espaço para
-            fé, amizades, conteúdo e experiências compartilhadas.
+            Casais reais que se conheceram aqui e nos permitiram contar suas histórias.
           </p>
         </header>
 
@@ -100,12 +99,14 @@ function DepoimentosPage() {
         </section>
 
         <section className="mt-20 text-center">
-          <h2 className="text-3xl font-extrabold tracking-tight">Faça parte da comunidade</h2>
+          <h2 className="text-3xl font-extrabold tracking-tight">
+            Sua história pode ser a próxima
+          </h2>
           <Link
             to="/auth/signup"
             className="mt-8 inline-flex h-12 items-center justify-center rounded-full bg-[var(--rose)] px-8 font-semibold text-white shadow-glow hover:opacity-90"
           >
-            Acessar comunidade
+            Criar conta gratuita
           </Link>
         </section>
       </main>

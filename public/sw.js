@@ -1,11 +1,6 @@
-importScripts("/vdn-navigation-policy.js");
-
-const CACHE_VERSION = "vaidarnamoro-pwa-v5";
+const CACHE_VERSION = "vaidarnamoro-pwa-v3";
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
-const PET_PUBLIC_IMG_CACHE = `${CACHE_VERSION}-pet-public`;
-const CLEAR_PRIVATE_CACHES_MESSAGE = "VDN_CLEAR_PRIVATE_CACHES";
-const ACTIVATE_WAITING_MESSAGE = "VDN_ACTIVATE_WAITING_SERVICE_WORKER";
-const SERVICE_WORKER_ACTIVATED_MESSAGE = "VDN_SERVICE_WORKER_ACTIVATED";
+const PET_IMG_CACHE = `${CACHE_VERSION}-pet-images`;
 
 const STATIC_ASSETS = [
   "/offline.html",
@@ -20,7 +15,6 @@ const SENSITIVE_PATHS = [
   "/admin",
   "/auth",
   "/bloqueados",
-  "/conta",
   "/conversas",
   "/interesses",
   "/loja",
@@ -32,14 +26,18 @@ const SENSITIVE_PATHS = [
   "/proposito",
   "/recados",
   "/verificacao",
-  "/v2",
   "/api",
 ];
 
 const STATIC_EXTENSIONS = [".css", ".js", ".ico", ".png", ".svg", ".webp", ".woff", ".woff2"];
 
 self.addEventListener("install", (event) => {
-  event.waitUntil(caches.open(STATIC_CACHE).then((cache) => cache.addAll(STATIC_ASSETS)));
+  event.waitUntil(
+    caches
+      .open(STATIC_CACHE)
+      .then((cache) => cache.addAll(STATIC_ASSETS))
+      .then(() => self.skipWaiting()),
+  );
 });
 
 self.addEventListener("activate", (event) => {
@@ -49,17 +47,11 @@ self.addEventListener("activate", (event) => {
       .then((keys) =>
         Promise.all(
           keys
-            .filter((key) => key !== STATIC_CACHE && key !== PET_PUBLIC_IMG_CACHE)
+            .filter((key) => key !== STATIC_CACHE && key !== PET_IMG_CACHE)
             .map((key) => caches.delete(key)),
         ),
       )
-      .then(() => self.clients.claim())
-      .then(() => self.clients.matchAll({ type: "window", includeUncontrolled: true }))
-      .then((windowClients) => {
-        for (const client of windowClients) {
-          client.postMessage({ type: SERVICE_WORKER_ACTIVATED_MESSAGE, version: CACHE_VERSION });
-        }
-      }),
+      .then(() => self.clients.claim()),
   );
 });
 
@@ -79,15 +71,20 @@ function isSafeStaticRequest(request, url) {
   return STATIC_EXTENSIONS.some((extension) => url.pathname.endsWith(extension));
 }
 
-function isPublicPetStorageRequest(request, url) {
+function isPetStorageRequest(request, url) {
   if (request.method !== "GET") return false;
   if (!/\.supabase\.co$/.test(url.hostname)) return false;
-  return /\/storage\/v1\/object\/public\/pets\//.test(url.pathname);
+  return /\/storage\/v1\/object\/(sign|public|authenticated)\/pets\//.test(url.pathname);
 }
 
-async function publicPetImageStaleWhileRevalidate(request) {
-  const cache = await caches.open(PET_PUBLIC_IMG_CACHE);
-  const key = request;
+// Cache key strips the query (signed-URL token) so refreshed signatures hit the same entry.
+function petCacheKey(url) {
+  return new Request(`${url.origin}${url.pathname}`, { method: "GET" });
+}
+
+async function petImageStaleWhileRevalidate(request, url) {
+  const cache = await caches.open(PET_IMG_CACHE);
+  const key = petCacheKey(url);
   const cached = await cache.match(key);
   const network = fetch(request)
     .then((response) => {
@@ -132,8 +129,8 @@ self.addEventListener("fetch", (event) => {
 
   const url = new URL(request.url);
 
-  if (isPublicPetStorageRequest(request, url)) {
-    event.respondWith(publicPetImageStaleWhileRevalidate(request));
+  if (isPetStorageRequest(request, url)) {
+    event.respondWith(petImageStaleWhileRevalidate(request, url));
     return;
   }
 
@@ -151,30 +148,6 @@ self.addEventListener("fetch", (event) => {
   }
 });
 
-self.addEventListener("message", (event) => {
-  if (event.data && event.data.type === ACTIVATE_WAITING_MESSAGE) {
-    event.waitUntil(self.skipWaiting());
-    return;
-  }
-  if (!event.data || event.data.type !== CLEAR_PRIVATE_CACHES_MESSAGE) return;
-  event.waitUntil(
-    caches
-      .keys()
-      .then((keys) =>
-        Promise.all(
-          keys
-            .filter(
-              (key) =>
-                key.includes("-private-") ||
-                key.endsWith("-pet-images") ||
-                key.includes("-authenticated-"),
-            )
-            .map((key) => caches.delete(key)),
-        ),
-      ),
-  );
-});
-
 self.addEventListener("push", (event) => {
   if (!event.data) return;
 
@@ -190,18 +163,17 @@ self.addEventListener("push", (event) => {
   }
 
   const title = typeof payload.title === "string" ? payload.title : "VaiDarNamoro";
-  const requestedUrl =
-    payload.data && typeof payload.data.url === "string"
-      ? payload.data.url
-      : typeof payload.url === "string"
-        ? payload.url
-        : "/notificacoes";
   const options = {
     body: typeof payload.body === "string" ? payload.body : "Voce tem uma nova notificacao.",
     icon: "/icon-192.png",
     badge: "/icon-192.png",
     data: {
-      url: self.VDN_NAVIGATION_POLICY.resolve(requestedUrl, self.location.origin, "/notificacoes"),
+      url:
+        payload.data && typeof payload.data.url === "string"
+          ? payload.data.url
+          : typeof payload.url === "string"
+            ? payload.url
+            : "/notificacoes",
     },
   };
 
@@ -211,16 +183,11 @@ self.addEventListener("push", (event) => {
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
 
-  const requestedUrl =
+  const targetUrl =
     event.notification.data && typeof event.notification.data.url === "string"
       ? event.notification.data.url
       : "/notificacoes";
-  const targetPath = self.VDN_NAVIGATION_POLICY.resolve(
-    requestedUrl,
-    self.location.origin,
-    "/notificacoes",
-  );
-  const url = new URL(targetPath, self.location.origin).href;
+  const url = new URL(targetUrl, self.location.origin).href;
 
   event.waitUntil(
     clients.matchAll({ type: "window", includeUncontrolled: true }).then((windowClients) => {

@@ -7,10 +7,8 @@ export const V2_FEATURE_FLAG_ENV = {
   economy: "VITE_FF_V2_ECONOMY",
   customization: "VITE_FF_V2_CUSTOMIZATION",
   pets: "VITE_FF_V2_PETS",
-  content: "VITE_FF_V2_CONTENT",
   admin: "VITE_FF_V2_ADMIN",
   cinema: "VITE_FF_V2_CINEMA",
-  trust: "VITE_FF_V2_TRUST_CENTER",
 } as const;
 
 export type V2FeatureFlag = keyof typeof V2_FEATURE_FLAG_ENV;
@@ -33,17 +31,7 @@ export function resolveV2FeatureFlags(environment: FeatureFlagEnvironment = impo
 }
 
 /**
- * V2 is the production experience after the approved all-user launch.
- * Explicit public build flags can still disable an individual module for an
- * emergency roll-forward, while missing flags keep the released V2 enabled.
+ * All V2 experiences are closed unless their public, non-secret build flag is
+ * explicitly set to the exact value "true".
  */
-const V2_RELEASE_DEFAULTS = Object.freeze(
-  Object.fromEntries(
-    Object.values(V2_FEATURE_FLAG_ENV).map((environmentName) => [environmentName, "true"]),
-  ),
-) as FeatureFlagEnvironment;
-
-export const v2FeatureFlags = resolveV2FeatureFlags({
-  ...V2_RELEASE_DEFAULTS,
-  ...import.meta.env,
-});
+export const v2FeatureFlags = resolveV2FeatureFlags();

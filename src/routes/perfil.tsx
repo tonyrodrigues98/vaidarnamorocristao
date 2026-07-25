@@ -507,7 +507,9 @@ function PerfilPage() {
         setSavingProfile(false);
         return;
       }
-      if (verdict.approved) {
+      if ("soft" in verdict && verdict.soft) {
+        // ok, segue
+      } else if (verdict.approved) {
         aiVerified = true;
         aiConfidence = verdict.confidence;
       } else if (verdict.needsReview) {

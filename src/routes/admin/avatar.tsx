@@ -31,10 +31,6 @@ import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { cn } from "@/lib/utils";
-import {
-  LegacyQuarantineNotice,
-  legacyRetirementState,
-} from "@/v2/platform/legacy-retirement";
 
 export const Route = createFileRoute("/admin/avatar")({
   component: AdminAvatarPage,
@@ -77,14 +73,6 @@ const emptyForm = {
 };
 
 function AdminAvatarPage() {
-  if (legacyRetirementState.characterAvatarQuarantined) {
-    return <LegacyQuarantineNotice context="admin-avatar" />;
-  }
-
-  return <LegacyAdminAvatarPage />;
-}
-
-function LegacyAdminAvatarPage() {
   const { user, role, loading: authLoading } = useAuth();
   const isSuperAdmin = role === "super_admin";
 

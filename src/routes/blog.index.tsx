@@ -7,16 +7,17 @@ export const Route = createFileRoute("/blog/")({
   component: BlogIndex,
   head: () => ({
     meta: [
-      { title: "Blog Vai Dar Namoro — Fé, comunidade e relacionamentos" },
+      { title: "Blog VaiDarNamoro — Relacionamentos com Propósito" },
       {
         name: "description",
         content:
-          "Artigos sobre fé, comunidade, convivência, namoro cristão, casamento e propósito.",
+          "Artigos bíblicos sobre namoro cristão, casamento, pureza, propósito e relacionamento com Deus no centro. Conteúdo sério para quem busca relacionamento sério.",
       },
       { property: "og:title", content: "Blog VaiDarNamoro" },
       {
         property: "og:description",
-        content: "Artigos sobre fé, comunidade, convivência e relacionamentos com propósito.",
+        content:
+          "Artigos bíblicos sobre namoro cristão, casamento e relacionamentos com propósito.",
       },
       { property: "og:url", content: "https://vaidarnamoro.com/blog" },
     ],
@@ -35,8 +36,8 @@ function BlogIndex() {
             Blog <span className="text-gradient">VaiDarNamoro</span>
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
-            Conteúdo sobre fé, comunidade, convivência, namoro e propósito para diferentes momentos
-            da caminhada.
+            Artigos bíblicos sobre namoro, casamento e propósito. Conteúdo sério para quem busca
+            relacionamento sério.
           </p>
         </header>
 

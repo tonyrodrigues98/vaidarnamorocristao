@@ -96,18 +96,6 @@ const pageCopy: Record<
     subtitle: "Uma experiência opcional e separada da participação comunitária.",
     width: "standard",
   },
-  purpose: {
-    title: "Propósito Firmado",
-    eyebrow: "Modo Namoro",
-    subtitle: "Um compromisso bilateral sem interromper a vida comunitária.",
-    width: "standard",
-  },
-  anonymous: {
-    title: "Recados anônimos",
-    eyebrow: "Modo Namoro",
-    subtitle: "Contato consentido, moderável e protegido.",
-    width: "standard",
-  },
   shop: {
     title: "Loja",
     eyebrow: "Personalização",
@@ -125,30 +113,6 @@ const pageCopy: Record<
     eyebrow: "Companheiro virtual",
     subtitle: "Seu progresso e histórico continuam protegidos.",
     width: "standard",
-  },
-  verbo: {
-    title: "Verbo",
-    eyebrow: "Bíblia & Estudo",
-    subtitle: "Leitura e anotações pessoais com privacidade por padrão.",
-    width: "wide",
-  },
-  cinema: {
-    title: "Sala de Cinema",
-    subtitle: "Sessões sincronizadas para assistir junto.",
-    eyebrow: "Assistir Juntos",
-    width: "wide",
-  },
-  trust: {
-    title: "Sua Central",
-    subtitle: "Notificações, confiança e suporte.",
-    eyebrow: "Privacidade e cuidado",
-    width: "wide",
-  },
-  admin: {
-    title: "Administração",
-    subtitle: "Saúde e ação por domínio.",
-    eyebrow: "Operação segura",
-    width: "fluid",
   },
   settings: {
     title: "Configurações",

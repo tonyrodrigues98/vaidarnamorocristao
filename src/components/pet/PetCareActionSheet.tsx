@@ -24,7 +24,7 @@ import {
   listCareItemsForPet,
 } from "@/lib/petCare";
 import { getCareItemStockMap } from "@/lib/petGrab";
-import { awardCareXp } from "@/lib/xp";
+import { awardXp, XP_SOURCES } from "@/lib/xp";
 import { cn } from "@/lib/utils";
 import { PET_CARE_ICON } from "./PetNeedsHud";
 import type { PetRandomEventPayload } from "./PetRandomEventModal";
@@ -99,12 +99,30 @@ export function PetCareActionSheet({
       toast(`${PET_CARE_LABEL[item.kind]} +${restore}${multiTxt}`, {
         icon: createElement(KindIcon, { className: "size-4" }),
       });
-      // A capability deriva identidade, elegibilidade, valor, cap e idempotência do evento salvo.
-      const xp = await awardCareXp(userPetId);
-      if (xp && xp.granted > 0)
-        toast(`XP +${xp.granted}`, {
-          icon: createElement(Sparkles, { className: "size-4 text-amber-500" }),
-        });
+      // XP: care de resgate (<20%) ou care preventivo (<50%)
+      if (currentValue < 20) {
+        const xp = await awardXp(
+          XP_SOURCES.CARE_RESCUE.source,
+          XP_SOURCES.CARE_RESCUE.amount,
+          XP_SOURCES.CARE_RESCUE.cap,
+          { kind: item.kind, item: item.slug },
+        );
+        if (xp && xp.granted > 0)
+          toast(`XP +${xp.granted}`, {
+            icon: createElement(Sparkles, { className: "size-4 text-amber-500" }),
+          });
+      } else if (currentValue < 50) {
+        const xp = await awardXp(
+          XP_SOURCES.CARE_LOW.source,
+          XP_SOURCES.CARE_LOW.amount,
+          XP_SOURCES.CARE_LOW.cap,
+          { kind: item.kind, item: item.slug },
+        );
+        if (xp && xp.granted > 0)
+          toast(`XP +${xp.granted}`, {
+            icon: createElement(Sparkles, { className: "size-4 text-amber-500" }),
+          });
+      }
       if (result.random_event) {
         const re = result.random_event;
         // Antes só um toast; agora um modal celebratório (parent controla).

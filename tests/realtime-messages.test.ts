@@ -15,18 +15,13 @@ afterAll(async () => {
   await deleteUsers(A, B, C);
 }, 30000);
 
-function subscribe(ctx: Ctx, targetMatchId: string, received: any[]): Promise<() => Promise<void>> {
+function subscribe(ctx: Ctx, received: any[]): Promise<() => Promise<void>> {
   return new Promise((resolve, reject) => {
     const channel = ctx.client
       .channel(`msgs-${ctx.userId}-${Math.random().toString(36).slice(2, 7)}`)
       .on(
         "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "messages",
-          filter: `match_id=eq.${targetMatchId}`,
-        },
+        { event: "INSERT", schema: "public", table: "messages" },
         (payload) => {
           received.push(payload.new);
         },
@@ -50,9 +45,9 @@ describe("Realtime — eventos de mensagens só vazam para participantes do matc
     const recvC: any[] = [];
 
     const [unsubA, unsubB, unsubC] = await Promise.all([
-      subscribe(A, matchId, recvA),
-      subscribe(B, matchId, recvB),
-      subscribe(C, matchId, recvC),
+      subscribe(A, recvA),
+      subscribe(B, recvB),
+      subscribe(C, recvC),
     ]);
 
     // Small delay to ensure subscriptions are warm
@@ -64,21 +59,13 @@ describe("Realtime — eventos de mensagens só vazam para participantes do matc
       .insert({ match_id: matchId, sender_id: A.userId, content });
     expect(error).toBeNull();
 
-    // GitHub-hosted runners can take longer than a fixed 2.5 s to fan out the
-    // first event after a complete local Supabase reset. Poll with a strict
-    // deadline while preserving the participant/non-participant assertions.
-    const deadline = Date.now() + 20000;
-    while (
-      Date.now() < deadline &&
-      (!recvA.some((m) => m.content === content) || !recvB.some((m) => m.content === content))
-    ) {
-      await sleep(200);
-    }
+    // Wait for realtime fanout
+    await sleep(2500);
 
     await Promise.all([unsubA(), unsubB(), unsubC()]);
 
     expect(recvA.some((m) => m.content === content)).toBe(true);
     expect(recvB.some((m) => m.content === content)).toBe(true);
     expect(recvC.some((m) => m.content === content)).toBe(false);
-  }, 45000);
+  }, 20000);
 });

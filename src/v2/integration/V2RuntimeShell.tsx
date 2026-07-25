@@ -1,7 +1,6 @@
-import { useMemo, useState, type ReactNode } from "react";
+import { useMemo, useState } from "react";
 import { V2AppShell, type V2CreateAction, type V2ShellNavigationItem } from "@/v2/app-shell";
 import { V2Heading, V2Surface, V2Text, type V2ThemeName } from "@/v2/design-system";
-import { V2ServiceWorkerUpdateNotice } from "@/v2/platform/resilience";
 import type { V2ShellUser } from "@/v2/app-shell";
 import {
   V2_RUNTIME_PRIMARY_NAVIGATION,
@@ -16,9 +15,6 @@ export interface V2RuntimeShellProps {
   readonly theme: V2ThemeName;
   readonly logoutLoading?: boolean;
   readonly statusMessage?: string;
-  readonly content?: ReactNode;
-  readonly navigation?: readonly V2ShellNavigationItem[];
-  readonly secondaryNavigation?: readonly V2ShellNavigationItem[];
   readonly onNavigate: (item: V2ShellNavigationItem) => void;
   readonly onNavigateHome: () => void;
   readonly onBack: () => void;
@@ -32,9 +28,6 @@ export function V2RuntimeShell({
   theme,
   logoutLoading,
   statusMessage,
-  content,
-  navigation = V2_RUNTIME_PRIMARY_NAVIGATION,
-  secondaryNavigation = V2_RUNTIME_SECONDARY_NAVIGATION,
   onNavigate,
   onNavigateHome,
   onBack,
@@ -79,8 +72,8 @@ export function V2RuntimeShell({
     <V2AppShell
       page={page}
       activeNavigationId={route?.navigationId ?? null}
-      navigation={navigation}
-      secondaryNavigation={secondaryNavigation}
+      navigation={V2_RUNTIME_PRIMARY_NAVIGATION}
+      secondaryNavigation={V2_RUNTIME_SECONDARY_NAVIGATION}
       user={user}
       theme={theme}
       logoutLoading={logoutLoading}
@@ -90,12 +83,11 @@ export function V2RuntimeShell({
       onSearch={() => unavailable("A busca")}
       onCreateAction={(action: V2CreateAction) => unavailable(action.label)}
     >
-      <V2ServiceWorkerUpdateNotice />
       <div className="vdn-v2-runtime-announcement" role="status" aria-live="polite">
         {statusMessage || announcement}
       </div>
       {route ? (
-        (content ?? <V2RuntimePage route={route} />)
+        <V2RuntimePage route={route} />
       ) : (
         <V2Surface className="vdn-v2-runtime-not-found" elevation="one">
           <V2Heading level={2} size="medium">

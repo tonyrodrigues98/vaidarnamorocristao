@@ -13,7 +13,8 @@ export type VerifyOutcome =
       reason: string;
       aiResult: unknown;
     }
-  | { ok: false; reason: string; retryable?: boolean };
+  | { ok: false; reason: string }
+  | { ok: true; soft: true; approved: false; needsReview: false; confidence: 0 };
 
 function fileToBase64(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -30,7 +31,7 @@ function fileToBase64(file: File): Promise<string> {
 
 /**
  * Two-stage verification: face-api.js (browser) then Lovable AI (server).
- * Technical moderation failures are fail-closed so an unreviewed upload cannot proceed.
+ * Returns soft=true if AI is unavailable so the upload can proceed unflagged.
  */
 export async function verifyProfilePhoto(
   file: File,
@@ -63,8 +64,6 @@ export async function verifyProfilePhoto(
 
   const imageBase64 = await fileToBase64(file);
   let resp: Response;
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 20_000);
   try {
     resp = await fetch("/api/verify-photo", {
       method: "POST",
@@ -78,25 +77,17 @@ export async function verifyProfilePhoto(
         scope,
         photoUrl: photoUrl ?? null,
       }),
-      signal: controller.signal,
     });
   } catch {
-    return {
-      ok: false,
-      retryable: true,
-      reason: "A verificação está temporariamente indisponível. Tente novamente em instantes.",
-    };
-  } finally {
-    clearTimeout(timeout);
+    return { ok: true, soft: true, approved: false, needsReview: false, confidence: 0 };
   }
 
   const data = await resp.json().catch(() => ({}));
+  if (data?.soft) {
+    return { ok: true, soft: true, approved: false, needsReview: false, confidence: 0 };
+  }
   if (!resp.ok) {
-    return {
-      ok: false,
-      retryable: data?.retryable === true || resp.status >= 500 || resp.status === 429,
-      reason: "Não foi possível verificar a foto agora. Tente novamente.",
-    };
+    return { ok: false, reason: "Não foi possível verificar a foto agora. Tente novamente." };
   }
   const result = data?.result ?? {};
   if (data?.approved) {

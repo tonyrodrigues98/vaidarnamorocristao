@@ -1,8 +1,5 @@
 import {
-  BookHeart,
-  BellRing,
   CircleUserRound,
-  Clapperboard,
   Compass,
   HeartHandshake,
   Home,
@@ -10,13 +7,11 @@ import {
   Palette,
   PawPrint,
   Settings,
-  ShieldCheck,
   ShoppingBag,
   UsersRound,
   type LucideIcon,
 } from "lucide-react";
 import type { V2ShellNavigationId, V2ShellNavigationItem, V2ShellPageConfig } from "@/v2/app-shell";
-import type { PlatformDomain } from "@/v2/platform/identity";
 
 export const V2_RUNTIME_SLUGS = [
   "inicio",
@@ -24,16 +19,10 @@ export const V2_RUNTIME_SLUGS = [
   "conversas",
   "perfil",
   "pretendentes",
-  "proposito",
-  "recados",
   "explorar-pessoas",
   "loja",
   "avatar",
   "meu-pet",
-  "verbo",
-  "cinema",
-  "central",
-  "admin",
   "configuracoes",
 ] as const;
 
@@ -49,7 +38,6 @@ export interface V2RuntimeRouteDescriptor {
   readonly description: string;
   readonly icon: LucideIcon;
   readonly primary: boolean;
-  readonly requiredDomain: PlatformDomain;
   readonly width?: V2ShellPageConfig["width"];
 }
 
@@ -62,10 +50,9 @@ const V2_RUNTIME_ROUTES = Object.freeze([
     subtitle: "Um ponto de encontro para fé, amizade e vida em comunidade.",
     eyebrow: "Community Platform V2",
     description:
-      "Feed, Status e vínculos sociais entram somente com a flag comunitária e preservam o Início legado como fallback.",
+      "O feed comunitário chegará em uma etapa própria. Esta página valida apenas a navegação real e o novo shell.",
     icon: Home,
     primary: true,
-    requiredDomain: "community",
   },
   {
     slug: "comunidade",
@@ -75,23 +62,21 @@ const V2_RUNTIME_ROUTES = Object.freeze([
     subtitle: "Grupos, reflexões e atividades para caminhar junto.",
     eyebrow: "Convivência",
     description:
-      "Espaços, eventos, presença e o histórico do chat global em uma experiência comunitária independente do Namoro.",
+      "Grupos e publicações ainda não estão ativos. Nenhum conteúdo exibido aqui é persistido.",
     icon: UsersRound,
     primary: true,
-    requiredDomain: "community",
   },
   {
     slug: "conversas",
     navigationId: "conversations",
     label: "Conversas",
     title: "Conversas",
-    subtitle: "Mensagens sociais, comunitárias e românticas com contexto explícito.",
+    subtitle: "Um espaço futuro para conversas privadas e coletivas.",
     eyebrow: "Mensagens",
     description:
-      "Inbox e thread V2 usam adapters sobre o histórico e escondem contextos românticos quando o Namoro está desligado.",
+      "A integração com mensagens reais permanece no aplicativo legado até a reconstrução dedicada.",
     icon: MessageCircle,
     primary: true,
-    requiredDomain: "messaging",
     width: "wide",
   },
   {
@@ -105,7 +90,6 @@ const V2_RUNTIME_ROUTES = Object.freeze([
       "A personalização modular será integrada progressivamente, preservando o perfil e as fotos existentes.",
     icon: CircleUserRound,
     primary: true,
-    requiredDomain: "profile",
   },
   {
     slug: "pretendentes",
@@ -114,37 +98,9 @@ const V2_RUNTIME_ROUTES = Object.freeze([
     title: "Pretendentes",
     subtitle: "Uma área opcional e separada da participação comunitária.",
     eyebrow: "Namoro",
-    description:
-      "Descoberta opcional, server-authoritative e separada da comunidade, com interesses e matches legados preservados.",
+    description: "As regras e os dados românticos existentes não foram alterados nesta etapa.",
     icon: HeartHandshake,
     primary: false,
-    requiredDomain: "dating",
-  },
-  {
-    slug: "proposito",
-    navigationId: "purpose",
-    label: "Propósito Firmado",
-    title: "Propósito Firmado",
-    subtitle: "Um compromisso bilateral que pausa somente a descoberta romântica.",
-    eyebrow: "Namoro",
-    description:
-      "Pedidos, aceite, página do casal, presentes e histórico preservados por uma máquina de estados explícita.",
-    icon: HeartHandshake,
-    primary: false,
-    requiredDomain: "dating",
-  },
-  {
-    slug: "recados",
-    navigationId: "anonymous",
-    label: "Recados anônimos",
-    title: "Recados anônimos",
-    subtitle: "Contato romântico consentido, moderável e protegido.",
-    eyebrow: "Namoro",
-    description:
-      "Somente participantes elegíveis e com consentimento explícito podem enviar e receber recados.",
-    icon: MessageCircle,
-    primary: false,
-    requiredDomain: "dating",
   },
   {
     slug: "explorar-pessoas",
@@ -154,10 +110,9 @@ const V2_RUNTIME_ROUTES = Object.freeze([
     subtitle: "Descoberta comunitária sem presumir disponibilidade romântica.",
     eyebrow: "Conexões",
     description:
-      "Descoberta social por vínculos comunitários, sem usar matches ou disponibilidade romântica.",
+      "A descoberta social será implementada com privacidade e moderação em uma etapa futura.",
     icon: Compass,
     primary: false,
-    requiredDomain: "community",
   },
   {
     slug: "loja",
@@ -166,11 +121,9 @@ const V2_RUNTIME_ROUTES = Object.freeze([
     title: "Loja",
     subtitle: "Itens e expressões para personalizar sua presença.",
     eyebrow: "Economia",
-    description:
-      "Compras server-authoritative, inventários preservados e equipamento com propriedade validada.",
+    description: "Saldos, compras e inventários permanecem intocados no sistema atual.",
     icon: ShoppingBag,
     primary: false,
-    requiredDomain: "economy",
   },
   {
     slug: "avatar",
@@ -182,7 +135,6 @@ const V2_RUNTIME_ROUTES = Object.freeze([
     description: "Nenhum item, foto ou personagem existente foi alterado por esta integração.",
     icon: Palette,
     primary: false,
-    requiredDomain: "profile",
   },
   {
     slug: "meu-pet",
@@ -192,79 +144,21 @@ const V2_RUNTIME_ROUTES = Object.freeze([
     subtitle: "Companhia, progresso e cuidado preservados.",
     eyebrow: "Pets",
     description:
-      "Cuidados server-authoritative, tabelas preservadas e arcade carregado somente sob demanda.",
+      "Pets, itens e progressão continuam disponíveis apenas na experiência legada por enquanto.",
     icon: PawPrint,
     primary: false,
-    requiredDomain: "pets",
-  },
-  {
-    slug: "verbo",
-    navigationId: "verbo",
-    label: "Verbo",
-    title: "Verbo — Bíblia & Estudo",
-    subtitle: "Leitura, estudo e conteúdo cristão com privacidade por padrão.",
-    eyebrow: "Conteúdo cristão",
-    description:
-      "Fontes editoriais e licenças falham fechadas; anotações, favoritos e progresso são pessoais.",
-    icon: BookHeart,
-    primary: false,
-    requiredDomain: "content",
-    width: "wide",
-  },
-  {
-    slug: "cinema",
-    navigationId: "cinema",
-    label: "Sala de Cinema",
-    title: "Sala de Cinema",
-    subtitle: "Assista a conteúdos autorizados em sessões sincronizadas.",
-    eyebrow: "Assistir Juntos",
-    description:
-      "Player, papéis e sincronização server-authoritative preparados sob gates jurídicos e operacionais fechados.",
-    icon: Clapperboard,
-    primary: false,
-    requiredDomain: "cinema",
-    width: "fluid",
-  },
-  {
-    slug: "central",
-    navigationId: "trust",
-    label: "Sua Central",
-    title: "Sua Central",
-    subtitle: "Notificações, privacidade, confiança e suporte em um só lugar.",
-    eyebrow: "Confiança",
-    description:
-      "Preferências por categoria, bloqueios globais, verificação e atendimento preservado.",
-    icon: BellRing,
-    primary: false,
-    requiredDomain: "trust",
-    width: "wide",
-  },
-  {
-    slug: "admin",
-    navigationId: "admin",
-    label: "Administração",
-    title: "Administração",
-    subtitle: "Saúde, filas e ações organizadas por capacidade.",
-    eyebrow: "Operação",
-    description:
-      "Console modular com autorização server-side e operações legadas preservadas durante a migração.",
-    icon: ShieldCheck,
-    primary: false,
-    requiredDomain: "admin",
-    width: "fluid",
   },
   {
     slug: "configuracoes",
     navigationId: "settings",
     label: "Configurações",
     title: "Configurações",
-    subtitle: "Controle sua experiência, privacidade e estado da conta.",
+    subtitle: "Controle sua experiência, privacidade e preferências.",
     eyebrow: "Conta",
     description:
-      "Configurações reais integradas aos contratos atuais, com o legado preservado como fallback.",
+      "As configurações reais permanecem no fluxo legado até a integração específica desse domínio.",
     icon: Settings,
     primary: false,
-    requiredDomain: "account",
   },
 ] satisfies readonly V2RuntimeRouteDescriptor[]);
 
@@ -288,17 +182,6 @@ export const V2_RUNTIME_PRIMARY_NAVIGATION = Object.freeze(
 export const V2_RUNTIME_SECONDARY_NAVIGATION = Object.freeze(
   V2_RUNTIME_ROUTES.filter((route) => !route.primary).map(toNavigationItem),
 );
-
-export function getV2RuntimeNavigation(canEnter: (domain: PlatformDomain) => boolean): Readonly<{
-  primary: readonly V2ShellNavigationItem[];
-  secondary: readonly V2ShellNavigationItem[];
-}> {
-  const available = V2_RUNTIME_ROUTES.filter((route) => canEnter(route.requiredDomain));
-  return Object.freeze({
-    primary: Object.freeze(available.filter((route) => route.primary).map(toNavigationItem)),
-    secondary: Object.freeze(available.filter((route) => !route.primary).map(toNavigationItem)),
-  });
-}
 
 export function isV2RuntimePath(pathname: string): boolean {
   return pathname === "/v2" || pathname.startsWith("/v2/");

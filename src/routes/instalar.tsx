@@ -15,13 +15,13 @@ export const Route = createFileRoute("/instalar")({
       {
         name: "description",
         content:
-          "Leve a comunidade Vai Dar Namoro para a tela inicial do iPhone ou Android, com acesso rápido, tela cheia e notificações.",
+          "Adicione o VaiDarNamoro à tela inicial do iPhone ou Android para abrir como app — sem barra do navegador, com notificações.",
       },
       { name: "robots", content: "noindex, follow" },
       { property: "og:title", content: "Instalar VaiDarNamoro" },
       {
         property: "og:description",
-        content: "Tenha a comunidade Vai Dar Namoro como app no seu celular em poucos segundos.",
+        content: "Tenha o VaiDarNamoro como app no seu celular em poucos segundos.",
       },
       { property: "og:url", content: "https://vaidarnamoro.com/instalar" },
     ],

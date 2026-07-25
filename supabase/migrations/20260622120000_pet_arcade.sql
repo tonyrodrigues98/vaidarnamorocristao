@@ -102,7 +102,7 @@ CREATE OR REPLACE FUNCTION public.pet_arcade_seed_unit(
   _server_seed text, _client_seed text, _nonce bigint, _counter integer
 ) RETURNS numeric
 LANGUAGE sql IMMUTABLE STRICT SET search_path = public AS $$
-  SELECT ((('x' || substr(encode(extensions.digest(
+  SELECT ((('x' || substr(encode(digest(
     _server_seed || ':' || _client_seed || ':' || _nonce::text || ':' || _counter::text,
     'sha256'
   ), 'hex'), 1, 8))::bit(32)::bigint)::numeric / 4294967296::numeric);
@@ -241,7 +241,7 @@ BEGIN
   SELECT * INTO v_wallet FROM public.user_coins WHERE user_id=uid FOR UPDATE;
   IF v_wallet.balance < _entry_coins THEN RAISE EXCEPTION 'insufficient_coins'; END IF;
 
-  v_client := COALESCE(NULLIF(trim(_client_seed),''), encode(extensions.digest(uid::text || clock_timestamp()::text,'sha256'),'hex'));
+  v_client := COALESCE(NULLIF(trim(_client_seed),''), encode(digest(uid::text || clock_timestamp()::text,'sha256'),'hex'));
   SELECT COALESCE(max(nonce),0)+1 INTO v_nonce FROM public.pet_arcade_rounds WHERE user_id=uid;
   v_traps := (v_cfg.treasure_difficulties ->> _difficulty)::integer;
   IF v_traps <= 0 OR v_traps >= v_cfg.treasure_grid_size THEN RAISE EXCEPTION 'invalid_game_config'; END IF;
@@ -257,7 +257,7 @@ BEGIN
   INSERT INTO public.pet_arcade_rounds(
     id,user_id,user_pet_id,game_type,entry_coins,server_seed,server_seed_hash,client_seed,nonce,day
   ) VALUES (
-    v_round_id,uid,v_pet_id,'treasure',_entry_coins,v_seed,encode(extensions.digest(v_seed,'sha256'),'hex'),v_client,v_nonce,v_today
+    v_round_id,uid,v_pet_id,'treasure',_entry_coins,v_seed,encode(digest(v_seed,'sha256'),'hex'),v_client,v_nonce,v_today
   );
   INSERT INTO public.pet_arcade_treasure_rounds(round_id,difficulty,grid_size,trap_count,trap_positions)
     VALUES(v_round_id,_difficulty,v_cfg.treasure_grid_size,v_traps,v_positions);
@@ -268,7 +268,7 @@ BEGIN
     'round_id',v_round_id,'status','active','difficulty',_difficulty,
     'grid_size',v_cfg.treasure_grid_size,'trap_count',v_traps,'revealed_positions','[]'::jsonb,
     'multiplier',1.00,'potential_reward',_entry_coins,'new_balance',v_wallet.balance-_entry_coins,
-    'server_seed_hash',encode(extensions.digest(v_seed,'sha256'),'hex'),'client_seed',v_client,'nonce',v_nonce
+    'server_seed_hash',encode(digest(v_seed,'sha256'),'hex'),'client_seed',v_client,'nonce',v_nonce
   );
 END;
 $$;
@@ -384,7 +384,7 @@ BEGIN
   INSERT INTO public.user_coins(user_id,balance) VALUES(uid,100) ON CONFLICT(user_id) DO NOTHING;
   SELECT * INTO v_wallet FROM public.user_coins WHERE user_id=uid FOR UPDATE;
   IF v_wallet.balance < _entry_coins THEN RAISE EXCEPTION 'insufficient_coins'; END IF;
-  v_client := COALESCE(NULLIF(trim(_client_seed),''),encode(extensions.digest(uid::text||clock_timestamp()::text,'sha256'),'hex'));
+  v_client := COALESCE(NULLIF(trim(_client_seed),''),encode(digest(uid::text||clock_timestamp()::text,'sha256'),'hex'));
   SELECT COALESCE(max(nonce),0)+1 INTO v_nonce FROM public.pet_arcade_rounds WHERE user_id=uid;
   v_unit := GREATEST(0.000001,public.pet_arcade_seed_unit(v_seed,v_client,v_nonce,0));
   v_final := LEAST(v_cfg.max_multiplier,GREATEST(1.01,round((0.97/v_unit)::numeric,2)));
@@ -393,7 +393,7 @@ BEGIN
   UPDATE public.user_coins SET balance=v_wallet.balance-_entry_coins,updated_at=now() WHERE user_id=uid;
   INSERT INTO public.pet_arcade_rounds(
     id,user_id,user_pet_id,game_type,entry_coins,server_seed,server_seed_hash,client_seed,nonce,day,started_at
-  ) VALUES(v_round_id,uid,v_pet_id,'flight',_entry_coins,v_seed,encode(extensions.digest(v_seed,'sha256'),'hex'),v_client,v_nonce,v_today,v_started);
+  ) VALUES(v_round_id,uid,v_pet_id,'flight',_entry_coins,v_seed,encode(digest(v_seed,'sha256'),'hex'),v_client,v_nonce,v_today,v_started);
   INSERT INTO public.pet_arcade_flight_rounds(round_id,final_multiplier,auto_collect_multiplier,ends_at)
     VALUES(v_round_id,v_final,_auto_collect_multiplier,v_ends);
   PERFORM public.log_coin_tx(uid,'pet_arcade_entry','out',_entry_coins,v_wallet.balance-_entry_coins,
@@ -402,7 +402,7 @@ BEGIN
   RETURN jsonb_build_object(
     'round_id',v_round_id,'status','active','started_at',v_started,'server_now',clock_timestamp(),
     'multiplier',1.00,'auto_collect_multiplier',_auto_collect_multiplier,
-    'new_balance',v_wallet.balance-_entry_coins,'server_seed_hash',encode(extensions.digest(v_seed,'sha256'),'hex'),
+    'new_balance',v_wallet.balance-_entry_coins,'server_seed_hash',encode(digest(v_seed,'sha256'),'hex'),
     'client_seed',v_client,'nonce',v_nonce
   );
 END;
