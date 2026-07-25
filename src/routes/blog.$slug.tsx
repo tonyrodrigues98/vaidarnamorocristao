@@ -2,7 +2,6 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { PublicNav } from "@/components/PublicNav";
 import { BLOG_POSTS, getPostBySlug } from "@/data/blog-posts";
 import { Clock, ArrowLeft } from "lucide-react";
-import { sanitizeBlogHtml } from "@/lib/trustedContent";
 
 export const Route = createFileRoute("/blog/$slug")({
   component: BlogPost,
@@ -96,7 +95,7 @@ function BlogPost() {
 
         <article
           className="prose prose-lg mt-12 max-w-none [&_h2]:mt-10 [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:tracking-tight [&_p]:mt-4 [&_p]:leading-relaxed [&_p]:text-foreground/85 [&_em]:text-[var(--rose)]"
-          dangerouslySetInnerHTML={{ __html: sanitizeBlogHtml(post.body) }}
+          dangerouslySetInnerHTML={{ __html: post.body }}
         />
 
         <section className="mt-16 rounded-3xl bg-gradient-warm p-8 text-center md:p-12">

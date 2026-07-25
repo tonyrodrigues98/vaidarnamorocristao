@@ -584,36 +584,6 @@ export type Database = {
           },
         ]
       }
-      community_onboarding_progress: {
-        Row: {
-          answers: Json
-          completed_at: string | null
-          created_at: string
-          current_step: string
-          questionnaire_version: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          answers?: Json
-          completed_at?: string | null
-          created_at?: string
-          current_step: string
-          questionnaire_version: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          answers?: Json
-          completed_at?: string | null
-          created_at?: string
-          current_step?: string
-          questionnaire_version?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
       daily_posts: {
         Row: {
           author_id: string
@@ -653,39 +623,6 @@ export type Database = {
           published_at?: string
           title?: string
           updated_at?: string
-        }
-        Relationships: []
-      }
-      dating_memberships: {
-        Row: {
-          activated_at: string | null
-          created_at: string
-          onboarding_version: string | null
-          paused_at: string | null
-          receive_anonymous: boolean
-          status: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          activated_at?: string | null
-          created_at?: string
-          onboarding_version?: string | null
-          paused_at?: string | null
-          receive_anonymous?: boolean
-          status?: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          activated_at?: string | null
-          created_at?: string
-          onboarding_version?: string | null
-          paused_at?: string | null
-          receive_anonymous?: boolean
-          status?: string
-          updated_at?: string
-          user_id?: string
         }
         Relationships: []
       }
@@ -3826,8 +3763,6 @@ export type Database = {
           bio: string | null
           church: string
           city: string
-          community_onboarding_completed_at: string | null
-          community_onboarding_version: string | null
           contributor_highlight: boolean
           created_at: string
           deactivated_at: string | null
@@ -3842,10 +3777,10 @@ export type Database = {
           height_cm: number | null
           id: string
           is_anonymized: boolean
-          marital: Database["public"]["Enums"]["marital_status"] | null
+          marital: Database["public"]["Enums"]["marital_status"]
           photo_url: string | null
           rejection_reason: string | null
-          sex: Database["public"]["Enums"]["sex_type"] | null
+          sex: Database["public"]["Enums"]["sex_type"]
           state: string
           status: Database["public"]["Enums"]["profile_status"]
           updated_at: string
@@ -3865,8 +3800,6 @@ export type Database = {
           bio?: string | null
           church: string
           city: string
-          community_onboarding_completed_at?: string | null
-          community_onboarding_version?: string | null
           contributor_highlight?: boolean
           created_at?: string
           deactivated_at?: string | null
@@ -3881,10 +3814,10 @@ export type Database = {
           height_cm?: number | null
           id: string
           is_anonymized?: boolean
-          marital?: Database["public"]["Enums"]["marital_status"] | null
+          marital: Database["public"]["Enums"]["marital_status"]
           photo_url?: string | null
           rejection_reason?: string | null
-          sex?: Database["public"]["Enums"]["sex_type"] | null
+          sex: Database["public"]["Enums"]["sex_type"]
           state: string
           status?: Database["public"]["Enums"]["profile_status"]
           updated_at?: string
@@ -3904,8 +3837,6 @@ export type Database = {
           bio?: string | null
           church?: string
           city?: string
-          community_onboarding_completed_at?: string | null
-          community_onboarding_version?: string | null
           contributor_highlight?: boolean
           created_at?: string
           deactivated_at?: string | null
@@ -3920,10 +3851,10 @@ export type Database = {
           height_cm?: number | null
           id?: string
           is_anonymized?: boolean
-          marital?: Database["public"]["Enums"]["marital_status"] | null
+          marital?: Database["public"]["Enums"]["marital_status"]
           photo_url?: string | null
           rejection_reason?: string | null
-          sex?: Database["public"]["Enums"]["sex_type"] | null
+          sex?: Database["public"]["Enums"]["sex_type"]
           state?: string
           status?: Database["public"]["Enums"]["profile_status"]
           updated_at?: string
@@ -6048,25 +5979,6 @@ export type Database = {
         }
         Returns: undefined
       }
-      activate_dating_membership: {
-        Args: {
-          _accepts_children: boolean
-          _age_max: number
-          _age_min: number
-          _custom_states: string[]
-          _essential_quality: string
-          _height_cm: number
-          _location_scope: Database["public"]["Enums"]["location_scope"]
-          _looking_for_bio: string
-          _marital: Database["public"]["Enums"]["marital_status"]
-          _onboarding_version: string
-          _pace: string
-          _receive_anonymous?: boolean
-          _seeking: string
-          _sex: Database["public"]["Enums"]["sex_type"]
-        }
-        Returns: Database["public"]["Tables"]["dating_memberships"]["Row"]
-      }
       admin_add_user_coins: {
         Args: { _amount: number; _user_id: string }
         Returns: number
@@ -6209,21 +6121,6 @@ export type Database = {
         }[]
       }
       consume_care_inventory: { Args: { _item_id: string }; Returns: boolean }
-      complete_community_onboarding: {
-        Args: {
-          _bio: string
-          _birth_date: string
-          _church: string
-          _city: string
-          _faith_moment: string
-          _full_name: string
-          _photo_url: string
-          _questionnaire_version: string
-          _state: string
-          _years_baptized: number
-        }
-        Returns: Database["public"]["Tables"]["profiles"]["Row"]
-      }
       count_advanced_sections: { Args: { _user_id: string }; Returns: number }
       create_notification: {
         Args: {
@@ -6238,10 +6135,6 @@ export type Database = {
         Returns: string
       }
       current_terms_version: { Args: never; Returns: string }
-      deactivate_dating_membership: {
-        Args: never
-        Returns: Database["public"]["Tables"]["dating_memberships"]["Row"]
-      }
       enqueue_pet_care_reminders: { Args: never; Returns: number }
       enqueue_push_for_shop_item: {
         Args: { p_emoji: string; p_label: string; p_name: string }
@@ -6565,10 +6458,6 @@ export type Database = {
         Args: { _client_seed?: string; _pack_size: number }
         Returns: Json
       }
-      pause_dating_membership: {
-        Args: never
-        Returns: Database["public"]["Tables"]["dating_memberships"]["Row"]
-      }
       perform_grab: { Args: { _pool_id: string }; Returns: Json }
       perform_grab_multi: {
         Args: { _count: number; _pool_id: string }
@@ -6862,10 +6751,6 @@ export type Database = {
           _entry_coins: number
         }
         Returns: Json
-      }
-      stage_legacy_dating_memberships: {
-        Args: { _batch_size?: number; _legacy_cutover_at: string }
-        Returns: number
       }
       sync_level_achievements: {
         Args: { _level: number; _user_id: string }

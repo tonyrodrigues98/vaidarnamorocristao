@@ -29,10 +29,6 @@ import {
   type AvatarPoseKey,
   type AvatarRendererLayer,
 } from "@/types/avatar";
-import {
-  LegacyQuarantineNotice,
-  legacyRetirementState,
-} from "@/v2/platform/legacy-retirement";
 
 const WEIGHT_TAB_ID = "__weight__";
 const POSE_TAB_ID = "__pose__";
@@ -139,14 +135,6 @@ type SavedLook = {
 };
 
 function AvatarPage() {
-  if (legacyRetirementState.characterAvatarQuarantined) {
-    return <LegacyQuarantineNotice context="avatar" />;
-  }
-
-  return <LegacyAvatarPage />;
-}
-
-function LegacyAvatarPage() {
   const { user, role, loading: authLoading } = useAuth();
   const isSuperAdmin = role === "super_admin";
 

@@ -1,22 +1,22 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { PublicNav } from "@/components/PublicNav";
-import { HeartHandshake, Shield, BookOpen, Users } from "lucide-react";
+import { Heart, Shield, BookOpen, Users } from "lucide-react";
 
 export const Route = createFileRoute("/sobre")({
   component: SobrePage,
   head: () => ({
     meta: [
-      { title: "Sobre — Comunidade Vai Dar Namoro" },
+      { title: "Sobre o VaiDarNamoro — Nossa missão no namoro cristão" },
       {
         name: "description",
         content:
-          "Conheça a missão e os valores do Vai Dar Namoro: uma comunidade cristã para convivência, fé, amizade, conteúdo e conexões com propósito.",
+          "Conheça a história, missão e valores do VaiDarNamoro: a plataforma cristã de relacionamentos sérios com aprovação manual de perfis e propósito eterno.",
       },
       { property: "og:title", content: "Sobre o VaiDarNamoro" },
       {
         property: "og:description",
         content:
-          "Nossa missão é criar um espaço cristão acolhedor para convivência, crescimento e conexões. O Namoro é uma experiência opcional.",
+          "Nossa missão é ajudar cristãos solteiros e divorciados a encontrar relacionamentos sérios, com fé e propósito.",
       },
       { property: "og:url", content: "https://vaidarnamoro.com/sobre" },
       { property: "og:type", content: "website" },
@@ -35,11 +35,11 @@ function SobrePage() {
             Quem somos
           </span>
           <h1 className="mt-6 text-4xl font-extrabold tracking-tight md:text-6xl">
-            Onde a fé encontra <span className="text-gradient">comunidade</span>
+            Onde a fé encontra <span className="text-gradient">o amor</span>
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">
-            O Vai Dar Namoro nasceu de encontros ao vivo e de uma convicção simples: cristãos
-            merecem um espaço humano para caminhar, conversar e construir vínculos com respeito.
+            O VaiDarNamoro nasceu de uma convicção simples: cristãos sérios merecem um espaço sério
+            para encontrar a pessoa certa, sem o ruído dos apps tradicionais.
           </p>
         </header>
 
@@ -48,8 +48,9 @@ function SobrePage() {
             <BookOpen className="h-6 w-6 text-[var(--rose)]" />
             <h2 className="mt-4 text-xl font-bold tracking-tight">Nossa missão</h2>
             <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-              Aproximar pessoas cristãs por fé, convivência e propósito. A comunidade acolhe
-              participação social independentemente de estado ou disponibilidade romântica.
+              Conectar cristãos solteiros e divorciados que buscam relacionamento com propósito
+              eterno. Não promovemos relacionamento descartável — caminhamos com você na construção
+              de algo duradouro.
             </p>
           </div>
           <div className="rounded-3xl border border-border bg-card p-7 shadow-soft">
@@ -61,19 +62,19 @@ function SobrePage() {
             </p>
           </div>
           <div className="rounded-3xl border border-border bg-card p-7 shadow-soft">
-            <HeartHandshake className="h-6 w-6 text-[var(--rose)]" />
-            <h2 className="mt-4 text-xl font-bold tracking-tight">Namoro como escolha</h2>
+            <Heart className="h-6 w-6 text-[var(--rose)]" />
+            <h2 className="mt-4 text-xl font-bold tracking-tight">Sem swipe, com propósito</h2>
             <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-              Quem quiser pode ativar uma área romântica própria. Quem não quiser continua com toda
-              a participação comunitária, sem referências ou filtros de namoro.
+              Não tratamos pessoas como cards descartáveis. Aqui você demonstra interesse e conversa
+              apenas quando o sentimento é recíproco.
             </p>
           </div>
           <div className="rounded-3xl border border-border bg-card p-7 shadow-soft">
             <Users className="h-6 w-6 text-[var(--rose)]" />
             <h2 className="mt-4 text-xl font-bold tracking-tight">Comunidade na fé</h2>
             <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-              Conteúdo, oração, conversas, atividades e experiências compartilhadas formam o núcleo
-              da plataforma.
+              Devocional diário, comunidade e espaço de oração. Mais que um app de relacionamento —
+              um lugar para crescer espiritualmente.
             </p>
           </div>
         </section>
@@ -90,13 +91,13 @@ function SobrePage() {
         <section className="mt-16 text-center">
           <h2 className="text-3xl font-extrabold tracking-tight">Junte-se a nós</h2>
           <p className="mx-auto mt-4 max-w-xl text-muted-foreground">
-            Entre pela comunidade. Sua participação não ativa o Modo Namoro.
+            Cadastro gratuito. Aprovação em até 48h. Comece hoje sua jornada com propósito.
           </p>
           <Link
             to="/auth/signup"
             className="mt-8 inline-flex h-12 items-center justify-center rounded-full bg-[var(--rose)] px-8 font-semibold text-white shadow-glow hover:opacity-90"
           >
-            Acessar comunidade
+            Criar conta gratuita
           </Link>
         </section>
       </main>

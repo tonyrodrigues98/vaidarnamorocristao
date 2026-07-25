@@ -1,71 +1,56 @@
 import { Link } from "@tanstack/react-router";
-import { Radio, UsersRound } from "lucide-react";
-import { CAREN_TIKTOK_LIVE_URL, PUBLIC_COMMUNITY_ROUTE } from "@/lib/publicAcquisition";
+import { Heart } from "lucide-react";
 
 export function PublicNav() {
   return (
-    <nav className="sticky top-0 z-50 border-b border-[#e8e3eb] bg-[#f7f7f5]/92 backdrop-blur-xl">
-      <div className="mx-auto flex min-h-16 max-w-7xl items-center justify-between gap-3 px-4 py-2 sm:px-6">
-        <Link
-          to="/"
-          className="flex min-h-11 items-center gap-2 rounded-xl font-bold tracking-tight text-[#271b38] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-violet-200"
-        >
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#5b21b6] text-white">
-            <UsersRound className="h-5 w-5" aria-hidden="true" />
-          </span>
-          <span className="hidden sm:inline">Vai Dar Namoro</span>
+    <nav className="sticky top-0 z-30 border-b border-border/60 bg-background/80 backdrop-blur">
+      <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+        <Link to="/" className="flex items-center gap-2 font-bold tracking-tight">
+          <Heart className="h-5 w-5 text-[var(--rose)]" />
+          <span>VaiDarNamoro</span>
         </Link>
-        <div className="hidden items-center gap-6 text-sm font-medium text-[#6d6476] lg:flex">
+        <div className="hidden items-center gap-6 text-sm font-medium text-muted-foreground md:flex">
           <Link
             to="/sobre"
-            className="hover:text-[#5b21b6]"
-            activeProps={{ className: "text-[#5b21b6]" }}
+            className="hover:text-[var(--rose)]"
+            activeProps={{ className: "text-[var(--rose)]" }}
           >
             Sobre
           </Link>
           <Link
             to="/como-funciona"
-            className="hover:text-[#5b21b6]"
-            activeProps={{ className: "text-[#5b21b6]" }}
+            className="hover:text-[var(--rose)]"
+            activeProps={{ className: "text-[var(--rose)]" }}
           >
             Como funciona
           </Link>
           <Link
             to="/depoimentos"
-            className="hover:text-[#5b21b6]"
-            activeProps={{ className: "text-[#5b21b6]" }}
+            className="hover:text-[var(--rose)]"
+            activeProps={{ className: "text-[var(--rose)]" }}
           >
             Depoimentos
           </Link>
           <Link
             to="/blog"
-            className="hover:text-[#5b21b6]"
-            activeProps={{ className: "text-[#5b21b6]" }}
+            className="hover:text-[var(--rose)]"
+            activeProps={{ className: "text-[var(--rose)]" }}
           >
             Blog
           </Link>
         </div>
         <div className="flex items-center gap-2">
-          <a
-            href={CAREN_TIKTOK_LIVE_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hidden min-h-11 items-center gap-2 rounded-full px-3 text-sm font-semibold text-[#c93656] hover:bg-rose-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-rose-200 md:inline-flex"
-          >
-            <Radio className="h-4 w-4" aria-hidden="true" />
-            Live
-          </a>
           <Link
             to="/auth/login"
-            className="hidden min-h-11 items-center rounded-full px-3 text-sm font-medium text-[#6d6476] hover:text-[#5b21b6] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-violet-200 sm:inline-flex"
+            className="hidden text-sm font-medium text-muted-foreground hover:text-[var(--rose)] md:inline"
           >
             Entrar
           </Link>
           <Link
-            to={PUBLIC_COMMUNITY_ROUTE}
-            className="inline-flex min-h-11 items-center rounded-full bg-[#5b21b6] px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_30px_rgba(91,33,182,.18)] hover:bg-[#4c1d95] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-violet-200"
+            to="/auth/signup"
+            className="rounded-full bg-[var(--rose)] px-4 py-2 text-sm font-semibold text-white shadow-glow hover:opacity-90"
           >
-            Acessar comunidade
+            Criar conta
           </Link>
         </div>
       </div>

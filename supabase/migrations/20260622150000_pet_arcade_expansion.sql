@@ -179,11 +179,11 @@ BEGIN
   INSERT INTO public.user_coins(user_id,balance) VALUES(uid,100) ON CONFLICT(user_id) DO NOTHING;
   SELECT * INTO v_wallet FROM public.user_coins WHERE user_id=uid FOR UPDATE;
   IF v_wallet.balance < _entry THEN RAISE EXCEPTION 'insufficient_coins'; END IF;
-  v_client:=COALESCE(NULLIF(trim(_client_seed),''),encode(extensions.digest(uid::text||clock_timestamp()::text,'sha256'),'hex'));
+  v_client:=COALESCE(NULLIF(trim(_client_seed),''),encode(digest(uid::text||clock_timestamp()::text,'sha256'),'hex'));
   SELECT COALESCE(max(nonce),0)+1 INTO v_nonce FROM public.pet_arcade_rounds WHERE user_id=uid;
   UPDATE public.user_coins SET balance=v_wallet.balance-_entry,updated_at=now() WHERE user_id=uid;
   INSERT INTO public.pet_arcade_rounds(user_id,user_pet_id,game_type,status,entry_coins,difficulty,server_seed,server_seed_hash,client_seed,nonce,day,metadata)
-  VALUES(uid,v_pet,_game_type,'active',_entry,_difficulty,v_seed,encode(extensions.digest(v_seed,'sha256'),'hex'),v_client,v_nonce,v_today,COALESCE(_metadata,'{}'::jsonb))
+  VALUES(uid,v_pet,_game_type,'active',_entry,_difficulty,v_seed,encode(digest(v_seed,'sha256'),'hex'),v_client,v_nonce,v_today,COALESCE(_metadata,'{}'::jsonb))
   RETURNING * INTO v_round;
   IF _entry>0 THEN PERFORM public.log_coin_tx(uid,'pet_arcade_entry','out',_entry,v_wallet.balance-_entry,
     'Entrada em '||v_cfg.display_name,NULL,v_round.id,NULL); END IF;
