@@ -55,7 +55,7 @@ export async function resolvePetImage(
   const { data } = await supabase.storage.from(BUCKET).createSignedUrl(path, SIGNED_TTL);
   const url = data?.signedUrl ?? null;
   if (url) signedCache.set(path, { url, expiresAt: now + SIGN_TTL_MS });
-  return url;
+  return url ?? supabase.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
 }
 
 export async function uploadPetCatalogImage(file: File, prefix: string): Promise<string> {

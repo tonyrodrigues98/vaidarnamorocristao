@@ -177,7 +177,8 @@ export function refreshSignedProfilePhoto(input: string | null | undefined) {
 export function useSignedPhotoUrlResult(input: string | null | undefined): SignedResult {
   const trimmedInput = input?.trim() || null;
   const path = useMemo(() => extractProfilePhotoPath(trimmedInput), [trimmedInput]);
-  const publicFallback = null as string | null;
+  const publicFallback =
+    trimmedInput && /^https?:\/\//i.test(trimmedInput) ? trimmedInput : null;
   const passthrough = !trimmedInput || path ? null : trimmedInput;
   const [refreshToken, setRefreshToken] = useState(0);
 
