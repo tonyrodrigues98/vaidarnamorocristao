@@ -71,15 +71,32 @@ function isSafeStaticRequest(request, url) {
   return STATIC_EXTENSIONS.some((extension) => url.pathname.endsWith(extension));
 }
 
-function isPetStorageRequest(request, url) {
+function isPublicPetStorageRequest(request, url) {
   if (request.method !== "GET") return false;
   if (!/\.supabase\.co$/.test(url.hostname)) return false;
-  return /\/storage\/v1\/object\/(sign|public|authenticated)\/pets\//.test(url.pathname);
+  return /\/storage\/v1\/object\/public\/pets\//.test(url.pathname);
 }
 
-// Cache key strips the query (signed-URL token) so refreshed signatures hit the same entry.
+// Public pet assets are stable. Signed/private storage URLs must never enter
+// this shared service worker cache because their tokens and authorization are
+// user-scoped and expire.
 function petCacheKey(url) {
   return new Request(`${url.origin}${url.pathname}`, { method: "GET" });
+}
+
+function safeNotificationPath(value) {
+  if (typeof value !== "string" || !value.startsWith("/") || value.startsWith("//")) {
+    return "/notificacoes";
+  }
+  try {
+    const url = new URL(value, self.location.origin);
+    if (url.origin !== self.location.origin || url.pathname.startsWith("/api/")) {
+      return "/notificacoes";
+    }
+    return `${url.pathname}${url.search}${url.hash}`;
+  } catch {
+    return "/notificacoes";
+  }
 }
 
 async function petImageStaleWhileRevalidate(request, url) {
@@ -129,7 +146,7 @@ self.addEventListener("fetch", (event) => {
 
   const url = new URL(request.url);
 
-  if (isPetStorageRequest(request, url)) {
+  if (isPublicPetStorageRequest(request, url)) {
     event.respondWith(petImageStaleWhileRevalidate(request, url));
     return;
   }
@@ -187,7 +204,7 @@ self.addEventListener("notificationclick", (event) => {
     event.notification.data && typeof event.notification.data.url === "string"
       ? event.notification.data.url
       : "/notificacoes";
-  const url = new URL(targetUrl, self.location.origin).href;
+  const url = new URL(safeNotificationPath(targetUrl), self.location.origin).href;
 
   event.waitUntil(
     clients.matchAll({ type: "window", includeUncontrolled: true }).then((windowClients) => {
