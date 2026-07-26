@@ -19,7 +19,7 @@ import {
   type AuthSessionStatus,
   type SanitizedAuthError,
 } from "@/v2/app/auth/session-state";
-import { isolatePrivateQueryCache } from "@/v2/app/auth/private-cache";
+import { isolatePrivateQueryCache } from "@/lib/privateSessionCache";
 
 type ProfileStatus = "pending" | "approved" | "rejected" | "banned" | null;
 
@@ -88,7 +88,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     (next: AuthSessionSnapshot<Session>) => {
       const nextUserId = next.user?.id ?? null;
       if (currentUserId.current !== nextUserId) {
-        isolatePrivateQueryCache(queryClient);
+        isolatePrivateQueryCache(queryClient, nextUserId ? "user-change" : "logout");
         currentUserId.current = nextUserId;
       }
       setAuth(next);
@@ -170,9 +170,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [auth.user?.id, auth.status, loadRoles]);
 
   const signOut = useCallback(async () => {
+    isolatePrivateQueryCache(queryClient, "logout");
     coordinator.current?.acceptSession(null);
     await supabase.auth.signOut();
-  }, []);
+  }, [queryClient]);
 
   const signInWithPassword = useCallback(
     async (credentials: { email: string; password: string }) => {
