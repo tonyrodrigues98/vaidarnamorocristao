@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { getCachedPrivateSignedUrl } from "@/lib/privateSignedUrlCache";
 import type {
   PetBenefit,
   PetBenefitScope,
@@ -19,28 +20,66 @@ import type {
 const BUCKET = "pets";
 const SIGNED_TTL = 60 * 60 * 24 * 365;
 
-const STORAGE_MARKERS = [
-  `/storage/v1/object/public/${BUCKET}/`,
+const PUBLIC_STORAGE_MARKER = `/storage/v1/object/public/${BUCKET}/`;
+const PRIVATE_STORAGE_MARKERS = [
   `/storage/v1/object/sign/${BUCKET}/`,
   `/storage/v1/object/authenticated/${BUCKET}/`,
 ];
 
-/** Extract the bucket-relative storage path from any stored value (path, public URL, signed URL). */
-function extractStoragePath(value: string | null | undefined): string | null {
-  if (!value) return null;
-  for (const m of STORAGE_MARKERS) {
-    const i = value.indexOf(m);
-    if (i >= 0) return value.slice(i + m.length).split("?")[0];
-  }
-  if (/^https?:\/\//i.test(value)) return null;
-  return value.split("?")[0];
+export type PetMediaSource =
+  | { kind: "empty"; path: null; url: null }
+  | { kind: "lovable"; path: null; url: string }
+  | { kind: "external"; path: null; url: string }
+  | { kind: "public"; path: string; url: string }
+  | { kind: "private"; path: string; url: null };
+
+function stripQueryAndHash(value: string) {
+  return value.split("#")[0].split("?")[0];
 }
 
-// In-memory cache: avoid re-signing the same path on every render.
-const signedCache = new Map<string, { url: string; expiresAt: number }>();
-const SIGN_TTL_MS = (SIGNED_TTL - 60 * 60) * 1000; // refresh 1h before expiry
+function extractPathAfterMarker(value: string, marker: string): string | null {
+  const index = value.indexOf(marker);
+  if (index < 0) return null;
+  return (
+    decodeURIComponent(stripQueryAndHash(value.slice(index + marker.length))).replace(/^\/+/, "") ||
+    null
+  );
+}
 
-export async function resolvePetImage(
+export function getPublicPetImageUrl(path: string): string {
+  return supabase.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
+}
+
+export function classifyPetMediaSource(value: string | null | undefined): PetMediaSource {
+  const clean = value?.trim();
+  if (!clean) return { kind: "empty", path: null, url: null };
+  if (clean.startsWith("/__l5e/")) return { kind: "lovable", path: null, url: clean };
+
+  const publicPath = extractPathAfterMarker(clean, PUBLIC_STORAGE_MARKER);
+  if (publicPath)
+    return { kind: "public", path: publicPath, url: getPublicPetImageUrl(publicPath) };
+
+  for (const marker of PRIVATE_STORAGE_MARKERS) {
+    const privatePath = extractPathAfterMarker(clean, marker);
+    if (privatePath) return { kind: "private", path: privatePath, url: null };
+  }
+
+  if (/^https?:\/\//i.test(clean)) return { kind: "external", path: null, url: clean };
+
+  const path = decodeURIComponent(stripQueryAndHash(clean)).replace(/^\/+/, "");
+  return path
+    ? { kind: "public", path, url: getPublicPetImageUrl(path) }
+    : { kind: "empty", path: null, url: null };
+}
+
+function extractStoragePath(value: string | null | undefined): string | null {
+  return classifyPetMediaSource(value).path;
+}
+
+const signedCache = new Map<string, { url: string; expiresAt: number }>();
+const SIGN_TTL_MS = (SIGNED_TTL - 60 * 60) * 1000;
+
+async function resolvePetImageLegacySigned(
   value: string | null | undefined,
   forceRefresh = false,
 ): Promise<string | null> {
@@ -56,6 +95,29 @@ export async function resolvePetImage(
   const url = data?.signedUrl ?? null;
   if (url) signedCache.set(path, { url, expiresAt: now + SIGN_TTL_MS });
   return url ?? supabase.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
+}
+
+export async function resolvePetImage(
+  value: string | null | undefined,
+  forceRefresh = false,
+  userId?: string | null,
+): Promise<string | null> {
+  const source = classifyPetMediaSource(value);
+  if (source.kind !== "private") return source.url;
+
+  const { url, pending } = getCachedPrivateSignedUrl({
+    bucket: BUCKET,
+    path: source.path,
+    userId,
+    ttlSeconds: SIGNED_TTL,
+    forceRefresh,
+    signer: async (_bucket, path, ttlSeconds) => {
+      const { data } = await supabase.storage.from(BUCKET).createSignedUrl(path, ttlSeconds);
+      return data?.signedUrl ?? null;
+    },
+  });
+
+  return pending ? await pending : url;
 }
 
 export async function uploadPetCatalogImage(file: File, prefix: string): Promise<string> {
@@ -87,7 +149,9 @@ async function hydrateImage<T extends { image_url: string | null }>(row: T): Pro
   const [main, baby, adult] = await Promise.all([
     resolvePetImage(r.image_url),
     r.image_url_baby !== undefined ? resolvePetImage(r.image_url_baby) : Promise.resolve(undefined),
-    r.image_url_adult !== undefined ? resolvePetImage(r.image_url_adult) : Promise.resolve(undefined),
+    r.image_url_adult !== undefined
+      ? resolvePetImage(r.image_url_adult)
+      : Promise.resolve(undefined),
   ]);
   const out: typeof r = { ...r, image_url: main };
   if (r.image_url_baby !== undefined) out.image_url_baby = baby ?? null;
@@ -126,7 +190,7 @@ export async function listAll<T extends PetCatalogEntity>(table: PetCatalogTable
     .order("sort_order", { ascending: true })
     .order("name", { ascending: true });
   if (error) throw error;
-  return hydrateAll(((data ?? []) as unknown) as T[]);
+  return hydrateAll((data ?? []) as unknown as T[]);
 }
 
 export async function listActive<T extends PetCatalogEntity>(table: PetCatalogTable): Promise<T[]> {
@@ -137,23 +201,42 @@ export async function listActive<T extends PetCatalogEntity>(table: PetCatalogTa
     .order("sort_order", { ascending: true })
     .order("name", { ascending: true });
   if (error) throw error;
-  return hydrateAll(((data ?? []) as unknown) as T[]);
+  return hydrateAll((data ?? []) as unknown as T[]);
 }
 
-export async function createRow<T>(table: PetCatalogTable, input: Record<string, unknown>): Promise<T> {
-  const { data, error } = await supabase.from(table as any).insert(input as any).select("*").single();
+export async function createRow<T>(
+  table: PetCatalogTable,
+  input: Record<string, unknown>,
+): Promise<T> {
+  const { data, error } = await supabase
+    .from(table as any)
+    .insert(input as any)
+    .select("*")
+    .single();
   if (error) throw error;
   return data as T;
 }
 
-export async function updateRow<T>(table: PetCatalogTable, id: string, patch: Record<string, unknown>): Promise<T> {
-  const { data, error } = await supabase.from(table as any).update(patch as any).eq("id", id).select("*").single();
+export async function updateRow<T>(
+  table: PetCatalogTable,
+  id: string,
+  patch: Record<string, unknown>,
+): Promise<T> {
+  const { data, error } = await supabase
+    .from(table as any)
+    .update(patch as any)
+    .eq("id", id)
+    .select("*")
+    .single();
   if (error) throw error;
   return data as T;
 }
 
 export async function deleteRow(table: PetCatalogTable, id: string): Promise<void> {
-  const { error } = await supabase.from(table as any).delete().eq("id", id);
+  const { error } = await supabase
+    .from(table as any)
+    .delete()
+    .eq("id", id);
   if (error) throw error;
 }
 
@@ -167,19 +250,27 @@ export async function listSpeciesByCategory(categoryId: string): Promise<PetSpec
     .order("sort_order", { ascending: true })
     .order("name", { ascending: true });
   if (error) throw error;
-  return hydrateAll(((data ?? []) as unknown) as PetSpecies[]);
+  return hydrateAll((data ?? []) as unknown as PetSpecies[]);
 }
 
-export async function listVariantsFor(categoryId: string, speciesId: string | null): Promise<PetVariant[]> {
-  let q = supabase.from("pet_variants" as any).select("*").eq("active", true);
+export async function listVariantsFor(
+  categoryId: string,
+  speciesId: string | null,
+): Promise<PetVariant[]> {
+  let q = supabase
+    .from("pet_variants" as any)
+    .select("*")
+    .eq("active", true);
   if (speciesId) {
     q = q.or(`species_id.eq.${speciesId},and(species_id.is.null,category_id.eq.${categoryId})`);
   } else {
     q = q.eq("category_id", categoryId).is("species_id", null);
   }
-  const { data, error } = await q.order("sort_order", { ascending: true }).order("name", { ascending: true });
+  const { data, error } = await q
+    .order("sort_order", { ascending: true })
+    .order("name", { ascending: true });
   if (error) throw error;
-  return hydrateAll(((data ?? []) as unknown) as PetVariant[]);
+  return hydrateAll((data ?? []) as unknown as PetVariant[]);
 }
 
 export async function listBenefitsFor(opts: {
@@ -199,7 +290,7 @@ export async function listBenefitsFor(opts: {
     .order("sort_order", { ascending: true })
     .order("name", { ascending: true });
   if (error) throw error;
-  return hydrateAll(((data ?? []) as unknown) as PetBenefit[]);
+  return hydrateAll((data ?? []) as unknown as PetBenefit[]);
 }
 
 // ---------- user_pets_v2 ----------
@@ -225,8 +316,12 @@ export async function getMyPetV2(userId: string): Promise<UserPetV2Full | null> 
     };
     const [main, baby, adult] = await Promise.all([
       resolvePetImage(rr.image_url),
-      rr.image_url_baby !== undefined ? resolvePetImage(rr.image_url_baby) : Promise.resolve(undefined),
-      rr.image_url_adult !== undefined ? resolvePetImage(rr.image_url_adult) : Promise.resolve(undefined),
+      rr.image_url_baby !== undefined
+        ? resolvePetImage(rr.image_url_baby)
+        : Promise.resolve(undefined),
+      rr.image_url_adult !== undefined
+        ? resolvePetImage(rr.image_url_adult)
+        : Promise.resolve(undefined),
     ]);
     const out: typeof rr = { ...rr, image_url: main };
     if (rr.image_url_baby !== undefined) out.image_url_baby = baby ?? null;
@@ -258,7 +353,10 @@ export async function createMyPetV2(input: {
   const uid = u.user?.id;
   if (!uid) throw new Error("Você precisa estar logado.");
   // Apaga pets anteriores do usuário para manter um único pet no v2 (simplificação).
-  await supabase.from("user_pets_v2" as any).delete().eq("user_id", uid);
+  await supabase
+    .from("user_pets_v2" as any)
+    .delete()
+    .eq("user_id", uid);
   const { data, error } = await supabase
     .from("user_pets_v2" as any)
     .insert({ ...input, user_id: uid, is_equipped: true })
@@ -272,7 +370,10 @@ export async function updateMyPetV2(
   id: string,
   patch: Partial<Pick<UserPetV2, "custom_name" | "visibility">>,
 ): Promise<void> {
-  const { error } = await supabase.from("user_pets_v2" as any).update(patch).eq("id", id);
+  const { error } = await supabase
+    .from("user_pets_v2" as any)
+    .update(patch)
+    .eq("id", id);
   if (error) throw error;
 }
 
@@ -306,14 +407,20 @@ export type {
 
 // ---------- Perk Effects ----------
 export async function listPerkEffects(onlyActive = false): Promise<PetPerkEffect[]> {
-  let q = supabase.from("pet_perk_effects" as any).select("*").order("sort_order").order("label");
+  let q = supabase
+    .from("pet_perk_effects" as any)
+    .select("*")
+    .order("sort_order")
+    .order("label");
   if (onlyActive) q = q.eq("active", true);
   const { data, error } = await q;
   if (error) throw error;
   return (data ?? []) as unknown as PetPerkEffect[];
 }
 
-export async function upsertPerkEffect(input: Partial<PetPerkEffect> & { key: string; label: string }): Promise<PetPerkEffect> {
+export async function upsertPerkEffect(
+  input: Partial<PetPerkEffect> & { key: string; label: string },
+): Promise<PetPerkEffect> {
   const { data, error } = await supabase
     .from("pet_perk_effects" as any)
     .upsert(input as any, { onConflict: "key" })
@@ -324,7 +431,10 @@ export async function upsertPerkEffect(input: Partial<PetPerkEffect> & { key: st
 }
 
 export async function deletePerkEffect(key: string): Promise<void> {
-  const { error } = await supabase.from("pet_perk_effects" as any).delete().eq("key", key);
+  const { error } = await supabase
+    .from("pet_perk_effects" as any)
+    .delete()
+    .eq("key", key);
   if (error) throw error;
 }
 
@@ -340,7 +450,9 @@ export const PERK_CATEGORY_LABEL: Record<PetPerkEffectCategory, string> = {
 };
 
 // ---------- Target pickers (for unlock_* effects) ----------
-export async function listDecorations(kind: "frame" | "aura"): Promise<{ id: string; name: string }[]> {
+export async function listDecorations(
+  kind: "frame" | "aura",
+): Promise<{ id: string; name: string }[]> {
   const { data, error } = await supabase
     .from("avatar_decorations" as any)
     .select("id, name, type, active")
@@ -374,7 +486,9 @@ export async function listBadgesCatalog(): Promise<{ id: string; name: string }[
 export async function getMyActivePerks() {
   const { data: u } = await supabase.auth.getUser();
   if (!u.user?.id) return [];
-  const { data, error } = await supabase.rpc("get_active_pet_perks" as any, { _user_id: u.user.id });
+  const { data, error } = await supabase.rpc("get_active_pet_perks" as any, {
+    _user_id: u.user.id,
+  });
   if (error) throw error;
   return (data ?? []) as Array<{
     benefit_id: string;

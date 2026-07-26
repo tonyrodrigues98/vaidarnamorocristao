@@ -1,23 +1,16 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { supabase } from "@/integrations/supabase/client";
+import { clearPrivateSignedUrlCache, getCachedPrivateSignedUrl } from "@/lib/privateSignedUrlCache";
 
 const BUCKET = "profile-photos";
-const PROFILE_MARKERS = [
-  `/storage/v1/object/public/${BUCKET}/`,
+const PUBLIC_PROFILE_MARKER = `/storage/v1/object/public/${BUCKET}/`;
+const PRIVATE_PROFILE_MARKERS = [
   `/storage/v1/object/sign/${BUCKET}/`,
   `/storage/v1/object/authenticated/${BUCKET}/`,
 ];
 const SIGN_TTL_SECONDS = 60 * 60;
-const REFRESH_BEFORE_MS = 5 * 60 * 1000;
 const RETRY_DELAY_MS = 1200;
-const EMPTY_SIGNED_EXPIRES_AT = 0;
-
-type CachedSigned = {
-  url: string;
-  expiresAt: number;
-  promise?: Promise<string | null>;
-};
 
 type SignedResult = {
   url: string | null;
@@ -27,50 +20,13 @@ type SignedResult = {
   refresh: () => void;
 };
 
-const cache = new Map<string, CachedSigned>();
+export type ProfilePhotoMediaKind = "public" | "private" | "passthrough" | "empty";
 
-const STORAGE_KEY = "vdn:signed-photos:v1";
-const STORAGE_SAFETY_MS = 60 * 1000;
-
-function hydrateFromStorage() {
-  if (typeof window === "undefined") return;
-  try {
-    const raw = window.sessionStorage.getItem(STORAGE_KEY);
-    if (!raw) return;
-    const parsed = JSON.parse(raw) as Record<string, { url: string; expiresAt: number }>;
-    const now = Date.now();
-    for (const [path, entry] of Object.entries(parsed)) {
-      if (entry?.url && entry.expiresAt - STORAGE_SAFETY_MS > now) {
-        cache.set(path, { url: entry.url, expiresAt: entry.expiresAt });
-      }
-    }
-  } catch {
-    /* ignore corrupt storage */
-  }
-}
-
-let persistTimer: ReturnType<typeof setTimeout> | null = null;
-function persistToStorage() {
-  if (typeof window === "undefined") return;
-  if (persistTimer) return;
-  persistTimer = setTimeout(() => {
-    persistTimer = null;
-    try {
-      const out: Record<string, { url: string; expiresAt: number }> = {};
-      const now = Date.now();
-      cache.forEach((entry, path) => {
-        if (entry.url && entry.expiresAt - STORAGE_SAFETY_MS > now) {
-          out[path] = { url: entry.url, expiresAt: entry.expiresAt };
-        }
-      });
-      window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify(out));
-    } catch {
-      /* quota or disabled — best effort only */
-    }
-  }, 400);
-}
-
-hydrateFromStorage();
+export type ProfilePhotoMediaSource = {
+  kind: ProfilePhotoMediaKind;
+  path: string | null;
+  url: string | null;
+};
 
 function stripQueryAndHash(value: string) {
   return value.split("#")[0].split("?")[0];
@@ -85,42 +41,66 @@ function safeDecode(value: string) {
 }
 
 function looksLikeRawProfilePath(value: string) {
-  if (!value || value.startsWith("/") || value.startsWith("data:") || value.startsWith("blob:"))
+  if (!value || value.startsWith("/") || value.startsWith("data:") || value.startsWith("blob:")) {
     return false;
+  }
   if (/^[a-z][a-z0-9+.-]*:/i.test(value)) return false;
   return value.includes("/");
 }
 
-export function extractProfilePhotoPath(url: string | null | undefined): string | null {
-  const clean = url?.trim();
-  if (!clean) return null;
+function extractPathAfterMarker(value: string, marker: string): string | null {
+  const index = value.indexOf(marker);
+  if (index < 0) return null;
+  const tail = value.slice(index + marker.length);
+  return safeDecode(stripQueryAndHash(tail)).replace(/^\/+/, "") || null;
+}
 
-  for (const marker of PROFILE_MARKERS) {
-    const idx = clean.indexOf(marker);
-    if (idx >= 0) {
-      const tail = clean.slice(idx + marker.length);
-      const path = safeDecode(stripQueryAndHash(tail)).replace(/^\/+/, "");
-      return path || null;
-    }
+export function getPublicProfilePhotoUrl(path: string): string {
+  return supabase.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
+}
+
+export function classifyProfilePhotoSource(
+  url: string | null | undefined,
+): ProfilePhotoMediaSource {
+  const clean = url?.trim();
+  if (!clean) return { kind: "empty", path: null, url: null };
+
+  const publicPath = extractPathAfterMarker(clean, PUBLIC_PROFILE_MARKER);
+  if (publicPath) {
+    return { kind: "public", path: publicPath, url: getPublicProfilePhotoUrl(publicPath) };
+  }
+
+  for (const marker of PRIVATE_PROFILE_MARKERS) {
+    const privatePath = extractPathAfterMarker(clean, marker);
+    if (privatePath) return { kind: "private", path: privatePath, url: null };
   }
 
   if (clean.startsWith(`${BUCKET}/`)) {
-    return (
-      safeDecode(stripQueryAndHash(clean.slice(BUCKET.length + 1))).replace(/^\/+/, "") || null
-    );
+    const path = safeDecode(stripQueryAndHash(clean.slice(BUCKET.length + 1))).replace(/^\/+/, "");
+    return path
+      ? { kind: "public", path, url: getPublicProfilePhotoUrl(path) }
+      : { kind: "empty", path: null, url: null };
   }
 
   if (clean.startsWith(`/${BUCKET}/`)) {
-    return (
-      safeDecode(stripQueryAndHash(clean.slice(BUCKET.length + 2))).replace(/^\/+/, "") || null
-    );
+    const path = safeDecode(stripQueryAndHash(clean.slice(BUCKET.length + 2))).replace(/^\/+/, "");
+    return path
+      ? { kind: "public", path, url: getPublicProfilePhotoUrl(path) }
+      : { kind: "empty", path: null, url: null };
   }
 
   if (looksLikeRawProfilePath(clean)) {
-    return safeDecode(stripQueryAndHash(clean)).replace(/^\/+/, "") || null;
+    const path = safeDecode(stripQueryAndHash(clean)).replace(/^\/+/, "");
+    return path
+      ? { kind: "public", path, url: getPublicProfilePhotoUrl(path) }
+      : { kind: "empty", path: null, url: null };
   }
 
-  return null;
+  return { kind: "passthrough", path: null, url: clean };
+}
+
+export function extractProfilePhotoPath(url: string | null | undefined): string | null {
+  return classifyProfilePhotoSource(url).path;
 }
 
 async function signPath(path: string): Promise<string | null> {
@@ -131,76 +111,63 @@ async function signPath(path: string): Promise<string | null> {
   return data.signedUrl;
 }
 
-function getSigned(
+function getSignedProfilePhoto(
   path: string,
+  userId: string | null | undefined,
   force = false,
 ): { url: string | null; pending: Promise<string | null> | null } {
-  const now = Date.now();
-  const cached = cache.get(path);
-
-  if (!force && cached?.url && cached.expiresAt - REFRESH_BEFORE_MS > now) {
-    return { url: cached.url, pending: null };
-  }
-
-  if (!force && cached?.promise) {
-    return { url: cached.url || null, pending: cached.promise };
-  }
-
-  const pending = signPath(path).then((url) => {
-    if (url) {
-      cache.set(path, { url, expiresAt: Date.now() + SIGN_TTL_SECONDS * 1000 });
-      persistToStorage();
-    } else if (cached?.url) {
-      cache.set(path, { url: cached.url, expiresAt: cached.expiresAt });
-    } else {
-      cache.set(path, { url: "", expiresAt: EMPTY_SIGNED_EXPIRES_AT });
-    }
-    return url;
+  return getCachedPrivateSignedUrl({
+    bucket: BUCKET,
+    path,
+    userId,
+    ttlSeconds: SIGN_TTL_SECONDS,
+    forceRefresh: force,
+    signer: (_bucket, signedPath) => signPath(signedPath),
   });
-
-  cache.set(path, {
-    url: cached?.url ?? "",
-    expiresAt: cached?.expiresAt ?? 0,
-    promise: pending,
-  });
-
-  return { url: cached?.url || null, pending };
 }
 
-export function refreshSignedProfilePhoto(input: string | null | undefined) {
-  const path = extractProfilePhotoPath(input);
-  if (!path) return Promise.resolve(input ?? null);
-  const result = getSigned(path, true);
+export function clearSignedProfilePhotoCache() {
+  clearPrivateSignedUrlCache();
+}
+
+export function refreshSignedProfilePhoto(
+  input: string | null | undefined,
+  userId?: string | null,
+) {
+  const source = classifyProfilePhotoSource(input);
+  if (source.kind !== "private" || !source.path) {
+    return Promise.resolve(source.url ?? input ?? null);
+  }
+  const result = getSignedProfilePhoto(source.path, userId, true);
   return result.pending ?? Promise.resolve(result.url);
 }
 
-export function useSignedPhotoUrlResult(input: string | null | undefined): SignedResult {
+export function useSignedPhotoUrlResult(
+  input: string | null | undefined,
+  userId?: string | null,
+): SignedResult {
   const trimmedInput = input?.trim() || null;
-  const path = useMemo(() => extractProfilePhotoPath(trimmedInput), [trimmedInput]);
+  const source = useMemo(() => classifyProfilePhotoSource(trimmedInput), [trimmedInput]);
   const publicFallback =
-    trimmedInput && /^https?:\/\//i.test(trimmedInput) ? trimmedInput : null;
-  const passthrough = !trimmedInput || path ? null : trimmedInput;
+    source.kind === "private" && trimmedInput && /^https?:\/\//i.test(trimmedInput)
+      ? trimmedInput
+      : null;
   const [refreshToken, setRefreshToken] = useState(0);
 
-  const initial = useMemo(() => {
-    if (!path) return passthrough;
-    const cached = cache.get(path);
-    if (cached?.url && cached.expiresAt - REFRESH_BEFORE_MS > Date.now()) return cached.url;
-    return null;
-  }, [path, passthrough, publicFallback]);
-
-  const [url, setUrl] = useState<string | null>(initial);
-  const [loading, setLoading] = useState(Boolean(path && !initial));
+  const [url, setUrl] = useState<string | null>(
+    source.kind === "public" || source.kind === "passthrough" ? source.url : null,
+  );
+  const [loading, setLoading] = useState(Boolean(source.kind === "private" && source.path));
   const [error, setError] = useState(false);
 
   const refresh = useCallback(() => {
-    if (!path) return;
+    if (source.kind !== "private") return;
     setRefreshToken((value) => value + 1);
-  }, [path]);
+  }, [source.kind]);
 
   useEffect(() => {
-    if (!path) {
-      setUrl(passthrough);
+    if (source.kind !== "private" || !source.path) {
+      setUrl(source.url);
       setLoading(false);
       setError(false);
       return;
@@ -208,7 +175,7 @@ export function useSignedPhotoUrlResult(input: string | null | undefined): Signe
 
     let cancelled = false;
     const force = refreshToken > 0;
-    const { url: cachedUrl, pending } = getSigned(path, force);
+    const { url: cachedUrl, pending } = getSignedProfilePhoto(source.path, userId, force);
 
     setUrl(cachedUrl || publicFallback);
     setLoading(Boolean(pending && !cachedUrl));
@@ -231,25 +198,17 @@ export function useSignedPhotoUrlResult(input: string | null | undefined): Signe
       });
     }
 
-    const current = cache.get(path);
-    const refreshIn = current?.expiresAt
-      ? Math.max(30_000, current.expiresAt - REFRESH_BEFORE_MS - Date.now())
-      : null;
-    const timer = refreshIn
-      ? window.setTimeout(() => {
-          if (!cancelled) setRefreshToken((value) => value + 1);
-        }, refreshIn)
-      : null;
-
     return () => {
       cancelled = true;
-      if (timer) window.clearTimeout(timer);
     };
-  }, [path, passthrough, publicFallback, refreshToken]);
+  }, [source.kind, source.path, source.url, publicFallback, refreshToken, userId]);
 
   return { url, fallbackUrl: publicFallback, loading, error, refresh };
 }
 
-export function useSignedPhotoUrl(input: string | null | undefined): string | null {
-  return useSignedPhotoUrlResult(input).url;
+export function useSignedPhotoUrl(
+  input: string | null | undefined,
+  userId?: string | null,
+): string | null {
+  return useSignedPhotoUrlResult(input, userId).url;
 }

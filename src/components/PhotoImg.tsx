@@ -1,4 +1,5 @@
 import { AvatarImage } from "@/components/ui/avatar";
+import { useAuth } from "@/lib/auth";
 import { useSignedPhotoUrlResult } from "@/lib/photoUrl";
 import { cn } from "@/lib/utils";
 import type { ComponentPropsWithoutRef, ReactNode } from "react";
@@ -20,7 +21,8 @@ export function PhotoImg({
   decoding,
   ...rest
 }: ImgProps) {
-  const { url, loading, refresh } = useSignedPhotoUrlResult(src ?? null);
+  const { user } = useAuth();
+  const { url, loading, refresh } = useSignedPhotoUrlResult(src ?? null, user?.id);
 
   if (!url) {
     if (fallback) return <>{fallback}</>;
@@ -50,7 +52,8 @@ type AvatarImageProps = Omit<ComponentPropsWithoutRef<typeof AvatarImage>, "src"
 
 /** AvatarImage wrapper that resolves stored profile-photos URLs to signed URLs and retries expired links. */
 export function PhotoAvatarImage({ src, onError, ...rest }: AvatarImageProps) {
-  const { url, refresh } = useSignedPhotoUrlResult(src ?? null);
+  const { user } = useAuth();
+  const { url, refresh } = useSignedPhotoUrlResult(src ?? null, user?.id);
   if (!url) return null;
   return (
     <AvatarImage
