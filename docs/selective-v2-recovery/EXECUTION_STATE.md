@@ -17,7 +17,20 @@
 
 ## Testes executados
 
-- Pendente: TypeScript, testes focados, lint focado e build após finalizar os ajustes.
+- `bun install --frozen-lockfile`: passou, sem mudanças.
+- `bunx tsc --noEmit`: passou.
+- Testes focados: `tests/selective-v2-recovery-*.test.ts`, 8 testes passando.
+- Suíte segura: 21 arquivos, 145 testes passando.
+- `bunx eslint` focado: 0 erros; 1 warning legado em `src/lib/auth.tsx`.
+- `bunx prettier --check` focado: passou.
+- `bun run build`: passou; warnings conhecidos de bundling/Cloudflare.
+- `git diff --check`: passou.
+
+## Escopo preservado
+
+- Sem migrations, deploy, merge, push para `main`, alteração de Supabase, secrets ou produção.
+- Nenhuma alteração visual planejada: V1 continua como experiência principal.
+- `/inicio` não foi redirecionado para `/v2`; referências `/v2` encontradas pertencem ao código/documentação V2 já existente.
 
 ## Bloqueadores reais
 
