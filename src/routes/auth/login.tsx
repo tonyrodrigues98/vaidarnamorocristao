@@ -9,6 +9,7 @@ import { Header } from "@/components/layout/Header";
 import { SocialAuthButtons } from "@/components/SocialAuthButtons";
 import { AuthBrand } from "@/components/auth/AuthBrand";
 import { useAuth } from "@/lib/auth";
+import { readSafeReturnTo } from "@/lib/safeRedirect";
 
 const schema = z.object({
   email: z.string().trim().email("Email inválido").max(255),
@@ -19,6 +20,8 @@ export const Route = createFileRoute("/auth/login")({ component: Login });
 
 function Login() {
   const { user, loading: authLoading, signInWithPassword } = useAuth();
+  const returnTo =
+    typeof window === "undefined" ? "/inicio" : readSafeReturnTo(window.location.search);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -40,7 +43,7 @@ function Login() {
     toast.success("Bem-vindo(a) de volta!");
   }
 
-  if (!authLoading && user) return <Navigate to="/inicio" replace />;
+  if (!authLoading && user) return <Navigate to={returnTo} replace />;
 
   return (
     <div className="min-h-screen">
