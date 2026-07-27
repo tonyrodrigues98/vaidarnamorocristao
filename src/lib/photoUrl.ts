@@ -5,7 +5,10 @@ import { clearPrivateSignedUrlCache, getCachedPrivateSignedUrl } from "@/lib/pri
 
 const BUCKET = "profile-photos";
 const PUBLIC_PROFILE_MARKER = `/storage/v1/object/public/${BUCKET}/`;
-const PRIVATE_PROFILE_MARKERS = [
+// Legacy rows can contain a signed/authenticated URL from when this bucket
+// was private. Profile pictures are public product media, so normalize those
+// representations to the stable public object URL too.
+const LEGACY_PROFILE_MARKERS = [
   `/storage/v1/object/sign/${BUCKET}/`,
   `/storage/v1/object/authenticated/${BUCKET}/`,
 ];
@@ -70,9 +73,11 @@ export function classifyProfilePhotoSource(
     return { kind: "public", path: publicPath, url: getPublicProfilePhotoUrl(publicPath) };
   }
 
-  for (const marker of PRIVATE_PROFILE_MARKERS) {
-    const privatePath = extractPathAfterMarker(clean, marker);
-    if (privatePath) return { kind: "private", path: privatePath, url: null };
+  for (const marker of LEGACY_PROFILE_MARKERS) {
+    const legacyPath = extractPathAfterMarker(clean, marker);
+    if (legacyPath) {
+      return { kind: "public", path: legacyPath, url: getPublicProfilePhotoUrl(legacyPath) };
+    }
   }
 
   if (clean.startsWith(`${BUCKET}/`)) {

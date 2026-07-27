@@ -1,5 +1,4 @@
 import { supabase } from "@/integrations/supabase/client";
-import { getCachedPrivateSignedUrl } from "@/lib/privateSignedUrlCache";
 import type {
   PetBenefit,
   PetBenefitScope,
@@ -18,10 +17,10 @@ import type {
 } from "@/types/petCatalog";
 
 const BUCKET = "pets";
-const SIGNED_TTL = 60 * 60 * 24 * 365;
-
 const PUBLIC_STORAGE_MARKER = `/storage/v1/object/public/${BUCKET}/`;
-const PRIVATE_STORAGE_MARKERS = [
+// Pet catalog art is public media. Normalize historical signed/authenticated
+// values from catalog rows instead of signing them again during render.
+const LEGACY_STORAGE_MARKERS = [
   `/storage/v1/object/sign/${BUCKET}/`,
   `/storage/v1/object/authenticated/${BUCKET}/`,
 ];
@@ -37,11 +36,19 @@ function stripQueryAndHash(value: string) {
   return value.split("#")[0].split("?")[0];
 }
 
+function safeDecode(value: string): string {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+}
+
 function extractPathAfterMarker(value: string, marker: string): string | null {
   const index = value.indexOf(marker);
   if (index < 0) return null;
   return (
-    decodeURIComponent(stripQueryAndHash(value.slice(index + marker.length))).replace(/^\/+/, "") ||
+    safeDecode(stripQueryAndHash(value.slice(index + marker.length))).replace(/^\/+/, "") ||
     null
   );
 }
@@ -59,14 +66,14 @@ export function classifyPetMediaSource(value: string | null | undefined): PetMed
   if (publicPath)
     return { kind: "public", path: publicPath, url: getPublicPetImageUrl(publicPath) };
 
-  for (const marker of PRIVATE_STORAGE_MARKERS) {
-    const privatePath = extractPathAfterMarker(clean, marker);
-    if (privatePath) return { kind: "private", path: privatePath, url: null };
+  for (const marker of LEGACY_STORAGE_MARKERS) {
+    const legacyPath = extractPathAfterMarker(clean, marker);
+    if (legacyPath) return { kind: "public", path: legacyPath, url: getPublicPetImageUrl(legacyPath) };
   }
 
   if (/^https?:\/\//i.test(clean)) return { kind: "external", path: null, url: clean };
 
-  const path = decodeURIComponent(stripQueryAndHash(clean)).replace(/^\/+/, "");
+  const path = safeDecode(stripQueryAndHash(clean)).replace(/^\/+/, "");
   return path
     ? { kind: "public", path, url: getPublicPetImageUrl(path) }
     : { kind: "empty", path: null, url: null };
@@ -75,9 +82,6 @@ export function classifyPetMediaSource(value: string | null | undefined): PetMed
 function extractStoragePath(value: string | null | undefined): string | null {
   return classifyPetMediaSource(value).path;
 }
-
-const signedCache = new Map<string, { url: string; expiresAt: number }>();
-const SIGN_TTL_MS = (SIGNED_TTL - 60 * 60) * 1000;
 
 async function resolvePetImageLegacySigned(
   value: string | null | undefined,
@@ -88,36 +92,15 @@ async function resolvePetImageLegacySigned(
   if (value.startsWith("/__l5e/")) return value;
   const path = extractStoragePath(value);
   if (!path) return value; // external https URL we don't own — return as-is
-  const now = Date.now();
-  const hit = signedCache.get(path);
-  if (!forceRefresh && hit && hit.expiresAt > now) return hit.url;
-  const { data } = await supabase.storage.from(BUCKET).createSignedUrl(path, SIGNED_TTL);
-  const url = data?.signedUrl ?? null;
-  if (url) signedCache.set(path, { url, expiresAt: now + SIGN_TTL_MS });
-  return url ?? supabase.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
+  return getPublicPetImageUrl(path);
 }
 
 export async function resolvePetImage(
   value: string | null | undefined,
-  forceRefresh = false,
-  userId?: string | null,
+  _forceRefresh = false,
+  _userId?: string | null,
 ): Promise<string | null> {
-  const source = classifyPetMediaSource(value);
-  if (source.kind !== "private") return source.url;
-
-  const { url, pending } = getCachedPrivateSignedUrl({
-    bucket: BUCKET,
-    path: source.path,
-    userId,
-    ttlSeconds: SIGNED_TTL,
-    forceRefresh,
-    signer: async (_bucket, path, ttlSeconds) => {
-      const { data } = await supabase.storage.from(BUCKET).createSignedUrl(path, ttlSeconds);
-      return data?.signedUrl ?? null;
-    },
-  });
-
-  return pending ? await pending : url;
+  return classifyPetMediaSource(value).url;
 }
 
 export async function uploadPetCatalogImage(file: File, prefix: string): Promise<string> {
@@ -177,9 +160,13 @@ export function resolvePetDisplayImage(
   if (!entity) return null;
   const baby = (entity as { image_url_baby?: string | null }).image_url_baby ?? null;
   const adult = (entity as { image_url_adult?: string | null }).image_url_adult ?? null;
-  if (stageKind === "baby") return baby ?? adult ?? entity.image_url ?? null;
-  if (stageKind === "adult") return adult ?? baby ?? entity.image_url ?? null;
-  return adult ?? baby ?? entity.image_url ?? null;
+  const candidate =
+    stageKind === "baby"
+      ? baby ?? adult ?? entity.image_url ?? null
+      : stageKind === "adult"
+        ? adult ?? baby ?? entity.image_url ?? null
+        : adult ?? baby ?? entity.image_url ?? null;
+  return classifyPetMediaSource(candidate).url;
 }
 
 // ---------- Generic admin CRUD ----------

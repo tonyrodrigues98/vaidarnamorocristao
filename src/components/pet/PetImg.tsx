@@ -1,17 +1,17 @@
 import { useCallback, useEffect, useRef, useState, type ComponentPropsWithoutRef } from "react";
 
 import { useAuth } from "@/lib/auth";
-import { resolvePetImage } from "@/lib/petCatalog";
+import { classifyPetMediaSource, resolvePetImage } from "@/lib/petCatalog";
 import { cn } from "@/lib/utils";
 
 type PetImgProps = Omit<ComponentPropsWithoutRef<"img">, "src"> & {
   src: string | null | undefined;
 };
 
-/** Resolves private `pets` storage paths and renews expired signed URLs. */
+/** Resolves catalog pet art to its stable public Storage URL. */
 export function PetImg({ src, className, onError, ...props }: PetImgProps) {
   const { user } = useAuth();
-  const [resolvedUrl, setResolvedUrl] = useState<string | null>(null);
+  const [resolvedUrl, setResolvedUrl] = useState<string | null>(() => classifyPetMediaSource(src).url);
   const [loading, setLoading] = useState(Boolean(src));
   const [refreshToken, setRefreshToken] = useState(0);
   const retryCount = useRef(0);
@@ -22,6 +22,7 @@ export function PetImg({ src, className, onError, ...props }: PetImgProps) {
 
   useEffect(() => {
     retryCount.current = 0;
+    setResolvedUrl(classifyPetMediaSource(src).url);
   }, [src]);
 
   useEffect(() => {

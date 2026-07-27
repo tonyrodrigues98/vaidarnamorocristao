@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { PawPrint } from "lucide-react";
 
 import { equippedPetV1QueryOptions } from "@/lib/petQueries";
+import { classifyPetMediaSource } from "@/lib/petCatalog";
 import { PET_RARITY_META } from "@/types/pet";
 import { cn } from "@/lib/utils";
 
@@ -25,6 +26,7 @@ export function EquippedPetBadge({
 
   const rarity = PET_RARITY_META[pet.pet.rarity];
   const displayName = pet.custom_name?.trim() || pet.pet.name;
+  const imageUrl = classifyPetMediaSource(pet.pet.image_url).url;
   const avatarSize = size === "sm" ? "h-7 w-7" : "h-9 w-9";
 
   const content = (
@@ -42,9 +44,9 @@ export function EquippedPetBadge({
           rarity.ringClass,
         )}
       >
-        {pet.pet.image_url ? (
+        {imageUrl ? (
           <img
-            src={pet.pet.image_url}
+            src={imageUrl}
             alt={pet.pet.name}
             className="h-full w-full object-cover"
             loading="lazy"

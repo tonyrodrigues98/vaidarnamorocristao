@@ -56,6 +56,31 @@ describe("selective V1 recovery media policy", () => {
     expect(createSignedUrl).not.toHaveBeenCalled();
   });
 
+  it("converts legacy signed profile and pet URLs into stable public URLs", async () => {
+    const { classifyProfilePhotoSource } = await import("../src/lib/photoUrl");
+    const { classifyPetMediaSource, resolvePetDisplayImage } = await import("../src/lib/petCatalog");
+
+    expect(
+      classifyProfilePhotoSource(
+        "https://supabase.test/storage/v1/object/sign/profile-photos/avatars/user-a/main.webp?token=expired",
+      ),
+    ).toMatchObject({
+      kind: "public",
+      url: "https://supabase.test/storage/v1/object/public/profile-photos/avatars/user-a/main.webp",
+    });
+    expect(
+      classifyPetMediaSource(
+        "https://supabase.test/storage/v1/object/sign/pets/catalog/cats/mila.webp?token=expired",
+      ),
+    ).toMatchObject({
+      kind: "public",
+      url: "https://supabase.test/storage/v1/object/public/pets/catalog/cats/mila.webp",
+    });
+    expect(
+      resolvePetDisplayImage({ image_url: "catalog/cats/mila.webp" }, undefined),
+    ).toBe("https://supabase.test/storage/v1/object/public/pets/catalog/cats/mila.webp");
+  });
+
   it("uses signed URLs only for explicitly private media and deduplicates concurrent requests", async () => {
     const { clearPrivateSignedUrlCache, getCachedPrivateSignedUrl } =
       await import("../src/lib/privateSignedUrlCache");

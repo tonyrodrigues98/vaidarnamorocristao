@@ -9,7 +9,7 @@ type ImgProps = Omit<ComponentPropsWithoutRef<"img">, "src"> & {
   fallback?: ReactNode;
 };
 
-/** <img> wrapper that resolves stored profile-photos URLs to signed URLs and retries expired links.
+/** <img> wrapper that resolves stored profile-photos URLs to stable public URLs.
  *  Defaults: loading="lazy", decoding="async" — pass loading="eager" + fetchPriority="high"
  *  explicitly for the LCP image of the route. */
 export function PhotoImg({
@@ -50,7 +50,7 @@ type AvatarImageProps = Omit<ComponentPropsWithoutRef<typeof AvatarImage>, "src"
   src: string | null | undefined;
 };
 
-/** AvatarImage wrapper that resolves stored profile-photos URLs to signed URLs and retries expired links. */
+/** AvatarImage wrapper that resolves stored profile-photos URLs to stable public URLs. */
 export function PhotoAvatarImage({ src, onError, ...rest }: AvatarImageProps) {
   const { user } = useAuth();
   const { url, refresh } = useSignedPhotoUrlResult(src ?? null, user?.id);
