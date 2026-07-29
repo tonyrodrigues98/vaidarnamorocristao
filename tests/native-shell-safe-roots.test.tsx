@@ -7,6 +7,7 @@ import { createPrivatePageMetadata } from "../src/lib/metadata";
 import { ThemeProvider } from "../src/lib/theme";
 
 const communitySource = readFileSync("src/routes/comunidade.tsx", "utf8");
+const communityTabsSource = readFileSync("src/config/native-community-tabs.ts", "utf8");
 const exploreSource = readFileSync("src/routes/explorar.tsx", "utf8");
 
 describe("NativeRootPlaceholder", () => {
@@ -47,14 +48,15 @@ describe("/comunidade safe root", () => {
     expect(communitySource).toContain('<Navigate to="/conversas/comunidade" replace />');
   });
 
-  it("uses the real approval gate and the three documentary sections when exposed", () => {
+  it("uses the real approval gate and the three useful sections when exposed", () => {
     expect(communitySource).toContain("<RequireApproved>");
-    expect(communitySource).toContain('title="Comunidade"');
-    expect(communitySource).toContain('label: "Agora"');
-    expect(communitySource).toContain('label: "Espaços"');
-    expect(communitySource).toContain('label: "Eventos"');
+    expect(communitySource).toContain(">Comunidade</h1>");
+    expect(communityTabsSource).toContain('label: "Agora"');
+    expect(communityTabsSource).toContain('label: "Espaços"');
+    expect(communityTabsSource).toContain('label: "Eventos"');
     expect(communitySource).toContain('to="/conversas/comunidade"');
-    expect(communitySource).toContain("Abrir chat geral");
+    expect(communitySource).toContain('title="Chat geral"');
+    expect(communitySource).not.toContain("NativeRootPlaceholder");
   });
 
   it("has private metadata and no backend or visual V2 dependency", () => {
