@@ -3,6 +3,16 @@ export { NativeProgress, type NativeProgressProps } from "./NativeProgress";
 export { NativeField, type NativeFieldProps } from "./NativeField";
 export { NativeBottomNavigation, type NativeBottomNavigationProps } from "./NativeBottomNavigation";
 export {
+  NativeAdaptiveNavigation,
+  type NativeAdaptiveNavigationProps,
+} from "./NativeAdaptiveNavigation";
+export {
+  NativeShellRuntimeProvider,
+  useNativeShellRuntime,
+  type NativeShellRuntimeContextValue,
+  type NativeShellRuntimeProviderProps,
+} from "./NativeShellRuntimeContext";
+export {
   NativeRootPlaceholder,
   type NativeRootPlaceholderProps,
   type NativeRootPlaceholderSection,

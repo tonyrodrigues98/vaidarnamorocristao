@@ -17,6 +17,8 @@ vi.mock("@tanstack/react-router", () => ({
 }));
 
 import { NativeBottomNavigation } from "../src/components/native-shell/NativeBottomNavigation";
+import { NativeAdaptiveNavigation } from "../src/components/native-shell/NativeAdaptiveNavigation";
+import { brand } from "../src/config/brand";
 import { plannedPrimaryDestinations } from "../src/config/app-destinations";
 import {
   NATIVE_TAB_RESELECT_EVENT,
@@ -66,6 +68,43 @@ describe("native primary navigation configuration", () => {
     const source = readFileSync("src/components/native-shell/NativeBottomNavigation.tsx", "utf8");
     expect(source).not.toMatch(/supabase|createPortal|avatar|badge|useQuery|@\/v2/i);
     expect(source).not.toMatch(/from\s+["'][^"']*(profile|perfil)[^"']*["']/i);
+  });
+
+  it("renders the official brand and the same five destinations without a nested nav", () => {
+    const markup = renderToStaticMarkup(
+      <NativeAdaptiveNavigation activeTab="explore" pathname="/explorar" />,
+    );
+
+    expect(markup).toContain(`src="${brand.assets.icon192}"`);
+    expect(markup).toContain(brand.displayName);
+    expect(markup.match(/<a /g)).toHaveLength(6);
+    expect(markup.match(/aria-current="page"/g)).toHaveLength(1);
+    expect(markup).not.toContain("<nav");
+    for (const item of nativePrimaryNavigation) {
+      expect(markup).toContain(`href="${item.path}"`);
+      expect(markup).toContain(item.label);
+    }
+  });
+
+  it("shares one selection hook without backend, avatar, badge, portal or V2 imports", () => {
+    const bottom = readFileSync("src/components/native-shell/NativeBottomNavigation.tsx", "utf8");
+    const adaptive = readFileSync(
+      "src/components/native-shell/NativeAdaptiveNavigation.tsx",
+      "utf8",
+    );
+    const selection = readFileSync(
+      "src/components/native-shell/useNativePrimaryTabSelection.ts",
+      "utf8",
+    );
+
+    expect(bottom).toContain("useNativePrimaryTabSelection");
+    expect(adaptive).toContain("useNativePrimaryTabSelection");
+    expect(bottom).not.toContain("window.scrollTo");
+    expect(adaptive).not.toContain("window.scrollTo");
+    expect(selection.match(/window\.scrollTo/g)).toHaveLength(1);
+    expect(`${adaptive}\n${selection}`).not.toMatch(
+      /supabase|createPortal|avatar|badge|useQuery|@\/v2/i,
+    );
   });
 });
 

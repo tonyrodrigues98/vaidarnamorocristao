@@ -11,7 +11,9 @@ import { nativeShellFeatureEnabled, shouldRenderNativeShell } from "@/config/nat
 import { useAuth } from "@/lib/auth";
 
 import { NativeShellFrame } from "./NativeShellFrame";
+import { NativeAdaptiveNavigation } from "./NativeAdaptiveNavigation";
 import { NativeBottomNavigation } from "./NativeBottomNavigation";
+import { NativeShellRuntimeProvider } from "./NativeShellRuntimeContext";
 
 export type NativeShellRuntimeBoundaryProps = {
   children: ReactNode;
@@ -86,20 +88,30 @@ export function NativeShellRuntimeBoundary({ children }: NativeShellRuntimeBound
 
   if (useNativeShell && activeTab) {
     return (
-      <NativeShellFrame
-        activePrimaryTab={activeTab}
-        keyboardOpen={keyboardOpen}
-        bottomNavigation={
-          <NativeBottomNavigation
-            activeTab={activeTab}
-            pathname={location.pathname}
-            search={location.searchStr}
-            hash={location.hash}
-          />
-        }
-      >
-        {children}
-      </NativeShellFrame>
+      <NativeShellRuntimeProvider active activeTab={activeTab}>
+        <NativeShellFrame
+          activePrimaryTab={activeTab}
+          keyboardOpen={keyboardOpen}
+          primaryNavigation={
+            <NativeAdaptiveNavigation
+              activeTab={activeTab}
+              pathname={location.pathname}
+              search={location.searchStr}
+              hash={location.hash}
+            />
+          }
+          bottomNavigation={
+            <NativeBottomNavigation
+              activeTab={activeTab}
+              pathname={location.pathname}
+              search={location.searchStr}
+              hash={location.hash}
+            />
+          }
+        >
+          {children}
+        </NativeShellFrame>
+      </NativeShellRuntimeProvider>
     );
   }
 

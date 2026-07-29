@@ -54,6 +54,123 @@
   backdrop-filter: blur(1rem);
 }
 
+[data-vdn-native-shell] > .vdn-native-shell-frame__primary-navigation {
+  display: none;
+}
+
+[data-vdn-native-shell] .vdn-native-adaptive-navigation {
+  display: flex;
+  min-width: 0;
+  min-height: 100%;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+[data-vdn-native-shell] .vdn-native-adaptive-navigation__brand {
+  display: flex;
+  min-width: 0;
+  min-height: var(--vdn-native-touch-target);
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  color: var(--vdn-native-text-primary);
+  text-decoration: none;
+}
+
+[data-vdn-native-shell] .vdn-native-adaptive-navigation__brand:focus-visible,
+[data-vdn-native-shell] .vdn-native-adaptive-navigation__link:focus-visible {
+  outline: 2px solid var(--vdn-native-brand-action);
+  outline-offset: 2px;
+}
+
+[data-vdn-native-shell] .vdn-native-adaptive-navigation__brand-icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  flex: 0 0 auto;
+  object-fit: contain;
+}
+
+[data-vdn-native-shell] .vdn-native-adaptive-navigation__brand-name {
+  min-width: 0;
+  overflow: hidden;
+  font-size: 1rem;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+[data-vdn-native-shell] .vdn-native-adaptive-navigation__list {
+  display: flex;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  flex-direction: column;
+  gap: 0.25rem;
+  list-style: none;
+}
+
+[data-vdn-native-shell] .vdn-native-adaptive-navigation__item {
+  min-width: 0;
+}
+
+[data-vdn-native-shell] .vdn-native-adaptive-navigation__link {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  min-height: var(--vdn-native-touch-target);
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  border-radius: 0.75rem;
+  color: var(--vdn-native-text-secondary);
+  text-decoration: none;
+  transition:
+    color var(--vdn-native-motion-touch) var(--vdn-native-ease-enter),
+    background-color var(--vdn-native-motion-touch) var(--vdn-native-ease-enter);
+}
+
+[data-vdn-native-shell] .vdn-native-adaptive-navigation__link:hover,
+[data-vdn-native-shell] .vdn-native-adaptive-navigation__link:focus-visible {
+  color: var(--vdn-native-text-primary);
+  background: var(--vdn-native-surface-secondary);
+}
+
+[data-vdn-native-shell] .vdn-native-adaptive-navigation__link[data-active="true"] {
+  color: var(--vdn-native-brand-action);
+  background: var(--vdn-native-brand-action-soft);
+  font-weight: 700;
+}
+
+[data-vdn-native-shell] .vdn-native-adaptive-navigation__indicator {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 0.2rem;
+  height: 1.5rem;
+  border-radius: 0 999px 999px 0;
+  background: transparent;
+  transform: translateY(-50%);
+}
+
+[data-vdn-native-shell]
+  .vdn-native-adaptive-navigation__link[data-active="true"]
+  .vdn-native-adaptive-navigation__indicator {
+  background: var(--vdn-native-brand-action);
+}
+
+[data-vdn-native-shell] .vdn-native-adaptive-navigation__icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex: 0 0 auto;
+}
+
+[data-vdn-native-shell] .vdn-native-adaptive-navigation__label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 [data-vdn-native-shell][data-keyboard-open="true"] > .vdn-native-shell-frame__bottom-navigation {
   display: none;
 }
@@ -150,25 +267,41 @@
   white-space: nowrap;
 }
 
-@media (min-width: 64rem) {
+@media (min-width: 48rem) {
   [data-vdn-native-shell].vdn-native-shell-frame:has(
       > .vdn-native-shell-frame__primary-navigation
     ) {
-    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-columns: 72px minmax(0, 1fr);
   }
 
-  [data-vdn-native-shell].vdn-native-shell-frame:has(> .vdn-native-shell-frame__context-panel) {
-    grid-template-columns: minmax(0, 1fr) auto;
+  [data-vdn-native-shell] > .vdn-native-shell-frame__primary-navigation {
+    box-sizing: border-box;
+    position: sticky;
+    top: 0;
+    display: block;
+    width: 72px;
+    height: 100dvh;
+    align-self: start;
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding-top: max(1rem, env(safe-area-inset-top, 0px));
+    padding-bottom: max(1rem, env(safe-area-inset-bottom, 0px));
+    padding-left: env(safe-area-inset-left, 0px);
+    border-right: 1px solid var(--vdn-native-border);
+    background: var(--vdn-native-surface-primary);
   }
 
-  [data-vdn-native-shell].vdn-native-shell-frame:has(
-      > .vdn-native-shell-frame__primary-navigation
-    ):has(> .vdn-native-shell-frame__context-panel) {
-    grid-template-columns: auto minmax(0, 1fr) auto;
+  [data-vdn-native-shell] .vdn-native-adaptive-navigation__brand-name,
+  [data-vdn-native-shell] .vdn-native-adaptive-navigation__label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
-}
 
-@media (min-width: 48rem) {
   [data-vdn-native-shell] > .vdn-native-shell-frame__bottom-navigation {
     display: none;
   }
@@ -179,10 +312,45 @@
   }
 }
 
+@media (min-width: 80rem) {
+  [data-vdn-native-shell].vdn-native-shell-frame:has(
+      > .vdn-native-shell-frame__primary-navigation
+    ) {
+    grid-template-columns: var(--vdn-native-sidebar-width) minmax(0, 1fr);
+  }
+
+  [data-vdn-native-shell] > .vdn-native-shell-frame__primary-navigation {
+    width: var(--vdn-native-sidebar-width);
+    padding-right: 1rem;
+    padding-left: max(1rem, env(safe-area-inset-left, 0px));
+  }
+
+  [data-vdn-native-shell] .vdn-native-adaptive-navigation__brand {
+    justify-content: flex-start;
+    padding: 0 0.75rem;
+  }
+
+  [data-vdn-native-shell] .vdn-native-adaptive-navigation__link {
+    justify-content: flex-start;
+    padding: 0 0.875rem;
+  }
+
+  [data-vdn-native-shell] .vdn-native-adaptive-navigation__brand-name,
+  [data-vdn-native-shell] .vdn-native-adaptive-navigation__label {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: hidden;
+    clip: auto;
+    clip-path: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   [data-vdn-native-shell].vdn-native-shell-frame,
   [data-vdn-native-shell] .vdn-native-shell-frame__content-column,
-  [data-vdn-native-shell] .vdn-native-shell-frame__main {
+  [data-vdn-native-shell] .vdn-native-shell-frame__main,
+  [data-vdn-native-shell] .vdn-native-adaptive-navigation__link {
     scroll-behavior: auto;
     transition-duration: 0.01ms;
     animation-duration: 0.01ms;

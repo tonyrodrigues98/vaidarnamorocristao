@@ -43,6 +43,7 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { brand } from "@/config/brand";
+import { useNativeShellRuntime } from "@/components/native-shell/NativeShellRuntimeContext";
 
 async function shareSite() {
   const url = typeof window !== "undefined" ? window.location.origin : brand.origin;
@@ -70,6 +71,14 @@ async function shareSite() {
 }
 
 export function Header() {
+  const { active } = useNativeShellRuntime();
+
+  if (active) return null;
+
+  return <LegacyHeader />;
+}
+
+function LegacyHeader() {
   const { user, isAdmin, role, isApproved, signOut } = useAuth();
   const canSeeAdminPanel = isAdmin || role === "apresentador" || role === "moderador";
   const navigate = useNavigate();

@@ -34,6 +34,12 @@ describe("native shell frame CSS boundary", () => {
     expect(css).toMatch(
       /\[data-vdn-native-shell\]\s*\.vdn-native-shell-frame__bottom-navigation\s*\{[^}]*position:\s*fixed/s,
     );
+    expect(css).not.toMatch(
+      /\.vdn-native-shell-frame__primary-navigation\s*\{[^}]*position:\s*fixed/s,
+    );
+    expect(css).toMatch(
+      /\.vdn-native-shell-frame__primary-navigation\s*\{[^}]*position:\s*sticky/s,
+    );
     expect(css).not.toMatch(/\.mobile-app-shell|\.mobile-chat-shell|\.app-/);
   });
 
@@ -54,7 +60,10 @@ describe("native shell frame CSS boundary", () => {
     expect(css).toContain("env(safe-area-inset-right");
     expect(css).toContain('[data-keyboard-open="true"]');
     expect(css).toContain("@media (min-width: 48rem)");
-    expect(css).toContain("@media (min-width: 64rem)");
+    expect(css).toContain("@media (min-width: 80rem)");
+    expect(css).toContain("grid-template-columns: 72px minmax(0, 1fr)");
+    expect(css).toContain("grid-template-columns: var(--vdn-native-sidebar-width) minmax(0, 1fr)");
+    expect(css).toContain("height: 100dvh");
     expect(css).toContain("@media (prefers-reduced-motion: reduce)");
     expect(css).toContain("min-width: 0");
   });

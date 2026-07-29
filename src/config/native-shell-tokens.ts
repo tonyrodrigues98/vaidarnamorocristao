@@ -39,6 +39,7 @@ export const nativeShellTokens = {
     easeExit: "cubic-bezier(0.4, 0, 1, 1)",
   },
   layout: {
+    rail: "72px",
     sidebar: "244px",
     contextPanel: "300px",
     touchTarget: "44px",

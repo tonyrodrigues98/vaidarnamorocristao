@@ -62,9 +62,28 @@ describe("NativeShellRuntimeBoundary decision", () => {
 
     expect(source).toContain("if (useNativeShell && activeTab)");
     expect(source).toContain("<NativeShellFrame");
+    expect(source).toContain("<NativeShellRuntimeProvider active activeTab={activeTab}>");
+    expect(source).toContain("<NativeAdaptiveNavigation");
     expect(source).toContain("<NativeBottomNavigation");
     expect(source).toContain("<MobileAppShell>");
     expect(source).not.toMatch(/Navigate|redirect|localStorage|sessionStorage|URLSearchParams/);
+  });
+
+  it("provides both adaptive and bottom navigation only in the native branch", () => {
+    const source = readFileSync(
+      "src/components/native-shell/NativeShellRuntimeBoundary.tsx",
+      "utf8",
+    );
+    const nativeBranch = source.slice(
+      source.indexOf("if (useNativeShell && activeTab)"),
+      source.indexOf("return <MobileAppShell>"),
+    );
+    const legacyBranch = source.slice(source.indexOf("return <MobileAppShell>"));
+
+    expect(nativeBranch).toContain("primaryNavigation=");
+    expect(nativeBranch).toContain("bottomNavigation=");
+    expect(legacyBranch).not.toContain("NativeAdaptiveNavigation");
+    expect(legacyBranch).not.toContain("NativeBottomNavigation");
   });
 });
 
