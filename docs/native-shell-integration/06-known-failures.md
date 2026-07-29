@@ -1,9 +1,29 @@
 # Falhas conhecidas do baseline
 
 Esta lista registra o resultado bruto dos comandos obrigatórios no commit-base.
-Nenhuma falha foi corrigida nesta tarefa.
+O bloco histórico abaixo permanece como evidência da captura T46-00. A
+estabilização T46-00.1 corrigiu somente o lockfile, a política de fim de linha e
+o `no-empty`, sem alterar comportamento.
 
-## `npm ci`
+## Estado após T46-00.1
+
+| Validação | Resultado atual |
+|---|---|
+| `npm ci` | **Passou** em instalação limpa: 524 pacotes instalados. |
+| `npm run build` | **Passou**: cliente e SSR, 4.603 módulos transformados. |
+| `npm run lint` | **Bloqueio preexistente não trivial**: 12.688 erros `prettier/prettier` em 206 arquivos e 39 warnings. O `no-empty` foi eliminado. |
+| `npm test` | 21 arquivos e 146 testes passaram; as mesmas cinco suítes Supabase falharam antes da coleta por ausência do ambiente descartável. |
+
+Adicionar `"endOfLine": "auto"` reduziu o lint de 105.557 para 12.688 erros,
+mas provou que o restante não era apenas CRLF: existem divergências reais de
+formatação em 206 arquivos. A tarefa proíbe formatação massiva, então esse
+conjunto permanece como um único bloqueio sistêmico documentado, sem
+desabilitar regras ou mascarar resultados.
+
+O npm também reportou nove vulnerabilidades de dependências (quatro baixas e
+cinco altas). Nenhum `npm audit fix` foi executado.
+
+## Baseline histórico: `npm ci`
 
 **Status: falhou antes da instalação.**
 
@@ -20,7 +40,7 @@ sincronizados. Exemplos relatados pelo próprio npm:
 O lockfile não foi regenerado. As dependências preexistentes do checkout
 permitiram executar os comandos seguintes.
 
-## `npm run build`
+## Baseline histórico: `npm run build`
 
 **Status: passou.**
 
@@ -33,7 +53,7 @@ permitiram executar os comandos seguintes.
 O gerador atualizou temporariamente `src/routeTree.gen.ts`; o arquivo foi
 restaurado ao blob do commit-base e não integra o diff.
 
-## `npm run lint`
+## Baseline histórico: `npm run lint`
 
 **Status: falhou.**
 
@@ -54,7 +74,7 @@ Os avisos incluem principalmente:
 
 O baseline global de formatação e os avisos não foram modificados.
 
-## `npm test`
+## Baseline histórico: `npm test`
 
 **Status: falhou no total; testes independentes passaram.**
 
@@ -78,12 +98,13 @@ Causa: ausência de `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY` e/ou
 `SUPABASE_SERVICE_ROLE_KEY`, conforme a suíte. Nenhum valor foi configurado e
 nenhum Supabase foi acessado.
 
-## Falhas não tratadas como bloqueio desta captura
+## Pendências após a estabilização
 
-- Locks divergentes impedem instalação reproduzível por `npm ci`.
-- Lint global não possui baseline verde.
+- O lint global ainda não possui baseline verde: 12.688 divergências reais de
+  Prettier não podem ser corrigidas sem um lote mecânico separado.
 - Cinco suítes exigem Supabase descartável configurado.
 - Warnings do build dependem de configuração/dependências preexistentes.
+- Nove vulnerabilidades do grafo npm exigem triagem separada.
 
-Essas condições impedem declarar a base integralmente verde, mas não impedem
-registrar de forma imutável o estado real para a próxima tarefa.
+O lockfile reproduzível, o build e o único `no-empty` foram resolvidos dentro do
+escopo. As pendências restantes continuam explícitas e não foram ocultadas.

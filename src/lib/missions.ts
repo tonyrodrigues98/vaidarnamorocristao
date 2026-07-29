@@ -22,7 +22,9 @@ export async function rollAndGetTodayMissions(): Promise<TodayMission[]> {
   // 1) garante sorteio idempotente (ignora falha silenciosamente)
   try {
     await supabase.rpc("roll_daily_missions" as never);
-  } catch {}
+  } catch {
+    // Best-effort idempotent roll; the list request below remains authoritative.
+  }
   // 2) lista com progresso
   const { data, error } = await supabase.rpc("get_today_missions" as never);
   if (error) return [];
