@@ -1,0 +1,89 @@
+# Falhas conhecidas do baseline
+
+Esta lista registra o resultado bruto dos comandos obrigatórios no commit-base.
+Nenhuma falha foi corrigida nesta tarefa.
+
+## `npm ci`
+
+**Status: falhou antes da instalação.**
+
+O npm retornou `EUSAGE` porque `package.json` e `package-lock.json` não estão
+sincronizados. Exemplos relatados pelo próprio npm:
+
+- `@cloudflare/vite-plugin`: lock `1.32.2`, requisito `1.48.0`
+- `@lovable.dev/vite-tanstack-config`: lock `2.3.1`, requisito `2.7.7`
+- `@supabase/supabase-js`: lock `2.105.3`, requisito `2.111.0`
+- `@tailwindcss/vite`: lock `4.2.2`, requisito `4.3.3`
+- `@tanstack/react-router`: lock `1.168.21`, requisito `1.170.18`
+- ausências como `@noble/curves@2.2.0` e `web-push-neo@0.1.2`
+
+O lockfile não foi regenerado. As dependências preexistentes do checkout
+permitiram executar os comandos seguintes.
+
+## `npm run build`
+
+**Status: passou.**
+
+- Vite `7.3.2`
+- 4.606 módulos transformados
+- build cliente e SSR gerados
+- warnings preexistentes de diretivas `"use client"` ignoradas em dependências
+- warning Nitro/Cloudflare de que `main` do Wrangler é sobrescrito/ignorado
+
+O gerador atualizou temporariamente `src/routeTree.gen.ts`; o arquivo foi
+restaurado ao blob do commit-base e não integra o diff.
+
+## `npm run lint`
+
+**Status: falhou.**
+
+Resultado detalhado equivalente com saída JSON do ESLint:
+
+- 466 arquivos com diagnósticos
+- 105.557 erros
+- 39 avisos
+- 105.556 erros `prettier/prettier`, predominantemente diferenças de CRLF
+- 1 erro não-Prettier:
+  `src/lib/missions.ts:25:11` — `no-empty` (`Empty block statement`)
+
+Os avisos incluem principalmente:
+
+- `react-hooks/exhaustive-deps`
+- `react-refresh/only-export-components`
+- diretivas ESLint não utilizadas
+
+O baseline global de formatação e os avisos não foram modificados.
+
+## `npm test`
+
+**Status: falhou no total; testes independentes passaram.**
+
+Resumo:
+
+- 26 arquivos detectados
+- 21 arquivos passaram
+- 5 arquivos falharam durante import/configuração
+- 146 testes passaram
+- 0 testes funcionais foram coletados nas cinco suítes dependentes do ambiente
+
+Suítes sem configuração Supabase:
+
+1. `tests/starter-bundle.test.ts`
+2. `tests/moderation-rls.test.ts`
+3. `tests/chat-e2e.test.ts`
+4. `tests/realtime-messages.test.ts`
+5. `tests/messages-rls.test.ts`
+
+Causa: ausência de `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY` e/ou
+`SUPABASE_SERVICE_ROLE_KEY`, conforme a suíte. Nenhum valor foi configurado e
+nenhum Supabase foi acessado.
+
+## Falhas não tratadas como bloqueio desta captura
+
+- Locks divergentes impedem instalação reproduzível por `npm ci`.
+- Lint global não possui baseline verde.
+- Cinco suítes exigem Supabase descartável configurado.
+- Warnings do build dependem de configuração/dependências preexistentes.
+
+Essas condições impedem declarar a base integralmente verde, mas não impedem
+registrar de forma imutável o estado real para a próxima tarefa.
