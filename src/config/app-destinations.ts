@@ -107,6 +107,12 @@ export const appDestinations: readonly AppDestination[] = [
   }),
 
   exact("app-home", "/inicio", { ...mobileAppDefaults, currentTab: "inicio" }),
+  exact("app-explore", "/explorar", {
+    ...appDefaults,
+    access: "approved",
+    futureTab: "explore",
+    footer: false,
+  }),
   exact("app-devotional", "/devocional", {
     ...mobileAppDefaults,
     currentTab: "devocional",
@@ -191,6 +197,7 @@ export const appDestinations: readonly AppDestination[] = [
   exact("compatibility-community", "/comunidade", {
     ...appDefaults,
     shell: "compatibility",
+    futureTab: "community",
     status: "redirect",
   }),
 ] as const;

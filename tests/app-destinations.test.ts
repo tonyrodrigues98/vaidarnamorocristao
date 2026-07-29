@@ -17,6 +17,7 @@ const expectedBehavior = {
   "/termos": ["public", false, "global", true, false, true, "active"],
   "/manual": ["public", false, "global", true, false, true, "active"],
   "/inicio": ["app", true, "contextual", true, false, true, "active"],
+  "/explorar": ["app", false, "global", false, false, true, "active"],
   "/devocional": ["app", true, "contextual", true, false, true, "active"],
   "/conversas": ["app", true, "contextual", false, false, true, "active"],
   "/conversas/abc": ["focused", false, "contextual", false, true, false, "active"],
@@ -77,10 +78,10 @@ describe("app destination registry", () => {
     },
   );
 
-  it("classifies all 68 generated routes without changing the generated file", () => {
+  it("classifies all 69 generated routes without fallback", () => {
     const routeTree = readFileSync("src/routeTree.gen.ts", "utf8");
     const fullPaths = [...routeTree.matchAll(/fullPath:\s*'([^']+)'/g)].map((match) => match[1]!);
-    expect(fullPaths).toHaveLength(68);
+    expect(fullPaths).toHaveLength(69);
 
     const unclassified = fullPaths
       .map(representativePath)
@@ -96,7 +97,20 @@ describe("app destination registry", () => {
       { id: "messages", path: "/conversas" },
       { id: "profile", path: "/perfil" },
     ]);
-    expect(matchDestination("/explorar")).toBe(unknownDestination);
+    expect(matchDestination("/explorar").id).toBe("app-explore");
+    expect(getDestinationBehavior("/explorar")).toMatchObject({
+      access: "approved",
+      futureTab: "explore",
+      mobileAppShell: false,
+      mobileBottomNav: false,
+      footer: false,
+      status: "active",
+    });
+    expect(getDestinationBehavior("/comunidade")).toMatchObject({
+      shell: "compatibility",
+      futureTab: "community",
+      status: "redirect",
+    });
   });
 
   it("validates the canonical registry", () => {

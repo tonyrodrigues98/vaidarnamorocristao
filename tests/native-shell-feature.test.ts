@@ -7,6 +7,7 @@ import {
   nativeShellInitialDestinationIds,
   parseNativeShellFeatureFlag,
   resolveNativeShellFeatureFlag,
+  shouldExposeNativeRootDestination,
 } from "../src/config/native-shell-feature";
 
 describe("native shell feature flag", () => {
@@ -57,5 +58,26 @@ describe("native shell initial rollout", () => {
     "/rota-desconhecida",
   ])("does not enable %s", (pathname) => {
     expect(isNativeShellEligibleDestination(getDestinationBehavior(pathname))).toBe(false);
+  });
+});
+
+describe("flagged native roots", () => {
+  it.each([
+    ["/comunidade", false, false],
+    ["/comunidade", true, true],
+    ["/explorar", false, false],
+    ["/explorar", true, true],
+    ["/inicio", true, false],
+    ["/conversas/comunidade", true, false],
+    ["/admin", true, false],
+    ["/rota-desconhecida", true, false],
+  ] as const)("resolves %s with feature=%s as %s", (pathname, featureEnabled, expected) => {
+    expect(shouldExposeNativeRootDestination(pathname, featureEnabled)).toBe(expected);
+  });
+
+  it("normalizes query, hash and trailing slash without expanding the allowlist", () => {
+    expect(shouldExposeNativeRootDestination("/comunidade/?tab=agora#top", true)).toBe(true);
+    expect(shouldExposeNativeRootDestination("/explorar/", true)).toBe(true);
+    expect(nativeShellInitialDestinationIds).toEqual(["app-home"]);
   });
 });

@@ -13,13 +13,17 @@ function selectorsFromStylesheet(stylesheet: string) {
 }
 
 describe("native shell frame CSS boundary", () => {
-  it("scopes every public selector to the native shell boundary", () => {
+  it("scopes every public selector to a native shell or local native root boundary", () => {
     const selectors = selectorsFromStylesheet(css);
 
     expect(selectors.length).toBeGreaterThan(0);
-    expect(selectors.every((selector) => selector.startsWith("[data-vdn-native-shell]"))).toBe(
-      true,
-    );
+    expect(
+      selectors.every(
+        (selector) =>
+          selector.startsWith("[data-vdn-native-shell]") ||
+          selector.startsWith("[data-vdn-native-root]"),
+      ),
+    ).toBe(true);
   });
 
   it("does not introduce global, legacy or fixed-frame styling", () => {

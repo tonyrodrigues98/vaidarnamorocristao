@@ -20,6 +20,7 @@ import { Route as ContaRouteImport } from './routes/conta'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as DepoimentosRouteImport } from './routes/depoimentos'
 import { Route as DevocionalRouteImport } from './routes/devocional'
+import { Route as ExplorarRouteImport } from './routes/explorar'
 import { Route as InicioRouteImport } from './routes/inicio'
 import { Route as InstalarRouteImport } from './routes/instalar'
 import { Route as InteressesRouteImport } from './routes/interesses'
@@ -131,6 +132,11 @@ const DepoimentosRoute = DepoimentosRouteImport.update({
 const DevocionalRoute = DevocionalRouteImport.update({
   id: '/devocional',
   path: '/devocional',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ExplorarRoute = ExplorarRouteImport.update({
+  id: '/explorar',
+  path: '/explorar',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InicioRoute = InicioRouteImport.update({
@@ -432,6 +438,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRoute
   '/depoimentos': typeof DepoimentosRoute
   '/devocional': typeof DevocionalRoute
+  '/explorar': typeof ExplorarRoute
   '/inicio': typeof InicioRoute
   '/instalar': typeof InstalarRoute
   '/interesses': typeof InteressesRoute
@@ -502,6 +509,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardRoute
   '/depoimentos': typeof DepoimentosRoute
   '/devocional': typeof DevocionalRoute
+  '/explorar': typeof ExplorarRoute
   '/inicio': typeof InicioRoute
   '/instalar': typeof InstalarRoute
   '/interesses': typeof InteressesRoute
@@ -572,6 +580,7 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/depoimentos': typeof DepoimentosRoute
   '/devocional': typeof DevocionalRoute
+  '/explorar': typeof ExplorarRoute
   '/inicio': typeof InicioRoute
   '/instalar': typeof InstalarRoute
   '/interesses': typeof InteressesRoute
@@ -644,6 +653,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/depoimentos'
     | '/devocional'
+    | '/explorar'
     | '/inicio'
     | '/instalar'
     | '/interesses'
@@ -714,6 +724,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/depoimentos'
     | '/devocional'
+    | '/explorar'
     | '/inicio'
     | '/instalar'
     | '/interesses'
@@ -783,6 +794,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/depoimentos'
     | '/devocional'
+    | '/explorar'
     | '/inicio'
     | '/instalar'
     | '/interesses'
@@ -854,6 +866,7 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   DepoimentosRoute: typeof DepoimentosRoute
   DevocionalRoute: typeof DevocionalRoute
+  ExplorarRoute: typeof ExplorarRoute
   InicioRoute: typeof InicioRoute
   InstalarRoute: typeof InstalarRoute
   InteressesRoute: typeof InteressesRoute
@@ -987,6 +1000,13 @@ declare module '@tanstack/react-router' {
       path: '/devocional'
       fullPath: '/devocional'
       preLoaderRoute: typeof DevocionalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/explorar': {
+      id: '/explorar'
+      path: '/explorar'
+      fullPath: '/explorar'
+      preLoaderRoute: typeof ExplorarRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/inicio': {
@@ -1426,6 +1446,7 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRoute,
   DepoimentosRoute: DepoimentosRoute,
   DevocionalRoute: DevocionalRoute,
+  ExplorarRoute: ExplorarRoute,
   InicioRoute: InicioRoute,
   InstalarRoute: InstalarRoute,
   InteressesRoute: InteressesRoute,
@@ -1484,3 +1505,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

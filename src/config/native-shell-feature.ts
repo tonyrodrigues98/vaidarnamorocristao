@@ -47,3 +47,14 @@ export function shouldRenderNativeShell({
 }: NativeShellRuntimeDecision): boolean {
   return featureEnabled && authenticated && !loading && isNativeShellEligibleDestination(behavior);
 }
+
+const nativeRootDestinationPaths: ReadonlySet<string> = new Set(["/comunidade", "/explorar"]);
+
+export function shouldExposeNativeRootDestination(
+  pathname: string,
+  featureEnabled: boolean,
+): boolean {
+  if (!featureEnabled) return false;
+  const normalizedPath = pathname.split(/[?#]/, 1)[0]?.replace(/\/+$/, "") || "/";
+  return nativeRootDestinationPaths.has(normalizedPath);
+}
