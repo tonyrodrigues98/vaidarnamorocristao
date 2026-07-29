@@ -49,6 +49,11 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { inicioMetadata } from "@/config/route-metadata";
+import {
+  NativeInicioView,
+  type NativeInicioViewModel,
+} from "@/components/home/native/NativeInicioView";
+import { useNativeShellRuntime } from "@/components/native-shell/NativeShellRuntimeContext";
 
 export const Route = createFileRoute("/inicio")({
   component: InicioRoute,
@@ -267,6 +272,7 @@ function actionSearch(id: string): Record<string, unknown> | undefined {
 }
 
 function InicioPage({ user }: { user: User }) {
+  const { active: nativeShellActive } = useNativeShellRuntime();
   const [profile, setProfile] = useState<Profile | null | undefined>(undefined);
   const [advanced, setAdvanced] = useState<StrengthAdvanced>(null);
   const [prefs, setPrefs] = useState<StrengthPreferences>(null);
@@ -615,6 +621,81 @@ function InicioPage({ user }: { user: User }) {
     setBanAppeals((prev) => [data as BanAppeal, ...prev]);
     setAppealText("");
     toast.success("Apelação enviada. A equipe vai analisar.");
+  }
+
+  if (nativeShellActive) {
+    const toNativeAppeal = (appeal: BanAppeal | null) =>
+      appeal
+        ? {
+            appealText: appeal.appeal_text,
+            status: appeal.status,
+            responseText: appeal.response_text,
+            createdAt: appeal.created_at,
+          }
+        : null;
+    const nativeModel: NativeInicioViewModel = {
+      status: profile.status,
+      firstName,
+      greeting: mood.greetingLabel,
+      greetingDetail: mood.subline,
+      bannedReason: profile.banned_reason ?? null,
+      rejectionReason: profile.rejection_reason ?? null,
+      warnings: activeWarnings.map((warning) => ({
+        id: warning.id,
+        message: warning.message,
+        severity: warning.severity,
+      })),
+      requests: adminRequests.map((request) => ({
+        id: request.id,
+        kind: request.kind,
+        message: request.message,
+        createdAt: request.created_at,
+      })),
+      latestAppeal: toNativeAppeal(latestAppeal),
+      latestRejectionAppeal: toNativeAppeal(latestRejectionAppeal),
+      canAppeal,
+      canReverify,
+      appealText,
+      appealBusy,
+      devotional: devo
+        ? {
+            title: devo.title,
+            bibleReference: devo.bible_reference,
+            bibleText: devo.bible_text,
+          }
+        : null,
+      strength,
+      strengthLabel: strengthLabel.label,
+      nextProfileAction: nextActions[0]
+        ? {
+            title: nextActions[0].title,
+            description: nextActions[0].description,
+          }
+        : null,
+      unreadConversations: unreadConvos,
+      newProfiles: newProfiles7d,
+      suggestion: suggestion
+        ? {
+            id: suggestion.id,
+            firstName: suggestion.full_name.split(" ")[0],
+            age: suggestion.age,
+            location: [suggestion.city, suggestion.state].filter(Boolean).join(" · ") || null,
+          }
+        : null,
+      commitment: activeCommitment
+        ? {
+            matchId: activeCommitment.match_id,
+            partnerName: commitmentPartner,
+            days: commitmentDays,
+          }
+        : null,
+      onAppealTextChange: setAppealText,
+      onAcknowledgeWarning: acknowledgeWarning,
+      onResolveRequest: resolveRequest,
+      onSubmitAppeal: submitAppeal,
+    };
+
+    return <NativeInicioView model={nativeModel} />;
   }
 
   return (
