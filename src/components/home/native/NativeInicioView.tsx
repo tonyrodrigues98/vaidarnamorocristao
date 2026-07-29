@@ -82,6 +82,7 @@ type NativePriority = {
   progress?: number;
 };
 
+// eslint-disable-next-line react-refresh/only-export-components -- pure priority contract is unit-tested with the view
 export function getNativeInicioPriority(model: NativeInicioViewModel): NativePriority {
   if (model.status === "banned") {
     return {

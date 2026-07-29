@@ -9,6 +9,7 @@ import { ThemeProvider } from "../src/lib/theme";
 const communitySource = readFileSync("src/routes/comunidade.tsx", "utf8");
 const communityTabsSource = readFileSync("src/config/native-community-tabs.ts", "utf8");
 const exploreSource = readFileSync("src/routes/explorar.tsx", "utf8");
+const exploreRegistrySource = readFileSync("src/config/native-explore-registry.ts", "utf8");
 
 describe("NativeRootPlaceholder", () => {
   it("renders accessible structural content without empty regions or fabricated data", () => {
@@ -81,14 +82,27 @@ describe("/explorar safe root", () => {
     expect(exploreSource).toContain("<RequireApproved>");
   });
 
-  it("contains three structural sections and only established V1 links", () => {
-    expect(exploreSource).toContain('title="Explorar"');
-    expect(exploreSource).toContain('label: "Continuar"');
-    expect(exploreSource).toContain('label: "Experiências"');
-    expect(exploreSource).toContain('label: "Descobertas"');
+  it("contains three functional sections and only established V1 links", () => {
+    expect(exploreSource).toContain(">Explorar</h1>");
+    expect(exploreSource).toContain('title="Continuar"');
+    expect(exploreSource).toContain('title="Experiências"');
+    expect(exploreSource).toContain('title="Descobertas"');
 
-    const links = [...exploreSource.matchAll(/\{ to: "([^"]+)"/g)].map((match) => match[1]);
-    expect(links).toEqual(["/devocional", "/meu-pet", "/pet-arcade", "/loja", "/pretendentes"]);
+    const links = [...exploreRegistrySource.matchAll(/path: "([^"]+)"/g)].map((match) => match[1]);
+    expect(links).toEqual([
+      "/devocional",
+      "/meu-pet",
+      "/pet-arcade",
+      "/quiz-biblico",
+      "/loja",
+      "/avatar",
+      "/caixas",
+      "/conquistas",
+      "/noticias",
+      "/oracoes",
+      "/pretendentes",
+      "/",
+    ]);
     expect(links).not.toContain("/cinema");
     expect(links).not.toContain("/verbo");
     expect(links).not.toContain("/pessoas");

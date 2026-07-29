@@ -1,11 +1,15 @@
-import { NativeRootPlaceholder } from "@/components/native-shell";
+import { createFileRoute, Navigate } from "@tanstack/react-router";
+
+import { NativeExploreCard } from "@/components/explore/native/NativeExploreCard";
+import { NativeExploreContinue } from "@/components/explore/native/NativeExploreContinue";
+import { NativeExploreSection } from "@/components/explore/native/NativeExploreSection";
 import { RequireApproved } from "@/components/RequireApproved";
+import { nativeExploreRegistry } from "@/config/native-explore-registry";
 import {
   nativeShellFeatureEnabled,
   shouldExposeNativeRootDestination,
 } from "@/config/native-shell-feature";
 import { createPrivatePageMetadata } from "@/lib/metadata";
-import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/explorar")({
   component: ExploreRoute,
@@ -17,57 +21,51 @@ export const Route = createFileRoute("/explorar")({
     }),
 });
 
-const exploreSections = [
-  {
-    id: "continuar",
-    label: "Continuar",
-    description: "Retomar experiências recentes.",
-  },
-  {
-    id: "experiencias",
-    label: "Experiências",
-    description: "Verbo, Cinema, Pets, Arcade e Loja.",
-  },
-  {
-    id: "descobertas",
-    label: "Descobertas",
-    description: "Pessoas, conteúdos e atividades.",
-  },
-] as const;
-
-const exploreLinks = [
-  { to: "/devocional", label: "Devocional" },
-  { to: "/meu-pet", label: "Meu Pet" },
-  { to: "/pet-arcade", label: "Pet Arcade" },
-  { to: "/loja", label: "Loja" },
-  { to: "/pretendentes", label: "Pretendentes" },
-] as const;
-
 function ExploreRoute() {
   if (!shouldExposeNativeRootDestination("/explorar", nativeShellFeatureEnabled)) {
     return <Navigate to="/inicio" replace />;
   }
 
+  const experiences = nativeExploreRegistry.filter((item) => item.category === "experiences");
+  const discoveries = nativeExploreRegistry.filter((item) => item.category === "discoveries");
+
   return (
     <RequireApproved>
-      <NativeRootPlaceholder
-        eyebrow="Estrutura em integração"
-        title="Explorar"
-        description="Experiências · Descobertas · Continuar"
-        sections={exploreSections}
-      >
-        <nav className="flex flex-wrap gap-2" aria-label="Experiências disponíveis">
-          {exploreLinks.map((link) => (
-            <Link
-              key={link.to}
-              to={link.to}
-              className="inline-flex min-h-11 items-center rounded-full border border-border bg-card px-4 py-2 text-sm font-semibold text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              {link.label}
-            </Link>
+      <main className="mx-auto grid w-full max-w-[1040px] gap-7 px-4 py-5 pb-28 sm:px-6 md:pb-8">
+        <section>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Explorar</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Continue experiências reais e descubra outras áreas da plataforma.
+          </p>
+        </section>
+
+        <NativeExploreSection
+          title="Continuar"
+          description="Atalhos locais para as experiências que você abriu recentemente."
+        >
+          <div className="sm:col-span-2 xl:col-span-3">
+            <NativeExploreContinue />
+          </div>
+        </NativeExploreSection>
+
+        <NativeExploreSection
+          title="Experiências"
+          description="Recursos existentes para fé, personalização, pets e diversão."
+        >
+          {experiences.map((item) => (
+            <NativeExploreCard key={item.id} item={item} />
           ))}
-        </nav>
-      </NativeRootPlaceholder>
+        </NativeExploreSection>
+
+        <NativeExploreSection
+          title="Descobertas"
+          description="Conteúdos e conexões disponíveis no aplicativo."
+        >
+          {discoveries.map((item) => (
+            <NativeExploreCard key={item.id} item={item} />
+          ))}
+        </NativeExploreSection>
+      </main>
     </RequireApproved>
   );
 }
