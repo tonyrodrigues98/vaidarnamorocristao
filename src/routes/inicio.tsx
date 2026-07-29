@@ -48,16 +48,11 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { toast } from "sonner";
+import { inicioMetadata } from "@/config/route-metadata";
 
 export const Route = createFileRoute("/inicio")({
   component: InicioRoute,
-  head: () => ({
-    meta: [
-      { title: "Início — VaiDarNamoro" },
-      { name: "description", content: "Seu espaço dentro do VaiDarNamoro. Bem-vindo(a) de volta." },
-      { name: "robots", content: "noindex, nofollow" },
-    ],
-  }),
+  head: () => inicioMetadata,
 });
 
 function InicioLoadingState() {
@@ -541,7 +536,10 @@ function InicioPage({ user }: { user: User }) {
   else if (strength < 60) heroStatus = "Seu perfil ainda pode ficar mais forte.";
 
   // Primary CTA logic
-  let primaryCta: { to: any; params?: any; label: string } = { to: "/perfil", label: "Completar perfil" };
+  let primaryCta: { to: any; params?: any; label: string } = {
+    to: "/perfil",
+    label: "Completar perfil",
+  };
   if (isBanned) {
     primaryCta = { to: "/suporte", label: "Falar com o suporte" };
   } else if (isRejected) {
@@ -897,7 +895,11 @@ function InicioPage({ user }: { user: User }) {
                     className="mt-2 min-h-[100px]"
                   />
                   <div className="mt-2 flex justify-end">
-                    <Button onClick={() => submitAppeal("rejection")} disabled={appealBusy} size="sm">
+                    <Button
+                      onClick={() => submitAppeal("rejection")}
+                      disabled={appealBusy}
+                      size="sm"
+                    >
                       <Send className="mr-2 h-3.5 w-3.5" /> Verificar Novamente
                     </Button>
                   </div>
@@ -917,7 +919,10 @@ function InicioPage({ user }: { user: User }) {
               </div>
               <ul className="mt-3 space-y-2">
                 {adminRequests.map((r) => (
-                  <li key={r.id} className="rounded-2xl border border-border/50 bg-background/40 p-3">
+                  <li
+                    key={r.id}
+                    className="rounded-2xl border border-border/50 bg-background/40 p-3"
+                  >
                     <p className="text-[11px] font-semibold uppercase tracking-wide text-[var(--rose)]">
                       {r.kind === "photo" && "Foto"}
                       {r.kind === "bio" && "Biografia"}
@@ -929,7 +934,12 @@ function InicioPage({ user }: { user: User }) {
                     <p className="mt-1 whitespace-pre-wrap text-sm">{r.message}</p>
                     <div className="mt-2 flex flex-wrap gap-2">
                       {(r.kind === "photo" || r.kind === "bio") && (
-                        <Button asChild size="sm" variant="outline" className="h-7 rounded-full text-xs">
+                        <Button
+                          asChild
+                          size="sm"
+                          variant="outline"
+                          className="h-7 rounded-full text-xs"
+                        >
                           <Link to="/perfil">Ir para o perfil</Link>
                         </Button>
                       )}
@@ -971,10 +981,7 @@ function InicioPage({ user }: { user: User }) {
                   </p>
                 </div>
                 <Button asChild size="sm" className="shrink-0 rounded-full">
-                  <Link
-                    to="/proposito/$matchId"
-                    params={{ matchId: activeCommitment.match_id }}
-                  >
+                  <Link to="/proposito/$matchId" params={{ matchId: activeCommitment.match_id }}>
                     Página
                   </Link>
                 </Button>
@@ -1150,7 +1157,12 @@ function InicioPage({ user }: { user: User }) {
                     <span className="ml-1.5 text-muted-foreground">· {strengthLabel.label}</span>
                   </p>
                 </div>
-                <Button asChild size="sm" variant="outline" className="h-8 shrink-0 rounded-full text-xs">
+                <Button
+                  asChild
+                  size="sm"
+                  variant="outline"
+                  className="h-8 shrink-0 rounded-full text-xs"
+                >
                   <Link to="/perfil">Melhorar</Link>
                 </Button>
               </div>
@@ -1291,7 +1303,9 @@ function ActivityChip({
     >
       <span
         className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${
-          highlight ? "bg-[var(--rose)]/15 text-[var(--rose)]" : "bg-[var(--petal)] text-[var(--rose)]"
+          highlight
+            ? "bg-[var(--rose)]/15 text-[var(--rose)]"
+            : "bg-[var(--petal)] text-[var(--rose)]"
         }`}
       >
         {icon}

@@ -42,12 +42,13 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
+import { brand } from "@/config/brand";
 
 async function shareSite() {
-  const url = typeof window !== "undefined" ? window.location.origin : "";
+  const url = typeof window !== "undefined" ? window.location.origin : brand.origin;
   const shareData = {
-    title: "VaiDarNamoro",
-    text: "Conheça pretendentes que compartilham sua fé.",
+    title: brand.name,
+    text: brand.positioning.community,
     url,
   };
   try {

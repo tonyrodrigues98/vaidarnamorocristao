@@ -17,41 +17,13 @@ import {
   type LiveMonthlyHighlight,
   type LiveTeamMember,
 } from "@/lib/liveTeam";
+import { liveHomeMetadata } from "@/config/route-metadata";
 
 export const Route = createFileRoute("/")({
   component: Home,
   head: () => ({
-    meta: [
-      { title: "Caren | Vai Dar Namoro Cristão" },
-      {
-        name: "description",
-        content:
-          "Página oficial da live Vai Dar Namoro Cristão da Caren. Uma comunidade real, feita de pessoas reais.",
-      },
-      {
-        name: "keywords",
-        content:
-          "Caren, Vai Dar Namoro Cristão, live cristã TikTok, comunidade cristã, relacionamento cristão",
-      },
-      { property: "og:title", content: "Caren | Vai Dar Namoro Cristão" },
-      {
-        property: "og:description",
-        content:
-          "A página oficial da live da Caren no TikTok. Uma comunidade real, feita de pessoas reais.",
-      },
-      { property: "og:image", content: "https://vaidarnamoro.com/og-image.jpg" },
-      { property: "og:url", content: "https://vaidarnamoro.com/" },
-      { name: "twitter:title", content: "Caren | Vai Dar Namoro Cristão" },
-      {
-        name: "twitter:description",
-        content: "Página oficial da live Vai Dar Namoro Cristão da Caren.",
-      },
-      { name: "twitter:image", content: "https://vaidarnamoro.com/og-image.jpg" },
-    ],
-    links: [
-      { rel: "canonical", href: "https://vaidarnamoro.com/" },
-      { rel: "me", href: TIKTOK_LIVE_URL },
-    ],
+    ...liveHomeMetadata,
+    links: [...(liveHomeMetadata.links ?? []), { rel: "me", href: TIKTOK_LIVE_URL }],
   }),
 });
 

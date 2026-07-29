@@ -36,6 +36,8 @@ import appCss from "../styles.css?url";
 import coinPng from "@/assets/coin.webp";
 import { useEffect, useState } from "react";
 import { registerAppServiceWorker } from "@/lib/registerSW";
+import { brand } from "@/config/brand";
+import { rootMetadata } from "@/config/route-metadata";
 
 function NotFoundComponent() {
   return (
@@ -64,58 +66,33 @@ export const Route = createRootRouteWithContext<AppRouterContext>()({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
-      { name: "theme-color", content: "#fff7f8", media: "(prefers-color-scheme: light)" },
-      { name: "theme-color", content: "#0b0b0d", media: "(prefers-color-scheme: dark)" },
+      {
+        name: "theme-color",
+        content: brand.theme.canvasLight,
+        media: "(prefers-color-scheme: light)",
+      },
+      {
+        name: "theme-color",
+        content: brand.theme.canvasDark,
+        media: "(prefers-color-scheme: dark)",
+      },
       { name: "format-detection", content: "telephone=no" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
       { name: "mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
-      { name: "apple-mobile-web-app-title", content: "VaiDarNamoro" },
-      { name: "application-name", content: "VaiDarNamoro" },
-      { name: "msapplication-TileColor", content: "#ff4f68" },
+      { name: "apple-mobile-web-app-title", content: brand.name },
+      { name: "application-name", content: brand.name },
+      { name: "msapplication-TileColor", content: brand.theme.action },
       { name: "vdn-build-commit", content: appBuildInfo.commit },
       { name: "vdn-build-channel", content: appBuildInfo.channel },
       {
         name: "google-site-verification",
         content: "PXzDRZhAILyhetuReW3wOrUOPfeN11JyBmm0bVeO0Hg",
       },
-      { title: "VaiDarNamoro — Namoro cristão sério com propósito" },
-      {
-        name: "description",
-        content:
-          "VaiDarNamoro é a plataforma cristã de relacionamentos sérios. Conheça pretendentes aprovados manualmente que vivem e compartilham a sua fé.",
-      },
-      { name: "author", content: "VaiDarNamoro" },
-      { name: "robots", content: "index, follow, max-image-preview:large, max-snippet:-1" },
-      { property: "og:site_name", content: "VaiDarNamoro" },
-      { property: "og:locale", content: "pt_BR" },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-      { property: "og:title", content: "VaiDarNamoro — Namoro cristão sério com propósito" },
-      { name: "twitter:title", content: "VaiDarNamoro — Namoro cristão sério com propósito" },
-      { name: "description", content: "Namoro cristão sério com propósito" },
-      { property: "og:description", content: "Namoro cristão sério com propósito" },
-      { name: "twitter:description", content: "Namoro cristão sério com propósito" },
-      {
-        property: "og:image",
-        content:
-          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/1b750425-4e0b-4a54-9e82-fd801fe3d681/id-preview-24502e78--3b50ea40-46ee-4b11-9926-5be9286cb827.lovable.app-1780599389099.png",
-      },
-      {
-        name: "twitter:image",
-        content:
-          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/1b750425-4e0b-4a54-9e82-fd801fe3d681/id-preview-24502e78--3b50ea40-46ee-4b11-9926-5be9286cb827.lovable.app-1780599389099.png",
-      },
-      {
-        property: "og:image",
-        content:
-          "https://storage.googleapis.com/gpt-engineer-file-uploads/GKTUFlq77iPwT8Pw4jhZzy7Szyp2/social-images/social-1780667467585-8a3c052a-1309-44dc-bb48-6fffc6504f58.webp",
-      },
-      {
-        name: "twitter:image",
-        content:
-          "https://storage.googleapis.com/gpt-engineer-file-uploads/GKTUFlq77iPwT8Pw4jhZzy7Szyp2/social-images/social-1780667467585-8a3c052a-1309-44dc-bb48-6fffc6504f58.webp",
-      },
+      { name: "author", content: brand.name },
+      { property: "og:site_name", content: brand.name },
+      { property: "og:locale", content: brand.locale },
+      ...rootMetadata.meta,
     ],
     links: [
       { rel: "preload", as: "image", href: coinPng },
@@ -128,24 +105,79 @@ export const Route = createRootRouteWithContext<AppRouterContext>()({
         href: (import.meta.env.VITE_SUPABASE_URL as string | undefined) ?? "",
         crossOrigin: "anonymous",
       },
-      { rel: "icon", href: "/favicon.ico", sizes: "any" },
-      { rel: "apple-touch-icon", href: "/apple-touch-icon.png", sizes: "180x180" },
-      { rel: "manifest", href: "/manifest.webmanifest" },
-      { rel: "icon", type: "image/png", sizes: "192x192", href: "/icon-192.png" },
-      { rel: "icon", type: "image/png", sizes: "512x512", href: "/icon-512.png" },
+      { rel: "icon", href: brand.assets.favicon, sizes: "any" },
+      { rel: "apple-touch-icon", href: brand.assets.appleTouchIcon, sizes: "180x180" },
+      { rel: "manifest", href: brand.assets.manifest },
+      { rel: "icon", type: "image/png", sizes: "192x192", href: brand.assets.icon192 },
+      { rel: "icon", type: "image/png", sizes: "512x512", href: brand.assets.icon512 },
       // iOS splash screens (apple-touch-startup-image) — kills the white flash
       // when launching the installed PWA from the home screen.
-      { rel: "apple-touch-startup-image", href: "/splash/splash-2048x2732.png", media: "(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" },
-      { rel: "apple-touch-startup-image", href: "/splash/splash-1668x2388.png", media: "(device-width: 834px) and (device-height: 1194px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" },
-      { rel: "apple-touch-startup-image", href: "/splash/splash-1536x2048.png", media: "(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" },
-      { rel: "apple-touch-startup-image", href: "/splash/splash-1290x2796.png", media: "(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" },
-      { rel: "apple-touch-startup-image", href: "/splash/splash-1284x2778.png", media: "(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" },
-      { rel: "apple-touch-startup-image", href: "/splash/splash-1179x2556.png", media: "(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" },
-      { rel: "apple-touch-startup-image", href: "/splash/splash-1170x2532.png", media: "(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" },
-      { rel: "apple-touch-startup-image", href: "/splash/splash-1125x2436.png", media: "(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" },
-      { rel: "apple-touch-startup-image", href: "/splash/splash-828x1792.png", media: "(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" },
-      { rel: "apple-touch-startup-image", href: "/splash/splash-750x1334.png", media: "(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" },
-      { rel: "apple-touch-startup-image", href: "/splash/splash-640x1136.png", media: "(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" },
+      {
+        rel: "apple-touch-startup-image",
+        href: "/splash/splash-2048x2732.png",
+        media:
+          "(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)",
+      },
+      {
+        rel: "apple-touch-startup-image",
+        href: "/splash/splash-1668x2388.png",
+        media:
+          "(device-width: 834px) and (device-height: 1194px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)",
+      },
+      {
+        rel: "apple-touch-startup-image",
+        href: "/splash/splash-1536x2048.png",
+        media:
+          "(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)",
+      },
+      {
+        rel: "apple-touch-startup-image",
+        href: "/splash/splash-1290x2796.png",
+        media:
+          "(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)",
+      },
+      {
+        rel: "apple-touch-startup-image",
+        href: "/splash/splash-1284x2778.png",
+        media:
+          "(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)",
+      },
+      {
+        rel: "apple-touch-startup-image",
+        href: "/splash/splash-1179x2556.png",
+        media:
+          "(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)",
+      },
+      {
+        rel: "apple-touch-startup-image",
+        href: "/splash/splash-1170x2532.png",
+        media:
+          "(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)",
+      },
+      {
+        rel: "apple-touch-startup-image",
+        href: "/splash/splash-1125x2436.png",
+        media:
+          "(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)",
+      },
+      {
+        rel: "apple-touch-startup-image",
+        href: "/splash/splash-828x1792.png",
+        media:
+          "(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)",
+      },
+      {
+        rel: "apple-touch-startup-image",
+        href: "/splash/splash-750x1334.png",
+        media:
+          "(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)",
+      },
+      {
+        rel: "apple-touch-startup-image",
+        href: "/splash/splash-640x1136.png",
+        media:
+          "(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)",
+      },
       {
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap",
@@ -163,7 +195,7 @@ export const Route = createRootRouteWithContext<AppRouterContext>()({
 
 function RootShell({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="pt-BR">
+    <html lang={brand.language}>
       <head>
         <HeadContent />
         <style
@@ -181,8 +213,10 @@ function RootShell({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         <div id="app-splash" aria-hidden="true">
-          <img src="/splash-logo.png" alt="VaiDarNamoro" className="app-splash-logo" />
-          <div className="app-splash-loader"><span className="app-splash-loader-bar" suppressHydrationWarning /></div>
+          <img src={brand.assets.splashLogo} alt={brand.name} className="app-splash-logo" />
+          <div className="app-splash-loader">
+            <span className="app-splash-loader-bar" suppressHydrationWarning />
+          </div>
         </div>
         {children}
         <Scripts />
@@ -225,45 +259,45 @@ function RootComponent() {
       <ThemeProvider>
         <SupabaseRuntimeBoundary>
           <AuthProvider>
-          <V2AwareRouteBoundary isV2Route={isV2Route}>
-            <AuthenticatedProviderBoundary>
-              <MobileAppShell>
-                {isHome ? (
-                  <Outlet />
-                ) : (
-                  <div
-                    className={
-                      chatRoute
-                        ? "flex h-[var(--app-visual-height,100dvh)] flex-col overflow-hidden"
-                        : "flex min-h-screen flex-col"
-                    }
-                  >
-                    <div className={chatRoute ? "min-h-0 flex-1 overflow-hidden" : "flex-1"}>
-                      <MobileRouteTransition disabled={chatRoute}>
-                        <Outlet />
-                      </MobileRouteTransition>
+            <V2AwareRouteBoundary isV2Route={isV2Route}>
+              <AuthenticatedProviderBoundary>
+                <MobileAppShell>
+                  {isHome ? (
+                    <Outlet />
+                  ) : (
+                    <div
+                      className={
+                        chatRoute
+                          ? "flex h-[var(--app-visual-height,100dvh)] flex-col overflow-hidden"
+                          : "flex min-h-screen flex-col"
+                      }
+                    >
+                      <div className={chatRoute ? "min-h-0 flex-1 overflow-hidden" : "flex-1"}>
+                        <MobileRouteTransition disabled={chatRoute}>
+                          <Outlet />
+                        </MobileRouteTransition>
+                      </div>
+                      {showFooter && (
+                        <footer className="mt-8 border-t border-border/40 bg-card/60 py-4 text-muted-foreground">
+                          <div className="mx-auto flex max-w-7xl items-center justify-end gap-4 px-4 text-xs text-muted-foreground">
+                            <Link to="/termos" className="hover:text-[var(--rose)] hover:underline">
+                              Termos e Condições
+                            </Link>
+                            <span aria-hidden className="opacity-40">
+                              •
+                            </span>
+                            <Link to="/manual" className="hover:text-[var(--rose)] hover:underline">
+                              Manual do Usuário
+                            </Link>
+                            <SupportFooterButton />
+                          </div>
+                        </footer>
+                      )}
                     </div>
-                    {showFooter && (
-                      <footer className="mt-8 border-t border-border/40 bg-card/60 py-4 text-muted-foreground">
-                        <div className="mx-auto flex max-w-7xl items-center justify-end gap-4 px-4 text-xs text-muted-foreground">
-                          <Link to="/termos" className="hover:text-[var(--rose)] hover:underline">
-                            Termos e Condições
-                          </Link>
-                          <span aria-hidden className="opacity-40">
-                            •
-                          </span>
-                          <Link to="/manual" className="hover:text-[var(--rose)] hover:underline">
-                            Manual do Usuário
-                          </Link>
-                          <SupportFooterButton />
-                        </div>
-                      </footer>
-                    )}
-                  </div>
-                )}
-              </MobileAppShell>
-            </AuthenticatedProviderBoundary>
-          </V2AwareRouteBoundary>
+                  )}
+                </MobileAppShell>
+              </AuthenticatedProviderBoundary>
+            </V2AwareRouteBoundary>
             <Toaster richColors position="top-right" />
           </AuthProvider>
         </SupabaseRuntimeBoundary>

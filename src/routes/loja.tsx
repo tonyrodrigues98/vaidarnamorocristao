@@ -75,37 +75,15 @@ import {
   type FreebieRarity,
 } from "@/lib/freebies";
 import { Gift } from "lucide-react";
+import { lojaMetadata } from "@/config/route-metadata";
 
 export const Route = createFileRoute("/loja")({
   component: LojaPage,
-  head: () => ({
-    meta: [
-      { title: "Loja — VaiDarNamoro" },
-      {
-        name: "description",
-        content:
-          "Use suas moedas para desbloquear molduras, auras e personalizações exclusivas do seu perfil.",
-      },
-      { property: "og:title", content: "Loja — VaiDarNamoro" },
-      {
-        property: "og:description",
-        content:
-          "Use suas moedas para desbloquear molduras, auras e personalizações exclusivas do seu perfil.",
-      },
-      { property: "og:url", content: "https://vaidarnamoro.com/loja" },
-      { name: "robots", content: "noindex, nofollow" },
-    ],
-  }),
+  head: () => lojaMetadata,
 });
 
 type EquippedMap = { frame: string | null; aura: string | null; sticker: string | null };
-type CategoryKey =
-  | "all"
-  | "frame"
-  | "aura"
-  | "background"
-  | "name-gradient"
-  | "inventory";
+type CategoryKey = "all" | "frame" | "aura" | "background" | "name-gradient" | "inventory";
 
 const CATEGORIES: {
   key: CategoryKey;
@@ -175,10 +153,7 @@ function LojaPage() {
     refetchOnReconnect: true,
   });
 
-  const catalog = useMemo<Decoration[]>(
-    () => decorationsQuery.data ?? [],
-    [decorationsQuery.data],
-  );
+  const catalog = useMemo<Decoration[]>(() => decorationsQuery.data ?? [], [decorationsQuery.data]);
   const backgrounds = useMemo<ProfileBackground[]>(
     () => backgroundsQuery.data ?? [],
     [backgroundsQuery.data],
@@ -305,8 +280,12 @@ function LojaPage() {
   }, [queryClient, user?.id]);
 
   const claimFreebieMutation = useMutation({
-    mutationFn: (args: { category: FreebieCategory; rarity: FreebieRarity; itemId: string; label: string }) =>
-      claimFreebie(args.category, args.rarity, args.itemId).then(() => args),
+    mutationFn: (args: {
+      category: FreebieCategory;
+      rarity: FreebieRarity;
+      itemId: string;
+      label: string;
+    }) => claimFreebie(args.category, args.rarity, args.itemId).then(() => args),
     onSuccess: (args) => {
       invalidateFreebies();
       if (args.category === "profile_background") invalidateBalanceAndBackgroundInventory();
@@ -318,13 +297,21 @@ function LojaPage() {
     },
     onError: (e) => {
       const msg = e instanceof Error ? e.message : "";
-      if (msg.includes("já foi resgatado")) toast.error("Você já resgatou um brinde dessa raridade.");
+      if (msg.includes("já foi resgatado"))
+        toast.error("Você já resgatou um brinde dessa raridade.");
       else if (msg.includes("Nível")) toast.error(msg);
       else toast.error("Não foi possível resgatar o brinde.");
     },
   });
-  const handleClaimFreebie = (category: FreebieCategory, rarity: FreebieRarity, itemId: string, label: string) =>
-    runMutation(itemId, offlineBuyToast, () => claimFreebieMutation.mutateAsync({ category, rarity, itemId, label }));
+  const handleClaimFreebie = (
+    category: FreebieCategory,
+    rarity: FreebieRarity,
+    itemId: string,
+    label: string,
+  ) =>
+    runMutation(itemId, offlineBuyToast, () =>
+      claimFreebieMutation.mutateAsync({ category, rarity, itemId, label }),
+    );
 
   // Pull-to-refresh resolver: when all user-scoped queries settle, release the promise.
   useEffect(() => {
@@ -500,27 +487,21 @@ function LojaPage() {
   };
   const handleUnequip = (type: DecorationType) => {
     if (!user) return Promise.resolve();
-    return runMutation(
-      `unequip-${type}`,
-      offlineVisualToast,
-      () => unequipDecorationMutation.mutateAsync(type),
+    return runMutation(`unequip-${type}`, offlineVisualToast, () =>
+      unequipDecorationMutation.mutateAsync(type),
     );
   };
   const handleEquipBackground = (b: ProfileBackground) =>
     runMutation(b.id, offlineVisualToast, () => equipBackgroundMutation.mutateAsync(b));
   const handleUnequipBackground = () =>
-    runMutation(
-      "unequip-background",
-      offlineVisualToast,
-      () => unequipBackgroundMutation.mutateAsync(),
+    runMutation("unequip-background", offlineVisualToast, () =>
+      unequipBackgroundMutation.mutateAsync(),
     );
   const handleEquipNameGradient = (g: NameGradient) =>
     runMutation(g.id, offlineVisualToast, () => equipNameGradientMutation.mutateAsync(g));
   const handleUnequipNameGradient = () =>
-    runMutation(
-      "unequip-name-gradient",
-      offlineVisualToast,
-      () => unequipNameGradientMutation.mutateAsync(),
+    runMutation("unequip-name-gradient", offlineVisualToast, () =>
+      unequipNameGradientMutation.mutateAsync(),
     );
 
   if (!authLoading && !user) return <Navigate to="/auth/login" />;
@@ -534,24 +515,84 @@ function LojaPage() {
       <Header />
       <MobileAppHeader title="Loja" subtitle="Personalize sua experiência" />
       <PullToRefresh onRefresh={handlePullRefresh} disabled={!user || !isOnline}>
+        {/* Mobile compact balance widget */}
+        <section className="md:hidden border-b border-border/60 bg-background">
+          <div className="px-4 py-4">
+            <div
+              className="relative overflow-hidden rounded-2xl border border-border/60 px-4 py-3 shadow-soft"
+              style={{
+                background:
+                  "linear-gradient(120deg, color-mix(in oklab, var(--rose) 14%, var(--card)) 0%, color-mix(in oklab, #f59e0b 12%, var(--card)) 100%)",
+              }}
+            >
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-100 text-amber-700">
+                    <CoinIcon className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                      Seu saldo
+                    </p>
+                    <p className="text-lg font-semibold leading-none">
+                      {balanceKnown ? balance : "—"}
+                      <span className="ml-1 text-xs font-normal text-muted-foreground">
+                        {balanceKnown ? "moedas" : "saldo indisponível offline"}
+                      </span>
+                    </p>
+                  </div>
+                </div>
+                <span className="inline-flex items-center gap-1 rounded-full bg-background/80 px-2.5 py-1 text-[10px] font-medium text-muted-foreground backdrop-blur">
+                  <Gem className="h-3 w-3 text-[var(--rose)]" /> Loja do App
+                </span>
+              </div>
+            </div>
+          </div>
+        </section>
 
-      {/* Mobile compact balance widget */}
-      <section className="md:hidden border-b border-border/60 bg-background">
-        <div className="px-4 py-4">
+        {/* Hero (desktop) */}
+        <section className="relative overflow-hidden border-b hidden md:block">
           <div
-            className="relative overflow-hidden rounded-2xl border border-border/60 px-4 py-3 shadow-soft"
+            aria-hidden
+            className="pointer-events-none absolute inset-0 -z-10"
             style={{
               background:
-                "linear-gradient(120deg, color-mix(in oklab, var(--rose) 14%, var(--card)) 0%, color-mix(in oklab, #f59e0b 12%, var(--card)) 100%)",
+                "radial-gradient(60% 80% at 20% 0%, color-mix(in oklab, var(--rose) 22%, transparent), transparent 60%), radial-gradient(50% 70% at 90% 10%, color-mix(in oklab, var(--lilac, #c4b5fd) 22%, transparent), transparent 60%)",
             }}
-          >
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -top-20 right-10 h-64 w-64 rounded-full opacity-40 blur-3xl"
+            style={{ background: "color-mix(in oklab, var(--rose) 50%, transparent)" }}
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -bottom-24 -left-10 h-72 w-72 rounded-full opacity-30 blur-3xl"
+            style={{ background: "color-mix(in oklab, var(--lilac, #c4b5fd) 60%, transparent)" }}
+          />
+
+          <div className="mx-auto max-w-5xl px-4 py-10 sm:py-14">
+            <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+              <div className="max-w-xl">
+                <div className="inline-flex items-center gap-2 rounded-full border border-[var(--rose-soft)]/40 bg-background/70 px-3 py-1 text-xs font-medium text-[var(--rose)] backdrop-blur">
+                  <Gem className="h-3.5 w-3.5" /> Loja da Plataforma
+                </div>
+                <h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
+                  Personalize seu perfil
+                </h1>
+                <p className="mt-2 text-sm text-muted-foreground sm:text-base">
+                  Use suas moedas para desbloquear molduras, auras e itens exclusivos. Toda compra
+                  fica salva permanentemente na sua conta.
+                </p>
+              </div>
+
+              {/* Balance */}
+              <div className="inline-flex items-center gap-3 self-start rounded-2xl border bg-card/80 px-4 py-3 shadow-soft backdrop-blur sm:self-end">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-100 text-amber-700">
                   <CoinIcon className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                  <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
                     Seu saldo
                   </p>
                   <p className="text-lg font-semibold leading-none">
@@ -562,384 +603,165 @@ function LojaPage() {
                   </p>
                 </div>
               </div>
-              <span className="inline-flex items-center gap-1 rounded-full bg-background/80 px-2.5 py-1 text-[10px] font-medium text-muted-foreground backdrop-blur">
-                <Gem className="h-3 w-3 text-[var(--rose)]" /> Loja do App
-              </span>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Hero (desktop) */}
-      <section className="relative overflow-hidden border-b hidden md:block">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 -z-10"
-          style={{
-            background:
-              "radial-gradient(60% 80% at 20% 0%, color-mix(in oklab, var(--rose) 22%, transparent), transparent 60%), radial-gradient(50% 70% at 90% 10%, color-mix(in oklab, var(--lilac, #c4b5fd) 22%, transparent), transparent 60%)",
-          }}
-        />
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -top-20 right-10 h-64 w-64 rounded-full opacity-40 blur-3xl"
-          style={{ background: "color-mix(in oklab, var(--rose) 50%, transparent)" }}
-        />
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -bottom-24 -left-10 h-72 w-72 rounded-full opacity-30 blur-3xl"
-          style={{ background: "color-mix(in oklab, var(--lilac, #c4b5fd) 60%, transparent)" }}
-        />
-
-        <div className="mx-auto max-w-5xl px-4 py-10 sm:py-14">
-          <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
-            <div className="max-w-xl">
-              <div className="inline-flex items-center gap-2 rounded-full border border-[var(--rose-soft)]/40 bg-background/70 px-3 py-1 text-xs font-medium text-[var(--rose)] backdrop-blur">
-                <Gem className="h-3.5 w-3.5" /> Loja da Plataforma
-              </div>
-              <h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
-                Personalize seu perfil
-              </h1>
-              <p className="mt-2 text-sm text-muted-foreground sm:text-base">
-                Use suas moedas para desbloquear molduras, auras e itens exclusivos. Toda compra
-                fica salva permanentemente na sua conta.
-              </p>
-            </div>
-
-            {/* Balance */}
-            <div className="inline-flex items-center gap-3 self-start rounded-2xl border bg-card/80 px-4 py-3 shadow-soft backdrop-blur sm:self-end">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-100 text-amber-700">
-                <CoinIcon className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
-                  Seu saldo
-                </p>
-                <p className="text-lg font-semibold leading-none">
-                  {balanceKnown ? balance : "—"}
-                  <span className="ml-1 text-xs font-normal text-muted-foreground">
-                    {balanceKnown ? "moedas" : "saldo indisponível offline"}
-                  </span>
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Categorias horizontais */}
-      <div className="sticky top-[calc(env(safe-area-inset-top,0px)+3.25rem)] z-20 -mb-2 bg-background/95 backdrop-blur md:static md:top-auto md:z-auto md:mb-0 md:bg-transparent md:backdrop-blur-0">
-        <div className="mx-auto max-w-5xl px-4 pt-4 md:pt-6">
-          <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-3 md:mx-0 md:flex-wrap md:overflow-visible md:px-0 md:pb-0 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-            {CATEGORIES.map((c) => {
-              const active = activeTab === c.key;
-              const Icon = c.icon;
-              return (
-                <button
-                  key={c.key}
-                  type="button"
-                  onClick={() => setActiveTab(c.key)}
-                  className={`app-pressable inline-flex shrink-0 items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition ${
-                    active
-                      ? "bg-foreground text-background shadow-soft"
-                      : "border bg-card text-foreground hover:border-[var(--rose-soft)]"
-                  }`}
-                >
-                  <Icon className="h-3.5 w-3.5" />
-                  {c.label}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-
-      {/* Content */}
-      <main className="mx-auto max-w-5xl px-4 pb-24 pt-6">
-        {!isOnline && !loading && hasCatalogCache && (
-          <StaleDataNotice
-            className="mb-4"
-            message="Você está offline. Mostrando itens carregados anteriormente. Compras e mudanças de visual estão indisponíveis."
-          />
-        )}
-        {loading ? (
-          <ShopSkeleton cards={8} />
-        ) : !isOnline && !hasCatalogCache ? (
-          <OfflineState className="my-12" />
-        ) : activeTab === "all" ? (
-          <HighlightsView
-            decorations={catalog}
-            backgrounds={backgrounds}
-            owned={owned}
-            ownedBackgrounds={ownedBackgrounds}
-            equipped={equipped}
-            equippedBackground={equippedBackground}
-            onPickCategory={setActiveTab}
-          />
-        ) : activeTab === "inventory" ? (
-          <InventoryView
-            decorations={catalog}
-            backgrounds={backgrounds}
-            nameGradients={nameGradients}
-            owned={owned}
-            ownedBackgrounds={ownedBackgrounds}
-            ownedNameGradients={ownedNameGradients}
-            equipped={equipped}
-            equippedBackground={equippedBackground}
-            equippedNameGradient={equippedNameGradient}
-            busyId={busyId}
-            photoUrl={photoUrl}
-            userEmail={user?.email ?? null}
-            onEquipFrame={handleEquip}
-            onEquipAura={handleEquip}
-            onUnequipFrame={() => handleUnequip("frame")}
-            onUnequipAura={() => handleUnequip("aura")}
-            onEquipBackground={handleEquipBackground}
-            onUnequipBackground={handleUnequipBackground}
-            onEquipNameGradient={handleEquipNameGradient}
-            onUnequipNameGradient={handleUnequipNameGradient}
-            onBrowse={() => setActiveTab("all")}
-          />
-        ) : activeTab === "name-gradient" ? (
-          nameGradients.length === 0 ? (
-            <AppEmptyState
-              icon={<GemIcon className="h-5 w-5" />}
-              title="Nenhum item nesta categoria"
-              description="Novos gradientes de nome podem aparecer em breve."
-              className="my-12"
-            />
-          ) : (
-            <>
-              {equippedNameGradient && (
-                <div className="mb-4 flex justify-end">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-xs text-muted-foreground"
-                    onClick={handleUnequipNameGradient}
-                    disabled={busyId === "unequip-name-gradient"}
+        {/* Categorias horizontais */}
+        <div className="sticky top-[calc(env(safe-area-inset-top,0px)+3.25rem)] z-20 -mb-2 bg-background/95 backdrop-blur md:static md:top-auto md:z-auto md:mb-0 md:bg-transparent md:backdrop-blur-0">
+          <div className="mx-auto max-w-5xl px-4 pt-4 md:pt-6">
+            <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-3 md:mx-0 md:flex-wrap md:overflow-visible md:px-0 md:pb-0 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+              {CATEGORIES.map((c) => {
+                const active = activeTab === c.key;
+                const Icon = c.icon;
+                return (
+                  <button
+                    key={c.key}
+                    type="button"
+                    onClick={() => setActiveTab(c.key)}
+                    className={`app-pressable inline-flex shrink-0 items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition ${
+                      active
+                        ? "bg-foreground text-background shadow-soft"
+                        : "border bg-card text-foreground hover:border-[var(--rose-soft)]"
+                    }`}
                   >
-                    <X className="mr-1 h-3 w-3" />
-                    Remover gradiente atual
-                  </Button>
-                </div>
-              )}
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {nameGradients.map((gradient) => {
-                  const isOwned = ownedNameGradients.has(gradient.id);
-                  const isEquipped = equippedNameGradient === gradient.id;
-                  const busy = busyId === gradient.id;
-                  const canAfford = balance >= gradient.price;
-                  const isFreebie =
-                    !isOwned && canClaimFreebie(freebieStatuses, "name_gradient", "legendary");
-                  return (
-                    <article
-                      key={gradient.id}
-                      className={`app-card-interactive overflow-hidden rounded-2xl border bg-card p-5 transition ${
-                        isEquipped
-                          ? "border-[var(--rose)] ring-1 ring-[var(--rose)]/30"
-                          : "hover:border-[var(--rose-soft)]"
-                      }`}
+                    <Icon className="h-3.5 w-3.5" />
+                    {c.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        {/* Content */}
+        <main className="mx-auto max-w-5xl px-4 pb-24 pt-6">
+          {!isOnline && !loading && hasCatalogCache && (
+            <StaleDataNotice
+              className="mb-4"
+              message="Você está offline. Mostrando itens carregados anteriormente. Compras e mudanças de visual estão indisponíveis."
+            />
+          )}
+          {loading ? (
+            <ShopSkeleton cards={8} />
+          ) : !isOnline && !hasCatalogCache ? (
+            <OfflineState className="my-12" />
+          ) : activeTab === "all" ? (
+            <HighlightsView
+              decorations={catalog}
+              backgrounds={backgrounds}
+              owned={owned}
+              ownedBackgrounds={ownedBackgrounds}
+              equipped={equipped}
+              equippedBackground={equippedBackground}
+              onPickCategory={setActiveTab}
+            />
+          ) : activeTab === "inventory" ? (
+            <InventoryView
+              decorations={catalog}
+              backgrounds={backgrounds}
+              nameGradients={nameGradients}
+              owned={owned}
+              ownedBackgrounds={ownedBackgrounds}
+              ownedNameGradients={ownedNameGradients}
+              equipped={equipped}
+              equippedBackground={equippedBackground}
+              equippedNameGradient={equippedNameGradient}
+              busyId={busyId}
+              photoUrl={photoUrl}
+              userEmail={user?.email ?? null}
+              onEquipFrame={handleEquip}
+              onEquipAura={handleEquip}
+              onUnequipFrame={() => handleUnequip("frame")}
+              onUnequipAura={() => handleUnequip("aura")}
+              onEquipBackground={handleEquipBackground}
+              onUnequipBackground={handleUnequipBackground}
+              onEquipNameGradient={handleEquipNameGradient}
+              onUnequipNameGradient={handleUnequipNameGradient}
+              onBrowse={() => setActiveTab("all")}
+            />
+          ) : activeTab === "name-gradient" ? (
+            nameGradients.length === 0 ? (
+              <AppEmptyState
+                icon={<GemIcon className="h-5 w-5" />}
+                title="Nenhum item nesta categoria"
+                description="Novos gradientes de nome podem aparecer em breve."
+                className="my-12"
+              />
+            ) : (
+              <>
+                {equippedNameGradient && (
+                  <div className="mb-4 flex justify-end">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-xs text-muted-foreground"
+                      onClick={handleUnequipNameGradient}
+                      disabled={busyId === "unequip-name-gradient"}
                     >
-                      <div className="rounded-2xl border bg-background p-5 text-center">
-                        <p className="text-xs text-muted-foreground">Preview no perfil</p>
-                        <p className="mt-2 text-3xl font-black" style={nameGradientStyle(gradient)}>
-                          {gradient.name}
-                        </p>
-                      </div>
-                      <div className="mt-4 flex items-center justify-between gap-3">
-                        <div>
-                          <h3 className="font-black">{gradient.name}</h3>
-                          <p className="text-xs text-muted-foreground">{gradient.price} moedas</p>
+                      <X className="mr-1 h-3 w-3" />
+                      Remover gradiente atual
+                    </Button>
+                  </div>
+                )}
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {nameGradients.map((gradient) => {
+                    const isOwned = ownedNameGradients.has(gradient.id);
+                    const isEquipped = equippedNameGradient === gradient.id;
+                    const busy = busyId === gradient.id;
+                    const canAfford = balance >= gradient.price;
+                    const isFreebie =
+                      !isOwned && canClaimFreebie(freebieStatuses, "name_gradient", "legendary");
+                    return (
+                      <article
+                        key={gradient.id}
+                        className={`app-card-interactive overflow-hidden rounded-2xl border bg-card p-5 transition ${
+                          isEquipped
+                            ? "border-[var(--rose)] ring-1 ring-[var(--rose)]/30"
+                            : "hover:border-[var(--rose-soft)]"
+                        }`}
+                      >
+                        <div className="rounded-2xl border bg-background p-5 text-center">
+                          <p className="text-xs text-muted-foreground">Preview no perfil</p>
+                          <p
+                            className="mt-2 text-3xl font-black"
+                            style={nameGradientStyle(gradient)}
+                          >
+                            {gradient.name}
+                          </p>
                         </div>
-                        {isEquipped ? (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-[var(--rose)] px-2 py-0.5 text-[10px] font-semibold text-white">
-                            <Check className="h-3 w-3" /> Equipado
-                          </span>
-                        ) : isFreebie ? (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500 px-2 py-0.5 text-[10px] font-semibold text-white">
-                            <Gift className="h-3 w-3" /> Brinde
-                          </span>
-                        ) : null}
-                      </div>
-                      <div className="mt-4">
-                        {isEquipped ? (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="w-full text-xs"
-                            disabled={busyId === "unequip-name-gradient"}
-                            onClick={handleUnequipNameGradient}
-                          >
-                            Equipado
-                          </Button>
-                        ) : isOwned ? (
-                          <Button
-                            size="sm"
-                            className="w-full text-xs"
-                            disabled={busy || !isOnline}
-                            onClick={() => handleEquipNameGradient(gradient)}
-                          >
-                            {busy ? <Loader2 className="h-3 w-3 animate-spin" /> : "Equipar"}
-                          </Button>
-                        ) : isFreebie ? (
-                          <Button
-                            size="sm"
-                            className="w-full bg-emerald-600 text-xs text-white hover:bg-emerald-700"
-                            disabled={busy || !isOnline}
-                            onClick={() =>
-                              handleClaimFreebie("name_gradient", "legendary", gradient.id, gradient.name)
-                            }
-                          >
-                            {busy ? (
-                              <Loader2 className="h-3 w-3 animate-spin" />
-                            ) : (
-                              <span className="inline-flex items-center gap-1.5">
-                                <Gift className="h-3 w-3" /> Resgatar grátis
-                              </span>
-                            )}
-                          </Button>
-                        ) : (
-                          <Button
-                            size="sm"
-                            className="w-full text-xs"
-                            disabled={busy || !canAfford || !isOnline}
-                            onClick={() => handleBuyNameGradient(gradient)}
-                          >
-                            {busy ? (
-                              <Loader2 className="h-3 w-3 animate-spin" />
-                            ) : canAfford ? (
-                              <span className="inline-flex items-center gap-1.5">
-                                Comprar
-                                <span className="inline-flex items-center gap-1 opacity-80">
-                                  <CoinIcon className="h-3 w-3" /> {gradient.price}
-                                </span>
-                              </span>
-                            ) : (
-                              "Moedas insuficientes"
-                            )}
-                          </Button>
-                        )}
-                      </div>
-                    </article>
-                  );
-                })}
-              </div>
-            </>
-          )
-        ) : activeTab === "background" ? (
-          backgrounds.length === 0 ? (
-            <AppEmptyState
-              icon={<GemIcon className="h-5 w-5" />}
-              title="Nenhum item nesta categoria"
-              description="Novos fundos de perfil podem aparecer em breve."
-              className="my-12"
-            />
-          ) : (
-            <>
-              {equippedBackground && (
-                <div className="mb-4 flex justify-end">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-xs text-muted-foreground"
-                    onClick={handleUnequipBackground}
-                    disabled={busyId === "unequip-background"}
-                  >
-                    <X className="mr-1 h-3 w-3" />
-                    Remover fundo atual
-                  </Button>
-                </div>
-              )}
-
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {backgrounds.map((background) => {
-                  const isOwned = ownedBackgrounds.has(background.id);
-                  const isEquipped = equippedBackground === background.id;
-                  const busy = busyId === background.id;
-                  const canAfford = balance >= background.price;
-                  const rarity = BACKGROUND_RARITY_STYLE[background.rarity];
-                  const isFreebie =
-                    !isOwned &&
-                    canClaimFreebie(freebieStatuses, "profile_background", background.rarity);
-
-                  return (
-                    <article
-                      key={background.id}
-                      className={`app-card-interactive group overflow-hidden rounded-2xl border bg-card transition ${
-                        isEquipped
-                          ? "border-[var(--rose)] ring-1 ring-[var(--rose)]/30"
-                          : rarity.border
-                      }`}
-                    >
-                      <div className="relative aspect-[16/10] overflow-hidden bg-gradient-to-br from-muted to-card">
-                        {background.image_url ? (
-                          <img
-                            src={background.image_url}
-                            alt={background.name}
-                            loading="lazy"
-                            className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-                          />
-                        ) : (
-                          <div className="flex h-full items-center justify-center text-muted-foreground">
-                            <ImageIcon className="h-10 w-10" />
+                        <div className="mt-4 flex items-center justify-between gap-3">
+                          <div>
+                            <h3 className="font-black">{gradient.name}</h3>
+                            <p className="text-xs text-muted-foreground">{gradient.price} moedas</p>
                           </div>
-                        )}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
-                        <div className="absolute left-3 top-3 flex gap-2">
-                          <span
-                            className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${rarity.chip}`}
-                          >
-                            {rarity.label}
-                          </span>
-                          {isEquipped && (
+                          {isEquipped ? (
                             <span className="inline-flex items-center gap-1 rounded-full bg-[var(--rose)] px-2 py-0.5 text-[10px] font-semibold text-white">
                               <Check className="h-3 w-3" /> Equipado
                             </span>
-                          )}
-                        </div>
-                        {!isOwned && (
-                          isFreebie ? (
-                            <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-emerald-500 px-2 py-0.5 text-[10px] font-semibold text-white shadow">
+                          ) : isFreebie ? (
+                            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500 px-2 py-0.5 text-[10px] font-semibold text-white">
                               <Gift className="h-3 w-3" /> Brinde
                             </span>
-                          ) : (
-                            <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-background/85 px-2 py-0.5 text-[10px] font-medium text-foreground backdrop-blur">
-                              <CoinIcon className="h-3 w-3" /> {background.price}
-                            </span>
-                          )
-                        )}
-                      </div>
-
-                      <div className="p-4">
-                        <h3 className="line-clamp-1 text-sm font-semibold" title={background.name}>
-                          {background.name}
-                        </h3>
-                        <p className="mt-1 line-clamp-2 min-h-[2.5rem] text-xs text-muted-foreground">
-                          {background.description || "Fundo premium para destacar seu perfil."}
-                        </p>
-
+                          ) : null}
+                        </div>
                         <div className="mt-4">
                           {isEquipped ? (
                             <Button
                               variant="outline"
                               size="sm"
                               className="w-full text-xs"
-                              disabled={busyId === "unequip-background"}
-                              onClick={handleUnequipBackground}
+                              disabled={busyId === "unequip-name-gradient"}
+                              onClick={handleUnequipNameGradient}
                             >
-                              {busyId === "unequip-background" ? (
-                                <Loader2 className="h-3 w-3 animate-spin" />
-                              ) : (
-                                "Equipado"
-                              )}
+                              Equipado
                             </Button>
                           ) : isOwned ? (
                             <Button
                               size="sm"
                               className="w-full text-xs"
                               disabled={busy || !isOnline}
-                              onClick={() => handleEquipBackground(background)}
+                              onClick={() => handleEquipNameGradient(gradient)}
                             >
                               {busy ? <Loader2 className="h-3 w-3 animate-spin" /> : "Equipar"}
                             </Button>
@@ -950,10 +772,10 @@ function LojaPage() {
                               disabled={busy || !isOnline}
                               onClick={() =>
                                 handleClaimFreebie(
-                                  "profile_background",
-                                  background.rarity as FreebieRarity,
-                                  background.id,
-                                  background.name,
+                                  "name_gradient",
+                                  "legendary",
+                                  gradient.id,
+                                  gradient.name,
                                 )
                               }
                             >
@@ -970,7 +792,7 @@ function LojaPage() {
                               size="sm"
                               className="w-full text-xs"
                               disabled={busy || !canAfford || !isOnline}
-                              onClick={() => setConfirmBackground(background)}
+                              onClick={() => handleBuyNameGradient(gradient)}
                             >
                               {busy ? (
                                 <Loader2 className="h-3 w-3 animate-spin" />
@@ -978,7 +800,7 @@ function LojaPage() {
                                 <span className="inline-flex items-center gap-1.5">
                                   Comprar
                                   <span className="inline-flex items-center gap-1 opacity-80">
-                                    <CoinIcon className="h-3 w-3" /> {background.price}
+                                    <CoinIcon className="h-3 w-3" /> {gradient.price}
                                   </span>
                                 </span>
                               ) : (
@@ -987,176 +809,352 @@ function LojaPage() {
                             </Button>
                           )}
                         </div>
+                      </article>
+                    );
+                  })}
+                </div>
+              </>
+            )
+          ) : activeTab === "background" ? (
+            backgrounds.length === 0 ? (
+              <AppEmptyState
+                icon={<GemIcon className="h-5 w-5" />}
+                title="Nenhum item nesta categoria"
+                description="Novos fundos de perfil podem aparecer em breve."
+                className="my-12"
+              />
+            ) : (
+              <>
+                {equippedBackground && (
+                  <div className="mb-4 flex justify-end">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-xs text-muted-foreground"
+                      onClick={handleUnequipBackground}
+                      disabled={busyId === "unequip-background"}
+                    >
+                      <X className="mr-1 h-3 w-3" />
+                      Remover fundo atual
+                    </Button>
+                  </div>
+                )}
+
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {backgrounds.map((background) => {
+                    const isOwned = ownedBackgrounds.has(background.id);
+                    const isEquipped = equippedBackground === background.id;
+                    const busy = busyId === background.id;
+                    const canAfford = balance >= background.price;
+                    const rarity = BACKGROUND_RARITY_STYLE[background.rarity];
+                    const isFreebie =
+                      !isOwned &&
+                      canClaimFreebie(freebieStatuses, "profile_background", background.rarity);
+
+                    return (
+                      <article
+                        key={background.id}
+                        className={`app-card-interactive group overflow-hidden rounded-2xl border bg-card transition ${
+                          isEquipped
+                            ? "border-[var(--rose)] ring-1 ring-[var(--rose)]/30"
+                            : rarity.border
+                        }`}
+                      >
+                        <div className="relative aspect-[16/10] overflow-hidden bg-gradient-to-br from-muted to-card">
+                          {background.image_url ? (
+                            <img
+                              src={background.image_url}
+                              alt={background.name}
+                              loading="lazy"
+                              className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                            />
+                          ) : (
+                            <div className="flex h-full items-center justify-center text-muted-foreground">
+                              <ImageIcon className="h-10 w-10" />
+                            </div>
+                          )}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
+                          <div className="absolute left-3 top-3 flex gap-2">
+                            <span
+                              className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${rarity.chip}`}
+                            >
+                              {rarity.label}
+                            </span>
+                            {isEquipped && (
+                              <span className="inline-flex items-center gap-1 rounded-full bg-[var(--rose)] px-2 py-0.5 text-[10px] font-semibold text-white">
+                                <Check className="h-3 w-3" /> Equipado
+                              </span>
+                            )}
+                          </div>
+                          {!isOwned &&
+                            (isFreebie ? (
+                              <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-emerald-500 px-2 py-0.5 text-[10px] font-semibold text-white shadow">
+                                <Gift className="h-3 w-3" /> Brinde
+                              </span>
+                            ) : (
+                              <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-background/85 px-2 py-0.5 text-[10px] font-medium text-foreground backdrop-blur">
+                                <CoinIcon className="h-3 w-3" /> {background.price}
+                              </span>
+                            ))}
+                        </div>
+
+                        <div className="p-4">
+                          <h3
+                            className="line-clamp-1 text-sm font-semibold"
+                            title={background.name}
+                          >
+                            {background.name}
+                          </h3>
+                          <p className="mt-1 line-clamp-2 min-h-[2.5rem] text-xs text-muted-foreground">
+                            {background.description || "Fundo premium para destacar seu perfil."}
+                          </p>
+
+                          <div className="mt-4">
+                            {isEquipped ? (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="w-full text-xs"
+                                disabled={busyId === "unequip-background"}
+                                onClick={handleUnequipBackground}
+                              >
+                                {busyId === "unequip-background" ? (
+                                  <Loader2 className="h-3 w-3 animate-spin" />
+                                ) : (
+                                  "Equipado"
+                                )}
+                              </Button>
+                            ) : isOwned ? (
+                              <Button
+                                size="sm"
+                                className="w-full text-xs"
+                                disabled={busy || !isOnline}
+                                onClick={() => handleEquipBackground(background)}
+                              >
+                                {busy ? <Loader2 className="h-3 w-3 animate-spin" /> : "Equipar"}
+                              </Button>
+                            ) : isFreebie ? (
+                              <Button
+                                size="sm"
+                                className="w-full bg-emerald-600 text-xs text-white hover:bg-emerald-700"
+                                disabled={busy || !isOnline}
+                                onClick={() =>
+                                  handleClaimFreebie(
+                                    "profile_background",
+                                    background.rarity as FreebieRarity,
+                                    background.id,
+                                    background.name,
+                                  )
+                                }
+                              >
+                                {busy ? (
+                                  <Loader2 className="h-3 w-3 animate-spin" />
+                                ) : (
+                                  <span className="inline-flex items-center gap-1.5">
+                                    <Gift className="h-3 w-3" /> Resgatar grátis
+                                  </span>
+                                )}
+                              </Button>
+                            ) : (
+                              <Button
+                                size="sm"
+                                className="w-full text-xs"
+                                disabled={busy || !canAfford || !isOnline}
+                                onClick={() => setConfirmBackground(background)}
+                              >
+                                {busy ? (
+                                  <Loader2 className="h-3 w-3 animate-spin" />
+                                ) : canAfford ? (
+                                  <span className="inline-flex items-center gap-1.5">
+                                    Comprar
+                                    <span className="inline-flex items-center gap-1 opacity-80">
+                                      <CoinIcon className="h-3 w-3" /> {background.price}
+                                    </span>
+                                  </span>
+                                ) : (
+                                  "Moedas insuficientes"
+                                )}
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      </article>
+                    );
+                  })}
+                </div>
+              </>
+            )
+          ) : items.length === 0 ? (
+            <AppEmptyState
+              icon={<GemIcon className="h-5 w-5" />}
+              title="Nenhum item nesta categoria"
+              description="Novos itens de personalização podem aparecer em breve."
+              className="my-12"
+            />
+          ) : (
+            <>
+              {activeCategory.type &&
+                activeCategory.type !== "background" &&
+                equipped[activeCategory.type] && (
+                  <div className="mb-4 flex justify-end">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-xs text-muted-foreground"
+                      onClick={() => handleUnequip(activeCategory.type as DecorationType)}
+                      disabled={busyId === `unequip-${activeCategory.type}`}
+                    >
+                      <X className="mr-1 h-3 w-3" />
+                      Remover {activeCategory.label.toLowerCase().slice(0, -1)} atual
+                    </Button>
+                  </div>
+                )}
+
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
+                {items.map((d) => {
+                  const isOwned = owned.has(d.id);
+                  const isEquipped = equipped[d.type] === d.id;
+                  const busy = busyId === d.id;
+                  const canAfford = balance >= d.price_coins;
+                  const decoCategory: FreebieCategory | null =
+                    d.type === "frame"
+                      ? "decoration_frame"
+                      : d.type === "aura"
+                        ? "decoration_aura"
+                        : null;
+                  const isFreebie =
+                    !isOwned &&
+                    !!decoCategory &&
+                    canClaimFreebie(freebieStatuses, decoCategory, d.rarity);
+
+                  return (
+                    <article
+                      key={d.id}
+                      className={`app-card-interactive group relative flex flex-col overflow-hidden rounded-2xl border bg-card p-4 transition ${
+                        isEquipped
+                          ? "border-[var(--rose)] ring-1 ring-[var(--rose)]/30"
+                          : "hover:border-[var(--rose-soft)]"
+                      }`}
+                    >
+                      {isEquipped && (
+                        <span className="absolute right-3 top-3 z-10 inline-flex items-center gap-1 rounded-full bg-[var(--rose)] px-2 py-0.5 text-[10px] font-semibold text-white">
+                          <Check className="h-3 w-3" /> Equipado
+                        </span>
+                      )}
+                      {!isOwned &&
+                        (isFreebie ? (
+                          <span className="absolute left-3 top-3 z-10 inline-flex items-center gap-1 rounded-full bg-emerald-500 px-2 py-0.5 text-[10px] font-semibold text-white shadow">
+                            <Gift className="h-3 w-3" /> Brinde
+                          </span>
+                        ) : (
+                          <span className="absolute left-3 top-3 z-10 inline-flex items-center gap-1 rounded-full bg-background/80 px-2 py-0.5 text-[10px] font-medium text-muted-foreground backdrop-blur">
+                            <CoinIcon className="h-3 w-3" /> {d.price_coins}
+                          </span>
+                        ))}
+
+                      <div className="relative mx-auto flex h-32 w-32 items-center justify-center sm:h-36 sm:w-36">
+                        <div
+                          aria-hidden
+                          className="absolute inset-0 rounded-full opacity-0 blur-2xl transition group-hover:opacity-60"
+                          style={{
+                            background:
+                              "radial-gradient(circle, color-mix(in oklab, var(--rose) 40%, transparent), transparent 70%)",
+                          }}
+                        />
+                        <DecoratedAvatar
+                          photoUrl={photoUrl}
+                          fallback={user?.email?.[0]?.toUpperCase() ?? "?"}
+                          size={56}
+                          frameId={d.type === "frame" ? d.id : equipped.frame}
+                          auraId={d.type === "aura" ? d.id : equipped.aura}
+                        />
+                      </div>
+
+                      <h3
+                        className="mt-3 line-clamp-1 text-center text-sm font-semibold"
+                        title={d.name}
+                      >
+                        {d.name}
+                      </h3>
+                      <p className="text-center text-[11px] uppercase tracking-wide text-muted-foreground">
+                        {d.type === "frame" ? "Moldura" : "Aura"}
+                      </p>
+
+                      <div className="mt-3">
+                        {isEquipped ? (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="w-full text-xs"
+                            disabled={busyId === `unequip-${d.type}`}
+                            onClick={() => handleUnequip(d.type)}
+                          >
+                            {busyId === `unequip-${d.type}` ? (
+                              <Loader2 className="h-3 w-3 animate-spin" />
+                            ) : (
+                              "Equipado"
+                            )}
+                          </Button>
+                        ) : isOwned ? (
+                          <Button
+                            size="sm"
+                            className="w-full text-xs"
+                            disabled={busy || !isOnline}
+                            onClick={() => handleEquip(d)}
+                          >
+                            {busy ? <Loader2 className="h-3 w-3 animate-spin" /> : "Equipar"}
+                          </Button>
+                        ) : isFreebie && decoCategory ? (
+                          <Button
+                            size="sm"
+                            className="w-full bg-emerald-600 text-xs text-white hover:bg-emerald-700"
+                            disabled={busy || !isOnline}
+                            onClick={() =>
+                              handleClaimFreebie(
+                                decoCategory,
+                                d.rarity as FreebieRarity,
+                                d.id,
+                                d.name,
+                              )
+                            }
+                          >
+                            {busy ? (
+                              <Loader2 className="h-3 w-3 animate-spin" />
+                            ) : (
+                              <span className="inline-flex items-center gap-1.5">
+                                <Gift className="h-3 w-3" /> Resgatar grátis
+                              </span>
+                            )}
+                          </Button>
+                        ) : (
+                          <Button
+                            size="sm"
+                            className="w-full text-xs"
+                            disabled={busy || !canAfford || !isOnline}
+                            onClick={() => setConfirm(d)}
+                          >
+                            {busy ? (
+                              <Loader2 className="h-3 w-3 animate-spin" />
+                            ) : canAfford ? (
+                              <span className="inline-flex items-center gap-1.5">
+                                Comprar
+                                <span className="inline-flex items-center gap-1 opacity-80">
+                                  <CoinIcon className="h-3 w-3" /> {d.price_coins}
+                                </span>
+                              </span>
+                            ) : (
+                              "Moedas insuficientes"
+                            )}
+                          </Button>
+                        )}
                       </div>
                     </article>
                   );
                 })}
               </div>
             </>
-          )
-        ) : items.length === 0 ? (
-          <AppEmptyState
-            icon={<GemIcon className="h-5 w-5" />}
-            title="Nenhum item nesta categoria"
-            description="Novos itens de personalização podem aparecer em breve."
-            className="my-12"
-          />
-        ) : (
-          <>
-            {activeCategory.type &&
-              activeCategory.type !== "background" &&
-              equipped[activeCategory.type] && (
-                <div className="mb-4 flex justify-end">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-xs text-muted-foreground"
-                    onClick={() => handleUnequip(activeCategory.type as DecorationType)}
-                    disabled={busyId === `unequip-${activeCategory.type}`}
-                  >
-                    <X className="mr-1 h-3 w-3" />
-                    Remover {activeCategory.label.toLowerCase().slice(0, -1)} atual
-                  </Button>
-                </div>
-              )}
-
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
-              {items.map((d) => {
-                const isOwned = owned.has(d.id);
-                const isEquipped = equipped[d.type] === d.id;
-                const busy = busyId === d.id;
-                const canAfford = balance >= d.price_coins;
-                const decoCategory: FreebieCategory | null =
-                  d.type === "frame" ? "decoration_frame" : d.type === "aura" ? "decoration_aura" : null;
-                const isFreebie =
-                  !isOwned &&
-                  !!decoCategory &&
-                  canClaimFreebie(freebieStatuses, decoCategory, d.rarity);
-
-                return (
-                  <article
-                    key={d.id}
-                    className={`app-card-interactive group relative flex flex-col overflow-hidden rounded-2xl border bg-card p-4 transition ${
-                      isEquipped
-                        ? "border-[var(--rose)] ring-1 ring-[var(--rose)]/30"
-                        : "hover:border-[var(--rose-soft)]"
-                    }`}
-                  >
-                    {isEquipped && (
-                      <span className="absolute right-3 top-3 z-10 inline-flex items-center gap-1 rounded-full bg-[var(--rose)] px-2 py-0.5 text-[10px] font-semibold text-white">
-                        <Check className="h-3 w-3" /> Equipado
-                      </span>
-                    )}
-                    {!isOwned && (
-                      isFreebie ? (
-                        <span className="absolute left-3 top-3 z-10 inline-flex items-center gap-1 rounded-full bg-emerald-500 px-2 py-0.5 text-[10px] font-semibold text-white shadow">
-                          <Gift className="h-3 w-3" /> Brinde
-                        </span>
-                      ) : (
-                        <span className="absolute left-3 top-3 z-10 inline-flex items-center gap-1 rounded-full bg-background/80 px-2 py-0.5 text-[10px] font-medium text-muted-foreground backdrop-blur">
-                          <CoinIcon className="h-3 w-3" /> {d.price_coins}
-                        </span>
-                      )
-                    )}
-
-                    <div className="relative mx-auto flex h-32 w-32 items-center justify-center sm:h-36 sm:w-36">
-                      <div
-                        aria-hidden
-                        className="absolute inset-0 rounded-full opacity-0 blur-2xl transition group-hover:opacity-60"
-                        style={{
-                          background:
-                            "radial-gradient(circle, color-mix(in oklab, var(--rose) 40%, transparent), transparent 70%)",
-                        }}
-                      />
-                      <DecoratedAvatar
-                        photoUrl={photoUrl}
-                        fallback={user?.email?.[0]?.toUpperCase() ?? "?"}
-                        size={56}
-                        frameId={d.type === "frame" ? d.id : equipped.frame}
-                        auraId={d.type === "aura" ? d.id : equipped.aura}
-                      />
-                    </div>
-
-                    <h3
-                      className="mt-3 line-clamp-1 text-center text-sm font-semibold"
-                      title={d.name}
-                    >
-                      {d.name}
-                    </h3>
-                    <p className="text-center text-[11px] uppercase tracking-wide text-muted-foreground">
-                      {d.type === "frame" ? "Moldura" : "Aura"}
-                    </p>
-
-                    <div className="mt-3">
-                      {isEquipped ? (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="w-full text-xs"
-                          disabled={busyId === `unequip-${d.type}`}
-                          onClick={() => handleUnequip(d.type)}
-                        >
-                          {busyId === `unequip-${d.type}` ? (
-                            <Loader2 className="h-3 w-3 animate-spin" />
-                          ) : (
-                            "Equipado"
-                          )}
-                        </Button>
-                      ) : isOwned ? (
-                        <Button
-                          size="sm"
-                          className="w-full text-xs"
-                          disabled={busy || !isOnline}
-                          onClick={() => handleEquip(d)}
-                        >
-                          {busy ? <Loader2 className="h-3 w-3 animate-spin" /> : "Equipar"}
-                        </Button>
-                      ) : isFreebie && decoCategory ? (
-                        <Button
-                          size="sm"
-                          className="w-full bg-emerald-600 text-xs text-white hover:bg-emerald-700"
-                          disabled={busy || !isOnline}
-                          onClick={() =>
-                            handleClaimFreebie(decoCategory, d.rarity as FreebieRarity, d.id, d.name)
-                          }
-                        >
-                          {busy ? (
-                            <Loader2 className="h-3 w-3 animate-spin" />
-                          ) : (
-                            <span className="inline-flex items-center gap-1.5">
-                              <Gift className="h-3 w-3" /> Resgatar grátis
-                            </span>
-                          )}
-                        </Button>
-                      ) : (
-                        <Button
-                          size="sm"
-                          className="w-full text-xs"
-                          disabled={busy || !canAfford || !isOnline}
-                          onClick={() => setConfirm(d)}
-                        >
-                          {busy ? (
-                            <Loader2 className="h-3 w-3 animate-spin" />
-                          ) : canAfford ? (
-                            <span className="inline-flex items-center gap-1.5">
-                              Comprar
-                              <span className="inline-flex items-center gap-1 opacity-80">
-                                <CoinIcon className="h-3 w-3" /> {d.price_coins}
-                              </span>
-                            </span>
-                          ) : (
-                            "Moedas insuficientes"
-                          )}
-                        </Button>
-                      )}
-                    </div>
-                  </article>
-                );
-              })}
-            </div>
-          </>
-        )}
-      </main>
+          )}
+        </main>
       </PullToRefresh>
 
       {/* Confirmation modal */}
@@ -1216,7 +1214,10 @@ function LojaPage() {
             >
               Cancelar
             </Button>
-            <Button onClick={() => confirm && handleBuy(confirm)} disabled={busyId === confirm?.id || !isOnline}>
+            <Button
+              onClick={() => confirm && handleBuy(confirm)}
+              disabled={busyId === confirm?.id || !isOnline}
+            >
               {busyId === confirm?.id ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
@@ -1333,8 +1334,10 @@ function HighlightsView({
       .map<HighlightItem>((b) => ({ kind: "background", item: b }));
     const all = [...decs, ...bgs];
     all.sort((a, b) => {
-      const ra = RARITY_WEIGHT[(a.kind === "decoration" ? a.item.rarity : a.item.rarity) as string] ?? 0;
-      const rb = RARITY_WEIGHT[(b.kind === "decoration" ? b.item.rarity : b.item.rarity) as string] ?? 0;
+      const ra =
+        RARITY_WEIGHT[(a.kind === "decoration" ? a.item.rarity : a.item.rarity) as string] ?? 0;
+      const rb =
+        RARITY_WEIGHT[(b.kind === "decoration" ? b.item.rarity : b.item.rarity) as string] ?? 0;
       if (rb !== ra) return rb - ra;
       const pa = a.kind === "decoration" ? a.item.price_coins : a.item.price;
       const pb = b.kind === "decoration" ? b.item.price_coins : b.item.price;
@@ -1344,7 +1347,11 @@ function HighlightsView({
   }, [decorations, backgrounds, owned, ownedBackgrounds]);
 
   const sections: { key: CategoryKey; label: string; count: number }[] = [
-    { key: "frame", label: "Molduras", count: decorations.filter((d) => d.type === "frame").length },
+    {
+      key: "frame",
+      label: "Molduras",
+      count: decorations.filter((d) => d.type === "frame").length,
+    },
     { key: "aura", label: "Auras", count: decorations.filter((d) => d.type === "aura").length },
     { key: "background", label: "Fundos de Perfil", count: backgrounds.length },
   ];
@@ -1662,10 +1669,7 @@ function InventoryView({
                 key={g.id}
                 name={g.name}
                 preview={
-                  <span
-                    className="text-xl font-black"
-                    style={nameGradientStyle(g)}
-                  >
+                  <span className="text-xl font-black" style={nameGradientStyle(g)}>
                     {g.name.slice(0, 6) || "Nome"}
                   </span>
                 }

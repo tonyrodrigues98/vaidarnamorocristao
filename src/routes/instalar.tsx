@@ -6,27 +6,11 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { usePwaInstall } from "@/hooks/usePwaInstall";
+import { instalarMetadata } from "@/config/route-metadata";
 
 export const Route = createFileRoute("/instalar")({
   component: InstallPage,
-  head: () => ({
-    meta: [
-      { title: "Instalar VaiDarNamoro no celular" },
-      {
-        name: "description",
-        content:
-          "Adicione o VaiDarNamoro à tela inicial do iPhone ou Android para abrir como app — sem barra do navegador, com notificações.",
-      },
-      { name: "robots", content: "noindex, follow" },
-      { property: "og:title", content: "Instalar VaiDarNamoro" },
-      {
-        property: "og:description",
-        content: "Tenha o VaiDarNamoro como app no seu celular em poucos segundos.",
-      },
-      { property: "og:url", content: "https://vaidarnamoro.com/instalar" },
-    ],
-    links: [{ rel: "canonical", href: "https://vaidarnamoro.com/instalar" }],
-  }),
+  head: () => instalarMetadata,
 });
 
 const iosSteps = [
