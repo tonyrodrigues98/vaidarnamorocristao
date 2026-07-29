@@ -27,9 +27,16 @@ export type NativeAvatarProps = (NativeAvatarImage | NativeAvatarFallbackOnly) &
   className?: string;
 };
 
-export function NativeAvatar({ src, alt, fallback, size = "md", className }: NativeAvatarProps) {
+export function NativeAvatar(props: NativeAvatarProps) {
+  const { fallback, size = "md", className } = props;
+  const hasImage = "src" in props && typeof props.src === "string";
+  const imageSrc = hasImage ? props.src : undefined;
+  const imageAlt = hasImage ? props.alt : undefined;
   const [imageFailed, setImageFailed] = React.useState(false);
-  const showImage = Boolean(src) && !imageFailed;
+
+  React.useEffect(() => {
+    setImageFailed(false);
+  }, [imageSrc]);
 
   return (
     <span
@@ -39,16 +46,19 @@ export function NativeAvatar({ src, alt, fallback, size = "md", className }: Nat
         className,
       )}
       data-native-avatar-size={size}
+      role={hasImage && imageFailed ? "img" : undefined}
+      aria-label={hasImage && imageFailed ? imageAlt : undefined}
+      aria-hidden={hasImage ? undefined : true}
     >
-      {showImage ? (
+      {hasImage && !imageFailed ? (
         <img
-          src={src}
-          alt={alt}
+          src={imageSrc}
+          alt={imageAlt}
           className="h-full w-full aspect-square shrink-0 rounded-full object-cover"
           onError={() => setImageFailed(true)}
         />
       ) : (
-        <span aria-hidden={src ? undefined : true}>{fallback}</span>
+        <span aria-hidden="true">{fallback}</span>
       )}
     </span>
   );

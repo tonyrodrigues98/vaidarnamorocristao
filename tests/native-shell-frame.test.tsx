@@ -7,6 +7,16 @@ import {
 } from "../src/components/native-shell/NativeShellFrame";
 import { ThemeProvider } from "../src/lib/theme";
 
+const keyboardViewport = {
+  width: 393,
+  layoutHeight: 852,
+  visualHeight: 510,
+  keyboardHeight: 342,
+  keyboardOpen: true,
+  orientation: "portrait" as const,
+  compact: true,
+};
+
 function renderFrame(props: Partial<React.ComponentProps<typeof NativeShellFrame>> = {}) {
   return renderToStaticMarkup(
     <ThemeProvider>
@@ -35,7 +45,7 @@ describe("NativeShellFrame", () => {
   it("keeps the route responsible for the only main landmark", () => {
     const markup = renderToStaticMarkup(
       <ThemeProvider>
-        <NativeShellFrame activePrimaryTab="home" keyboardOpen>
+        <NativeShellFrame activePrimaryTab="home" viewportState={keyboardViewport}>
           <main>Rota</main>
         </NativeShellFrame>
       </ThemeProvider>,
@@ -44,6 +54,12 @@ describe("NativeShellFrame", () => {
     expect(markup.match(/<main/g)).toHaveLength(1);
     expect(markup).toContain('data-active-primary-tab="home"');
     expect(markup).toContain('data-keyboard-open="true"');
+    expect(markup).toContain('data-orientation="portrait"');
+    expect(markup).toContain('data-viewport-compact="true"');
+    expect(markup).toContain("--vdn-native-viewport-width:393px");
+    expect(markup).toContain("--vdn-native-layout-height:852px");
+    expect(markup).toContain("--vdn-native-visual-height:510px");
+    expect(markup).toContain("--vdn-native-keyboard-height:342px");
     expect(markup).toMatch(
       new RegExp(`<div[^>]+id="${NATIVE_SHELL_MAIN_ID}"[^>]+data-native-shell-content`),
     );
@@ -86,5 +102,6 @@ describe("NativeShellFrame", () => {
     expect(NATIVE_SHELL_MAIN_ID).toBe("vdn-native-shell-main");
     expect(source).not.toMatch(/\bkey\s*=/);
     expect(source).not.toMatch(/pathname|useLocation|useAuth|supabase/i);
+    expect(source).not.toMatch(/\bheight\s*:/);
   });
 });

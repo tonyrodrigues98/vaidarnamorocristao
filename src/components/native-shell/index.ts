@@ -6,6 +6,7 @@ export {
   NativeAdaptiveNavigation,
   type NativeAdaptiveNavigationProps,
 } from "./NativeAdaptiveNavigation";
+export { NativeTopBar, type NativeTopBarProps } from "./NativeTopBar";
 export {
   NativeShellRuntimeProvider,
   useNativeShellRuntime,
@@ -26,3 +27,4 @@ export {
   NativeShellRuntimeBoundary,
   type NativeShellRuntimeBoundaryProps,
 } from "./NativeShellRuntimeBoundary";
+export { useNativeViewportState, type NativeViewportState } from "./useNativeViewportState";

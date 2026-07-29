@@ -197,11 +197,8 @@ describe("native keyboard visibility", () => {
   });
 
   it("registers and cleans every runtime listener", () => {
-    const source = readFileSync(
-      "src/components/native-shell/NativeShellRuntimeBoundary.tsx",
-      "utf8",
-    );
-    for (const event of ["focusin", "focusout", "resize", "scroll"]) {
+    const source = readFileSync("src/components/native-shell/useNativeViewportState.ts", "utf8");
+    for (const event of ["focusin", "focusout", "resize", "scroll", "orientationchange"]) {
       expect(source).toContain(`addEventListener("${event}"`);
       expect(source).toContain(`removeEventListener("${event}"`);
     }

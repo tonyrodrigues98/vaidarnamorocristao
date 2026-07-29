@@ -1,7 +1,21 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
-import { NativeAvatar, NativeField, NativeProgress } from "../src/components/native-shell";
+import {
+  NativeAvatar,
+  NativeField,
+  NativeProgress,
+  type NativeAvatarProps,
+} from "../src/components/native-shell";
+
+const validImageAvatar: NativeAvatarProps = {
+  src: "/profile.jpg",
+  alt: "Foto de Ana",
+  fallback: "AN",
+};
+const validFallbackAvatar: NativeAvatarProps = { fallback: "AN" };
+// @ts-expect-error image avatars require alternative text
+const invalidImageAvatar: NativeAvatarProps = { src: "/profile.jpg", fallback: "AN" };
 
 describe("isolated native shell primitives", () => {
   it("renders a square, circular and incompressible avatar with required image semantics", () => {
@@ -16,6 +30,10 @@ describe("isolated native shell primitives", () => {
     expect(markup).toContain("object-cover");
     expect(markup).toContain('alt="Foto de Ana"');
     expect(markup).toContain("h-12 w-12");
+    expect(markup).not.toContain('src="undefined"');
+    expect(validImageAvatar.alt).toBe("Foto de Ana");
+    expect(validFallbackAvatar.src).toBeUndefined();
+    expect(invalidImageAvatar.src).toBe("/profile.jpg");
   });
 
   it("renders an avatar fallback without an image request", () => {
@@ -24,6 +42,19 @@ describe("isolated native shell primitives", () => {
     expect(markup).toContain("VD");
     expect(markup).toContain('aria-hidden="true"');
     expect(markup).not.toContain("<img");
+  });
+
+  it("falls back on error and resets the failure when the image source changes", async () => {
+    const source = await import("node:fs/promises").then(({ readFile }) =>
+      readFile("src/components/native-shell/NativeAvatar.tsx", "utf8"),
+    );
+
+    expect(source).toContain('const hasImage = "src" in props');
+    expect(source).toContain("setImageFailed(false)");
+    expect(source).toContain("}, [imageSrc])");
+    expect(source).toContain("onError={() => setImageFailed(true)}");
+    expect(source).toContain('role={hasImage && imageFailed ? "img" : undefined}');
+    expect(source).not.toMatch(/src=\{[^}]*undefined/);
   });
 
   it("clamps progress and exposes its accessible range on a separate bar row", () => {

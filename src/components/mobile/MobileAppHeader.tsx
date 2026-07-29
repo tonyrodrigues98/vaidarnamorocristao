@@ -1,6 +1,7 @@
 import { ChevronLeft } from "lucide-react";
 import type { ReactNode } from "react";
 
+import { useNativeShellRuntime } from "@/components/native-shell/NativeShellRuntimeContext";
 import { cn } from "@/lib/utils";
 
 type MobileAppHeaderProps = {
@@ -18,7 +19,15 @@ type MobileAppHeaderProps = {
  * Renders only on mobile; on desktop the global Header continues to handle
  * navigation.
  */
-export function MobileAppHeader({
+export function MobileAppHeader(props: MobileAppHeaderProps) {
+  const { active } = useNativeShellRuntime();
+
+  if (active) return null;
+
+  return <LegacyMobileAppHeader {...props} />;
+}
+
+function LegacyMobileAppHeader({
   title,
   subtitle,
   rightAction,

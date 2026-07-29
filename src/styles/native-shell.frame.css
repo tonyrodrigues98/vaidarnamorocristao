@@ -1,7 +1,7 @@
 [data-vdn-native-shell].vdn-native-shell-frame {
   display: grid;
   min-width: 0;
-  min-height: 100%;
+  min-height: var(--vdn-native-visual-height, 100dvh);
   grid-template-columns: minmax(0, 1fr);
   color: var(--vdn-native-text-primary);
   background: var(--vdn-native-canvas);
@@ -36,7 +36,92 @@
 }
 
 [data-vdn-native-shell] .vdn-native-shell-frame__top-bar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
   padding-top: env(safe-area-inset-top, 0px);
+  border-bottom: 1px solid var(--vdn-native-border);
+  background: var(--vdn-native-surface-primary);
+  background: color-mix(in srgb, var(--vdn-native-surface-primary) 94%, transparent);
+  backdrop-filter: blur(1rem);
+}
+
+[data-vdn-native-shell] .vdn-native-top-bar {
+  display: flex;
+  min-width: 0;
+  min-height: 3.5rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.375rem 0.75rem;
+}
+
+[data-vdn-native-shell] .vdn-native-top-bar__context,
+[data-vdn-native-shell] .vdn-native-top-bar__actions {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+}
+
+[data-vdn-native-shell] .vdn-native-top-bar__context {
+  gap: 0.625rem;
+}
+
+[data-vdn-native-shell] .vdn-native-top-bar__actions {
+  flex: 0 0 auto;
+  gap: 0.25rem;
+}
+
+[data-vdn-native-shell] .vdn-native-top-bar__brand-icon {
+  width: 2rem;
+  height: 2rem;
+  flex: 0 0 auto;
+  object-fit: contain;
+}
+
+[data-vdn-native-shell] .vdn-native-top-bar__title {
+  min-width: 0;
+  overflow: hidden;
+  font-size: 1rem;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+[data-vdn-native-shell] .vdn-native-top-bar__action,
+[data-vdn-native-shell] .vdn-native-top-bar__profile {
+  display: inline-grid;
+  width: var(--vdn-native-touch-target);
+  min-width: var(--vdn-native-touch-target);
+  height: var(--vdn-native-touch-target);
+  min-height: var(--vdn-native-touch-target);
+  place-items: center;
+  border: 0;
+  border-radius: 999px;
+  color: var(--vdn-native-text-secondary);
+  background: transparent;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    color var(--vdn-native-motion-touch) var(--vdn-native-ease-enter),
+    background-color var(--vdn-native-motion-touch) var(--vdn-native-ease-enter);
+}
+
+[data-vdn-native-shell] .vdn-native-top-bar__action:hover,
+[data-vdn-native-shell] .vdn-native-top-bar__profile:hover {
+  color: var(--vdn-native-text-primary);
+  background: var(--vdn-native-surface-secondary);
+}
+
+[data-vdn-native-shell] .vdn-native-top-bar__action:focus-visible,
+[data-vdn-native-shell] .vdn-native-top-bar__profile:focus-visible {
+  outline: 2px solid var(--vdn-native-brand-action);
+  outline-offset: 2px;
+}
+
+[data-vdn-native-shell] .vdn-native-top-bar__action > svg {
+  width: 1.25rem;
+  height: 1.25rem;
 }
 
 [data-vdn-native-shell] .vdn-native-shell-frame__bottom-navigation {
@@ -302,6 +387,20 @@
     white-space: nowrap;
   }
 
+  [data-vdn-native-shell] .vdn-native-top-bar__brand-icon {
+    display: none;
+  }
+
+  [data-vdn-native-shell] .vdn-native-top-bar__title {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
   [data-vdn-native-shell] > .vdn-native-shell-frame__bottom-navigation {
     display: none;
   }
@@ -350,7 +449,9 @@
   [data-vdn-native-shell].vdn-native-shell-frame,
   [data-vdn-native-shell] .vdn-native-shell-frame__content-column,
   [data-vdn-native-shell] .vdn-native-shell-frame__main,
-  [data-vdn-native-shell] .vdn-native-adaptive-navigation__link {
+  [data-vdn-native-shell] .vdn-native-adaptive-navigation__link,
+  [data-vdn-native-shell] .vdn-native-top-bar__action,
+  [data-vdn-native-shell] .vdn-native-top-bar__profile {
     scroll-behavior: auto;
     transition-duration: 0.01ms;
     animation-duration: 0.01ms;

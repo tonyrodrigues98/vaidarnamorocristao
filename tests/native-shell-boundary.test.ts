@@ -64,6 +64,7 @@ describe("NativeShellRuntimeBoundary decision", () => {
     expect(source).toContain("<NativeShellFrame");
     expect(source).toContain("<NativeShellRuntimeProvider active activeTab={activeTab}>");
     expect(source).toContain("<NativeAdaptiveNavigation");
+    expect(source).toContain("<NativeTopBar");
     expect(source).toContain("<NativeBottomNavigation");
     expect(source).toContain("<MobileAppShell>");
     expect(source).not.toMatch(/Navigate|redirect|localStorage|sessionStorage|URLSearchParams/);
@@ -81,9 +82,24 @@ describe("NativeShellRuntimeBoundary decision", () => {
     const legacyBranch = source.slice(source.indexOf("return <MobileAppShell>"));
 
     expect(nativeBranch).toContain("primaryNavigation=");
+    expect(nativeBranch).toContain("topBar=");
     expect(nativeBranch).toContain("bottomNavigation=");
     expect(legacyBranch).not.toContain("NativeAdaptiveNavigation");
     expect(legacyBranch).not.toContain("NativeBottomNavigation");
+    expect(legacyBranch).not.toContain("NativeTopBar");
+  });
+
+  it("centralizes viewport listeners and derives the user label without a query", () => {
+    const source = readFileSync(
+      "src/components/native-shell/NativeShellRuntimeBoundary.tsx",
+      "utf8",
+    );
+
+    expect(source.match(/useNativeViewportState\(/g)).toHaveLength(1);
+    expect(source).toContain("user?.email ?? user?.id ??");
+    expect(source).not.toMatch(
+      /visualViewport|addEventListener|requestAnimationFrame|supabase|\.from\(|\.channel\(/,
+    );
   });
 });
 
