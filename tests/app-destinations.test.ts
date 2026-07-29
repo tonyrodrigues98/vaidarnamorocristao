@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import {
   appDestinations,
   getDestinationBehavior,
+  getFuturePrimaryTab,
   matchDestination,
   normalizeDestinationPath,
   plannedPrimaryDestinations,
@@ -115,6 +116,19 @@ describe("app destination registry", () => {
 
   it("validates the canonical registry", () => {
     expect(validateDestinationRegistry()).toEqual([]);
+  });
+
+  it("classifies the five primary roots and focused chats", () => {
+    expect([
+      getFuturePrimaryTab("/inicio"),
+      getFuturePrimaryTab("/comunidade"),
+      getFuturePrimaryTab("/explorar"),
+      getFuturePrimaryTab("/conversas"),
+      getFuturePrimaryTab("/perfil"),
+    ]).toEqual(["home", "community", "explore", "messages", "profile"]);
+    expect(getFuturePrimaryTab("/conversas/comunidade")).toBe("messages");
+    expect(getFuturePrimaryTab("/conversas/abc")).toBe("messages");
+    expect(getFuturePrimaryTab("/devocional")).toBeUndefined();
   });
 
   it("detects duplicate, unreachable, conflicting and incompatible rules", () => {

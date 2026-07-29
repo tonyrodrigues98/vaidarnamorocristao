@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 
+import type { FuturePrimaryTab } from "@/config/app-destinations";
 import { useTheme } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 
@@ -15,6 +16,8 @@ export type NativeShellFrameProps = {
   contextPanel?: ReactNode;
   bottomNavigation?: ReactNode;
   overlayHost?: ReactNode;
+  activePrimaryTab?: FuturePrimaryTab;
+  keyboardOpen?: boolean;
   className?: string;
 };
 
@@ -25,6 +28,8 @@ export function NativeShellFrame({
   contextPanel,
   bottomNavigation,
   overlayHost,
+  activePrimaryTab,
+  keyboardOpen = false,
   className,
 }: NativeShellFrameProps) {
   const { preference, resolvedTheme } = useTheme();
@@ -37,6 +42,8 @@ export function NativeShellFrame({
       data-theme-preference={preference}
       data-reference-status="partially-frozen"
       data-native-shell-version="scaffold-1"
+      data-active-primary-tab={activePrimaryTab}
+      data-keyboard-open={String(keyboardOpen)}
     >
       {primaryNavigation !== undefined && (
         <nav
@@ -50,9 +57,14 @@ export function NativeShellFrame({
         {topBar !== undefined && (
           <header className="vdn-native-shell-frame__top-bar">{topBar}</header>
         )}
-        <main id={NATIVE_SHELL_MAIN_ID} className="vdn-native-shell-frame__main">
+        <div
+          id={NATIVE_SHELL_MAIN_ID}
+          className="vdn-native-shell-frame__main"
+          data-native-shell-content
+          tabIndex={-1}
+        >
           {children}
-        </main>
+        </div>
       </div>
       {contextPanel !== undefined && (
         <aside className="vdn-native-shell-frame__context-panel" aria-label="Contexto">

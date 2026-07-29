@@ -26,9 +26,14 @@ describe("native shell frame CSS boundary", () => {
     ).toBe(true);
   });
 
-  it("does not introduce global, legacy or fixed-frame styling", () => {
+  it("does not introduce global, legacy or fixed outer-frame styling", () => {
     expect(css).not.toMatch(/(^|[,{]\s*)(:root|html|body|\.dark)(?=[\s,{:[.#>])/m);
-    expect(css).not.toContain("position: fixed");
+    expect(css).not.toMatch(
+      /\[data-vdn-native-shell\]\s*\.vdn-native-shell-frame\s*\{[^}]*position:\s*fixed/s,
+    );
+    expect(css).toMatch(
+      /\[data-vdn-native-shell\]\s*\.vdn-native-shell-frame__bottom-navigation\s*\{[^}]*position:\s*fixed/s,
+    );
     expect(css).not.toMatch(/\.mobile-app-shell|\.mobile-chat-shell|\.app-/);
   });
 
@@ -45,6 +50,10 @@ describe("native shell frame CSS boundary", () => {
   it("provides safe-area, responsive and reduced-motion preparation", () => {
     expect(css).toContain("env(safe-area-inset-top");
     expect(css).toContain("env(safe-area-inset-bottom");
+    expect(css).toContain("env(safe-area-inset-left");
+    expect(css).toContain("env(safe-area-inset-right");
+    expect(css).toContain('[data-keyboard-open="true"]');
+    expect(css).toContain("@media (min-width: 48rem)");
     expect(css).toContain("@media (min-width: 64rem)");
     expect(css).toContain("@media (prefers-reduced-motion: reduce)");
     expect(css).toContain("min-width: 0");

@@ -1,6 +1,7 @@
 export { NativeAvatar, type NativeAvatarProps, type NativeAvatarSize } from "./NativeAvatar";
 export { NativeProgress, type NativeProgressProps } from "./NativeProgress";
 export { NativeField, type NativeFieldProps } from "./NativeField";
+export { NativeBottomNavigation, type NativeBottomNavigationProps } from "./NativeBottomNavigation";
 export {
   NativeRootPlaceholder,
   type NativeRootPlaceholderProps,

@@ -5,6 +5,7 @@ import {
   NATIVE_SHELL_FEATURE_ENV,
   isNativeShellEligibleDestination,
   nativeShellInitialDestinationIds,
+  nativeShellPrimaryDestinationIds,
   parseNativeShellFeatureFlag,
   resolveNativeShellFeatureFlag,
   shouldExposeNativeRootDestination,
@@ -40,25 +41,40 @@ describe("native shell feature flag", () => {
   });
 });
 
-describe("native shell initial rollout", () => {
-  it("has only the app home destination in its typed allowlist", () => {
-    expect(nativeShellInitialDestinationIds).toEqual(["app-home"]);
-    expect(isNativeShellEligibleDestination(getDestinationBehavior("/inicio"))).toBe(true);
+describe("native shell primary rollout", () => {
+  it("has exactly the five primary destination ids in its typed allowlist", () => {
+    const expected = [
+      "app-home",
+      "compatibility-community",
+      "app-explore",
+      "app-conversations",
+      "app-profile",
+    ];
+    expect(nativeShellPrimaryDestinationIds).toEqual(expected);
+    expect(nativeShellInitialDestinationIds).toEqual(expected);
   });
 
   it.each([
-    "/conversas",
     "/conversas/abc",
-    "/perfil",
+    "/conversas/comunidade",
+    "/devocional",
+    "/pretendentes",
+    "/conta",
     "/",
     "/admin",
-    "/comunidade",
     "/v2",
     "/api/public/runtime-config",
     "/rota-desconhecida",
   ])("does not enable %s", (pathname) => {
     expect(isNativeShellEligibleDestination(getDestinationBehavior(pathname))).toBe(false);
   });
+
+  it.each(["/inicio", "/comunidade", "/explorar", "/conversas", "/perfil"])(
+    "enables the authenticated primary root %s",
+    (pathname) => {
+      expect(isNativeShellEligibleDestination(getDestinationBehavior(pathname))).toBe(true);
+    },
+  );
 });
 
 describe("flagged native roots", () => {
@@ -78,6 +94,6 @@ describe("flagged native roots", () => {
   it("normalizes query, hash and trailing slash without expanding the allowlist", () => {
     expect(shouldExposeNativeRootDestination("/comunidade/?tab=agora#top", true)).toBe(true);
     expect(shouldExposeNativeRootDestination("/explorar/", true)).toBe(true);
-    expect(nativeShellInitialDestinationIds).toEqual(["app-home"]);
+    expect(nativeShellInitialDestinationIds).toEqual(nativeShellPrimaryDestinationIds);
   });
 });

@@ -16,20 +16,23 @@ export function resolveNativeShellFeatureFlag(
 
 export const nativeShellFeatureEnabled = resolveNativeShellFeatureFlag();
 
-export const nativeShellInitialDestinationIds = ["app-home"] as const;
+export const nativeShellPrimaryDestinationIds = [
+  "app-home",
+  "compatibility-community",
+  "app-explore",
+  "app-conversations",
+  "app-profile",
+] as const;
 
-type NativeShellInitialDestinationId = (typeof nativeShellInitialDestinationIds)[number];
+export const nativeShellInitialDestinationIds = nativeShellPrimaryDestinationIds;
 
-const nativeShellInitialDestinationIdSet: ReadonlySet<string> =
-  new Set<NativeShellInitialDestinationId>(nativeShellInitialDestinationIds);
+type NativeShellPrimaryDestinationId = (typeof nativeShellPrimaryDestinationIds)[number];
+
+const nativeShellPrimaryDestinationIdSet: ReadonlySet<string> =
+  new Set<NativeShellPrimaryDestinationId>(nativeShellPrimaryDestinationIds);
 
 export function isNativeShellEligibleDestination(behavior: DestinationBehavior): boolean {
-  return (
-    nativeShellInitialDestinationIdSet.has(behavior.destinationId) &&
-    behavior.shell === "app" &&
-    behavior.access === "authenticated" &&
-    behavior.status === "active"
-  );
+  return nativeShellPrimaryDestinationIdSet.has(behavior.destinationId);
 }
 
 export type NativeShellRuntimeDecision = {

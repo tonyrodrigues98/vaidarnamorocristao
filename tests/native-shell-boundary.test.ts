@@ -29,18 +29,30 @@ describe("NativeShellRuntimeBoundary decision", () => {
     expect(decide("/inicio", { featureEnabled: false })).toBe(false);
   });
 
-  it("uses the scaffold only for an authenticated, resolved app home", () => {
-    expect(decide("/inicio")).toBe(true);
-    expect(decide("/inicio", { loading: true })).toBe(false);
-    expect(decide("/inicio", { authenticated: false })).toBe(false);
-  });
-
-  it.each(["/perfil", "/conversas/abc", "/admin", "/"])(
-    "keeps the legacy path for %s",
+  it.each(["/inicio", "/comunidade", "/explorar", "/conversas", "/perfil"])(
+    "uses the scaffold for authenticated primary root %s",
     (pathname) => {
-      expect(decide(pathname)).toBe(false);
+      expect(decide(pathname)).toBe(true);
+      expect(decide(pathname, { featureEnabled: false })).toBe(false);
+      expect(decide(pathname, { loading: true })).toBe(false);
+      expect(decide(pathname, { authenticated: false })).toBe(false);
     },
   );
+
+  it.each([
+    "/conversas/abc",
+    "/conversas/comunidade",
+    "/devocional",
+    "/pretendentes",
+    "/conta",
+    "/admin",
+    "/",
+    "/v2",
+    "/api/public/runtime-config",
+    "/rota-inexistente",
+  ])("keeps the legacy path for %s", (pathname) => {
+    expect(decide(pathname)).toBe(false);
+  });
 
   it("renders mutually exclusive shell branches without redirects or persistence", () => {
     const source = readFileSync(
@@ -48,8 +60,9 @@ describe("NativeShellRuntimeBoundary decision", () => {
       "utf8",
     );
 
-    expect(source).toContain("if (useNativeShell)");
-    expect(source).toContain("<NativeShellFrame>");
+    expect(source).toContain("if (useNativeShell && activeTab)");
+    expect(source).toContain("<NativeShellFrame");
+    expect(source).toContain("<NativeBottomNavigation");
     expect(source).toContain("<MobileAppShell>");
     expect(source).not.toMatch(/Navigate|redirect|localStorage|sessionStorage|URLSearchParams/);
   });

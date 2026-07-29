@@ -106,7 +106,11 @@ export const appDestinations: readonly AppDestination[] = [
     footer: false,
   }),
 
-  exact("app-home", "/inicio", { ...mobileAppDefaults, currentTab: "inicio" }),
+  exact("app-home", "/inicio", {
+    ...mobileAppDefaults,
+    currentTab: "inicio",
+    futureTab: "home",
+  }),
   exact("app-explore", "/explorar", {
     ...appDefaults,
     access: "approved",
@@ -120,12 +124,14 @@ export const appDestinations: readonly AppDestination[] = [
   exact("app-conversations", "/conversas", {
     ...mobileAppDefaults,
     currentTab: "conversas",
+    futureTab: "messages",
     footer: false,
   }),
   exact("app-community-chat", "/conversas/comunidade", {
     ...mobileAppDefaults,
     shell: "focused",
     currentTab: "conversas",
+    futureTab: "messages",
     footer: false,
     visualViewport: true,
     routeTransition: false,
@@ -135,6 +141,7 @@ export const appDestinations: readonly AppDestination[] = [
     ...mobileAppDefaults,
     shell: "focused",
     currentTab: "conversas",
+    futureTab: "messages",
     mobileBottomNav: false,
     footer: false,
     visualViewport: true,
@@ -147,6 +154,7 @@ export const appDestinations: readonly AppDestination[] = [
   exact("app-profile", "/perfil", {
     ...mobileAppDefaults,
     currentTab: "perfil",
+    futureTab: "profile",
     footer: false,
   }),
   exact("app-store", "/loja", { ...mobileAppDefaults, footer: false }),
@@ -258,6 +266,10 @@ export function getDestinationBehavior(pathname: string): DestinationBehavior {
     ...behavior
   } = matchDestination(pathname);
   return { destinationId: id, ...behavior };
+}
+
+export function getFuturePrimaryTab(pathname: string): FuturePrimaryTab | undefined {
+  return getDestinationBehavior(pathname).futureTab;
 }
 
 export type RegistryValidationIssue = {

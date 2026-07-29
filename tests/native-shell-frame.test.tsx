@@ -27,7 +27,26 @@ describe("NativeShellFrame", () => {
     expect(markup).toContain('data-reference-status="partially-frozen"');
     expect(markup).toContain('data-native-shell-version="scaffold-1"');
     expect(markup).toContain(`id="${NATIVE_SHELL_MAIN_ID}"`);
+    expect(markup).toContain("data-native-shell-content");
+    expect(markup).toContain('tabindex="-1"');
     expect(markup).toContain("Conteúdo existente");
+  });
+
+  it("keeps the route responsible for the only main landmark", () => {
+    const markup = renderToStaticMarkup(
+      <ThemeProvider>
+        <NativeShellFrame activePrimaryTab="home" keyboardOpen>
+          <main>Rota</main>
+        </NativeShellFrame>
+      </ThemeProvider>,
+    );
+
+    expect(markup.match(/<main/g)).toHaveLength(1);
+    expect(markup).toContain('data-active-primary-tab="home"');
+    expect(markup).toContain('data-keyboard-open="true"');
+    expect(markup).toMatch(
+      new RegExp(`<div[^>]+id="${NATIVE_SHELL_MAIN_ID}"[^>]+data-native-shell-content`),
+    );
   });
 
   it("does not render absent slot regions", () => {
