@@ -1,0 +1,70 @@
+[data-vdn-native-shell].vdn-native-shell-frame {
+  display: grid;
+  min-width: 0;
+  min-height: 100%;
+  grid-template-columns: minmax(0, 1fr);
+  color: var(--vdn-native-text-primary);
+  background: var(--vdn-native-canvas);
+}
+
+[data-vdn-native-shell] .vdn-native-shell-frame__content-column,
+[data-vdn-native-shell] .vdn-native-shell-frame__main {
+  min-width: 0;
+}
+
+[data-vdn-native-shell] .vdn-native-shell-frame__content-column {
+  display: flex;
+  min-height: 100%;
+  flex-direction: column;
+}
+
+[data-vdn-native-shell] .vdn-native-shell-frame__main {
+  flex: 1 1 auto;
+}
+
+[data-vdn-native-shell] .vdn-native-shell-frame__primary-navigation,
+[data-vdn-native-shell] .vdn-native-shell-frame__top-bar,
+[data-vdn-native-shell] .vdn-native-shell-frame__context-panel,
+[data-vdn-native-shell] .vdn-native-shell-frame__bottom-navigation,
+[data-vdn-native-shell] .vdn-native-shell-frame__overlay-host {
+  min-width: 0;
+}
+
+[data-vdn-native-shell] .vdn-native-shell-frame__top-bar {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+[data-vdn-native-shell] .vdn-native-shell-frame__bottom-navigation {
+  padding-right: env(safe-area-inset-right, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  padding-left: env(safe-area-inset-left, 0px);
+}
+
+@media (min-width: 64rem) {
+  [data-vdn-native-shell].vdn-native-shell-frame:has(
+      > .vdn-native-shell-frame__primary-navigation
+    ) {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  [data-vdn-native-shell].vdn-native-shell-frame:has(> .vdn-native-shell-frame__context-panel) {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  [data-vdn-native-shell].vdn-native-shell-frame:has(
+      > .vdn-native-shell-frame__primary-navigation
+    ):has(> .vdn-native-shell-frame__context-panel) {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-vdn-native-shell].vdn-native-shell-frame,
+  [data-vdn-native-shell] .vdn-native-shell-frame__content-column,
+  [data-vdn-native-shell] .vdn-native-shell-frame__main {
+    scroll-behavior: auto;
+    transition-duration: 0.01ms;
+    animation-duration: 0.01ms;
+    animation-iteration-count: 1;
+  }
+}

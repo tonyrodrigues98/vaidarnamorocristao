@@ -18,7 +18,7 @@ import { getThemeBootstrapScript } from "@/lib/theme-core";
 import { SupportFooterButton } from "@/components/SupportFooterButton";
 import { PresenceProvider } from "@/lib/presence";
 import { BanGuard } from "@/components/BanGuard";
-import { MobileAppShell } from "@/components/mobile/MobileAppShell";
+import { NativeShellRuntimeBoundary } from "@/components/native-shell";
 import { NetworkStatusBanner } from "@/components/mobile/NetworkStatusBanner";
 import { InstallPromptBanner } from "@/components/InstallPromptBanner";
 import { MobileRouteTransition } from "@/components/mobile/MobileRouteTransition";
@@ -260,7 +260,7 @@ function RootComponent() {
           <AuthProvider>
             <V2AwareRouteBoundary isV2Route={isV2Route}>
               <AuthenticatedProviderBoundary>
-                <MobileAppShell>
+                <NativeShellRuntimeBoundary>
                   {isHome ? (
                     <Outlet />
                   ) : (
@@ -294,7 +294,7 @@ function RootComponent() {
                       )}
                     </div>
                   )}
-                </MobileAppShell>
+                </NativeShellRuntimeBoundary>
               </AuthenticatedProviderBoundary>
             </V2AwareRouteBoundary>
             <Toaster richColors position="top-right" />
