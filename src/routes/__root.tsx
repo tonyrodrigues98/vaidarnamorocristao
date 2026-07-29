@@ -14,6 +14,7 @@ import { AuthProvider, useAuth } from "@/lib/auth";
 import { Toaster } from "@/components/ui/sonner";
 import { NotificationsBridge } from "@/lib/useRealtimeNotifications";
 import { ThemeProvider } from "@/lib/theme";
+import { getThemeBootstrapScript } from "@/lib/theme-core";
 import { SupportFooterButton } from "@/components/SupportFooterButton";
 import { PresenceProvider } from "@/lib/presence";
 import { BanGuard } from "@/components/BanGuard";
@@ -69,12 +70,6 @@ export const Route = createRootRouteWithContext<AppRouterContext>()({
       {
         name: "theme-color",
         content: brand.theme.canvasLight,
-        media: "(prefers-color-scheme: light)",
-      },
-      {
-        name: "theme-color",
-        content: brand.theme.canvasDark,
-        media: "(prefers-color-scheme: dark)",
       },
       { name: "format-detection", content: "telephone=no" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
@@ -195,18 +190,22 @@ export const Route = createRootRouteWithContext<AppRouterContext>()({
 
 function RootShell({ children }: { children: React.ReactNode }) {
   return (
-    <html lang={brand.language}>
+    <html lang={brand.language} suppressHydrationWarning>
       <head>
         <HeadContent />
+        <script dangerouslySetInnerHTML={{ __html: getThemeBootstrapScript() }} />
         <style
           dangerouslySetInnerHTML={{
             __html: `
 #app-splash{position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#ffffff;transition:opacity .35s ease;}
+html.dark #app-splash,html[data-theme="dark"] #app-splash{background:${brand.theme.canvasDark};}
 #app-splash.is-hiding{opacity:0;pointer-events:none;}
 #app-splash .app-splash-logo{width:min(60vw,200px);height:auto;object-fit:contain;display:block;filter:drop-shadow(0 8px 24px rgba(0,0,0,.08));}
 @media (min-width:768px){#app-splash .app-splash-logo{width:240px;}}
 #app-splash .app-splash-loader{margin-top:32px;width:160px;height:3px;background:rgba(0,0,0,.08);border-radius:999px;overflow:hidden;}
+html.dark #app-splash .app-splash-loader,html[data-theme="dark"] #app-splash .app-splash-loader{background:rgba(255,255,255,.14);}
 #app-splash .app-splash-loader-bar{display:block;height:100%;width:0%;background:#000;border-radius:999px;transition:width .35s cubic-bezier(.22,.61,.36,1);}
+html.dark #app-splash .app-splash-loader-bar,html[data-theme="dark"] #app-splash .app-splash-loader-bar{background:#fff;}
 `,
           }}
         />

@@ -4,9 +4,9 @@ import { toast } from "sonner";
 import { Header } from "@/components/layout/Header";
 import { MobileAppHeader } from "@/components/mobile/MobileAppHeader";
 import { AccountDangerZone } from "@/components/AccountDangerZone";
+import { ThemePreferenceControl } from "@/components/settings/ThemePreferenceControl";
 import { useAuth } from "@/lib/auth";
 import { useTheme } from "@/lib/theme";
-import { Switch } from "@/components/ui/switch";
 import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 import { StaleDataNotice } from "@/components/ui/StaleDataNotice";
 import {
@@ -56,13 +56,7 @@ type SettingsItemProps =
   | (ItemBase & { onClick: () => void; to?: never })
   | (ItemBase & { to?: undefined; onClick?: undefined });
 
-function SettingsGroup({
-  title,
-  children,
-}: {
-  title?: string;
-  children: React.ReactNode;
-}) {
+function SettingsGroup({ title, children }: { title?: string; children: React.ReactNode }) {
   return (
     <section className="space-y-2">
       {title ? (
@@ -91,9 +85,7 @@ function SettingsItem(props: SettingsItemProps) {
   const iconTone = danger
     ? "bg-red-100 text-red-600 dark:bg-red-500/15 dark:text-red-300"
     : "bg-[var(--petal)]/60 text-[var(--rose)]";
-  const titleTone = danger
-    ? "text-red-700 dark:text-red-300"
-    : "text-foreground";
+  const titleTone = danger ? "text-red-700 dark:text-red-300" : "text-foreground";
 
   const inner = (
     <>
@@ -103,9 +95,7 @@ function SettingsItem(props: SettingsItemProps) {
         <Icon className="h-4 w-4" />
       </span>
       <span className="min-w-0 flex-1 text-left">
-        <span className={`block text-[15px] font-medium leading-tight ${titleTone}`}>
-          {title}
-        </span>
+        <span className={`block text-[15px] font-medium leading-tight ${titleTone}`}>{title}</span>
         {description ? (
           <span className="mt-0.5 block text-xs text-muted-foreground">{description}</span>
         ) : null}
@@ -141,7 +131,7 @@ function SettingsItem(props: SettingsItemProps) {
 
 function ContaPage() {
   const { user, signOut, role } = useAuth();
-  const { theme, toggle: toggleTheme } = useTheme();
+  const { preference, resolvedTheme, setTheme } = useTheme();
   const { isOnline } = useNetworkStatus();
   const isStaff = role !== "user";
   const [signingOut, setSigningOut] = useState(false);
@@ -190,12 +180,7 @@ function ContaPage() {
           >
             <span className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[var(--petal)]/60 text-base font-semibold text-[var(--rose)]">
               {avatar ? (
-                <img
-                  src={avatar}
-                  alt=""
-                  loading="lazy"
-                  className="h-full w-full object-cover"
-                />
+                <img src={avatar} alt="" loading="lazy" className="h-full w-full object-cover" />
               ) : (
                 initial
               )}
@@ -254,19 +239,20 @@ function ContaPage() {
               description="Veja e gerencie suas novidades"
               to="/notificacoes"
             />
-            <SettingsItem
-              icon={Moon}
-              title="Tema do app"
-              description={theme === "dark" ? "Modo escuro ativado" : "Modo claro ativado"}
-              showChevron={false}
-              rightContent={
-                <Switch
-                  checked={theme === "dark"}
-                  onCheckedChange={toggleTheme}
-                  aria-label="Alternar tema claro e escuro"
+            <div className="flex gap-3 px-4 py-3">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--petal)]/60 text-[var(--rose)]">
+                <Moon className="h-4 w-4" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="text-[15px] font-medium leading-tight text-foreground">Tema do app</p>
+                <ThemePreferenceControl
+                  className="mt-2"
+                  preference={preference}
+                  resolvedTheme={resolvedTheme}
+                  onChange={setTheme}
                 />
-              }
-            />
+              </div>
+            </div>
           </SettingsGroup>
 
           <SettingsGroup title="Suporte e documentos">
@@ -282,11 +268,7 @@ function ContaPage() {
               description="Como usar o VaiDarNamoro"
               to="/manual"
             />
-            <SettingsItem
-              icon={FileText}
-              title="Termos de uso"
-              to="/termos"
-            />
+            <SettingsItem icon={FileText} title="Termos de uso" to="/termos" />
           </SettingsGroup>
 
           <SettingsGroup title="Sessão">
@@ -308,7 +290,8 @@ function ContaPage() {
             <div className="rounded-2xl border border-red-200 bg-red-50/40 p-3 dark:border-red-400/40 dark:bg-red-950/30">
               {!isOnline && (
                 <p className="mb-2 rounded-lg bg-red-100/60 px-3 py-2 text-[11px] font-medium text-red-800 dark:bg-red-900/40 dark:text-red-200">
-                  Disponível online. Reconecte-se para alterar dados de segurança ou excluir a conta.
+                  Disponível online. Reconecte-se para alterar dados de segurança ou excluir a
+                  conta.
                 </p>
               )}
               <div
