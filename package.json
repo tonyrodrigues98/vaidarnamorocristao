@@ -9,8 +9,14 @@
     "build:dev": "vite build --mode development",
     "preview": "vite preview",
     "lint": "eslint .",
+    "lint:changed": "node scripts/native-shell/lint-changed.mjs",
+    "lint:global": "eslint .",
     "format": "prettier --write .",
-    "test": "vitest run"
+    "format:check:changed": "node scripts/native-shell/format-check-changed.mjs",
+    "test": "vitest run",
+    "test:unit": "vitest run --exclude tests/starter-bundle.test.ts --exclude tests/moderation-rls.test.ts --exclude tests/chat-e2e.test.ts --exclude tests/realtime-messages.test.ts --exclude tests/messages-rls.test.ts",
+    "test:supabase": "vitest run tests/starter-bundle.test.ts tests/moderation-rls.test.ts tests/chat-e2e.test.ts tests/realtime-messages.test.ts tests/messages-rls.test.ts",
+    "test:all": "npm run test:unit && npm run test:supabase"
   },
   "dependencies": {
     "@cloudflare/vite-plugin": "^1.46.0",
