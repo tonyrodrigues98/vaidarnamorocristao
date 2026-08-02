@@ -92,6 +92,11 @@ describe("native shell primary rollout", () => {
       "app-news",
       "app-prayers",
       "app-bible-quiz",
+      "app-avatar",
+      "app-avatar-create",
+      "app-boxes",
+      "app-achievements",
+      "app-gifts",
     ]);
     expect(isNativeShellEligibleDestination(getDestinationBehavior("/conta"))).toBe(true);
     expect(isNativeShellEligibleDestination(getDestinationBehavior("/notificacoes"))).toBe(true);

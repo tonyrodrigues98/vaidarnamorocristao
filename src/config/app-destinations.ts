@@ -184,7 +184,11 @@ export const appDestinations: readonly AppDestination[] = [
   exact("app-dashboard", "/dashboard", { ...mobileAppDefaults, futureTab: "profile" }),
   exact("app-interests", "/interesses", { ...mobileAppDefaults, futureTab: "explore" }),
   exact("app-matches", "/matches", { ...mobileAppDefaults, futureTab: "explore" }),
-  prefix("app-gifts", "/presentes", { ...mobileAppDefaults, footer: false }),
+  prefix("app-gifts", "/presentes", {
+    ...mobileAppDefaults,
+    futureTab: "explore",
+    footer: false,
+  }),
   exact("app-anonymous-notes", "/recados", { ...mobileAppDefaults, futureTab: "explore" }),
   exact("app-prayers", "/oracoes", {
     ...mobileAppDefaults,
@@ -212,9 +216,10 @@ export const appDestinations: readonly AppDestination[] = [
     footer: false,
   }),
 
-  prefix("app-avatar", "/avatar", appDefaults),
-  exact("app-boxes", "/caixas", appDefaults),
-  exact("app-achievements", "/conquistas", appDefaults),
+  exact("app-avatar-create", "/avatar/criar", { ...appDefaults, futureTab: "explore" }),
+  exact("app-avatar", "/avatar", { ...appDefaults, futureTab: "explore" }),
+  exact("app-boxes", "/caixas", { ...appDefaults, futureTab: "explore" }),
+  exact("app-achievements", "/conquistas", { ...appDefaults, futureTab: "explore" }),
   exact("app-pet", "/meu-pet", {
     ...appDefaults,
     futureTab: "explore",

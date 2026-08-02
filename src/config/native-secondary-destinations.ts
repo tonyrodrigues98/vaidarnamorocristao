@@ -153,6 +153,36 @@ export const nativeSecondaryDestinations = [
     parentTab: "explore",
     parentPath: "/explorar",
   },
+  {
+    destinationId: "app-avatar",
+    title: "Avatar",
+    parentTab: "explore",
+    parentPath: "/explorar",
+  },
+  {
+    destinationId: "app-avatar-create",
+    title: "Criar avatar",
+    parentTab: "explore",
+    parentPath: "/explorar",
+  },
+  {
+    destinationId: "app-boxes",
+    title: "Caixas",
+    parentTab: "explore",
+    parentPath: "/explorar",
+  },
+  {
+    destinationId: "app-achievements",
+    title: "Conquistas",
+    parentTab: "explore",
+    parentPath: "/explorar",
+  },
+  {
+    destinationId: "app-gifts",
+    title: "Presentes",
+    parentTab: "explore",
+    parentPath: "/explorar",
+  },
 ] as const satisfies readonly NativeSecondaryDestinationChrome[];
 
 export function getNativeSecondaryDestinationChrome(
