@@ -58,7 +58,8 @@ describe("selective V1 recovery media policy", () => {
 
   it("converts legacy signed profile and pet URLs into stable public URLs", async () => {
     const { classifyProfilePhotoSource } = await import("../src/lib/photoUrl");
-    const { classifyPetMediaSource, resolvePetDisplayImage } = await import("../src/lib/petCatalog");
+    const { classifyPetMediaSource, resolvePetDisplayImage } =
+      await import("../src/lib/petCatalog");
 
     expect(
       classifyProfilePhotoSource(
@@ -76,9 +77,9 @@ describe("selective V1 recovery media policy", () => {
       kind: "public",
       url: "https://supabase.test/storage/v1/object/public/pets/catalog/cats/mila.webp",
     });
-    expect(
-      resolvePetDisplayImage({ image_url: "catalog/cats/mila.webp" }, undefined),
-    ).toBe("https://supabase.test/storage/v1/object/public/pets/catalog/cats/mila.webp");
+    expect(resolvePetDisplayImage({ image_url: "catalog/cats/mila.webp" }, undefined)).toBe(
+      "https://supabase.test/storage/v1/object/public/pets/catalog/cats/mila.webp",
+    );
   });
 
   it("uses signed URLs only for explicitly private media and deduplicates concurrent requests", async () => {

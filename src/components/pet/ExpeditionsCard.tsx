@@ -175,7 +175,12 @@ export function ExpeditionsCard({
 
   if (today === null) {
     return (
-      <div className={cn("h-44 animate-pulse rounded-2xl border border-neutral-200 bg-white", className)} />
+      <div
+        className={cn(
+          "h-44 animate-pulse rounded-2xl border border-neutral-200 bg-white",
+          className,
+        )}
+      />
     );
   }
   if (today.length === 0 && !active) return null;
@@ -417,7 +422,14 @@ function ActiveRunCard({
             }}
             disabled={busy}
           >
-            {busy ? <Loader2 className="size-3.5 animate-spin" /> : <><Gift className="mr-1 size-3.5" />Coletar</>}
+            {busy ? (
+              <Loader2 className="size-3.5 animate-spin" />
+            ) : (
+              <>
+                <Gift className="mr-1 size-3.5" />
+                Coletar
+              </>
+            )}
           </Button>
         )}
       </div>

@@ -208,11 +208,26 @@ function Admin() {
         description: "Fluxo de aprovação e status dos cadastros.",
         icon: <BadgeCheck className="h-5 w-5" />,
         items: [
-          { value: "pending", label: "Pendentes", description: "Aguardando análise.", icon: ClipboardList },
-          { value: "approved", label: "Aprovados", description: "Perfis liberados.", icon: BadgeCheck },
+          {
+            value: "pending",
+            label: "Pendentes",
+            description: "Aguardando análise.",
+            icon: ClipboardList,
+          },
+          {
+            value: "approved",
+            label: "Aprovados",
+            description: "Perfis liberados.",
+            icon: BadgeCheck,
+          },
           { value: "rejected", label: "Rejeitados", description: "Cadastros recusados.", icon: X },
           { value: "banned", label: "Banidos", description: "Contas banidas.", icon: Ban },
-          { value: "deactivated", label: "Desativados", description: "Contas inativas ou em exclusão.", icon: ShieldX },
+          {
+            value: "deactivated",
+            label: "Desativados",
+            description: "Contas inativas ou em exclusão.",
+            icon: ShieldX,
+          },
         ],
       },
       {
@@ -221,9 +236,24 @@ function Admin() {
         description: "Denúncias, sinalizações e filtros.",
         icon: <ShieldAlert className="h-5 w-5" />,
         items: [
-          { value: "reports", label: "Denúncias", description: "Reportes feitos pela comunidade.", icon: Flag },
-          { value: "flags", label: "Sinalizações", description: "Alertas internos do sistema.", icon: MessageSquareWarning },
-          { value: "restricted_words", label: "Palavras restritas", description: "Lista de termos bloqueados.", icon: ShieldAlert },
+          {
+            value: "reports",
+            label: "Denúncias",
+            description: "Reportes feitos pela comunidade.",
+            icon: Flag,
+          },
+          {
+            value: "flags",
+            label: "Sinalizações",
+            description: "Alertas internos do sistema.",
+            icon: MessageSquareWarning,
+          },
+          {
+            value: "restricted_words",
+            label: "Palavras restritas",
+            description: "Lista de termos bloqueados.",
+            icon: ShieldAlert,
+          },
         ],
       },
       {
@@ -232,7 +262,12 @@ function Admin() {
         description: "Publicações e mensagens do app.",
         icon: <Newspaper className="h-5 w-5" />,
         items: [
-          { value: "posts", label: "Texto diário", description: "Notícias e devocionais.", icon: Newspaper },
+          {
+            value: "posts",
+            label: "Texto diário",
+            description: "Notícias e devocionais.",
+            icon: Newspaper,
+          },
         ],
       },
       {
@@ -241,9 +276,24 @@ function Admin() {
         description: "Usuários, pré-cadastros e relacionamentos.",
         icon: <UsersIcon className="h-5 w-5" />,
         items: [
-          { value: "users", label: "Usuários", description: "Gestão de papéis e verificações.", icon: UsersIcon },
-          { value: "pre_cadastros", label: "Pré-cadastros", description: "Cadastros da live e parceiros.", icon: UserPlus },
-          { value: "interests", label: "Interesses & Matches", description: "Interesses cruzados e matches.", icon: Heart },
+          {
+            value: "users",
+            label: "Usuários",
+            description: "Gestão de papéis e verificações.",
+            icon: UsersIcon,
+          },
+          {
+            value: "pre_cadastros",
+            label: "Pré-cadastros",
+            description: "Cadastros da live e parceiros.",
+            icon: UserPlus,
+          },
+          {
+            value: "interests",
+            label: "Interesses & Matches",
+            description: "Interesses cruzados e matches.",
+            icon: Heart,
+          },
         ],
       },
     ];
@@ -645,8 +695,8 @@ function Admin() {
             <div className="leading-snug">
               <p className="font-semibold">Painel administrativo em modo leitura</p>
               <p className="text-xs opacity-90">
-                Você está offline. Ações administrativas (aprovar, banir, moderar, publicar)
-                estão desabilitadas até a conexão voltar.
+                Você está offline. Ações administrativas (aprovar, banir, moderar, publicar) estão
+                desabilitadas até a conexão voltar.
               </p>
             </div>
           </div>
@@ -1564,7 +1614,8 @@ function GrantCoinsButton({ userId, userName }: { userId: string; userName: stri
           <Label htmlFor="grant-coins-amount">Quantidade</Label>
           <Input
             id="grant-coins-amount"
-            type="text" inputMode="decimal"
+            type="text"
+            inputMode="decimal"
             min={1}
             max={500}
             step={1}
@@ -1869,7 +1920,8 @@ function PreCadastrosPanel({
             <div className="space-y-1">
               <Label>Idade</Label>
               <Input
-                type="text" inputMode="decimal"
+                type="text"
+                inputMode="decimal"
                 value={draft.age ?? ""}
                 onChange={(e) => set("age", numOrNull(e.target.value))}
               />
@@ -1877,7 +1929,8 @@ function PreCadastrosPanel({
             <div className="space-y-1">
               <Label>Altura (cm)</Label>
               <Input
-                type="text" inputMode="decimal"
+                type="text"
+                inputMode="decimal"
                 value={draft.height_cm ?? ""}
                 onChange={(e) => set("height_cm", numOrNull(e.target.value))}
               />
@@ -1939,7 +1992,8 @@ function PreCadastrosPanel({
             <div className="space-y-1">
               <Label>Idade desejada (mín)</Label>
               <Input
-                type="text" inputMode="decimal"
+                type="text"
+                inputMode="decimal"
                 value={draft.pref_age_min ?? ""}
                 onChange={(e) => set("pref_age_min", numOrNull(e.target.value))}
               />
@@ -1947,7 +2001,8 @@ function PreCadastrosPanel({
             <div className="space-y-1">
               <Label>Idade desejada (máx)</Label>
               <Input
-                type="text" inputMode="decimal"
+                type="text"
+                inputMode="decimal"
                 value={draft.pref_age_max ?? ""}
                 onChange={(e) => set("pref_age_max", numOrNull(e.target.value))}
               />
@@ -1985,7 +2040,8 @@ function PreCadastrosPanel({
                 <div className="space-y-1">
                   <Label className="text-xs">Quantidade de filhos</Label>
                   <Input
-                    type="text" inputMode="decimal"
+                    type="text"
+                    inputMode="decimal"
                     min={1}
                     value={draft.children_count ?? ""}
                     onChange={(e) => set("children_count", numOrNull(e.target.value))}
@@ -2814,7 +2870,8 @@ function MatchDialog({
           <div className="space-y-1">
             <Label>Idade</Label>
             <Input
-              type="text" inputMode="decimal"
+              type="text"
+              inputMode="decimal"
               value={draft.partner_age ?? ""}
               onChange={(e) => set("partner_age", numOrNull(e.target.value))}
             />
@@ -2822,7 +2879,8 @@ function MatchDialog({
           <div className="space-y-1">
             <Label>Altura (cm)</Label>
             <Input
-              type="text" inputMode="decimal"
+              type="text"
+              inputMode="decimal"
               value={draft.partner_height_cm ?? ""}
               onChange={(e) => set("partner_height_cm", numOrNull(e.target.value))}
             />
@@ -2903,7 +2961,8 @@ function MatchDialog({
               <div className="space-y-1">
                 <Label className="text-xs">Quantidade</Label>
                 <Input
-                  type="text" inputMode="decimal"
+                  type="text"
+                  inputMode="decimal"
                   min={1}
                   value={draft.partner_children_count ?? ""}
                   onChange={(e) => set("partner_children_count", numOrNull(e.target.value))}

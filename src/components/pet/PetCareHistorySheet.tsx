@@ -1,14 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import {
-  Activity,
-  Clock,
-  Coins,
-  Layers,
-  Loader2,
-  Moon,
-  PawPrint,
-  TrendingUp,
-} from "lucide-react";
+import { Activity, Clock, Coins, Layers, Loader2, Moon, PawPrint, TrendingUp } from "lucide-react";
 
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { supabase } from "@/integrations/supabase/client";
@@ -36,8 +27,7 @@ type DayBucket = { key: string; date: Date; count: number };
 const MAX_DAYS = 7;
 
 const USER_TZ =
-  (typeof Intl !== "undefined" &&
-    Intl.DateTimeFormat().resolvedOptions().timeZone) ||
+  (typeof Intl !== "undefined" && Intl.DateTimeFormat().resolvedOptions().timeZone) ||
   "America/Sao_Paulo";
 
 const DAY_KEY_FMT = new Intl.DateTimeFormat("en-CA", {
@@ -54,9 +44,7 @@ function dayKey(d: Date): string {
 function dayDiff(aKey: string, bKey: string): number {
   const [ay, am, ad] = aKey.split("-").map(Number);
   const [by, bm, bd] = bKey.split("-").map(Number);
-  return Math.round(
-    (Date.UTC(ay, am - 1, ad) - Date.UTC(by, bm - 1, bd)) / 86_400_000,
-  );
+  return Math.round((Date.UTC(ay, am - 1, ad) - Date.UTC(by, bm - 1, bd)) / 86_400_000);
 }
 
 function lastSevenDays(): DayBucket[] {
@@ -119,9 +107,7 @@ export function PetCareHistorySheet({ open, onOpenChange }: Props) {
       since.setHours(0, 0, 0, 0);
       const { data, error } = await supabase
         .from("pet_care_events")
-        .select(
-          "id, kind, delta, cost_coins, created_at, item_id, pet_care_items(name)",
-        )
+        .select("id, kind, delta, cost_coins, created_at, item_id, pet_care_items(name)")
         .gte("created_at", since.toISOString())
         .order("created_at", { ascending: false })
         .limit(500);
@@ -136,8 +122,8 @@ export function PetCareHistorySheet({ open, onOpenChange }: Props) {
             created_at: r.created_at as string,
             item_id: (r.item_id as string | null) ?? null,
             item_name:
-              (r as { pet_care_items?: { name?: string | null } | null })
-                .pet_care_items?.name ?? null,
+              (r as { pet_care_items?: { name?: string | null } | null }).pet_care_items?.name ??
+              null,
           })),
         );
       } else {
@@ -214,20 +200,14 @@ export function PetCareHistorySheet({ open, onOpenChange }: Props) {
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent
-        ref={contentRef}
-        side="right"
-        className="w-full p-0 sm:max-w-md"
-      >
+      <SheetContent ref={contentRef} side="right" className="w-full p-0 sm:max-w-md">
         <div className="flex h-full flex-col">
           <header className="flex items-center gap-2 border-b border-neutral-200 px-4 py-3 pr-12">
             <div className="flex size-8 items-center justify-center rounded-lg bg-neutral-100 text-neutral-700">
               <Clock className="size-4" />
             </div>
             <div className="min-w-0">
-              <h2 className="text-sm font-semibold text-neutral-900">
-                Histórico de cuidado
-              </h2>
+              <h2 className="text-sm font-semibold text-neutral-900">Histórico de cuidado</h2>
               <p className="text-[11px] text-neutral-500">
                 Últimos {MAX_DAYS} dias · arraste para fechar
               </p>
@@ -255,11 +235,7 @@ export function PetCareHistorySheet({ open, onOpenChange }: Props) {
                         {formatDayLabel(d.key, d.date)}
                       </span>
                       <span className="mt-0.5 text-[11px] text-neutral-500">
-                        {d.count === 0
-                          ? "—"
-                          : d.count === 1
-                            ? "1 ação"
-                            : `${d.count} ações`}
+                        {d.count === 0 ? "—" : d.count === 1 ? "1 ação" : `${d.count} ações`}
                       </span>
                     </button>
                   </li>
@@ -281,11 +257,7 @@ export function PetCareHistorySheet({ open, onOpenChange }: Props) {
             ) : filtered.length === 0 ? (
               <div className="flex flex-col items-center px-6 py-12 text-center">
                 <div className="flex size-14 items-center justify-center rounded-full bg-neutral-100 text-neutral-400">
-                  {isToday ? (
-                    <PawPrint className="size-6" />
-                  ) : (
-                    <Moon className="size-6" />
-                  )}
+                  {isToday ? <PawPrint className="size-6" /> : <Moon className="size-6" />}
                 </div>
                 <h3 className="mt-3 text-sm font-semibold text-neutral-800">
                   {isToday ? "Nada por aqui ainda" : "Dia tranquilo"}
@@ -319,9 +291,7 @@ export function PetCareHistorySheet({ open, onOpenChange }: Props) {
                       className="flex flex-col items-center rounded-lg border border-neutral-200 bg-white px-1.5 py-2"
                     >
                       <Icon className="size-3.5 text-neutral-400" />
-                      <span className="mt-1 text-sm font-semibold text-neutral-900">
-                        {value}
-                      </span>
+                      <span className="mt-1 text-sm font-semibold text-neutral-900">{value}</span>
                       <span className="text-[10px] uppercase tracking-wide text-neutral-500">
                         {label}
                       </span>
@@ -329,37 +299,32 @@ export function PetCareHistorySheet({ open, onOpenChange }: Props) {
                   ))}
                 </div>
                 <ul className="divide-y divide-neutral-100">
-                {filtered.map((ev) => {
-                  const Icon = PET_CARE_ICON[ev.kind as PetCareKind] ?? Clock;
-                  return (
-                    <li
-                      key={ev.id}
-                      className="flex items-center gap-3 px-4 py-3"
-                    >
-                      <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-neutral-50 text-neutral-700 ring-1 ring-neutral-200">
-                        <Icon className="size-4" />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="truncate text-[13px] font-medium text-neutral-900">
-                          {actionLabel(ev.kind)}
-                          {ev.item_name ? (
-                            <span className="text-neutral-500">
-                              {" · "}
-                              {ev.item_name}
-                            </span>
-                          ) : null}
+                  {filtered.map((ev) => {
+                    const Icon = PET_CARE_ICON[ev.kind as PetCareKind] ?? Clock;
+                    return (
+                      <li key={ev.id} className="flex items-center gap-3 px-4 py-3">
+                        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-neutral-50 text-neutral-700 ring-1 ring-neutral-200">
+                          <Icon className="size-4" />
                         </div>
-                        <div className="text-[11px] text-neutral-500">
-                          {formatTime(ev.created_at)}
-                          {ev.delta > 0 ? <> · +{ev.delta}</> : null}
-                          {ev.cost_coins > 0 ? (
-                            <> · -{ev.cost_coins} moedas</>
-                          ) : null}
+                        <div className="min-w-0 flex-1">
+                          <div className="truncate text-[13px] font-medium text-neutral-900">
+                            {actionLabel(ev.kind)}
+                            {ev.item_name ? (
+                              <span className="text-neutral-500">
+                                {" · "}
+                                {ev.item_name}
+                              </span>
+                            ) : null}
+                          </div>
+                          <div className="text-[11px] text-neutral-500">
+                            {formatTime(ev.created_at)}
+                            {ev.delta > 0 ? <> · +{ev.delta}</> : null}
+                            {ev.cost_coins > 0 ? <> · -{ev.cost_coins} moedas</> : null}
+                          </div>
                         </div>
-                      </div>
-                    </li>
-                  );
-                })}
+                      </li>
+                    );
+                  })}
                 </ul>
               </>
             )}

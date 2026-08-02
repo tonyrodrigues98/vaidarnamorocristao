@@ -53,12 +53,7 @@ import {
   uploadPetImage,
   type PetWritable,
 } from "@/lib/pets";
-import {
-  PET_RARITY_COLOR,
-  PET_RARITY_LABEL,
-  type Pet,
-  type PetRarity,
-} from "@/types/pet";
+import { PET_RARITY_COLOR, PET_RARITY_LABEL, type Pet, type PetRarity } from "@/types/pet";
 import {
   BENEFIT_SCOPE_LABEL,
   PET_TABLE_LABEL,
@@ -331,7 +326,10 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
     setDraft(null);
   }
 
-  async function uploadImage(file: File, field: "image_url" | "image_url_baby" | "image_url_adult" = "image_url") {
+  async function uploadImage(
+    file: File,
+    field: "image_url" | "image_url_baby" | "image_url_adult" = "image_url",
+  ) {
     if (!draft) return;
     setBusy(true);
     try {
@@ -437,7 +435,11 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
         } else {
           payload.benefit_id = null;
           if (existingBenefitId) {
-            try { await deleteRow("pet_benefits", existingBenefitId); } catch { /* ignore */ }
+            try {
+              await deleteRow("pet_benefits", existingBenefitId);
+            } catch {
+              /* ignore */
+            }
           }
         }
       }
@@ -481,7 +483,12 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
       <div className="flex items-center justify-between">
         <h2 className="text-base font-semibold tracking-tight">{PET_TABLE_LABEL[table]}</h2>
         <div className="flex items-center gap-2">
-          <Button size="sm" onClick={startCreate} disabled={creating || editingId !== null} className="rounded-full">
+          <Button
+            size="sm"
+            onClick={startCreate}
+            disabled={creating || editingId !== null}
+            className="rounded-full"
+          >
             <Plus className="mr-1 h-4 w-4" /> Novo
           </Button>
         </div>
@@ -503,7 +510,10 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
               />
             </Field>
             <Field icon={Hash} label="Slug">
-              <Input value={draft.slug} onChange={(e) => setDraft({ ...draft, slug: e.target.value })} />
+              <Input
+                value={draft.slug}
+                onChange={(e) => setDraft({ ...draft, slug: e.target.value })}
+              />
             </Field>
             <div className="sm:col-span-2">
               <Field icon={Pencil} label="Descrição">
@@ -515,7 +525,8 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
             </div>
             <Field icon={Hash} label="Ordem">
               <Input
-                type="text" inputMode="decimal"
+                type="text"
+                inputMode="decimal"
                 value={(draft.sort_order as number) ?? 0}
                 onChange={(e) => setDraft({ ...draft, sort_order: Number(e.target.value) })}
               />
@@ -535,10 +546,14 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
                     value={(draft.category_id as string) ?? ""}
                     onValueChange={(v) => setDraft({ ...draft, category_id: v })}
                   >
-                    <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione" />
+                    </SelectTrigger>
                     <SelectContent>
                       {categories.map((c) => (
-                        <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                        <SelectItem key={c.id} value={c.id}>
+                          {c.name}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -563,10 +578,14 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
                     value={(draft.category_id as string) ?? ""}
                     onValueChange={(v) => setDraft({ ...draft, category_id: v || null })}
                   >
-                    <SelectTrigger><SelectValue placeholder="(opcional)" /></SelectTrigger>
+                    <SelectTrigger>
+                      <SelectValue placeholder="(opcional)" />
+                    </SelectTrigger>
                     <SelectContent>
                       {categories.map((c) => (
-                        <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                        <SelectItem key={c.id} value={c.id}>
+                          {c.name}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -576,12 +595,16 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
                     value={(draft.species_id as string) ?? ""}
                     onValueChange={(v) => setDraft({ ...draft, species_id: v || null })}
                   >
-                    <SelectTrigger><SelectValue placeholder="(opcional)" /></SelectTrigger>
+                    <SelectTrigger>
+                      <SelectValue placeholder="(opcional)" />
+                    </SelectTrigger>
                     <SelectContent>
                       {species
                         .filter((s) => !draft.category_id || s.category_id === draft.category_id)
                         .map((s) => (
-                          <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                          <SelectItem key={s.id} value={s.id}>
+                            {s.name}
+                          </SelectItem>
                         ))}
                     </SelectContent>
                   </Select>
@@ -604,7 +627,9 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
                         })
                       }
                     >
-                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="__none__">Sem efeito (apenas cosmético)</SelectItem>
                         {Object.entries(
@@ -638,7 +663,8 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
                 {selectedEffect?.numeric_param && (
                   <Field icon={Hash} label="Quantidade">
                     <Input
-                      type="text" inputMode="decimal"
+                      type="text"
+                      inputMode="decimal"
                       value={(draft.effect_param as number) ?? selectedEffect.default_param ?? 0}
                       onChange={(e) =>
                         setDraft({ ...draft, effect_param: Number(e.target.value) || 0 })
@@ -653,7 +679,9 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
                         value={(draft.effect_target_id as string) ?? ""}
                         onValueChange={(v) => setDraft({ ...draft, effect_target_id: v })}
                       >
-                        <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione" />
+                        </SelectTrigger>
                         <SelectContent>
                           {targets.length === 0 ? (
                             <SelectItem value="__empty__" disabled>
@@ -661,7 +689,9 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
                             </SelectItem>
                           ) : (
                             targets.map((t) => (
-                              <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
+                              <SelectItem key={t.id} value={t.id}>
+                                {t.name}
+                              </SelectItem>
                             ))
                           )}
                         </SelectContent>
@@ -676,10 +706,14 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
                       setDraft({ ...draft, scope: v as PetBenefitScope, scope_id: null })
                     }
                   >
-                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
                     <SelectContent>
                       {scopeOptions.map((s) => (
-                        <SelectItem key={s} value={s}>{BENEFIT_SCOPE_LABEL[s]}</SelectItem>
+                        <SelectItem key={s} value={s}>
+                          {BENEFIT_SCOPE_LABEL[s]}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -690,10 +724,14 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
                       value={(draft.scope_id as string) ?? ""}
                       onValueChange={(v) => setDraft({ ...draft, scope_id: v })}
                     >
-                      <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione" />
+                      </SelectTrigger>
                       <SelectContent>
                         {scopeTargets(draft.scope as PetBenefitScope).map((t) => (
-                          <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
+                          <SelectItem key={t.id} value={t.id}>
+                            {t.name}
+                          </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -708,10 +746,15 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
                   <Select
                     value={(draft.kind as string) ?? "__none__"}
                     onValueChange={(v) =>
-                      setDraft({ ...draft, kind: v === "__none__" ? null : (v as "baby" | "adult") })
+                      setDraft({
+                        ...draft,
+                        kind: v === "__none__" ? null : (v as "baby" | "adult"),
+                      })
                     }
                   >
-                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="__none__">Sem distinção (usa imagem padrão)</SelectItem>
                       <SelectItem value="baby">Filhote</SelectItem>
@@ -743,9 +786,13 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
                             })
                           }
                         >
-                          <SelectTrigger><SelectValue /></SelectTrigger>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="__none__">Sem vantagem (apenas cosmético)</SelectItem>
+                            <SelectItem value="__none__">
+                              Sem vantagem (apenas cosmético)
+                            </SelectItem>
                             {Object.entries(
                               perkEffects.reduce<Record<string, PetPerkEffect[]>>((acc, e) => {
                                 (acc[e.category] ||= []).push(e);
@@ -757,7 +804,9 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
                                   {PERK_CATEGORY_LABEL[cat as PetPerkEffectCategory]}
                                 </div>
                                 {items.map((e) => (
-                                  <SelectItem key={e.key} value={e.key}>{e.label}</SelectItem>
+                                  <SelectItem key={e.key} value={e.key}>
+                                    {e.label}
+                                  </SelectItem>
                                 ))}
                               </div>
                             ))}
@@ -777,8 +826,11 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
                         {selectedEffect?.numeric_param && (
                           <Field icon={Hash} label="Quantidade">
                             <Input
-                              type="text" inputMode="decimal"
-                              value={(draft.effect_param as number) ?? selectedEffect.default_param ?? 0}
+                              type="text"
+                              inputMode="decimal"
+                              value={
+                                (draft.effect_param as number) ?? selectedEffect.default_param ?? 0
+                              }
                               onChange={(e) =>
                                 setDraft({ ...draft, effect_param: Number(e.target.value) || 0 })
                               }
@@ -792,7 +844,9 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
                                 value={(draft.effect_target_id as string) ?? ""}
                                 onValueChange={(v) => setDraft({ ...draft, effect_target_id: v })}
                               >
-                                <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Selecione" />
+                                </SelectTrigger>
                                 <SelectContent>
                                   {targets.length === 0 ? (
                                     <SelectItem value="__empty__" disabled>
@@ -800,7 +854,9 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
                                     </SelectItem>
                                   ) : (
                                     targets.map((t) => (
-                                      <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
+                                      <SelectItem key={t.id} value={t.id}>
+                                        {t.name}
+                                      </SelectItem>
                                     ))
                                   )}
                                 </SelectContent>
@@ -821,7 +877,7 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
                           ...draft,
                           is_exclusive: v,
                           rarity: v ? (draft.rarity as PetRarity) || "rare" : "common",
-                          price_coins: v ? draft.price_coins ?? 0 : 0,
+                          price_coins: v ? (draft.price_coins ?? 0) : 0,
                         })
                       }
                     />
@@ -835,21 +891,29 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
                         value={(draft.rarity as string) ?? "rare"}
                         onValueChange={(v) => setDraft({ ...draft, rarity: v as PetRarity })}
                       >
-                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
                         <SelectContent>
                           {RARITIES.map((r) => (
-                            <SelectItem key={r} value={r}>{PET_RARITY_LABEL[r]}</SelectItem>
+                            <SelectItem key={r} value={r}>
+                              {PET_RARITY_LABEL[r]}
+                            </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
                     </Field>
                     <Field icon={Sparkles} label="Preço (moedas)">
                       <Input
-                        type="text" inputMode="decimal"
+                        type="text"
+                        inputMode="decimal"
                         min={0}
                         value={(draft.price_coins as number) ?? 0}
                         onChange={(e) =>
-                          setDraft({ ...draft, price_coins: Math.max(0, Number(e.target.value) || 0) })
+                          setDraft({
+                            ...draft,
+                            price_coins: Math.max(0, Number(e.target.value) || 0),
+                          })
                         }
                       />
                     </Field>
@@ -938,7 +1002,9 @@ function CatalogPanel({ table }: { table: PetCatalogTable }) {
           try {
             await updateRow(table, row.id, { [field]: null });
             setRows((prev) =>
-              prev.map((r) => (r.id === row.id ? ({ ...r, [field]: null } as PetCatalogEntity) : r)),
+              prev.map((r) =>
+                r.id === row.id ? ({ ...r, [field]: null } as PetCatalogEntity) : r,
+              ),
             );
             toast.success("Imagem removida");
           } catch (e) {
@@ -969,7 +1035,10 @@ function CatalogRowsView({
   onEdit: (row: PetCatalogEntity) => void;
   onRemove: (row: PetCatalogEntity) => void;
   onToggleActive: (row: PetCatalogEntity, next: boolean) => void;
-  onClearImage: (row: PetCatalogEntity, field: "image_url" | "image_url_baby" | "image_url_adult") => void;
+  onClearImage: (
+    row: PetCatalogEntity,
+    field: "image_url" | "image_url_baby" | "image_url_adult",
+  ) => void;
 }) {
   if (rows.length === 0) {
     return (
@@ -984,7 +1053,15 @@ function CatalogRowsView({
     return (
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {rows.map((row) => (
-          <RowCard key={row.id} row={row} table={table} onEdit={onEdit} onRemove={onRemove} onToggleActive={onToggleActive} onClearImage={onClearImage} />
+          <RowCard
+            key={row.id}
+            row={row}
+            table={table}
+            onEdit={onEdit}
+            onRemove={onRemove}
+            onToggleActive={onToggleActive}
+            onClearImage={onClearImage}
+          />
         ))}
       </div>
     );
@@ -1005,7 +1082,12 @@ function CatalogRowsView({
     for (const c of categories) {
       const list = byCat.get(c.id);
       if (list && list.length) {
-        groups.push({ key: c.id, title: c.name, subtitle: `${list.length} ${list.length === 1 ? "espécie" : "espécies"}`, rows: list });
+        groups.push({
+          key: c.id,
+          title: c.name,
+          subtitle: `${list.length} ${list.length === 1 ? "espécie" : "espécies"}`,
+          rows: list,
+        });
       }
     }
     if (byCat.get("__none__")?.length) orphan.push(...byCat.get("__none__")!);
@@ -1065,7 +1147,15 @@ function CatalogRowsView({
           </header>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {g.rows.map((row) => (
-              <RowCard key={row.id} row={row} table={table} onEdit={onEdit} onRemove={onRemove} onToggleActive={onToggleActive} onClearImage={onClearImage} />
+              <RowCard
+                key={row.id}
+                row={row}
+                table={table}
+                onEdit={onEdit}
+                onRemove={onRemove}
+                onToggleActive={onToggleActive}
+                onClearImage={onClearImage}
+              />
             ))}
           </div>
         </section>
@@ -1080,7 +1170,15 @@ function CatalogRowsView({
           </header>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {orphan.map((row) => (
-              <RowCard key={row.id} row={row} table={table} onEdit={onEdit} onRemove={onRemove} onToggleActive={onToggleActive} onClearImage={onClearImage} />
+              <RowCard
+                key={row.id}
+                row={row}
+                table={table}
+                onEdit={onEdit}
+                onRemove={onRemove}
+                onToggleActive={onToggleActive}
+                onClearImage={onClearImage}
+              />
             ))}
           </div>
         </section>
@@ -1102,7 +1200,10 @@ function RowCard({
   onEdit: (row: PetCatalogEntity) => void;
   onRemove: (row: PetCatalogEntity) => void;
   onToggleActive: (row: PetCatalogEntity, next: boolean) => void;
-  onClearImage: (row: PetCatalogEntity, field: "image_url" | "image_url_baby" | "image_url_adult") => void;
+  onClearImage: (
+    row: PetCatalogEntity,
+    field: "image_url" | "image_url_baby" | "image_url_adult",
+  ) => void;
 }) {
   const isProduct = table === "pet_species" || table === "pet_variants";
   const prod = row as PetCatalogEntity & {
@@ -1116,11 +1217,11 @@ function RowCard({
   const adult = prod.image_url_adult ?? null;
   const stageLabel =
     table === "pet_life_stages"
-      ? ((row as unknown as { kind?: string | null }).kind === "baby"
-          ? "Filhote"
-          : (row as unknown as { kind?: string | null }).kind === "adult"
-            ? "Adulto"
-            : null)
+      ? (row as unknown as { kind?: string | null }).kind === "baby"
+        ? "Filhote"
+        : (row as unknown as { kind?: string | null }).kind === "adult"
+          ? "Adulto"
+          : null
       : null;
   return (
     <div
@@ -1194,7 +1295,12 @@ function RowCard({
         )}
       </div>
       <div className="flex items-center gap-1">
-        <Button size="icon" variant="ghost" onClick={() => onEdit(row)} className="h-8 w-8 rounded-full">
+        <Button
+          size="icon"
+          variant="ghost"
+          onClick={() => onEdit(row)}
+          className="h-8 w-8 rounded-full"
+        >
           <Pencil className="h-4 w-4" />
         </Button>
         <Button
@@ -1248,7 +1354,11 @@ function ThumbWithLabel({
     <div className="flex flex-col items-center gap-0.5">
       {resolved ? (
         <div className="group/thumb relative h-14 w-14">
-          <img src={resolved} alt={label} className="h-14 w-14 rounded-xl object-contain bg-muted/50 ring-1 ring-border" />
+          <img
+            src={resolved}
+            alt={label}
+            className="h-14 w-14 rounded-xl object-contain bg-muted/50 ring-1 ring-border"
+          />
           {onClear && (
             <button
               type="button"
@@ -1331,7 +1441,9 @@ function ImagePreview({
         className={cn(
           "relative grid place-items-center overflow-hidden rounded-2xl border-2 border-dashed transition-all",
           "h-72 cursor-pointer",
-          drag ? "border-primary bg-primary/5" : "border-border bg-muted/30 hover:border-foreground/30",
+          drag
+            ? "border-primary bg-primary/5"
+            : "border-border bg-muted/30 hover:border-foreground/30",
         )}
         style={{
           backgroundImage: value
@@ -1366,11 +1478,23 @@ function ImagePreview({
         )}
       </div>
       <div className="flex flex-wrap items-center gap-2">
-        <Button type="button" variant="outline" size="sm" onClick={() => ref.current?.click()} className="rounded-full">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => ref.current?.click()}
+          className="rounded-full"
+        >
           <Upload className="mr-1 h-4 w-4" /> {value ? "Trocar" : "Enviar"}
         </Button>
         {value && (
-          <Button type="button" variant="ghost" size="sm" onClick={onClear} className="rounded-full text-destructive">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={onClear}
+            className="rounded-full text-destructive"
+          >
             <Trash2 className="mr-1 h-4 w-4" /> Remover
           </Button>
         )}
@@ -1394,7 +1518,11 @@ function ImagePreview({
                 backgroundColor: "white",
               }}
             >
-              <img src={resolvedValue ?? value} alt="preview ampliado" className="max-h-[90vh] max-w-full object-contain" />
+              <img
+                src={resolvedValue ?? value}
+                alt="preview ampliado"
+                className="max-h-[90vh] max-w-full object-contain"
+              />
             </div>
           )}
           {meta && (
@@ -1478,7 +1606,8 @@ function PerkEffectsPanel() {
   }
 
   async function remove(r: PetPerkEffect) {
-    if (!confirm(`Excluir "${r.label}"? Vantagens que usam este efeito perderão o vínculo.`)) return;
+    if (!confirm(`Excluir "${r.label}"? Vantagens que usam este efeito perderão o vínculo.`))
+      return;
     try {
       await deletePerkEffect(r.key);
       toast.success("Removido");
@@ -1494,8 +1623,8 @@ function PerkEffectsPanel() {
         <div>
           <h2 className="text-base font-semibold tracking-tight">Tipos de efeito</h2>
           <p className="text-xs text-muted-foreground">
-            Crie regras reutilizáveis. Apenas chaves reconhecidas pelo backend produzem efeito; novas chaves ficam como
-            tags informativas até serem ligadas via código.
+            Crie regras reutilizáveis. Apenas chaves reconhecidas pelo backend produzem efeito;
+            novas chaves ficam como tags informativas até serem ligadas via código.
           </p>
         </div>
         <Button size="sm" onClick={startCreate} disabled={!!draft} className="rounded-full">
@@ -1535,17 +1664,22 @@ function PerkEffectsPanel() {
                 value={draft.category ?? "cosmetic"}
                 onValueChange={(v) => setDraft({ ...draft, category: v as PetPerkEffectCategory })}
               >
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   {Object.entries(PERK_CATEGORY_LABEL).map(([k, v]) => (
-                    <SelectItem key={k} value={k}>{v}</SelectItem>
+                    <SelectItem key={k} value={k}>
+                      {v}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </Field>
             <Field icon={Hash} label="Ordem">
               <Input
-                type="text" inputMode="decimal"
+                type="text"
+                inputMode="decimal"
                 value={draft.sort_order ?? 0}
                 onChange={(e) => setDraft({ ...draft, sort_order: Number(e.target.value) || 0 })}
               />
@@ -1560,9 +1694,12 @@ function PerkEffectsPanel() {
             {draft.numeric_param && (
               <Field icon={Hash} label="Valor padrão">
                 <Input
-                  type="text" inputMode="decimal"
+                  type="text"
+                  inputMode="decimal"
                   value={draft.default_param ?? 0}
-                  onChange={(e) => setDraft({ ...draft, default_param: Number(e.target.value) || 0 })}
+                  onChange={(e) =>
+                    setDraft({ ...draft, default_param: Number(e.target.value) || 0 })
+                  }
                 />
               </Field>
             )}
@@ -1570,10 +1707,15 @@ function PerkEffectsPanel() {
               <Select
                 value={draft.needs_target ?? "__none__"}
                 onValueChange={(v) =>
-                  setDraft({ ...draft, needs_target: v === "__none__" ? null : (v as PetPerkEffect["needs_target"]) })
+                  setDraft({
+                    ...draft,
+                    needs_target: v === "__none__" ? null : (v as PetPerkEffect["needs_target"]),
+                  })
                 }
               >
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="__none__">Nenhum</SelectItem>
                   <SelectItem value="avatar_decorations">Moldura/Aura</SelectItem>
@@ -1591,11 +1733,20 @@ function PerkEffectsPanel() {
             </div>
           </div>
           <div className="mt-4 flex justify-end gap-2">
-            <Button variant="outline" size="sm" onClick={() => setDraft(null)} className="rounded-full">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setDraft(null)}
+              className="rounded-full"
+            >
               <X className="mr-1 h-4 w-4" /> Cancelar
             </Button>
             <Button size="sm" onClick={() => void save()} disabled={busy} className="rounded-full">
-              {busy ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <Save className="mr-1 h-4 w-4" />}
+              {busy ? (
+                <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+              ) : (
+                <Save className="mr-1 h-4 w-4" />
+              )}
               Salvar
             </Button>
           </div>
@@ -1619,12 +1770,20 @@ function PerkEffectsPanel() {
                 <p className="truncate text-sm font-semibold">{r.label}</p>
                 <p className="truncate font-mono text-[11px] text-muted-foreground">{r.key}</p>
                 <p className="mt-0.5 text-[11px] text-muted-foreground">
-                  {PERK_CATEGORY_LABEL[r.category]} · {r.numeric_param ? `numérico (padrão ${r.default_param ?? "-"})` : "sem parâmetro"}
+                  {PERK_CATEGORY_LABEL[r.category]} ·{" "}
+                  {r.numeric_param
+                    ? `numérico (padrão ${r.default_param ?? "-"})`
+                    : "sem parâmetro"}
                   {r.needs_target ? ` · alvo: ${r.needs_target}` : ""}
                 </p>
               </div>
               <div className="flex gap-1">
-                <Button variant="ghost" size="icon" onClick={() => startEdit(r)} className="h-8 w-8 rounded-full">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => startEdit(r)}
+                  className="h-8 w-8 rounded-full"
+                >
                   <Pencil className="h-4 w-4" />
                 </Button>
                 <Button
@@ -1762,7 +1921,7 @@ function LegacyPetsPanel() {
           species,
           description: draft.description?.trim() || null,
           is_exclusive: draft.is_exclusive,
-          price_coins: draft.is_exclusive ? draft.price_coins ?? 0 : 0,
+          price_coins: draft.is_exclusive ? (draft.price_coins ?? 0) : 0,
         });
         toast.success("Pet criado");
       } else if (editingId) {
@@ -1775,7 +1934,7 @@ function LegacyPetsPanel() {
           is_active: draft.is_active,
           sort_order: draft.sort_order,
           is_exclusive: draft.is_exclusive,
-          price_coins: draft.is_exclusive ? draft.price_coins ?? 0 : 0,
+          price_coins: draft.is_exclusive ? (draft.price_coins ?? 0) : 0,
         };
         if (draft.image_url) patch.image_url = draft.image_url;
         await updatePet(editingId, patch);
@@ -1829,7 +1988,9 @@ function LegacyPetsPanel() {
       <div className="flex items-center justify-between gap-3">
         <div>
           <h2 className="text-base font-semibold tracking-tight">Pets (sistema antigo)</h2>
-          <p className="text-xs text-muted-foreground">Mantenha enquanto migra para o catálogo dinâmico acima.</p>
+          <p className="text-xs text-muted-foreground">
+            Mantenha enquanto migra para o catálogo dinâmico acima.
+          </p>
         </div>
         <Button onClick={startCreate} size="sm" className="rounded-full">
           <Plus className="mr-1 h-4 w-4" /> Novo
@@ -1858,7 +2019,10 @@ function LegacyPetsPanel() {
               />
             </Field>
             <Field icon={Hash} label="Slug">
-              <Input value={draft.slug} onChange={(e) => setDraft({ ...draft, slug: slugifyPet(e.target.value) })} />
+              <Input
+                value={draft.slug}
+                onChange={(e) => setDraft({ ...draft, slug: slugifyPet(e.target.value) })}
+              />
             </Field>
             <Field icon={Layers} label="Categoria">
               <Select
@@ -1869,11 +2033,15 @@ function LegacyPetsPanel() {
                 }}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder={categories.length ? "Selecione" : "Cadastre uma categoria"} />
+                  <SelectValue
+                    placeholder={categories.length ? "Selecione" : "Cadastre uma categoria"}
+                  />
                 </SelectTrigger>
                 <SelectContent>
                   {categories.map((c) => (
-                    <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                    <SelectItem key={c.id} value={c.id}>
+                      {c.name}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -1890,7 +2058,9 @@ function LegacyPetsPanel() {
                   {speciesList
                     .filter((s) => !categoryId || s.category_id === categoryId)
                     .map((s) => (
-                      <SelectItem key={s.id} value={s.name}>{s.name}</SelectItem>
+                      <SelectItem key={s.id} value={s.name}>
+                        {s.name}
+                      </SelectItem>
                     ))}
                 </SelectContent>
               </Select>
@@ -1907,7 +2077,8 @@ function LegacyPetsPanel() {
             </div>
             <Field icon={Hash} label="Ordem">
               <Input
-                type="text" inputMode="decimal"
+                type="text"
+                inputMode="decimal"
                 value={draft.sort_order ?? 0}
                 onChange={(e) => setDraft({ ...draft, sort_order: Number(e.target.value) || 0 })}
               />
@@ -1941,17 +2112,22 @@ function LegacyPetsPanel() {
                     value={draft.rarity}
                     onValueChange={(v) => setDraft({ ...draft, rarity: v as PetRarity })}
                   >
-                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
                     <SelectContent>
                       {RARITIES.map((r) => (
-                        <SelectItem key={r} value={r}>{PET_RARITY_LABEL[r]}</SelectItem>
+                        <SelectItem key={r} value={r}>
+                          {PET_RARITY_LABEL[r]}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </Field>
                 <Field icon={Sparkles} label="Preço (moedas)">
                   <Input
-                    type="text" inputMode="decimal"
+                    type="text"
+                    inputMode="decimal"
                     min={0}
                     value={draft.price_coins ?? 0}
                     onChange={(e) =>
@@ -1978,7 +2154,11 @@ function LegacyPetsPanel() {
               Cancelar
             </Button>
             <Button onClick={save} disabled={busy} className="rounded-full">
-              {busy ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <Save className="mr-1 h-4 w-4" />}
+              {busy ? (
+                <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+              ) : (
+                <Save className="mr-1 h-4 w-4" />
+              )}
               Salvar
             </Button>
           </div>
@@ -2025,8 +2205,12 @@ function LegacyPetsPanel() {
                     </span>
                   )}
                 </div>
-                <p className="text-xs text-muted-foreground">{p.species} · ordem {p.sort_order}</p>
-                <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{p.description ?? "—"}</p>
+                <p className="text-xs text-muted-foreground">
+                  {p.species} · ordem {p.sort_order}
+                </p>
+                <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">
+                  {p.description ?? "—"}
+                </p>
               </div>
             </div>
             <div className="mt-3 flex items-center justify-between gap-2">
@@ -2035,7 +2219,12 @@ function LegacyPetsPanel() {
                 <span className="text-muted-foreground">Ativo</span>
               </div>
               <div className="flex gap-1">
-                <Button variant="ghost" size="icon" onClick={() => startEdit(p)} className="h-8 w-8 rounded-full">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => startEdit(p)}
+                  className="h-8 w-8 rounded-full"
+                >
                   <Pencil className="h-4 w-4" />
                 </Button>
                 <Button
@@ -2059,4 +2248,3 @@ function LegacyPetsPanel() {
     </section>
   );
 }
-

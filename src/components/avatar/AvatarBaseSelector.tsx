@@ -34,9 +34,7 @@ export function AvatarBaseSelector({
     <div className="rounded-t-3xl bg-white px-4 pt-4 pb-24 shadow-[0_-8px_30px_rgba(0,0,0,0.06)]">
       <div className="mb-3">
         <h3 className="text-sm font-semibold text-foreground">{title}</h3>
-        {description && (
-          <p className="mt-0.5 text-xs text-muted-foreground">{description}</p>
-        )}
+        {description && <p className="mt-0.5 text-xs text-muted-foreground">{description}</p>}
       </div>
       {options.length === 0 ? (
         <div className="rounded-2xl bg-secondary/40 px-3 py-4 text-center text-xs text-muted-foreground">

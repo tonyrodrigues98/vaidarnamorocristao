@@ -169,8 +169,7 @@ export function PetProgressionCard({
             break;
           default:
             toast.error("Não foi possível confirmar o resgate", {
-              description:
-                "Tente novamente. Se persistir, recarregue a página.",
+              description: "Tente novamente. Se persistir, recarregue a página.",
             });
         }
         // Sincroniza UI mesmo se o servidor recusar.
@@ -212,10 +211,7 @@ export function PetProgressionCard({
         toast.success(`Renascimento Lv. ${r.new_prestige_level}!`, {
           description: `Medalha permanente + ${r.xp_bonus_pct}% de XP para sempre.`,
         });
-        const [fresh, freshHistory] = await Promise.all([
-          getPrestige(),
-          getRebirthHistory(),
-        ]);
+        const [fresh, freshHistory] = await Promise.all([getPrestige(), getRebirthHistory()]);
         setPrestige(fresh);
         setHistory(freshHistory);
         onChanged?.();
@@ -257,7 +253,10 @@ export function PetProgressionCard({
         )}
       >
         <div className="flex items-center gap-2">
-          <Moon className={cn("size-4", boostActive ? "text-white" : "text-slate-400")} strokeWidth={2.2} />
+          <Moon
+            className={cn("size-4", boostActive ? "text-white" : "text-slate-400")}
+            strokeWidth={2.2}
+          />
           <div className="leading-tight">
             <p className="text-[12px] font-semibold">
               {boostActive ? "Boost 2x ativo" : "Boost noturno 2x"}
@@ -302,7 +301,8 @@ export function PetProgressionCard({
             <div className="leading-tight">
               <p className="text-[12px] font-semibold text-slate-700">Pacote inicial</p>
               <p className="text-[10.5px] text-slate-500">
-                Coletado em {formatDateShort(bundle.claimed_at)} · +{bundle.coins_granted} moedas · +{bundle.xp_granted} XP
+                Coletado em {formatDateShort(bundle.claimed_at)} · +{bundle.coins_granted} moedas ·
+                +{bundle.xp_granted} XP
               </p>
             </div>
           </div>
@@ -358,19 +358,14 @@ export function PetProgressionCard({
                 <Award className="size-3.5 text-amber-500" strokeWidth={2.4} />
                 Medalhas
               </span>
-              <span className="text-[10.5px] text-slate-500">
-                Prestígio {prestige.level}/10
-              </span>
+              <span className="text-[10.5px] text-slate-500">Prestígio {prestige.level}/10</span>
             </div>
             <div className="flex items-center justify-between gap-1">
               {PRESTIGE_MEDALS.map((m) => {
                 const unlocked = prestige.level >= m.level;
                 const style = MEDAL_STYLE[m.medal];
                 return (
-                  <div
-                    key={m.medal}
-                    className="flex flex-1 flex-col items-center gap-1"
-                  >
+                  <div key={m.medal} className="flex flex-1 flex-col items-center gap-1">
                     <div
                       className={cn(
                         "flex size-9 items-center justify-center rounded-full ring-2",
@@ -478,9 +473,7 @@ export function PetProgressionCard({
                           <span className="font-medium text-slate-700">
                             Prestígio {h.prestige_level}
                           </span>
-                          <span className="text-slate-500">
-                            {formatDateShort(h.created_at)}
-                          </span>
+                          <span className="text-slate-500">{formatDateShort(h.created_at)}</span>
                         </div>
                       </li>
                     );
@@ -497,8 +490,8 @@ export function PetProgressionCard({
           <AlertDialogHeader>
             <AlertDialogTitle>Renascer agora?</AlertDialogTitle>
             <AlertDialogDescription>
-              Seu XP vai voltar a zero, mas você mantém uma medalha permanente
-              de prestígio e ganha +5% de XP para sempre (cumulativo até +50%).
+              Seu XP vai voltar a zero, mas você mantém uma medalha permanente de prestígio e ganha
+              +5% de XP para sempre (cumulativo até +50%).
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -515,9 +508,8 @@ export function PetProgressionCard({
           <AlertDialogHeader>
             <AlertDialogTitle>Confirmar pacote inicial</AlertDialogTitle>
             <AlertDialogDescription>
-              Esta é uma compra única e gratuita: +300 moedas e +200 XP creditados
-              agora. A operação é registrada no seu histórico de moedas e não pode
-              ser repetida.
+              Esta é uma compra única e gratuita: +300 moedas e +200 XP creditados agora. A operação
+              é registrada no seu histórico de moedas e não pode ser repetida.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

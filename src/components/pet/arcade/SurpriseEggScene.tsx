@@ -253,7 +253,11 @@ function CinematicEgg({
             initial={{ opacity: 0, scaleX: 0.2 }}
             animate={{ opacity: state === "opening" ? [0, 1, 0.9] : [0.4, 0.9, 0.4], scaleX: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: state === "opening" ? 0.6 : 1.6, repeat: state === "ready" ? Infinity : 0, ease: "easeInOut" }}
+            transition={{
+              duration: state === "opening" ? 0.6 : 1.6,
+              repeat: state === "ready" ? Infinity : 0,
+              ease: "easeInOut",
+            }}
             className="absolute left-1/2 top-1/2 h-2 w-44 -translate-x-1/2 -translate-y-1/2 rounded-full"
             style={{
               background:
@@ -268,12 +272,7 @@ function CinematicEgg({
   );
 }
 
-export function SurpriseEggGame({
-  config,
-  balance,
-  onBalanceChange,
-  onFinished,
-}: ArcadeGameProps) {
+export function SurpriseEggGame({ config, balance, onBalanceChange, onFinished }: ArcadeGameProps) {
   const reduceMotion = useReducedMotion() ?? false;
   const [state, setState] = useState<PetAlbumState | null>(null);
   const [busy, setBusy] = useState(false);
@@ -482,7 +481,13 @@ export function SurpriseEggGame({
                 onClick={() => void open(false)}
                 disabled={busy}
                 tone="open"
-                icon={busy ? <Loader2 className="size-5 animate-spin" /> : <PackageOpen className="size-5" />}
+                icon={
+                  busy ? (
+                    <Loader2 className="size-5 animate-spin" />
+                  ) : (
+                    <PackageOpen className="size-5" />
+                  )
+                }
               >
                 Abrir ovo
               </CinematicButton>
@@ -521,7 +526,9 @@ export function SurpriseEggGame({
                 onClick={() => void buy()}
                 disabled={busy || balance < config.min_entry}
                 tone="buy"
-                icon={busy ? <Loader2 className="size-5 animate-spin" /> : <Egg className="size-5" />}
+                icon={
+                  busy ? <Loader2 className="size-5 animate-spin" /> : <Egg className="size-5" />
+                }
               >
                 Comprar ovo · {config.min_entry} moedas
               </CinematicButton>

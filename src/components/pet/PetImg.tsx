@@ -11,7 +11,9 @@ type PetImgProps = Omit<ComponentPropsWithoutRef<"img">, "src"> & {
 /** Resolves catalog pet art to its stable public Storage URL. */
 export function PetImg({ src, className, onError, ...props }: PetImgProps) {
   const { user } = useAuth();
-  const [resolvedUrl, setResolvedUrl] = useState<string | null>(() => classifyPetMediaSource(src).url);
+  const [resolvedUrl, setResolvedUrl] = useState<string | null>(
+    () => classifyPetMediaSource(src).url,
+  );
   const [loading, setLoading] = useState(Boolean(src));
   const [refreshToken, setRefreshToken] = useState(0);
   const retryCount = useRef(0);

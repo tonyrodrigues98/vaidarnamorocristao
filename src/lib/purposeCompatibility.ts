@@ -78,7 +78,8 @@ export function getPurposeCompatibility(input: CompatInput): CompatResult {
       talk.push({
         key: "diff-state",
         title: "Cidades diferentes",
-        description: "Vocês estão em estados diferentes — vale conversar sobre distância com calma.",
+        description:
+          "Vocês estão em estados diferentes — vale conversar sobre distância com calma.",
       });
     }
   }
@@ -147,12 +148,14 @@ export function getPurposeCompatibility(input: CompatInput): CompatResult {
   // Faixa etária pretendida
   const ageA = currentProfile.age;
   const ageB = targetProfile.age;
-  const rangeA = currentPrefs?.age_min != null && currentPrefs?.age_max != null
-    ? [currentPrefs.age_min, currentPrefs.age_max]
-    : null;
-  const rangeB = targetPrefs?.age_min != null && targetPrefs?.age_max != null
-    ? [targetPrefs.age_min, targetPrefs.age_max]
-    : null;
+  const rangeA =
+    currentPrefs?.age_min != null && currentPrefs?.age_max != null
+      ? [currentPrefs.age_min, currentPrefs.age_max]
+      : null;
+  const rangeB =
+    targetPrefs?.age_min != null && targetPrefs?.age_max != null
+      ? [targetPrefs.age_min, targetPrefs.age_max]
+      : null;
   if (typeof ageA === "number" && typeof ageB === "number" && rangeA && rangeB) {
     signals++;
     const aInB = ageA >= rangeB[0] && ageA <= rangeB[1];

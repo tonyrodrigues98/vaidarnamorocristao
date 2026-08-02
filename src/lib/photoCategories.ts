@@ -5,12 +5,7 @@
  * "Dia a dia" no agrupamento de UI.
  */
 
-export type PhotoCategory =
-  | "fe"
-  | "familia"
-  | "especiais"
-  | "viagens"
-  | "dia_a_dia";
+export type PhotoCategory = "fe" | "familia" | "especiais" | "viagens" | "dia_a_dia";
 
 export type PhotoCategoryOption = {
   value: PhotoCategory;
@@ -36,14 +31,9 @@ export function categoryLabel(value: string | null | undefined): string {
 }
 
 export function isPhotoCategory(value: unknown): value is PhotoCategory {
-  return (
-    typeof value === "string" &&
-    PHOTO_CATEGORIES.some((c) => c.value === value)
-  );
+  return typeof value === "string" && PHOTO_CATEGORIES.some((c) => c.value === value);
 }
 
-export function normalizeCategory(
-  value: string | null | undefined,
-): PhotoCategory {
+export function normalizeCategory(value: string | null | undefined): PhotoCategory {
   return isPhotoCategory(value) ? value : "dia_a_dia";
 }

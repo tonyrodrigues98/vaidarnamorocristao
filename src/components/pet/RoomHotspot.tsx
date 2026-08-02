@@ -1,10 +1,6 @@
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 type Props = {
   /** Posição em % do container (0-100) — ponto central do item clicável. */
@@ -44,10 +40,10 @@ export function RoomHotspot({
   const size = `${radius * 2}%`;
   // Posicionamento da etiqueta em relação ao centro do glow.
   const labelPos = {
-    top:    { bottom: `calc(100% + 6px)`, left: "50%", transform: "translateX(-50%)" },
-    bottom: { top:    `calc(100% + 6px)`, left: "50%", transform: "translateX(-50%)" },
-    left:   { right:  `calc(100% + 6px)`, top:  "50%", transform: "translateY(-50%)" },
-    right:  { left:   `calc(100% + 6px)`, top:  "50%", transform: "translateY(-50%)" },
+    top: { bottom: `calc(100% + 6px)`, left: "50%", transform: "translateX(-50%)" },
+    bottom: { top: `calc(100% + 6px)`, left: "50%", transform: "translateX(-50%)" },
+    left: { right: `calc(100% + 6px)`, top: "50%", transform: "translateY(-50%)" },
+    right: { left: `calc(100% + 6px)`, top: "50%", transform: "translateY(-50%)" },
   }[labelPlacement];
 
   const btn = (
@@ -78,7 +74,9 @@ export function RoomHotspot({
         style={{
           background:
             "radial-gradient(circle, rgba(255,224,140,0.85) 0%, rgba(255,200,90,0.45) 35%, rgba(255,180,60,0) 72%)",
-          animation: urgent ? "hotspot-glow 1.8s ease-in-out infinite" : "hotspot-glow 4s ease-in-out infinite",
+          animation: urgent
+            ? "hotspot-glow 1.8s ease-in-out infinite"
+            : "hotspot-glow 4s ease-in-out infinite",
           filter: urgent ? "saturate(1.2)" : undefined,
           mixBlendMode: "screen",
         }}
@@ -99,7 +97,9 @@ export function RoomHotspot({
         className={cn(
           "pointer-events-none absolute whitespace-nowrap rounded-full bg-neutral-900/85 px-2 py-0.5 text-[10px] font-semibold tracking-tight text-amber-50 shadow-md ring-1 ring-amber-200/30 backdrop-blur-sm",
           "transition-opacity duration-300",
-          urgent ? "opacity-100" : "opacity-85 group-hover:opacity-100 group-focus-visible:opacity-100",
+          urgent
+            ? "opacity-100"
+            : "opacity-85 group-hover:opacity-100 group-focus-visible:opacity-100",
         )}
         style={labelPos}
       >

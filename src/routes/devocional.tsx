@@ -764,7 +764,9 @@ function Devocional() {
                             Abrir
                           </span>
                         </summary>
-                        <div className="border-t border-border/40 p-3 sm:p-4">{renderPostCard(post)}</div>
+                        <div className="border-t border-border/40 p-3 sm:p-4">
+                          {renderPostCard(post)}
+                        </div>
                       </details>
                     ))
                   )}

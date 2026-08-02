@@ -43,11 +43,7 @@ export function SkinTintFilter() {
     >
       <defs>
         {(Object.keys(SKIN_PALETTE) as SkinToneKey[]).map((tone) => (
-          <filter
-            key={tone}
-            id={`skin-tint-${tone}`}
-            colorInterpolationFilters="sRGB"
-          >
+          <filter key={tone} id={`skin-tint-${tone}`} colorInterpolationFilters="sRGB">
             <feColorMatrix
               in="SourceGraphic"
               type="matrix"

@@ -11,18 +11,9 @@ import {
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { CoinIcon } from "@/components/icons/CoinIcon";
-import {
-  PET_CARE_ACTION_LABEL,
-  PET_CARE_LABEL,
-  type PetCareKind,
-} from "@/types/petCare";
+import { PET_CARE_ACTION_LABEL, PET_CARE_LABEL, type PetCareKind } from "@/types/petCare";
 import type { PetCareItem } from "@/types/petCare";
-import {
-  applyPetCare,
-  getCareConfig,
-  getItemUsesToday,
-  listCareItemsForPet,
-} from "@/lib/petCare";
+import { applyPetCare, getCareConfig, getItemUsesToday, listCareItemsForPet } from "@/lib/petCare";
 import { getCareItemStockMap } from "@/lib/petGrab";
 import { awardXp, XP_SOURCES } from "@/lib/xp";
 import { cn } from "@/lib/utils";
@@ -71,13 +62,17 @@ export function PetCareActionSheet({
       .then(async (its) => {
         setItems(its);
         const entries = await Promise.all(
-          its.filter((i) => i.daily_uses > 0).map(async (i) => [i.id, await getItemUsesToday(userPetId, i.id)] as const),
+          its
+            .filter((i) => i.daily_uses > 0)
+            .map(async (i) => [i.id, await getItemUsesToday(userPetId, i.id)] as const),
         );
         setUsesToday(Object.fromEntries(entries));
         try {
           const map = await getCareItemStockMap(its.map((i) => i.id));
           setStock(map);
-        } catch { /* ignore */ }
+        } catch {
+          /* ignore */
+        }
       })
       .catch((e) => toast.error((e as Error).message))
       .finally(() => setLoading(false));
@@ -92,9 +87,8 @@ export function PetCareActionSheet({
         setStock((s) => ({ ...s, [item.id]: Math.max(0, (s[item.id] ?? 0) - 1) }));
       }
       const restore = result.restore || item.restore_amount;
-      const multiTxt = result.multiplier && result.multiplier !== 1
-        ? ` (×${result.multiplier.toFixed(2)})`
-        : "";
+      const multiTxt =
+        result.multiplier && result.multiplier !== 1 ? ` (×${result.multiplier.toFixed(2)})` : "";
       const KindIcon = PET_CARE_ICON[item.kind];
       toast(`${PET_CARE_LABEL[item.kind]} +${restore}${multiTxt}`, {
         icon: createElement(KindIcon, { className: "size-4" }),
@@ -135,11 +129,15 @@ export function PetCareActionSheet({
     } catch (e) {
       const msg = (e as Error).message;
       toast.error(
-        msg.includes("insufficient_coins") ? "Moedas insuficientes" :
-        msg.includes("energia_insuficiente") ? "Seu pet está sem energia para essa ação" :
-        msg.includes("limite_diario_atingido") ? "Limite diário atingido (reseta às 00:00)" :
-        msg.includes("incompativel") ? "Esse item não é compatível com seu pet" :
-        msg,
+        msg.includes("insufficient_coins")
+          ? "Moedas insuficientes"
+          : msg.includes("energia_insuficiente")
+            ? "Seu pet está sem energia para essa ação"
+            : msg.includes("limite_diario_atingido")
+              ? "Limite diário atingido (reseta às 00:00)"
+              : msg.includes("incompativel")
+                ? "Esse item não é compatível com seu pet"
+                : msg,
       );
     } finally {
       setPending(null);
@@ -171,8 +169,8 @@ export function PetCareActionSheet({
                 <Zap className="h-4 w-4 text-yellow-500" /> Regeneração automática
               </div>
               <p className="mt-1 text-xs text-neutral-600">
-                +1 ponto a cada {regenMin} {regenMin === 1 ? "minuto" : "minutos"}. Volte mais
-                tarde para encontrar seu pet com mais energia!
+                +1 ponto a cada {regenMin} {regenMin === 1 ? "minuto" : "minutos"}. Volte mais tarde
+                para encontrar seu pet com mais energia!
               </p>
             </div>
           ) : loading ? (
@@ -205,7 +203,11 @@ export function PetCareActionSheet({
                     >
                       <div className="grid h-16 w-16 place-items-center overflow-hidden rounded-xl bg-neutral-50">
                         {it.image_url ? (
-                          <img src={it.image_url} alt={it.name} className="h-full w-full object-cover" />
+                          <img
+                            src={it.image_url}
+                            alt={it.name}
+                            className="h-full w-full object-cover"
+                          />
                         ) : (
                           <Icon className="h-7 w-7 text-neutral-400" />
                         )}
@@ -221,7 +223,12 @@ export function PetCareActionSheet({
                           )}
                         </div>
                         {remaining !== null && (
-                          <div className={cn("mt-0.5 text-[10px]", exhausted ? "text-red-500" : "text-neutral-400")}>
+                          <div
+                            className={cn(
+                              "mt-0.5 text-[10px]",
+                              exhausted ? "text-red-500" : "text-neutral-400",
+                            )}
+                          >
                             {exhausted ? "Esgotado hoje" : `${remaining}/${it.daily_uses} hoje`}
                           </div>
                         )}
@@ -249,7 +256,9 @@ export function PetCareActionSheet({
         </div>
 
         <div className="flex justify-end pt-2">
-          <Button variant="ghost" onClick={onClose}>Fechar</Button>
+          <Button variant="ghost" onClick={onClose}>
+            Fechar
+          </Button>
         </div>
       </SheetContent>
     </Sheet>

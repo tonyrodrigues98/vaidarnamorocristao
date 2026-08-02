@@ -28,10 +28,7 @@ export const MobileChatScreen = forwardRef<HTMLDivElement, Props>(function Mobil
     <div className={cn("mobile-chat-screen flex h-full w-full flex-col bg-background", className)}>
       {header}
       {pinned}
-      <div
-        ref={scrollRef}
-        className="mobile-chat-scroll min-h-0 w-full flex-1 overflow-y-auto"
-      >
+      <div ref={scrollRef} className="mobile-chat-scroll min-h-0 w-full flex-1 overflow-y-auto">
         <div className="mx-auto w-full max-w-3xl space-y-4 px-3 py-4 md:space-y-5 md:px-4 md:py-6">
           {messages}
         </div>

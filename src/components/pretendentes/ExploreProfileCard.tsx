@@ -1,5 +1,13 @@
 import { Link } from "@tanstack/react-router";
-import { ChevronLeft, ChevronRight, Heart, MapPin, ShieldCheck, Sparkles, UserRound } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Heart,
+  MapPin,
+  ShieldCheck,
+  Sparkles,
+  UserRound,
+} from "lucide-react";
 
 import { PhotoCarousel } from "@/components/PhotoCarousel";
 import { VerifiedBadge } from "@/components/VerifiedBadge";

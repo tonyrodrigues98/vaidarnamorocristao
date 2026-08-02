@@ -84,9 +84,7 @@ export function AvatarStage({
             <span className="mt-0.5 text-xs font-semibold leading-tight text-amber-700">
               Visual
             </span>
-            <span className="text-xs font-semibold leading-tight text-amber-700">
-              Premium
-            </span>
+            <span className="text-xs font-semibold leading-tight text-amber-700">Premium</span>
           </div>
         </div>
 

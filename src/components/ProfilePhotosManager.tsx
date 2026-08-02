@@ -9,11 +9,7 @@ import { extractProfilePhotoPath } from "@/lib/photoUrl";
 import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 import { StaleDataNotice } from "@/components/ui/StaleDataNotice";
 import { OfflineState } from "@/components/ui/OfflineState";
-import {
-  PHOTO_CATEGORIES,
-  type PhotoCategory,
-  normalizeCategory,
-} from "@/lib/photoCategories";
+import { PHOTO_CATEGORIES, type PhotoCategory, normalizeCategory } from "@/lib/photoCategories";
 
 interface Photo {
   id: string;
@@ -49,12 +45,9 @@ export function ProfilePhotosManager({ userId }: { userId: string }) {
 
   const photos: Photo[] = photosQuery.data ?? [];
   const loading = photosQuery.isLoading;
-  const refetchPhotos = () =>
-    qc.invalidateQueries({ queryKey: ["profile-photos", userId] });
+  const refetchPhotos = () => qc.invalidateQueries({ queryKey: ["profile-photos", userId] });
 
-  const visiblePhotos = photos.filter(
-    (p) => normalizeCategory(p.category) === activeCategory,
-  );
+  const visiblePhotos = photos.filter((p) => normalizeCategory(p.category) === activeCategory);
 
   const onUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -223,9 +216,7 @@ export function ProfilePhotosManager({ userId }: { userId: string }) {
       </div>
       <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
         {PHOTO_CATEGORIES.map((c) => {
-          const count = photos.filter(
-            (p) => normalizeCategory(p.category) === c.value,
-          ).length;
+          const count = photos.filter((p) => normalizeCategory(p.category) === c.value).length;
           const active = activeCategory === c.value;
           return (
             <button

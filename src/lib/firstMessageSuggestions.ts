@@ -36,14 +36,10 @@ export function getFirstMessageSuggestions(
   const seeking = clean(partner?.seeking);
 
   if (city) {
-    personalized.push(
-      `Vi que você é de ${city}. Como é viver sua fé por aí?`,
-    );
+    personalized.push(`Vi que você é de ${city}. Como é viver sua fé por aí?`);
   }
   if (church) {
-    personalized.push(
-      "Vi que a fé faz parte da sua vida. Como tem sido sua caminhada com Deus?",
-    );
+    personalized.push("Vi que a fé faz parte da sua vida. Como tem sido sua caminhada com Deus?");
   }
   if (bio) {
     personalized.push(
@@ -51,9 +47,7 @@ export function getFirstMessageSuggestions(
     );
   }
   if (seeking) {
-    personalized.push(
-      "Vi que você busca algo com propósito. O que isso significa para você?",
-    );
+    personalized.push("Vi que você busca algo com propósito. O que isso significa para você?");
   }
 
   const seen = new Set<string>();

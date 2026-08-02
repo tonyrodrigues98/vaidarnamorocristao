@@ -140,4 +140,3 @@ Não ativar Namoro automaticamente para novos usuários.
 - metadata/manifest não expõem Pretendentes como destino universal;
 - flags e rollback;
 - Draft PRs e estado persistente.
-

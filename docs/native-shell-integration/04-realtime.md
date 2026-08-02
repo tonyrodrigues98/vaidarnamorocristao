@@ -5,28 +5,28 @@
 Foram identificados 20 nomes/padrões de canal: 19 expressões literais e a
 constante `global-chat-typing`.
 
-| Canal/padrão | Origem | Eventos/dados | Limpeza observada |
-|---|---|---|---|
-| `profile-self-delete-${uid}` | Auth/profile | `DELETE` em `profiles` para o usuário | `removeChannel` |
-| `conv-list-${userId}` | Lista de conversas | `messages`, `matches`, `relationship_commitments` | Cleanup com contagem de referências e `removeChannel` |
-| `devotional-live` | Devocional | Reações, comentários, likes e posts diários | `removeChannel` |
-| `notifications-${userId}-${instanceIdRef.current}` | Bridge de notificações | `notifications` do usuário | `removeChannel` |
-| `chat-${matchId}` | Chat de match | Inserção/remoção de `messages` filtradas | `removeChannel` |
-| `message-flags` | Moderação de mensagens | `message_flags` | `removeChannel` |
-| `global-chat` | Conversa comunitária | `global_messages` | `removeChannel` |
-| `recados-${user.id}` | Recados | Recados, dicas e compromissos | `removeChannel` |
-| `matches-list` | Matches | `matches` e compromissos | `removeChannel` |
-| `prayer-requests-live` | Orações | Pedidos, “orei” e denúncias | `removeChannel` |
-| `daily-posts` | Conteúdo diário | `daily_posts` | `removeChannel` |
-| `couple-chat-${matchId}` | Propósito/chat | `messages` filtradas | `removeChannel` |
-| `interests-page` | Interesses | `interests`, `matches`, compromissos | `removeChannel` |
-| `support_tickets_list` | Suporte | `support_tickets` | `removeChannel` |
-| `support_ticket_${id}` | Ticket | `support_messages` filtradas | `removeChannel` |
-| `global-presence` | PresenceProvider | Presence por `user.id`; heartbeat de atividade | `unsubscribe` e `removeChannel`; timer limpo |
-| `notif-${user.id}` | Notificações/header | Interesses e eventos relacionados | `removeChannel` |
-| `badges-${userId}` | Badges | `user_badges` do usuário | `unsubscribe` e `removeChannel` |
-| `hdr-counters` | Cabeçalho | Interesses, mensagens, matches, posts e recados | `removeChannel` |
-| `global-chat-typing` | Indicador de digitação | Broadcast `typing` | Dois consumidores com `removeChannel`; timer de varredura limpo |
+| Canal/padrão                                       | Origem                 | Eventos/dados                                     | Limpeza observada                                               |
+| -------------------------------------------------- | ---------------------- | ------------------------------------------------- | --------------------------------------------------------------- |
+| `profile-self-delete-${uid}`                       | Auth/profile           | `DELETE` em `profiles` para o usuário             | `removeChannel`                                                 |
+| `conv-list-${userId}`                              | Lista de conversas     | `messages`, `matches`, `relationship_commitments` | Cleanup com contagem de referências e `removeChannel`           |
+| `devotional-live`                                  | Devocional             | Reações, comentários, likes e posts diários       | `removeChannel`                                                 |
+| `notifications-${userId}-${instanceIdRef.current}` | Bridge de notificações | `notifications` do usuário                        | `removeChannel`                                                 |
+| `chat-${matchId}`                                  | Chat de match          | Inserção/remoção de `messages` filtradas          | `removeChannel`                                                 |
+| `message-flags`                                    | Moderação de mensagens | `message_flags`                                   | `removeChannel`                                                 |
+| `global-chat`                                      | Conversa comunitária   | `global_messages`                                 | `removeChannel`                                                 |
+| `recados-${user.id}`                               | Recados                | Recados, dicas e compromissos                     | `removeChannel`                                                 |
+| `matches-list`                                     | Matches                | `matches` e compromissos                          | `removeChannel`                                                 |
+| `prayer-requests-live`                             | Orações                | Pedidos, “orei” e denúncias                       | `removeChannel`                                                 |
+| `daily-posts`                                      | Conteúdo diário        | `daily_posts`                                     | `removeChannel`                                                 |
+| `couple-chat-${matchId}`                           | Propósito/chat         | `messages` filtradas                              | `removeChannel`                                                 |
+| `interests-page`                                   | Interesses             | `interests`, `matches`, compromissos              | `removeChannel`                                                 |
+| `support_tickets_list`                             | Suporte                | `support_tickets`                                 | `removeChannel`                                                 |
+| `support_ticket_${id}`                             | Ticket                 | `support_messages` filtradas                      | `removeChannel`                                                 |
+| `global-presence`                                  | PresenceProvider       | Presence por `user.id`; heartbeat de atividade    | `unsubscribe` e `removeChannel`; timer limpo                    |
+| `notif-${user.id}`                                 | Notificações/header    | Interesses e eventos relacionados                 | `removeChannel`                                                 |
+| `badges-${userId}`                                 | Badges                 | `user_badges` do usuário                          | `unsubscribe` e `removeChannel`                                 |
+| `hdr-counters`                                     | Cabeçalho              | Interesses, mensagens, matches, posts e recados   | `removeChannel`                                                 |
+| `global-chat-typing`                               | Indicador de digitação | Broadcast `typing`                                | Dois consumidores com `removeChannel`; timer de varredura limpo |
 
 ## Providers e momento de montagem
 

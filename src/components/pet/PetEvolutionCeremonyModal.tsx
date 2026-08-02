@@ -101,8 +101,8 @@ export function PetEvolutionCeremonyModal({
             {petName} cresceu
           </h2>
           <p className="text-sm text-neutral-500">
-            Vocês passaram por essa jornada juntos. Daqui em diante, quando criar
-            um pet novo, você poderá escolher já adulto.
+            Vocês passaram por essa jornada juntos. Daqui em diante, quando criar um pet novo, você
+            poderá escolher já adulto.
           </p>
           <div className="mx-auto inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-700">
             <XpIcon className="size-4" /> +{xpBonus} XP de bônus

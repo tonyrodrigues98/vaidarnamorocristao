@@ -25,12 +25,12 @@ Este documento descreve o que existe. Ele não aplica correções, migrations, r
 
 ### 1.1 Como interpretar as evidências
 
-| Marcação | Significado |
-|---|---|
-| Confirmado no código | Comportamento diretamente encontrado em rotas, componentes, serviços ou SQL |
-| Confirmado por build/teste | Comportamento estrutural validado pela instalação, compilação ou testes existentes |
-| Dependente do ambiente | Requer credenciais, dados ou políticas do Supabase publicado para validação integral |
-| Destino preliminar | Classificação inicial; ainda depende da decisão de produto de Antonio |
+| Marcação                   | Significado                                                                          |
+| -------------------------- | ------------------------------------------------------------------------------------ |
+| Confirmado no código       | Comportamento diretamente encontrado em rotas, componentes, serviços ou SQL          |
+| Confirmado por build/teste | Comportamento estrutural validado pela instalação, compilação ou testes existentes   |
+| Dependente do ambiente     | Requer credenciais, dados ou políticas do Supabase publicado para validação integral |
+| Destino preliminar         | Classificação inicial; ainda depende da decisão de produto de Antonio                |
 
 ---
 
@@ -40,19 +40,19 @@ O VaiDarNamoro atual é um monólito modular de produto social cristão. O namor
 
 ### 2.1 Escala atual
 
-| Indicador | Estado congelado |
-|---|---:|
-| Arquivos em `src` | 595 |
-| Componentes React | 207 |
-| Rotas de aplicação/API | 65 |
-| Bibliotecas e serviços internos | 79 |
-| Migrations Supabase | 196 |
-| Tabelas tipadas | 140 |
-| Views tipadas | 3 |
-| Funções/RPCs tipadas | 201 |
-| Linhas TypeScript/TSX | aproximadamente 96.700 |
-| Linhas SQL | aproximadamente 21.900 |
-| Tamanho do repositório | aproximadamente 463 MB |
+| Indicador                       |       Estado congelado |
+| ------------------------------- | ---------------------: |
+| Arquivos em `src`               |                    595 |
+| Componentes React               |                    207 |
+| Rotas de aplicação/API          |                     65 |
+| Bibliotecas e serviços internos |                     79 |
+| Migrations Supabase             |                    196 |
+| Tabelas tipadas                 |                    140 |
+| Views tipadas                   |                      3 |
+| Funções/RPCs tipadas            |                    201 |
+| Linhas TypeScript/TSX           | aproximadamente 96.700 |
+| Linhas SQL                      | aproximadamente 21.900 |
+| Tamanho do repositório          | aproximadamente 463 MB |
 
 ### 2.2 Arquitetura resumida
 
@@ -151,12 +151,12 @@ O primeiro cargo encontrado nessa prioridade vira o cargo principal apresentado 
 
 ### 4.3 Estados do perfil
 
-| Estado | Efeito principal |
-|---|---|
-| `pending` | Acesso a áreas básicas; recursos protegidos redirecionam para `/dashboard` |
-| `approved` | Acesso normal às áreas protegidas |
-| `rejected` | Acesso limitado, mas ainda pode editar `/perfil` |
-| `banned` | Acesso restrito a início, notificações, conta, suporte, termos, manual e auth |
+| Estado     | Efeito principal                                                              |
+| ---------- | ----------------------------------------------------------------------------- |
+| `pending`  | Acesso a áreas básicas; recursos protegidos redirecionam para `/dashboard`    |
+| `approved` | Acesso normal às áreas protegidas                                             |
+| `rejected` | Acesso limitado, mas ainda pode editar `/perfil`                              |
+| `banned`   | Acesso restrito a início, notificações, conta, suporte, termos, manual e auth |
 
 Equipe (`super_admin`, `admin`, `apresentador`, `moderador`) é tratada como aprovada.
 
@@ -166,16 +166,16 @@ O aplicativo acompanha em Realtime a remoção do próprio registro em `profiles
 
 ### 4.5 Matriz resumida de acesso
 
-| Área | Visitante | Autenticado não aprovado | Aprovado | Staff/Admin |
-|---|---:|---:|---:|---:|
-| Landing, sobre, termos, manual | Sim | Sim | Sim | Sim |
-| Login/cadastro/recuperação | Sim | Sim | Sim | Sim |
-| Início, conta, notificações, suporte | Não | Sim | Sim | Sim |
-| Perfil próprio | Não | Sim, inclusive rejeitado | Sim | Sim |
-| Pretendentes, interesses, matches | Não | Não | Sim | Sim |
-| Chat privado e comunidade | Não | Não | Sim | Sim |
-| Recados, orações, verificação | Não | Não | Sim | Sim |
-| Administração | Não | Não | Não | Conforme cargo e regra local |
+| Área                                 | Visitante | Autenticado não aprovado | Aprovado |                  Staff/Admin |
+| ------------------------------------ | --------: | -----------------------: | -------: | ---------------------------: |
+| Landing, sobre, termos, manual       |       Sim |                      Sim |      Sim |                          Sim |
+| Login/cadastro/recuperação           |       Sim |                      Sim |      Sim |                          Sim |
+| Início, conta, notificações, suporte |       Não |                      Sim |      Sim |                          Sim |
+| Perfil próprio                       |       Não | Sim, inclusive rejeitado |      Sim |                          Sim |
+| Pretendentes, interesses, matches    |       Não |                      Não |      Sim |                          Sim |
+| Chat privado e comunidade            |       Não |                      Não |      Sim |                          Sim |
+| Recados, orações, verificação        |       Não |                      Não |      Sim |                          Sim |
+| Administração                        |       Não |                      Não |      Não | Conforme cargo e regra local |
 
 **Dependência crítica:** bloqueios visuais não substituem RLS. A autorização real precisa continuar garantida no banco.
 
@@ -223,97 +223,97 @@ O usuário aprovado pode conversar no chat global, reagir e comentar devocionais
 
 ### 6.1 Públicas e institucionais
 
-| Rota | Comportamento atual |
-|---|---|
-| `/` | Landing page pública e porta de entrada do produto |
-| `/como-funciona` | Explicação institucional do fluxo |
-| `/sobre` | Conteúdo institucional |
-| `/depoimentos` | Depoimentos apresentados publicamente |
-| `/blog` e `/blog/$slug` | Índice e leitura de artigos |
-| `/termos` | Termos de uso |
-| `/manual` | Manual do usuário dentro do produto |
-| `/instalar` | Orientação de instalação PWA |
+| Rota                    | Comportamento atual                                |
+| ----------------------- | -------------------------------------------------- |
+| `/`                     | Landing page pública e porta de entrada do produto |
+| `/como-funciona`        | Explicação institucional do fluxo                  |
+| `/sobre`                | Conteúdo institucional                             |
+| `/depoimentos`          | Depoimentos apresentados publicamente              |
+| `/blog` e `/blog/$slug` | Índice e leitura de artigos                        |
+| `/termos`               | Termos de uso                                      |
+| `/manual`               | Manual do usuário dentro do produto                |
+| `/instalar`             | Orientação de instalação PWA                       |
 
 ### 6.2 Autenticação e onboarding
 
-| Rota | Comportamento atual |
-|---|---|
-| `/auth/login` | Login e redirecionamento de sessão |
-| `/auth/signup` | Cadastro e registro do aceite de termos |
-| `/auth/forgot-password` | Solicitação de recuperação |
-| `/auth/reset-password` | Redefinição de senha |
-| `/onboarding` | Fluxo principal de 12 etapas |
-| `/onboarding/etapa-1` | Compatibilidade/legado de etapa |
-| `/onboarding/etapa-2` | Preferências/legado de etapa |
+| Rota                    | Comportamento atual                     |
+| ----------------------- | --------------------------------------- |
+| `/auth/login`           | Login e redirecionamento de sessão      |
+| `/auth/signup`          | Cadastro e registro do aceite de termos |
+| `/auth/forgot-password` | Solicitação de recuperação              |
+| `/auth/reset-password`  | Redefinição de senha                    |
+| `/onboarding`           | Fluxo principal de 12 etapas            |
+| `/onboarding/etapa-1`   | Compatibilidade/legado de etapa         |
+| `/onboarding/etapa-2`   | Preferências/legado de etapa            |
 
 ### 6.3 Núcleo autenticado
 
-| Rota | Comportamento atual |
-|---|---|
-| `/inicio` | Hub diário, estado da conta, atalhos e atividade |
-| `/dashboard` | Métricas, gráficos, status e painel analítico; é legítimo e separado de `/inicio` |
-| `/perfil` | Perfil próprio, edição, preferências, visual, saldo, presentes, conquistas e papel |
-| `/conta` | Configurações de conta, tema, segurança, suporte, sessão e zona de perigo |
-| `/notificacoes` | Central de atividades e notificações |
-| `/verificacao` | Solicitação e acompanhamento de verificação |
-| `/bloqueados` | Lista e desbloqueio de pessoas |
+| Rota            | Comportamento atual                                                                |
+| --------------- | ---------------------------------------------------------------------------------- |
+| `/inicio`       | Hub diário, estado da conta, atalhos e atividade                                   |
+| `/dashboard`    | Métricas, gráficos, status e painel analítico; é legítimo e separado de `/inicio`  |
+| `/perfil`       | Perfil próprio, edição, preferências, visual, saldo, presentes, conquistas e papel |
+| `/conta`        | Configurações de conta, tema, segurança, suporte, sessão e zona de perigo          |
+| `/notificacoes` | Central de atividades e notificações                                               |
+| `/verificacao`  | Solicitação e acompanhamento de verificação                                        |
+| `/bloqueados`   | Lista e desbloqueio de pessoas                                                     |
 
 ### 6.4 Namoro e relacionamento
 
-| Rota | Comportamento atual |
-|---|---|
-| `/pretendentes` | Descoberta, filtros, afinidade e agrupamentos |
-| `/pretendentes/$id` | Perfil público romântico e ações de interação |
-| `/interesses` | Interesses recebidos/enviados e retribuição |
-| `/matches` | Matches existentes e desfazer match |
-| `/conversas` | Lista de conversas privadas e acesso à comunidade |
-| `/conversas/$matchId` | Chat privado Realtime |
-| `/proposito/$matchId` | Área do casal e gestão do compromisso |
-| `/recados` | Mensagens anônimas, dicas, resposta e revelação |
-| `/presentes` | Catálogo/envio e presentes recebidos |
+| Rota                  | Comportamento atual                               |
+| --------------------- | ------------------------------------------------- |
+| `/pretendentes`       | Descoberta, filtros, afinidade e agrupamentos     |
+| `/pretendentes/$id`   | Perfil público romântico e ações de interação     |
+| `/interesses`         | Interesses recebidos/enviados e retribuição       |
+| `/matches`            | Matches existentes e desfazer match               |
+| `/conversas`          | Lista de conversas privadas e acesso à comunidade |
+| `/conversas/$matchId` | Chat privado Realtime                             |
+| `/proposito/$matchId` | Área do casal e gestão do compromisso             |
+| `/recados`            | Mensagens anônimas, dicas, resposta e revelação   |
+| `/presentes`          | Catálogo/envio e presentes recebidos              |
 
 ### 6.5 Comunidade e conteúdo cristão
 
-| Rota | Comportamento atual |
-|---|---|
-| `/comunidade` | Redirect legado para a experiência comunitária atual |
-| `/conversas/comunidade` | Chat global comunitário em tempo real |
-| `/devocional` | Posts, reações, oração, comentários e moderação |
-| `/oracoes` | Pedidos comunitários de oração |
-| `/quiz-biblico` | Quiz diário obtido por RPC |
-| `/noticias` | Notícias/reflexões/avisos publicados em `daily_posts` |
+| Rota                    | Comportamento atual                                   |
+| ----------------------- | ----------------------------------------------------- |
+| `/comunidade`           | Redirect legado para a experiência comunitária atual  |
+| `/conversas/comunidade` | Chat global comunitário em tempo real                 |
+| `/devocional`           | Posts, reações, oração, comentários e moderação       |
+| `/oracoes`              | Pedidos comunitários de oração                        |
+| `/quiz-biblico`         | Quiz diário obtido por RPC                            |
+| `/noticias`             | Notícias/reflexões/avisos publicados em `daily_posts` |
 
 ### 6.6 Economia, customização e jogos
 
-| Rota | Comportamento atual |
-|---|---|
-| `/loja` | Compra, inventário e equipamento visual |
-| `/caixas` | Sistema de caixas/prêmios |
-| `/conquistas` | Conquistas do usuário e do pet |
-| `/avatar` | Editor, loja, inventário e looks do avatar |
-| `/avatar/criar` | Criação inicial do avatar |
-| `/meu-pet` | Criação, cuidado, progressão e ambiente do pet |
-| `/pet-arcade` | Hub de jogos ligados ao pet |
+| Rota            | Comportamento atual                            |
+| --------------- | ---------------------------------------------- |
+| `/loja`         | Compra, inventário e equipamento visual        |
+| `/caixas`       | Sistema de caixas/prêmios                      |
+| `/conquistas`   | Conquistas do usuário e do pet                 |
+| `/avatar`       | Editor, loja, inventário e looks do avatar     |
+| `/avatar/criar` | Criação inicial do avatar                      |
+| `/meu-pet`      | Criação, cuidado, progressão e ambiente do pet |
+| `/pet-arcade`   | Hub de jogos ligados ao pet                    |
 
 ### 6.7 Suporte e administração
 
-| Rota | Comportamento atual |
-|---|---|
-| `/suporte` | Tickets do usuário |
-| `/suporte/$id` | Conversa e anexos de um ticket |
-| `/suporte/ajuda` | Base de artigos de ajuda |
-| `/admin` | Painel administrativo central |
-| `/admin/fotos` | Moderação e reparo de fotos |
-| `/admin/verificacoes` | Pedidos de verificação |
-| `/admin/economia` | Economia e concessões |
-| `/admin/presentes` | Catálogo de presentes |
-| `/admin/molduras` e `/admin/auras` | Catálogo de decorações |
-| `/admin/fundos` | Fundos de perfil |
-| `/admin/gradientes-nome` | Gradientes de nome |
-| `/admin/stickers` | Categorias e stickers |
-| `/admin/avatar` | Catálogo do avatar |
-| `/admin/pets` | Ecossistema de pets e Pet Arcade |
-| `/admin/equipe-live` | Equipe e destaques mensais da live |
+| Rota                               | Comportamento atual                |
+| ---------------------------------- | ---------------------------------- |
+| `/suporte`                         | Tickets do usuário                 |
+| `/suporte/$id`                     | Conversa e anexos de um ticket     |
+| `/suporte/ajuda`                   | Base de artigos de ajuda           |
+| `/admin`                           | Painel administrativo central      |
+| `/admin/fotos`                     | Moderação e reparo de fotos        |
+| `/admin/verificacoes`              | Pedidos de verificação             |
+| `/admin/economia`                  | Economia e concessões              |
+| `/admin/presentes`                 | Catálogo de presentes              |
+| `/admin/molduras` e `/admin/auras` | Catálogo de decorações             |
+| `/admin/fundos`                    | Fundos de perfil                   |
+| `/admin/gradientes-nome`           | Gradientes de nome                 |
+| `/admin/stickers`                  | Categorias e stickers              |
+| `/admin/avatar`                    | Catálogo do avatar                 |
+| `/admin/pets`                      | Ecossistema de pets e Pet Arcade   |
+| `/admin/equipe-live`               | Equipe e destaques mensais da live |
 
 ---
 
@@ -321,14 +321,14 @@ O usuário aprovado pode conversar no chat global, reagir e comentar devocionais
 
 ## 7.1 Landing e conteúdo institucional
 
-| Campo | Registro atual |
-|---|---|
-| Estado atual | Área pública de aquisição, explicação, depoimentos, blog e instalação |
-| Dependências | Rotas públicas, assets, metadados SEO, PWA e conteúdos locais/remotos |
-| Regras críticas | Não exigir login; manter entrada para auth; preservar SEO e instalação |
+| Campo                | Registro atual                                                                                                          |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| Estado atual         | Área pública de aquisição, explicação, depoimentos, blog e instalação                                                   |
+| Dependências         | Rotas públicas, assets, metadados SEO, PWA e conteúdos locais/remotos                                                   |
+| Regras críticas      | Não exigir login; manter entrada para auth; preservar SEO e instalação                                                  |
 | Problemas observados | Metadados possuem descrições e imagens OG duplicadas; identidade ainda posiciona o produto prioritariamente como namoro |
-| Destino preliminar | Redesenhar e reposicionar para comunidade + namoro |
-| Risco | Médio, por impacto em aquisição, SEO e primeira impressão |
+| Destino preliminar   | Redesenhar e reposicionar para comunidade + namoro                                                                      |
+| Risco                | Médio, por impacto em aquisição, SEO e primeira impressão                                                               |
 
 ## 7.2 Cadastro e onboarding
 
@@ -347,36 +347,36 @@ O onboarding atual possui 12 etapas:
 11. objetivo e ritmo;
 12. preferências.
 
-| Campo | Registro atual |
-|---|---|
-| Estado atual | Fluxo guiado com rascunho local e gravação em múltiplas estruturas |
-| Dependências | `profiles`, `profile_advanced`, `profile_preferences`, Storage de fotos, termos |
-| Regras críticas | Primeiras etapas formam perfil básico; foto passa por normalização/moderação; preferências alimentam Pretendentes |
+| Campo                | Registro atual                                                                                                     |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| Estado atual         | Fluxo guiado com rascunho local e gravação em múltiplas estruturas                                                 |
+| Dependências         | `profiles`, `profile_advanced`, `profile_preferences`, Storage de fotos, termos                                    |
+| Regras críticas      | Primeiras etapas formam perfil básico; foto passa por normalização/moderação; preferências alimentam Pretendentes  |
 | Problemas observados | Onboarding serve simultaneamente conta, namoro e identidade comunitária; esses conceitos ainda não estão separados |
-| Destino preliminar | Refatorar regra e redesenhar experiência |
-| Risco | Alto, pois erros bloqueiam entrada e contaminam os dados-base do usuário |
+| Destino preliminar   | Refatorar regra e redesenhar experiência                                                                           |
+| Risco                | Alto, pois erros bloqueiam entrada e contaminam os dados-base do usuário                                           |
 
 ## 7.3 Início
 
-| Campo | Registro atual |
-|---|---|
-| Estado atual | Hub de boas-vindas contextual por horário, situação de aprovação e atividade |
-| Dependências | Perfil, perfil avançado, preferências, fotos, posts, solicitações administrativas, avisos, apelações, conversas e notificações |
-| Regras críticas | CTA muda conforme pendência, rejeição, banimento, completude e aprovação |
-| Problemas observados | Concentra muitas responsabilidades e consultas; mistura estado operacional com descoberta de conteúdo |
-| Destino preliminar | Preservar função, redesenhar e dividir internamente |
-| Risco | Alto, pois é o hub principal após login |
+| Campo                | Registro atual                                                                                                                 |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| Estado atual         | Hub de boas-vindas contextual por horário, situação de aprovação e atividade                                                   |
+| Dependências         | Perfil, perfil avançado, preferências, fotos, posts, solicitações administrativas, avisos, apelações, conversas e notificações |
+| Regras críticas      | CTA muda conforme pendência, rejeição, banimento, completude e aprovação                                                       |
+| Problemas observados | Concentra muitas responsabilidades e consultas; mistura estado operacional com descoberta de conteúdo                          |
+| Destino preliminar   | Preservar função, redesenhar e dividir internamente                                                                            |
+| Risco                | Alto, pois é o hub principal após login                                                                                        |
 
 ## 7.4 Dashboard
 
-| Campo | Registro atual |
-|---|---|
-| Estado atual | Centro analítico com visualizações, interesses, matches, não lidas, visitantes e distribuição etária |
-| Dependências | `profiles`, `profile_views`, `interests`, `matches`, `messages`, `daily_posts`, Recharts e TanStack Query |
-| Regras críticas | `/dashboard` é uma rota legítima e independente; filtros de 7, 30, 90 dias e tudo alteram métricas reais |
-| Problemas observados | Métricas dependem da disponibilidade/qualidade dos dados registrados e de consultas agregadas no cliente |
-| Destino preliminar | Preservar e redesenhar somente quando necessário |
-| Risco | Médio |
+| Campo                | Registro atual                                                                                            |
+| -------------------- | --------------------------------------------------------------------------------------------------------- |
+| Estado atual         | Centro analítico com visualizações, interesses, matches, não lidas, visitantes e distribuição etária      |
+| Dependências         | `profiles`, `profile_views`, `interests`, `matches`, `messages`, `daily_posts`, Recharts e TanStack Query |
+| Regras críticas      | `/dashboard` é uma rota legítima e independente; filtros de 7, 30, 90 dias e tudo alteram métricas reais  |
+| Problemas observados | Métricas dependem da disponibilidade/qualidade dos dados registrados e de consultas agregadas no cliente  |
+| Destino preliminar   | Preservar e redesenhar somente quando necessário                                                          |
+| Risco                | Médio                                                                                                     |
 
 ## 7.5 Perfil próprio
 
@@ -395,14 +395,14 @@ O perfil atual contém:
 - configurações de cargo para staff;
 - opção de visibilidade em Pretendentes.
 
-| Campo | Registro atual |
-|---|---|
-| Estado atual | Grande página multifuncional com abas e edição inline |
-| Dependências | `profiles`, `profile_preferences`, `user_roles`, `user_badges`, fotos, moderação, decorações, fundos, gradientes, presentes, moedas, XP e missões |
-| Regras críticas | Itens equipados precisam permanecer sincronizados; edições não podem perder inventário; staff possui controles adicionais |
-| Problemas observados | Arquivo acima de 1.700 linhas; identidade, configurações, inventário e perfil romântico estão misturados |
-| Destino preliminar | Redesenhar profundamente no estilo de perfil modular/customizável; refatorar sem perder regras |
-| Risco | Crítico para a reestruturação, por ser o principal ponto de integração visual |
+| Campo                | Registro atual                                                                                                                                    |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Estado atual         | Grande página multifuncional com abas e edição inline                                                                                             |
+| Dependências         | `profiles`, `profile_preferences`, `user_roles`, `user_badges`, fotos, moderação, decorações, fundos, gradientes, presentes, moedas, XP e missões |
+| Regras críticas      | Itens equipados precisam permanecer sincronizados; edições não podem perder inventário; staff possui controles adicionais                         |
+| Problemas observados | Arquivo acima de 1.700 linhas; identidade, configurações, inventário e perfil romântico estão misturados                                          |
+| Destino preliminar   | Redesenhar profundamente no estilo de perfil modular/customizável; refatorar sem perder regras                                                    |
+| Risco                | Crítico para a reestruturação, por ser o principal ponto de integração visual                                                                     |
 
 ## 7.6 Pretendentes e perfil individual
 
@@ -420,25 +420,25 @@ A listagem atual:
 
 As ações primárias do perfil individual são ocultadas quando visitante e perfil têm o mesmo sexo. Staff que escolhe aparecer deve ser tratado como perfil normal.
 
-| Campo | Registro atual |
-|---|---|
-| Estado atual | Motor de descoberta romântica com filtros e afinidade |
-| Dependências | `profiles`, `profile_advanced`, `profile_preferences`, `profile_photos`, `blocks`, `user_roles`, `relationship_commitments`, `interests`, `matches`, `profile_views`, `reports` |
-| Regras críticas | Sexo oposto, bloqueios, compromisso ativo, aprovação e visibilidade do staff determinam elegibilidade |
-| Problemas observados | Descoberta social e elegibilidade romântica são praticamente o mesmo conceito |
-| Destino preliminar | Preservar o motor romântico, mas separá-lo futuramente da descoberta comunitária |
-| Risco | Crítico, porque uma alteração errada expõe ou oculta pessoas indevidamente |
+| Campo                | Registro atual                                                                                                                                                                  |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Estado atual         | Motor de descoberta romântica com filtros e afinidade                                                                                                                           |
+| Dependências         | `profiles`, `profile_advanced`, `profile_preferences`, `profile_photos`, `blocks`, `user_roles`, `relationship_commitments`, `interests`, `matches`, `profile_views`, `reports` |
+| Regras críticas      | Sexo oposto, bloqueios, compromisso ativo, aprovação e visibilidade do staff determinam elegibilidade                                                                           |
+| Problemas observados | Descoberta social e elegibilidade romântica são praticamente o mesmo conceito                                                                                                   |
+| Destino preliminar   | Preservar o motor romântico, mas separá-lo futuramente da descoberta comunitária                                                                                                |
+| Risco                | Crítico, porque uma alteração errada expõe ou oculta pessoas indevidamente                                                                                                      |
 
 ## 7.7 Interesses e matches
 
-| Campo | Registro atual |
-|---|---|
-| Estado atual | Interesse unilateral pode ser retribuído; reciprocidade produz match; match pode ser desfeito |
-| Dependências | `interests`, `matches`, `profiles`, triggers/RLS e RPC `unmatch` |
-| Regras críticas | Não duplicar interesse/match; apenas participantes acessam os dados; bloqueio e compromisso interferem em ações |
-| Problemas observados | Parte da criação efetiva depende de comportamento do banco e precisa ser coberta por testes de integração |
-| Destino preliminar | Preservar lógica, redesenhar UI se desejado |
-| Risco | Alto |
+| Campo                | Registro atual                                                                                                  |
+| -------------------- | --------------------------------------------------------------------------------------------------------------- |
+| Estado atual         | Interesse unilateral pode ser retribuído; reciprocidade produz match; match pode ser desfeito                   |
+| Dependências         | `interests`, `matches`, `profiles`, triggers/RLS e RPC `unmatch`                                                |
+| Regras críticas      | Não duplicar interesse/match; apenas participantes acessam os dados; bloqueio e compromisso interferem em ações |
+| Problemas observados | Parte da criação efetiva depende de comportamento do banco e precisa ser coberta por testes de integração       |
+| Destino preliminar   | Preservar lógica, redesenhar UI se desejado                                                                     |
+| Risco                | Alto                                                                                                            |
 
 ## 7.8 Conversas privadas
 
@@ -460,14 +460,14 @@ O chat privado possui:
 - tratamento especial do teclado mobile;
 - bloqueio e encerramento de vínculo.
 
-| Campo | Registro atual |
-|---|---|
-| Estado atual | Uma das experiências mais maduras e completas do sistema |
-| Dependências | `matches`, `messages`, `profiles`, `blocks`, stickers, Realtime, RPC `mark_message_read` |
-| Regras críticas | Somente participantes; manter ordenação, id otimista, reconciliação e leitura; não quebrar viewport mobile |
+| Campo                | Registro atual                                                                                                           |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| Estado atual         | Uma das experiências mais maduras e completas do sistema                                                                 |
+| Dependências         | `matches`, `messages`, `profiles`, `blocks`, stickers, Realtime, RPC `mark_message_read`                                 |
+| Regras críticas      | Somente participantes; manter ordenação, id otimista, reconciliação e leitura; não quebrar viewport mobile               |
 | Problemas observados | A lista compartilhada faz consultas por conversa para a última mensagem; existe cache próprio paralelo ao TanStack Query |
-| Destino preliminar | Preservar comportamento; redesenhar de forma conservadora; refatorar infraestrutura gradualmente |
-| Risco | Crítico |
+| Destino preliminar   | Preservar comportamento; redesenhar de forma conservadora; refatorar infraestrutura gradualmente                         |
+| Risco                | Crítico                                                                                                                  |
 
 ## 7.9 Propósito Firmado
 
@@ -481,14 +481,14 @@ Efeitos confirmados:
 - a área do casal reúne timeline, conquistas, galeria, conversa e cápsulas do tempo;
 - encerrar muda o status para `ended` e devolve o sistema ao estado comum.
 
-| Campo | Registro atual |
-|---|---|
-| Estado atual | Camada relacional transversal acima do match |
-| Dependências | `relationship_commitments`, `matches`, `messages`, `profiles`, `gift_transactions`, cápsulas do tempo, descoberta e conversas |
-| Regras críticas | Exclusividade, aceite bilateral, pausa de descoberta/conversas e preservação do histórico |
-| Problemas observados | Efeitos estão distribuídos por vários módulos; não há um único orquestrador de domínio |
-| Destino preliminar | Preservar integralmente; refatorar internamente antes de qualquer mudança de regra |
-| Risco | Crítico |
+| Campo                | Registro atual                                                                                                                |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| Estado atual         | Camada relacional transversal acima do match                                                                                  |
+| Dependências         | `relationship_commitments`, `matches`, `messages`, `profiles`, `gift_transactions`, cápsulas do tempo, descoberta e conversas |
+| Regras críticas      | Exclusividade, aceite bilateral, pausa de descoberta/conversas e preservação do histórico                                     |
+| Problemas observados | Efeitos estão distribuídos por vários módulos; não há um único orquestrador de domínio                                        |
+| Destino preliminar   | Preservar integralmente; refatorar internamente antes de qualquer mudança de regra                                            |
+| Risco                | Crítico                                                                                                                       |
 
 ## 7.10 Recados anônimos
 
@@ -508,38 +508,38 @@ O sistema suporta:
 - denúncia;
 - ocultar e restaurar.
 
-| Campo | Registro atual |
-|---|---|
-| Estado atual | Subsistema completo de interação anônima |
-| Dependências | tabelas `anonymous_*`, várias RPCs, moedas, notificações e perfis |
-| Regras críticas | Anonimato antes da revelação, limites, expiração, consentimento e proteção contra abuso |
-| Problemas observados | Muitas transições dependentes de RPC; exige matriz de testes por estado |
-| Destino preliminar | Preservar lógica; redesenhar se necessário |
-| Risco | Alto |
+| Campo                | Registro atual                                                                          |
+| -------------------- | --------------------------------------------------------------------------------------- |
+| Estado atual         | Subsistema completo de interação anônima                                                |
+| Dependências         | tabelas `anonymous_*`, várias RPCs, moedas, notificações e perfis                       |
+| Regras críticas      | Anonimato antes da revelação, limites, expiração, consentimento e proteção contra abuso |
+| Problemas observados | Muitas transições dependentes de RPC; exige matriz de testes por estado                 |
+| Destino preliminar   | Preservar lógica; redesenhar se necessário                                              |
+| Risco                | Alto                                                                                    |
 
 ## 7.11 Comunidade global
 
-| Campo | Registro atual |
-|---|---|
-| Estado atual | Chat global Realtime dentro do domínio Conversas |
-| Dependências | `global_messages`, `profiles`, `user_roles`, badges, gradientes, stickers, flags, palavras restritas e compromisso |
-| Regras críticas | Cooldown, moderação, sinalização, edição, fixação, cargos e identidade equipada |
-| Problemas observados | Comunidade é uma conversa global, não um domínio social com feed, grupos, eventos e vínculos próprios |
-| Destino preliminar | Preservar o chat como recurso; criar domínio comunitário separado futuramente |
-| Risco | Alto |
+| Campo                | Registro atual                                                                                                     |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| Estado atual         | Chat global Realtime dentro do domínio Conversas                                                                   |
+| Dependências         | `global_messages`, `profiles`, `user_roles`, badges, gradientes, stickers, flags, palavras restritas e compromisso |
+| Regras críticas      | Cooldown, moderação, sinalização, edição, fixação, cargos e identidade equipada                                    |
+| Problemas observados | Comunidade é uma conversa global, não um domínio social com feed, grupos, eventos e vínculos próprios              |
+| Destino preliminar   | Preservar o chat como recurso; criar domínio comunitário separado futuramente                                      |
+| Risco                | Alto                                                                                                               |
 
 ## 7.12 Devocional, orações, Bíblia e notícias
 
 O devocional permite reações, comentários em árvore, curtidas, marcação de oração, compartilhamento e denúncias. Pedidos de oração possuem categorias, oração por outros usuários, status respondido, exclusão e denúncias. O quiz busca a pergunta diária por RPC. Notícias e devocionais usam `daily_posts`.
 
-| Campo | Registro atual |
-|---|---|
-| Estado atual | Conjunto relevante de experiências espirituais e conteúdo cristão |
-| Dependências | `daily_posts`, `devotional_*`, `prayer_requests`, `prayer_request_*`, `profiles`, RPCs de quiz/streak e Bíblia local |
-| Regras críticas | Moderação, autoria, reações únicas, privacidade e linguagem espiritual cuidadosa |
-| Problemas observados | Recursos aparecem como páginas separadas, sem arquitetura unificada de conteúdo/comunidade |
-| Destino preliminar | Preservar funcionalidades e reorganizar a experiência |
-| Risco | Médio/alto |
+| Campo                | Registro atual                                                                                                       |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| Estado atual         | Conjunto relevante de experiências espirituais e conteúdo cristão                                                    |
+| Dependências         | `daily_posts`, `devotional_*`, `prayer_requests`, `prayer_request_*`, `profiles`, RPCs de quiz/streak e Bíblia local |
+| Regras críticas      | Moderação, autoria, reações únicas, privacidade e linguagem espiritual cuidadosa                                     |
+| Problemas observados | Recursos aparecem como páginas separadas, sem arquitetura unificada de conteúdo/comunidade                           |
+| Destino preliminar   | Preservar funcionalidades e reorganizar a experiência                                                                |
+| Risco                | Médio/alto                                                                                                           |
 
 ## 7.13 Economia, loja e inventários
 
@@ -561,25 +561,25 @@ A economia inclui:
 - itens e desbloqueios do pet;
 - caixas e pools de prêmio.
 
-| Campo | Registro atual |
-|---|---|
-| Estado atual | Economia virtual extensa, compartilhada por vários módulos |
-| Dependências | `user_coins`, `coin_transactions`, catálogos, inventários e RPCs transacionais |
-| Regras críticas | Nunca confiar apenas no saldo do cliente; compra, gasto, recompensa e equipamento precisam ser atômicos e auditáveis |
-| Problemas observados | Existem múltiplos inventários e padrões de compra/equipamento; nem toda leitura usa TanStack Query |
-| Destino preliminar | Preservar dados e regras; unificar contratos internos; redesenhar loja/perfil |
-| Risco | Crítico, por envolver saldo e propriedade digital |
+| Campo                | Registro atual                                                                                                       |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| Estado atual         | Economia virtual extensa, compartilhada por vários módulos                                                           |
+| Dependências         | `user_coins`, `coin_transactions`, catálogos, inventários e RPCs transacionais                                       |
+| Regras críticas      | Nunca confiar apenas no saldo do cliente; compra, gasto, recompensa e equipamento precisam ser atômicos e auditáveis |
+| Problemas observados | Existem múltiplos inventários e padrões de compra/equipamento; nem toda leitura usa TanStack Query                   |
+| Destino preliminar   | Preservar dados e regras; unificar contratos internos; redesenhar loja/perfil                                        |
+| Risco                | Crítico, por envolver saldo e propriedade digital                                                                    |
 
 ## 7.14 Presentes
 
-| Campo | Registro atual |
-|---|---|
-| Estado atual | Catálogo visual, filtros, destaques, envio animado e aba de recebidos |
-| Dependências | `virtual_gifts`, `gift_transactions`, moedas, perfis, Storage e notificações |
-| Regras críticas | Débito e registro precisam ocorrer juntos; destinatário e presente devem existir/estar ativos |
+| Campo                | Registro atual                                                                                                          |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| Estado atual         | Catálogo visual, filtros, destaques, envio animado e aba de recebidos                                                   |
+| Dependências         | `virtual_gifts`, `gift_transactions`, moedas, perfis, Storage e notificações                                            |
+| Regras críticas      | Débito e registro precisam ocorrer juntos; destinatário e presente devem existir/estar ativos                           |
 | Problemas observados | UI e serviço estão divididos entre rota e vários componentes; precisa contrato transacional explícito na reestruturação |
-| Destino preliminar | Preservar e redesenhar conforme novo perfil |
-| Risco | Alto |
+| Destino preliminar   | Preservar e redesenhar conforme novo perfil                                                                             |
+| Risco                | Alto                                                                                                                    |
 
 ## 7.15 Avatar
 
@@ -597,14 +597,14 @@ O avatar possui:
 - poses;
 - looks salvos.
 
-| Campo | Registro atual |
-|---|---|
-| Estado atual | Editor 2D em camadas com catálogo administrável |
-| Dependências | `avatar_bases`, `avatar_categories`, `avatar_items`, `user_avatar_base`, `user_avatar_inventory`, `user_avatar_equipped`, `user_avatar_looks`, moedas e buckets de assets |
-| Regras críticas | Compatibilidade entre base, gênero, corpo, pose, pele e item; ordem de camadas; propriedade antes de equipar |
-| Problemas observados | Alguns estados ainda aparecem como “Em desenvolvimento”; grande volume de PNGs pode aumentar muito o repositório |
-| Destino preliminar | Preservar sistema e migrar mídia pesada para Storage/CDN; evoluir renderização sem invalidar inventários |
-| Risco | Alto |
+| Campo                | Registro atual                                                                                                                                                            |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Estado atual         | Editor 2D em camadas com catálogo administrável                                                                                                                           |
+| Dependências         | `avatar_bases`, `avatar_categories`, `avatar_items`, `user_avatar_base`, `user_avatar_inventory`, `user_avatar_equipped`, `user_avatar_looks`, moedas e buckets de assets |
+| Regras críticas      | Compatibilidade entre base, gênero, corpo, pose, pele e item; ordem de camadas; propriedade antes de equipar                                                              |
+| Problemas observados | Alguns estados ainda aparecem como “Em desenvolvimento”; grande volume de PNGs pode aumentar muito o repositório                                                          |
+| Destino preliminar   | Preservar sistema e migrar mídia pesada para Storage/CDN; evoluir renderização sem invalidar inventários                                                                  |
+| Risco                | Alto                                                                                                                                                                      |
 
 ## 7.16 Pets
 
@@ -632,27 +632,27 @@ O domínio de pets possui aproximadamente 47 tabelas e inclui:
 - eventos aleatórios;
 - prestígio/renascimento.
 
-| Campo | Registro atual |
-|---|---|
-| Estado atual | Produto próprio dentro do produto principal |
-| Dependências | dezenas de tabelas/RPCs, moedas, XP, assets, caches locais, admin e Pet Arcade |
-| Regras críticas | Compatibilidade de itens, cálculo temporal, recompensas server-side, progressão e propriedade |
+| Campo                | Registro atual                                                                                           |
+| -------------------- | -------------------------------------------------------------------------------------------------------- |
+| Estado atual         | Produto próprio dentro do produto principal                                                              |
+| Dependências         | dezenas de tabelas/RPCs, moedas, XP, assets, caches locais, admin e Pet Arcade                           |
+| Regras críticas      | Compatibilidade de itens, cálculo temporal, recompensas server-side, progressão e propriedade            |
 | Problemas observados | Grande superfície funcional; UI, narrativa, estado e economia se cruzam; risco elevado de peso de assets |
-| Destino preliminar | Preservar o domínio; separar internamente em módulos; mídia fora do Git |
-| Risco | Crítico |
+| Destino preliminar   | Preservar o domínio; separar internamente em módulos; mídia fora do Git                                  |
+| Risco                | Crítico                                                                                                  |
 
 ## 7.17 Pet Arcade e caixas
 
 O Pet Arcade classifica jogos como rápidos, estratégia, sorte e cuidado. O catálogo contém experiências como roleta, plinko, keno, corrida, memória, torres, hilo, cofrinho, ovo surpresa, voo estelar, caça ao tesouro e álbum.
 
-| Campo | Registro atual |
-|---|---|
-| Estado atual | Hub configurável com jogos e recompensas relacionados ao pet |
-| Dependências | RPCs de entrada/resultado/recompensa, missões, limites diários, moedas, inventários e admin |
-| Regras críticas | Resultado e prêmio não devem ser decididos apenas no navegador; limites e registros precisam ser verificáveis |
-| Problemas observados | Muitos jogos compartilham uma rota grande e assets pesados; qualidade visual varia entre capa e gameplay |
-| Destino preliminar | Preservar jogos válidos, substituir experiências fracas individualmente e modularizar runtime |
-| Risco | Alto/crítico para economia |
+| Campo                | Registro atual                                                                                                |
+| -------------------- | ------------------------------------------------------------------------------------------------------------- |
+| Estado atual         | Hub configurável com jogos e recompensas relacionados ao pet                                                  |
+| Dependências         | RPCs de entrada/resultado/recompensa, missões, limites diários, moedas, inventários e admin                   |
+| Regras críticas      | Resultado e prêmio não devem ser decididos apenas no navegador; limites e registros precisam ser verificáveis |
+| Problemas observados | Muitos jogos compartilham uma rota grande e assets pesados; qualidade visual varia entre capa e gameplay      |
+| Destino preliminar   | Preservar jogos válidos, substituir experiências fracas individualmente e modularizar runtime                 |
+| Risco                | Alto/crítico para economia                                                                                    |
 
 ## 7.18 Notificações e push
 
@@ -669,38 +669,38 @@ Funcionalidades:
 - links internos;
 - inscrição Web Push.
 
-| Campo | Registro atual |
-|---|---|
-| Estado atual | Central de atividades madura e integrada |
-| Dependências | `notifications`, `push_subscriptions`, `push_queue`, Realtime, Service Worker e VAPID |
-| Regras críticas | Deduplicação, links válidos, leitura, permissão do navegador e privacidade do payload |
+| Campo                | Registro atual                                                                                        |
+| -------------------- | ----------------------------------------------------------------------------------------------------- |
+| Estado atual         | Central de atividades madura e integrada                                                              |
+| Dependências         | `notifications`, `push_subscriptions`, `push_queue`, Realtime, Service Worker e VAPID                 |
+| Regras críticas      | Deduplicação, links válidos, leitura, permissão do navegador e privacidade do payload                 |
 | Problemas observados | Há reescrita de links legados; o processador público da fila precisa ser tratado no item de segurança |
-| Destino preliminar | Preservar, refatorar segurança e normalizar rotas |
-| Risco | Alto |
+| Destino preliminar   | Preservar, refatorar segurança e normalizar rotas                                                     |
+| Risco                | Alto                                                                                                  |
 
 ## 7.19 Verificação e moderação de fotos
 
 O fluxo envolve upload, normalização de HEIC/imagem, análise, fila/log de moderação e pedido de verificação. Existem rotas server-side para verificar e reparar foto.
 
-| Campo | Registro atual |
-|---|---|
-| Estado atual | Moderação híbrida automática e administrativa |
-| Dependências | `photo_moderation_settings`, fila/log, `profile_photos`, `verification_requests`, `verifications`, Storage, Face API/HEIC e endpoint de IA |
-| Regras críticas | Não aprovar silenciosamente; registrar decisão; limitar tipo/tamanho; restringir operações administrativas |
-| Problemas observados | Bibliotecas pesadas; custo/abuso do endpoint de IA; fluxo repartido por frontend, server e banco |
-| Destino preliminar | Preservar finalidade e refatorar segurança/processamento |
-| Risco | Crítico, por identidade, privacidade e custo |
+| Campo                | Registro atual                                                                                                                             |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| Estado atual         | Moderação híbrida automática e administrativa                                                                                              |
+| Dependências         | `photo_moderation_settings`, fila/log, `profile_photos`, `verification_requests`, `verifications`, Storage, Face API/HEIC e endpoint de IA |
+| Regras críticas      | Não aprovar silenciosamente; registrar decisão; limitar tipo/tamanho; restringir operações administrativas                                 |
+| Problemas observados | Bibliotecas pesadas; custo/abuso do endpoint de IA; fluxo repartido por frontend, server e banco                                           |
+| Destino preliminar   | Preservar finalidade e refatorar segurança/processamento                                                                                   |
+| Risco                | Crítico, por identidade, privacidade e custo                                                                                               |
 
 ## 7.20 Suporte
 
-| Campo | Registro atual |
-|---|---|
-| Estado atual | Base de ajuda, tickets, mensagens, anexos e agentes de suporte |
-| Dependências | `support_articles`, `support_tickets`, `support_messages`, Storage, perfis e cargos |
-| Regras críticas | Usuário vê apenas seus tickets; agentes autorizados acessam atendimento; anexos respeitam acesso |
-| Problemas observados | Autorizações precisam ser validadas no banco e não apenas pela flag do contexto |
-| Destino preliminar | Preservar e redesenhar se necessário |
-| Risco | Alto, por dados potencialmente sensíveis |
+| Campo                | Registro atual                                                                                   |
+| -------------------- | ------------------------------------------------------------------------------------------------ |
+| Estado atual         | Base de ajuda, tickets, mensagens, anexos e agentes de suporte                                   |
+| Dependências         | `support_articles`, `support_tickets`, `support_messages`, Storage, perfis e cargos              |
+| Regras críticas      | Usuário vê apenas seus tickets; agentes autorizados acessam atendimento; anexos respeitam acesso |
+| Problemas observados | Autorizações precisam ser validadas no banco e não apenas pela flag do contexto                  |
+| Destino preliminar   | Preservar e redesenhar se necessário                                                             |
+| Risco                | Alto, por dados potencialmente sensíveis                                                         |
 
 ## 7.21 Administração
 
@@ -722,14 +722,14 @@ O admin atual cobre:
 - pets e Pet Arcade;
 - equipe da live.
 
-| Campo | Registro atual |
-|---|---|
-| Estado atual | Console operacional muito amplo |
-| Dependências | quase todos os domínios, service role em operações específicas e RPCs administrativas |
-| Regras críticas | Separar permissões por ação; registrar alterações; confirmar ações destrutivas; não conceder autoridade por UI |
+| Campo                | Registro atual                                                                                                   |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| Estado atual         | Console operacional muito amplo                                                                                  |
+| Dependências         | quase todos os domínios, service role em operações específicas e RPCs administrativas                            |
+| Regras críticas      | Separar permissões por ação; registrar alterações; confirmar ações destrutivas; não conceder autoridade por UI   |
 | Problemas observados | `admin/index.tsx` tem quase 4.000 linhas e `admin/pets.tsx` mais de 2.000; papéis e capacidades ainda são amplos |
-| Destino preliminar | Preservar capacidades e refatorar em subaplicações/domínios |
-| Risco | Crítico |
+| Destino preliminar   | Preservar capacidades e refatorar em subaplicações/domínios                                                      |
+| Risco                | Crítico                                                                                                          |
 
 ---
 
@@ -773,20 +773,20 @@ Qualquer reestruturação deve manter:
 
 ### 9.1 Agrupamento conceitual das 140 tabelas
 
-| Domínio | Exemplos principais |
-|---|---|
-| Conta e identidade | `profiles`, `profile_advanced`, `profile_preferences`, `profile_photos`, `user_roles` |
-| Namoro | `interests`, `matches`, `relationship_commitments`, `blocks`, `reports`, `profile_views` |
-| Mensagens | `messages`, `global_messages`, `message_flags`, `restricted_words` |
-| Anônimos | `anonymous_messages` e tabelas auxiliares `anonymous_*` |
-| Conteúdo cristão | `daily_posts`, `devotional_*`, `prayer_requests`, `prayer_request_*` |
-| Economia | `user_coins`, `coin_transactions`, `user_badges`, catálogos e inventários |
+| Domínio                | Exemplos principais                                                                                 |
+| ---------------------- | --------------------------------------------------------------------------------------------------- |
+| Conta e identidade     | `profiles`, `profile_advanced`, `profile_preferences`, `profile_photos`, `user_roles`               |
+| Namoro                 | `interests`, `matches`, `relationship_commitments`, `blocks`, `reports`, `profile_views`            |
+| Mensagens              | `messages`, `global_messages`, `message_flags`, `restricted_words`                                  |
+| Anônimos               | `anonymous_messages` e tabelas auxiliares `anonymous_*`                                             |
+| Conteúdo cristão       | `daily_posts`, `devotional_*`, `prayer_requests`, `prayer_request_*`                                |
+| Economia               | `user_coins`, `coin_transactions`, `user_badges`, catálogos e inventários                           |
 | Presentes/customização | `virtual_gifts`, `gift_transactions`, `avatar_decorations`, `user_decorations`, fundos e gradientes |
-| Avatar | `avatar_bases`, `avatar_items`, `user_avatar_*` |
-| Pets | espécies, variantes, `user_pets_v2`, cuidado, missões, expedições, benefícios, fundos e progressão |
-| Arcade/caixas | pools, prêmios, inventário de grab e configurações/jogos |
-| Moderação e suporte | filas/logs de foto, verificações, tickets, mensagens e artigos |
-| Push | `notifications`, `push_subscriptions`, `push_queue` |
+| Avatar                 | `avatar_bases`, `avatar_items`, `user_avatar_*`                                                     |
+| Pets                   | espécies, variantes, `user_pets_v2`, cuidado, missões, expedições, benefícios, fundos e progressão  |
+| Arcade/caixas          | pools, prêmios, inventário de grab e configurações/jogos                                            |
+| Moderação e suporte    | filas/logs de foto, verificações, tickets, mensagens e artigos                                      |
+| Push                   | `notifications`, `push_subscriptions`, `push_queue`                                                 |
 
 ### 9.2 RPCs
 
@@ -882,17 +882,17 @@ Há 196 migrations. Elas representam o histórico de evolução, não uma docume
 
 ## 11. Dependências cruzadas mais perigosas
 
-| Origem | Afeta também | Motivo |
-|---|---|---|
-| Status do perfil | quase toda a navegação | Define aprovação, bloqueio e acesso |
-| Cargo | admin, badges, comunidade, Pretendentes e suporte | Papel principal e capacidades |
-| Bloqueio | Pretendentes, match e conversas | Remove visibilidade/interação |
-| Propósito Firmado | Pretendentes, conversas e perfil do casal | Pausa fluxos românticos normais |
-| Moedas | loja, presentes, avatar, pet e jogos | Saldo compartilhado |
-| Equipamentos | perfil, chat, comunidade e cards | Identidade visual atravessa telas |
-| Fotos | onboarding, perfil, Pretendentes, chat, admin e verificação | Identidade e moderação |
-| Notificações | todos os domínios interativos | Links e eventos de múltiplas origens |
-| Pets | perfil, economia, missões e Arcade | Benefícios e progressão compartilhados |
+| Origem            | Afeta também                                                | Motivo                                 |
+| ----------------- | ----------------------------------------------------------- | -------------------------------------- |
+| Status do perfil  | quase toda a navegação                                      | Define aprovação, bloqueio e acesso    |
+| Cargo             | admin, badges, comunidade, Pretendentes e suporte           | Papel principal e capacidades          |
+| Bloqueio          | Pretendentes, match e conversas                             | Remove visibilidade/interação          |
+| Propósito Firmado | Pretendentes, conversas e perfil do casal                   | Pausa fluxos românticos normais        |
+| Moedas            | loja, presentes, avatar, pet e jogos                        | Saldo compartilhado                    |
+| Equipamentos      | perfil, chat, comunidade e cards                            | Identidade visual atravessa telas      |
+| Fotos             | onboarding, perfil, Pretendentes, chat, admin e verificação | Identidade e moderação                 |
+| Notificações      | todos os domínios interativos                               | Links e eventos de múltiplas origens   |
+| Pets              | perfil, economia, missões e Arcade                          | Benefícios e progressão compartilhados |
 
 ---
 
@@ -922,30 +922,30 @@ Esta seção apenas registra; as correções pertencem às próximas etapas.
 
 Esta classificação não é decisão final. Ela serve para nossa próxima conversa de produto.
 
-| Módulo | Preservar regra | Redesenhar UI | Refatorar código | Substituir conceito |
-|---|:---:|:---:|:---:|:---:|
-| Autenticação/cargos | Sim | Parcial | Sim | Não |
-| Onboarding | Parcial | Sim | Sim | Parcial |
-| Início | Sim | Sim | Sim | Não |
-| Dashboard | Sim | Opcional | Parcial | Não |
-| Perfil | Sim, dados | Sim, profundamente | Sim | Parcial |
-| Pretendentes | Sim | Sim | Sim | Não |
-| Descoberta comunitária | Não existe | Criar | Criar | Sim, novo domínio |
-| Interesses/matches | Sim | Opcional | Parcial | Não |
-| Chat privado | Sim | Conservador | Sim | Não |
-| Propósito Firmado | Sim | Opcional | Sim | Não |
-| Recados anônimos | Sim | Opcional | Sim | Não |
-| Chat global | Sim | Sim | Sim | Não |
-| Comunidade ampla | Não existe | Criar | Criar | Sim, novo domínio |
-| Conteúdo cristão | Sim | Sim | Sim | Não |
-| Economia | Sim | Parcial | Sim | Não |
-| Loja/inventário | Sim | Sim | Sim | Não |
-| Avatar | Sim | Sim | Sim | Parcial, tecnologia visual |
-| Pets | Sim | Sim | Sim | Não |
-| Jogos | Caso a caso | Sim | Sim | Caso a caso |
-| Notificações | Sim | Opcional | Sim | Não |
-| Suporte | Sim | Opcional | Sim | Não |
-| Administração | Sim | Sim | Sim | Não |
+| Módulo                 | Preservar regra |   Redesenhar UI    | Refatorar código |    Substituir conceito     |
+| ---------------------- | :-------------: | :----------------: | :--------------: | :------------------------: |
+| Autenticação/cargos    |       Sim       |      Parcial       |       Sim        |            Não             |
+| Onboarding             |     Parcial     |        Sim         |       Sim        |          Parcial           |
+| Início                 |       Sim       |        Sim         |       Sim        |            Não             |
+| Dashboard              |       Sim       |      Opcional      |     Parcial      |            Não             |
+| Perfil                 |   Sim, dados    | Sim, profundamente |       Sim        |          Parcial           |
+| Pretendentes           |       Sim       |        Sim         |       Sim        |            Não             |
+| Descoberta comunitária |   Não existe    |       Criar        |      Criar       |     Sim, novo domínio      |
+| Interesses/matches     |       Sim       |      Opcional      |     Parcial      |            Não             |
+| Chat privado           |       Sim       |    Conservador     |       Sim        |            Não             |
+| Propósito Firmado      |       Sim       |      Opcional      |       Sim        |            Não             |
+| Recados anônimos       |       Sim       |      Opcional      |       Sim        |            Não             |
+| Chat global            |       Sim       |        Sim         |       Sim        |            Não             |
+| Comunidade ampla       |   Não existe    |       Criar        |      Criar       |     Sim, novo domínio      |
+| Conteúdo cristão       |       Sim       |        Sim         |       Sim        |            Não             |
+| Economia               |       Sim       |      Parcial       |       Sim        |            Não             |
+| Loja/inventário        |       Sim       |        Sim         |       Sim        |            Não             |
+| Avatar                 |       Sim       |        Sim         |       Sim        | Parcial, tecnologia visual |
+| Pets                   |       Sim       |        Sim         |       Sim        |            Não             |
+| Jogos                  |   Caso a caso   |        Sim         |       Sim        |        Caso a caso         |
+| Notificações           |       Sim       |      Opcional      |       Sim        |            Não             |
+| Suporte                |       Sim       |      Opcional      |       Sim        |            Não             |
+| Administração          |       Sim       |        Sim         |       Sim        |            Não             |
 
 ---
 
@@ -1014,4 +1014,3 @@ Durante a produção deste manual:
 - nenhum asset foi removido;
 - nenhum dado do Supabase foi modificado;
 - nenhuma configuração de deploy foi modificada.
-

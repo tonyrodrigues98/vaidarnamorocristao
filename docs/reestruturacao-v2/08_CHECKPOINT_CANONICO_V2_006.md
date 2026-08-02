@@ -84,4 +84,3 @@ Não houve:
 Este é um checkpoint histórico, não uma ordem para rejeitar progresso posterior.
 O Codex deve confrontá-lo com Git/PRs e continuar do estado real mais recente,
 preservando trabalho válido.
-

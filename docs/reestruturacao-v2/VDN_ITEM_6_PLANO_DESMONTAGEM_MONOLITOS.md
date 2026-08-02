@@ -62,31 +62,31 @@ O alvo é um **monólito modular**, conforme definido no Item 4. Não há justif
 
 ### 3.1 Arquivos principais
 
-| Arquivo | Linhas aproximadas | Papel atual | Risco |
-|---|---:|---|---|
-| `src/routes/admin/index.tsx` | 3.999 | painel administrativo multi-domínio | crítico |
-| `src/routes/admin/pets.tsx` | 2.062 | catálogo, benefícios e central de operações de pets | alto |
-| `src/routes/loja.tsx` | 1.764 | catálogo, compras, equipamentos, brindes e inventário | alto |
-| `src/routes/perfil.tsx` | 1.746 | leitura, edição, personalização, saldo, missões e presentes | alto |
-| `src/routes/conversas/comunidade.tsx` | 1.528 | chat global, Realtime, moderação, stickers e presença | alto |
-| `src/routes/onboarding/index.tsx` | 1.460 | fluxo de 12 etapas, rascunho, uploads e persistência | alto |
-| `src/routes/meu-pet.tsx` | 1.369 | vitrine, cuidado, progressão, cenário e criação do pet | alto |
-| `src/routes/pet-arcade.tsx` | 789 | catálogo e carregamento de aproximadamente 17 jogos | médio |
+| Arquivo                               | Linhas aproximadas | Papel atual                                                 | Risco   |
+| ------------------------------------- | -----------------: | ----------------------------------------------------------- | ------- |
+| `src/routes/admin/index.tsx`          |              3.999 | painel administrativo multi-domínio                         | crítico |
+| `src/routes/admin/pets.tsx`           |              2.062 | catálogo, benefícios e central de operações de pets         | alto    |
+| `src/routes/loja.tsx`                 |              1.764 | catálogo, compras, equipamentos, brindes e inventário       | alto    |
+| `src/routes/perfil.tsx`               |              1.746 | leitura, edição, personalização, saldo, missões e presentes | alto    |
+| `src/routes/conversas/comunidade.tsx` |              1.528 | chat global, Realtime, moderação, stickers e presença       | alto    |
+| `src/routes/onboarding/index.tsx`     |              1.460 | fluxo de 12 etapas, rascunho, uploads e persistência        | alto    |
+| `src/routes/meu-pet.tsx`              |              1.369 | vitrine, cuidado, progressão, cenário e criação do pet      | alto    |
+| `src/routes/pet-arcade.tsx`           |                789 | catálogo e carregamento de aproximadamente 17 jogos         | médio   |
 
 Total: aproximadamente **14.700 linhas** concentradas em oito rotas.
 
 ### 3.2 Indicadores de acoplamento direto
 
-| Arquivo | Imports | `useState` | `useEffect` | Consultas `.from(...)` diretas | RPCs diretas | Canais Realtime |
-|---|---:|---:|---:|---:|---:|---:|
-| Perfil | 47 | 11 | 9 | 16 | 0 | 0 |
-| Admin | 32 | 32 | 9 | 61 | 6 | 0 |
-| Admin Pets | 26 | 7 | 5 | encapsuladas em bibliotecas | encapsuladas | 0 |
-| Loja | 26 | estado remoto via Query | 1 | 1 | encapsuladas | 0 |
-| Comunidade | 34 | 13 | 9 | 23 | 0 | 2 |
-| Onboarding | 16 | múltiplos campos locais | 3 | 15 | 0 | 0 |
-| Meu Pet | 48 | 10 | 6 | encapsuladas | encapsuladas | 0 |
-| Pet Arcade | 46 | 1 | 1 | encapsuladas | encapsuladas | 0 |
+| Arquivo    | Imports |              `useState` | `useEffect` | Consultas `.from(...)` diretas | RPCs diretas | Canais Realtime |
+| ---------- | ------: | ----------------------: | ----------: | -----------------------------: | -----------: | --------------: |
+| Perfil     |      47 |                      11 |           9 |                             16 |            0 |               0 |
+| Admin      |      32 |                      32 |           9 |                             61 |            6 |               0 |
+| Admin Pets |      26 |                       7 |           5 |    encapsuladas em bibliotecas | encapsuladas |               0 |
+| Loja       |      26 | estado remoto via Query |           1 |                              1 | encapsuladas |               0 |
+| Comunidade |      34 |                      13 |           9 |                             23 |            0 |               2 |
+| Onboarding |      16 | múltiplos campos locais |           3 |                             15 |            0 |               0 |
+| Meu Pet    |      48 |                      10 |           6 |                   encapsuladas | encapsuladas |               0 |
+| Pet Arcade |      46 |                       1 |           1 |                   encapsuladas | encapsuladas |               0 |
 
 Esses números não são uma métrica de qualidade isolada. Eles mostram onde uma alteração visual pode acidentalmente atingir persistência, autorização, economia ou Realtime.
 
@@ -235,14 +235,14 @@ Essa árvore é um destino, não uma ordem para mover tudo de uma vez.
 
 ### 5.1 Responsabilidade das camadas
 
-| Camada | Pode conhecer | Não deve conhecer |
-|---|---|---|
-| rota | URL, guardas, página | schema do banco |
-| UI | view model, comandos | tabelas e RPCs cruas |
-| aplicação | casos de uso e coordenação | detalhes visuais |
-| modelo | tipos, invariantes, regras puras | React e Supabase |
-| queries | cache e chaves | markup da tela |
-| API/repositório | Supabase e mapeamento | estado de modal |
+| Camada          | Pode conhecer                    | Não deve conhecer    |
+| --------------- | -------------------------------- | -------------------- |
+| rota            | URL, guardas, página             | schema do banco      |
+| UI              | view model, comandos             | tabelas e RPCs cruas |
+| aplicação       | casos de uso e coordenação       | detalhes visuais     |
+| modelo          | tipos, invariantes, regras puras | React e Supabase     |
+| queries         | cache e chaves                   | markup da tela       |
+| API/repositório | Supabase e mapeamento            | estado de modal      |
 
 ---
 
@@ -363,18 +363,18 @@ O arquivo atual não deve ser usado como base direta do redesign. Primeiro serã
 
 ### 7.3 Fronteiras obrigatórias
 
-| Responsabilidade | Domínio dono |
-|---|---|
-| nome, foto, bio e presença | Perfil |
-| configuração do perfil modular | Perfil |
-| preferências românticas | Namoro |
-| cargo e poderes | Identidade/Autorização |
-| saldo | Economia |
-| itens equipados | Inventário |
-| presentes recebidos | Presentes/Inventário |
-| missões e recompensas | Progressão |
-| compromisso | Propósito Firmado |
-| pet exibido | Pets |
+| Responsabilidade               | Domínio dono           |
+| ------------------------------ | ---------------------- |
+| nome, foto, bio e presença     | Perfil                 |
+| configuração do perfil modular | Perfil                 |
+| preferências românticas        | Namoro                 |
+| cargo e poderes                | Identidade/Autorização |
+| saldo                          | Economia               |
+| itens equipados                | Inventário             |
+| presentes recebidos            | Presentes/Inventário   |
+| missões e recompensas          | Progressão             |
+| compromisso                    | Propósito Firmado      |
+| pet exibido                    | Pets                   |
 
 ### 7.4 Estrutura-alvo
 
@@ -812,16 +812,16 @@ O futuro feed, grupos, eventos, espaços e Sala de Cinema não devem ser adicion
 
 ### 11.3 Fronteiras
 
-| Capacidade | Domínio dono |
-|---|---|
-| sala e mensagens | Conversas |
-| elegibilidade para participar | Comunidade |
-| cargos | Identidade/Autorização |
-| palavras e flags | Moderação |
-| stickers e propriedade | Inventário |
-| custo de ação | Economia |
-| presença e digitação | Conversas/Presença |
-| compromisso exibido | Propósito Firmado |
+| Capacidade                    | Domínio dono           |
+| ----------------------------- | ---------------------- |
+| sala e mensagens              | Conversas              |
+| elegibilidade para participar | Comunidade             |
+| cargos                        | Identidade/Autorização |
+| palavras e flags              | Moderação              |
+| stickers e propriedade        | Inventário             |
+| custo de ação                 | Economia               |
+| presença e digitação          | Conversas/Presença     |
+| compromisso exibido           | Propósito Firmado      |
 
 ### 11.4 Estrutura-alvo
 
@@ -1494,18 +1494,18 @@ Reduzir linhas sem cumprir esses critérios não conclui a desmontagem.
 
 ## 22. Riscos do plano
 
-| Risco | Impacto | Mitigação |
-|---|---|---|
-| extração muda comportamento | regressão silenciosa | testes de caracterização e diffs pequenos |
-| duplicação de fontes de verdade | dados divergentes | dono por domínio e período curto de compatibilidade |
-| abstração genérica demais | código difícil de evoluir | abstrair apenas comportamento realmente comum |
-| flags permanentes | complexidade acumulada | dono e data de remoção por flag |
-| bundle piora | PWA mais lenta | medição por rota e lazy loading |
-| cache inconsistente | telas desatualizadas | query keys e eventos canônicos |
-| Admin perde capacidade | operação bloqueada | matriz de paridade por módulo |
-| Realtime duplica estado | mensagens duplicadas | id estável e reconciliação |
-| avatar removido incorretamente | perda de foto/decorações | taxonomia explícita das três noções de avatar |
-| redesign invade refatoração | escopo incontrolável | entregas separadas |
+| Risco                           | Impacto                   | Mitigação                                           |
+| ------------------------------- | ------------------------- | --------------------------------------------------- |
+| extração muda comportamento     | regressão silenciosa      | testes de caracterização e diffs pequenos           |
+| duplicação de fontes de verdade | dados divergentes         | dono por domínio e período curto de compatibilidade |
+| abstração genérica demais       | código difícil de evoluir | abstrair apenas comportamento realmente comum       |
+| flags permanentes               | complexidade acumulada    | dono e data de remoção por flag                     |
+| bundle piora                    | PWA mais lenta            | medição por rota e lazy loading                     |
+| cache inconsistente             | telas desatualizadas      | query keys e eventos canônicos                      |
+| Admin perde capacidade          | operação bloqueada        | matriz de paridade por módulo                       |
+| Realtime duplica estado         | mensagens duplicadas      | id estável e reconciliação                          |
+| avatar removido incorretamente  | perda de foto/decorações  | taxonomia explícita das três noções de avatar       |
+| redesign invade refatoração     | escopo incontrolável      | entregas separadas                                  |
 
 ---
 
@@ -1598,4 +1598,3 @@ O Item 7 deve definir o plano de preservação e migração dos dados e comporta
 - rollback;
 - remoção controlada do avatar-personagem;
 - preservação de usuários, mensagens, matches, Propósito Firmado, economia, itens, pets e jogos.
-

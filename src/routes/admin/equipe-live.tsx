@@ -913,7 +913,8 @@ function LiveTeamDialog({
             <div className="space-y-2">
               <Label>Ordem</Label>
               <Input
-                type="text" inputMode="decimal"
+                type="text"
+                inputMode="decimal"
                 value={form.sort_order}
                 onChange={(e) => onFormChange({ ...form, sort_order: Number(e.target.value) })}
               />
@@ -1073,7 +1074,8 @@ function MonthlyHighlightDialog({
             <div className="space-y-2">
               <Label>Mês</Label>
               <Input
-                type="text" inputMode="decimal"
+                type="text"
+                inputMode="decimal"
                 min={1}
                 max={12}
                 value={form.month}
@@ -1083,7 +1085,8 @@ function MonthlyHighlightDialog({
             <div className="space-y-2">
               <Label>Ano</Label>
               <Input
-                type="text" inputMode="decimal"
+                type="text"
+                inputMode="decimal"
                 min={2026}
                 value={form.year}
                 onChange={(e) => onFormChange({ ...form, year: Number(e.target.value) })}

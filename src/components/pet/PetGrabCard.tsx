@@ -11,7 +11,11 @@ import grabEpicaImg from "@/assets/grab-epica.png";
 import grabLendariaImg from "@/assets/grab-lendaria.png";
 import capsulaXpImg from "@/assets/caixas/capsula_xp.png";
 import {
-  getGrabState, listMyGrabInventory, listPoolPrizeMetas, performGrab, resolvePrize,
+  getGrabState,
+  listMyGrabInventory,
+  listPoolPrizeMetas,
+  performGrab,
+  resolvePrize,
   type PrizeMeta,
 } from "@/lib/petGrab";
 import {
@@ -105,10 +109,15 @@ export function PetGrabCard({ refreshKey, onChanged }: Props) {
   async function reload() {
     try {
       const [s, i] = await Promise.all([getGrabState(), listMyGrabInventory()]);
-      setState(s); setInv(i);
-    } catch (e) { /* silently */ console.warn(e); }
+      setState(s);
+      setInv(i);
+    } catch (e) {
+      /* silently */ console.warn(e);
+    }
   }
-  useEffect(() => { void reload(); }, [refreshKey]);
+  useEffect(() => {
+    void reload();
+  }, [refreshKey]);
 
   async function grab(poolId: string) {
     // Unlock the shared AudioContext synchronously inside this user gesture
@@ -117,10 +126,7 @@ export function PetGrabCard({ refreshKey, onChanged }: Props) {
     unlockGrabAudio();
     setPendingPoolId(poolId);
     try {
-      const [prizes, res] = await Promise.all([
-        listPoolPrizeMetas(poolId),
-        performGrab(poolId),
-      ]);
+      const [prizes, res] = await Promise.all([listPoolPrizeMetas(poolId), performGrab(poolId)]);
       const winnerMeta = await resolvePrize(res.prize_kind, res.prize_ref_id);
       const winner: PrizeMeta = {
         ...(winnerMeta ?? { name: GRAB_PRIZE_KIND_LABEL[res.prize_kind], image_url: null }),
@@ -134,10 +140,13 @@ export function PetGrabCard({ refreshKey, onChanged }: Props) {
     } catch (e) {
       const msg = (e as Error).message;
       toast.error(
-        msg.includes("insufficient_coins") ? "Moedas insuficientes" :
-        msg.includes("pool_empty") ? "Pool sem prêmios configurados" :
-        msg.includes("pool_not_found") ? "Pool indisponível" :
-        msg,
+        msg.includes("insufficient_coins")
+          ? "Moedas insuficientes"
+          : msg.includes("pool_empty")
+            ? "Pool sem prêmios configurados"
+            : msg.includes("pool_not_found")
+              ? "Pool indisponível"
+              : msg,
       );
     } finally {
       setPendingPoolId(null);
@@ -179,9 +188,9 @@ export function PetGrabCard({ refreshKey, onChanged }: Props) {
             <h2 className="text-sm font-semibold">Grab — Sorteio diário</h2>
             <p className="text-[11px] text-neutral-500">Itens, cenários e bônus aleatórios.</p>
           </div>
-          <Button size="sm" variant="ghost" className="ml-auto"
-            onClick={() => setShowInv(true)}>
-            <Package className="size-4 mr-1" />Estoque
+          <Button size="sm" variant="ghost" className="ml-auto" onClick={() => setShowInv(true)}>
+            <Package className="size-4 mr-1" />
+            Estoque
             {inv.length > 0 && (
               <span className="ml-1.5 rounded-full bg-amber-100 px-1.5 text-[10px] font-semibold text-amber-700">
                 {inv.reduce((s, x) => s + x.quantity, 0)}
@@ -251,7 +260,8 @@ export function PetGrabCard({ refreshKey, onChanged }: Props) {
                       className="pointer-events-none absolute inset-[-6%] rounded-full"
                       style={{
                         background: `conic-gradient(from 0deg, transparent 0deg, ${tier.ringColor} 60deg, transparent 120deg, transparent 240deg, ${tier.ringColor} 300deg, transparent 360deg)`,
-                        WebkitMask: "radial-gradient(circle, transparent 56%, #000 58%, #000 62%, transparent 64%)",
+                        WebkitMask:
+                          "radial-gradient(circle, transparent 56%, #000 58%, #000 62%, transparent 64%)",
                         mask: "radial-gradient(circle, transparent 56%, #000 58%, #000 62%, transparent 64%)",
                         animation: "grab-ring-spin 9s linear infinite",
                         opacity: 0.9,
@@ -266,8 +276,8 @@ export function PetGrabCard({ refreshKey, onChanged }: Props) {
                           aria-hidden
                           className="pointer-events-none absolute size-1 rounded-full"
                           style={{
-                            top: `${20 + (i * 47) % 60}%`,
-                            left: `${10 + (i * 67) % 80}%`,
+                            top: `${20 + ((i * 47) % 60)}%`,
+                            left: `${10 + ((i * 67) % 80)}%`,
                             background: tier.ringColor,
                             boxShadow: `0 0 6px ${tier.ringColor}`,
                             animation: `grab-particle-float ${2.4 + (i % 3) * 0.4}s ease-in-out ${i * 0.25}s infinite`,
@@ -300,17 +310,20 @@ export function PetGrabCard({ refreshKey, onChanged }: Props) {
                   <div
                     className={cn(
                       "mt-0.5 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold",
-                      isFree
-                        ? "bg-neutral-900 text-white"
-                        : "bg-neutral-100 text-neutral-700",
+                      isFree ? "bg-neutral-900 text-white" : "bg-neutral-100 text-neutral-700",
                     )}
                   >
                     {busy ? (
                       <Loader2 className="size-3 animate-spin" />
                     ) : isFree ? (
-                      <>Sortear grátis <Sparkles className="size-3" /></>
+                      <>
+                        Sortear grátis <Sparkles className="size-3" />
+                      </>
                     ) : (
-                      <><CoinIcon className="size-3" />{pool.cost_coins}</>
+                      <>
+                        <CoinIcon className="size-3" />
+                        {pool.cost_coins}
+                      </>
                     )}
                   </div>
                 </div>
@@ -349,9 +362,7 @@ export function PetGrabCard({ refreshKey, onChanged }: Props) {
         />
       )}
 
-      {showInv && (
-        <InventoryDialog inventory={inv} onClose={() => setShowInv(false)} />
-      )}
+      {showInv && <InventoryDialog inventory={inv} onClose={() => setShowInv(false)} />}
     </>
   );
 }
@@ -405,12 +416,19 @@ export function GrabRouletteModal({
   // Winner rarity drives both the color-preview overlay and the legendary
   // cinematic. Fall back to "common" when metadata didn't carry rarity.
   const winnerRarity = ((winner as { rarity?: string }).rarity ?? "common") as
-    | "common" | "rare" | "epic" | "legendary";
+    | "common"
+    | "rare"
+    | "epic"
+    | "legendary";
   const isLegendary = winnerRarity === "legendary";
   const rarityHex =
-    winnerRarity === "legendary" ? "#fbbf24" :
-    winnerRarity === "epic" ? "#a855f7" :
-    winnerRarity === "rare" ? "#38bdf8" : "#ffffff";
+    winnerRarity === "legendary"
+      ? "#fbbf24"
+      : winnerRarity === "epic"
+        ? "#a855f7"
+        : winnerRarity === "rare"
+          ? "#38bdf8"
+          : "#ffffff";
 
   const { items, winnerIndex, winnerOffset } = useMemo(() => {
     const base = prizes.length > 0 ? prizes : [winner];
@@ -421,7 +439,11 @@ export function GrabRouletteModal({
     // almost got the knife" feeling — the eye catches an epic/legendary right
     // beside the winner as the reel decelerates.
     const RANK: Record<string, number> = {
-      legendary: 4, epic: 3, rare: 2, uncommon: 1, common: 0,
+      legendary: 4,
+      epic: 3,
+      rare: 2,
+      uncommon: 1,
+      common: 0,
     };
     const rankOf = (p: PrizeMeta) => RANK[(p.rarity as string) ?? "common"] ?? 0;
     const sorted = [...base].sort((a, b) => rankOf(b) - rankOf(a));
@@ -438,8 +460,8 @@ export function GrabRouletteModal({
     const NEIGHBOR_BIAS: Array<{ d: number; chance: number }> = [
       { d: -2, chance: 0.55 },
       { d: -1, chance: 0.85 },
-      { d:  1, chance: 0.85 },
-      { d:  2, chance: 0.55 },
+      { d: 1, chance: 0.85 },
+      { d: 2, chance: 0.55 },
     ];
     const winnerRank = rankOf(winner);
     for (const { d, chance } of NEIGHBOR_BIAS) {
@@ -448,9 +470,7 @@ export function GrabRouletteModal({
       if (Math.random() > chance) continue;
       // Try a few times to land on something rarer than the winner so the
       // "quase ganhei algo melhor" effect actually lands.
-      const candidates = highBucket.filter(
-        (p) => rankOf(p) > winnerRank && p !== winner,
-      );
+      const candidates = highBucket.filter((p) => rankOf(p) > winnerRank && p !== winner);
       const pool = candidates.length > 0 ? candidates : highBucket;
       list[j] = pickRandom(pool);
     }
@@ -464,12 +484,18 @@ export function GrabRouletteModal({
   }, []);
 
   const targetX = -(
-    winnerIndex * ROULETTE_ITEM + ROULETTE_ITEM / 2 - ROULETTE_VIEW / 2 + winnerOffset
+    winnerIndex * ROULETTE_ITEM +
+    ROULETTE_ITEM / 2 -
+    ROULETTE_VIEW / 2 +
+    winnerOffset
   );
 
   // cubic-bezier(0.08, 0.82, 0.18, 1) — same easing the CSS transition uses
   const easeProgress = useMemo(() => {
-    const cx1 = 0.08, cy1 = 0.82, cx2 = 0.18, cy2 = 1;
+    const cx1 = 0.08,
+      cy1 = 0.82,
+      cx2 = 0.18,
+      cy2 = 1;
     const bz = (t: number, a: number, b: number) =>
       3 * t * (1 - t) * (1 - t) * a + 3 * t * t * (1 - t) * b + t * t * t;
     return (x: number) => {
@@ -477,9 +503,7 @@ export function GrabRouletteModal({
       for (let i = 0; i < 8; i++) {
         const xt = bz(t, cx1, cx2) - x;
         const dx =
-          3 * (1 - t) * (1 - t) * cx1 +
-          6 * (1 - t) * t * (cx2 - cx1) +
-          3 * t * t * (1 - cx2);
+          3 * (1 - t) * (1 - t) * cx1 + 6 * (1 - t) * t * (cx2 - cx1) + 3 * t * t * (1 - cx2);
         if (Math.abs(dx) < 1e-6) break;
         t -= xt / dx;
         if (t < 0) t = 0;
@@ -492,90 +516,97 @@ export function GrabRouletteModal({
   useEffect(() => {
     const timers: ReturnType<typeof setTimeout>[] = [];
     // intro → spin
-    timers.push(setTimeout(() => {
-      setPhase("spin");
-      rafRef.current = requestAnimationFrame(() => {
-        rafRef.current = requestAnimationFrame(() => setTranslate(targetX));
-      });
-      // Start tick loop only once per modal mount, even under StrictMode.
-      if (tickStartedRef.current) return;
-      tickStartedRef.current = true;
-      // Rolling-ball rumble bed under the ticks. Volume + cutoff are
-      // modulated from inside the tick loop based on visual speed so the
-      // audio tracks the deceleration smoothly.
-      startGrabRumble();
-      const spinStart = performance.now();
-      // Tick when an item's CENTER (not its left edge) crosses the selector.
-      // `centerIndex` = floor of how many full items have already passed center.
-      const tickLoop = (now: number) => {
-        const elapsed = now - spinStart;
-        const t = Math.min(1, elapsed / ROULETTE_SPIN_MS);
-        const eased = easeProgress(t);
-        const currentX = targetX * eased;
-        // Drive the rumble bed from the same instantaneous speed used for
-        // ticks. Quadratic curve falls off harder near the end.
-        {
-          const dt = 1 / ROULETTE_SPIN_MS;
-          const next = easeProgress(Math.min(1, t + dt));
-          const speedNow = Math.min(1, (next - eased) * ROULETTE_SPIN_MS * 0.6);
-          setGrabRumbleSpeed(speedNow);
-        }
-        const centerIndex = Math.floor(
-          (-currentX + ROULETTE_VIEW / 2 - ROULETTE_ITEM / 2) / ROULETTE_ITEM,
-        );
-        if (centerIndex > lastTickCenterRef.current) {
-          // First observation just seeds the baseline — no tick yet.
-          if (lastTickCenterRef.current !== Number.NEGATIVE_INFINITY) {
-            // Instantaneous speed via bezier derivative, normalised to [0, 1]
+    timers.push(
+      setTimeout(() => {
+        setPhase("spin");
+        rafRef.current = requestAnimationFrame(() => {
+          rafRef.current = requestAnimationFrame(() => setTranslate(targetX));
+        });
+        // Start tick loop only once per modal mount, even under StrictMode.
+        if (tickStartedRef.current) return;
+        tickStartedRef.current = true;
+        // Rolling-ball rumble bed under the ticks. Volume + cutoff are
+        // modulated from inside the tick loop based on visual speed so the
+        // audio tracks the deceleration smoothly.
+        startGrabRumble();
+        const spinStart = performance.now();
+        // Tick when an item's CENTER (not its left edge) crosses the selector.
+        // `centerIndex` = floor of how many full items have already passed center.
+        const tickLoop = (now: number) => {
+          const elapsed = now - spinStart;
+          const t = Math.min(1, elapsed / ROULETTE_SPIN_MS);
+          const eased = easeProgress(t);
+          const currentX = targetX * eased;
+          // Drive the rumble bed from the same instantaneous speed used for
+          // ticks. Quadratic curve falls off harder near the end.
+          {
             const dt = 1 / ROULETTE_SPIN_MS;
             const next = easeProgress(Math.min(1, t + dt));
-            const speed = Math.min(1, (next - eased) * ROULETTE_SPIN_MS * 0.6);
-            // Emit exactly one tick per integer step, even if several centers
-            // were skipped in a single frame (very early, very fast section).
-            const steps = Math.min(4, centerIndex - lastTickCenterRef.current);
-            for (let i = 0; i < steps; i++) {
-              // Alternate ticks across the stereo field; magnitude shrinks
-              // as the wheel slows so the final ticks feel centered.
-              const idx = lastTickCenterRef.current + 1 + i;
-              const pan = ((idx % 2 === 0 ? 1 : -1) * (0.4 + speed * 0.5));
-              playGrabTick(speed, pan);
-            }
+            const speedNow = Math.min(1, (next - eased) * ROULETTE_SPIN_MS * 0.6);
+            setGrabRumbleSpeed(speedNow);
           }
-          lastTickCenterRef.current = centerIndex;
-        }
-        if (t < 1) {
-          tickRafRef.current = requestAnimationFrame(tickLoop);
-        }
-      };
-      tickRafRef.current = requestAnimationFrame(tickLoop);
-    }, ROULETTE_INTRO_MS));
+          const centerIndex = Math.floor(
+            (-currentX + ROULETTE_VIEW / 2 - ROULETTE_ITEM / 2) / ROULETTE_ITEM,
+          );
+          if (centerIndex > lastTickCenterRef.current) {
+            // First observation just seeds the baseline — no tick yet.
+            if (lastTickCenterRef.current !== Number.NEGATIVE_INFINITY) {
+              // Instantaneous speed via bezier derivative, normalised to [0, 1]
+              const dt = 1 / ROULETTE_SPIN_MS;
+              const next = easeProgress(Math.min(1, t + dt));
+              const speed = Math.min(1, (next - eased) * ROULETTE_SPIN_MS * 0.6);
+              // Emit exactly one tick per integer step, even if several centers
+              // were skipped in a single frame (very early, very fast section).
+              const steps = Math.min(4, centerIndex - lastTickCenterRef.current);
+              for (let i = 0; i < steps; i++) {
+                // Alternate ticks across the stereo field; magnitude shrinks
+                // as the wheel slows so the final ticks feel centered.
+                const idx = lastTickCenterRef.current + 1 + i;
+                const pan = (idx % 2 === 0 ? 1 : -1) * (0.4 + speed * 0.5);
+                playGrabTick(speed, pan);
+              }
+            }
+            lastTickCenterRef.current = centerIndex;
+          }
+          if (t < 1) {
+            tickRafRef.current = requestAnimationFrame(tickLoop);
+          }
+        };
+        tickRafRef.current = requestAnimationFrame(tickLoop);
+      }, ROULETTE_INTRO_MS),
+    );
     // unblur ~40% of the spin
     timers.push(setTimeout(() => setBlur(false), ROULETTE_INTRO_MS + ROULETTE_SPIN_MS * 0.45));
     // ~1.5s before settle, project a vertical light column of the winner's
     // rarity color through the anchor — CS:GO-style "you can tell it's
     // gold before it lands" tease.
-    timers.push(setTimeout(
-      () => setColorPreview(true),
-      ROULETTE_INTRO_MS + ROULETTE_SPIN_MS - 1500,
-    ));
+    timers.push(
+      setTimeout(() => setColorPreview(true), ROULETTE_INTRO_MS + ROULETTE_SPIN_MS - 1500),
+    );
     // spin finished → settle (burst + pop)
-    timers.push(setTimeout(() => {
-      setPhase("settle");
-      stopGrabRumble();
-      if (!dingPlayedRef.current) {
-        dingPlayedRef.current = true;
-        if (isLegendary) {
-          playGrabLegendaryReveal();
-          setShake(true);
-          setTimeout(() => setShake(false), 220);
-        } else {
-          playGrabFinalDing();
-        }
-      }
-    }, ROULETTE_INTRO_MS + ROULETTE_SPIN_MS + 80));
+    timers.push(
+      setTimeout(
+        () => {
+          setPhase("settle");
+          stopGrabRumble();
+          if (!dingPlayedRef.current) {
+            dingPlayedRef.current = true;
+            if (isLegendary) {
+              playGrabLegendaryReveal();
+              setShake(true);
+              setTimeout(() => setShake(false), 220);
+            } else {
+              playGrabFinalDing();
+            }
+          }
+        },
+        ROULETTE_INTRO_MS + ROULETTE_SPIN_MS + 80,
+      ),
+    );
     // settle done → reveal details
-    timers.push(setTimeout(() => setPhase("done"),
-      ROULETTE_INTRO_MS + ROULETTE_SPIN_MS + ROULETTE_BURST_MS));
+    timers.push(
+      setTimeout(() => setPhase("done"), ROULETTE_INTRO_MS + ROULETTE_SPIN_MS + ROULETTE_BURST_MS),
+    );
     return () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       if (tickRafRef.current) cancelAnimationFrame(tickRafRef.current);
@@ -586,26 +617,39 @@ export function GrabRouletteModal({
 
   // Legendary drops get a denser, brighter burst (CS:GO knife reveal vibes).
   const sparkleCount = isLegendary ? 60 : SPARKLE_COUNT;
-  const sparkles = useMemo(() => Array.from({ length: sparkleCount }, (_, i) => {
-    const angle = (Math.PI * 2 * i) / sparkleCount + Math.random() * 0.3;
-    const dist = (isLegendary ? 110 : 90) + Math.random() * (isLegendary ? 110 : 70);
-    const palette = isLegendary
-      ? ["#fbbf24", "#fde68a", "#f59e0b", "#fffbeb", "#fbbf24"]
-      : ["#fbbf24", "#f97316", "#ec4899", "#a855f7", "#22d3ee"];
-    return {
-      tx: Math.cos(angle) * dist,
-      ty: Math.sin(angle) * dist,
-      delay: Math.random() * (isLegendary ? 220 : 120),
-      hue: palette[i % palette.length],
-      size: (isLegendary ? 5 : 6) + Math.random() * (isLegendary ? 8 : 6),
-    };
-  }), [sparkleCount, isLegendary]);
+  const sparkles = useMemo(
+    () =>
+      Array.from({ length: sparkleCount }, (_, i) => {
+        const angle = (Math.PI * 2 * i) / sparkleCount + Math.random() * 0.3;
+        const dist = (isLegendary ? 110 : 90) + Math.random() * (isLegendary ? 110 : 70);
+        const palette = isLegendary
+          ? ["#fbbf24", "#fde68a", "#f59e0b", "#fffbeb", "#fbbf24"]
+          : ["#fbbf24", "#f97316", "#ec4899", "#a855f7", "#22d3ee"];
+        return {
+          tx: Math.cos(angle) * dist,
+          ty: Math.sin(angle) * dist,
+          delay: Math.random() * (isLegendary ? 220 : 120),
+          hue: palette[i % palette.length],
+          size: (isLegendary ? 5 : 6) + Math.random() * (isLegendary ? 8 : 6),
+        };
+      }),
+    [sparkleCount, isLegendary],
+  );
 
   return (
-    <Dialog open onOpenChange={(o) => { if (!o) handleClose(); }}>
+    <Dialog
+      open
+      onOpenChange={(o) => {
+        if (!o) handleClose();
+      }}
+    >
       <DialogContent
         className="max-w-md overflow-hidden border-neutral-800 bg-neutral-950 p-0 text-white"
-        style={shake ? { animation: "grab-screen-shake 220ms cubic-bezier(.36,.07,.19,.97) both" } : undefined}
+        style={
+          shake
+            ? { animation: "grab-screen-shake 220ms cubic-bezier(.36,.07,.19,.97) both" }
+            : undefined
+        }
       >
         <style>{`
           @keyframes grab-spin-conic { to { transform: rotate(360deg); } }
@@ -676,19 +720,25 @@ export function GrabRouletteModal({
               className={cn(
                 "size-5 text-amber-400 transition-transform",
                 phase === "spin" && "animate-pulse",
-                (phase === "settle" || phase === "done") && "drop-shadow-[0_0_10px_rgba(251,191,36,0.9)]",
+                (phase === "settle" || phase === "done") &&
+                  "drop-shadow-[0_0_10px_rgba(251,191,36,0.9)]",
               )}
             />
             <span
               className={cn(
                 "bg-clip-text",
-                (phase === "settle" || phase === "done")
+                phase === "settle" || phase === "done"
                   ? "bg-[linear-gradient(90deg,#fbbf24,#f97316,#ec4899,#fbbf24)] text-transparent"
                   : "text-neutral-100",
               )}
-              style={(phase === "settle" || phase === "done")
-                ? { backgroundSize: "200% 100%", animation: "grab-title-shine 2.5s linear infinite" }
-                : undefined}
+              style={
+                phase === "settle" || phase === "done"
+                  ? {
+                      backgroundSize: "200% 100%",
+                      animation: "grab-title-shine 2.5s linear infinite",
+                    }
+                  : undefined
+              }
             >
               {phase === "intro" && "Preparando..."}
               {phase === "spin" && "Girando a roleta..."}
@@ -697,7 +747,10 @@ export function GrabRouletteModal({
           </DialogTitle>
 
           {/* roulette container */}
-          <div className="relative mx-auto mt-5" style={{ width: ROULETTE_VIEW, height: ROULETTE_VIEW_H }}>
+          <div
+            className="relative mx-auto mt-5"
+            style={{ width: ROULETTE_VIEW, height: ROULETTE_VIEW_H }}
+          >
             {/* conic-gradient rotating ring behind frame */}
             <div
               className="pointer-events-none absolute left-1/2 top-1/2 z-0 -translate-x-1/2 -translate-y-1/2"
@@ -714,8 +767,7 @@ export function GrabRouletteModal({
                   transition: "opacity 400ms",
                   WebkitMaskImage:
                     "radial-gradient(circle at center, transparent 56px, black 62px)",
-                  maskImage:
-                    "radial-gradient(circle at center, transparent 56px, black 62px)",
+                  maskImage: "radial-gradient(circle at center, transparent 56px, black 62px)",
                 }}
               />
             </div>
@@ -744,7 +796,8 @@ export function GrabRouletteModal({
               className="pointer-events-none absolute left-1/2 top-0 z-30 h-full -translate-x-1/2"
               style={{
                 width: 2,
-                background: "linear-gradient(180deg, transparent, #fbbf24 18%, #fbbf24 82%, transparent)",
+                background:
+                  "linear-gradient(180deg, transparent, #fbbf24 18%, #fbbf24 82%, transparent)",
                 boxShadow: "0 0 8px rgba(251,191,36,0.9), 0 0 16px rgba(251,191,36,0.55)",
                 animation: "grab-anchor-pulse 1.4s ease-in-out infinite",
               }}
@@ -799,7 +852,12 @@ export function GrabRouletteModal({
                 {items.map((it, i) => {
                   const isWinner = i === winnerIndex;
                   const popping = isWinner && (phase === "settle" || phase === "done");
-                  const rarity = (it as any)?.rarity as "common" | "rare" | "epic" | "legendary" | undefined;
+                  const rarity = (it as any)?.rarity as
+                    | "common"
+                    | "rare"
+                    | "epic"
+                    | "legendary"
+                    | undefined;
                   const rarityStyle =
                     rarity === "legendary"
                       ? {
@@ -809,25 +867,25 @@ export function GrabRouletteModal({
                             : "shadow-[0_0_18px_rgba(251,191,36,0.55)]",
                         }
                       : rarity === "epic"
-                      ? {
-                          ring: popping ? "ring-4 ring-violet-300" : "ring-2 ring-violet-400/90",
-                          shadow: popping
-                            ? "shadow-[0_0_34px_10px_rgba(167,139,250,0.80)]"
-                            : "shadow-[0_0_16px_rgba(167,139,250,0.50)]",
-                        }
-                      : rarity === "rare"
-                      ? {
-                          ring: popping ? "ring-4 ring-sky-300" : "ring-2 ring-sky-400/90",
-                          shadow: popping
-                            ? "shadow-[0_0_30px_10px_rgba(56,189,248,0.75)]"
-                            : "shadow-[0_0_14px_rgba(56,189,248,0.45)]",
-                        }
-                      : {
-                          ring: popping ? "ring-2 ring-white/70" : "ring-1 ring-white/10",
-                          shadow: popping
-                            ? "shadow-[0_0_24px_8px_rgba(255,255,255,0.35)]"
-                            : "shadow-lg shadow-black/40",
-                        };
+                        ? {
+                            ring: popping ? "ring-4 ring-violet-300" : "ring-2 ring-violet-400/90",
+                            shadow: popping
+                              ? "shadow-[0_0_34px_10px_rgba(167,139,250,0.80)]"
+                              : "shadow-[0_0_16px_rgba(167,139,250,0.50)]",
+                          }
+                        : rarity === "rare"
+                          ? {
+                              ring: popping ? "ring-4 ring-sky-300" : "ring-2 ring-sky-400/90",
+                              shadow: popping
+                                ? "shadow-[0_0_30px_10px_rgba(56,189,248,0.75)]"
+                                : "shadow-[0_0_14px_rgba(56,189,248,0.45)]",
+                            }
+                          : {
+                              ring: popping ? "ring-2 ring-white/70" : "ring-1 ring-white/10",
+                              shadow: popping
+                                ? "shadow-[0_0_24px_8px_rgba(255,255,255,0.35)]"
+                                : "shadow-lg shadow-black/40",
+                            };
                   return (
                     <div
                       key={i}
@@ -841,19 +899,21 @@ export function GrabRouletteModal({
                           rarityStyle.ring,
                           rarityStyle.shadow,
                         )}
-                        style={popping ? {
-                          animation: isLegendary && isWinner
-                            ? "grab-pop-legendary 900ms cubic-bezier(0.22,1.4,0.36,1) forwards"
-                            : "grab-pop 700ms cubic-bezier(0.22,1.4,0.36,1) forwards",
-                          zIndex: isLegendary && isWinner ? 50 : undefined,
-                          position: "relative",
-                        } : undefined}
+                        style={
+                          popping
+                            ? {
+                                animation:
+                                  isLegendary && isWinner
+                                    ? "grab-pop-legendary 900ms cubic-bezier(0.22,1.4,0.36,1) forwards"
+                                    : "grab-pop 700ms cubic-bezier(0.22,1.4,0.36,1) forwards",
+                                zIndex: isLegendary && isWinner ? 50 : undefined,
+                                position: "relative",
+                              }
+                            : undefined
+                        }
                       >
                         {it?.kind === "name_gradient" && it.gradient_css ? (
-                          <div
-                            className="size-full"
-                            style={{ background: it.gradient_css }}
-                          >
+                          <div className="size-full" style={{ background: it.gradient_css }}>
                             <div className="flex h-full w-full items-end justify-center p-1.5">
                               <span
                                 className="block max-w-[88%] whitespace-nowrap rounded-md bg-black/55 px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-tight text-white backdrop-blur"
@@ -910,15 +970,17 @@ export function GrabRouletteModal({
                     <span
                       key={i}
                       className="absolute left-0 top-0 block rounded-full"
-                      style={{
-                        width: s.size,
-                        height: s.size,
-                        background: s.hue,
-                        boxShadow: `0 0 12px ${s.hue}`,
-                        ["--tx" as never]: String(s.tx),
-                        ["--ty" as never]: String(s.ty),
-                        animation: `grab-spark-burst 1100ms ease-out ${s.delay}ms forwards`,
-                      } as React.CSSProperties}
+                      style={
+                        {
+                          width: s.size,
+                          height: s.size,
+                          background: s.hue,
+                          boxShadow: `0 0 12px ${s.hue}`,
+                          ["--tx" as never]: String(s.tx),
+                          ["--ty" as never]: String(s.ty),
+                          animation: `grab-spark-burst 1100ms ease-out ${s.delay}ms forwards`,
+                        } as React.CSSProperties
+                      }
                     />
                   ))}
                 </div>
@@ -1052,17 +1114,27 @@ export function GrabRouletteModal({
   );
 }
 
-export function InventoryDialog({ inventory, onClose }: { inventory: GrabInventoryItem[]; onClose: () => void }) {
+export function InventoryDialog({
+  inventory,
+  onClose,
+}: {
+  inventory: GrabInventoryItem[];
+  onClose: () => void;
+}) {
   const [resolved, setResolved] = useState<Record<string, PrizeMeta | null>>({});
   useEffect(() => {
     let cancelled = false;
-    void Promise.all(inventory.map(async (it) => {
-      const meta = await resolvePrize(it.prize_kind, it.prize_ref_id);
-      return [it.id, meta] as const;
-    })).then((entries) => {
+    void Promise.all(
+      inventory.map(async (it) => {
+        const meta = await resolvePrize(it.prize_kind, it.prize_ref_id);
+        return [it.id, meta] as const;
+      }),
+    ).then((entries) => {
       if (!cancelled) setResolved(Object.fromEntries(entries));
     });
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [inventory]);
 
   return (
@@ -1072,16 +1144,25 @@ export function InventoryDialog({ inventory, onClose }: { inventory: GrabInvento
           <Package className="size-5" /> Meu estoque
         </DialogTitle>
         {inventory.length === 0 ? (
-          <p className="py-8 text-center text-sm text-neutral-500">Estoque vazio. Faça um sorteio!</p>
+          <p className="py-8 text-center text-sm text-neutral-500">
+            Estoque vazio. Faça um sorteio!
+          </p>
         ) : (
           <ul className="max-h-[60vh] space-y-2 overflow-y-auto">
             {inventory.map((it) => {
               const meta = resolved[it.id];
               return (
-                <li key={it.id} className="flex items-center gap-3 rounded-xl border border-neutral-200 p-2">
+                <li
+                  key={it.id}
+                  className="flex items-center gap-3 rounded-xl border border-neutral-200 p-2"
+                >
                   <div className="grid size-12 place-items-center overflow-hidden rounded-lg bg-neutral-50">
                     {meta?.image_url ? (
-                      <img src={meta.image_url} alt={meta.name} className="size-full object-cover" />
+                      <img
+                        src={meta.image_url}
+                        alt={meta.name}
+                        className="size-full object-cover"
+                      />
                     ) : (
                       <Gift className="size-5 text-neutral-400" />
                     )}
@@ -1090,7 +1171,9 @@ export function InventoryDialog({ inventory, onClose }: { inventory: GrabInvento
                     <div className="truncate text-sm font-medium">
                       {meta?.name ?? GRAB_PRIZE_KIND_LABEL[it.prize_kind]}
                     </div>
-                    <div className="text-[11px] text-neutral-500">{GRAB_PRIZE_KIND_LABEL[it.prize_kind]}</div>
+                    <div className="text-[11px] text-neutral-500">
+                      {GRAB_PRIZE_KIND_LABEL[it.prize_kind]}
+                    </div>
                   </div>
                   <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-700">
                     x{it.quantity}
@@ -1101,7 +1184,8 @@ export function InventoryDialog({ inventory, onClose }: { inventory: GrabInvento
           </ul>
         )}
         <Button variant="ghost" className="mt-2 w-full" onClick={onClose}>
-          <X className="size-4 mr-1" />Fechar
+          <X className="size-4 mr-1" />
+          Fechar
         </Button>
       </DialogContent>
     </Dialog>
@@ -1116,7 +1200,10 @@ function AnimatedCounter({ value, duration = 800 }: { value: number; duration?: 
   const [n, setN] = useState(0);
   useEffect(() => {
     const target = Number.isFinite(value) ? value : 0;
-    if (target <= 0) { setN(target); return; }
+    if (target <= 0) {
+      setN(target);
+      return;
+    }
     let raf = 0;
     const start = performance.now();
     const loop = (now: number) => {

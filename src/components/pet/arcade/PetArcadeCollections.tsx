@@ -172,7 +172,6 @@ export function ScratchGame({ config, balance, onBalanceChange, onFinished }: Ar
 export { SurpriseEggGame } from "./SurpriseEggScene";
 export { PetAlbumGame } from "./PetAlbumScene";
 
-
 export function CapsuleGame({ config, balance, onBalanceChange, onFinished }: ArcadeGameProps) {
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<ArcadeGameResult | null>(null);

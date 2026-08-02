@@ -27,10 +27,7 @@ import {
   uploadBackgroundImage,
   type BackgroundWritable,
 } from "@/lib/petBackgrounds";
-import type {
-  PetBackgroundCompat,
-  PetBackgroundWithCompat,
-} from "@/types/petBackground";
+import type { PetBackgroundCompat, PetBackgroundWithCompat } from "@/types/petBackground";
 import { PET_RARITY_COLOR, PET_RARITY_LABEL, type PetRarity } from "@/types/pet";
 import type { PetCategory, PetSpecies } from "@/types/petCatalog";
 import { cn } from "@/lib/utils";
@@ -169,10 +166,7 @@ export function PetBackgroundsPanel() {
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {rows.map((row) => (
-          <div
-            key={row.id}
-            className="overflow-hidden rounded-2xl border border-border bg-card"
-          >
+          <div key={row.id} className="overflow-hidden rounded-2xl border border-border bg-card">
             <div className="relative grid grid-cols-2 gap-px bg-border">
               <div className="relative aspect-video bg-muted">
                 {row.image_url_day ? (
@@ -207,7 +201,12 @@ export function PetBackgroundsPanel() {
                 )}
               </div>
               <div className="flex flex-wrap gap-1 text-[10px]">
-                <span className={cn("rounded-full px-2 py-0.5 font-medium", PET_RARITY_COLOR[row.rarity])}>
+                <span
+                  className={cn(
+                    "rounded-full px-2 py-0.5 font-medium",
+                    PET_RARITY_COLOR[row.rarity],
+                  )}
+                >
                   {PET_RARITY_LABEL[row.rarity]}
                 </span>
                 {row.is_exclusive && (
@@ -220,7 +219,12 @@ export function PetBackgroundsPanel() {
                 </span>
               </div>
               <div className="flex gap-2 pt-1">
-                <Button size="sm" variant="outline" onClick={() => openEdit(row)} className="flex-1">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => openEdit(row)}
+                  className="flex-1"
+                >
                   <Pencil className="mr-1 h-3.5 w-3.5" /> Editar
                 </Button>
                 <Button
@@ -316,9 +320,7 @@ function DraftForm({
   }
 
   function toggleSpecies(catId: string, spId: string, on: boolean) {
-    let next = draft.compat.filter(
-      (c) => !(c.category_id === catId && c.species_id === null),
-    );
+    let next = draft.compat.filter((c) => !(c.category_id === catId && c.species_id === null));
     if (on) {
       next = next.filter((c) => !(c.category_id === catId && c.species_id === spId));
       next.push({ category_id: catId, species_id: spId });
@@ -417,10 +419,14 @@ function DraftForm({
               onChange({ ...draft, rarity: r, min_level: suggested });
             }}
           >
-            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               {RARITIES.map((r) => (
-                <SelectItem key={r} value={r}>{PET_RARITY_LABEL[r]}</SelectItem>
+                <SelectItem key={r} value={r}>
+                  {PET_RARITY_LABEL[r]}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -433,7 +439,10 @@ function DraftForm({
             value={draft.min_level}
             onChange={(e) => {
               const n = parseInt(e.target.value.replace(/\D+/g, ""), 10);
-              onChange({ ...draft, min_level: Number.isFinite(n) ? Math.max(1, Math.min(50, n)) : 1 });
+              onChange({
+                ...draft,
+                min_level: Number.isFinite(n) ? Math.max(1, Math.min(50, n)) : 1,
+              });
             }}
           />
           <p className="text-[10px] text-muted-foreground">
@@ -451,7 +460,8 @@ function DraftForm({
           <div className="space-y-1.5">
             <Label>Preço (moedas)</Label>
             <Input
-              type="text" inputMode="decimal"
+              type="text"
+              inputMode="decimal"
               min={0}
               value={draft.price_coins}
               onChange={(e) => onChange({ ...draft, price_coins: Number(e.target.value) || 0 })}
@@ -461,18 +471,15 @@ function DraftForm({
       </div>
 
       <div className="flex items-center gap-2">
-        <Switch
-          checked={draft.active}
-          onCheckedChange={(v) => onChange({ ...draft, active: v })}
-        />
+        <Switch checked={draft.active} onCheckedChange={(v) => onChange({ ...draft, active: v })} />
         <Label className="m-0">Ativo</Label>
       </div>
 
       <div className="space-y-2">
         <Label>Compatibilidade</Label>
         <p className="text-xs text-muted-foreground">
-          Marque "Categoria inteira" para liberar todas as espécies, ou escolha apenas as
-          espécies permitidas.
+          Marque "Categoria inteira" para liberar todas as espécies, ou escolha apenas as espécies
+          permitidas.
         </p>
         <div className="space-y-2">
           {categories.map((cat) => {
@@ -500,7 +507,9 @@ function DraftForm({
                           key={sp.id}
                           className={cn(
                             "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs",
-                            on ? "border-foreground bg-foreground text-background" : "border-border",
+                            on
+                              ? "border-foreground bg-foreground text-background"
+                              : "border-border",
                           )}
                         >
                           <Checkbox
@@ -524,7 +533,11 @@ function DraftForm({
           <X className="mr-1 h-4 w-4" /> Cancelar
         </Button>
         <Button onClick={onSave} disabled={busy}>
-          {busy ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <Save className="mr-1 h-4 w-4" />}
+          {busy ? (
+            <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+          ) : (
+            <Save className="mr-1 h-4 w-4" />
+          )}
           Salvar
         </Button>
       </div>

@@ -147,9 +147,7 @@ export function ExpeditionLiveSceneModal({
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent
-        className="flex h-[92vh] max-h-[92vh] w-full max-w-md flex-col overflow-hidden border-0 bg-neutral-950 p-0 [&>button]:hidden"
-      >
+      <DialogContent className="flex h-[92vh] max-h-[92vh] w-full max-w-md flex-col overflow-hidden border-0 bg-neutral-950 p-0 [&>button]:hidden">
         <DialogTitle className="sr-only">{active.title}</DialogTitle>
 
         {/* ===== SCENE (top half) ===== */}
@@ -197,10 +195,7 @@ export function ExpeditionLiveSceneModal({
           <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-b from-transparent to-neutral-950" />
           {/* Base weather particles (biome) — density modulates per phase */}
           <div className="pointer-events-none absolute inset-0 transition-opacity duration-[2000ms]">
-            <SceneWeatherLayer
-              weather={data.weather}
-              densityMul={PHASE_DENSITY[data.phase]}
-            />
+            <SceneWeatherLayer weather={data.weather} densityMul={PHASE_DENSITY[data.phase]} />
           </div>
           {/* Phase ambient particles — crossfade between phases without remount */}
           {PHASE_ORDER.map((p) => (
@@ -242,10 +237,7 @@ export function ExpeditionLiveSceneModal({
 
           {/* Walking pet — bottom of the scene */}
           <div className="pointer-events-none absolute inset-x-0 bottom-3 z-10 flex justify-center">
-            <div
-              className="relative"
-              style={{ animation: "scene-walk 1.4s ease-in-out infinite" }}
-            >
+            <div className="relative" style={{ animation: "scene-walk 1.4s ease-in-out infinite" }}>
               {petImage ? (
                 <img
                   src={petImage}
@@ -274,7 +266,13 @@ export function ExpeditionLiveSceneModal({
           <div className="mt-1.5 flex justify-between text-[10.5px] tabular-nums text-white/60">
             <span>{Math.round(data.pct)}% concluído</span>
             <span className="capitalize">
-              {data.phase === "dawn" ? "amanhecer" : data.phase === "day" ? "dia" : data.phase === "dusk" ? "entardecer" : "noite"}
+              {data.phase === "dawn"
+                ? "amanhecer"
+                : data.phase === "day"
+                  ? "dia"
+                  : data.phase === "dusk"
+                    ? "entardecer"
+                    : "noite"}
             </span>
           </div>
         </div>
@@ -299,10 +297,12 @@ export function ExpeditionLiveSceneModal({
                         : "border-white/10 bg-neutral-900/70 text-white/85",
                     )}
                   >
-                    <div className={cn(
-                      "grid size-8 shrink-0 place-items-center rounded-full",
-                      isLatest ? "bg-indigo-500/25 text-indigo-200" : "bg-white/10 text-white/70",
-                    )}>
+                    <div
+                      className={cn(
+                        "grid size-8 shrink-0 place-items-center rounded-full",
+                        isLatest ? "bg-indigo-500/25 text-indigo-200" : "bg-white/10 text-white/70",
+                      )}
+                    >
                       <Icon className="size-4" />
                     </div>
                     <div className="min-w-0 flex-1">
@@ -323,7 +323,9 @@ export function ExpeditionLiveSceneModal({
               <div className="rounded-2xl border border-amber-300/40 bg-amber-500/10 p-4 text-center text-white animate-scale-in">
                 <Sparkles className="mx-auto size-5 text-amber-200" />
                 <p className="mt-1 text-[14px] font-semibold">{petName} voltou!</p>
-                <p className="text-[11.5px] text-white/75">Recompensas prontas pra serem reveladas.</p>
+                <p className="text-[11.5px] text-white/75">
+                  Recompensas prontas pra serem reveladas.
+                </p>
               </div>
               <Button
                 size="lg"

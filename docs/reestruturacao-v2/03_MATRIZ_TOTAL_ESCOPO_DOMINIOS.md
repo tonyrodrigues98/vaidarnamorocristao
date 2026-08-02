@@ -5,36 +5,36 @@ linha deve ser rastreada até código, dados, testes, flags e critério de aceit
 
 ## Decisões de destino
 
-| Área | Estado futuro | Preservar | Reconstruir/criar | Retirar somente depois |
-|---|---|---|---|---|
-| Aquisição e página pública | comunidade + live/eventos | SEO, conteúdo real, auth e links | posicionamento community-first, páginas públicas premium, PWA install | chamadas dating-first obrigatórias |
-| Identidade e acesso | identidade única e capabilities | contas, sessões, papéis, termos, aprovação | guards canônicos, dispositivos, estados de conta | guards locais duplicados |
-| Conta e configurações | central simples e contextual | RPCs e preferências legítimas | Conta, Privacidade, Segurança, Notificações, Aparência, Dados, Ajuda, perigo | duplicações e links inseguros |
-| Onboarding | comunidade primeiro | cadastro aprovado, foto, moderação | mínimo comunitário + trilha romântica opcional | perguntas obrigatórias só de namoro |
-| Início | hub social diário | conteúdo e atalhos úteis | feed, novidades, conexões, Status, eventos | cards românticos para namoro desligado |
-| Dashboard | painel analítico separado | métricas legítimas | UX e adapters por domínio | redirect para Início |
-| Perfil | identidade modular expressiva | fotos, verificações, decorações, presentes, pets, conquistas | vitrines, capa, privacidade por módulo, editor lateral | avatar-personagem |
-| Comunidade | núcleo do produto | chat global e conteúdo existente | feed, descoberta social, espaços, grupos, canais, eventos, presença | equivalência Comunidade = chat global |
-| Vínculos sociais | independente de romance | bloqueios e perfis | seguir/conexão, solicitações, privacidade, antispam | uso de match como amizade |
-| Namoro | modo opt-in | interesses, matches, preferências, elegibilidade segura | ativar/pausar/sair, perfil romântico, nova descoberta | Pretendentes antigo após paridade |
-| Conversas | inbox por contexto e núcleo único | mensagens, anexos, ordem, read receipts, histórico | social, solicitações, grupos, romance, Propósito, Cinema | infraestruturas paralelas duplicadas |
-| Propósito Firmado | compromisso bilateral redesenhado | participantes, estado, datas, histórico, cápsulas | orquestrador, página do casal, timeline | efeitos globais sobre comunidade |
-| Recados anônimos | romântico e opt-in | histórico e dicas legítimas | consentimento, limites, denúncia, revelação segura | presença na comunidade geral |
-| Conteúdo cristão | hub integrado | devocional, orações, quiz, notícias, blog | contratos editoriais e distribuição social | gamificação espiritual nociva |
-| Verbo | subproduto de estudo pessoal | dados do projeto Verbo quando integrados | Bíblia, versões, leitura, marcações, notas, estudos, pesquisa, explorar e desafios educativos | exposição automática de hábitos privados |
-| Economia | autoridade única | moedas, XP, ledger, transações | comandos idempotentes, reconciliação, antifraude | escrita direta do cliente |
-| Inventário/Loja | catálogo e propriedade claros | compras, itens, equipados, raridade, histórico | catálogo modular, preview, recibo, entrega atômica | itens do avatar sem compensação |
-| Presentes | social/romântico contextual | propriedade, remetente, destinatário | consentimento, visibilidade e integração ao perfil | duplicação de débito/entrega |
-| Pets | subproduto preservado | instâncias V1/V2, cuidado, progressão, itens | adapters, UX, histórico e admin | consolidação sem reconciliação |
-| Jogos/Arcade | decisão por jogo | progresso, missões, recompensas, coleções | hub lazy, regras versionadas, redesign dos mantidos | qualquer jogo antes da lista de Antonio |
-| Cinema | watch party integrada | n/a | upload, transcode, catálogo, sessão, host, sync, chat, reações, moderação, casal e histórico | mídia no Git ou screen share como modelo principal |
-| Notificações | central categorizada | histórico, push, preferências | categorias, privacidade, deep links seguros, agregação | payload sensível na tela bloqueada |
-| Confiança/moderação | transversal | denúncias, bloqueios, verificações, evidências | filas, rate limit, revisão, escopo contextual | fail-open silencioso |
-| Suporte | ajuda e tickets | tickets, anexos, mensagens, estados | busca, categorias, protocolo, SLA real | perda de histórico |
-| Administração | console por capacidades | todas as capacidades legítimas | módulos, filtros URL, auditoria, ações seguras | monólito único |
-| Métricas | saúde e evolução | Dashboard e dados operacionais | eventos sem PII, SLOs e alertas | métricas de vaidade/competição espiritual |
-| PWA/offline | continuidade privada | install, manifest, SW, push, deep links | cache por usuário/domínio, update seguro, outbox idempotente | cache cruzado ou promessas falsas offline |
-| Legado | quarentena e retirada controlada | histórico e dados necessários | telemetria de uso, compatibilidade, compensação | exclusão por scan estático |
+| Área                       | Estado futuro                     | Preservar                                                    | Reconstruir/criar                                                                             | Retirar somente depois                             |
+| -------------------------- | --------------------------------- | ------------------------------------------------------------ | --------------------------------------------------------------------------------------------- | -------------------------------------------------- |
+| Aquisição e página pública | comunidade + live/eventos         | SEO, conteúdo real, auth e links                             | posicionamento community-first, páginas públicas premium, PWA install                         | chamadas dating-first obrigatórias                 |
+| Identidade e acesso        | identidade única e capabilities   | contas, sessões, papéis, termos, aprovação                   | guards canônicos, dispositivos, estados de conta                                              | guards locais duplicados                           |
+| Conta e configurações      | central simples e contextual      | RPCs e preferências legítimas                                | Conta, Privacidade, Segurança, Notificações, Aparência, Dados, Ajuda, perigo                  | duplicações e links inseguros                      |
+| Onboarding                 | comunidade primeiro               | cadastro aprovado, foto, moderação                           | mínimo comunitário + trilha romântica opcional                                                | perguntas obrigatórias só de namoro                |
+| Início                     | hub social diário                 | conteúdo e atalhos úteis                                     | feed, novidades, conexões, Status, eventos                                                    | cards românticos para namoro desligado             |
+| Dashboard                  | painel analítico separado         | métricas legítimas                                           | UX e adapters por domínio                                                                     | redirect para Início                               |
+| Perfil                     | identidade modular expressiva     | fotos, verificações, decorações, presentes, pets, conquistas | vitrines, capa, privacidade por módulo, editor lateral                                        | avatar-personagem                                  |
+| Comunidade                 | núcleo do produto                 | chat global e conteúdo existente                             | feed, descoberta social, espaços, grupos, canais, eventos, presença                           | equivalência Comunidade = chat global              |
+| Vínculos sociais           | independente de romance           | bloqueios e perfis                                           | seguir/conexão, solicitações, privacidade, antispam                                           | uso de match como amizade                          |
+| Namoro                     | modo opt-in                       | interesses, matches, preferências, elegibilidade segura      | ativar/pausar/sair, perfil romântico, nova descoberta                                         | Pretendentes antigo após paridade                  |
+| Conversas                  | inbox por contexto e núcleo único | mensagens, anexos, ordem, read receipts, histórico           | social, solicitações, grupos, romance, Propósito, Cinema                                      | infraestruturas paralelas duplicadas               |
+| Propósito Firmado          | compromisso bilateral redesenhado | participantes, estado, datas, histórico, cápsulas            | orquestrador, página do casal, timeline                                                       | efeitos globais sobre comunidade                   |
+| Recados anônimos           | romântico e opt-in                | histórico e dicas legítimas                                  | consentimento, limites, denúncia, revelação segura                                            | presença na comunidade geral                       |
+| Conteúdo cristão           | hub integrado                     | devocional, orações, quiz, notícias, blog                    | contratos editoriais e distribuição social                                                    | gamificação espiritual nociva                      |
+| Verbo                      | subproduto de estudo pessoal      | dados do projeto Verbo quando integrados                     | Bíblia, versões, leitura, marcações, notas, estudos, pesquisa, explorar e desafios educativos | exposição automática de hábitos privados           |
+| Economia                   | autoridade única                  | moedas, XP, ledger, transações                               | comandos idempotentes, reconciliação, antifraude                                              | escrita direta do cliente                          |
+| Inventário/Loja            | catálogo e propriedade claros     | compras, itens, equipados, raridade, histórico               | catálogo modular, preview, recibo, entrega atômica                                            | itens do avatar sem compensação                    |
+| Presentes                  | social/romântico contextual       | propriedade, remetente, destinatário                         | consentimento, visibilidade e integração ao perfil                                            | duplicação de débito/entrega                       |
+| Pets                       | subproduto preservado             | instâncias V1/V2, cuidado, progressão, itens                 | adapters, UX, histórico e admin                                                               | consolidação sem reconciliação                     |
+| Jogos/Arcade               | decisão por jogo                  | progresso, missões, recompensas, coleções                    | hub lazy, regras versionadas, redesign dos mantidos                                           | qualquer jogo antes da lista de Antonio            |
+| Cinema                     | watch party integrada             | n/a                                                          | upload, transcode, catálogo, sessão, host, sync, chat, reações, moderação, casal e histórico  | mídia no Git ou screen share como modelo principal |
+| Notificações               | central categorizada              | histórico, push, preferências                                | categorias, privacidade, deep links seguros, agregação                                        | payload sensível na tela bloqueada                 |
+| Confiança/moderação        | transversal                       | denúncias, bloqueios, verificações, evidências               | filas, rate limit, revisão, escopo contextual                                                 | fail-open silencioso                               |
+| Suporte                    | ajuda e tickets                   | tickets, anexos, mensagens, estados                          | busca, categorias, protocolo, SLA real                                                        | perda de histórico                                 |
+| Administração              | console por capacidades           | todas as capacidades legítimas                               | módulos, filtros URL, auditoria, ações seguras                                                | monólito único                                     |
+| Métricas                   | saúde e evolução                  | Dashboard e dados operacionais                               | eventos sem PII, SLOs e alertas                                                               | métricas de vaidade/competição espiritual          |
+| PWA/offline                | continuidade privada              | install, manifest, SW, push, deep links                      | cache por usuário/domínio, update seguro, outbox idempotente                                  | cache cruzado ou promessas falsas offline          |
+| Legado                     | quarentena e retirada controlada  | histórico e dados necessários                                | telemetria de uso, compatibilidade, compensação                                               | exclusão por scan estático                         |
 
 ## Os 17 domínios canônicos
 
@@ -158,4 +158,3 @@ Uma área não pode ser marcada como concluída sem:
 - feature flag/rollback quando aplicável;
 - telemetria sem PII;
 - reconciliação dos dados protegidos.
-

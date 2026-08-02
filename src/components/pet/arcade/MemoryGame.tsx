@@ -133,48 +133,55 @@ export function MemoryGame({
       <div className="space-y-4">
         {round ? (
           <>
-            <ArcadeStage className="bg-gradient-to-br from-teal-950 via-cyan-950 to-slate-950" glowClassName="bg-cyan-400/25">
+            <ArcadeStage
+              className="bg-gradient-to-br from-teal-950 via-cyan-950 to-slate-950"
+              glowClassName="bg-cyan-400/25"
+            >
               <div className="mb-3 grid grid-cols-2 gap-2">
                 <ArcadeMetric label="Tentativas" value={attempts} />
-                <ArcadeMetric label="Pares" value={`${matched.length / 2}/${Number(round.pairs ?? cardCount / 2)}`} tone="success" />
+                <ArcadeMetric
+                  label="Pares"
+                  value={`${matched.length / 2}/${Number(round.pairs ?? cardCount / 2)}`}
+                  tone="success"
+                />
               </div>
-            <div className="grid grid-cols-4 gap-2">
-              {Array.from({ length: cardCount }, (_, position) => {
-                const card = cards[position];
-                const open = Boolean(card) || matched.includes(position);
-                return (
-                  <motion.button
-                    key={position}
-                    type="button"
-                    whileTap={{ scale: 0.95 }}
-                    disabled={busy || open}
-                    onClick={() => void reveal(position)}
-                    className="relative aspect-[0.78] overflow-hidden rounded-2xl [perspective:600px]"
-                  >
-                    <motion.div
-                      animate={{ rotateY: open ? 180 : 0 }}
-                      transition={{ duration: 0.35 }}
-                      className="absolute inset-0 [transform-style:preserve-3d]"
+              <div className="grid grid-cols-4 gap-2">
+                {Array.from({ length: cardCount }, (_, position) => {
+                  const card = cards[position];
+                  const open = Boolean(card) || matched.includes(position);
+                  return (
+                    <motion.button
+                      key={position}
+                      type="button"
+                      whileTap={{ scale: 0.95 }}
+                      disabled={busy || open}
+                      onClick={() => void reveal(position)}
+                      className="relative aspect-[0.78] overflow-hidden rounded-2xl [perspective:600px]"
                     >
-                      <div className="absolute inset-0 grid place-items-center rounded-2xl border-2 border-white/30 bg-[radial-gradient(circle_at_top,#5eead4,#0891b2_60%,#155e75)] text-white shadow-lg [backface-visibility:hidden]">
-                        <PawPrint className="size-6" />
-                      </div>
-                      <div className="absolute inset-0 overflow-hidden rounded-2xl border-2 border-white bg-white [backface-visibility:hidden] [transform:rotateY(180deg)]">
-                        {card?.image_url ? (
-                          <PetImg
-                            src={card.image_url}
-                            alt={card.name ?? "Pet"}
-                            className="size-full object-contain p-1"
-                          />
-                        ) : (
-                          <PawPrint className="m-auto mt-5 size-6 text-teal-500" />
-                        )}
-                      </div>
-                    </motion.div>
-                  </motion.button>
-                );
-              })}
-            </div>
+                      <motion.div
+                        animate={{ rotateY: open ? 180 : 0 }}
+                        transition={{ duration: 0.35 }}
+                        className="absolute inset-0 [transform-style:preserve-3d]"
+                      >
+                        <div className="absolute inset-0 grid place-items-center rounded-2xl border-2 border-white/30 bg-[radial-gradient(circle_at_top,#5eead4,#0891b2_60%,#155e75)] text-white shadow-lg [backface-visibility:hidden]">
+                          <PawPrint className="size-6" />
+                        </div>
+                        <div className="absolute inset-0 overflow-hidden rounded-2xl border-2 border-white bg-white [backface-visibility:hidden] [transform:rotateY(180deg)]">
+                          {card?.image_url ? (
+                            <PetImg
+                              src={card.image_url}
+                              alt={card.name ?? "Pet"}
+                              className="size-full object-contain p-1"
+                            />
+                          ) : (
+                            <PawPrint className="m-auto mt-5 size-6 text-teal-500" />
+                          )}
+                        </div>
+                      </motion.div>
+                    </motion.button>
+                  );
+                })}
+              </div>
             </ArcadeStage>
             <p className="text-center text-xs text-neutral-500">
               {pending !== null ? "Agora escolha a segunda carta." : "Encontre duas cartas iguais."}
@@ -189,7 +196,9 @@ export function MemoryGame({
         ) : (
           <>
             <div className="grid min-h-44 place-items-center rounded-3xl bg-gradient-to-br from-teal-50 to-cyan-100 text-teal-700">
-              <div className="grid size-28 place-items-center rounded-full bg-white/70 shadow-xl shadow-teal-100"><Brain className="size-16 text-teal-600" /></div>
+              <div className="grid size-28 place-items-center rounded-full bg-white/70 shadow-xl shadow-teal-100">
+                <Brain className="size-16 text-teal-600" />
+              </div>
             </div>
             <EntryControl
               value={entry}

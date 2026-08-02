@@ -94,15 +94,8 @@ describe("claim_starter_bundle — integração", () => {
 
   it("claims paralelos do mesmo usuário concedem apenas uma vez", async () => {
     const u = users[1];
-    const results = await Promise.all([
-      callClaim(u),
-      callClaim(u),
-      callClaim(u),
-      callClaim(u),
-    ]);
-    const oks = results
-      .map((r) => r.data as { ok: boolean } | null)
-      .filter((r) => r?.ok === true);
+    const results = await Promise.all([callClaim(u), callClaim(u), callClaim(u), callClaim(u)]);
+    const oks = results.map((r) => r.data as { ok: boolean } | null).filter((r) => r?.ok === true);
     expect(oks.length).toBe(1);
 
     const bundle = await admin
@@ -129,7 +122,10 @@ describe("claim_starter_bundle — integração", () => {
     const all = await admin
       .from("user_starter_bundle")
       .select("user_id")
-      .in("user_id", users.map((x) => x.userId));
+      .in(
+        "user_id",
+        users.map((x) => x.userId),
+      );
     expect(all.data?.length).toBe(users.length);
   }, 30_000);
 });

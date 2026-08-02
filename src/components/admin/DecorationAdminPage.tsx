@@ -794,7 +794,8 @@ function DecorationDialog({
               <div className="space-y-2">
                 <Label>Preco</Label>
                 <Input
-                  type="text" inputMode="decimal"
+                  type="text"
+                  inputMode="decimal"
                   min={0}
                   value={form.price_coins}
                   onChange={(e) => onFormChange({ ...form, price_coins: Number(e.target.value) })}
@@ -823,7 +824,8 @@ function DecorationDialog({
               <div className="space-y-2">
                 <Label>Ordem</Label>
                 <Input
-                  type="text" inputMode="decimal"
+                  type="text"
+                  inputMode="decimal"
                   value={form.sort_order}
                   onChange={(e) => onFormChange({ ...form, sort_order: Number(e.target.value) })}
                 />
@@ -891,29 +893,37 @@ function DecorationPreview({ item, type }: { item: Decoration; type: ManagedType
 
   return (
     <div className="relative h-36 w-36">
-      {type === "aura" && auraCss && (() => {
-        if (auraCss.kind === "box-shadow") {
+      {type === "aura" &&
+        auraCss &&
+        (() => {
+          if (auraCss.kind === "box-shadow") {
+            return (
+              <div
+                aria-hidden
+                className="absolute inset-6 rounded-full"
+                style={{ boxShadow: auraCss.value }}
+              />
+            );
+          }
+          if (auraCss.kind === "background") {
+            return (
+              <div
+                aria-hidden
+                className="absolute inset-2 rounded-full blur-xl"
+                style={{ background: auraCss.value }}
+              />
+            );
+          }
           return (
             <div
               aria-hidden
-              className="absolute inset-6 rounded-full"
-              style={{ boxShadow: auraCss.value }}
+              className="absolute inset-2 rounded-full blur-xl"
+              style={{
+                background: `radial-gradient(circle, ${auraCss.value}66 0%, ${auraCss.value}33 45%, transparent 72%)`,
+              }}
             />
           );
-        }
-        if (auraCss.kind === "background") {
-          return <div aria-hidden className="absolute inset-2 rounded-full blur-xl" style={{ background: auraCss.value }} />;
-        }
-        return (
-          <div
-            aria-hidden
-            className="absolute inset-2 rounded-full blur-xl"
-            style={{
-              background: `radial-gradient(circle, ${auraCss.value}66 0%, ${auraCss.value}33 45%, transparent 72%)`,
-            }}
-          />
-        );
-      })()}
+        })()}
       {type === "aura" && image && (
         <img
           src={image}

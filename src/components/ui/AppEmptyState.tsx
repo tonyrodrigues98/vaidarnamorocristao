@@ -61,11 +61,7 @@ export function AppEmptyState({
         <div className="mt-2 flex flex-wrap items-center justify-center gap-2">
           {hasPrimary &&
             (actionTo ? (
-              <Button
-                asChild
-                size="sm"
-                className="app-pressable rounded-full"
-              >
+              <Button asChild size="sm" className="app-pressable rounded-full">
                 <Link to={actionTo as never}>{actionLabel}</Link>
               </Button>
             ) : (
@@ -79,12 +75,7 @@ export function AppEmptyState({
               </Button>
             ))}
           {hasSecondary && (
-            <Button
-              asChild
-              size="sm"
-              variant="outline"
-              className="app-pressable rounded-full"
-            >
+            <Button asChild size="sm" variant="outline" className="app-pressable rounded-full">
               <Link to={secondaryActionTo as never}>{secondaryActionLabel}</Link>
             </Button>
           )}

@@ -166,4 +166,3 @@ Redesenhar:
 - suporte preservado;
 - telemetria e auditoria;
 - flag/rollback.
-

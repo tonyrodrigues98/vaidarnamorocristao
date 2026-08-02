@@ -29,13 +29,13 @@ O novo VaiDarNamoro deixa de ser um site de namoro com recursos adicionais e pas
 
 ## 2. Vocabulário oficial
 
-| Termo | Significado nesta revisão |
-|---|---|
-| Preservar | Manter regras, dados e experiência essencial |
-| Redesenhar | Manter a função, mas reorganizar e modernizar sua interface |
+| Termo       | Significado nesta revisão                                                               |
+| ----------- | --------------------------------------------------------------------------------------- |
+| Preservar   | Manter regras, dados e experiência essencial                                            |
+| Redesenhar  | Manter a função, mas reorganizar e modernizar sua interface                             |
 | Reconstruir | Refazer a experiência e sua implementação, preservando somente dados e regras validados |
-| Criar | Adicionar uma experiência que ainda não existe no produto atual |
-| Retirar | Desativar e remover da experiência de forma segura, sem exclusão precipitada de dados |
+| Criar       | Adicionar uma experiência que ainda não existe no produto atual                         |
+| Retirar     | Desativar e remover da experiência de forma segura, sem exclusão precipitada de dados   |
 
 ### 2.1 Duas definições que não podem ser confundidas
 
@@ -94,25 +94,25 @@ A expressão pessoal será uma regra de produto, mas as configurações deverão
 
 ## 4. Matriz oficial de decisões
 
-| Área | Decisão principal | Observação |
-|---|---|---|
-| Perfil público | Reconstruir | Inspirado na liberdade de personalização da Steam |
-| Configurações do perfil | Reconstruir | Fluxo lateral simples, inspirado na clareza do WhatsApp |
-| Identidade pública e página inicial | Reconstruir | Feed vivo, novidades, amigos e status de 24 horas |
-| Cadastro e onboarding | Reconstruir parcialmente | Preservar a base aprovada; revisar perguntas |
-| Comunidade | Reconstruir do zero | Organização e presença inspiradas no Discord, com identidade própria |
-| Pretendentes atual | Retirar | Substituir por descoberta dentro do Modo Namoro |
-| Modo Namoro | Reconstruir | Opcional e totalmente separado da experiência comunitária |
-| Conversas | Reconstruir totalmente | Fluidez, simplicidade e desempenho como prioridade máxima |
-| Recados anônimos | Reconstruir e restringir | Exclusivos do namoro, mediante opt-in |
-| Propósito Firmado | Redesenhar | Preservar função e dados |
-| Loja, moedas e inventário | Redesenhar | Preservar regras e propriedade dos itens |
-| Pets | Redesenhar | Preservar a função e progressão |
-| Jogos | Redesenhar e revisar | Retirar posteriormente apenas os jogos indicados por Antonio |
-| Verbo / Bíblia e estudo | Criar integração | Feature independente vinculada ao mesmo login |
-| Sala de Cinema | Criar | Watch party social integrada à comunidade |
-| Administração e moderação | Redesenhar | Mais minimalista e moderno; preservar capacidades |
-| Avatar-personagem | Retirar | Remoção controlada, sem atingir a foto do perfil |
+| Área                                | Decisão principal        | Observação                                                           |
+| ----------------------------------- | ------------------------ | -------------------------------------------------------------------- |
+| Perfil público                      | Reconstruir              | Inspirado na liberdade de personalização da Steam                    |
+| Configurações do perfil             | Reconstruir              | Fluxo lateral simples, inspirado na clareza do WhatsApp              |
+| Identidade pública e página inicial | Reconstruir              | Feed vivo, novidades, amigos e status de 24 horas                    |
+| Cadastro e onboarding               | Reconstruir parcialmente | Preservar a base aprovada; revisar perguntas                         |
+| Comunidade                          | Reconstruir do zero      | Organização e presença inspiradas no Discord, com identidade própria |
+| Pretendentes atual                  | Retirar                  | Substituir por descoberta dentro do Modo Namoro                      |
+| Modo Namoro                         | Reconstruir              | Opcional e totalmente separado da experiência comunitária            |
+| Conversas                           | Reconstruir totalmente   | Fluidez, simplicidade e desempenho como prioridade máxima            |
+| Recados anônimos                    | Reconstruir e restringir | Exclusivos do namoro, mediante opt-in                                |
+| Propósito Firmado                   | Redesenhar               | Preservar função e dados                                             |
+| Loja, moedas e inventário           | Redesenhar               | Preservar regras e propriedade dos itens                             |
+| Pets                                | Redesenhar               | Preservar a função e progressão                                      |
+| Jogos                               | Redesenhar e revisar     | Retirar posteriormente apenas os jogos indicados por Antonio         |
+| Verbo / Bíblia e estudo             | Criar integração         | Feature independente vinculada ao mesmo login                        |
+| Sala de Cinema                      | Criar                    | Watch party social integrada à comunidade                            |
+| Administração e moderação           | Redesenhar               | Mais minimalista e moderno; preservar capacidades                    |
+| Avatar-personagem                   | Retirar                  | Remoção controlada, sem atingir a foto do perfil                     |
 
 ---
 

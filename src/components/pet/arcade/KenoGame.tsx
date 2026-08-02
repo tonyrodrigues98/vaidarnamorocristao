@@ -90,31 +90,34 @@ export function KenoGame({ config, balance, onBalanceChange, onFinished }: Arcad
             value={result ? Number(data.hits ?? 0) : `${gridSize} números`}
           />
         </div>
-        <ArcadeStage className="border-violet-200/60 bg-gradient-to-b from-violet-950 via-indigo-900 to-fuchsia-900" glowClassName="bg-violet-300/20">
+        <ArcadeStage
+          className="border-violet-200/60 bg-gradient-to-b from-violet-950 via-indigo-900 to-fuchsia-900"
+          glowClassName="bg-violet-300/20"
+        >
           <div className="grid grid-cols-8 gap-1.5 sm:grid-cols-10">
-          {Array.from({ length: gridSize }, (_, index) => index + 1).map((number) => {
-            const picked = selected.includes(number);
-            const drawnNow = revealed.includes(number);
-            return (
-              <button
-                key={number}
-                type="button"
-                onClick={() => toggle(number)}
-                className={cn(
-                  "aspect-square rounded-lg border text-[11px] font-black transition",
-                  drawnNow && picked
-                    ? "border-emerald-300 bg-emerald-400 text-emerald-950 shadow-lg"
-                    : drawnNow
-                      ? "border-amber-200 bg-amber-100 text-amber-900"
-                      : picked
-                        ? "border-violet-300 bg-white text-violet-700 shadow-lg"
-                        : "border-white/15 bg-white/10 text-white/78 backdrop-blur-sm",
-                )}
-              >
-                {drawnNow && picked ? <Check className="mx-auto size-3" /> : number}
-              </button>
-            );
-          })}
+            {Array.from({ length: gridSize }, (_, index) => index + 1).map((number) => {
+              const picked = selected.includes(number);
+              const drawnNow = revealed.includes(number);
+              return (
+                <button
+                  key={number}
+                  type="button"
+                  onClick={() => toggle(number)}
+                  className={cn(
+                    "aspect-square rounded-lg border text-[11px] font-black transition",
+                    drawnNow && picked
+                      ? "border-emerald-300 bg-emerald-400 text-emerald-950 shadow-lg"
+                      : drawnNow
+                        ? "border-amber-200 bg-amber-100 text-amber-900"
+                        : picked
+                          ? "border-violet-300 bg-white text-violet-700 shadow-lg"
+                          : "border-white/15 bg-white/10 text-white/78 backdrop-blur-sm",
+                  )}
+                >
+                  {drawnNow && picked ? <Check className="mx-auto size-3" /> : number}
+                </button>
+              );
+            })}
           </div>
         </ArcadeStage>
         {!result ? (

@@ -70,10 +70,7 @@ export async function sendPushToSubscription(
   }
 }
 
-export async function sendPushToUser(
-  userId: string,
-  payload: PushPayload,
-): Promise<SendResult[]> {
+export async function sendPushToUser(userId: string, payload: PushPayload): Promise<SendResult[]> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const { data, error } = await supabaseAdmin
     .from("push_subscriptions")

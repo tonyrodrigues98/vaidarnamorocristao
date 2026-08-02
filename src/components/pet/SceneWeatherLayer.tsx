@@ -31,18 +31,43 @@ function buildParticles(count: number, seed: number): Particle[] {
   return arr;
 }
 
-const WEATHER_CONFIG: Record<
-  Weather,
-  { count: number; animation: string; className: string }
-> = {
-  snow: { count: 50, animation: "scene-fall", className: "bg-white rounded-full shadow-[0_0_8px_rgba(255,255,255,0.9)]" },
-  dust: { count: 40, animation: "scene-fall", className: "bg-amber-200 rounded-full shadow-[0_0_4px_rgba(255,220,150,0.7)]" },
-  leaves: { count: 30, animation: "scene-drift", className: "bg-emerald-300 rounded-[40%_60%_60%_40%] shadow-[0_0_4px_rgba(120,255,160,0.5)]" },
-  light: { count: 30, animation: "scene-rise", className: "bg-amber-100 rounded-full shadow-[0_0_10px_rgba(255,220,150,0.9)]" },
-  stars: { count: 60, animation: "scene-twinkle", className: "bg-white rounded-full shadow-[0_0_6px_rgba(255,255,255,1)]" },
+const WEATHER_CONFIG: Record<Weather, { count: number; animation: string; className: string }> = {
+  snow: {
+    count: 50,
+    animation: "scene-fall",
+    className: "bg-white rounded-full shadow-[0_0_8px_rgba(255,255,255,0.9)]",
+  },
+  dust: {
+    count: 40,
+    animation: "scene-fall",
+    className: "bg-amber-200 rounded-full shadow-[0_0_4px_rgba(255,220,150,0.7)]",
+  },
+  leaves: {
+    count: 30,
+    animation: "scene-drift",
+    className: "bg-emerald-300 rounded-[40%_60%_60%_40%] shadow-[0_0_4px_rgba(120,255,160,0.5)]",
+  },
+  light: {
+    count: 30,
+    animation: "scene-rise",
+    className: "bg-amber-100 rounded-full shadow-[0_0_10px_rgba(255,220,150,0.9)]",
+  },
+  stars: {
+    count: 60,
+    animation: "scene-twinkle",
+    className: "bg-white rounded-full shadow-[0_0_6px_rgba(255,255,255,1)]",
+  },
   mist: { count: 22, animation: "scene-drift", className: "bg-white/60 rounded-full blur-md" },
-  sparks: { count: 40, animation: "scene-rise", className: "bg-orange-300 rounded-full shadow-[0_0_8px_rgba(255,180,80,1)]" },
-  fireflies: { count: 30, animation: "scene-twinkle", className: "bg-lime-200 rounded-full shadow-[0_0_10px_rgba(190,255,120,1)]" },
+  sparks: {
+    count: 40,
+    animation: "scene-rise",
+    className: "bg-orange-300 rounded-full shadow-[0_0_8px_rgba(255,180,80,1)]",
+  },
+  fireflies: {
+    count: 30,
+    animation: "scene-twinkle",
+    className: "bg-lime-200 rounded-full shadow-[0_0_10px_rgba(190,255,120,1)]",
+  },
 };
 
 export function SceneWeatherLayer({

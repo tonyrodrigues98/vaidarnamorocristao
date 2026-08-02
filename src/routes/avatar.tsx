@@ -1,9 +1,6 @@
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-  Loader2,
-  Crown,
-} from "lucide-react";
+import { Loader2, Crown } from "lucide-react";
 import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
@@ -18,10 +15,7 @@ import { AvatarPoseSelector } from "@/components/avatar/AvatarPoseSelector";
 import { AvatarExpressionSelector } from "@/components/avatar/AvatarExpressionSelector";
 import { AvatarColorPicker } from "@/components/avatar/AvatarColorPicker";
 import { getColorPreset } from "@/data/avatarColorPresets";
-import {
-  CATEGORY_SLUG_TO_LAYER,
-  LAYER_SLOTS,
-} from "@/data/avatarMockData";
+import { CATEGORY_SLUG_TO_LAYER, LAYER_SLOTS } from "@/data/avatarMockData";
 import {
   LAYER_Z_INDEX,
   type AvatarExpressionKey,
@@ -67,13 +61,7 @@ const SKIN_SWATCH: Record<string, string> = {
 };
 const SKIN_ORDER = ["default", "porcelain", "light", "tan", "olive", "brown", "deep"];
 const BODY_TYPE_ORDER = ["default", "slim", "overweight", "muscular"];
-const POSE_ORDER = [
-  "standing_default",
-  "elegant",
-  "praying",
-  "waving",
-  "holding_heart",
-];
+const POSE_ORDER = ["standing_default", "elegant", "praying", "waving", "holding_heart"];
 
 /**
  * Maps a DB category slug to a renderer layer key + anchor slot. Future:
@@ -170,9 +158,7 @@ function AvatarPage() {
    * `user_avatar_base.color_selections` (jsonb). Chave = AvatarLayerKey,
    * valor = id do preset em `src/data/avatarColorPresets.ts`.
    */
-  const [colorSelections, setColorSelections] = useState<
-    Partial<Record<AvatarLayerKey, string>>
-  >({
+  const [colorSelections, setColorSelections] = useState<Partial<Record<AvatarLayerKey, string>>>({
     hairFront: "hair-dark-brown",
     top: "cloth-white",
   });
@@ -247,19 +233,22 @@ function AvatarPage() {
 
     const [catsRes, itemsRes, basesRes, profileRes, invRes, eqRes, coinsRes, userBaseRes] =
       await Promise.all([
-      supabase.from("avatar_categories").select("*").order("sort_order"),
-      supabase.from("avatar_items").select("*").eq("is_active", true).order("sort_order"),
-      supabase.from("avatar_bases").select("*").eq("is_active", true),
-      supabase.from("profiles").select("sex").eq("id", user.id).maybeSingle(),
-      supabase.from("user_avatar_inventory").select("item_id, is_favorite").eq("user_id", user.id),
-      supabase.from("user_avatar_equipped").select("category_id, item_id").eq("user_id", user.id),
-      supabase.from("user_coins").select("balance").eq("user_id", user.id).maybeSingle(),
-      supabase
-        .from("user_avatar_base")
-        .select("base_id, skin_tone, color_selections")
-        .eq("user_id", user.id)
-        .maybeSingle(),
-    ]);
+        supabase.from("avatar_categories").select("*").order("sort_order"),
+        supabase.from("avatar_items").select("*").eq("is_active", true).order("sort_order"),
+        supabase.from("avatar_bases").select("*").eq("is_active", true),
+        supabase.from("profiles").select("sex").eq("id", user.id).maybeSingle(),
+        supabase
+          .from("user_avatar_inventory")
+          .select("item_id, is_favorite")
+          .eq("user_id", user.id),
+        supabase.from("user_avatar_equipped").select("category_id, item_id").eq("user_id", user.id),
+        supabase.from("user_coins").select("balance").eq("user_id", user.id).maybeSingle(),
+        supabase
+          .from("user_avatar_base")
+          .select("base_id, skin_tone, color_selections")
+          .eq("user_id", user.id)
+          .maybeSingle(),
+      ]);
 
     const cats = (catsRes.data ?? []) as Category[];
     const its = (itemsRes.data ?? []) as Item[];
@@ -271,13 +260,11 @@ function AvatarPage() {
 
     // Hydrate from saved avatar choice if present; otherwise fall back to
     // profile gender default. Onboarding (/avatar/criar) is opt-in for now.
-    const saved = userBaseRes.data as
-      | {
-          base_id: string;
-          skin_tone: string | null;
-          color_selections: Partial<Record<AvatarLayerKey, string>> | null;
-        }
-      | null;
+    const saved = userBaseRes.data as {
+      base_id: string;
+      skin_tone: string | null;
+      color_selections: Partial<Record<AvatarLayerKey, string>> | null;
+    } | null;
     const profileGender =
       (profileRes.data?.sex as string | undefined) === "f" ? "feminino" : "masculino";
     const matched =
@@ -361,8 +348,7 @@ function AvatarPage() {
     // Apply preview: swap or insert the previewed item in its category
     const previewCatId = previewItem?.category_id;
     for (const cat of categories) {
-      const it =
-        previewCatId === cat.id ? previewItem : equippedItems.get(cat.id);
+      const it = previewCatId === cat.id ? previewItem : equippedItems.get(cat.id);
       if (it) list.push({ item: it, layer: cat.layer_index, slug: cat.slug });
     }
     list.sort((a, b) => a.layer - b.layer);
@@ -524,7 +510,10 @@ function AvatarPage() {
 
       const snapshot = {
         base_id: base.id,
-        items: Array.from(equipped.entries()).map(([category_id, item_id]) => ({ category_id, item_id })),
+        items: Array.from(equipped.entries()).map(([category_id, item_id]) => ({
+          category_id,
+          item_id,
+        })),
         pose,
         expression,
       };
@@ -673,7 +662,8 @@ function AvatarPage() {
           b.body_type === nextBodyType &&
           b.pose_key === nextPose &&
           b.skin_tone === "default",
-      ) ?? null
+      ) ??
+      null
     );
   }
 
@@ -750,19 +740,21 @@ function AvatarPage() {
   const poseOptions: AvatarBaseOption[] = useMemo(
     () =>
       POSE_ORDER.map((pk) => {
-        const row = bases.find(
-          (b) =>
-            b.gender === currentGender &&
-            b.body_type === "default" &&
-            b.pose_key === pk &&
-            b.skin_tone === skinTone,
-        ) ?? bases.find(
-          (b) =>
-            b.gender === currentGender &&
-            b.body_type === "default" &&
-            b.pose_key === pk &&
-            b.skin_tone === "default",
-        );
+        const row =
+          bases.find(
+            (b) =>
+              b.gender === currentGender &&
+              b.body_type === "default" &&
+              b.pose_key === pk &&
+              b.skin_tone === skinTone,
+          ) ??
+          bases.find(
+            (b) =>
+              b.gender === currentGender &&
+              b.body_type === "default" &&
+              b.pose_key === pk &&
+              b.skin_tone === "default",
+          );
         if (!row) return null;
         return {
           id: row.id,
@@ -814,7 +806,8 @@ function AvatarPage() {
         <Crown className="h-10 w-10 text-muted-foreground" />
         <h1 className="text-xl font-semibold">Em desenvolvimento</h1>
         <p className="text-sm text-muted-foreground">
-          A página de Avatar está disponível apenas para super administradores enquanto está em construção.
+          A página de Avatar está disponível apenas para super administradores enquanto está em
+          construção.
         </p>
         <Button asChild variant="outline">
           <Link to="/inicio">Voltar para o início</Link>
@@ -829,7 +822,8 @@ function AvatarPage() {
 
       <div className="mx-auto mt-2 flex w-full max-w-md items-center justify-between gap-2 rounded-full border border-dashed border-amber-400 bg-amber-50 px-3 py-1.5 text-[11px] text-amber-900">
         <span>
-          Modo teste · Gênero: <strong>{currentGender === "feminino" ? "Feminino" : "Masculino"}</strong>
+          Modo teste · Gênero:{" "}
+          <strong>{currentGender === "feminino" ? "Feminino" : "Masculino"}</strong>
         </span>
         <button
           type="button"
@@ -875,9 +869,7 @@ function AvatarPage() {
               category="hair"
               title="Cor do cabelo"
               value={colorSelections.hairFront ?? null}
-              onChange={(id) =>
-                setColorSelections((s) => ({ ...s, hairFront: id }))
-              }
+              onChange={(id) => setColorSelections((s) => ({ ...s, hairFront: id }))}
             />
             <AvatarColorPicker
               category="clothing"
@@ -887,9 +879,8 @@ function AvatarPage() {
             />
           </div>
           <p className="mt-3 text-[11px] text-muted-foreground">
-            Pose, expressão e cores são locais por enquanto. As cores só
-            afetam itens marcados como recoloríveis (`tintable`/`mask_tint`)
-            — itens fixos do catálogo atual ignoram a seleção.
+            Pose, expressão e cores são locais por enquanto. As cores só afetam itens marcados como
+            recoloríveis (`tintable`/`mask_tint`) — itens fixos do catálogo atual ignoram a seleção.
           </p>
         </div>
       )}

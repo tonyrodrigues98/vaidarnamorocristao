@@ -144,4 +144,3 @@ Inspirar-se na clareza e fluidez do WhatsApp/Vitra sem copiar:
 - flag/rollback;
 - telemetria;
 - Draft PRs revisáveis.
-

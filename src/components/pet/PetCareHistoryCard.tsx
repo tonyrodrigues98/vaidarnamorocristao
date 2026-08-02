@@ -75,7 +75,9 @@ export function PetCareHistoryCard({
             cost_coins: r.cost_coins as number,
             created_at: r.created_at as string,
             item_id: r.item_id as string | null,
-            item_name: (r as { pet_care_items?: { name?: string | null } | null }).pet_care_items?.name ?? null,
+            item_name:
+              (r as { pet_care_items?: { name?: string | null } | null }).pet_care_items?.name ??
+              null,
           })),
         );
       }
@@ -102,10 +104,7 @@ export function PetCareHistoryCard({
           <div className="text-[12px] text-neutral-500">Últimas ações com este pet</div>
         </div>
         <ChevronDown
-          className={cn(
-            "size-4 text-neutral-400 transition-transform",
-            open && "rotate-180",
-          )}
+          className={cn("size-4 text-neutral-400 transition-transform", open && "rotate-180")}
         />
       </button>
       {open && (

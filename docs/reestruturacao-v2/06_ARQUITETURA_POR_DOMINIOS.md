@@ -187,12 +187,12 @@ Cada domínio deve concentrar:
 
 Não é necessário criar burocracia excessiva. Cada domínio pode usar quatro áreas práticas:
 
-| Área | Responsabilidade |
-|---|---|
-| `model` | entidades, estados, tipos e regras puras |
-| `data` | queries, mutations, RPCs e adaptadores Supabase |
-| `features` | casos de uso e fluxos do domínio |
-| `ui` | componentes visuais pertencentes ao domínio |
+| Área       | Responsabilidade                                |
+| ---------- | ----------------------------------------------- |
+| `model`    | entidades, estados, tipos e regras puras        |
+| `data`     | queries, mutations, RPCs e adaptadores Supabase |
+| `features` | casos de uso e fluxos do domínio                |
+| `ui`       | componentes visuais pertencentes ao domínio     |
 
 ### 4.4 Rotas finas
 
@@ -339,15 +339,15 @@ Representar a identidade pública e controlável de uma pessoa na plataforma.
 
 ### Submódulos propostos
 
-| Submódulo | Função |
-|---|---|
-| Identidade pública | nome, foto, bio, localidade e apresentação |
-| Fé e trajetória | igreja, ministério, rotina e testemunho |
-| Aparência | fundo, capa, moldura, aura, gradiente e tema |
-| Vitrines | módulos escolhidos e ordenados pelo usuário |
-| Presença | online, última atividade e disponibilidade social |
-| Privacidade | audiência por campo e por vitrine |
-| Visualizações | registro e métricas de visitas conforme consentimento |
+| Submódulo          | Função                                                |
+| ------------------ | ----------------------------------------------------- |
+| Identidade pública | nome, foto, bio, localidade e apresentação            |
+| Fé e trajetória    | igreja, ministério, rotina e testemunho               |
+| Aparência          | fundo, capa, moldura, aura, gradiente e tema          |
+| Vitrines           | módulos escolhidos e ordenados pelo usuário           |
+| Presença           | online, última atividade e disponibilidade social     |
+| Privacidade        | audiência por campo e por vitrine                     |
+| Visualizações      | registro e métricas de visitas conforme consentimento |
 
 ### Vitrines iniciais possíveis
 
@@ -397,13 +397,13 @@ Permitir pertencimento, descoberta social e convivência cristã sem exigir disp
 
 ### Estados sociais separados
 
-| Conceito | Significado |
-|---|---|
-| Membro visível | pode aparecer na comunidade |
+| Conceito                        | Significado                                     |
+| ------------------------------- | ----------------------------------------------- |
+| Membro visível                  | pode aparecer na comunidade                     |
 | Disponível para conversa social | aceita contato comunitário conforme privacidade |
-| Seguindo/conectado | vínculo social não romântico |
-| Participante de espaço | pertence a grupo ou comunidade temática |
-| Disponível romanticamente | pertence exclusivamente ao domínio Namoro |
+| Seguindo/conectado              | vínculo social não romântico                    |
+| Participante de espaço          | pertence a grupo ou comunidade temática         |
+| Disponível romanticamente       | pertence exclusivamente ao domínio Namoro       |
 
 ### Migração conceitual
 
@@ -904,15 +904,15 @@ Preservar `/dashboard`, formalizar definições e mover agregações críticas p
 
 Estes não são features visíveis isoladas:
 
-| Núcleo | Responsabilidade |
-|---|---|
-| Design system | tokens, tipografia Poppins, componentes base, acessibilidade e motion |
-| PWA/runtime | Service Worker, instalação, offline, atualização e safe areas |
-| Mídia | upload, transformação, formatos, CDN, retenção e URLs assinadas |
-| Observabilidade | logs, erros, métricas técnicas, tracing e alertas |
-| Configuração | feature flags, limites e parâmetros por ambiente |
-| Eventos internos | envelopes, nomes, versão e entrega de eventos |
-| Testes | fixtures, usuários por cargo, contratos e integração Supabase |
+| Núcleo           | Responsabilidade                                                      |
+| ---------------- | --------------------------------------------------------------------- |
+| Design system    | tokens, tipografia Poppins, componentes base, acessibilidade e motion |
+| PWA/runtime      | Service Worker, instalação, offline, atualização e safe areas         |
+| Mídia            | upload, transformação, formatos, CDN, retenção e URLs assinadas       |
+| Observabilidade  | logs, erros, métricas técnicas, tracing e alertas                     |
+| Configuração     | feature flags, limites e parâmetros por ambiente                      |
+| Eventos internos | envelopes, nomes, versão e entrega de eventos                         |
+| Testes           | fixtures, usuários por cargo, contratos e integração Supabase         |
 
 O diretório `shared` deve conter apenas infraestrutura genuinamente transversal. Regras de namoro, pet, economia ou perfil não entram em `shared`.
 
@@ -920,21 +920,21 @@ O diretório `shared` deve conter apenas infraestrutura genuinamente transversal
 
 ## 24. Matriz de propriedade de dados
 
-| Dado/regra | Dono | Consumidores principais |
-|---|---|---|
-| Sessão e capacidades | Identidade e acesso | todos |
-| Foto, bio e visibilidade | Perfil | comunidade, namoro, chat |
-| Disponibilidade romântica | Namoro | perfil, propósito, notificações |
-| Interesse e match | Namoro | conversas, propósito, métricas |
-| Mensagens | Conversas | namoro, comunidade, cinema |
-| Compromisso | Propósito Firmado | namoro, perfil, conversas |
-| Post/devocional/oração | Conteúdo cristão | comunidade, notificações |
-| Saldo e XP | Economia | loja, pets, jogos, admin |
-| Propriedade de item | Inventário | perfil, chat, comunidade |
-| Estado do pet | Pets | perfil, notificações, jogos |
-| Rodada e resultado | Jogos | economia, inventário, métricas |
-| Sessão e playback | Cinema | comunidade, conversas, notificações |
-| Denúncia/sanção | Segurança | todos os domínios interativos |
+| Dado/regra                | Dono                | Consumidores principais             |
+| ------------------------- | ------------------- | ----------------------------------- |
+| Sessão e capacidades      | Identidade e acesso | todos                               |
+| Foto, bio e visibilidade  | Perfil              | comunidade, namoro, chat            |
+| Disponibilidade romântica | Namoro              | perfil, propósito, notificações     |
+| Interesse e match         | Namoro              | conversas, propósito, métricas      |
+| Mensagens                 | Conversas           | namoro, comunidade, cinema          |
+| Compromisso               | Propósito Firmado   | namoro, perfil, conversas           |
+| Post/devocional/oração    | Conteúdo cristão    | comunidade, notificações            |
+| Saldo e XP                | Economia            | loja, pets, jogos, admin            |
+| Propriedade de item       | Inventário          | perfil, chat, comunidade            |
+| Estado do pet             | Pets                | perfil, notificações, jogos         |
+| Rodada e resultado        | Jogos               | economia, inventário, métricas      |
+| Sessão e playback         | Cinema              | comunidade, conversas, notificações |
+| Denúncia/sanção           | Segurança           | todos os domínios interativos       |
 
 Regra: consumidor lê por contrato público, view ou caso de uso; não assume propriedade da tabela.
 
@@ -944,19 +944,19 @@ Regra: consumidor lê por contrato público, view ou caso de uso; não assume pr
 
 Eventos não substituem transações. Eles propagam fatos já confirmados.
 
-| Evento | Publicado por | Consumido por |
-|---|---|---|
-| `account.approved` | Identidade | onboarding, notificações |
-| `profile.updated` | Perfil | comunidade, namoro, cache |
-| `dating.activated` | Namoro | perfil, métricas |
-| `match.created` | Namoro | conversas, notificações |
-| `purpose.accepted` | Propósito | namoro, perfil, conversas |
-| `coin.transaction_posted` | Economia | dashboard, notificações |
-| `inventory.item_acquired` | Inventário | perfil, notificações |
-| `pet.need_changed` | Pets | notificações |
-| `game.round_settled` | Jogos | economia, inventário, métricas |
-| `cinema.session_started` | Cinema | comunidade, notificações |
-| `moderation.action_applied` | Segurança | identidade e domínio afetado |
+| Evento                      | Publicado por | Consumido por                  |
+| --------------------------- | ------------- | ------------------------------ |
+| `account.approved`          | Identidade    | onboarding, notificações       |
+| `profile.updated`           | Perfil        | comunidade, namoro, cache      |
+| `dating.activated`          | Namoro        | perfil, métricas               |
+| `match.created`             | Namoro        | conversas, notificações        |
+| `purpose.accepted`          | Propósito     | namoro, perfil, conversas      |
+| `coin.transaction_posted`   | Economia      | dashboard, notificações        |
+| `inventory.item_acquired`   | Inventário    | perfil, notificações           |
+| `pet.need_changed`          | Pets          | notificações                   |
+| `game.round_settled`        | Jogos         | economia, inventário, métricas |
+| `cinema.session_started`    | Cinema        | comunidade, notificações       |
+| `moderation.action_applied` | Segurança     | identidade e domínio afetado   |
 
 Todo evento deve ter:
 
@@ -1043,29 +1043,29 @@ O `index.ts` do domínio expõe apenas sua API pública. Importações internas 
 
 ## 28. Mapeamento das áreas atuais
 
-| Área atual | Domínio futuro | Destino |
-|---|---|---|
-| Landing/institucional | Aquisição | reposicionar |
-| Onboarding | Aquisição + Identidade + Perfil | dividir |
-| `/inicio` | composição comunitária | preservar e redesenhar |
-| `/dashboard` | Métricas | preservar separado |
-| `/perfil` | Perfil + vitrines | reconstruir gradualmente |
-| `/pretendentes` | Namoro | preservar motor |
-| Interesses/matches | Namoro | preservar |
-| Chat privado | Conversas | preservar comportamento |
-| Comunidade global | Comunidade + Conversas | expandir |
-| Propósito Firmado | domínio próprio | preservar integralmente |
-| Recados anônimos | Namoro/experiência autônoma | decidir no Item 5 |
-| Devocional/orações/Bíblia | Conteúdo cristão | unificar experiência |
-| Loja/presentes | Inventário + Economia | modularizar |
-| Avatar-personagem | legado | retirar com protocolo |
-| Molduras/auras/fundos | Inventário + Perfil | preservar |
-| Meu Pet | Pets | modularizar |
-| Pet Arcade/Grab | Jogos | avaliar por jogo |
-| Notificações | Notificações | endurecer segurança |
-| Suporte | Suporte | preservar |
-| Admin | operação por domínio | dividir |
-| Sala de Cinema | Cinema | criar |
+| Área atual                | Domínio futuro                  | Destino                  |
+| ------------------------- | ------------------------------- | ------------------------ |
+| Landing/institucional     | Aquisição                       | reposicionar             |
+| Onboarding                | Aquisição + Identidade + Perfil | dividir                  |
+| `/inicio`                 | composição comunitária          | preservar e redesenhar   |
+| `/dashboard`              | Métricas                        | preservar separado       |
+| `/perfil`                 | Perfil + vitrines               | reconstruir gradualmente |
+| `/pretendentes`           | Namoro                          | preservar motor          |
+| Interesses/matches        | Namoro                          | preservar                |
+| Chat privado              | Conversas                       | preservar comportamento  |
+| Comunidade global         | Comunidade + Conversas          | expandir                 |
+| Propósito Firmado         | domínio próprio                 | preservar integralmente  |
+| Recados anônimos          | Namoro/experiência autônoma     | decidir no Item 5        |
+| Devocional/orações/Bíblia | Conteúdo cristão                | unificar experiência     |
+| Loja/presentes            | Inventário + Economia           | modularizar              |
+| Avatar-personagem         | legado                          | retirar com protocolo    |
+| Molduras/auras/fundos     | Inventário + Perfil             | preservar                |
+| Meu Pet                   | Pets                            | modularizar              |
+| Pet Arcade/Grab           | Jogos                           | avaliar por jogo         |
+| Notificações              | Notificações                    | endurecer segurança      |
+| Suporte                   | Suporte                         | preservar                |
+| Admin                     | operação por domínio            | dividir                  |
+| Sala de Cinema            | Cinema                          | criar                    |
 
 ---
 

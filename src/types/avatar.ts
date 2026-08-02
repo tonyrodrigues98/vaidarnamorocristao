@@ -132,26 +132,13 @@ export type AvatarExpressionKey =
  * Tipo de corpo. `"standard"` é o canônico do novo pipeline; `"default"`
  * e `"curvy"` ficam por compatibilidade com bases já cadastradas.
  */
-export type AvatarBodyType =
-  | "standard"
-  | "slim"
-  | "overweight"
-  | "strong"
-  | "default"
-  | "curvy";
+export type AvatarBodyType = "standard" | "slim" | "overweight" | "strong" | "default" | "curvy";
 
 /**
  * Tom de pele canônico do pipeline composicional. Adicionar uma entrada
  * aqui = adicionar tokens em `src/data/avatarColorPresets.ts` + 0 PNG.
  */
-export type AvatarSkinTone =
-  | "default"
-  | "porcelain"
-  | "light"
-  | "tan"
-  | "olive"
-  | "brown"
-  | "deep";
+export type AvatarSkinTone = "default" | "porcelain" | "light" | "tan" | "olive" | "brown" | "deep";
 
 /**
  * Estratégia de cor por layer/item. O `AvatarRenderer` lê este campo e
@@ -166,11 +153,7 @@ export type AvatarSkinTone =
  *                   sombras procedurais). Renderer trata como fallback
  *                   `fixed_asset` enquanto não estiver implementado.
  */
-export type AvatarColorMode =
-  | "fixed_asset"
-  | "tintable"
-  | "mask_tint"
-  | "canvas_tint";
+export type AvatarColorMode = "fixed_asset" | "tintable" | "mask_tint" | "canvas_tint";
 
 export type AvatarColorPresetCategory = "skin" | "hair" | "clothing" | "eyes";
 

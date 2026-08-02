@@ -28,7 +28,7 @@ export async function rollAndGetTodayMissions(): Promise<TodayMission[]> {
   // 2) lista com progresso
   const { data, error } = await supabase.rpc("get_today_missions" as never);
   if (error) return [];
-  return ((data as unknown) as TodayMission[]) ?? [];
+  return (data as unknown as TodayMission[]) ?? [];
 }
 
 export const DIFFICULTY_LABEL: Record<string, string> = {

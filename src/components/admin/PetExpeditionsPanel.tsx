@@ -1,15 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import {
-  Compass,
-  Loader2,
-  Pencil,
-  Plus,
-  Sparkles,
-  Trash2,
-  Upload,
-  ImageOff,
-} from "lucide-react";
+import { Compass, Loader2, Pencil, Plus, Sparkles, Trash2, Upload, ImageOff } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -273,9 +264,7 @@ export function PetExpeditionsPanel() {
                     type="text"
                     inputMode="numeric"
                     value={draft.sort_order}
-                    onChange={(e) =>
-                      setDraft({ ...draft, sort_order: intOr(e.target.value, 0) })
-                    }
+                    onChange={(e) => setDraft({ ...draft, sort_order: intOr(e.target.value, 0) })}
                   />
                 </div>
               </div>

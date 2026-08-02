@@ -128,4 +128,3 @@ Inspirar-se na organização do Discord, não em sua aparência:
 - integração por eventos/adapters;
 - flag e rollback;
 - paridade de histórico.
-

@@ -14,25 +14,13 @@ import { cn } from "@/lib/utils";
  * nunca durante refetch quando já há dados na tela.
  */
 
-export function Skeleton({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLDivElement>) {
+export function Skeleton({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div
-      className={cn("app-skeleton app-skeleton-shimmer rounded-xl", className)}
-      {...props}
-    />
+    <div className={cn("app-skeleton app-skeleton-shimmer rounded-xl", className)} {...props} />
   );
 }
 
-export function SkeletonCircle({
-  size = 40,
-  className,
-}: {
-  size?: number;
-  className?: string;
-}) {
+export function SkeletonCircle({ size = 40, className }: { size?: number; className?: string }) {
   return (
     <div
       className={cn("app-skeleton app-skeleton-shimmer rounded-full", className)}
@@ -50,10 +38,7 @@ export function SkeletonLine({
 }) {
   return (
     <div
-      className={cn(
-        "app-skeleton app-skeleton-shimmer h-3 rounded-full",
-        className,
-      )}
+      className={cn("app-skeleton app-skeleton-shimmer h-3 rounded-full", className)}
       style={{ width }}
     />
   );
@@ -107,10 +92,7 @@ export function ChatSkeleton({ bubbles = 8 }: { bubbles?: number }) {
           const mine = i % 2 === 1;
           const w = widths[i % widths.length];
           return (
-            <div
-              key={i}
-              className={`flex ${mine ? "justify-end" : "justify-start"}`}
-            >
+            <div key={i} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
               <div
                 className="app-skeleton app-skeleton-shimmer h-10 rounded-2xl"
                 style={{ width: `${w}%`, maxWidth: 320 }}

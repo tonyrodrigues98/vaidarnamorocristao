@@ -50,11 +50,14 @@ export async function claimFreebie(
   rarity: FreebieRarity,
   itemId: string,
 ) {
-  const { data, error } = await supabase.rpc("claim_freebie" as never, {
-    _category: category,
-    _rarity: rarity,
-    _item_id: itemId,
-  } as never);
+  const { data, error } = await supabase.rpc(
+    "claim_freebie" as never,
+    {
+      _category: category,
+      _rarity: rarity,
+      _item_id: itemId,
+    } as never,
+  );
   if (error) throw error;
   return data as unknown as { success: boolean; item_id: string };
 }

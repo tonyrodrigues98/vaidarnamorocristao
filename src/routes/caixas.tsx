@@ -418,7 +418,12 @@ function MultiResultsDialog({
 }) {
   const totalPaid = results.reduce((sum, item) => sum + item.res.cost_paid, 0);
   return (
-    <Dialog open onOpenChange={(o) => { if (!o) onClose(); }}>
+    <Dialog
+      open
+      onOpenChange={(o) => {
+        if (!o) onClose();
+      }}
+    >
       <DialogContent className="max-w-md border-[#e6cf8a] bg-[#FAF7EF] p-4 text-[#1a1410]">
         <DialogTitle className="sr-only">{poolName}</DialogTitle>
         <div className="mb-3 flex items-center justify-between gap-3">

@@ -179,4 +179,3 @@ No máximo 20 linhas:
 - blockers;
 - decisões de Antonio;
 - confirmação de ausência de merge/deploy/mutation.
-

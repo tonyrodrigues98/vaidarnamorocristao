@@ -25,16 +25,16 @@ Este é um projeto documental. Ele não autoriza alteração de código, banco, 
 
 ## 2. Marco de referência
 
-| Campo | Valor |
-|---|---|
-| Repositório | `tonyrodrigues98/vaidarnamorocristao` |
-| Branch | `main` |
-| Commit de referência | `1de94bca421c36d32b1a4d96b2fc96f2330129aa` |
-| Estado do GitHub | Sem commit posterior aos Itens 3–7 |
-| Escala informada pelo GitHub | Aproximadamente 469 MB |
-| Backend | Supabase |
-| Aplicação | React, TanStack Router/Query, Nitro/Vite e PWA |
-| Escopo desta etapa | Somente projeto de experiência |
+| Campo                        | Valor                                          |
+| ---------------------------- | ---------------------------------------------- |
+| Repositório                  | `tonyrodrigues98/vaidarnamorocristao`          |
+| Branch                       | `main`                                         |
+| Commit de referência         | `1de94bca421c36d32b1a4d96b2fc96f2330129aa`     |
+| Estado do GitHub             | Sem commit posterior aos Itens 3–7             |
+| Escala informada pelo GitHub | Aproximadamente 469 MB                         |
+| Backend                      | Supabase                                       |
+| Aplicação                    | React, TanStack Router/Query, Nitro/Vite e PWA |
+| Escopo desta etapa           | Somente projeto de experiência                 |
 
 ### 2.1 Bases obrigatórias
 
@@ -91,16 +91,16 @@ O produto não deve mais se apresentar como:
 
 ### 3.4 Pilares da experiência
 
-| Pilar | Resultado perceptível |
-|---|---|
-| Pertencimento | Usuário encontra pessoas, espaços e assuntos sem ativar Namoro |
-| Identidade | Perfil comunica fé, história, interesses e personalidade |
-| Controle | Privacidade e configuração são compreensíveis |
-| Propósito | Relações românticas possuem contexto, limites e intenção |
-| Expressão | Personalização é rica, mas nunca prejudica leitura ou acessibilidade |
-| Segurança | Consentimento, bloqueio e denúncia funcionam em todos os módulos |
-| Continuidade | Dados e conquistas atuais sobrevivem ao redesign |
-| Leveza | Cada rota carrega apenas o necessário |
+| Pilar         | Resultado perceptível                                                |
+| ------------- | -------------------------------------------------------------------- |
+| Pertencimento | Usuário encontra pessoas, espaços e assuntos sem ativar Namoro       |
+| Identidade    | Perfil comunica fé, história, interesses e personalidade             |
+| Controle      | Privacidade e configuração são compreensíveis                        |
+| Propósito     | Relações românticas possuem contexto, limites e intenção             |
+| Expressão     | Personalização é rica, mas nunca prejudica leitura ou acessibilidade |
+| Segurança     | Consentimento, bloqueio e denúncia funcionam em todos os módulos     |
+| Continuidade  | Dados e conquistas atuais sobrevivem ao redesign                     |
+| Leveza        | Cada rota carrega apenas o necessário                                |
 
 ---
 
@@ -169,13 +169,13 @@ Direção visual:
 
 ### 5.1 Cinco destinos principais no mobile
 
-| Destino | Missão | Conteúdo principal |
-|---|---|---|
-| Início | Orientar o dia do usuário | resumo, atalhos, convites e continuidade |
-| Comunidade | Participar e descobrir | feed, espaços, pessoas, grupos e eventos |
-| Criar | Publicar ou iniciar ação contextual | post, oração, evento, sessão ou mídia permitida |
-| Conversas | Comunicar com consentimento | sociais, românticas, grupos e solicitações |
-| Eu | Acessar identidade e conta | perfil, inventário, pet, configurações e dashboard |
+| Destino    | Missão                              | Conteúdo principal                                 |
+| ---------- | ----------------------------------- | -------------------------------------------------- |
+| Início     | Orientar o dia do usuário           | resumo, atalhos, convites e continuidade           |
+| Comunidade | Participar e descobrir              | feed, espaços, pessoas, grupos e eventos           |
+| Criar      | Publicar ou iniciar ação contextual | post, oração, evento, sessão ou mídia permitida    |
+| Conversas  | Comunicar com consentimento         | sociais, românticas, grupos e solicitações         |
+| Eu         | Acessar identidade e conta          | perfil, inventário, pet, configurações e dashboard |
 
 O botão central `Criar` pode ser substituído por uma ação contextual em áreas onde publicar não faça sentido. Ele não deve abrir uma lista enorme e indiferenciada.
 
@@ -373,12 +373,12 @@ Após a entrada, um convite separado explica:
 
 ### 8.3 Estados de aprovação
 
-| Estado | Experiência |
-|---|---|
-| Pendente | checklist, conteúdo permitido e previsão honesta sem data inventada |
-| Aprovado | entrada completa e tour contextual opcional |
-| Rejeitado | motivo permitido, correção orientada e reenvio |
-| Banido | explicação segura, suporte/recurso e rotas autorizadas |
+| Estado    | Experiência                                                         |
+| --------- | ------------------------------------------------------------------- |
+| Pendente  | checklist, conteúdo permitido e previsão honesta sem data inventada |
+| Aprovado  | entrada completa e tour contextual opcional                         |
+| Rejeitado | motivo permitido, correção orientada e reenvio                      |
+| Banido    | explicação segura, suporte/recurso e rotas autorizadas              |
 
 ---
 
@@ -544,12 +544,12 @@ O perfil é a principal superfície de identidade do produto. Deve parecer pesso
 
 ### 12.3 Camadas do perfil
 
-| Camada | Conteúdo |
-|---|---|
-| Compartilhada | nome, foto, bio, localização aproximada e interesses |
-| Comunitária | grupos, posts, conexões, conteúdo e vitrines sociais |
-| Romântica | intenção, preferências, detalhes consentidos e ações de namoro |
-| Privada | configurações, inventário, rascunhos e controles |
+| Camada        | Conteúdo                                                       |
+| ------------- | -------------------------------------------------------------- |
+| Compartilhada | nome, foto, bio, localização aproximada e interesses           |
+| Comunitária   | grupos, posts, conexões, conteúdo e vitrines sociais           |
+| Romântica     | intenção, preferências, detalhes consentidos e ações de namoro |
+| Privada       | configurações, inventário, rascunhos e controles               |
 
 ### 12.4 Vitrines iniciais
 
@@ -1395,54 +1395,54 @@ Legenda:
 - **X** retirar com protocolo;
 - **N** criar.
 
-| Rota/área | Decisão | Destino futuro |
-|---|---:|---|
-| `/` | S | Landing da comunidade com Namoro opcional |
-| `/como-funciona` | D | Jornadas Comunidade e Namoro |
-| `/sobre` | D | Propósito, princípios e governança |
-| `/depoimentos` | D | Prova social real e contextual |
-| `/blog`, `/blog/$slug` | D | Sistema editorial coerente |
-| `/termos` | P/D | Documento legível e versionado |
-| `/manual` | S | Central de ajuda contextual |
-| `/instalar` | D | Instalação PWA por dispositivo |
-| `/auth/*` | P/D | Mesma base de auth, UX reconstruída |
-| `/onboarding` | S/R | Onboarding comunitário + Namoro opcional |
-| `/onboarding/etapa-*` | R/X | Compatibilidade temporária e retirada controlada |
-| `/inicio` | D/R | Hub diário adaptativo |
-| `/dashboard` | D/R | Painel analítico separado |
-| `/perfil` | S/R | Perfil modular e editor simples |
-| `/conta` | D/R | Configurações claras por área |
-| `/notificacoes` | D/R | Central categorizada |
-| `/verificacao` | P/D | Fluxo transparente e seguro |
-| `/bloqueados` | P/D | Gestão do bloqueio global |
-| `/pretendentes` | P/S/R | Motor preservado, experiência reconstruída |
-| `/pretendentes/$id` | P/S/R | Camada romântica do perfil único |
-| `/interesses` | P/D/R | Estados claros e regras no domínio |
-| `/matches` | P/D/R | Dados preservados, UX atualizada |
-| `/conversas` | P/S/R | Inbox unificada por contexto |
-| `/conversas/$matchId` | P/D/R | Chat maduro preservado |
-| `/proposito/$matchId` | P/D/R | Área do casal ampliada |
-| `/recados` | P/D/R | Exclusivo do Namoro |
-| `/presentes` | P/D/R | Contexto social/romântico explícito |
-| `/comunidade` | N/S | Hub comunitário real |
-| `/conversas/comunidade` | P/D/R | Espaço oficial dentro da Comunidade |
-| `/devocional` | P/D/R | Conteúdo focado e integrado |
-| `/oracoes` | P/D/R | Pedidos com audiência e segurança |
-| `/quiz-biblico` | P/D | Aprendizado sem ranking espiritual |
-| `/noticias` | D/R | Tipos editoriais separados |
-| `/loja` | P/S/R | Catálogo modular e compra segura |
-| `/caixas` | P/D/R | Transparência, recibo e regra versionada |
-| `/conquistas` | P/D/R | Conquistas sem confundir mérito espiritual |
-| `/avatar` | X | Retirar personagem customizável |
-| `/avatar/criar` | X | Retirar criação do personagem |
-| `/meu-pet` | P/D/R | Central modular do pet |
-| `/pet-arcade` | R/D | Hub lazy-load; avaliar cada jogo |
-| `/suporte/*` | P/D/R | Ajuda e tickets preservados |
-| `/admin/*` | P/S/R | Console por capacidade |
-| Sala de Cinema | N | Domínio social e de mídia novo |
-| Espaços/grupos | N | Comunidade estruturada |
-| Conexões sociais | N | Vínculo bilateral não romântico |
-| Solicitações de mensagem | N | Consentimento antispam |
+| Rota/área                | Decisão | Destino futuro                                   |
+| ------------------------ | ------: | ------------------------------------------------ |
+| `/`                      |       S | Landing da comunidade com Namoro opcional        |
+| `/como-funciona`         |       D | Jornadas Comunidade e Namoro                     |
+| `/sobre`                 |       D | Propósito, princípios e governança               |
+| `/depoimentos`           |       D | Prova social real e contextual                   |
+| `/blog`, `/blog/$slug`   |       D | Sistema editorial coerente                       |
+| `/termos`                |     P/D | Documento legível e versionado                   |
+| `/manual`                |       S | Central de ajuda contextual                      |
+| `/instalar`              |       D | Instalação PWA por dispositivo                   |
+| `/auth/*`                |     P/D | Mesma base de auth, UX reconstruída              |
+| `/onboarding`            |     S/R | Onboarding comunitário + Namoro opcional         |
+| `/onboarding/etapa-*`    |     R/X | Compatibilidade temporária e retirada controlada |
+| `/inicio`                |     D/R | Hub diário adaptativo                            |
+| `/dashboard`             |     D/R | Painel analítico separado                        |
+| `/perfil`                |     S/R | Perfil modular e editor simples                  |
+| `/conta`                 |     D/R | Configurações claras por área                    |
+| `/notificacoes`          |     D/R | Central categorizada                             |
+| `/verificacao`           |     P/D | Fluxo transparente e seguro                      |
+| `/bloqueados`            |     P/D | Gestão do bloqueio global                        |
+| `/pretendentes`          |   P/S/R | Motor preservado, experiência reconstruída       |
+| `/pretendentes/$id`      |   P/S/R | Camada romântica do perfil único                 |
+| `/interesses`            |   P/D/R | Estados claros e regras no domínio               |
+| `/matches`               |   P/D/R | Dados preservados, UX atualizada                 |
+| `/conversas`             |   P/S/R | Inbox unificada por contexto                     |
+| `/conversas/$matchId`    |   P/D/R | Chat maduro preservado                           |
+| `/proposito/$matchId`    |   P/D/R | Área do casal ampliada                           |
+| `/recados`               |   P/D/R | Exclusivo do Namoro                              |
+| `/presentes`             |   P/D/R | Contexto social/romântico explícito              |
+| `/comunidade`            |     N/S | Hub comunitário real                             |
+| `/conversas/comunidade`  |   P/D/R | Espaço oficial dentro da Comunidade              |
+| `/devocional`            |   P/D/R | Conteúdo focado e integrado                      |
+| `/oracoes`               |   P/D/R | Pedidos com audiência e segurança                |
+| `/quiz-biblico`          |     P/D | Aprendizado sem ranking espiritual               |
+| `/noticias`              |     D/R | Tipos editoriais separados                       |
+| `/loja`                  |   P/S/R | Catálogo modular e compra segura                 |
+| `/caixas`                |   P/D/R | Transparência, recibo e regra versionada         |
+| `/conquistas`            |   P/D/R | Conquistas sem confundir mérito espiritual       |
+| `/avatar`                |       X | Retirar personagem customizável                  |
+| `/avatar/criar`          |       X | Retirar criação do personagem                    |
+| `/meu-pet`               |   P/D/R | Central modular do pet                           |
+| `/pet-arcade`            |     R/D | Hub lazy-load; avaliar cada jogo                 |
+| `/suporte/*`             |   P/D/R | Ajuda e tickets preservados                      |
+| `/admin/*`               |   P/S/R | Console por capacidade                           |
+| Sala de Cinema           |       N | Domínio social e de mídia novo                   |
+| Espaços/grupos           |       N | Comunidade estruturada                           |
+| Conexões sociais         |       N | Vínculo bilateral não romântico                  |
+| Solicitações de mensagem |       N | Consentimento antispam                           |
 
 Esta matriz será revisada com o proprietário ao redesenhar o Item 1. Ela não é autorização de remoção ou implementação.
 
@@ -1476,20 +1476,20 @@ Não são automaticamente:
 
 Cada tela criada no Sites será avaliada por:
 
-| Critério | Pergunta |
-|---|---|
-| Objetivo | Qual problema resolve? |
-| Contexto | Comunidade, Namoro ou ambos? |
-| Dados | Quais dados reais alimentam a tela? |
-| Ações | Quais comandos ela executa? |
-| Permissões | Quem pode ver e agir? |
-| Estados | Há loading, vazio, erro, offline e bloqueio? |
-| Mobile | Funciona com teclado, toque e área segura? |
-| Desktop | Expande sem virar espaço vazio? |
+| Critério       | Pergunta                                          |
+| -------------- | ------------------------------------------------- |
+| Objetivo       | Qual problema resolve?                            |
+| Contexto       | Comunidade, Namoro ou ambos?                      |
+| Dados          | Quais dados reais alimentam a tela?               |
+| Ações          | Quais comandos ela executa?                       |
+| Permissões     | Quem pode ver e agir?                             |
+| Estados        | Há loading, vazio, erro, offline e bloqueio?      |
+| Mobile         | Funciona com teclado, toque e área segura?        |
+| Desktop        | Expande sem virar espaço vazio?                   |
 | Acessibilidade | Contraste, foco e leitor de tela estão previstos? |
-| Performance | Quais assets e módulos carrega? |
-| Preservação | O que atual não pode ser perdido? |
-| Decisão | adotar, adaptar, combinar ou descartar |
+| Performance    | Quais assets e módulos carrega?                   |
+| Preservação    | O que atual não pode ser perdido?                 |
+| Decisão        | adotar, adaptar, combinar ou descartar            |
 
 ### 33.3 Perfil Steam-like
 

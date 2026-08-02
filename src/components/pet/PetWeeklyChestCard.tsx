@@ -91,8 +91,7 @@ export function PetWeeklyChestCard({
           <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-neutral-100">
             <div
               className={
-                "h-full rounded-full transition-all " +
-                (ready ? "bg-amber-500" : "bg-neutral-300")
+                "h-full rounded-full transition-all " + (ready ? "bg-amber-500" : "bg-neutral-300")
               }
               style={{ width: `${pct}%` }}
             />

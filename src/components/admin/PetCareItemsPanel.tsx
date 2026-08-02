@@ -161,8 +161,8 @@ export function PetCareItemsPanel() {
       <div>
         <h2 className="text-lg font-semibold">Cuidados do pet</h2>
         <p className="text-xs text-muted-foreground">
-          Configure os itens que aparecem no menu radial. Cada item tem custo em moedas
-          e quanto restaura da barra. Compatibilidade define em quais espécies/categorias o item aparece.
+          Configure os itens que aparecem no menu radial. Cada item tem custo em moedas e quanto
+          restaura da barra. Compatibilidade define em quais espécies/categorias o item aparece.
         </p>
       </div>
 
@@ -172,23 +172,37 @@ export function PetCareItemsPanel() {
           <div className="space-y-1.5">
             <Label>Decaimento global por hora (todas as barras menos energia)</Label>
             <Input
-              type="text" inputMode="decimal"
+              type="text"
+              inputMode="decimal"
               min={0}
               max={100}
               value={cfg.decay_per_hour}
               onChange={(e) => setCfg({ ...cfg, decay_per_hour: Number(e.target.value) || 0 })}
-              onBlur={() => updateCareConfig({ decay_per_hour: cfg.decay_per_hour }).catch((e) => toast.error((e as Error).message))}
+              onBlur={() =>
+                updateCareConfig({ decay_per_hour: cfg.decay_per_hour }).catch((e) =>
+                  toast.error((e as Error).message),
+                )
+              }
             />
           </div>
           <div className="space-y-1.5">
-            <Label className="flex items-center gap-1.5"><Zap className="h-3.5 w-3.5 text-yellow-500" /> Minutos para +1 de Energia</Label>
+            <Label className="flex items-center gap-1.5">
+              <Zap className="h-3.5 w-3.5 text-yellow-500" /> Minutos para +1 de Energia
+            </Label>
             <Input
-              type="text" inputMode="decimal"
+              type="text"
+              inputMode="decimal"
               min={1}
               max={240}
               value={cfg.energy_regen_minutes_per_point}
-              onChange={(e) => setCfg({ ...cfg, energy_regen_minutes_per_point: Number(e.target.value) || 1 })}
-              onBlur={() => updateCareConfig({ energy_regen_minutes_per_point: cfg.energy_regen_minutes_per_point }).catch((e) => toast.error((e as Error).message))}
+              onChange={(e) =>
+                setCfg({ ...cfg, energy_regen_minutes_per_point: Number(e.target.value) || 1 })
+              }
+              onBlur={() =>
+                updateCareConfig({
+                  energy_regen_minutes_per_point: cfg.energy_regen_minutes_per_point,
+                }).catch((e) => toast.error((e as Error).message))
+              }
             />
           </div>
         </div>
@@ -442,7 +456,12 @@ function DraftForm({
               e.target.value = "";
             }}
           />
-          <Button type="button" size="sm" variant="outline" onClick={() => fileRef.current?.click()}>
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={() => fileRef.current?.click()}
+          >
             <Upload className="mr-1 h-3.5 w-3.5" /> Enviar imagem
           </Button>
           {draft.image_url && (
@@ -463,7 +482,8 @@ function DraftForm({
         <div className="space-y-1.5">
           <Label>Custo (moedas)</Label>
           <Input
-            type="text" inputMode="decimal"
+            type="text"
+            inputMode="decimal"
             min={0}
             value={draft.cost_coins}
             onChange={(e) => onChange({ ...draft, cost_coins: Number(e.target.value) || 0 })}
@@ -472,7 +492,8 @@ function DraftForm({
         <div className="space-y-1.5">
           <Label>Restaura (+barra)</Label>
           <Input
-            type="text" inputMode="decimal"
+            type="text"
+            inputMode="decimal"
             min={1}
             max={100}
             value={draft.restore_amount}
@@ -482,7 +503,8 @@ function DraftForm({
         <div className="space-y-1.5">
           <Label>Ordem</Label>
           <Input
-            type="text" inputMode="decimal"
+            type="text"
+            inputMode="decimal"
             value={draft.sort_order}
             onChange={(e) => onChange({ ...draft, sort_order: Number(e.target.value) || 0 })}
           />
@@ -497,11 +519,16 @@ function DraftForm({
       <div className="grid gap-3 sm:grid-cols-2">
         {draft.kind === "sleep" ? (
           <div className="space-y-1.5">
-            <Label className="flex items-center gap-1.5"><Moon className="h-3.5 w-3.5" /> Horas de sono desta caminha</Label>
+            <Label className="flex items-center gap-1.5">
+              <Moon className="h-3.5 w-3.5" /> Horas de sono desta caminha
+            </Label>
             <Input
-              type="text" inputMode="decimal"
+              type="text"
+              inputMode="decimal"
               value={draft.sleep_hours}
-              onChange={(e) => onChange({ ...draft, sleep_hours: Number(e.target.value.replace(",", ".")) || 0 })}
+              onChange={(e) =>
+                onChange({ ...draft, sleep_hours: Number(e.target.value.replace(",", ".")) || 0 })
+              }
             />
             <p className="text-[11px] text-muted-foreground">
               8h ≈ restaura 100 de sono e 100 de energia. (Ex.: 4h ≈ 50)
@@ -509,30 +536,39 @@ function DraftForm({
           </div>
         ) : (
           <div className="space-y-1.5">
-            <Label className="flex items-center gap-1.5"><Zap className="h-3.5 w-3.5 text-yellow-500" /> Custo de energia por uso</Label>
+            <Label className="flex items-center gap-1.5">
+              <Zap className="h-3.5 w-3.5 text-yellow-500" /> Custo de energia por uso
+            </Label>
             <Input
-              type="text" inputMode="numeric"
+              type="text"
+              inputMode="numeric"
               value={draft.energy_cost}
               onChange={(e) => onChange({ ...draft, energy_cost: Number(e.target.value) || 0 })}
             />
-            <p className="text-[11px] text-muted-foreground">Se a energia for menor, o pet não consegue realizar a ação.</p>
+            <p className="text-[11px] text-muted-foreground">
+              Se a energia for menor, o pet não consegue realizar a ação.
+            </p>
           </div>
         )}
         <div className="space-y-1.5">
           <Label>Usos por dia (0 = ilimitado)</Label>
           <Input
-            type="text" inputMode="numeric"
+            type="text"
+            inputMode="numeric"
             value={draft.daily_uses}
             onChange={(e) => onChange({ ...draft, daily_uses: Number(e.target.value) || 0 })}
           />
-          <p className="text-[11px] text-muted-foreground">Reseta às 00:00 (horário de Brasília).</p>
+          <p className="text-[11px] text-muted-foreground">
+            Reseta às 00:00 (horário de Brasília).
+          </p>
         </div>
       </div>
 
       <div className="space-y-2">
         <Label>Compatibilidade</Label>
         <p className="text-xs text-muted-foreground">
-          Marque "Categoria inteira" para liberar todas as espécies dela, ou escolha apenas espécies específicas.
+          Marque "Categoria inteira" para liberar todas as espécies dela, ou escolha apenas espécies
+          específicas.
         </p>
         <div className="space-y-2">
           {categories.map((cat) => {
@@ -547,7 +583,9 @@ function DraftForm({
                     onCheckedChange={(v) => toggleWholeCategory(cat.id, !!v)}
                   />
                   {cat.name}
-                  <span className="text-xs font-normal text-muted-foreground">(categoria inteira)</span>
+                  <span className="text-xs font-normal text-muted-foreground">
+                    (categoria inteira)
+                  </span>
                 </label>
                 {!wholeOn && catSpecies.length > 0 && (
                   <div className="mt-2 flex flex-wrap gap-2 pl-6">
@@ -558,7 +596,9 @@ function DraftForm({
                           key={sp.id}
                           className={cn(
                             "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs",
-                            on ? "border-foreground bg-foreground text-background" : "border-border",
+                            on
+                              ? "border-foreground bg-foreground text-background"
+                              : "border-border",
                           )}
                         >
                           <Checkbox
@@ -582,7 +622,11 @@ function DraftForm({
           <X className="mr-1 h-3.5 w-3.5" /> Cancelar
         </Button>
         <Button onClick={onSave} disabled={busy}>
-          {busy ? <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" /> : <Save className="mr-1 h-3.5 w-3.5" />}
+          {busy ? (
+            <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />
+          ) : (
+            <Save className="mr-1 h-3.5 w-3.5" />
+          )}
           Salvar
         </Button>
       </div>

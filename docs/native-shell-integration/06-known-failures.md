@@ -7,12 +7,12 @@ o `no-empty`, sem alterar comportamento.
 
 ## Estado após T46-00.1
 
-| Validação | Resultado atual |
-|---|---|
-| `npm ci` | **Passou** em instalação limpa: 524 pacotes instalados. |
-| `npm run build` | **Passou**: cliente e SSR, 4.603 módulos transformados. |
-| `npm run lint` | **Bloqueio preexistente não trivial**: 12.688 erros `prettier/prettier` em 206 arquivos e 39 warnings. O `no-empty` foi eliminado. |
-| `npm test` | 21 arquivos e 146 testes passaram; as mesmas cinco suítes Supabase falharam antes da coleta por ausência do ambiente descartável. |
+| Validação       | Resultado atual                                                                                                                    |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `npm ci`        | **Passou** em instalação limpa: 524 pacotes instalados.                                                                            |
+| `npm run build` | **Passou**: cliente e SSR, 4.603 módulos transformados.                                                                            |
+| `npm run lint`  | **Bloqueio preexistente não trivial**: 12.688 erros `prettier/prettier` em 206 arquivos e 39 warnings. O `no-empty` foi eliminado. |
+| `npm test`      | 21 arquivos e 146 testes passaram; as mesmas cinco suítes Supabase falharam antes da coleta por ausência do ambiente descartável.  |
 
 Adicionar `"endOfLine": "auto"` reduziu o lint de 105.557 para 12.688 erros,
 mas provou que o restante não era apenas CRLF: existem divergências reais de

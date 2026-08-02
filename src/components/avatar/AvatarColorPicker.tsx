@@ -7,10 +7,7 @@
 
 import { useMemo } from "react";
 import { getColorPresetsByCategory } from "@/data/avatarColorPresets";
-import type {
-  AvatarColorPreset,
-  AvatarColorPresetCategory,
-} from "@/types/avatar";
+import type { AvatarColorPreset, AvatarColorPresetCategory } from "@/types/avatar";
 import { cn } from "@/lib/utils";
 import { Check } from "lucide-react";
 

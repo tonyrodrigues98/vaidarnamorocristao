@@ -96,15 +96,9 @@ export default function DashboardCharts({
           <p className="text-sm text-muted-foreground">Idade declarada de quem visitou</p>
           <div className="mt-4 h-64">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                data={ageBucketSeries}
-                margin={{ top: 5, right: 10, left: -20, bottom: 0 }}
-              >
+              <BarChart data={ageBucketSeries} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
                 <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
-                <XAxis
-                  dataKey="label"
-                  tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
-                />
+                <XAxis dataKey="label" tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} />
                 <YAxis
                   allowDecimals={false}
                   tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
@@ -141,11 +135,7 @@ export default function DashboardCharts({
                     paddingAngle={2}
                   >
                     {topCities.map((_, i) => (
-                      <Cell
-                        key={i}
-                        fill={i % 2 === 0 ? ROSE : CORAL}
-                        fillOpacity={1 - i * 0.15}
-                      />
+                      <Cell key={i} fill={i % 2 === 0 ? ROSE : CORAL} fillOpacity={1 - i * 0.15} />
                     ))}
                   </Pie>
                   <Legend wrapperStyle={{ fontSize: 12 }} />

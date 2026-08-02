@@ -46,8 +46,18 @@ export function PetNeedsHud({
             aria-label={`${PET_CARE_LABEL[k]} ${v}%`}
           >
             <div className="flex min-w-0 items-center justify-between gap-1">
-              <Icon className={cn("h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4", low ? "text-red-500" : "text-neutral-600")} />
-              <span className={cn("text-[10px] font-semibold tabular-nums sm:text-xs", low ? "text-red-600" : "text-neutral-700")}>
+              <Icon
+                className={cn(
+                  "h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4",
+                  low ? "text-red-500" : "text-neutral-600",
+                )}
+              />
+              <span
+                className={cn(
+                  "text-[10px] font-semibold tabular-nums sm:text-xs",
+                  low ? "text-red-600" : "text-neutral-700",
+                )}
+              >
                 {v}
               </span>
             </div>

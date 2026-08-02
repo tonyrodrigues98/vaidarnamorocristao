@@ -43,8 +43,7 @@ const channels: Record<string, { ch: ReturnType<typeof supabase.channel>; refs: 
 const debouncers: Record<string, ReturnType<typeof setTimeout> | null> = {};
 
 function snapshot(uid: string): State {
-  if (!state[uid])
-    state[uid] = { items: [], commitment: null, loadedAt: 0, loading: false };
+  if (!state[uid]) state[uid] = { items: [], commitment: null, loadedAt: 0, loading: false };
   return state[uid];
 }
 
@@ -93,9 +92,7 @@ async function loadFor(userId: string): Promise<void> {
     const [{ data: profs }, { data: commitments }] = await Promise.all([
       supabase
         .from("profiles")
-        .select(
-          "id,full_name,photo_url,city,state,verified,equipped_frame_id,equipped_aura_id",
-        )
+        .select("id,full_name,photo_url,city,state,verified,equipped_frame_id,equipped_aura_id")
         .in("id", partnerIds),
       supabase
         .from("relationship_commitments")
@@ -174,15 +171,11 @@ function subscribe(userId: string) {
   }
   const ch = supabase
     .channel(`conv-list-${userId}`)
-    .on(
-      "postgres_changes",
-      { event: "*", schema: "public", table: "messages" },
-      () => scheduleRefresh(userId),
+    .on("postgres_changes", { event: "*", schema: "public", table: "messages" }, () =>
+      scheduleRefresh(userId),
     )
-    .on(
-      "postgres_changes",
-      { event: "*", schema: "public", table: "matches" },
-      () => scheduleRefresh(userId),
+    .on("postgres_changes", { event: "*", schema: "public", table: "matches" }, () =>
+      scheduleRefresh(userId),
     )
     .on(
       "postgres_changes",

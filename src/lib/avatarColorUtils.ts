@@ -14,11 +14,7 @@
  */
 
 import type { CSSProperties } from "react";
-import type {
-  AvatarColorMode,
-  AvatarColorPreset,
-  AvatarRendererLayer,
-} from "@/types/avatar";
+import type { AvatarColorMode, AvatarColorPreset, AvatarRendererLayer } from "@/types/avatar";
 
 type LayerColorInput = {
   colorMode?: AvatarColorMode;
@@ -89,9 +85,7 @@ export function getLayerColorStyle({
   return EMPTY;
 }
 
-export function getLayerColorStyleForRendererLayer(
-  layer: AvatarRendererLayer,
-): LayerColorOutput {
+export function getLayerColorStyleForRendererLayer(layer: AvatarRendererLayer): LayerColorOutput {
   return getLayerColorStyle({
     colorMode: layer.colorMode,
     preset: layer.colorPreset ?? null,

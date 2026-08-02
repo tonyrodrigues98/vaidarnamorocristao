@@ -24,32 +24,32 @@ Este documento congela as duas primeiras camadas e define o procedimento de leit
 
 ### Números canônicos do contrato tipado
 
-| Objeto | Quantidade |
-|---|---:|
-| Tabelas públicas | 140 |
-| Views públicas | 3 |
-| Funções/RPCs públicas | 201 |
-| Enums públicos | 26 |
-| Relacionamentos tipados | 91 |
-| Migrations no repositório | 196 |
-| Linhas SQL nas migrations | 21.890 |
-| Migrations de maio de 2026 | 84 |
-| Migrations de junho de 2026 | 112 |
+| Objeto                      | Quantidade |
+| --------------------------- | ---------: |
+| Tabelas públicas            |        140 |
+| Views públicas              |          3 |
+| Funções/RPCs públicas       |        201 |
+| Enums públicos              |         26 |
+| Relacionamentos tipados     |         91 |
+| Migrations no repositório   |        196 |
+| Linhas SQL nas migrations   |     21.890 |
+| Migrations de maio de 2026  |         84 |
+| Migrations de junho de 2026 |        112 |
 
 ### Evidências de acúmulo histórico
 
 | Operação encontrada nas migrations | Ocorrências históricas |
-|---|---:|
-| `CREATE TABLE` | 151 |
-| `ALTER TABLE` | 286 |
-| `CREATE/REPLACE FUNCTION` | 394 |
-| `CREATE POLICY` | 446 |
-| `DROP POLICY` | 169 |
-| `CREATE TRIGGER` | 114 |
-| `SECURITY DEFINER` | 384 |
-| habilitações de RLS | 153 |
-| `GRANT EXECUTE` | 214 |
-| `REVOKE` | 191 |
+| ---------------------------------- | ---------------------: |
+| `CREATE TABLE`                     |                    151 |
+| `ALTER TABLE`                      |                    286 |
+| `CREATE/REPLACE FUNCTION`          |                    394 |
+| `CREATE POLICY`                    |                    446 |
+| `DROP POLICY`                      |                    169 |
+| `CREATE TRIGGER`                   |                    114 |
+| `SECURITY DEFINER`                 |                    384 |
+| habilitações de RLS                |                    153 |
+| `GRANT EXECUTE`                    |                    214 |
+| `REVOKE`                           |                    191 |
 
 Há 394 definições históricas para apenas 201 funções finais tipadas. Isso não significa 193 funções abandonadas: muitas foram redefinidas várias vezes. Da mesma forma, 151 criações históricas de tabela resultam em 140 tabelas expostas atualmente.
 
@@ -95,12 +95,12 @@ A reconstituição em ordem cronológica permite estimar o último `CREATE`, `DR
 
 ### Classificação de confiança
 
-| Marca | Significado |
-|---|---|
-| Confirmado-T | objeto presente no contrato tipado atual |
+| Marca        | Significado                                      |
+| ------------ | ------------------------------------------------ |
+| Confirmado-T | objeto presente no contrato tipado atual         |
 | Confirmado-G | conteúdo confirmado no GitHub no commit canônico |
-| Inferido-M | estado final inferido pela ordem das migrations |
-| Pendente-P | precisa ser confirmado no PostgreSQL publicado |
+| Inferido-M   | estado final inferido pela ordem das migrations  |
+| Pendente-P   | precisa ser confirmado no PostgreSQL publicado   |
 
 ---
 
@@ -108,21 +108,21 @@ A reconstituição em ordem cronológica permite estimar o último `CREATE`, `DR
 
 As 140 tabelas foram atribuídas uma única vez a 12 domínios documentais. Esta divisão não muda o banco; serve de base para a futura arquitetura modular.
 
-| Domínio documental | Tabelas | Estado futuro preliminar |
-|---|---:|---|
-| Identidade, perfil e governança de conta | 17 | preservar e separar melhor |
-| Namoro e relacionamento | 8 | preservar, redesenhar e desacoplar da comunidade |
-| Recados anônimos | 5 | revisar como feature autônoma |
-| Comunidade e conteúdo cristão | 13 | expandir como domínio principal |
-| Suporte | 3 | preservar/refatorar |
-| Notificações e push | 3 | preservar e corrigir segurança |
-| Economia, loja e personalização de perfil | 21 | preservar e modularizar |
-| Avatar-personagem customizável | 7 | retirar futuramente com migração controlada |
-| Pré-cadastro e equipe da live | 4 | revisar finalidade futura |
-| Pets, cuidado, progressão e álbum | 40 | preservar como subproduto modular |
-| Grab/caixas | 9 | preservar com controles econômicos |
-| Pet Arcade | 10 | preservar/refatorar como subproduto modular |
-| **Total** | **140** | |
+| Domínio documental                        | Tabelas | Estado futuro preliminar                         |
+| ----------------------------------------- | ------: | ------------------------------------------------ |
+| Identidade, perfil e governança de conta  |      17 | preservar e separar melhor                       |
+| Namoro e relacionamento                   |       8 | preservar, redesenhar e desacoplar da comunidade |
+| Recados anônimos                          |       5 | revisar como feature autônoma                    |
+| Comunidade e conteúdo cristão             |      13 | expandir como domínio principal                  |
+| Suporte                                   |       3 | preservar/refatorar                              |
+| Notificações e push                       |       3 | preservar e corrigir segurança                   |
+| Economia, loja e personalização de perfil |      21 | preservar e modularizar                          |
+| Avatar-personagem customizável            |       7 | retirar futuramente com migração controlada      |
+| Pré-cadastro e equipe da live             |       4 | revisar finalidade futura                        |
+| Pets, cuidado, progressão e álbum         |      40 | preservar como subproduto modular                |
+| Grab/caixas                               |       9 | preservar com controles econômicos               |
+| Pet Arcade                                |      10 | preservar/refatorar como subproduto modular      |
+| **Total**                                 | **140** |                                                  |
 
 ---
 
@@ -313,11 +313,11 @@ Há coexistência de `user_pets` e `user_pets_v2`. Isso é sinal de migração e
 
 ## 5. Views canônicas
 
-| View | Domínio | Finalidade |
-|---|---|---|
-| `anonymous_messages_inbox` | recados anônimos | caixa de entrada derivada |
-| `anonymous_messages_outbox` | recados anônimos | caixa de saída derivada |
-| `v_economy_daily` | economia/admin | consolidação diária da economia |
+| View                        | Domínio          | Finalidade                      |
+| --------------------------- | ---------------- | ------------------------------- |
+| `anonymous_messages_inbox`  | recados anônimos | caixa de entrada derivada       |
+| `anonymous_messages_outbox` | recados anônimos | caixa de saída derivada         |
+| `v_economy_daily`           | economia/admin   | consolidação diária da economia |
 
 As views dependem de tabelas e policies subjacentes. A futura baseline deve preservar explicitamente `security_invoker`/privilégios conforme o estado confirmado no banco publicado.
 
@@ -387,19 +387,19 @@ Para separar comunidade de namoro, não é obrigatório remover `sex_type` ou `m
 
 Os tipos declaram 91 relacionamentos. Os alvos com maior número de referências são:
 
-| Relação de destino | Referências tipadas |
-|---|---:|
-| `user_pets_v2` | 7 |
-| `pet_categories` | 6 |
-| `grab_pools` | 5 |
-| `pet_arcade_rounds` | 5 |
-| `pet_species` | 4 |
-| `avatar_decorations` | 4 |
-| `devotional_comments` | 3 |
-| `daily_posts` | 3 |
-| `pet_care_items` | 3 |
-| `pet_personalities` | 3 |
-| `pet_benefits` | 3 |
+| Relação de destino    | Referências tipadas |
+| --------------------- | ------------------: |
+| `user_pets_v2`        |                   7 |
+| `pet_categories`      |                   6 |
+| `grab_pools`          |                   5 |
+| `pet_arcade_rounds`   |                   5 |
+| `pet_species`         |                   4 |
+| `avatar_decorations`  |                   4 |
+| `devotional_comments` |                   3 |
+| `daily_posts`         |                   3 |
+| `pet_care_items`      |                   3 |
+| `pet_personalities`   |                   3 |
+| `pet_benefits`        |                   3 |
 
 Isso confirma dois centros de acoplamento:
 
@@ -452,16 +452,16 @@ Nenhuma policy deve ser copiada por nome apenas. Para cada tabela será necessá
 
 As migrations declaram oito buckets:
 
-| Bucket | Visibilidade declarada | Finalidade |
-|---|---|---|
-| `profile-photos` | público | fotos de perfil e pré-cadastros |
-| `verifications` | privado | documentos/arquivos de verificação |
-| `support-attachments` | privado | anexos de suporte |
-| `photo-moderation-rejects` | privado | evidências de rejeição/moderação |
-| `stickers` | público | stickers da plataforma |
-| `gift-images` | público | imagens de presentes |
-| `profile-backgrounds` | público | fundos premium de perfil |
-| `live-team` | público | imagens da equipe/destaques da live |
+| Bucket                     | Visibilidade declarada | Finalidade                          |
+| -------------------------- | ---------------------- | ----------------------------------- |
+| `profile-photos`           | público                | fotos de perfil e pré-cadastros     |
+| `verifications`            | privado                | documentos/arquivos de verificação  |
+| `support-attachments`      | privado                | anexos de suporte                   |
+| `photo-moderation-rejects` | privado                | evidências de rejeição/moderação    |
+| `stickers`                 | público                | stickers da plataforma              |
+| `gift-images`              | público                | imagens de presentes                |
+| `profile-backgrounds`      | público                | fundos premium de perfil            |
+| `live-team`                | público                | imagens da equipe/destaques da live |
 
 Foram encontradas 52 policies historicamente reconstituídas em `storage.objects`, incluindo políticas relacionadas a pets e avatar looks que podem operar sobre buckets não criados explicitamente pelas migrations ou sobre objetos em buckets já existentes.
 
@@ -585,14 +585,14 @@ Quando executado por uma conta autorizada no SQL Editor do projeto correto, deve
 
 ### Comparações obrigatórias
 
-| Comparação | Resultado esperado |
-|---|---|
+| Comparação                               | Resultado esperado                                        |
+| ---------------------------------------- | --------------------------------------------------------- |
 | migrations GitHub × migrations aplicadas | nenhuma ausente, extra ou fora de ordem sem justificativa |
-| tipos × tabelas/views | mesmos nomes e colunas públicas |
-| tipos × RPCs | mesmas assinaturas e retornos |
-| histórico × RLS real | diferenças documentadas e testadas |
-| histórico × Realtime real | allowlist confirmada |
-| histórico × Storage real | buckets, privacidade e policies confirmados |
+| tipos × tabelas/views                    | mesmos nomes e colunas públicas                           |
+| tipos × RPCs                             | mesmas assinaturas e retornos                             |
+| histórico × RLS real                     | diferenças documentadas e testadas                        |
+| histórico × Realtime real                | allowlist confirmada                                      |
+| histórico × Storage real                 | buckets, privacidade e policies confirmados               |
 
 ### Classificação de divergência
 
@@ -661,4 +661,3 @@ Até que a comparação publicada esteja concluída:
 - só então produzir a baseline executável para novos ambientes.
 
 O Item 4 — divisão futura por domínios — pode ser desenhado com este snapshot documental. Qualquer implementação no banco deve aguardar a confirmação publicada e as correções P0 do Item 2.
-

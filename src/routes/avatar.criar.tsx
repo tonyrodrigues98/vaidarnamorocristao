@@ -30,8 +30,16 @@ type Base = {
 
 const AGE_OPTIONS: { key: AvatarAgeRange; label: string; desc: string }[] = [
   { key: "20-35", label: "20 – 35 anos", desc: "Jovem adulto. Visual padrão e vibrante." },
-  { key: "36-50", label: "36 – 50 anos", desc: "Adulto maduro. Em breve traços sutis de maturidade." },
-  { key: "50+", label: "50+ anos", desc: "Idade avançada. Em breve cabelos grisalhos e traços marcantes." },
+  {
+    key: "36-50",
+    label: "36 – 50 anos",
+    desc: "Adulto maduro. Em breve traços sutis de maturidade.",
+  },
+  {
+    key: "50+",
+    label: "50+ anos",
+    desc: "Idade avançada. Em breve cabelos grisalhos e traços marcantes.",
+  },
 ];
 
 const SKIN_OPTIONS: { key: string; label: string; swatch: string }[] = [
@@ -59,15 +67,7 @@ const POSE_OPTIONS: { key: AvatarPoseKey; label: string; pose_key: string }[] = 
   { key: "holding_heart", label: "Com coração", pose_key: "holding_heart" },
 ];
 
-const STEPS = [
-  "Nome",
-  "Gênero",
-  "Idade",
-  "Pele",
-  "Corpo",
-  "Pose",
-  "Confirmar",
-] as const;
+const STEPS = ["Nome", "Gênero", "Idade", "Pele", "Corpo", "Pose", "Confirmar"] as const;
 const LAST_STEP = STEPS.length - 1;
 
 const nameSchema = z.string().trim().min(2, "Nome muito curto").max(40, "Nome muito longo");
@@ -82,14 +82,9 @@ function findBase(
   return (
     bases.find(
       (b) =>
-        b.gender === gender &&
-        b.body_type === body &&
-        b.pose_key === pose &&
-        b.skin_tone === skin,
+        b.gender === gender && b.body_type === body && b.pose_key === pose && b.skin_tone === skin,
     ) ??
-    bases.find(
-      (b) => b.gender === gender && b.body_type === body && b.pose_key === pose,
-    ) ??
+    bases.find((b) => b.gender === gender && b.body_type === body && b.pose_key === pose) ??
     bases.find(
       (b) => b.gender === gender && b.body_type === "default" && b.pose_key === "standing_default",
     ) ??
@@ -132,18 +127,16 @@ function AvatarCreatePage() {
         profileSex === "f" || profileSex === "feminino" || profileSex === "mulher"
           ? "feminino"
           : "masculino";
-      const existing = existingRes.data as
-        | {
-            avatar_name?: string | null;
-            skin_tone?: string | null;
-            age_range?: string | null;
-            base_id?: string | null;
-          }
-        | null;
+      const existing = existingRes.data as {
+        avatar_name?: string | null;
+        skin_tone?: string | null;
+        age_range?: string | null;
+        base_id?: string | null;
+      } | null;
 
       setName(existing?.avatar_name || profileRes.data?.full_name || "");
       setSkinTone(existing?.skin_tone ?? "default");
-      setAgeRange(((existing?.age_range as AvatarAgeRange) ?? "20-35"));
+      setAgeRange((existing?.age_range as AvatarAgeRange) ?? "20-35");
 
       if (existing?.base_id) {
         const found = (basesRes.data ?? []).find((b: Base) => b.id === existing.base_id);
@@ -403,9 +396,7 @@ function PreviewCard({ base, loading }: { base: Base | null; loading: boolean })
           className="h-full w-full object-contain p-3"
         />
       ) : (
-        <p className="px-4 text-center text-xs text-muted-foreground">
-          Combinação indisponível
-        </p>
+        <p className="px-4 text-center text-xs text-muted-foreground">Combinação indisponível</p>
       )}
     </div>
   );
@@ -514,9 +505,7 @@ function SwatchCard({
       onClick={onClick}
       className={cn(
         "flex flex-col items-center gap-1.5 rounded-2xl border p-2 transition",
-        active
-          ? "border-primary ring-1 ring-primary"
-          : "border-border hover:border-primary/40",
+        active ? "border-primary ring-1 ring-primary" : "border-border hover:border-primary/40",
       )}
     >
       <div

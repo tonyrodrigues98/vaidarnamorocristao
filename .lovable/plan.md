@@ -1,4 +1,3 @@
-
 # Fase 3 — Mapa do Reino (Z2)
 
 Sai do Quarto Vivo (Z1) com um **zoom-out cinematográfico** e revela o mundo onde o pet vive: um mapa pintado à mão, mesma paleta clara da Fase 1, com regiões que pulsam de acordo com o progresso real do usuário (expedições, streak, missões, evolução).
@@ -9,14 +8,14 @@ Não é uma tela de menu nem um grid de cards. É uma ilustração viva.
 
 ## Decisões registradas
 
-| Decisão | Escolha |
-|---|---|
-| Estilo | Mesmo storybook 2.5D pintado à mão, paleta clara (creme, sage, dusty rose, âmbar) |
-| Transição Z1 → Z2 | Zoom-out animado (scale + fade) ~700ms via CSS. Pinch-out no mobile, scroll-up no desktop, botão "Ver o reino" no canto |
-| Volta Z2 → Z1 | Toca no telhado da casa central ou botão "Voltar pro quarto" |
-| Regiões | 5 fixas nesta fase: **Casa do Pet** (centro), **Floresta das Expedições**, **Vale das Missões**, **Lago do Descanso**, **Torre da Evolução** |
-| Vida no mapa | Nuvens passando lento, água do lago brilhando, fumaça da chaminé, dia/noite igual Z1 |
-| Escopo | Apenas navegação visual + abrir os modais existentes. Sem novo backend. Constelação (Z3) fica pra Fase 4 |
+| Decisão           | Escolha                                                                                                                                      |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| Estilo            | Mesmo storybook 2.5D pintado à mão, paleta clara (creme, sage, dusty rose, âmbar)                                                            |
+| Transição Z1 → Z2 | Zoom-out animado (scale + fade) ~700ms via CSS. Pinch-out no mobile, scroll-up no desktop, botão "Ver o reino" no canto                      |
+| Volta Z2 → Z1     | Toca no telhado da casa central ou botão "Voltar pro quarto"                                                                                 |
+| Regiões           | 5 fixas nesta fase: **Casa do Pet** (centro), **Floresta das Expedições**, **Vale das Missões**, **Lago do Descanso**, **Torre da Evolução** |
+| Vida no mapa      | Nuvens passando lento, água do lago brilhando, fumaça da chaminé, dia/noite igual Z1                                                         |
+| Escopo            | Apenas navegação visual + abrir os modais existentes. Sem novo backend. Constelação (Z3) fica pra Fase 4                                     |
 
 ---
 
@@ -50,13 +49,13 @@ Paleta clara aprovada. Gerados via `imagegen` standard quality, salvos como `lov
 
 ### 3. Regiões e ações
 
-| Região | Glow quando | Ao tocar |
-|---|---|---|
-| Casa do Pet | sempre suave | volta pra Z1 (Quarto Vivo) |
-| Floresta das Expedições | há expedição disponível ou em andamento | abre `ExpeditionsCard` em sheet |
-| Vale das Missões | há missões diárias pendentes | abre `MissionsTodayCard` em sheet |
-| Lago do Descanso | energia do pet < 40 | abre `PetCareActionSheet kind="sleep"` |
-| Torre da Evolução | pet pronto pra evoluir | abre `PetEvolutionCard` em sheet |
+| Região                  | Glow quando                             | Ao tocar                               |
+| ----------------------- | --------------------------------------- | -------------------------------------- |
+| Casa do Pet             | sempre suave                            | volta pra Z1 (Quarto Vivo)             |
+| Floresta das Expedições | há expedição disponível ou em andamento | abre `ExpeditionsCard` em sheet        |
+| Vale das Missões        | há missões diárias pendentes            | abre `MissionsTodayCard` em sheet      |
+| Lago do Descanso        | energia do pet < 40                     | abre `PetCareActionSheet kind="sleep"` |
+| Torre da Evolução       | pet pronto pra evoluir                  | abre `PetEvolutionCard` em sheet       |
 
 Cada região é um `<RoomHotspot>` (reaproveita o componente da Fase 1) posicionado em `%`, com glow pulsante condicional. Pulse mais forte quando há ação urgente.
 
@@ -93,6 +92,7 @@ Topo minimalista: nome do reino (gerado uma vez via `petName + "'s Realm"` salvo
 ## Detalhes técnicos
 
 **Arquivos novos:**
+
 - `src/components/pet/PetKingdomMap.tsx`
 - `src/components/pet/MapBackground.tsx`
 - `src/components/pet/MapClouds.tsx`
@@ -103,16 +103,19 @@ Topo minimalista: nome do reino (gerado uma vez via `petName + "'s Realm"` salvo
 - `src/assets/pet-kingdom/kingdom-clouds.png.asset.json`
 
 **Arquivos modificados:**
+
 - `src/components/pet/PetLivingRoom.tsx` — adiciona `zoomLevel` state, gesto pinch-out, animação de saída, renderiza `<PetKingdomMap>` quando `zoomLevel === "kingdom"`
 - `src/routes/meu-pet.tsx` — nenhuma mudança estrutural; modais já são compartilhados via Sheet
 - `src/styles.css` — keyframes `cloud-drift`, `water-shimmer`, `chimney-smoke`, `bird-cross`
 
 **Sem alterações em:**
+
 - Backend
 - Modais (`ExpeditionsCard`, `MissionsTodayCard`, `PetEvolutionCard`, `PetCareActionSheet`) — reaproveitados inteiros
 - Fase 1 (Quarto Vivo continua funcionando exatamente igual quando `zoomLevel === "room"`)
 
 **Performance:**
+
 - 2 PNGs de mapa (~250kb cada) + 1 PNG de nuvens (~80kb) = ~580kb, lazy load só quando `zoomLevel === "kingdom"` pela primeira vez
 - Animações CSS-only, GPU-accelerated
 

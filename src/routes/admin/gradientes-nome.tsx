@@ -146,7 +146,8 @@ function NameGradientsAdminPage() {
                 <div>
                   <Label>Preço</Label>
                   <Input
-                    type="text" inputMode="decimal"
+                    type="text"
+                    inputMode="decimal"
                     value={form.price}
                     onChange={(e) => setForm({ ...form, price: e.target.value })}
                   />
@@ -154,7 +155,8 @@ function NameGradientsAdminPage() {
                 <div>
                   <Label>Ordem</Label>
                   <Input
-                    type="text" inputMode="decimal"
+                    type="text"
+                    inputMode="decimal"
                     value={form.sort_order}
                     onChange={(e) => setForm({ ...form, sort_order: e.target.value })}
                   />

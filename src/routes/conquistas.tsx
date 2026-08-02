@@ -29,7 +29,9 @@ function ConquistasPage() {
   const { user, loading } = useAuth();
   const [items, setItems] = useState<Achievement[]>([]);
   const [xp, setXp] = useState<XpState | null>(null);
-  const [progressByAch, setProgressByAch] = useState<Record<string, { progress: number; unlocked: boolean }>>({});
+  const [progressByAch, setProgressByAch] = useState<
+    Record<string, { progress: number; unlocked: boolean }>
+  >({});
   const [busy, setBusy] = useState(true);
 
   useEffect(() => {
@@ -51,7 +53,11 @@ function ConquistasPage() {
         setItems((data ?? []) as Achievement[]);
         setXp(state);
         const map: Record<string, { progress: number; unlocked: boolean }> = {};
-        for (const r of (prog ?? []) as Array<{ achievement_id: string; progress: number; unlocked_at: string | null }>) {
+        for (const r of (prog ?? []) as Array<{
+          achievement_id: string;
+          progress: number;
+          unlocked_at: string | null;
+        }>) {
           map[r.achievement_id] = { progress: r.progress ?? 0, unlocked: !!r.unlocked_at };
         }
         setProgressByAch(map);
@@ -103,10 +109,15 @@ function ConquistasPage() {
             {items.map((a) => {
               const p = progressByAch[a.id];
               const unlocked = p?.unlocked || isUnlocked(a, level);
-              const progress = p?.progress ?? (a.category === "level" ? Math.min(a.goal, level) : 0);
+              const progress =
+                p?.progress ?? (a.category === "level" ? Math.min(a.goal, level) : 0);
               const IconCmp =
-                (LucideIcons as unknown as Record<string, React.ComponentType<{ className?: string }>>)[a.icon] ??
-                Trophy;
+                (
+                  LucideIcons as unknown as Record<
+                    string,
+                    React.ComponentType<{ className?: string }>
+                  >
+                )[a.icon] ?? Trophy;
               return (
                 <article
                   key={a.id}

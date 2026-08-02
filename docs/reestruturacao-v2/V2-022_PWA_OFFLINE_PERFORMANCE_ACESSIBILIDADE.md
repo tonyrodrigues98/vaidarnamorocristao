@@ -163,4 +163,3 @@ Validar:
 - subscriptions controladas;
 - documentação de limites;
 - regressões automatizadas.
-

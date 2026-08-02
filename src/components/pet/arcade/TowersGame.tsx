@@ -114,7 +114,10 @@ export function TowersGame({
       icon={<Building2 className="size-5" />}
     >
       <div className="space-y-4">
-        <ArcadeStage className="bg-gradient-to-b from-emerald-950 via-teal-950 to-slate-950 p-4" glowClassName="bg-emerald-400/25">
+        <ArcadeStage
+          className="bg-gradient-to-b from-emerald-950 via-teal-950 to-slate-950 p-4"
+          glowClassName="bg-emerald-400/25"
+        >
           <div className="mb-4 flex items-center justify-between text-xs font-bold">
             <span>
               Andar {Math.min(floor + 1, floors)} de {floors}
@@ -140,7 +143,11 @@ export function TowersGame({
           </div>
           <div className="mt-4 grid grid-cols-2 gap-2">
             <ArcadeMetric label="Andar atual" value={`${Math.min(floor + 1, floors)}/${floors}`} />
-            <ArcadeMetric label="Multiplicador" value={`${Number(round?.multiplier ?? 1).toFixed(2)}x`} tone="success" />
+            <ArcadeMetric
+              label="Multiplicador"
+              value={`${Number(round?.multiplier ?? 1).toFixed(2)}x`}
+              tone="success"
+            />
           </div>
         </ArcadeStage>
 

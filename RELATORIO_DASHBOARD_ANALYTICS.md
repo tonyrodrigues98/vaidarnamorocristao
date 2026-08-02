@@ -1,6 +1,7 @@
 # Relatório — /dashboard como Analytics Center
 
 ## Arquivos alterados
+
 - `src/routes/dashboard.tsx` — refatoração completa (UI, TanStack Query, offline, performance).
 
 Nenhum outro arquivo foi modificado. `DashboardCharts.tsx` permaneceu intacto (já estava bem isolado).
@@ -10,6 +11,7 @@ Nenhum outro arquivo foi modificado. `DashboardCharts.tsx` permaneceu intacto (j
 ## Auditoria do estado anterior
 
 ### Métricas reais já carregadas
+
 - `profile_views` (últimos 30 dias, fixo) — visitas, únicas, tendência 7d vs 7d anterior, faixa etária, top cidades.
 - `interests` — contagem total recebida.
 - `matches` — lista (para derivar `unread`).
@@ -18,13 +20,16 @@ Nenhum outro arquivo foi modificado. `DashboardCharts.tsx` permaneceu intacto (j
 - `profiles` — status do próprio usuário + `equipped_name_gradient_id`.
 
 ### Queries
+
 - Todas via `useEffect` + `supabase.from(...)` direto. Sem `useQuery`.
 - Sem `staleTime`, sem `refetchOnReconnect`, sem `queryKey` estável.
 
 ### Recharts / bundle
+
 - Já estava lazy via `React.lazy(() => import("@/components/dashboard/DashboardCharts"))` com `<Suspense fallback={...}>`. **Mantido**.
 
 ### Problemas encontrados
+
 - Sem filtro de período (fixo 30d).
 - Sem offline awareness.
 - Grid `sm:grid-cols-2 lg:grid-cols-4` em KPIs — empilhava demais no mobile (1 coluna < 640px).
@@ -68,11 +73,11 @@ Atalhos (grid 2/3/4): /perfil /conversas /pretendentes /interesses /matches /not
 
 Três queries com chaves estáveis:
 
-| queryKey | enabled | staleTime |
-|---|---|---|
-| `["dashboard-profile", userId]` | `!!user` | 60s |
-| `["dashboard-latest-news", userId]` | `!!user` | 60s |
-| `["dashboard-metrics", userId, period]` | `!!user && profile.status === "approved"` | 30s |
+| queryKey                                | enabled                                   | staleTime |
+| --------------------------------------- | ----------------------------------------- | --------- |
+| `["dashboard-profile", userId]`         | `!!user`                                  | 60s       |
+| `["dashboard-latest-news", userId]`     | `!!user`                                  | 60s       |
+| `["dashboard-metrics", userId, period]` | `!!user && profile.status === "approved"` | 30s       |
 
 Todas com `refetchOnReconnect: true`. `period` entra na chave porque o range de `profile_views.gte("created_at", since)` muda com ela.
 

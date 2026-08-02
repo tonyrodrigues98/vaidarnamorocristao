@@ -86,35 +86,41 @@ Em `docs/reestruturacao-v2/referencias-sites/README.md`, use este modelo:
 # Referências visuais criadas no Sites
 
 ## Perfil estilo Steam
+
 - Link: [COLE O LINK, SE EXISTIR]
 - Arquivos: `perfil-steam/`
 - Aproveitar: capa, identidade visual, vitrines reorganizáveis, inventário equipado e liberdade de expressão.
 - Não copiar: navegação global, dados falsos, backend, nomes de tabelas e qualquer elemento que conflite com o projeto real.
 
 ## Início estilo Instagram
+
 - Link: [COLE O LINK, SE EXISTIR]
 - Arquivos: `inicio-instagram/`
 - Aproveitar: novidades logo na entrada, feed social, status de 24 horas e sensação de comunidade viva.
 - Não copiar: marca Instagram, ícones proprietários, conteúdo fictício e arquitetura de dados.
 
 ## Comunidade inspirada no Discord
+
 - Link: [COLE O LINK, SE EXISTIR]
 - Arquivos: `comunidade-discord/`
 - Aproveitar: organização de espaços, canais, presença, acontecimentos e conversa comunitária.
 - Não copiar: identidade do Discord ou sua interface literalmente.
 
 ## Conversas inspiradas no WhatsApp/Vitra
+
 - Link: [COLE O LINK, SE EXISTIR]
 - Arquivos: `conversas-whatsapp/`
 - Aproveitar: fluidez, simplicidade, leitura imediata, navegação mobile-first e painel lateral de configurações.
 - Não copiar: identidade, ícones proprietários ou aparência literal do WhatsApp.
 
 ## Verbo
+
 - Link: [COLE O LINK, SE EXISTIR]
 - Arquivos: `verbo/`
 - Aproveitar: experiência completa de Bíblia e estudo pessoal como feature independente ligada ao login do usuário.
 
 ## Sala de Cinema
+
 - Link: [COLE O LINK, SE EXISTIR]
 - Arquivos: `sala-cinema/`
 - Aproveitar: assistir juntos, player sincronizado, participantes, chat em tempo real e experiência cinematográfica integrada ao VaiDarNamoro.

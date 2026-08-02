@@ -4,10 +4,7 @@ import { useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Check, Gift, Loader2, Lock, Sparkles } from "lucide-react";
 import { CoinIcon } from "@/components/icons/CoinIcon";
 
-import {
-  equipPetBackground,
-  unlockPetBackground,
-} from "@/lib/petBackgrounds";
+import { equipPetBackground, unlockPetBackground } from "@/lib/petBackgrounds";
 import {
   petKeys,
   petSceneryEquippedQueryOptions,
@@ -93,8 +90,7 @@ export function PetSceneryPanel({
     }
     // Brinde grátis por raridade desbloqueada
     const canFreebie =
-      !ownedIds.has(bg.id) &&
-      canClaimFreebie(freebieStatuses, "pet_background", bg.rarity);
+      !ownedIds.has(bg.id) && canClaimFreebie(freebieStatuses, "pet_background", bg.rarity);
     if (canFreebie) {
       toast(`Resgatar "${bg.name}" grátis?`, {
         description: `Você pode escolher 1 cenário ${bg.rarity} de graça nesse tier.`,
@@ -211,8 +207,7 @@ export function PetSceneryPanel({
             const busy = busyId === bg.id;
             const locked = !owned && level < (bg.min_level ?? 1);
             const isFreebie =
-              !owned && !locked &&
-              canClaimFreebie(freebieStatuses, "pet_background", bg.rarity);
+              !owned && !locked && canClaimFreebie(freebieStatuses, "pet_background", bg.rarity);
             return (
               <button
                 key={bg.id}
@@ -249,8 +244,10 @@ export function PetSceneryPanel({
                       </div>
                     </div>
                   )}
-                  {!locked && !owned && bg.is_exclusive && (
-                    isFreebie ? (
+                  {!locked &&
+                    !owned &&
+                    bg.is_exclusive &&
+                    (isFreebie ? (
                       <div className="absolute left-1.5 top-1.5 inline-flex items-center gap-1 rounded-full bg-emerald-500 px-2 py-0.5 text-[10px] font-semibold text-white">
                         <Gift className="h-3 w-3" /> Brinde
                       </div>
@@ -258,8 +255,7 @@ export function PetSceneryPanel({
                       <div className="absolute left-1.5 top-1.5 inline-flex items-center gap-1 rounded-full bg-amber-500 px-2 py-0.5 text-[10px] font-semibold text-white">
                         <CoinIcon className="h-3 w-3" /> {bg.price_coins}
                       </div>
-                    )
-                  )}
+                    ))}
                   {!locked && !owned && !bg.is_exclusive && !isFreebie && (
                     <div className="absolute left-1.5 top-1.5 inline-flex items-center gap-1 rounded-full bg-white/95 px-2 py-0.5 text-[10px] font-semibold text-neutral-700 ring-1 ring-neutral-200">
                       <Lock className="h-3 w-3" /> Grátis

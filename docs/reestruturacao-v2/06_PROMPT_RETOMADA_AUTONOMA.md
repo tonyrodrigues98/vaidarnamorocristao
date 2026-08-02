@@ -19,4 +19,3 @@ Não gere um novo plano e não peça que eu recopie contexto.
 
 Ao terminar a sessão, responda em no máximo 20 linhas com resultado, PRs,
 validações, próximo lote e blockers reais.
-

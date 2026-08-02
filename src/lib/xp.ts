@@ -42,12 +42,15 @@ export async function awardXp(
   meta?: Record<string, unknown>,
 ): Promise<AwardResult | null> {
   try {
-    const { data, error } = await supabase.rpc("award_xp" as never, {
-      _source: source,
-      _amount: amount,
-      _daily_cap: dailyCap ?? null,
-      _meta: meta ?? null,
-    } as never);
+    const { data, error } = await supabase.rpc(
+      "award_xp" as never,
+      {
+        _source: source,
+        _amount: amount,
+        _daily_cap: dailyCap ?? null,
+        _meta: meta ?? null,
+      } as never,
+    );
     if (error) return null;
     return (data as AwardResult) ?? null;
   } catch {

@@ -571,7 +571,8 @@ function BackgroundDialog({
             <div className="space-y-2">
               <Label>Preco</Label>
               <Input
-                type="text" inputMode="decimal"
+                type="text"
+                inputMode="decimal"
                 min={0}
                 value={form.price}
                 onChange={(e) => onFormChange({ ...form, price: Number(e.target.value) })}
@@ -600,7 +601,8 @@ function BackgroundDialog({
             <div className="space-y-2">
               <Label>Ordem</Label>
               <Input
-                type="text" inputMode="decimal"
+                type="text"
+                inputMode="decimal"
                 value={form.sort_order}
                 onChange={(e) => onFormChange({ ...form, sort_order: Number(e.target.value) })}
               />

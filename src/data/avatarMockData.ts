@@ -10,12 +10,7 @@
  * aligned with `src/types/avatar.ts`.
  */
 
-import type {
-  AvatarExpression,
-  AvatarLayerKey,
-  AvatarPose,
-  AvatarSlot,
-} from "@/types/avatar";
+import type { AvatarExpression, AvatarLayerKey, AvatarPose, AvatarSlot } from "@/types/avatar";
 
 export const MOCK_POSES: AvatarPose[] = [
   { key: "standing_default", label: "Padrão", description: "Postura neutra de pé." },

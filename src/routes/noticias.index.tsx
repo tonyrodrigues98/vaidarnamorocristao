@@ -255,10 +255,7 @@ function NoticiasSkeleton() {
       </div>
       <div className="space-y-2">
         {[0, 1, 2].map((i) => (
-          <div
-            key={i}
-            className="flex gap-3 rounded-2xl border border-border/60 bg-card/70 p-3.5"
-          >
+          <div key={i} className="flex gap-3 rounded-2xl border border-border/60 bg-card/70 p-3.5">
             <div className="h-9 w-9 shrink-0 animate-pulse rounded-xl bg-muted" />
             <div className="flex-1 space-y-2">
               <div className="h-3 w-24 animate-pulse rounded bg-muted" />

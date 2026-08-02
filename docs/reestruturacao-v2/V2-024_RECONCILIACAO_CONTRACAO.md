@@ -142,4 +142,3 @@ Se preparado:
 - decisões de Antonio listadas;
 - nenhuma exclusão, compensação ou mutation externa;
 - Draft PR documental/técnico.
-

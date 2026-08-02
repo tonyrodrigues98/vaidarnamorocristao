@@ -143,4 +143,3 @@ layout ou marca. Manter identidade premium, leve e legível.
 - nenhuma pista romântica com modo off;
 - acessibilidade e responsividade;
 - flag/rollback e paridade.
-

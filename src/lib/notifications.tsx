@@ -79,11 +79,7 @@ export function useNotifications(limit = 50) {
           {
             predicate: (q) => {
               const k = q.queryKey;
-              return (
-                Array.isArray(k) &&
-                k[0] === "notifications" &&
-                k[1] === userId
-              );
+              return Array.isArray(k) && k[0] === "notifications" && k[1] === userId;
             },
           },
           (prev) => updater(prev),

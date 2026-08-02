@@ -96,9 +96,7 @@ export function PetProfileCard({ userId, linkToManager = false, className }: Pro
             <span className="text-neutral-400">♥</span>
           </div>
 
-          {subtitle && (
-            <p className="truncate text-xs text-muted-foreground">{subtitle}</p>
-          )}
+          {subtitle && <p className="truncate text-xs text-muted-foreground">{subtitle}</p>}
 
           {pet.personality && (
             <span className="mt-0.5 inline-flex w-fit items-center gap-1 rounded-full bg-neutral-100 px-2 py-0.5 text-[10px] font-semibold text-neutral-700 dark:bg-neutral-700/40 dark:text-neutral-200">
@@ -116,10 +114,7 @@ export function PetProfileCard({ userId, linkToManager = false, className }: Pro
           </p>
           <ul className="grid grid-cols-1 gap-1 sm:grid-cols-2">
             {benefits.slice(0, 4).map((b) => (
-              <li
-                key={b.id}
-                className="flex items-center gap-1.5 text-[11px] text-foreground"
-              >
+              <li key={b.id} className="flex items-center gap-1.5 text-[11px] text-foreground">
                 <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-neutral-500/15 text-neutral-600 dark:text-neutral-300">
                   <Sparkles className="h-2.5 w-2.5" aria-hidden />
                 </span>

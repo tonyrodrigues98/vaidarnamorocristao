@@ -148,4 +148,3 @@ o gate sem bloquear o restante da Economia.
 - nenhum item apagado;
 - UI nova atrás de flag;
 - testes de segurança e concorrência.
-

@@ -33,13 +33,13 @@ export function PetRandomEventModal({
     : "from-indigo-50 to-indigo-100 text-indigo-700";
 
   const title = isCoins ? "Evento da sorte!" : "Buff ativado!";
-  const headline = isCoins
-    ? `+${event.amount} moedas`
-    : event.label;
+  const headline = isCoins ? `+${event.amount} moedas` : event.label;
   const detail = isCoins
     ? event.label
     : `Próximas ações de ${
-        event.kind === "all" ? "qualquer tipo" : PET_CARE_LABEL[event.kind as PetCareKind] ?? event.kind
+        event.kind === "all"
+          ? "qualquer tipo"
+          : (PET_CARE_LABEL[event.kind as PetCareKind] ?? event.kind)
       } com +${Math.round((event.mult - 1) * 100)}% por ${event.duration_min} min.`;
 
   return createPortal(

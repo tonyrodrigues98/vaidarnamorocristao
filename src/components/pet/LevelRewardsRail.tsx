@@ -43,13 +43,7 @@ const RARITY_STYLES: Record<
  * Trilha horizontal de níveis (1 → 50) com marcadores de recompensa.
  * Nível atual destacado, recompensas raras/épicas/lendárias com glow tonalizado.
  */
-export function LevelRewardsRail({
-  level,
-  className,
-}: {
-  level: number;
-  className?: string;
-}) {
+export function LevelRewardsRail({ level, className }: { level: number; className?: string }) {
   const rewardsByLevel = useMemo(() => {
     const map = new Map<number, LevelReward>();
     for (const r of LEVEL_REWARDS) map.set(r.level, r);
@@ -89,7 +83,9 @@ export function LevelRewardsRail({
           </h2>
         </div>
         <div className="text-right">
-          <div className="text-[10px] font-medium uppercase tracking-wider text-neutral-400">Atual</div>
+          <div className="text-[10px] font-medium uppercase tracking-wider text-neutral-400">
+            Atual
+          </div>
           <div className="text-lg font-semibold tabular-nums text-neutral-900">Nv. {level}</div>
         </div>
       </header>
@@ -116,8 +112,12 @@ export function LevelRewardsRail({
               const rarity = r?.rarity ?? "common";
               const styles = r ? RARITY_STYLES[rarity] : null;
               const Icon = r
-                ? ((LucideIcons as unknown as Record<string, React.ComponentType<{ className?: string }>>)[r.icon] ??
-                  LucideIcons.Gift)
+                ? ((
+                    LucideIcons as unknown as Record<
+                      string,
+                      React.ComponentType<{ className?: string }>
+                    >
+                  )[r.icon] ?? LucideIcons.Gift)
                 : null;
 
               if (!r) {
@@ -209,8 +209,12 @@ export function LevelRewardsRail({
           >
             {(() => {
               const Icon =
-                (LucideIcons as unknown as Record<string, React.ComponentType<{ className?: string }>>)[reward.icon] ??
-                LucideIcons.Gift;
+                (
+                  LucideIcons as unknown as Record<
+                    string,
+                    React.ComponentType<{ className?: string }>
+                  >
+                )[reward.icon] ?? LucideIcons.Gift;
               return <Icon className="size-5 text-neutral-800" />;
             })()}
           </div>

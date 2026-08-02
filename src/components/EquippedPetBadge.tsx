@@ -56,9 +56,7 @@ export function EquippedPetBadge({
         )}
       </span>
       <span className="flex flex-col leading-tight">
-        <span className="text-[10px] uppercase tracking-wide text-muted-foreground">
-          Pet
-        </span>
+        <span className="text-[10px] uppercase tracking-wide text-muted-foreground">Pet</span>
         <span className="truncate max-w-[10rem] text-foreground">{displayName}</span>
       </span>
     </span>

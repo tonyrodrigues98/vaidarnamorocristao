@@ -102,7 +102,10 @@ export async function createCareItem(input: CareItemWritable): Promise<PetCareIt
   return hydrateItem(data as any);
 }
 
-export async function updateCareItem(id: string, patch: Partial<CareItemWritable>): Promise<PetCareItem> {
+export async function updateCareItem(
+  id: string,
+  patch: Partial<CareItemWritable>,
+): Promise<PetCareItem> {
   const { data, error } = await supabase
     .from("pet_care_items" as any)
     .update(patch as any)
@@ -114,7 +117,10 @@ export async function updateCareItem(id: string, patch: Partial<CareItemWritable
 }
 
 export async function deleteCareItem(id: string): Promise<void> {
-  const { error } = await supabase.from("pet_care_items" as any).delete().eq("id", id);
+  const { error } = await supabase
+    .from("pet_care_items" as any)
+    .delete()
+    .eq("id", id);
   if (error) throw error;
 }
 
@@ -145,7 +151,7 @@ export async function listCareItemsForPet(opts: {
     .from("pet_care_item_compat" as any)
     .select("item_id, category_id, species_id");
   if (ce) throw ce;
-  const compat = ((c ?? []) as unknown) as PetCareItemCompat[];
+  const compat = (c ?? []) as unknown as PetCareItemCompat[];
   const allowed = new Set<string>();
   for (const r of compat) {
     if (r.category_id !== opts.categoryId) continue;
@@ -190,7 +196,9 @@ export function deriveCurrentValue(
   const decayMult = aggregateMult(mods, kind, "decay_mult");
   if (kind === "energy") {
     // regenera: +1 a cada N minutos (acelerado pelo restore_mult de energia)
-    const gain = Math.floor((elapsedMin * restoreMult) / Math.max(1, cfg.energy_regen_minutes_per_point));
+    const gain = Math.floor(
+      (elapsedMin * restoreMult) / Math.max(1, cfg.energy_regen_minutes_per_point),
+    );
     return Math.max(0, Math.min(100, state.value_at_anchor + gain));
   }
   const decay = (cfg.decay_per_hour * elapsedMin * decayMult) / 60;
@@ -213,8 +221,12 @@ function aggregateMult(
   return m;
 }
 
-export async function getPetRuntimeModifiers(userPetId: string): Promise<PetRuntimeModifiers | null> {
-  const { data, error } = await supabase.rpc("pet_runtime_modifiers" as any, { _user_pet_id: userPetId });
+export async function getPetRuntimeModifiers(
+  userPetId: string,
+): Promise<PetRuntimeModifiers | null> {
+  const { data, error } = await supabase.rpc("pet_runtime_modifiers" as any, {
+    _user_pet_id: userPetId,
+  });
   if (error) return null;
   return (data as PetRuntimeModifiers) ?? null;
 }
@@ -233,17 +245,15 @@ export async function consumeEnergyLocally(
     .maybeSingle();
   const current = deriveCurrentValue((data as any) ?? undefined, cfg, "energy");
   const next = Math.max(0, current - amount);
-  await supabase
-    .from("pet_care_state" as any)
-    .upsert(
-      {
-        user_pet_id: userPetId,
-        kind: "energy",
-        value_at_anchor: next,
-        anchor_at: new Date().toISOString(),
-      } as any,
-      { onConflict: "user_pet_id,kind" },
-    );
+  await supabase.from("pet_care_state" as any).upsert(
+    {
+      user_pet_id: userPetId,
+      kind: "energy",
+      value_at_anchor: next,
+      anchor_at: new Date().toISOString(),
+    } as any,
+    { onConflict: "user_pet_id,kind" },
+  );
 }
 
 /* -------------------- apply action -------------------- */
@@ -256,7 +266,15 @@ export async function applyPetCare(userPetId: string, itemId: string): Promise<A
   if (error) throw error;
   // Compat: pode vir como número (RPC antigo) ou objeto (novo)
   if (typeof data === "number") {
-    return { new_value: data, restore: 0, energy: 0, energy_delta: 0, multiplier: 1, notes: [], random_event: null };
+    return {
+      new_value: data,
+      restore: 0,
+      energy: 0,
+      energy_delta: 0,
+      multiplier: 1,
+      notes: [],
+      random_event: null,
+    };
   }
   return data as ApplyCareResult;
 }

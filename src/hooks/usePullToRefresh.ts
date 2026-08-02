@@ -15,12 +15,7 @@ type Options = {
  * batched through requestAnimationFrame to keep the gesture cheap. Desktop
  * (fine pointer) and SSR are bypassed.
  */
-export function usePullToRefresh({
-  onRefresh,
-  disabled,
-  threshold = 72,
-  max = 110,
-}: Options) {
+export function usePullToRefresh({ onRefresh, disabled, threshold = 72, max = 110 }: Options) {
   const [pull, setPull] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
 

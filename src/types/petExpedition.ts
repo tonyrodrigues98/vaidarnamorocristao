@@ -28,10 +28,42 @@ export const DIFFICULTY_DEFAULTS: Record<
     crit_rate: number;
   }
 > = {
-  easy: { duration_minutes: 60, energy_cost: 20, min_user_level: 1, xp_reward: 20, coin_reward: 30, success_rate: 100, crit_rate: 10 },
-  medium: { duration_minutes: 240, energy_cost: 40, min_user_level: 3, xp_reward: 50, coin_reward: 60, success_rate: 85, crit_rate: 12 },
-  hard: { duration_minutes: 480, energy_cost: 60, min_user_level: 5, xp_reward: 120, coin_reward: 150, success_rate: 70, crit_rate: 15 },
-  extreme: { duration_minutes: 960, energy_cost: 80, min_user_level: 10, xp_reward: 280, coin_reward: 320, success_rate: 50, crit_rate: 20 },
+  easy: {
+    duration_minutes: 60,
+    energy_cost: 20,
+    min_user_level: 1,
+    xp_reward: 20,
+    coin_reward: 30,
+    success_rate: 100,
+    crit_rate: 10,
+  },
+  medium: {
+    duration_minutes: 240,
+    energy_cost: 40,
+    min_user_level: 3,
+    xp_reward: 50,
+    coin_reward: 60,
+    success_rate: 85,
+    crit_rate: 12,
+  },
+  hard: {
+    duration_minutes: 480,
+    energy_cost: 60,
+    min_user_level: 5,
+    xp_reward: 120,
+    coin_reward: 150,
+    success_rate: 70,
+    crit_rate: 15,
+  },
+  extreme: {
+    duration_minutes: 960,
+    energy_cost: 80,
+    min_user_level: 10,
+    xp_reward: 280,
+    coin_reward: 320,
+    success_rate: 50,
+    crit_rate: 20,
+  },
 };
 
 export type PetExpedition = {

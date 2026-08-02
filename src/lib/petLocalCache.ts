@@ -64,10 +64,7 @@ const lastActionKey = (petId: string) => `pet:last-action:${petId}`;
 export function recordLastAction(petId: string, kind: PetCareKind) {
   if (typeof window === "undefined") return;
   try {
-    window.localStorage.setItem(
-      lastActionKey(petId),
-      JSON.stringify({ kind, at: Date.now() }),
-    );
+    window.localStorage.setItem(lastActionKey(petId), JSON.stringify({ kind, at: Date.now() }));
   } catch {
     /* ignore */
   }

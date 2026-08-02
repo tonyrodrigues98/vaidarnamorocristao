@@ -85,9 +85,7 @@ function BlockedPage() {
     onSettled: () => setBusyId(null),
     onSuccess: (id) => {
       toast.success("Perfil desbloqueado");
-      qc.setQueryData<Row[]>(queryKey, (prev) =>
-        (prev ?? []).filter((r) => r.blocked_id !== id),
-      );
+      qc.setQueryData<Row[]>(queryKey, (prev) => (prev ?? []).filter((r) => r.blocked_id !== id));
     },
     onError: (err: Error) => {
       toast.error(err.message || "Não foi possível desbloquear");
@@ -106,7 +104,8 @@ function BlockedPage() {
   if (!user) return <Navigate to="/auth/login" />;
 
   const showStaleNotice = !isOnline && rows !== null && rows.length > 0;
-  const showOfflineEmpty = !isOnline && (rows === null || rows.length === 0) && !blockedQuery.isLoading;
+  const showOfflineEmpty =
+    !isOnline && (rows === null || rows.length === 0) && !blockedQuery.isLoading;
 
   return (
     <div className="min-h-screen bg-background">

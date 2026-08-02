@@ -67,42 +67,136 @@ const MAX_LOG = 60;
 
 const ENTRIES: DiaryEntry[] = [
   // Manhã
-  { id: "morning-soft", text: "A primeira luz tocou meu pelo e me lembrou de {name}.", match: { phase: "morning" }, weight: 1.4 },
-  { id: "morning-streak", text: "Acordei sabendo que {name} viria. Estou seguro.", match: { phase: "morning", minStreak: 5 }, weight: 2 },
-  { id: "morning-hungry", text: "Bom dia, {name}. Cheirei algo bom em algum lugar…", match: { phase: "morning", mood: "hungry" } },
-  { id: "morning-playful", text: "Hoje quero correr no tapete. Brinca comigo?", match: { phase: "morning", mood: "playful" } },
+  {
+    id: "morning-soft",
+    text: "A primeira luz tocou meu pelo e me lembrou de {name}.",
+    match: { phase: "morning" },
+    weight: 1.4,
+  },
+  {
+    id: "morning-streak",
+    text: "Acordei sabendo que {name} viria. Estou seguro.",
+    match: { phase: "morning", minStreak: 5 },
+    weight: 2,
+  },
+  {
+    id: "morning-hungry",
+    text: "Bom dia, {name}. Cheirei algo bom em algum lugar…",
+    match: { phase: "morning", mood: "hungry" },
+  },
+  {
+    id: "morning-playful",
+    text: "Hoje quero correr no tapete. Brinca comigo?",
+    match: { phase: "morning", mood: "playful" },
+  },
 
   // Tarde / dia
-  { id: "day-watching", text: "Fiquei sentado vendo a luz se mover pelas paredes.", match: { phase: "day" }, weight: 1.2 },
-  { id: "day-grateful", text: "Você sempre volta. Isso me ensinou a confiar.", match: { phase: "day", minStreak: 3 } },
-  { id: "day-bored", text: "Hmm. Tudo parado por aqui. Cadê você, {name}?", match: { phase: "day", mood: "lonely" } },
+  {
+    id: "day-watching",
+    text: "Fiquei sentado vendo a luz se mover pelas paredes.",
+    match: { phase: "day" },
+    weight: 1.2,
+  },
+  {
+    id: "day-grateful",
+    text: "Você sempre volta. Isso me ensinou a confiar.",
+    match: { phase: "day", minStreak: 3 },
+  },
+  {
+    id: "day-bored",
+    text: "Hmm. Tudo parado por aqui. Cadê você, {name}?",
+    match: { phase: "day", mood: "lonely" },
+  },
 
   // Tarde-noite
-  { id: "evening-soft", text: "O céu ficou cor de pêssego. Pensei em {name}.", match: { phase: "evening" }, weight: 1.4 },
-  { id: "evening-tired", text: "Foi um dia bom. Já estou ficando com sono.", match: { phase: "evening", mood: "tired" } },
-  { id: "evening-proud", text: "Hoje fizemos muita coisa juntos. Estou orgulhoso.", match: { phase: "evening", mood: "proud" } },
+  {
+    id: "evening-soft",
+    text: "O céu ficou cor de pêssego. Pensei em {name}.",
+    match: { phase: "evening" },
+    weight: 1.4,
+  },
+  {
+    id: "evening-tired",
+    text: "Foi um dia bom. Já estou ficando com sono.",
+    match: { phase: "evening", mood: "tired" },
+  },
+  {
+    id: "evening-proud",
+    text: "Hoje fizemos muita coisa juntos. Estou orgulhoso.",
+    match: { phase: "evening", mood: "proud" },
+  },
 
   // Noite
-  { id: "night-dream", text: "Vou sonhar com nosso quarto inteiro só pra mim.", match: { phase: "night" } },
-  { id: "night-quiet", text: "Boa noite, {name}. Cuidei do silêncio enquanto você não veio.", match: { phase: "night", mood: "lonely" } },
-  { id: "night-rain", text: "Imaginei que estava chovendo lá fora. Foi gostoso.", match: { phase: "night", mood: "sleepy" } },
+  {
+    id: "night-dream",
+    text: "Vou sonhar com nosso quarto inteiro só pra mim.",
+    match: { phase: "night" },
+  },
+  {
+    id: "night-quiet",
+    text: "Boa noite, {name}. Cuidei do silêncio enquanto você não veio.",
+    match: { phase: "night", mood: "lonely" },
+  },
+  {
+    id: "night-rain",
+    text: "Imaginei que estava chovendo lá fora. Foi gostoso.",
+    match: { phase: "night", mood: "sleepy" },
+  },
 
   // Mood — independente de hora
-  { id: "hungry-soft", text: "Acho que minha tigela está pedindo atenção…", match: { mood: "hungry" }, weight: 1.6 },
+  {
+    id: "hungry-soft",
+    text: "Acho que minha tigela está pedindo atenção…",
+    match: { mood: "hungry" },
+    weight: 1.6,
+  },
   { id: "tired-curl", text: "Vou me enroscar um pouquinho. Volto já.", match: { mood: "tired" } },
-  { id: "happy-content", text: "Por agora, está tudo certo. Obrigado, {name}.", match: { mood: "happy" }, weight: 1.2 },
-  { id: "playful-tail", text: "Meu rabo balançou sozinho quando você abriu a porta.", match: { mood: "playful" } },
-  { id: "lonely-watch", text: "Fiquei na janela esperando.", match: { mood: "lonely" }, weight: 1.4 },
+  {
+    id: "happy-content",
+    text: "Por agora, está tudo certo. Obrigado, {name}.",
+    match: { mood: "happy" },
+    weight: 1.2,
+  },
+  {
+    id: "playful-tail",
+    text: "Meu rabo balançou sozinho quando você abriu a porta.",
+    match: { mood: "playful" },
+  },
+  {
+    id: "lonely-watch",
+    text: "Fiquei na janela esperando.",
+    match: { mood: "lonely" },
+    weight: 1.4,
+  },
   { id: "sad-soft", text: "Hoje pareceu mais longo. Mas você apareceu.", match: { mood: "sad" } },
 
   // Streak
-  { id: "streak-7", text: "Sete dias seguidos. Aprendi seu cheiro de cor.", match: { minStreak: 7 }, weight: 2 },
-  { id: "streak-14", text: "Duas semanas. Já decorei seus passos.", match: { minStreak: 14 }, weight: 2.4 },
-  { id: "streak-30", text: "Um mês inteiro. Você virou parte do meu mundo.", match: { minStreak: 30 }, weight: 3 },
+  {
+    id: "streak-7",
+    text: "Sete dias seguidos. Aprendi seu cheiro de cor.",
+    match: { minStreak: 7 },
+    weight: 2,
+  },
+  {
+    id: "streak-14",
+    text: "Duas semanas. Já decorei seus passos.",
+    match: { minStreak: 14 },
+    weight: 2.4,
+  },
+  {
+    id: "streak-30",
+    text: "Um mês inteiro. Você virou parte do meu mundo.",
+    match: { minStreak: 30 },
+    weight: 3,
+  },
 
   // Genéricos (sem match) — fallback de variedade
   { id: "generic-paws", text: "Patinhas no chão fazem som de chuva fina.", weight: 0.6 },
-  { id: "generic-curious", text: "Vi algo brilhando no canto. Ou foi minha imaginação.", weight: 0.6 },
+  {
+    id: "generic-curious",
+    text: "Vi algo brilhando no canto. Ou foi minha imaginação.",
+    weight: 0.6,
+  },
   { id: "generic-window", text: "A janela tem cor de história hoje.", weight: 0.6 },
   { id: "generic-thanks", text: "Só queria te avisar: você está fazendo bonito.", weight: 0.8 },
 ];
@@ -241,9 +335,7 @@ export function clearDiaryLog(petId: string) {
 
 /* -------------------- derivação de mood -------------------- */
 
-export function deriveDiaryMood(
-  values: Partial<Record<PetCareKind, number>>,
-): DiaryMood {
+export function deriveDiaryMood(values: Partial<Record<PetCareKind, number>>): DiaryMood {
   const feed = values.feed ?? 100;
   const sleep = values.sleep ?? 100;
   const play = values.play ?? 100;

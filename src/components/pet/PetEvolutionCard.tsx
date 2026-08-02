@@ -2,11 +2,7 @@ import { useEffect, useState } from "react";
 import { Sparkles, Loader2, TrendingUp, Flame } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import {
-  evolveMyPet,
-  getPetEvolutionStatus,
-  type PetEvolutionStatus,
-} from "@/lib/petEvolution";
+import { evolveMyPet, getPetEvolutionStatus, type PetEvolutionStatus } from "@/lib/petEvolution";
 import { PetEvolutionCeremonyModal } from "./PetEvolutionCeremonyModal";
 
 type Props = {
@@ -23,13 +19,7 @@ function isEligible(
   return !!s && "is_baby" in s;
 }
 
-export function PetEvolutionCard({
-  refreshKey,
-  petName,
-  babyImage,
-  adultImage,
-  onEvolved,
-}: Props) {
+export function PetEvolutionCard({ refreshKey, petName, babyImage, adultImage, onEvolved }: Props) {
   const [status, setStatus] = useState<PetEvolutionStatus | null>(null);
   const [busy, setBusy] = useState(false);
   const [ceremony, setCeremony] = useState<{ xp: number } | null>(null);
@@ -51,10 +41,7 @@ export function PetEvolutionCard({
   if (!isEligible(status) || !status.is_baby) return null;
 
   const levelPct = Math.min(100, Math.round((status.level / status.required_level) * 100));
-  const streakPct = Math.min(
-    100,
-    Math.round((status.streak / status.required_streak) * 100),
-  );
+  const streakPct = Math.min(100, Math.round((status.streak / status.required_streak) * 100));
   const ready = status.eligible;
 
   async function handleEvolve() {

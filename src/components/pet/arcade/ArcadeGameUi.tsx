@@ -249,7 +249,9 @@ export function ResultCard({
         <span
           className={cn(
             "grid size-10 place-items-center rounded-2xl shadow-lg",
-            rewarded ? "bg-emerald-600 text-white shadow-emerald-200" : "bg-amber-500 text-white shadow-amber-200",
+            rewarded
+              ? "bg-emerald-600 text-white shadow-emerald-200"
+              : "bg-amber-500 text-white shadow-amber-200",
           )}
         >
           {rewarded ? <Coins className="size-5" /> : <ShieldCheck className="size-5" />}

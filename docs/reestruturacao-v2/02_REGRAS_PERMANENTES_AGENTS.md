@@ -125,4 +125,3 @@ Uma fatia só está pronta quando:
 8. flag/rollback existem quando necessários;
 9. nenhum dado legítimo foi perdido;
 10. estado persistente e Draft PR foram atualizados.
-

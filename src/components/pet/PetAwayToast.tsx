@@ -7,22 +7,10 @@ const KIND_MESSAGES: Record<PetCareKind, string[]> = {
     "Encontrou bagas raras no caminho.",
     "Diz que o lanche pode esperar.",
   ],
-  hygiene: [
-    "Tá voltando coberto de poeira épica.",
-    "Banho? Só depois da aventura.",
-  ],
-  energy: [
-    "Cochilou rapidinho atrás de uma pedra.",
-    "Energia? Adrenalina pura agora.",
-  ],
-  sleep: [
-    "Cochilou rapidinho atrás de uma pedra.",
-    "Tá guardando energia pra próxima.",
-  ],
-  play: [
-    "Tá brincando com criaturas estranhas.",
-    "Achou amigos novos no caminho.",
-  ],
+  hygiene: ["Tá voltando coberto de poeira épica.", "Banho? Só depois da aventura."],
+  energy: ["Cochilou rapidinho atrás de uma pedra.", "Energia? Adrenalina pura agora."],
+  sleep: ["Cochilou rapidinho atrás de uma pedra.", "Tá guardando energia pra próxima."],
+  play: ["Tá brincando com criaturas estranhas.", "Achou amigos novos no caminho."],
   affection: [
     "Mandou um carinho mental — disse que te ama.",
     "Tá pensando em você bem nesse momento.",

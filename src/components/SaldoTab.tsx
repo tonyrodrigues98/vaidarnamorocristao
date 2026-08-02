@@ -1,11 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import {
-  Loader2,
-  Sparkles,
-  Wallet,
-  Inbox,
-} from "lucide-react";
+import { Loader2, Sparkles, Wallet, Inbox } from "lucide-react";
 import coinIcon from "@/assets/coin.webp";
 import coinSound from "@/assets/coin-reward.mp3";
 import grabComumImg from "@/assets/grab-comum.png";
@@ -195,8 +190,8 @@ export function SaldoTab() {
           <div className="mb-2 text-sm text-muted-foreground">/ {COIN_MAX}</div>
         </div>
         <p className="relative mt-3 text-xs text-muted-foreground/80">
-          O limite é {COIN_MAX} moedas — gaste em stickers, molduras, fundos ou itens do pet
-          para liberar espaço e continuar recebendo recompensas diárias.
+          O limite é {COIN_MAX} moedas — gaste em stickers, molduras, fundos ou itens do pet para
+          liberar espaço e continuar recebendo recompensas diárias.
         </p>
       </div>
 

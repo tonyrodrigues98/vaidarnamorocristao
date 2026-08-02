@@ -140,4 +140,3 @@ Preservar capacidades.
 - nenhum jogo/asset removido;
 - UX redesenhada por flags;
 - telemetria e rollback.
-

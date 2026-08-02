@@ -75,10 +75,7 @@ export function EquippedPetSidekick({
             right: -4,
           }}
         >
-          <Heart
-            className="fill-white"
-            style={{ width: size * 0.14, height: size * 0.14 }}
-          />
+          <Heart className="fill-white" style={{ width: size * 0.14, height: size * 0.14 }} />
         </div>
       )}
 

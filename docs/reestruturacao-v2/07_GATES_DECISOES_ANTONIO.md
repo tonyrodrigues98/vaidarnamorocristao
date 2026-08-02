@@ -105,4 +105,3 @@ Quando um gate for inevitável, perguntar uma única vez e de forma compacta:
 5. trabalho já concluído sem depender dela.
 
 Não recopie o histórico inteiro.
-

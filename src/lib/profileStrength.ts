@@ -98,8 +98,7 @@ const hasHeight = (p: StrengthProfile) => {
   const h = pickNum(p, ["height_cm", "height"]);
   return h != null && h > 0;
 };
-const hasMarital = (p: StrengthProfile) =>
-  pickText(p, ["marital", "marital_status"]).length > 0;
+const hasMarital = (p: StrengthProfile) => pickText(p, ["marital", "marital_status"]).length > 0;
 const hasBio = (p: StrengthProfile) => pickText(p, ["bio", "about"]).length >= 20;
 const hasChurch = (p: StrengthProfile) => pickText(p, ["church", "igreja"]).length > 1;
 const hasSex = (p: StrengthProfile) => pickText(p, ["sex", "gender"]).length > 0;

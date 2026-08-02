@@ -32,7 +32,7 @@ function QuizPage() {
 
   async function load() {
     const { data } = await supabase.rpc("get_today_quiz" as never);
-    setItems(((data as unknown) as Question[]) ?? []);
+    setItems((data as unknown as Question[]) ?? []);
   }
 
   useEffect(() => {
@@ -50,10 +50,12 @@ function QuizPage() {
   async function answer(q: Question, idx: number) {
     if (q.already_answered) return;
     setSubmitting(q.id);
-    const { data, error } = await (supabase.rpc as unknown as (
-      fn: string,
-      args: Record<string, unknown>,
-    ) => Promise<{ data: unknown; error: unknown }>)("answer_quiz", {
+    const { data, error } = await (
+      supabase.rpc as unknown as (
+        fn: string,
+        args: Record<string, unknown>,
+      ) => Promise<{ data: unknown; error: unknown }>
+    )("answer_quiz", {
       _question_id: q.id,
       _chosen: idx,
     });
@@ -64,12 +66,14 @@ function QuizPage() {
       await load();
       return;
     }
-    const row = ((data as unknown) as Array<{
-      correct: boolean;
-      correct_index: number;
-      reference: string;
-      explanation: string;
-    }>)?.[0];
+    const row = (
+      data as unknown as Array<{
+        correct: boolean;
+        correct_index: number;
+        reference: string;
+        explanation: string;
+      }>
+    )?.[0];
     if (!row) {
       await load();
       return;
@@ -145,8 +149,7 @@ function QuizPage() {
             {remaining === 0 && (
               <div className="rounded-2xl border border-emerald-200 bg-emerald-50/50 p-4 text-center text-sm text-emerald-700">
                 <Sparkles className="mx-auto mb-1 size-4" />
-                Quiz do dia concluído — {correctCount}/3 acertos. Volte amanhã para novas
-                perguntas.
+                Quiz do dia concluído — {correctCount}/3 acertos. Volte amanhã para novas perguntas.
               </div>
             )}
           </ul>

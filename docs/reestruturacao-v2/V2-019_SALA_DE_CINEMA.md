@@ -204,4 +204,3 @@ teste e feature flag fechada.
 - flag fechada;
 - gates jurídicos explícitos;
 - rollback que encerra novas sessões sem perder histórico.
-

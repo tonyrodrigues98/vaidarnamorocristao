@@ -3,7 +3,12 @@ import { Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { PET_CARE_ICON } from "@/components/pet/PetNeedsHud";
-import { PET_CARE_LABEL, PET_CARE_ORDER, type PetCareKind, type PetRuntimeModifiers } from "@/types/petCare";
+import {
+  PET_CARE_LABEL,
+  PET_CARE_ORDER,
+  type PetCareKind,
+  type PetRuntimeModifiers,
+} from "@/types/petCare";
 
 function fmtMult(n: number): string {
   return `×${n.toFixed(2).replace(/\.?0+$/, "")}`;
@@ -21,7 +26,11 @@ function fmtRemaining(ms: number): string {
 }
 
 /** Próximo expirar entre buffs que afetam o kind (ignora rules, que não têm expiração). */
-function nextExpiry(mods: PetRuntimeModifiers | null | undefined, kind: PetCareKind, now: number): number | null {
+function nextExpiry(
+  mods: PetRuntimeModifiers | null | undefined,
+  kind: PetCareKind,
+  now: number,
+): number | null {
   if (!mods) return null;
   let soonest: number | null = null;
   for (const b of mods.buffs) {

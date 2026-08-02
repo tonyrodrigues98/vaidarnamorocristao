@@ -68,13 +68,7 @@ export type GrabStatePool = {
   pity_eligible?: boolean;
 };
 
-export type GrabPoolRarity =
-  | "starter"
-  | "common"
-  | "rare"
-  | "epic"
-  | "legendary"
-  | "special";
+export type GrabPoolRarity = "starter" | "common" | "rare" | "epic" | "legendary" | "special";
 
 export type GrabRecentRoll = {
   prize_kind: GrabPrizeKind;

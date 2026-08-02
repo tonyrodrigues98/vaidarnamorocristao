@@ -127,7 +127,13 @@ function ParticleField({ count = 18 }: { count?: number }) {
 }
 
 /** Single slot on the right page (collected or silhouette). */
-function StickerSlot({ sticker, justRevealed }: { sticker?: PetAlbumSticker; justRevealed?: boolean }) {
+function StickerSlot({
+  sticker,
+  justRevealed,
+}: {
+  sticker?: PetAlbumSticker;
+  justRevealed?: boolean;
+}) {
   if (!sticker) {
     return (
       <div className="grid aspect-[3/4] place-items-center rounded-md border border-amber-900/15 bg-amber-50/40 text-amber-900/30">
@@ -152,10 +158,7 @@ function StickerSlot({ sticker, justRevealed }: { sticker?: PetAlbumSticker; jus
       <PetImg
         src={sticker.image_path}
         alt={sticker.name}
-        className={cn(
-          "size-full object-contain",
-          !owned && "opacity-20 blur-[1.5px] grayscale",
-        )}
+        className={cn("size-full object-contain", !owned && "opacity-20 blur-[1.5px] grayscale")}
       />
       <span
         className={cn(
@@ -251,9 +254,7 @@ function BookSpread({
               </button>
             )
           ) : (
-            <p className="text-[9px] text-amber-800/70">
-              Complete para ganhar moedas e XP.
-            </p>
+            <p className="text-[9px] text-amber-800/70">Complete para ganhar moedas e XP.</p>
           )}
         </div>
       </div>
@@ -338,9 +339,7 @@ function PackTearOverlay({
             <motion.div
               className="relative h-full w-full"
               animate={
-                reduceMotion
-                  ? {}
-                  : { rotate: [0, -2, 2, -2, 2, 0], x: [0, -3, 3, -3, 3, 0] }
+                reduceMotion ? {} : { rotate: [0, -2, 2, -2, 2, 0], x: [0, -3, 3, -3, 3, 0] }
               }
               transition={{ duration: 0.5, delay: 0.45 }}
             >
@@ -539,7 +538,7 @@ export function PetAlbumGame({ config, balance, onBalanceChange, onFinished }: A
 
   const currentSpread = spreads[Math.min(spreadIndex, Math.max(0, spreads.length - 1))] ?? null;
   const claimed = currentSpread
-    ? state?.claimed.includes(`category:${currentSpread.category}`) ?? false
+    ? (state?.claimed.includes(`category:${currentSpread.category}`) ?? false)
     : false;
   const prices = (config.difficulty_config.pack_prices ?? {}) as Record<string, number>;
 

@@ -9,11 +9,7 @@
  * `src/lib/avatarPalette.ts` (`SKIN_PALETTE`).
  */
 
-import type {
-  AvatarColorPreset,
-  AvatarColorPresetCategory,
-  AvatarSkinTone,
-} from "@/types/avatar";
+import type { AvatarColorPreset, AvatarColorPresetCategory, AvatarSkinTone } from "@/types/avatar";
 import { SKIN_PALETTE } from "@/lib/avatarPalette";
 
 // ── Pele ────────────────────────────────────────────────────────────
@@ -40,23 +36,114 @@ export const SKIN_COLOR_PRESETS: AvatarColorPreset[] = (
 
 // ── Cabelo ──────────────────────────────────────────────────────────
 export const HAIR_COLOR_PRESETS: AvatarColorPreset[] = [
-  { id: "hair-black", name: "Preto", hex: "#1B1B1F", shadowHex: "#000000", highlightHex: "#3A3A40", category: "hair" },
-  { id: "hair-dark-brown", name: "Castanho escuro", hex: "#3B2418", shadowHex: "#1F120A", highlightHex: "#6A4632", category: "hair" },
-  { id: "hair-light-brown", name: "Castanho claro", hex: "#8A5A3B", shadowHex: "#5A3923", highlightHex: "#B98762", category: "hair" },
-  { id: "hair-blonde", name: "Loiro", hex: "#D9B16C", shadowHex: "#A57E3D", highlightHex: "#F1D89A", category: "hair" },
-  { id: "hair-red", name: "Ruivo", hex: "#B5471F", shadowHex: "#7A2D11", highlightHex: "#E0744A", category: "hair" },
-  { id: "hair-grey", name: "Grisalho", hex: "#9A9A9A", shadowHex: "#6B6B6B", highlightHex: "#D5D5D5", category: "hair" },
+  {
+    id: "hair-black",
+    name: "Preto",
+    hex: "#1B1B1F",
+    shadowHex: "#000000",
+    highlightHex: "#3A3A40",
+    category: "hair",
+  },
+  {
+    id: "hair-dark-brown",
+    name: "Castanho escuro",
+    hex: "#3B2418",
+    shadowHex: "#1F120A",
+    highlightHex: "#6A4632",
+    category: "hair",
+  },
+  {
+    id: "hair-light-brown",
+    name: "Castanho claro",
+    hex: "#8A5A3B",
+    shadowHex: "#5A3923",
+    highlightHex: "#B98762",
+    category: "hair",
+  },
+  {
+    id: "hair-blonde",
+    name: "Loiro",
+    hex: "#D9B16C",
+    shadowHex: "#A57E3D",
+    highlightHex: "#F1D89A",
+    category: "hair",
+  },
+  {
+    id: "hair-red",
+    name: "Ruivo",
+    hex: "#B5471F",
+    shadowHex: "#7A2D11",
+    highlightHex: "#E0744A",
+    category: "hair",
+  },
+  {
+    id: "hair-grey",
+    name: "Grisalho",
+    hex: "#9A9A9A",
+    shadowHex: "#6B6B6B",
+    highlightHex: "#D5D5D5",
+    category: "hair",
+  },
 ];
 
 // ── Roupas básicas (recoloríveis) ───────────────────────────────────
 export const CLOTHING_COLOR_PRESETS: AvatarColorPreset[] = [
-  { id: "cloth-white", name: "Branco", hex: "#F7F4EF", shadowHex: "#D9D4CB", highlightHex: "#FFFFFF", category: "clothing" },
-  { id: "cloth-beige", name: "Bege", hex: "#D9C2A1", shadowHex: "#A88E6A", highlightHex: "#EBD9BD", category: "clothing" },
-  { id: "cloth-navy", name: "Azul marinho", hex: "#1F3A5F", shadowHex: "#0E2240", highlightHex: "#3A6093", category: "clothing" },
-  { id: "cloth-olive", name: "Verde oliva", hex: "#5F6B3A", shadowHex: "#3A4321", highlightHex: "#8E9A60", category: "clothing" },
-  { id: "cloth-black", name: "Preto", hex: "#1A1A1A", shadowHex: "#000000", highlightHex: "#3A3A3A", category: "clothing" },
-  { id: "cloth-coral", name: "Coral", hex: "#E27D5A", shadowHex: "#A8523A", highlightHex: "#F0A287", category: "clothing" },
-  { id: "cloth-blush", name: "Rosa suave", hex: "#E6B5B0", shadowHex: "#B4807B", highlightHex: "#F5D3CF", category: "clothing" },
+  {
+    id: "cloth-white",
+    name: "Branco",
+    hex: "#F7F4EF",
+    shadowHex: "#D9D4CB",
+    highlightHex: "#FFFFFF",
+    category: "clothing",
+  },
+  {
+    id: "cloth-beige",
+    name: "Bege",
+    hex: "#D9C2A1",
+    shadowHex: "#A88E6A",
+    highlightHex: "#EBD9BD",
+    category: "clothing",
+  },
+  {
+    id: "cloth-navy",
+    name: "Azul marinho",
+    hex: "#1F3A5F",
+    shadowHex: "#0E2240",
+    highlightHex: "#3A6093",
+    category: "clothing",
+  },
+  {
+    id: "cloth-olive",
+    name: "Verde oliva",
+    hex: "#5F6B3A",
+    shadowHex: "#3A4321",
+    highlightHex: "#8E9A60",
+    category: "clothing",
+  },
+  {
+    id: "cloth-black",
+    name: "Preto",
+    hex: "#1A1A1A",
+    shadowHex: "#000000",
+    highlightHex: "#3A3A3A",
+    category: "clothing",
+  },
+  {
+    id: "cloth-coral",
+    name: "Coral",
+    hex: "#E27D5A",
+    shadowHex: "#A8523A",
+    highlightHex: "#F0A287",
+    category: "clothing",
+  },
+  {
+    id: "cloth-blush",
+    name: "Rosa suave",
+    hex: "#E6B5B0",
+    shadowHex: "#B4807B",
+    highlightHex: "#F5D3CF",
+    category: "clothing",
+  },
 ];
 
 // ── Olhos (preset simples, ainda não usado pelo renderer) ───────────
@@ -88,8 +175,6 @@ export function getColorPresetsByCategory(
 }
 
 /** Default por categoria (primeiro preset). */
-export function defaultPresetIdForCategory(
-  category: AvatarColorPresetCategory,
-): string {
+export function defaultPresetIdForCategory(category: AvatarColorPresetCategory): string {
   return getColorPresetsByCategory(category)[0]?.id ?? "";
 }

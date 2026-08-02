@@ -137,4 +137,3 @@ modo.
 - telemetria de paridade;
 - flag/rollback;
 - nenhum delete.
-

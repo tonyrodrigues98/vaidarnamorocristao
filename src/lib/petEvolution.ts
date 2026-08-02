@@ -1,15 +1,17 @@
 import { supabase } from "@/integrations/supabase/client";
 
-export type PetEvolutionStatus = {
-  pet_id: string;
-  stage_kind: "baby" | "adult";
-  is_baby: boolean;
-  level: number;
-  streak: number;
-  required_level: number;
-  required_streak: number;
-  eligible: boolean;
-} | { eligible: false; reason: "auth" | "no_pet" };
+export type PetEvolutionStatus =
+  | {
+      pet_id: string;
+      stage_kind: "baby" | "adult";
+      is_baby: boolean;
+      level: number;
+      streak: number;
+      required_level: number;
+      required_streak: number;
+      eligible: boolean;
+    }
+  | { eligible: false; reason: "auth" | "no_pet" };
 
 export async function getPetEvolutionStatus(): Promise<PetEvolutionStatus> {
   const { data, error } = await supabase.rpc("get_pet_evolution_status" as never);
@@ -52,11 +54,21 @@ export const ADULT_PET_UNLOCK_COST = 250;
 
 export type UnlockAdultResult =
   | { ok: true; already_unlocked: boolean; balance: number; cost?: number }
-  | { ok: false; reason: "auth" | "invalid_amount" | "insufficient_coins"; balance?: number; cost?: number };
+  | {
+      ok: false;
+      reason: "auth" | "invalid_amount" | "insufficient_coins";
+      balance?: number;
+      cost?: number;
+    };
 
 /** Paga moedas pra desbloquear escolha de pet adulto. */
-export async function unlockAdultPetWithCoins(cost = ADULT_PET_UNLOCK_COST): Promise<UnlockAdultResult> {
-  const { data, error } = await supabase.rpc("unlock_adult_pet_with_coins" as never, { _cost: cost } as never);
+export async function unlockAdultPetWithCoins(
+  cost = ADULT_PET_UNLOCK_COST,
+): Promise<UnlockAdultResult> {
+  const { data, error } = await supabase.rpc(
+    "unlock_adult_pet_with_coins" as never,
+    { _cost: cost } as never,
+  );
   if (error) throw error;
   return data as unknown as UnlockAdultResult;
 }

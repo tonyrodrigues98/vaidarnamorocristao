@@ -379,8 +379,8 @@ function Dashboard() {
                 name={profile.full_name?.split(" ")[0]}
                 gradient={profileNameGradient}
                 fallback="Bem-vindo(a)"
-              />
-              {" "}· métricas dos {periodLabel.toLowerCase()}
+              />{" "}
+              · métricas dos {periodLabel.toLowerCase()}
             </p>
           </div>
         </header>
@@ -393,10 +393,7 @@ function Dashboard() {
         )}
 
         {approved && (
-          <nav
-            aria-label="Período"
-            className="-mx-1 mt-4 flex gap-2 overflow-x-auto px-1 pb-1"
-          >
+          <nav aria-label="Período" className="-mx-1 mt-4 flex gap-2 overflow-x-auto px-1 pb-1">
             {PERIOD_OPTIONS.map((opt) => {
               const active = opt.id === period;
               return (
@@ -527,9 +524,7 @@ function Dashboard() {
             {/* Tendências (charts lazy) — só quando há dados reais */}
             {totalViews > 0 ? (
               <Suspense
-                fallback={
-                  <div className="glass mt-6 h-64 animate-pulse rounded-3xl shadow-soft" />
-                }
+                fallback={<div className="glass mt-6 h-64 animate-pulse rounded-3xl shadow-soft" />}
               >
                 <DashboardCharts
                   dailySeries={dailySeries}
@@ -541,7 +536,8 @@ function Dashboard() {
             ) : !metricsQuery.isLoading && !showOfflineEmpty ? (
               <section className="glass mt-6 rounded-3xl p-6 text-center shadow-soft">
                 <p className="text-sm text-muted-foreground">
-                  Dados insuficientes para exibir tendência. Continue ativo — assim que houver visitas, os gráficos aparecem aqui.
+                  Dados insuficientes para exibir tendência. Continue ativo — assim que houver
+                  visitas, os gráficos aparecem aqui.
                 </p>
               </section>
             ) : null}
@@ -629,7 +625,9 @@ function Dashboard() {
                       month: "long",
                     })}
                   </p>
-                  <h3 className="mt-1 truncate text-base font-semibold sm:text-lg">{latestNews.title}</h3>
+                  <h3 className="mt-1 truncate text-base font-semibold sm:text-lg">
+                    {latestNews.title}
+                  </h3>
                   <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
                     {latestNews.content}
                   </p>

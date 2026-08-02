@@ -28,17 +28,17 @@ Entretanto, a auditoria encontrou riscos que precisam ser resolvidos antes da gr
 
 ### 1.1 Nível geral de risco
 
-| Camada | Avaliação | Motivo principal |
-|---|---|---|
-| Endpoints server-side | Crítico | `push-dispatch` público opera com `service_role` |
-| Economia e progressão | Crítico | RPCs internas executáveis por usuários autenticados |
-| Banco e RLS | Alto | grande superfície e permissões acumuladas em migrations |
-| Fotos e mídia | Alto | moderação sem limite; fotos principais em bucket público |
-| Administração | Alto | ações muito poderosas; dependência forte de autorização distribuída |
-| Autenticação | Médio | base correta, mas sessão persiste em `localStorage` |
-| Frontend e navegador | Médio | ausência de política de cabeçalhos/CSP verificável |
-| Dependências | Médio/alto | lock oficial é Bun, mas há alerta confirmado para Vite fixado no lock |
-| Auditoria e observabilidade | Médio | logs e testes ainda não cobrem toda a superfície crítica |
+| Camada                      | Avaliação  | Motivo principal                                                      |
+| --------------------------- | ---------- | --------------------------------------------------------------------- |
+| Endpoints server-side       | Crítico    | `push-dispatch` público opera com `service_role`                      |
+| Economia e progressão       | Crítico    | RPCs internas executáveis por usuários autenticados                   |
+| Banco e RLS                 | Alto       | grande superfície e permissões acumuladas em migrations               |
+| Fotos e mídia               | Alto       | moderação sem limite; fotos principais em bucket público              |
+| Administração               | Alto       | ações muito poderosas; dependência forte de autorização distribuída   |
+| Autenticação                | Médio      | base correta, mas sessão persiste em `localStorage`                   |
+| Frontend e navegador        | Médio      | ausência de política de cabeçalhos/CSP verificável                    |
+| Dependências                | Médio/alto | lock oficial é Bun, mas há alerta confirmado para Vite fixado no lock |
+| Auditoria e observabilidade | Médio      | logs e testes ainda não cobrem toda a superfície crítica              |
 
 ### 1.2 Regra de leitura
 
@@ -71,13 +71,13 @@ Foram examinados:
 
 ### 2.1 Indicadores encontrados no histórico SQL
 
-| Indicador no histórico | Quantidade |
-|---|---:|
-| Ocorrências de `SECURITY DEFINER` | 384 |
-| Definições/redefinições de funções | 394 |
-| Ativações de RLS | 153 |
-| Criações de políticas | 446 |
-| Ocorrências de `FORCE ROW LEVEL SECURITY` | 0 |
+| Indicador no histórico                    | Quantidade |
+| ----------------------------------------- | ---------: |
+| Ocorrências de `SECURITY DEFINER`         |        384 |
+| Definições/redefinições de funções        |        394 |
+| Ativações de RLS                          |        153 |
+| Criações de políticas                     |        446 |
+| Ocorrências de `FORCE ROW LEVEL SECURITY` |          0 |
 
 Esses números são ocorrências acumuladas nas migrations, não o número de objetos finais ativos. O Item 3 deverá reconstruir o estado canônico real.
 
@@ -634,26 +634,26 @@ Ordem recomendada:
 
 ## 8. Matriz mínima de testes de segurança
 
-| Domínio | Teste obrigatório |
-|---|---|
-| Perfis | usuário A não altera campos protegidos de B |
-| Fotos | URL/objeto privado não é acessível após bloqueio ou remoção |
-| Roles | usuário não cria, remove ou promove o próprio cargo |
-| Admin | moderador não executa ação exclusiva de admin/super_admin |
-| Mensagens | terceiro não lê, envia, edita ou recebe Realtime do match |
-| Comunidade | usuário banido/rejeitado não publica quando a regra proíbe |
-| Propósito | terceiro não consulta nem modifica compromisso |
-| Moedas | cliente não credita saldo, altera ledger ou repete recompensa |
-| XP | cliente não escolhe quantidade nem repete evento |
-| Conquistas | progresso só nasce de fato validado |
-| Pet Arcade | resultado e recompensa não são definidos pelo cliente |
-| Presentes | compra, envio, resgate e cashback são idempotentes |
-| Notificações | usuário não cria alerta arbitrário para terceiros |
-| Push | endpoint exige assinatura e não duplica envio concorrente |
-| Storage | dono só grava em sua pasta; admin conforme allowlist |
-| Suporte | somente participante/staff autorizado lê ticket e anexo |
-| Verificação | documento e evidência permanecem privados |
-| Exclusão | remoção de conta elimina ou anonimiza dados conforme política |
+| Domínio      | Teste obrigatório                                             |
+| ------------ | ------------------------------------------------------------- |
+| Perfis       | usuário A não altera campos protegidos de B                   |
+| Fotos        | URL/objeto privado não é acessível após bloqueio ou remoção   |
+| Roles        | usuário não cria, remove ou promove o próprio cargo           |
+| Admin        | moderador não executa ação exclusiva de admin/super_admin     |
+| Mensagens    | terceiro não lê, envia, edita ou recebe Realtime do match     |
+| Comunidade   | usuário banido/rejeitado não publica quando a regra proíbe    |
+| Propósito    | terceiro não consulta nem modifica compromisso                |
+| Moedas       | cliente não credita saldo, altera ledger ou repete recompensa |
+| XP           | cliente não escolhe quantidade nem repete evento              |
+| Conquistas   | progresso só nasce de fato validado                           |
+| Pet Arcade   | resultado e recompensa não são definidos pelo cliente         |
+| Presentes    | compra, envio, resgate e cashback são idempotentes            |
+| Notificações | usuário não cria alerta arbitrário para terceiros             |
+| Push         | endpoint exige assinatura e não duplica envio concorrente     |
+| Storage      | dono só grava em sua pasta; admin conforme allowlist          |
+| Suporte      | somente participante/staff autorizado lê ticket e anexo       |
+| Verificação  | documento e evidência permanecem privados                     |
+| Exclusão     | remoção de conta elimina ou anonimiza dados conforme política |
 
 ### 8.1 Papéis de teste
 
@@ -728,24 +728,24 @@ Essa decisão não será presumida nem aplicada neste item.
 
 ## 10. Backlog priorizado
 
-| ID | Prioridade | Trabalho futuro | Risco evitado |
-|---|---:|---|---|
-| SEG-001 | P0 | autenticar e tornar atômico o push dispatcher | abuso de `service_role`, duplicidade, DoS |
-| SEG-002 | P0 | fechar `grant_coin_event` | fraude de moedas |
-| SEG-003 | P0 | fechar `award_xp` | progressão arbitrária |
-| SEG-004 | P0 | fechar conquistas/missões internas | recompensas forjadas |
-| SEG-006 | P0 | privatizar helper de notificação | spam/phishing interno |
-| SEG-005 | P0/P1 | baseline de ACL das funções | novas exposições silenciosas |
-| SEG-007 | P0/P1 | rate limit da IA | custo e indisponibilidade |
-| SEG-008 | P1 | quarentena em falha de IA | publicação sem moderação |
-| SEG-009 | P1 | rever bucket público de fotos | vazamento de mídia |
-| SEG-010 | P1 | retirar `.env` e escanear histórico | vazamento futuro de segredos |
-| SEG-011 | P1 | cabeçalhos e CSP | XSS, framing, abuso de browser APIs |
-| SEG-015 | P1 | revisar leituras amplas | exposição de preferências/atividade |
-| SEG-016 | P1 | testar Realtime por participante | vazamento em tempo real |
-| SEG-018 | P2 | endurecer reparo administrativo | abuso/erro operacional |
-| SEG-020 | P2 | consolidar locks e atualizar dependências | supply chain e CVEs |
-| AVATAR-RET | Futuro | retirada segura do avatar customizável | perda de dados e quebra de foto/perfil |
+| ID         | Prioridade | Trabalho futuro                               | Risco evitado                             |
+| ---------- | ---------: | --------------------------------------------- | ----------------------------------------- |
+| SEG-001    |         P0 | autenticar e tornar atômico o push dispatcher | abuso de `service_role`, duplicidade, DoS |
+| SEG-002    |         P0 | fechar `grant_coin_event`                     | fraude de moedas                          |
+| SEG-003    |         P0 | fechar `award_xp`                             | progressão arbitrária                     |
+| SEG-004    |         P0 | fechar conquistas/missões internas            | recompensas forjadas                      |
+| SEG-006    |         P0 | privatizar helper de notificação              | spam/phishing interno                     |
+| SEG-005    |      P0/P1 | baseline de ACL das funções                   | novas exposições silenciosas              |
+| SEG-007    |      P0/P1 | rate limit da IA                              | custo e indisponibilidade                 |
+| SEG-008    |         P1 | quarentena em falha de IA                     | publicação sem moderação                  |
+| SEG-009    |         P1 | rever bucket público de fotos                 | vazamento de mídia                        |
+| SEG-010    |         P1 | retirar `.env` e escanear histórico           | vazamento futuro de segredos              |
+| SEG-011    |         P1 | cabeçalhos e CSP                              | XSS, framing, abuso de browser APIs       |
+| SEG-015    |         P1 | revisar leituras amplas                       | exposição de preferências/atividade       |
+| SEG-016    |         P1 | testar Realtime por participante              | vazamento em tempo real                   |
+| SEG-018    |         P2 | endurecer reparo administrativo               | abuso/erro operacional                    |
+| SEG-020    |         P2 | consolidar locks e atualizar dependências     | supply chain e CVEs                       |
+| AVATAR-RET |     Futuro | retirada segura do avatar customizável        | perda de dados e quebra de foto/perfil    |
 
 ---
 

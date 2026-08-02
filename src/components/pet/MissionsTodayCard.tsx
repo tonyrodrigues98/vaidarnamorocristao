@@ -70,10 +70,7 @@ export function MissionsTodayCard({
 
   return (
     <section
-      className={cn(
-        "rounded-2xl border border-neutral-200 bg-white p-4 sm:p-5",
-        className,
-      )}
+      className={cn("rounded-2xl border border-neutral-200 bg-white p-4 sm:p-5", className)}
       aria-label="Missões do dia"
     >
       <header className="mb-3 flex items-center justify-between">

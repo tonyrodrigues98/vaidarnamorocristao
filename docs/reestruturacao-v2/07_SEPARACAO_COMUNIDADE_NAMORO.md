@@ -149,25 +149,25 @@ Ele deve ser preservado como dado e comportamento até a futura migração, mas 
 
 Para evitar novas ambiguidades, o produto usará estas definições:
 
-| Termo | Definição |
-|---|---|
-| Conta | Identidade de autenticação e segurança |
-| Membro | Pessoa aprovada para participar da comunidade |
-| Perfil comunitário | Identidade social visível dentro da comunidade |
-| Perfil romântico | Conjunto separado de informações e preferências de namoro |
-| Modo namoro | Estado que permite aparecer e agir no domínio romântico |
-| Seguir | Vínculo social unilateral de interesse em conteúdo |
-| Conexão | Vínculo social bilateral aceito |
-| Solicitação de conversa | Pedido consentido para iniciar conversa social privada |
-| Interesse | Ação romântica privada e unilateral |
-| Match | Interesse romântico recíproco |
-| Propósito Firmado | Compromisso bilateral exclusivo construído sobre um match |
-| Conversa social | Conversa que não depende de match |
-| Conversa romântica | Conversa criada por match |
-| Bloqueio | Proteção global entre duas contas |
-| Silenciar | Preferência local para não receber atualizações sem bloquear |
-| Restringir | Medida de moderação ou segurança com alcance definido |
-| Disponibilidade romântica | Capacidade efetiva de aparecer e agir no namoro |
+| Termo                     | Definição                                                    |
+| ------------------------- | ------------------------------------------------------------ |
+| Conta                     | Identidade de autenticação e segurança                       |
+| Membro                    | Pessoa aprovada para participar da comunidade                |
+| Perfil comunitário        | Identidade social visível dentro da comunidade               |
+| Perfil romântico          | Conjunto separado de informações e preferências de namoro    |
+| Modo namoro               | Estado que permite aparecer e agir no domínio romântico      |
+| Seguir                    | Vínculo social unilateral de interesse em conteúdo           |
+| Conexão                   | Vínculo social bilateral aceito                              |
+| Solicitação de conversa   | Pedido consentido para iniciar conversa social privada       |
+| Interesse                 | Ação romântica privada e unilateral                          |
+| Match                     | Interesse romântico recíproco                                |
+| Propósito Firmado         | Compromisso bilateral exclusivo construído sobre um match    |
+| Conversa social           | Conversa que não depende de match                            |
+| Conversa romântica        | Conversa criada por match                                    |
+| Bloqueio                  | Proteção global entre duas contas                            |
+| Silenciar                 | Preferência local para não receber atualizações sem bloquear |
+| Restringir                | Medida de moderação ou segurança com alcance definido        |
+| Disponibilidade romântica | Capacidade efetiva de aparecer e agir no namoro              |
 
 Não usar “match” como sinônimo de amizade, conexão, seguidor ou conversa social.
 
@@ -200,37 +200,37 @@ Um único campo `profiles.status` não deve representar tudo.
 
 Responsável por autenticação e segurança:
 
-| Estado | Significado |
-|---|---|
-| `active` | conta utilizável |
-| `restricted` | limitações de segurança ou moderação |
-| `suspended` | acesso temporariamente suspenso |
-| `banned` | acesso encerrado |
-| `deleted` | processo de exclusão concluído ou anonimizado |
+| Estado       | Significado                                   |
+| ------------ | --------------------------------------------- |
+| `active`     | conta utilizável                              |
+| `restricted` | limitações de segurança ou moderação          |
+| `suspended`  | acesso temporariamente suspenso               |
+| `banned`     | acesso encerrado                              |
+| `deleted`    | processo de exclusão concluído ou anonimizado |
 
 ### 6.2 Estado comunitário
 
-| Estado | Significado |
-|---|---|
-| `draft` | perfil básico ainda incompleto |
-| `pending_review` | aguardando aprovação |
-| `active` | pode participar da comunidade |
-| `limited` | participa com capacidades reduzidas |
+| Estado           | Significado                                               |
+| ---------------- | --------------------------------------------------------- |
+| `draft`          | perfil básico ainda incompleto                            |
+| `pending_review` | aguardando aprovação                                      |
+| `active`         | pode participar da comunidade                             |
+| `limited`        | participa com capacidades reduzidas                       |
 | `hidden_by_user` | perfil não aparece no diretório, mas conta continua ativa |
-| `suspended` | participação comunitária suspensa |
+| `suspended`      | participação comunitária suspensa                         |
 
 ### 6.3 Estado configurado do namoro
 
-| Estado | Significado |
-|---|---|
-| `never_configured` | nunca criou perfil romântico |
-| `draft` | configuração romântica incompleta |
-| `pending_review` | mudanças aguardam validação, se necessária |
-| `enabled` | modo namoro ativado pelo usuário |
-| `paused_by_user` | usuário pausou voluntariamente |
-| `paused_by_commitment` | pausa automática por Propósito Firmado |
-| `paused_by_moderation` | pausa determinada pela moderação |
-| `disabled` | usuário encerrou a participação romântica |
+| Estado                 | Significado                                |
+| ---------------------- | ------------------------------------------ |
+| `never_configured`     | nunca criou perfil romântico               |
+| `draft`                | configuração romântica incompleta          |
+| `pending_review`       | mudanças aguardam validação, se necessária |
+| `enabled`              | modo namoro ativado pelo usuário           |
+| `paused_by_user`       | usuário pausou voluntariamente             |
+| `paused_by_commitment` | pausa automática por Propósito Firmado     |
+| `paused_by_moderation` | pausa determinada pela moderação           |
+| `disabled`             | usuário encerrou a participação romântica  |
 
 ### 6.4 Disponibilidade romântica efetiva
 
@@ -330,53 +330,53 @@ Pausar ou desativar não apaga histórico, matches, mensagens ou dados financeir
 
 Usada por ambos os contextos:
 
-| Campo | Uso comunitário | Uso romântico |
-|---|---:|---:|
-| nome | sim | sim |
-| foto principal | sim | sim |
-| idade/faixa etária | conforme privacidade | sim |
-| cidade/estado | conforme privacidade | sim |
-| verificação | sim | sim |
-| cargo/badge | sim | sim |
-| moldura, aura e fundo | sim | sim |
-| status de conta | autorização | autorização |
+| Campo                 |      Uso comunitário | Uso romântico |
+| --------------------- | -------------------: | ------------: |
+| nome                  |                  sim |           sim |
+| foto principal        |                  sim |           sim |
+| idade/faixa etária    | conforme privacidade |           sim |
+| cidade/estado         | conforme privacidade |           sim |
+| verificação           |                  sim |           sim |
+| cargo/badge           |                  sim |           sim |
+| moldura, aura e fundo |                  sim |           sim |
+| status de conta       |          autorização |   autorização |
 
 ### 8.2 Campos comunitários
 
-| Campo ou módulo | Observação |
-|---|---|
-| apresentação social | não deve pressupor busca romântica |
-| igreja e trajetória de fé | visibilidade configurável |
-| testemunho | visibilidade configurável |
-| versículo favorito | comunitário |
-| ministério e participação | comunitário |
-| interesses e hobbies | comunitário |
-| grupos/espaços | comunitário |
-| publicações, comentários e reações | comunitário |
-| pedidos de oração | com privacidade própria |
-| eventos e Sala de Cinema | comunitário |
-| vitrines personalizáveis | comunitário |
-| pet em destaque | comunitário, opcional |
-| badges e conquistas | comunitário, configurável |
+| Campo ou módulo                    | Observação                         |
+| ---------------------------------- | ---------------------------------- |
+| apresentação social                | não deve pressupor busca romântica |
+| igreja e trajetória de fé          | visibilidade configurável          |
+| testemunho                         | visibilidade configurável          |
+| versículo favorito                 | comunitário                        |
+| ministério e participação          | comunitário                        |
+| interesses e hobbies               | comunitário                        |
+| grupos/espaços                     | comunitário                        |
+| publicações, comentários e reações | comunitário                        |
+| pedidos de oração                  | com privacidade própria            |
+| eventos e Sala de Cinema           | comunitário                        |
+| vitrines personalizáveis           | comunitário                        |
+| pet em destaque                    | comunitário, opcional              |
+| badges e conquistas                | comunitário, configurável          |
 
 ### 8.3 Campos românticos
 
-| Campo | Regra |
-|---|---|
-| disponibilidade | nunca exposta fora do contexto apropriado |
-| preferências de parceiro | não aparece no perfil comunitário |
-| faixa de idade desejada | privada para o motor de elegibilidade |
-| alcance de localização | privado ou resumido |
-| intenção de casamento | perfil romântico |
-| filhos e aceitação de filhos | perfil romântico |
-| qualidades desejadas | perfil romântico |
-| linguagem do amor | perfil romântico, opcional |
-| ritmo de relacionamento | perfil romântico |
-| não negociáveis | perfil romântico, exposição cuidadosa |
-| afinidade calculada | visível apenas no namoro |
-| interesses recebidos/enviados | privado |
-| matches | privado |
-| Propósito Firmado | visibilidade definida pelo casal |
+| Campo                         | Regra                                     |
+| ----------------------------- | ----------------------------------------- |
+| disponibilidade               | nunca exposta fora do contexto apropriado |
+| preferências de parceiro      | não aparece no perfil comunitário         |
+| faixa de idade desejada       | privada para o motor de elegibilidade     |
+| alcance de localização        | privado ou resumido                       |
+| intenção de casamento         | perfil romântico                          |
+| filhos e aceitação de filhos  | perfil romântico                          |
+| qualidades desejadas          | perfil romântico                          |
+| linguagem do amor             | perfil romântico, opcional                |
+| ritmo de relacionamento       | perfil romântico                          |
+| não negociáveis               | perfil romântico, exposição cuidadosa     |
+| afinidade calculada           | visível apenas no namoro                  |
+| interesses recebidos/enviados | privado                                   |
+| matches                       | privado                                   |
+| Propósito Firmado             | visibilidade definida pelo casal          |
 
 ### 8.4 Renderização contextual
 
@@ -537,10 +537,10 @@ Desativar o namoro:
 
 Para manter a simplicidade, adotar apenas dois vínculos principais:
 
-| Vínculo | Direção | Consentimento | Efeito |
-|---|---|---|---|
-| Seguir | unilateral | não exige aceite, salvo perfil privado | organiza conteúdo e atualizações |
-| Conexão | bilateral | exige aceite | permite proximidade e conversa conforme privacidade |
+| Vínculo | Direção    | Consentimento                          | Efeito                                              |
+| ------- | ---------- | -------------------------------------- | --------------------------------------------------- |
+| Seguir  | unilateral | não exige aceite, salvo perfil privado | organiza conteúdo e atualizações                    |
+| Conexão | bilateral  | exige aceite                           | permite proximidade e conversa conforme privacidade |
 
 Não criar “amizade”, “contato”, “parceiro”, “favorito” e “conexão” como cinco sistemas equivalentes.
 
@@ -564,14 +564,14 @@ Não criar “amizade”, “contato”, “parceiro”, “favorito” e “con
 
 ### 11.4 Estados da conexão
 
-| Estado | Significado |
-|---|---|
-| `pending` | aguardando destinatário |
-| `accepted` | conexão bilateral ativa |
-| `declined` | recusada, sem exposição pública |
-| `cancelled` | remetente cancelou |
-| `removed` | conexão foi desfeita |
-| `blocked` | encerrada por bloqueio global |
+| Estado      | Significado                     |
+| ----------- | ------------------------------- |
+| `pending`   | aguardando destinatário         |
+| `accepted`  | conexão bilateral ativa         |
+| `declined`  | recusada, sem exposição pública |
+| `cancelled` | remetente cancelou              |
+| `removed`   | conexão foi desfeita            |
+| `blocked`   | encerrada por bloqueio global   |
 
 ### 11.5 Controles antispam
 
@@ -588,14 +588,14 @@ Não criar “amizade”, “contato”, “parceiro”, “favorito” e “con
 
 ### 12.1 Tipos separados
 
-| Tipo | Origem | Participação |
-|---|---|---|
-| Social direta | conexão ou solicitação aceita | membros autorizados |
-| Romântica | match | participantes do match |
-| Propósito | compromisso ativo | casal |
-| Grupo/espaço | comunidade | membros do grupo |
-| Comunidade global | comunidade | membros aprovados |
-| Cinema | sessão | participantes autorizados |
+| Tipo              | Origem                        | Participação              |
+| ----------------- | ----------------------------- | ------------------------- |
+| Social direta     | conexão ou solicitação aceita | membros autorizados       |
+| Romântica         | match                         | participantes do match    |
+| Propósito         | compromisso ativo             | casal                     |
+| Grupo/espaço      | comunidade                    | membros do grupo          |
+| Comunidade global | comunidade                    | membros aprovados         |
+| Cinema            | sessão                        | participantes autorizados |
 
 ### 12.2 Início de conversa social
 
@@ -678,25 +678,25 @@ Para manter simplicidade semelhante ao WhatsApp, a tela principal deve ter pouco
 
 ### 13.2 Controles comunitários
 
-| Controle | Opções recomendadas |
-|---|---|
-| aparecer em busca de membros | sim / não |
-| quem vê localização | todos os membros / conexões / ninguém |
-| quem vê igreja | todos os membros / conexões / ninguém |
-| quem pode seguir | membros / mediante aprovação / ninguém |
-| quem pode solicitar conexão | membros / conexões em comum / ninguém |
-| quem pode enviar mensagem | conexões / por solicitação / ninguém |
-| mostrar presença online | todos / conexões / ninguém |
+| Controle                     | Opções recomendadas                    |
+| ---------------------------- | -------------------------------------- |
+| aparecer em busca de membros | sim / não                              |
+| quem vê localização          | todos os membros / conexões / ninguém  |
+| quem vê igreja               | todos os membros / conexões / ninguém  |
+| quem pode seguir             | membros / mediante aprovação / ninguém |
+| quem pode solicitar conexão  | membros / conexões em comum / ninguém  |
+| quem pode enviar mensagem    | conexões / por solicitação / ninguém   |
+| mostrar presença online      | todos / conexões / ninguém             |
 
 ### 13.3 Controles românticos
 
-| Controle | Opções |
-|---|---|
-| modo namoro | ativado / pausado |
-| aparecer em Pretendentes | derivado do modo e elegibilidade |
-| receber recados anônimos | sim / não |
-| alcance de localização | regras do namoro |
-| exibir selo de compromisso | decisão bilateral do casal |
+| Controle                   | Opções                           |
+| -------------------------- | -------------------------------- |
+| modo namoro                | ativado / pausado                |
+| aparecer em Pretendentes   | derivado do modo e elegibilidade |
+| receber recados anônimos   | sim / não                        |
+| alcance de localização     | regras do namoro                 |
+| exibir selo de compromisso | decisão bilateral do casal       |
 
 ### 13.4 Dados que nunca devem aparecer no perfil comunitário por padrão
 
@@ -1098,20 +1098,20 @@ Se o namoro estiver desligado e não houver histórico, a aba pode ficar dentro 
 
 ### 19.6 Rotas conceituais futuras
 
-| Rota | Função |
-|---|---|
-| `/membros` | descoberta comunitária |
-| `/membros/$id` | perfil comunitário |
-| `/pretendentes` | descoberta romântica existente |
-| `/pretendentes/$id` | perfil romântico existente |
-| `/conversas` | agregador de caixas |
-| `/conversas/social/$id` | conversa social |
-| `/conversas/$matchId` | conversa romântica existente durante transição |
-| `/comunidade` | hub comunitário futuro |
-| `/conversas/comunidade` | chat global preservado |
-| `/configuracoes/privacidade` | controles comunitários |
-| `/configuracoes/namoro` | modo e preferências românticas |
-| `/proposito/$matchId` | experiência do compromisso preservada |
+| Rota                         | Função                                         |
+| ---------------------------- | ---------------------------------------------- |
+| `/membros`                   | descoberta comunitária                         |
+| `/membros/$id`               | perfil comunitário                             |
+| `/pretendentes`              | descoberta romântica existente                 |
+| `/pretendentes/$id`          | perfil romântico existente                     |
+| `/conversas`                 | agregador de caixas                            |
+| `/conversas/social/$id`      | conversa social                                |
+| `/conversas/$matchId`        | conversa romântica existente durante transição |
+| `/comunidade`                | hub comunitário futuro                         |
+| `/conversas/comunidade`      | chat global preservado                         |
+| `/configuracoes/privacidade` | controles comunitários                         |
+| `/configuracoes/namoro`      | modo e preferências românticas                 |
+| `/proposito/$matchId`        | experiência do compromisso preservada          |
 
 Esses nomes são uma proposta arquitetural e não autorizam criação de rotas nesta fase.
 
@@ -1222,19 +1222,19 @@ Esta seção é desenho, não migration.
 
 ### 22.2 Novas capacidades conceituais
 
-| Capacidade | Responsabilidade |
-|---|---|
-| `community_memberships` | estado e presença comunitária |
-| `community_privacy_settings` | descoberta, perfil e contato |
-| `social_follows` | vínculo unilateral |
-| `social_connections` | solicitação e vínculo bilateral |
-| `social_message_requests` | consentimento antes da DM |
-| `social_conversations` | conversas não românticas |
-| `social_conversation_members` | participantes e estado |
-| `dating_memberships` | estado do modo namoro |
-| `dating_profiles` | campos especificamente românticos |
-| `dating_privacy_settings` | recados e presença romântica |
-| `capability_restrictions` | sanções específicas por domínio |
+| Capacidade                    | Responsabilidade                  |
+| ----------------------------- | --------------------------------- |
+| `community_memberships`       | estado e presença comunitária     |
+| `community_privacy_settings`  | descoberta, perfil e contato      |
+| `social_follows`              | vínculo unilateral                |
+| `social_connections`          | solicitação e vínculo bilateral   |
+| `social_message_requests`     | consentimento antes da DM         |
+| `social_conversations`        | conversas não românticas          |
+| `social_conversation_members` | participantes e estado            |
+| `dating_memberships`          | estado do modo namoro             |
+| `dating_profiles`             | campos especificamente românticos |
+| `dating_privacy_settings`     | recados e presença romântica      |
+| `capability_restrictions`     | sanções específicas por domínio   |
 
 Os nomes finais dependem do snapshot real do Supabase e do padrão escolhido na implementação.
 
@@ -1251,18 +1251,18 @@ Os nomes finais dependem do snapshot real do Supabase e do padrão escolhido na 
 
 ### 22.4 Fonte de verdade
 
-| Decisão | Autoridade |
-|---|---|
-| conta pode acessar | Identidade/Conta |
-| pode participar da comunidade | Comunidade |
-| pode ver perfil comunitário | Comunidade + Privacidade + Bloqueio |
-| pode iniciar conversa social | Conversas + Privacidade + Bloqueio |
-| está disponível romanticamente | Namoro |
-| pode interagir romanticamente com X | Namoro + Bloqueio + Propósito |
-| compromisso está ativo | Propósito Firmado |
-| saldo e compra | Economia |
-| item pertence ao usuário | Inventário |
-| ação está restrita | Moderação |
+| Decisão                             | Autoridade                          |
+| ----------------------------------- | ----------------------------------- |
+| conta pode acessar                  | Identidade/Conta                    |
+| pode participar da comunidade       | Comunidade                          |
+| pode ver perfil comunitário         | Comunidade + Privacidade + Bloqueio |
+| pode iniciar conversa social        | Conversas + Privacidade + Bloqueio  |
+| está disponível romanticamente      | Namoro                              |
+| pode interagir romanticamente com X | Namoro + Bloqueio + Propósito       |
+| compromisso está ativo              | Propósito Firmado                   |
+| saldo e compra                      | Economia                            |
+| item pertence ao usuário            | Inventário                          |
+| ação está restrita                  | Moderação                           |
 
 ---
 
@@ -1501,18 +1501,18 @@ Não registrar conteúdo privado em telemetria comum.
 
 ## 27. Matriz de comportamento
 
-| Cenário | Comunidade | Perfil social | Conversa social | Pretendentes | Interesse/recado | Match existente |
-|---|---:|---:|---:|---:|---:|---:|
-| aprovado, namoro desligado | sim | sim | conforme privacidade | não | não | preservado |
-| aprovado, namoro ativo | sim | sim | conforme privacidade | sim | sim | ativo |
-| namoro pausado pelo usuário | sim | sim | sim | não | não | preservado |
-| Propósito Firmado ativo | sim | sim | sim | não | não | parceiro ativo; outros arquivados |
-| perfil comunitário oculto | acesso direto conforme política | limitado | conexões existentes | depende do namoro | depende do namoro | preservado |
-| namoro suspenso pela moderação | conforme sanção | sim | conforme sanção | não | não | conforme sanção |
-| comunidade suspensa | não | não | não | não | não | preservado, inacessível |
-| bloqueio entre A e B | ambos continuam na comunidade | invisíveis entre si | não | não entre si | não | encerrado/arquivado entre si |
-| staff com namoro desligado | sim | sim | conforme privacidade | não | não | preservado |
-| staff com namoro ativo | sim | sim | conforme privacidade | sim, se elegível | sim | ativo |
+| Cenário                        |                      Comunidade |       Perfil social |      Conversa social |      Pretendentes |  Interesse/recado |                   Match existente |
+| ------------------------------ | ------------------------------: | ------------------: | -------------------: | ----------------: | ----------------: | --------------------------------: |
+| aprovado, namoro desligado     |                             sim |                 sim | conforme privacidade |               não |               não |                        preservado |
+| aprovado, namoro ativo         |                             sim |                 sim | conforme privacidade |               sim |               sim |                             ativo |
+| namoro pausado pelo usuário    |                             sim |                 sim |                  sim |               não |               não |                        preservado |
+| Propósito Firmado ativo        |                             sim |                 sim |                  sim |               não |               não | parceiro ativo; outros arquivados |
+| perfil comunitário oculto      | acesso direto conforme política |            limitado |  conexões existentes | depende do namoro | depende do namoro |                        preservado |
+| namoro suspenso pela moderação |                 conforme sanção |                 sim |      conforme sanção |               não |               não |                   conforme sanção |
+| comunidade suspensa            |                             não |                 não |                  não |               não |               não |           preservado, inacessível |
+| bloqueio entre A e B           |   ambos continuam na comunidade | invisíveis entre si |                  não |      não entre si |               não |      encerrado/arquivado entre si |
+| staff com namoro desligado     |                             sim |                 sim | conforme privacidade |               não |               não |                        preservado |
+| staff com namoro ativo         |                             sim |                 sim | conforme privacidade |  sim, se elegível |               sim |                             ativo |
 
 ---
 
@@ -1649,20 +1649,20 @@ Não registrar conteúdo privado em telemetria comum.
 
 ## 30. Riscos e mitigação
 
-| Risco | Impacto | Mitigação |
-|---|---|---|
-| duplicar perfil social e romântico | inconsistência | camada compartilhada + dono por campo |
-| autorização apenas no frontend | abuso | RLS/RPC/capacidades centrais |
-| DM comunitária virar spam | alto | solicitações, rate limit, privacidade |
-| bloqueio incompleto em novos módulos | segurança | política global e testes por contexto |
-| compromisso ainda zerar conversa social | produto | pausa com escopo romântico |
-| reativar namoro sem consentimento | privacidade | escolha explícita |
-| recado anônimo aberto à comunidade | abuso | manter exclusivo no namoro |
-| staff privilegiado em interações | confiança | mesmas regras + auditoria |
-| migration apagar histórico | crítico | adição compatível, backfill, flags e rollback |
-| caixa unificada confundir contexto | UX | rótulos e seções claras |
-| comunidade usar afinidade romântica | exclusão | ranking comunitário próprio |
-| estado derivado duplicado | bugs | uma autoridade de disponibilidade |
+| Risco                                   | Impacto        | Mitigação                                     |
+| --------------------------------------- | -------------- | --------------------------------------------- |
+| duplicar perfil social e romântico      | inconsistência | camada compartilhada + dono por campo         |
+| autorização apenas no frontend          | abuso          | RLS/RPC/capacidades centrais                  |
+| DM comunitária virar spam               | alto           | solicitações, rate limit, privacidade         |
+| bloqueio incompleto em novos módulos    | segurança      | política global e testes por contexto         |
+| compromisso ainda zerar conversa social | produto        | pausa com escopo romântico                    |
+| reativar namoro sem consentimento       | privacidade    | escolha explícita                             |
+| recado anônimo aberto à comunidade      | abuso          | manter exclusivo no namoro                    |
+| staff privilegiado em interações        | confiança      | mesmas regras + auditoria                     |
+| migration apagar histórico              | crítico        | adição compatível, backfill, flags e rollback |
+| caixa unificada confundir contexto      | UX             | rótulos e seções claras                       |
+| comunidade usar afinidade romântica     | exclusão       | ranking comunitário próprio                   |
+| estado derivado duplicado               | bugs           | uma autoridade de disponibilidade             |
 
 ---
 

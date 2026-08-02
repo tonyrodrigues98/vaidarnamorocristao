@@ -166,4 +166,3 @@ Para cada monólito Admin:
 - monólitos reduzidos sem big bang;
 - flags/rollback;
 - documentação operacional.
-

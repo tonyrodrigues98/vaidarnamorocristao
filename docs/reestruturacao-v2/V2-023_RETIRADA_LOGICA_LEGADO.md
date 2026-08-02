@@ -138,4 +138,3 @@ Quarentena antes de exclusão.
 - flags reativáveis;
 - nenhum delete físico;
 - lista objetiva para compensação e contração.
-

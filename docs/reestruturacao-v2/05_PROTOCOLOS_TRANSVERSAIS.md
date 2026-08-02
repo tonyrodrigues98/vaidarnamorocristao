@@ -291,4 +291,3 @@ Este pacote não autoriza produção. Um futuro release exige:
 - runbook;
 - rollback;
 - aprovação explícita.
-

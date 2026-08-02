@@ -20,12 +20,10 @@ import { getMyXpState } from "@/lib/xp";
 export const petKeys = {
   all: ["pet"] as const,
   myV2: (userId: string | null | undefined) => ["pet", "my-v2", userId ?? null] as const,
-  benefits: (
-    categoryId: string | null,
-    speciesId: string | null,
-    variantId: string | null,
-  ) => ["pet", "benefits", categoryId, speciesId, variantId] as const,
-  equippedV1: (userId: string | null | undefined) => ["pet", "equipped-v1", userId ?? null] as const,
+  benefits: (categoryId: string | null, speciesId: string | null, variantId: string | null) =>
+    ["pet", "benefits", categoryId, speciesId, variantId] as const,
+  equippedV1: (userId: string | null | undefined) =>
+    ["pet", "equipped-v1", userId ?? null] as const,
   sceneryList: (categoryId: string | null, speciesId: string | null) =>
     ["pet", "scenery", "list", categoryId, speciesId] as const,
   sceneryUnlocks: () => ["pet", "scenery", "unlocks"] as const,

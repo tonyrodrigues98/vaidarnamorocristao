@@ -21,27 +21,36 @@ export async function rollAndGetTodayExpeditions(): Promise<TodayExpedition[]> {
 }
 
 export async function getActiveExpedition(userPetId: string): Promise<ActiveExpedition | null> {
-  const { data, error } = await supabase.rpc("get_active_expedition" as never, {
-    _user_pet_id: userPetId,
-  } as never);
+  const { data, error } = await supabase.rpc(
+    "get_active_expedition" as never,
+    {
+      _user_pet_id: userPetId,
+    } as never,
+  );
   if (error) return null;
   const rows = (data ?? []) as unknown as ActiveExpedition[];
   return rows[0] ?? null;
 }
 
 export async function startExpedition(expeditionId: string, userPetId: string): Promise<string> {
-  const { data, error } = await supabase.rpc("start_expedition" as never, {
-    _expedition_id: expeditionId,
-    _user_pet_id: userPetId,
-  } as never);
+  const { data, error } = await supabase.rpc(
+    "start_expedition" as never,
+    {
+      _expedition_id: expeditionId,
+      _user_pet_id: userPetId,
+    } as never,
+  );
   if (error) throw new Error(translateError(error.message));
   return data as unknown as string;
 }
 
 export async function claimExpedition(runId: string): Promise<ClaimResult> {
-  const { data, error } = await supabase.rpc("claim_expedition" as never, {
-    _run_id: runId,
-  } as never);
+  const { data, error } = await supabase.rpc(
+    "claim_expedition" as never,
+    {
+      _run_id: runId,
+    } as never,
+  );
   if (error) throw new Error(translateError(error.message));
   return data as unknown as ClaimResult;
 }
@@ -96,6 +105,9 @@ export async function updateExpedition(
 }
 
 export async function deleteExpedition(id: string): Promise<void> {
-  const { error } = await supabase.from("pet_expeditions" as never).delete().eq("id", id);
+  const { error } = await supabase
+    .from("pet_expeditions" as never)
+    .delete()
+    .eq("id", id);
   if (error) throw error;
 }

@@ -143,4 +143,3 @@ Requisitos:
 - presentes contextuais sem duplicar economia;
 - dados históricos preservados;
 - flag/rollback e telemetria.
-

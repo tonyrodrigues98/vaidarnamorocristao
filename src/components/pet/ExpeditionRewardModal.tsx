@@ -18,7 +18,12 @@ type Reward = {
 
 const OUTCOME_META: Record<
   ClaimResult["outcome"],
-  { title: string; subtitle: string; Icon: React.ComponentType<{ className?: string }>; aura: string }
+  {
+    title: string;
+    subtitle: string;
+    Icon: React.ComponentType<{ className?: string }>;
+    aura: string;
+  }
 > = {
   crit: {
     title: "Recompensa Divina",
@@ -215,16 +220,16 @@ export function ExpeditionRewardModal({
                     transition={{ duration: 0.9, ease: "easeOut" }}
                     className={`pointer-events-none absolute left-6 top-1/2 -z-0 size-6 -translate-y-1/2 rounded-full blur-xl ${r.glow}`}
                   />
-                  <div className={`relative grid size-10 shrink-0 place-items-center rounded-xl bg-neutral-50 ring-1 ring-neutral-200 ${r.tint}`}>
+                  <div
+                    className={`relative grid size-10 shrink-0 place-items-center rounded-xl bg-neutral-50 ring-1 ring-neutral-200 ${r.tint}`}
+                  >
                     <r.Icon className="size-5" />
                   </div>
                   <div className="relative min-w-0 flex-1">
                     <p className="text-[10px] font-medium uppercase tracking-wider text-neutral-400">
                       {r.label}
                     </p>
-                    <p className="truncate text-base font-semibold text-neutral-950">
-                      {r.value}
-                    </p>
+                    <p className="truncate text-base font-semibold text-neutral-950">{r.value}</p>
                   </div>
                   {i === step - 1 && (
                     <motion.div

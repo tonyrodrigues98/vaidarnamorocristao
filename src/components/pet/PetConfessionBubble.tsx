@@ -68,7 +68,7 @@ export function PetConfessionBubble({
   async function fetchDreamMatch(): Promise<DreamMatch | null> {
     const { data, error } = await supabase.rpc("get_pet_dream_match" as never);
     if (error) console.warn("[pet] dream rpc error", error);
-    const row = ((data as unknown) as DreamMatch[])?.[0];
+    const row = (data as unknown as DreamMatch[])?.[0];
     return row ?? null;
   }
 

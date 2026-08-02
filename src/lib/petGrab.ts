@@ -111,12 +111,18 @@ export async function createGrabPool(p: GrabPoolWritable): Promise<GrabPool> {
 }
 
 export async function updateGrabPool(id: string, patch: Partial<GrabPoolWritable>): Promise<void> {
-  const { error } = await supabase.from("grab_pools" as any).update(patch as any).eq("id", id);
+  const { error } = await supabase
+    .from("grab_pools" as any)
+    .update(patch as any)
+    .eq("id", id);
   if (error) throw error;
 }
 
 export async function deleteGrabPool(id: string): Promise<void> {
-  const { error } = await supabase.from("grab_pools" as any).delete().eq("id", id);
+  const { error } = await supabase
+    .from("grab_pools" as any)
+    .delete()
+    .eq("id", id);
   if (error) throw error;
 }
 
@@ -143,13 +149,22 @@ export async function createGrabPrize(p: GrabPrizeWritable): Promise<GrabPoolPri
   return data as unknown as GrabPoolPrize;
 }
 
-export async function updateGrabPrize(id: string, patch: Partial<GrabPrizeWritable>): Promise<void> {
-  const { error } = await supabase.from("grab_pool_prizes" as any).update(patch as any).eq("id", id);
+export async function updateGrabPrize(
+  id: string,
+  patch: Partial<GrabPrizeWritable>,
+): Promise<void> {
+  const { error } = await supabase
+    .from("grab_pool_prizes" as any)
+    .update(patch as any)
+    .eq("id", id);
   if (error) throw error;
 }
 
 export async function deleteGrabPrize(id: string): Promise<void> {
-  const { error } = await supabase.from("grab_pool_prizes" as any).delete().eq("id", id);
+  const { error } = await supabase
+    .from("grab_pool_prizes" as any)
+    .delete()
+    .eq("id", id);
   if (error) throw error;
 }
 
@@ -161,25 +176,37 @@ export async function listPrizeCatalog(kind: string): Promise<PrizeCatalogItem[]
   switch (kind) {
     case "care_item": {
       const { data, error } = await supabase
-        .from("pet_care_items" as any).select("id, name").eq("active", true).order("name");
+        .from("pet_care_items" as any)
+        .select("id, name")
+        .eq("active", true)
+        .order("name");
       if (error) throw error;
       return (data ?? []) as unknown as PrizeCatalogItem[];
     }
     case "pet_background": {
       const { data, error } = await supabase
-        .from("pet_backgrounds" as any).select("id, name").eq("active", true).order("name");
+        .from("pet_backgrounds" as any)
+        .select("id, name")
+        .eq("active", true)
+        .order("name");
       if (error) throw error;
       return (data ?? []) as unknown as PrizeCatalogItem[];
     }
     case "decoration": {
       const { data, error } = await supabase
-        .from("avatar_decorations" as any).select("id, name").eq("active", true).order("name");
+        .from("avatar_decorations" as any)
+        .select("id, name")
+        .eq("active", true)
+        .order("name");
       if (error) throw error;
       return (data ?? []) as unknown as PrizeCatalogItem[];
     }
     case "name_gradient": {
       const { data, error } = await supabase
-        .from("name_gradients" as any).select("id, name").eq("is_active", true).order("name");
+        .from("name_gradients" as any)
+        .select("id, name")
+        .eq("is_active", true)
+        .order("name");
       if (error) throw error;
       return (data ?? []) as unknown as PrizeCatalogItem[];
     }
@@ -200,7 +227,10 @@ export type PrizeMeta = {
   gradient_css?: string;
 };
 
-function rarityFromCareItem(row: { cost_coins?: number | null; restore_amount?: number | null }): PrizeRarity {
+function rarityFromCareItem(row: {
+  cost_coins?: number | null;
+  restore_amount?: number | null;
+}): PrizeRarity {
   const cost = row.cost_coins ?? 0;
   const restore = row.restore_amount ?? 0;
   if (cost >= 25 || restore >= 80) return "legendary";
@@ -210,7 +240,8 @@ function rarityFromCareItem(row: { cost_coins?: number | null; restore_amount?: 
 }
 function rarityFromString(r: string | null | undefined): PrizeRarity {
   const v = (r ?? "").toLowerCase();
-  if (v === "exclusive" || v === "legendary" || v === "lendaria" || v === "lendária") return "legendary";
+  if (v === "exclusive" || v === "legendary" || v === "lendaria" || v === "lendária")
+    return "legendary";
   if (v === "epic" || v === "epica" || v === "épica") return "epic";
   if (v === "rare" || v === "rara") return "rare";
   return "common";
@@ -245,10 +276,7 @@ export async function listPoolPrizeMetas(poolId: string): Promise<PrizeMeta[]> {
   return metas.filter((m): m is PrizeMeta => !!m);
 }
 
-export async function resolvePrize(
-  kind: string,
-  refId: string | null,
-): Promise<PrizeMeta | null> {
+export async function resolvePrize(kind: string, refId: string | null): Promise<PrizeMeta | null> {
   if (kind === "coins") {
     return { name: "Moedas", image_url: null, kind, rarity: "common" };
   }
@@ -262,19 +290,46 @@ export async function resolvePrize(
   }
   if (!refId) return null;
   if (kind === "care_item") {
-    const { data } = await supabase.from("pet_care_items" as any).select("name, image_url, cost_coins, restore_amount").eq("id", refId).maybeSingle();
+    const { data } = await supabase
+      .from("pet_care_items" as any)
+      .select("name, image_url, cost_coins, restore_amount")
+      .eq("id", refId)
+      .maybeSingle();
     if (!data) return null;
-    return { name: (data as any).name, image_url: await resolvePetImage((data as any).image_url), kind, rarity: rarityFromCareItem(data as any) };
+    return {
+      name: (data as any).name,
+      image_url: await resolvePetImage((data as any).image_url),
+      kind,
+      rarity: rarityFromCareItem(data as any),
+    };
   }
   if (kind === "pet_background") {
-    const { data } = await supabase.from("pet_backgrounds" as any).select("name, image_url_day, rarity").eq("id", refId).maybeSingle();
+    const { data } = await supabase
+      .from("pet_backgrounds" as any)
+      .select("name, image_url_day, rarity")
+      .eq("id", refId)
+      .maybeSingle();
     if (!data) return null;
-    return { name: (data as any).name, image_url: await resolvePetImage((data as any).image_url_day), kind, rarity: rarityFromString((data as any).rarity) };
+    return {
+      name: (data as any).name,
+      image_url: await resolvePetImage((data as any).image_url_day),
+      kind,
+      rarity: rarityFromString((data as any).rarity),
+    };
   }
   if (kind === "decoration") {
-    const { data } = await supabase.from("avatar_decorations" as any).select("name, image_url, rarity").eq("id", refId).maybeSingle();
+    const { data } = await supabase
+      .from("avatar_decorations" as any)
+      .select("name, image_url, rarity")
+      .eq("id", refId)
+      .maybeSingle();
     if (!data) return null;
-    return { name: (data as any).name, image_url: decorationAssetFor({ image_url: (data as any).image_url }), kind, rarity: rarityFromString((data as any).rarity) };
+    return {
+      name: (data as any).name,
+      image_url: decorationAssetFor({ image_url: (data as any).image_url }),
+      kind,
+      rarity: rarityFromString((data as any).rarity),
+    };
   }
   if (kind === "name_gradient") {
     const { data } = await supabase

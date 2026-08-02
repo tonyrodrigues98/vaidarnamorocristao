@@ -136,4 +136,3 @@ Não introduzir API paga ou segredo sem gate.
 - desafios não competitivos espiritualmente;
 - licenças/custos como gates explícitos;
 - flag/rollback.
-

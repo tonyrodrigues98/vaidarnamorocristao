@@ -1,10 +1,6 @@
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 type Props = {
   /** Posição em % do container — ponto central da região. */
@@ -37,16 +33,18 @@ export function RegionHotspot({
 }: Props) {
   const size = `${radius * 2}%`;
   const labelPos = {
-    top:    { bottom: `calc(100% + 6px)`, left: "50%", transform: "translateX(-50%)" },
-    bottom: { top:    `calc(100% + 6px)`, left: "50%", transform: "translateX(-50%)" },
-    left:   { right:  `calc(100% + 6px)`, top:  "50%", transform: "translateY(-50%)" },
-    right:  { left:   `calc(100% + 6px)`, top:  "50%", transform: "translateY(-50%)" },
+    top: { bottom: `calc(100% + 6px)`, left: "50%", transform: "translateX(-50%)" },
+    bottom: { top: `calc(100% + 6px)`, left: "50%", transform: "translateX(-50%)" },
+    left: { right: `calc(100% + 6px)`, top: "50%", transform: "translateY(-50%)" },
+    right: { left: `calc(100% + 6px)`, top: "50%", transform: "translateY(-50%)" },
   }[labelPlacement];
 
   const pulse =
-    attention === 2 ? "region-glow 2.4s ease-in-out infinite"
-    : attention === 1 ? "region-glow 5s ease-in-out infinite"
-    : "none";
+    attention === 2
+      ? "region-glow 2.4s ease-in-out infinite"
+      : attention === 1
+        ? "region-glow 5s ease-in-out infinite"
+        : "none";
 
   const btn = (
     <button
@@ -89,7 +87,9 @@ export function RegionHotspot({
         aria-hidden
         className={cn(
           "pointer-events-none absolute whitespace-nowrap rounded-full bg-neutral-900/85 px-2 py-0.5 text-[10px] font-semibold tracking-tight text-amber-50 shadow-md ring-1 ring-amber-200/30 backdrop-blur-sm transition-opacity duration-300",
-          attention === 2 ? "opacity-100" : "opacity-85 group-hover:opacity-100 group-focus-visible:opacity-100",
+          attention === 2
+            ? "opacity-100"
+            : "opacity-85 group-hover:opacity-100 group-focus-visible:opacity-100",
         )}
         style={labelPos}
       >

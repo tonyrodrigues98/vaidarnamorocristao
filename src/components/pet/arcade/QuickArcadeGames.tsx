@@ -62,7 +62,10 @@ export function CoinFlipGame({ config, balance, onBalanceChange, onFinished }: A
       icon={<PawPrint className="size-5" />}
     >
       <div className="space-y-5">
-        <ArcadeStage className="grid min-h-64 place-items-center border-pink-200/60 bg-gradient-to-br from-rose-950 via-pink-900 to-amber-700 [perspective:800px]" glowClassName="bg-pink-300/20">
+        <ArcadeStage
+          className="grid min-h-64 place-items-center border-pink-200/60 bg-gradient-to-br from-rose-950 via-pink-900 to-amber-700 [perspective:800px]"
+          glowClassName="bg-pink-300/20"
+        >
           <motion.div
             animate={{
               rotateY: flipping
@@ -84,7 +87,11 @@ export function CoinFlipGame({ config, balance, onBalanceChange, onFinished }: A
           </motion.div>
         </ArcadeStage>
         <div className="grid grid-cols-2 gap-2">
-          <ArcadeMetric label="Escolha" value={side === "paw" ? "Patinha" : "Coração"} tone="dark" />
+          <ArcadeMetric
+            label="Escolha"
+            value={side === "paw" ? "Patinha" : "Coração"}
+            tone="dark"
+          />
           <ArcadeMetric label="Entrada" value={`${entry} moedas`} />
         </div>
         {!result || flipping ? (
@@ -177,7 +184,10 @@ export function DiceGame({ config, balance, onBalanceChange, onFinished }: Arcad
       icon={<Dices className="size-5" />}
     >
       <div className="space-y-5">
-        <ArcadeStage className="grid min-h-60 place-items-center border-blue-200/40 bg-gradient-to-br from-blue-950 via-indigo-900 to-sky-800 text-white" glowClassName="bg-blue-300/20">
+        <ArcadeStage
+          className="grid min-h-60 place-items-center border-blue-200/40 bg-gradient-to-br from-blue-950 via-indigo-900 to-sky-800 text-white"
+          glowClassName="bg-blue-300/20"
+        >
           <motion.div
             animate={{ rotate: rolling ? 1080 : 0, scale: rolling ? [1, 0.75, 1.1, 1] : 1 }}
             transition={{ duration: 1.2 }}

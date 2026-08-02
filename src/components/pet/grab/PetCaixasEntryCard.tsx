@@ -23,9 +23,7 @@ export function PetCaixasEntryCard() {
     };
   }, []);
 
-  const freeLeft = state
-    ? Math.max(0, state.default_free_daily - state.free_used)
-    : 0;
+  const freeLeft = state ? Math.max(0, state.default_free_daily - state.free_used) : 0;
   const poolCount = state?.pools.length ?? 0;
 
   return (

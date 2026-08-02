@@ -113,7 +113,7 @@ function AdminVerifs() {
     return (
       <div className="min-h-screen">
         <Header />
-      <AdminTopNav compact />
+        <AdminTopNav compact />
         <main className="mx-auto max-w-md px-4 py-20 text-center">
           <ShieldAlert className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
           <h1 className="text-2xl">Acesso restrito</h1>

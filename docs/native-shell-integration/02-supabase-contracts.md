@@ -208,12 +208,12 @@ consultada nesta etapa.
 
 ## Endpoints internos
 
-| Endpoint | Papel observado |
-|---|---|
-| `/api/photo-repair` | Reparação controlada de caminhos de foto; usa cliente server-side. |
-| `/api/public/hooks/push-dispatch` | Dispatch de push autenticado por segredo server-side. |
-| `/api/public/runtime-config` | Expõe apenas configuração pública necessária ao cliente. |
-| `/api/verify-photo` | Validação server-side de foto. |
+| Endpoint                          | Papel observado                                                    |
+| --------------------------------- | ------------------------------------------------------------------ |
+| `/api/photo-repair`               | Reparação controlada de caminhos de foto; usa cliente server-side. |
+| `/api/public/hooks/push-dispatch` | Dispatch de push autenticado por segredo server-side.              |
+| `/api/public/runtime-config`      | Expõe apenas configuração pública necessária ao cliente.           |
+| `/api/verify-photo`               | Validação server-side de foto.                                     |
 
 Não existe diretório versionado `supabase/functions` no commit-base.
 

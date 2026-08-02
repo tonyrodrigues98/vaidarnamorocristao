@@ -154,4 +154,3 @@ Não executar testes mutáveis contra produção.
 - não alterar saldo/dados;
 - não publicar snapshot com PII;
 - não encerrar o programa se o acesso read-only estiver ausente.
-

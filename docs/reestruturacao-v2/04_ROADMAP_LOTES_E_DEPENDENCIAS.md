@@ -17,27 +17,27 @@ um mecanismo de coordenação, não autorização para ignorar o estado real.
 
 ## Visão geral
 
-| Lote | Objetivo | Depende de | Saída mínima |
-|---|---|---|---|
-| V2-007 | Conta e configurações | fundação V2 e auditoria | domínio, adapter, rota, cache/deep links seguros |
-| V2-008 | segurança e verdade publicada | auditoria + acesso disponível | snapshot, testes RLS/RPC, hardening proposto/implementado localmente |
-| V2-009 | aquisição, identidade e onboarding | Conta + capabilities | entrada community-first e namoro opt-in |
-| V2-010 | Início, vínculos e Status | identidade/perfil base | hub social, social graph e status 24 h |
-| V2-011 | Comunidade | vínculos + moderação base | hub, descoberta, espaços/grupos/eventos |
-| V2-012 | Conversas | identidade + capabilities | inbox contextual e núcleo confiável |
-| V2-013 | Perfil modular | inventário adapter + social state | perfil expressivo e editor lateral |
-| V2-014 | Modo Namoro | identidade + conversas + perfil | opt-in, descoberta, interesse e match |
-| V2-015 | Propósito e recados | namoro + conversas | casal, pausa romântica e recados opt-in |
-| V2-016 | economia, Loja e inventário | segurança RPC + perfil contracts | ledger/ownership e UX redesenhada |
-| V2-017 | pets e jogos | economia/inventário | adapters, redesign e classificação sem remoção |
-| V2-018 | conteúdo e Verbo | identidade + PWA base | hub cristão e subproduto de estudo |
-| V2-019 | Cinema | comunidade + conversas + mídia | spike, MVP e operação de watch party |
-| V2-020 | notificações, confiança e suporte | eventos dos domínios | central, moderação e suporte contextual |
-| V2-021 | Administração e métricas | capabilities + domínios estáveis | console modular e observabilidade |
-| V2-022 | PWA, offline, performance e a11y | superfícies V2 principais | hardening transversal e budgets |
-| V2-023 | retirada lógica do legado | paridade e telemetria | flags, redirects e quarentena |
-| V2-024 | reconciliação e contração autorizável | snapshots/backups/gates | manifests, dry-runs e proposta destrutiva |
-| V2-025 | convergência e release | todos os lotes | matriz final, rollout, rollback e readiness |
+| Lote   | Objetivo                              | Depende de                        | Saída mínima                                                         |
+| ------ | ------------------------------------- | --------------------------------- | -------------------------------------------------------------------- |
+| V2-007 | Conta e configurações                 | fundação V2 e auditoria           | domínio, adapter, rota, cache/deep links seguros                     |
+| V2-008 | segurança e verdade publicada         | auditoria + acesso disponível     | snapshot, testes RLS/RPC, hardening proposto/implementado localmente |
+| V2-009 | aquisição, identidade e onboarding    | Conta + capabilities              | entrada community-first e namoro opt-in                              |
+| V2-010 | Início, vínculos e Status             | identidade/perfil base            | hub social, social graph e status 24 h                               |
+| V2-011 | Comunidade                            | vínculos + moderação base         | hub, descoberta, espaços/grupos/eventos                              |
+| V2-012 | Conversas                             | identidade + capabilities         | inbox contextual e núcleo confiável                                  |
+| V2-013 | Perfil modular                        | inventário adapter + social state | perfil expressivo e editor lateral                                   |
+| V2-014 | Modo Namoro                           | identidade + conversas + perfil   | opt-in, descoberta, interesse e match                                |
+| V2-015 | Propósito e recados                   | namoro + conversas                | casal, pausa romântica e recados opt-in                              |
+| V2-016 | economia, Loja e inventário           | segurança RPC + perfil contracts  | ledger/ownership e UX redesenhada                                    |
+| V2-017 | pets e jogos                          | economia/inventário               | adapters, redesign e classificação sem remoção                       |
+| V2-018 | conteúdo e Verbo                      | identidade + PWA base             | hub cristão e subproduto de estudo                                   |
+| V2-019 | Cinema                                | comunidade + conversas + mídia    | spike, MVP e operação de watch party                                 |
+| V2-020 | notificações, confiança e suporte     | eventos dos domínios              | central, moderação e suporte contextual                              |
+| V2-021 | Administração e métricas              | capabilities + domínios estáveis  | console modular e observabilidade                                    |
+| V2-022 | PWA, offline, performance e a11y      | superfícies V2 principais         | hardening transversal e budgets                                      |
+| V2-023 | retirada lógica do legado             | paridade e telemetria             | flags, redirects e quarentena                                        |
+| V2-024 | reconciliação e contração autorizável | snapshots/backups/gates           | manifests, dry-runs e proposta destrutiva                            |
+| V2-025 | convergência e release                | todos os lotes                    | matriz final, rollout, rollback e readiness                          |
 
 ## V2-007 — Configurações/Conta
 
@@ -293,4 +293,3 @@ Gate de saída:
 - Comunidade + Conversas antes de Cinema social;
 - paridade antes de retirada lógica;
 - reconciliação/restore antes de contração física.
-

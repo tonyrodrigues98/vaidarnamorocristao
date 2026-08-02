@@ -75,7 +75,10 @@ export function PetRaceGame({
       icon={<Flag className="size-5" />}
     >
       <div className="space-y-4">
-        <ArcadeStage className="bg-gradient-to-br from-sky-950 via-cyan-950 to-emerald-950 p-3" glowClassName="bg-cyan-300/25">
+        <ArcadeStage
+          className="bg-gradient-to-br from-sky-950 via-cyan-950 to-emerald-950 p-3"
+          glowClassName="bg-cyan-300/25"
+        >
           <div className="mb-3 flex items-center justify-between rounded-2xl border border-white/20 bg-white/10 px-3 py-2 text-xs font-bold text-white backdrop-blur">
             <span>Cuidado geral: {displayCareScore}%</span>
             <span>

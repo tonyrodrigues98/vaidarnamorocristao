@@ -15,20 +15,17 @@ const STEPS: Step[] = [
   {
     icon: Sparkles,
     title: "Barras de cuidado",
-    body:
-      "Fome, energia, humor, higiene, sono e carência caem com o tempo. Mantenha-as acima de 50% para deixar seu pet feliz.",
+    body: "Fome, energia, humor, higiene, sono e carência caem com o tempo. Mantenha-as acima de 50% para deixar seu pet feliz.",
   },
   {
     icon: ListChecks,
     title: "Missões e XP",
-    body:
-      "Complete missões diárias para ganhar XP, moedas e subir de nível — destrava novos cenários e itens.",
+    body: "Complete missões diárias para ganhar XP, moedas e subir de nível — destrava novos cenários e itens.",
   },
   {
     icon: Hand,
     title: "Segure no pet",
-    body:
-      "Segure (ou clique com o direito) sobre o pet para abrir o menu circular de ações: alimentar, brincar, dar banho e mais.",
+    body: "Segure (ou clique com o direito) sobre o pet para abrir o menu circular de ações: alimentar, brincar, dar banho e mais.",
   },
 ];
 
@@ -72,12 +69,10 @@ export function PetOnboardingTour() {
       <div className="absolute inset-0 bg-black/55 backdrop-blur-sm animate-in fade-in duration-200" />
       <div className="relative z-10 m-3 w-full max-w-sm overflow-hidden rounded-3xl bg-white shadow-2xl animate-in slide-in-from-bottom-6 sm:slide-in-from-bottom-0 sm:zoom-in-95">
         <div className="flex items-center justify-between border-b border-neutral-100 px-5 py-3 text-[10px] font-medium uppercase tracking-[0.18em] text-neutral-400">
-          <span>Passo {i + 1} de {STEPS.length}</span>
-          <button
-            type="button"
-            onClick={close}
-            className="text-neutral-400 hover:text-neutral-700"
-          >
+          <span>
+            Passo {i + 1} de {STEPS.length}
+          </span>
+          <button type="button" onClick={close} className="text-neutral-400 hover:text-neutral-700">
             Pular
           </button>
         </div>

@@ -22,12 +22,7 @@ const COMMUNITY_KEYWORDS = ["comunidade", "geral", "chat", "comunidade geral", "
  * Reusable drawer that lists the user's conversations with the global
  * community pinned at the top. Loads its own data lazily when opened.
  */
-export function ConversationDrawer({
-  open,
-  onOpenChange,
-  currentMatchId,
-  currentType,
-}: Props) {
+export function ConversationDrawer({ open, onOpenChange, currentMatchId, currentType }: Props) {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
@@ -35,17 +30,13 @@ export function ConversationDrawer({
 
   // If user is in an active commitment, only show that match.
   const items = useMemo(
-    () =>
-      commitment
-        ? rawItems.filter((i) => i.matchId === commitment.match_id)
-        : rawItems,
+    () => (commitment ? rawItems.filter((i) => i.matchId === commitment.match_id) : rawItems),
     [rawItems, commitment],
   );
 
   const q = query.trim().toLowerCase();
   const filtered = useMemo(
-    () =>
-      q ? items.filter((i) => i.partner.full_name.toLowerCase().includes(q)) : items,
+    () => (q ? items.filter((i) => i.partner.full_name.toLowerCase().includes(q)) : items),
     [items, q],
   );
   const showCommunity = !q || COMMUNITY_KEYWORDS.some((k) => k.includes(q) || q.includes(k));

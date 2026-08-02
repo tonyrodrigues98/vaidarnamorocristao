@@ -82,8 +82,7 @@ export function PetDiarySheet({
             <div className="rounded-2xl border border-dashed border-neutral-200 bg-neutral-50 p-6 text-center">
               <Sparkles className="mx-auto mb-2 size-5 text-amber-500" />
               <p className="text-sm text-neutral-600">
-                Nenhuma página ainda. Quando seu pet pensar em algo bonito, toque em
-                {" "}
+                Nenhuma página ainda. Quando seu pet pensar em algo bonito, toque em{" "}
                 <span className="font-medium">Guardar no diário</span> para preservar.
               </p>
             </div>

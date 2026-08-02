@@ -13,21 +13,19 @@ import { shouldHidePrimaryActions } from "../src/lib/pretendentesEligibility";
 
 describe("shouldHidePrimaryActions — elegibilidade vs cargo", () => {
   it("oculta quando ambos têm o mesmo sexo (regra geral mantida)", () => {
-    expect(
-      shouldHidePrimaryActions({ viewerSex: "masculino", profileSex: "masculino" }),
-    ).toBe(true);
-    expect(
-      shouldHidePrimaryActions({ viewerSex: "feminino", profileSex: "feminino" }),
-    ).toBe(true);
+    expect(shouldHidePrimaryActions({ viewerSex: "masculino", profileSex: "masculino" })).toBe(
+      true,
+    );
+    expect(shouldHidePrimaryActions({ viewerSex: "feminino", profileSex: "feminino" })).toBe(true);
   });
 
   it("NÃO oculta para sexo oposto, mesmo sem cargo", () => {
-    expect(
-      shouldHidePrimaryActions({ viewerSex: "masculino", profileSex: "feminino" }),
-    ).toBe(false);
-    expect(
-      shouldHidePrimaryActions({ viewerSex: "feminino", profileSex: "masculino" }),
-    ).toBe(false);
+    expect(shouldHidePrimaryActions({ viewerSex: "masculino", profileSex: "feminino" })).toBe(
+      false,
+    );
+    expect(shouldHidePrimaryActions({ viewerSex: "feminino", profileSex: "masculino" })).toBe(
+      false,
+    );
   });
 
   describe("staff que optou por aparecer na lista", () => {

@@ -46,9 +46,7 @@ export async function listMyPets(userId: string): Promise<UserPetWithPet[]> {
     .order("acquired_at", { ascending: false });
   if (error) throw error;
   const rows = (data ?? []) as UserPetWithPet[];
-  return Promise.all(
-    rows.map(async (r) => ({ ...r, pet: await hydratePet(r.pet) })),
-  );
+  return Promise.all(rows.map(async (r) => ({ ...r, pet: await hydratePet(r.pet) })));
 }
 
 export async function getEquippedPet(userId: string): Promise<UserPetWithPet | null> {
@@ -119,11 +117,7 @@ export async function uploadPetImage(file: File): Promise<string> {
 }
 
 export async function createPet(input: PetWritable): Promise<Pet> {
-  const { data, error } = await supabase
-    .from("pets")
-    .insert(input)
-    .select("*")
-    .single();
+  const { data, error } = await supabase.from("pets").insert(input).select("*").single();
   if (error) throw error;
   return hydratePet(data as Pet);
 }

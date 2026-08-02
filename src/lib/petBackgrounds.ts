@@ -42,7 +42,7 @@ export async function listAdminBackgrounds(): Promise<PetBackgroundWithCompat[]>
     .order("sort_order", { ascending: true })
     .order("name", { ascending: true });
   if (error) throw error;
-  const rows = await hydrateAll(((data ?? []) as unknown) as PetBackground[]);
+  const rows = await hydrateAll((data ?? []) as unknown as PetBackground[]);
   const ids = rows.map((r) => r.id);
   let compat: PetBackgroundCompat[] = [];
   if (ids.length) {
@@ -95,7 +95,10 @@ export async function updateBackground(
 }
 
 export async function deleteBackground(id: string): Promise<void> {
-  const { error } = await supabase.from("pet_backgrounds" as any).delete().eq("id", id);
+  const { error } = await supabase
+    .from("pet_backgrounds" as any)
+    .delete()
+    .eq("id", id);
   if (error) throw error;
 }
 
@@ -141,7 +144,7 @@ export async function listCompatibleBackgroundsForPet(opts: {
     .order("sort_order", { ascending: true })
     .order("name", { ascending: true });
   if (error) throw error;
-  return hydrateAll(((data ?? []) as unknown) as PetBackground[]);
+  return hydrateAll((data ?? []) as unknown as PetBackground[]);
 }
 
 export async function listMyBackgroundUnlocks(): Promise<UserPetBackground[]> {

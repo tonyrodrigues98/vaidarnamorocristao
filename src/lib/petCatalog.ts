@@ -48,8 +48,7 @@ function extractPathAfterMarker(value: string, marker: string): string | null {
   const index = value.indexOf(marker);
   if (index < 0) return null;
   return (
-    safeDecode(stripQueryAndHash(value.slice(index + marker.length))).replace(/^\/+/, "") ||
-    null
+    safeDecode(stripQueryAndHash(value.slice(index + marker.length))).replace(/^\/+/, "") || null
   );
 }
 
@@ -68,7 +67,8 @@ export function classifyPetMediaSource(value: string | null | undefined): PetMed
 
   for (const marker of LEGACY_STORAGE_MARKERS) {
     const legacyPath = extractPathAfterMarker(clean, marker);
-    if (legacyPath) return { kind: "public", path: legacyPath, url: getPublicPetImageUrl(legacyPath) };
+    if (legacyPath)
+      return { kind: "public", path: legacyPath, url: getPublicPetImageUrl(legacyPath) };
   }
 
   if (/^https?:\/\//i.test(clean)) return { kind: "external", path: null, url: clean };
@@ -162,10 +162,10 @@ export function resolvePetDisplayImage(
   const adult = (entity as { image_url_adult?: string | null }).image_url_adult ?? null;
   const candidate =
     stageKind === "baby"
-      ? baby ?? adult ?? entity.image_url ?? null
+      ? (baby ?? adult ?? entity.image_url ?? null)
       : stageKind === "adult"
-        ? adult ?? baby ?? entity.image_url ?? null
-        : adult ?? baby ?? entity.image_url ?? null;
+        ? (adult ?? baby ?? entity.image_url ?? null)
+        : (adult ?? baby ?? entity.image_url ?? null);
   return classifyPetMediaSource(candidate).url;
 }
 

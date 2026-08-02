@@ -1,14 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { Link } from "@tanstack/react-router";
-import {
-  ArrowRight,
-  CheckCircle2,
-  Gift,
-  ShieldCheck,
-  Sparkles,
-  Sun,
-} from "lucide-react";
+import { ArrowRight, CheckCircle2, Gift, ShieldCheck, Sparkles, Sun } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -347,86 +340,90 @@ export function HomeStarterSection({ userId, onAction, topSpacing }: Props) {
       </div>
 
       {/* Free frame modal */}
-      {showFrames && typeof document !== "undefined" && createPortal(
-        <div
-          className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-3 sm:items-center"
-          onClick={() => setShowFrames(false)}
-        >
+      {showFrames &&
+        typeof document !== "undefined" &&
+        createPortal(
           <div
-            className="w-full max-w-md rounded-3xl border border-border/60 bg-card p-4 shadow-xl"
-            onClick={(e) => e.stopPropagation()}
+            className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-3 sm:items-center"
+            onClick={() => setShowFrames(false)}
           >
-            <div className="mb-3 flex items-start gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--rose)]/15 to-[var(--coral)]/15 text-[var(--rose)]">
-                <Gift className="h-5 w-5" />
+            <div
+              className="w-full max-w-md rounded-3xl border border-border/60 bg-card p-4 shadow-xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="mb-3 flex items-start gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--rose)]/15 to-[var(--coral)]/15 text-[var(--rose)]">
+                  <Gift className="h-5 w-5" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <h3 className="text-base font-semibold">Escolha sua moldura grátis</h3>
+                  <p className="text-xs text-muted-foreground">
+                    Apenas uma moldura comum ou rara, por usuário.
+                  </p>
+                </div>
               </div>
-              <div className="min-w-0 flex-1">
-                <h3 className="text-base font-semibold">Escolha sua moldura grátis</h3>
-                <p className="text-xs text-muted-foreground">
-                  Apenas uma moldura comum ou rara, por usuário.
+
+              {eligibleFrames.length === 0 ? (
+                <p className="py-6 text-center text-sm text-muted-foreground">
+                  Carregando opções...
                 </p>
-              </div>
-            </div>
-
-            {eligibleFrames.length === 0 ? (
-              <p className="py-6 text-center text-sm text-muted-foreground">
-                Carregando opções...
-              </p>
-            ) : (
-              <div className="grid max-h-[60vh] grid-cols-2 gap-3 overflow-y-auto">
-                {eligibleFrames.map((d) => {
-                  const src = assetFor(d);
-                  const owned = ownedIds.has(d.id);
-                  const r = DECORATION_RARITY_STYLE[d.rarity];
-                  return (
-                    <div
-                      key={d.id}
-                      className={`flex flex-col items-center rounded-2xl border bg-background/70 p-3 ${r.border}`}
-                    >
-                      <div className="relative h-20 w-20">
-                        {src ? (
-                          <img
-                            src={src}
-                            alt={d.name}
-                            className="h-full w-full object-contain"
-                            loading="lazy"
-                          />
-                        ) : (
-                          <div className="h-full w-full rounded-full bg-muted" />
-                        )}
-                      </div>
-                      <p className="mt-2 line-clamp-1 text-center text-xs font-medium">{d.name}</p>
-                      <span className={`mt-1 rounded-full px-2 py-0.5 text-[10px] ${r.chip}`}>
-                        {r.label}
-                      </span>
-                      <Button
-                        size="sm"
-                        className="app-pressable mt-2 w-full rounded-full"
-                        disabled={!!claiming || owned}
-                        onClick={() => claim(d)}
+              ) : (
+                <div className="grid max-h-[60vh] grid-cols-2 gap-3 overflow-y-auto">
+                  {eligibleFrames.map((d) => {
+                    const src = assetFor(d);
+                    const owned = ownedIds.has(d.id);
+                    const r = DECORATION_RARITY_STYLE[d.rarity];
+                    return (
+                      <div
+                        key={d.id}
+                        className={`flex flex-col items-center rounded-2xl border bg-background/70 p-3 ${r.border}`}
                       >
-                        {owned ? "Já possui" : claiming === d.id ? "Resgatando..." : "Resgatar"}
-                      </Button>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
+                        <div className="relative h-20 w-20">
+                          {src ? (
+                            <img
+                              src={src}
+                              alt={d.name}
+                              className="h-full w-full object-contain"
+                              loading="lazy"
+                            />
+                          ) : (
+                            <div className="h-full w-full rounded-full bg-muted" />
+                          )}
+                        </div>
+                        <p className="mt-2 line-clamp-1 text-center text-xs font-medium">
+                          {d.name}
+                        </p>
+                        <span className={`mt-1 rounded-full px-2 py-0.5 text-[10px] ${r.chip}`}>
+                          {r.label}
+                        </span>
+                        <Button
+                          size="sm"
+                          className="app-pressable mt-2 w-full rounded-full"
+                          disabled={!!claiming || owned}
+                          onClick={() => claim(d)}
+                        >
+                          {owned ? "Já possui" : claiming === d.id ? "Resgatando..." : "Resgatar"}
+                        </Button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
 
-            <div className="mt-3 flex justify-end">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowFrames(false)}
-                className="rounded-full"
-              >
-                Fechar
-              </Button>
+              <div className="mt-3 flex justify-end">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowFrames(false)}
+                  className="rounded-full"
+                >
+                  Fechar
+                </Button>
+              </div>
             </div>
-          </div>
-        </div>,
-        document.body,
-      )}
+          </div>,
+          document.body,
+        )}
     </section>
   );
 }

@@ -10,14 +10,7 @@
 
 import type { AvatarAgeRange } from "@/types/avatar";
 
-export type SkinToneKey =
-  | "default"
-  | "porcelain"
-  | "light"
-  | "tan"
-  | "olive"
-  | "brown"
-  | "deep";
+export type SkinToneKey = "default" | "porcelain" | "light" | "tan" | "olive" | "brown" | "deep";
 
 export type SkinTonePalette = {
   /** Cor base aplicada ao branco puro da luminância (multiply). */

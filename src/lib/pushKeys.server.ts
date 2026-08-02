@@ -43,7 +43,9 @@ function extractRawScalarFromPkcs8(bytes: Uint8Array) {
 }
 
 async function deriveScalarFromSeed(seed: string) {
-  const digest = new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(seed)));
+  const digest = new Uint8Array(
+    await crypto.subtle.digest("SHA-256", new TextEncoder().encode(seed)),
+  );
   const scalar = (bytesToBigInt(digest) % (P256_ORDER - 1n)) + 1n;
   return bigIntTo32Bytes(scalar);
 }

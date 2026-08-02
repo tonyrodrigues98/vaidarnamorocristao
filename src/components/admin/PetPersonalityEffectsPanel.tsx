@@ -414,11 +414,7 @@ export function PetPersonalityEffectsPanel() {
                       onClick={() => void toggleActive(r)}
                       className="rounded-full p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"
                     >
-                      {r.active ? (
-                        <Eye className="h-4 w-4" />
-                      ) : (
-                        <EyeOff className="h-4 w-4" />
-                      )}
+                      {r.active ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
                     </button>
                     <button
                       type="button"
@@ -438,9 +434,7 @@ export function PetPersonalityEffectsPanel() {
                     </button>
                   </div>
                 </div>
-                {r.note && (
-                  <p className="mt-2 text-xs text-muted-foreground">{r.note}</p>
-                )}
+                {r.note && <p className="mt-2 text-xs text-muted-foreground">{r.note}</p>}
               </li>
             );
           })}

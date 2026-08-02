@@ -358,24 +358,24 @@ Pode ser reconstruído somente quando a origem e o algoritmo estiverem preservad
 
 Cada mudança futura deverá possuir uma ficha:
 
-| Campo | Obrigatório |
-|---|---|
-| ID da migração | identificador único e imutável |
-| Domínio | dono funcional |
-| Origem | tabelas, colunas, buckets e funções atuais |
-| Destino | estruturas novas ou adaptadas |
-| Transformação | regra determinística de conversão |
-| Autoridade | fonte de verdade antes/durante/depois |
-| Invariantes | condições que nunca podem quebrar |
-| Volume esperado | linhas, bytes e usuários afetados |
-| Backfill | lotes, cursor e idempotência |
-| Compatibilidade | leitura/escrita velha e nova |
-| Verificação | contagens, checks e amostras |
-| Segurança | RLS, privilégios e dados sensíveis |
-| Rollout | flag, percentual e duração |
-| Rollback | ação e limite temporal |
-| Contração | pré-condições para remover legado |
-| Responsável | pessoa ou equipe aprovadora |
+| Campo           | Obrigatório                                |
+| --------------- | ------------------------------------------ |
+| ID da migração  | identificador único e imutável             |
+| Domínio         | dono funcional                             |
+| Origem          | tabelas, colunas, buckets e funções atuais |
+| Destino         | estruturas novas ou adaptadas              |
+| Transformação   | regra determinística de conversão          |
+| Autoridade      | fonte de verdade antes/durante/depois      |
+| Invariantes     | condições que nunca podem quebrar          |
+| Volume esperado | linhas, bytes e usuários afetados          |
+| Backfill        | lotes, cursor e idempotência               |
+| Compatibilidade | leitura/escrita velha e nova               |
+| Verificação     | contagens, checks e amostras               |
+| Segurança       | RLS, privilégios e dados sensíveis         |
+| Rollout         | flag, percentual e duração                 |
+| Rollback        | ação e limite temporal                     |
+| Contração       | pré-condições para remover legado          |
+| Responsável     | pessoa ou equipe aprovadora                |
 
 Nenhuma migration deve existir apenas como SQL sem esta intenção documentada.
 
@@ -1582,22 +1582,22 @@ Por isso `DROP`, exclusão de objetos e limpeza de arquivos ficam muito depois d
 
 ## 29. Matriz resumida de preservação
 
-| Domínio | Fonte atual | Invariante principal | Estratégia inicial | Contração |
-|---|---|---|---|---|
-| Identidade | auth + profiles | mesmo usuário/status/cargo | projeção aditiva | não prevista |
-| Perfil | profiles + extensões | privacidade e fotos | adapter + novos módulos | muito posterior |
-| Namoro | interests/matches | mesmos pares e estados | capacidades derivadas | não apagar histórico |
-| Mensagens | messages | autoria, ordem e leitura | leitura compatível | nunca sem retenção |
-| Propósito | commitments | mesmo casal/status | projeção de disponibilidade | preservar histórico |
-| Comunidade | global/content | autoria e moderação | entidades novas | manter chat histórico |
-| Economia | ledger + saldo | reconciliação exata | RPCs versionadas | ledger permanente |
-| Inventário | ownership tables | posse/equipamento | adapter comum | item inativo permanece |
-| Avatar-personagem | 7 tabelas | direito/compensação | aposentadoria em fases | somente após arquivo |
-| Pets | 40 tabelas | dono e progressão | mapear legado/v2 | decisão futura |
-| Arcade/Grab | rounds/logs | custo, resultado e claim | regras versionadas | manter histórico econômico |
-| Storage | buckets + refs | objeto e referência | cópia verificada | após zero referência |
-| Moderação | reports/logs | evidência e acesso | preservar IDs | segundo retenção |
-| Push | queue/subscriptions | sem reenvio duplicado | separar evento/entrega | filas reprocessáveis |
+| Domínio           | Fonte atual          | Invariante principal       | Estratégia inicial          | Contração                  |
+| ----------------- | -------------------- | -------------------------- | --------------------------- | -------------------------- |
+| Identidade        | auth + profiles      | mesmo usuário/status/cargo | projeção aditiva            | não prevista               |
+| Perfil            | profiles + extensões | privacidade e fotos        | adapter + novos módulos     | muito posterior            |
+| Namoro            | interests/matches    | mesmos pares e estados     | capacidades derivadas       | não apagar histórico       |
+| Mensagens         | messages             | autoria, ordem e leitura   | leitura compatível          | nunca sem retenção         |
+| Propósito         | commitments          | mesmo casal/status         | projeção de disponibilidade | preservar histórico        |
+| Comunidade        | global/content       | autoria e moderação        | entidades novas             | manter chat histórico      |
+| Economia          | ledger + saldo       | reconciliação exata        | RPCs versionadas            | ledger permanente          |
+| Inventário        | ownership tables     | posse/equipamento          | adapter comum               | item inativo permanece     |
+| Avatar-personagem | 7 tabelas            | direito/compensação        | aposentadoria em fases      | somente após arquivo       |
+| Pets              | 40 tabelas           | dono e progressão          | mapear legado/v2            | decisão futura             |
+| Arcade/Grab       | rounds/logs          | custo, resultado e claim   | regras versionadas          | manter histórico econômico |
+| Storage           | buckets + refs       | objeto e referência        | cópia verificada            | após zero referência       |
+| Moderação         | reports/logs         | evidência e acesso         | preservar IDs               | segundo retenção           |
+| Push              | queue/subscriptions  | sem reenvio duplicado      | separar evento/entrega      | filas reprocessáveis       |
 
 ---
 

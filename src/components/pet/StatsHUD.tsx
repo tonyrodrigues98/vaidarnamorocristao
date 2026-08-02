@@ -64,7 +64,12 @@ export function StatsHUD({
                 key={k}
                 className="inline-flex items-center gap-1.5 rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-medium text-neutral-800 shadow-sm ring-1 ring-black/5 backdrop-blur"
               >
-                <Icon className={cn("size-3", v < 40 ? "text-rose-500" : v < 70 ? "text-amber-600" : "text-emerald-600")} />
+                <Icon
+                  className={cn(
+                    "size-3",
+                    v < 40 ? "text-rose-500" : v < 70 ? "text-amber-600" : "text-emerald-600",
+                  )}
+                />
                 <span className="text-neutral-500">{PET_CARE_LABEL[k]}</span>
                 <span className="tabular-nums">{v}</span>
               </div>

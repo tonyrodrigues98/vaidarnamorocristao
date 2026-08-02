@@ -86,7 +86,9 @@ export function PetKingdomMap({
 
           {/* CASA — volta pro quarto */}
           <RegionHotspot
-            x={48} y={62} radius={9}
+            x={48}
+            y={62}
+            radius={9}
             label="Casa"
             tooltip="Voltar pro Quarto · cuidado do dia-a-dia."
             labelPlacement="bottom"
@@ -96,7 +98,9 @@ export function PetKingdomMap({
 
           {/* FLORESTA — expedições */}
           <RegionHotspot
-            x={18} y={42} radius={10}
+            x={18}
+            y={42}
+            radius={10}
             label="Floresta"
             tooltip="Mundo · enviar o pet em expedição pra trazer recompensas."
             labelPlacement="bottom"
@@ -106,7 +110,9 @@ export function PetKingdomMap({
 
           {/* MERCADO — caixas */}
           <RegionHotspot
-            x={76} y={38} radius={11}
+            x={76}
+            y={38}
+            radius={11}
             label="Mercado"
             tooltip="Mundo · abrir caixas surpresa com itens raros."
             labelPlacement="bottom"
@@ -116,17 +122,23 @@ export function PetKingdomMap({
 
           {/* LAGO — quiz */}
           <RegionHotspot
-            x={22} y={80} radius={10}
+            x={22}
+            y={80}
+            radius={10}
             label="Lago"
             tooltip="Mundo · responder o Quiz Bíblico do dia."
             labelPlacement="top"
             attention={lakeAttention}
-            onClick={() => { window.location.assign("/quiz-biblico"); }}
+            onClick={() => {
+              window.location.assign("/quiz-biblico");
+            }}
           />
 
           {/* TORRE — caixa semanal */}
           <RegionHotspot
-            x={80} y={75} radius={10}
+            x={80}
+            y={75}
+            radius={10}
             label="Torre"
             tooltip="Mundo · caixa semanal que enche conforme você completa missões."
             labelPlacement="top"
@@ -185,7 +197,12 @@ function KingdomSheet({
   children: ReactNode;
 }) {
   return (
-    <Sheet open={open} onOpenChange={(o) => { if (!o) onClose(); }}>
+    <Sheet
+      open={open}
+      onOpenChange={(o) => {
+        if (!o) onClose();
+      }}
+    >
       <SheetContent side="bottom" className="max-h-[88vh] overflow-y-auto rounded-t-3xl">
         <SheetHeader className="text-left">
           <SheetTitle>{title}</SheetTitle>

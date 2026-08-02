@@ -4,15 +4,15 @@
 
 ## Relatórios por escopo
 
-| Escopo | Documento |
-|---|---|
-| Visão geral consolidada (mais atual) | `RELATORIO_CONSOLIDADO_OFFLINE.md` |
-| Perfil — Parte 1 (dados principais) | `RELATORIO_PERFIL_OFFLINE.md` |
-| Perfil — Parte 2 (fotos e visual) | `RELATORIO_PERFIL_OFFLINE_PARTE2.md` |
-| Loja | `RELATORIO_LOJA_OFFLINE.md` |
-| Conta (settings) | `RELATORIO_CONTA_SETTINGS.md` |
-| Notificações | `RELATORIO_NOTIFICACOES_OFFLINE.md` |
-| Dashboard (Analytics Center) | `RELATORIO_DASHBOARD_ANALYTICS.md` |
+| Escopo                               | Documento                            |
+| ------------------------------------ | ------------------------------------ |
+| Visão geral consolidada (mais atual) | `RELATORIO_CONSOLIDADO_OFFLINE.md`   |
+| Perfil — Parte 1 (dados principais)  | `RELATORIO_PERFIL_OFFLINE.md`        |
+| Perfil — Parte 2 (fotos e visual)    | `RELATORIO_PERFIL_OFFLINE_PARTE2.md` |
+| Loja                                 | `RELATORIO_LOJA_OFFLINE.md`          |
+| Conta (settings)                     | `RELATORIO_CONTA_SETTINGS.md`        |
+| Notificações                         | `RELATORIO_NOTIFICACOES_OFFLINE.md`  |
+| Dashboard (Analytics Center)         | `RELATORIO_DASHBOARD_ANALYTICS.md`   |
 
 ## Resumo executivo
 

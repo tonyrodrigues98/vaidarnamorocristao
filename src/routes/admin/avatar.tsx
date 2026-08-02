@@ -1,15 +1,6 @@
 import { createFileRoute, Navigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
-import {
-  Crown,
-  Eye,
-  EyeOff,
-  Loader2,
-  Pencil,
-  Plus,
-  Trash2,
-  Upload,
-} from "lucide-react";
+import { Crown, Eye, EyeOff, Loader2, Pencil, Plus, Trash2, Upload } from "lucide-react";
 import { toast } from "sonner";
 
 import { AdminTopNav } from "@/components/admin/AdminTopNav";
@@ -237,7 +228,9 @@ function AdminAvatarPage() {
             onClick={() => setFilterCat("all")}
             className={cn(
               "rounded-full px-3 py-1.5 text-sm font-medium transition",
-              filterCat === "all" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground",
+              filterCat === "all"
+                ? "bg-primary text-primary-foreground"
+                : "bg-muted text-muted-foreground",
             )}
           >
             Todas
@@ -248,7 +241,9 @@ function AdminAvatarPage() {
               onClick={() => setFilterCat(c.id)}
               className={cn(
                 "rounded-full px-3 py-1.5 text-sm font-medium transition",
-                filterCat === c.id ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground",
+                filterCat === c.id
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted text-muted-foreground",
               )}
             >
               {c.name}
@@ -274,7 +269,10 @@ function AdminAvatarPage() {
             {filtered.map((item) => {
               const cat = categories.find((c) => c.id === item.category_id);
               return (
-                <Card key={item.id} className={cn("overflow-hidden", !item.is_active && "opacity-60")}>
+                <Card
+                  key={item.id}
+                  className={cn("overflow-hidden", !item.is_active && "opacity-60")}
+                >
                   <div className="relative aspect-square bg-gradient-to-b from-muted/50 to-muted">
                     <img
                       src={item.image_url}
@@ -309,7 +307,12 @@ function AdminAvatarPage() {
                       </p>
                     </div>
                     <div className="flex gap-1">
-                      <Button size="sm" variant="outline" className="flex-1" onClick={() => openEdit(item)}>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="flex-1"
+                        onClick={() => openEdit(item)}
+                      >
                         <Pencil className="h-3 w-3" />
                       </Button>
                       <Button
@@ -318,7 +321,11 @@ function AdminAvatarPage() {
                         onClick={() => toggleActive(item)}
                         title={item.is_active ? "Desativar" : "Ativar"}
                       >
-                        {item.is_active ? <Eye className="h-3 w-3" /> : <EyeOff className="h-3 w-3" />}
+                        {item.is_active ? (
+                          <Eye className="h-3 w-3" />
+                        ) : (
+                          <EyeOff className="h-3 w-3" />
+                        )}
                       </Button>
                       <Button size="sm" variant="outline" onClick={() => handleDelete(item)}>
                         <Trash2 className="h-3 w-3 text-destructive" />
@@ -398,11 +405,18 @@ function AdminAvatarPage() {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <Label>Categoria</Label>
-                <Select value={form.category_id} onValueChange={(v) => setForm({ ...form, category_id: v })}>
-                  <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                <Select
+                  value={form.category_id}
+                  onValueChange={(v) => setForm({ ...form, category_id: v })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione" />
+                  </SelectTrigger>
                   <SelectContent>
                     {categories.map((c) => (
-                      <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                      <SelectItem key={c.id} value={c.id}>
+                        {c.name}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -410,10 +424,14 @@ function AdminAvatarPage() {
               <div>
                 <Label>Gênero</Label>
                 <Select value={form.gender} onValueChange={(v) => setForm({ ...form, gender: v })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
                     {GENDERS.map((g) => (
-                      <SelectItem key={g.value} value={g.value}>{g.label}</SelectItem>
+                      <SelectItem key={g.value} value={g.value}>
+                        {g.label}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -421,7 +439,8 @@ function AdminAvatarPage() {
               <div>
                 <Label>Preço (moedas)</Label>
                 <Input
-                  type="text" inputMode="decimal"
+                  type="text"
+                  inputMode="decimal"
                   min={0}
                   value={form.price}
                   onChange={(e) => setForm({ ...form, price: parseInt(e.target.value) || 0 })}
@@ -430,10 +449,14 @@ function AdminAvatarPage() {
               <div>
                 <Label>Raridade</Label>
                 <Select value={form.rarity} onValueChange={(v) => setForm({ ...form, rarity: v })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
                     {RARITIES.map((r) => (
-                      <SelectItem key={r} value={r}>{r}</SelectItem>
+                      <SelectItem key={r} value={r}>
+                        {r}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -441,7 +464,8 @@ function AdminAvatarPage() {
               <div>
                 <Label>Ordem</Label>
                 <Input
-                  type="text" inputMode="decimal"
+                  type="text"
+                  inputMode="decimal"
                   value={form.sort_order}
                   onChange={(e) => setForm({ ...form, sort_order: parseInt(e.target.value) || 0 })}
                 />
@@ -453,14 +477,20 @@ function AdminAvatarPage() {
                 <Label className="text-sm">Premium</Label>
                 <p className="text-xs text-muted-foreground">Marca como item premium</p>
               </div>
-              <Switch checked={form.is_premium} onCheckedChange={(v) => setForm({ ...form, is_premium: v })} />
+              <Switch
+                checked={form.is_premium}
+                onCheckedChange={(v) => setForm({ ...form, is_premium: v })}
+              />
             </div>
             <div className="flex items-center justify-between rounded-lg border p-3">
               <div>
                 <Label className="text-sm">Ativo</Label>
                 <p className="text-xs text-muted-foreground">Visível na loja</p>
               </div>
-              <Switch checked={form.is_active} onCheckedChange={(v) => setForm({ ...form, is_active: v })} />
+              <Switch
+                checked={form.is_active}
+                onCheckedChange={(v) => setForm({ ...form, is_active: v })}
+              />
             </div>
 
             <div className="flex justify-end gap-2 pt-2">

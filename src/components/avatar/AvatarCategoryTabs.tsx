@@ -50,10 +50,7 @@ export function AvatarCategoryTabs({ categories, activeId, onChange }: Props) {
             >
               <div className="flex items-center gap-1.5">
                 <Icon
-                  className={cn(
-                    "h-5 w-5",
-                    isActive ? "text-primary" : "text-muted-foreground",
-                  )}
+                  className={cn("h-5 w-5", isActive ? "text-primary" : "text-muted-foreground")}
                 />
                 <span
                   className={cn(

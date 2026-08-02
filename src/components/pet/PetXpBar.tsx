@@ -10,13 +10,7 @@ import { toast } from "sonner";
  * Barra de XP azul, full-width dentro do bloco do pet.
  * Atualiza ao montar e quando `refreshKey` muda.
  */
-export function PetXpBar({
-  refreshKey,
-  className,
-}: {
-  refreshKey?: number;
-  className?: string;
-}) {
+export function PetXpBar({ refreshKey, className }: { refreshKey?: number; className?: string }) {
   const [state, setState] = useState<XpState | null>(null);
   const prevLevelRef = useRef<number | null>(null);
 

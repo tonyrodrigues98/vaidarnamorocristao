@@ -14,12 +14,7 @@ import {
   SheetTitle,
   SheetDescription,
 } from "@/components/ui/sheet";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { ArrowDownLeft } from "lucide-react";
 import skyAsset from "@/assets/pet-kingdom/constellation-sky.png.asset.json";
 import type { PetCareKind } from "@/types/petCare";
@@ -44,10 +39,38 @@ type StarDef = {
 };
 
 const STARS: StarDef[] = [
-  { id: "evolution",   label: "Estrela da Evolução",   tooltip: "Memória · etapas pelas quais seu pet já passou.",        x: 30, y: 30, r: 2.6 },
-  { id: "progression", label: "Estrela da Progressão", tooltip: "Memória · nível, XP e marcos de longo prazo.",            x: 70, y: 34, r: 2.6 },
-  { id: "diary",       label: "Estrela do Diário",     tooltip: "Memória · reler as entradas que o pet escreveu pra você.", x: 28, y: 64, r: 2.4 },
-  { id: "history",     label: "Estrela das Memórias",  tooltip: "Memória · histórico de cuidados dia a dia.",              x: 72, y: 68, r: 2.4 },
+  {
+    id: "evolution",
+    label: "Estrela da Evolução",
+    tooltip: "Memória · etapas pelas quais seu pet já passou.",
+    x: 30,
+    y: 30,
+    r: 2.6,
+  },
+  {
+    id: "progression",
+    label: "Estrela da Progressão",
+    tooltip: "Memória · nível, XP e marcos de longo prazo.",
+    x: 70,
+    y: 34,
+    r: 2.6,
+  },
+  {
+    id: "diary",
+    label: "Estrela do Diário",
+    tooltip: "Memória · reler as entradas que o pet escreveu pra você.",
+    x: 28,
+    y: 64,
+    r: 2.4,
+  },
+  {
+    id: "history",
+    label: "Estrela das Memórias",
+    tooltip: "Memória · histórico de cuidados dia a dia.",
+    x: 72,
+    y: 68,
+    r: 2.4,
+  },
 ];
 
 // Linhas conectando as estrelas em losango.
@@ -113,7 +136,11 @@ export function PetConstellation({
   function visit(id: StarId) {
     setLastVisited(id);
     setSheet(id);
-    try { window.localStorage.setItem(LAST_STAR_KEY, id); } catch { /* ignore */ }
+    try {
+      window.localStorage.setItem(LAST_STAR_KEY, id);
+    } catch {
+      /* ignore */
+    }
   }
 
   useEffect(() => {
@@ -128,7 +155,8 @@ export function PetConstellation({
     if (idx < 0) return;
     let nextIdx: number | null = null;
     if (e.key === "ArrowRight" || e.key === "ArrowDown") nextIdx = (idx + 1) % STARS.length;
-    else if (e.key === "ArrowLeft" || e.key === "ArrowUp") nextIdx = (idx - 1 + STARS.length) % STARS.length;
+    else if (e.key === "ArrowLeft" || e.key === "ArrowUp")
+      nextIdx = (idx - 1 + STARS.length) % STARS.length;
     else if (e.key === "Home") nextIdx = 0;
     else if (e.key === "End") nextIdx = STARS.length - 1;
     if (nextIdx === null) return;
@@ -224,7 +252,9 @@ export function PetConstellation({
             {STARS.map((s) => (
               <StarButton
                 key={s.id}
-                ref={(el) => { starRefs.current[s.id] = el; }}
+                ref={(el) => {
+                  starRefs.current[s.id] = el;
+                }}
                 star={s}
                 attention={attention[s.id]}
                 isLastVisited={lastVisited === s.id}
@@ -246,7 +276,8 @@ export function PetConstellation({
           </div>
 
           <p className="sr-only" aria-live="polite">
-            Constelação aberta. {STARS.length} estrelas de memória. Use Tab e setas para navegar; Enter para abrir.
+            Constelação aberta. {STARS.length} estrelas de memória. Use Tab e setas para navegar;
+            Enter para abrir.
           </p>
         </div>
 
@@ -331,7 +362,8 @@ const StarButton = forwardRef<HTMLButtonElement, StarButtonProps>(function StarB
             style={{
               background:
                 "radial-gradient(circle, rgba(255,236,180,0.55) 0%, rgba(255,236,180,0.18) 35%, rgba(255,236,180,0) 70%)",
-              animation: attention > 0 ? `star-pulse ${pulseDuration} ease-in-out infinite` : undefined,
+              animation:
+                attention > 0 ? `star-pulse ${pulseDuration} ease-in-out infinite` : undefined,
               opacity: baseGlowOpacity,
             }}
           />
@@ -341,8 +373,7 @@ const StarButton = forwardRef<HTMLButtonElement, StarButtonProps>(function StarB
             style={{
               width: `${star.r * 4}px`,
               height: `${star.r * 4}px`,
-              boxShadow:
-                "0 0 8px 1px rgba(255,236,180,0.95), 0 0 22px 6px rgba(255,200,120,0.5)",
+              boxShadow: "0 0 8px 1px rgba(255,236,180,0.95), 0 0 22px 6px rgba(255,200,120,0.5)",
             }}
           />
         </button>
@@ -376,7 +407,12 @@ function ConstellationSheet({
   children: ReactNode;
 }) {
   return (
-    <Sheet open={open} onOpenChange={(o) => { if (!o) onClose(); }}>
+    <Sheet
+      open={open}
+      onOpenChange={(o) => {
+        if (!o) onClose();
+      }}
+    >
       <SheetContent side="bottom" className="max-h-[88vh] overflow-y-auto rounded-t-3xl">
         <SheetHeader className="text-left">
           <SheetTitle>{title}</SheetTitle>

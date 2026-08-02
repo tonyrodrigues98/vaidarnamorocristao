@@ -21,11 +21,7 @@ import {
 } from "lucide-react";
 import { CoinIcon } from "@/components/icons/CoinIcon";
 
-export type HubSection =
-  | "identity"
-  | "about"
-  | "faith"
-  | "preferences";
+export type HubSection = "identity" | "about" | "faith" | "preferences";
 
 type CardItem = {
   id: HubSection;
@@ -35,10 +31,30 @@ type CardItem = {
 };
 
 const CARDS: CardItem[] = [
-  { id: "identity", title: "Identidade", desc: "Nome, foto, cidade e dados principais.", Icon: IdCard },
-  { id: "about", title: "Sobre mim", desc: "Bio, personalidade e interesses.", Icon: MessageSquareText },
-  { id: "faith", title: "Fé e caminhada", desc: "Igreja, batismo e rotina cristã.", Icon: BookOpen },
-  { id: "preferences", title: "O que procuro", desc: "Preferências e intenção de relacionamento.", Icon: HeartHandshake },
+  {
+    id: "identity",
+    title: "Identidade",
+    desc: "Nome, foto, cidade e dados principais.",
+    Icon: IdCard,
+  },
+  {
+    id: "about",
+    title: "Sobre mim",
+    desc: "Bio, personalidade e interesses.",
+    Icon: MessageSquareText,
+  },
+  {
+    id: "faith",
+    title: "Fé e caminhada",
+    desc: "Igreja, batismo e rotina cristã.",
+    Icon: BookOpen,
+  },
+  {
+    id: "preferences",
+    title: "O que procuro",
+    desc: "Preferências e intenção de relacionamento.",
+    Icon: HeartHandshake,
+  },
 ];
 
 export type ProfileActionHubProps = {
@@ -48,15 +64,16 @@ export type ProfileActionHubProps = {
   onOpenResource: (id: "missions" | "role" | "customizacao" | "saldo" | "presentes") => void;
 };
 
-export function ProfileActionHub({ activeTab, isStaff, onSelect, onOpenResource }: ProfileActionHubProps) {
+export function ProfileActionHub({
+  activeTab,
+  isStaff,
+  onSelect,
+  onOpenResource,
+}: ProfileActionHubProps) {
   const [resourcesOpen, setResourcesOpen] = useState(false);
 
   const activeId: HubSection | null =
-    activeTab === "prefs"
-      ? "preferences"
-      : activeTab === "profile"
-        ? "about"
-        : null;
+    activeTab === "prefs" ? "preferences" : activeTab === "profile" ? "about" : null;
 
   return (
     <div className="w-full min-w-0 lg:hidden">
@@ -64,9 +81,7 @@ export function ProfileActionHub({ activeTab, isStaff, onSelect, onOpenResource 
         <p className="text-xs font-semibold uppercase tracking-wide text-[var(--rose)]">
           Central do perfil
         </p>
-        <p className="mt-0.5 text-sm text-muted-foreground">
-          Organize as áreas do seu perfil.
-        </p>
+        <p className="mt-0.5 text-sm text-muted-foreground">Organize as áreas do seu perfil.</p>
       </div>
 
       <ul className="grid w-full min-w-0 grid-cols-1 gap-2 sm:grid-cols-2">
@@ -97,7 +112,10 @@ export function ProfileActionHub({ activeTab, isStaff, onSelect, onOpenResource 
                   </span>
                   <span className="block truncate text-xs text-muted-foreground">{desc}</span>
                 </span>
-                <ChevronRight aria-hidden="true" className="h-4 w-4 shrink-0 text-muted-foreground" />
+                <ChevronRight
+                  aria-hidden="true"
+                  className="h-4 w-4 shrink-0 text-muted-foreground"
+                />
               </button>
             </li>
           );
@@ -162,12 +180,7 @@ export function ProfileActionHub({ activeTab, isStaff, onSelect, onOpenResource 
                 onClick={() => onOpenResource("role")}
               />
             )}
-            <ResourceLink
-              Icon={Store}
-              title="Loja"
-              desc="Comprar novos itens."
-              to="/loja"
-            />
+            <ResourceLink Icon={Store} title="Loja" desc="Comprar novos itens." to="/loja" />
             <ResourceLink
               Icon={ShieldCheck}
               title="Conta e segurança"
