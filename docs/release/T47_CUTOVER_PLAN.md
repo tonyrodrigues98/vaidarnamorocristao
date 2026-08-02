@@ -4,7 +4,7 @@ Plano futuro apenas. Nenhuma etapa deste documento foi executada ou autorizada p
 
 ## Pré-condições
 
-1. Aprovação humana do candidato e dos achados P2.
+1. Aprovação humana do candidato e da evidência de encerramento dos achados P2.
 2. Resolução e assinatura da revisão jurídica humana.
 3. E2E autenticado em Supabase real controlado.
 4. Validação física em iPhone/Safari/PWA e Android/Chrome/PWA.

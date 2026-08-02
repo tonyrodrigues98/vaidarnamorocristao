@@ -21,6 +21,8 @@ Este status não significa `PRODUCTION_READY`, autorização de deploy ou aprova
 - `c7dc5c7d7c2cfc224ca4744ce5e8f9200c5ee456` — gate global de formatação.
 - `450b90457671eacf3f35404dee32465754a6bc9a` — qualificação automatizada do corte Native.
 - `14154e5e1e551366144b7fdd23d8788fb9efce4a` — matriz visual no Chrome e harness isolado.
+- `75752049861ef52fa7b490207ed0a7ef2fb4dec2` — asset original da Live incorporado ao artefato público.
+- `b7c45686f4df0a847f7df694652f606930544120` — 404 público preservado fora das fronteiras privadas.
 - Commit deste documento — pacote de aceitação humana.
 
 ## Cobertura estrutural
@@ -35,7 +37,7 @@ A fronteira administrativa cobre as 13 rotas `/admin` com a feature flag ligada 
 - npm: `10.9.2`
 - Build cliente/SSR, flag off: passou.
 - Build cliente/SSR, flag on: passou.
-- Testes unitários, flag off/on: 468 passaram em cada execução.
+- Testes unitários, flag off/on: 480 passaram em cada execução.
 - Qualificação de release: 69 rotas, PWA e resíduos visuais passaram.
 - ESLint global: zero erros e 31 warnings inventariados.
 - Prettier global: passou.
@@ -60,22 +62,19 @@ Há dívida P2 de performance: assets individuais chegam a aproximadamente 2,96 
 - Motor: Chrome DevTools Protocol via WebSocket nativo do Node.
 - Artefato real: Wrangler sobre `.output/server/wrangler.json`.
 - Superfícies privadas: harness isolado, sem rota de produção e sem dados reais.
-- Screenshots: 48.
+- Screenshots: 55.
 - Viewports: `393x852`, `430x932`, `852x393`, `834x1194`, `1194x834`, `1440x900`.
 - Temas: light, dark, system-light e system-dark.
 - Motion: normal e prefers-reduced-motion.
 - P0: 0.
 - P1: 0.
-- P2: 2.
+- P2: 0.
 - P3: 0.
 - ZIP local: `artifacts/T47_VISUAL_QA.zip`.
-- SHA-256: `8d29811ebc8eb5434bf6f36a0042a9bb80b4cebdfe8264d8dcb9ca8248ace6fc`.
+- SHA-256: `b75ac4bf5737a592946332874d25fa3bab8086af779e3f86578a59155c5a6a62`.
 - Manifesto: `docs/release/t47-visual-qa-manifest.md`.
 
-Achados P2:
-
-1. imagem pública `caren-hero.jpeg` retorna 404 no artefato local;
-2. rota inexistente termina no AuthShell/login em vez de um 404 público dedicado.
+Os dois achados P2 anteriores foram encerrados no artefato Wrangler: o JPEG original da Live foi carregado e decodificado pelo bundle sem `__l5e`, e `/rota-inexistente` retornou HTTP 404 com PublicShell em português, sem AuthShell ou redirect. As regressões de acesso de Admin, `/inicio`, blog e tombstones V2 também foram repetidas.
 
 O dark mode foi validado estruturalmente, mas não está visualmente congelado.
 
@@ -98,7 +97,7 @@ Continuam pendentes:
 
 Rollback imediato sem alteração de código: manter `VITE_FF_NATIVE_SHELL=false`.
 
-Rollback dos commits T47, se necessário, deve ser feito em ordem inversa com `git revert`, começando pelo commit deste manifesto e por `14154e5e1e551366144b7fdd23d8788fb9efce4a`. Nenhum rollback foi executado.
+Rollback dos commits T47, se necessário, deve ser feito em ordem inversa com `git revert`, começando pelo commit deste manifesto, seguido por `b7c45686f4df0a847f7df694652f606930544120`, `75752049861ef52fa7b490207ed0a7ef2fb4dec2` e pelos commits T47 anteriores. Nenhum rollback foi executado.
 
 ## Restrições de release
 

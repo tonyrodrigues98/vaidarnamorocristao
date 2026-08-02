@@ -66,5 +66,5 @@ Usar apenas projeto/contas de teste autorizados e dados reversíveis.
 - [ ] Resolver `REQUIRES_HUMAN_LEGAL_REVIEW` em `docs/legal/terms-product-consistency-audit.md`.
 - [ ] Revisar Termos, privacidade, retenção, moderação, conteúdo e direitos autorais.
 - [ ] Antonio validar visualmente as superfícies críticas em aparelhos reais.
-- [ ] Registrar P2 aceitos ou corrigidos: imagem pública ausente e comportamento da rota 404.
+- [x] Registrar correção automatizada dos P2: imagem pública autocontida e 404 público, com evidência no manifesto visual T47.
 - [ ] Obter autorização explícita e separada para o corte de produção.

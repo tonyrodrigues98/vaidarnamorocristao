@@ -187,10 +187,18 @@ async function capture(cdp, item) {
   const navigation = await cdp.send("Page.navigate", { url: item.url });
   await load.catch(() => undefined);
   await new Promise((resolveDelay) => setTimeout(resolveDelay, 900));
+  if (item.expect?.pathPrefix) {
+    const deadline = Date.now() + 8_000;
+    while (Date.now() < deadline) {
+      const currentPath = await evalValue(cdp, "location.pathname");
+      if (currentPath.startsWith(item.expect.pathPrefix)) break;
+      await new Promise((resolveDelay) => setTimeout(resolveDelay, 250));
+    }
+  }
   await evalValue(cdp, "scrollTo(0,0); true");
   const state = await evalValue(
     cdp,
-    `({url:location.href,title:document.title,text:(document.body?.innerText||"").slice(0,500),bodyLength:(document.body?.innerText||"").trim().length,scrollWidth:document.documentElement.scrollWidth,clientWidth:document.documentElement.clientWidth,theme:document.documentElement.dataset.theme||document.querySelector('[data-theme]')?.getAttribute('data-theme'),native:!!document.querySelector('[data-vdn-native-shell]'),admin:!!document.querySelector('[data-vdn-admin-shell]'),focused:!!document.querySelector('[data-vdn-native-focused-chat]'),legacyHeader:!!document.querySelector('header [data-legacy-header]'),adminLegacy:!!document.querySelector('[data-admin-top-nav]')})`,
+    `({url:location.href,title:document.title,text:(document.body?.innerText||"").slice(0,1000),bodyLength:(document.body?.innerText||"").trim().length,scrollWidth:document.documentElement.scrollWidth,clientWidth:document.documentElement.clientWidth,theme:document.documentElement.dataset.theme||document.querySelector('[data-theme]')?.getAttribute('data-theme'),native:!!document.querySelector('[data-vdn-native-shell]'),admin:!!document.querySelector('[data-vdn-admin-shell]'),focused:!!document.querySelector('[data-vdn-native-focused-chat]'),publicShell:!!document.querySelector('[data-vdn-public-shell]'),authShell:!!document.querySelector('[data-vdn-auth-shell]'),legacyHeader:!!document.querySelector('header [data-legacy-header]'),adminLegacy:!!document.querySelector('[data-admin-top-nav]'),brokenImages:[...document.images].filter(image=>image.complete&&image.naturalWidth===0).map(image=>image.currentSrc||image.src),hero:(()=>{const image=document.querySelector('img[alt="Caren"]');return image?{src:image.currentSrc||image.src,width:image.naturalWidth,height:image.naturalHeight,displayWidth:image.getBoundingClientRect().width,displayHeight:image.getBoundingClientRect().height}:null})()})`,
   );
   if (item.interaction === "public-menu") {
     await evalValue(cdp, `document.querySelector('[aria-label="Abrir menu"]')?.click(); true`);
@@ -229,34 +237,77 @@ async function capture(cdp, item) {
     const closed = await evalValue(cdp, `!document.querySelector('.vdn-admin-drawer')`);
     checks.push({ check: "admin-drawer-escape", route: item.route, opened, closed });
   }
+  let screenshotClip;
+  if (item.expect?.hero) {
+    const sectionY = await evalValue(
+      cdp,
+      `(()=>{const section=document.querySelector('img[alt="Caren"]')?.closest('section');return section?section.getBoundingClientRect().top+scrollY:null})()`,
+    );
+    await evalValue(cdp, `scrollTo(0,${JSON.stringify(sectionY)}); true`);
+    await new Promise((resolveDelay) => setTimeout(resolveDelay, 150));
+    if (Number.isFinite(sectionY)) {
+      screenshotClip = { x: 0, y: sectionY, width, height, scale: 1 };
+    }
+  }
   const categoryDir = join(artifactsRoot, item.category);
   await mkdir(categoryDir, { recursive: true });
   const filename = `${item.category}__${safeName(item.route)}__${width}x${height}__${item.theme}__${item.state}.png`;
   const path = join(categoryDir, filename);
   const screenshot = await cdp.send("Page.captureScreenshot", {
     format: "png",
-    captureBeyondViewport: false,
+    captureBeyondViewport: Boolean(screenshotClip),
+    ...(screenshotClip ? { clip: screenshotClip } : {}),
   });
   const bytes = Buffer.from(screenshot.data, "base64");
   await writeFile(path, bytes);
-  const knownP2 = [...pageErrors, ...networkErrors].filter(
-    (entry) =>
-      entry.includes("/__l5e/assets-v1/") ||
-      (item.route === "/rota-inexistente" && entry.startsWith("404 ")),
+  const expectedDocumentNotFound = (entry) =>
+    item.expect?.status === 404 &&
+    entry === `404 ${new URL(item.url).origin}${new URL(item.url).pathname}`;
+  const knownP2 = [...pageErrors, ...networkErrors].filter((entry) =>
+    entry.includes("/__l5e/assets-v1/"),
   );
-  if (item.route === "/rota-inexistente" && state.url.includes("/auth/login")) {
-    knownP2.push("Unknown route renders AuthShell instead of a public 404");
-  }
   const unexpected = [...pageErrors, ...networkErrors].filter(
     (entry) =>
       !knownP2.includes(entry) &&
+      !expectedDocumentNotFound(entry) &&
       !entry.includes("runtime-config") &&
       !entry.includes("Supabase runtime configuration is unavailable") &&
       !entry.includes("example.supabase.co"),
   );
+  const validationErrors = [];
+  if (item.expect?.status !== undefined && documentStatus !== item.expect.status) {
+    validationErrors.push(`expected HTTP ${item.expect.status}, received ${documentStatus}`);
+  }
+  if (item.expect?.path && new URL(state.url).pathname !== item.expect.path) {
+    validationErrors.push(
+      `expected final path ${item.expect.path}, received ${new URL(state.url).pathname}`,
+    );
+  }
+  if (item.expect?.pathPrefix && !new URL(state.url).pathname.startsWith(item.expect.pathPrefix)) {
+    validationErrors.push(
+      `expected final path prefix ${item.expect.pathPrefix}, received ${new URL(state.url).pathname}`,
+    );
+  }
+  if (item.expect?.publicShell && !state.publicShell)
+    validationErrors.push("PublicShell is absent");
+  if (item.expect?.noAuthShell && state.authShell)
+    validationErrors.push("AuthShell rendered unexpectedly");
+  if (item.expect?.portuguese404 && !state.text.includes("Página não encontrada"))
+    validationErrors.push("Portuguese 404 copy is absent");
+  if (item.expect?.hero) {
+    if (!state.hero || state.hero.width <= 0 || state.hero.height <= 0)
+      validationErrors.push("Live hero did not decode");
+    if (state.hero?.src.includes("/__l5e/assets-v1/"))
+      validationErrors.push("Live hero still depends on __l5e");
+    if (state.brokenImages.length) validationErrors.push("Home contains a broken image");
+  }
   const startupFailure = state.text.includes("Não foi possível iniciar");
   const result =
-    state.bodyLength > 20 && !startupFailure && !navigation.errorText && unexpected.length === 0
+    state.bodyLength > 20 &&
+    !startupFailure &&
+    !navigation.errorText &&
+    unexpected.length === 0 &&
+    validationErrors.length === 0
       ? "pass"
       : "issue";
   manifest.push({
@@ -273,6 +324,10 @@ async function capture(cdp, item) {
     finalUrl: state.url,
     bodyLength: state.bodyLength,
     horizontalOverflow: state.scrollWidth > state.clientWidth + 1,
+    publicShell: state.publicShell,
+    authShell: state.authShell,
+    hero: state.hero,
+    brokenImages: state.brokenImages,
     chrome: {
       native: state.native,
       admin: state.admin,
@@ -284,7 +339,7 @@ async function capture(cdp, item) {
     result,
     issue:
       result !== "pass"
-        ? "P1: runtime/console/empty-page failure"
+        ? `P1: ${[...unexpected, ...validationErrors].join(" | ") || "runtime/empty-page failure"}`
         : knownP2.length
           ? `P2: ${knownP2.join(" | ")}`
           : null,
@@ -371,6 +426,105 @@ publicRoutes.forEach((routeValue, index) =>
     motion: index % 5 === 0 ? "reduced" : "normal",
     state: "ssr-hydrated",
     interaction: routeValue === "/" ? "public-menu" : undefined,
+    expect:
+      routeValue === "/"
+        ? { hero: true }
+        : routeValue === "/rota-inexistente"
+          ? {
+              status: 404,
+              path: "/rota-inexistente",
+              publicShell: true,
+              noAuthShell: true,
+              portuguese404: true,
+            }
+          : undefined,
+  }),
+);
+[
+  {
+    route: "/",
+    viewport: { width: 430, height: 932 },
+    theme: "dark",
+    motion: "normal",
+    state: "hero-dark",
+    expect: { hero: true },
+  },
+  {
+    route: "/",
+    viewport: { width: 1440, height: 900 },
+    theme: "system-dark",
+    motion: "normal",
+    state: "hero-system-dark",
+    expect: { hero: true },
+  },
+  {
+    route: "/rota-inexistente",
+    viewport: { width: 393, height: 852 },
+    theme: "light",
+    motion: "normal",
+    state: "public-404-light",
+    expect: {
+      status: 404,
+      path: "/rota-inexistente",
+      publicShell: true,
+      noAuthShell: true,
+      portuguese404: true,
+    },
+  },
+  {
+    route: "/rota-inexistente",
+    viewport: { width: 1440, height: 900 },
+    theme: "system-light",
+    motion: "normal",
+    state: "public-404-system-light",
+    expect: {
+      status: 404,
+      path: "/rota-inexistente",
+      publicShell: true,
+      noAuthShell: true,
+      portuguese404: true,
+    },
+  },
+].forEach((item) =>
+  items.push({
+    category: item.route === "/" ? "public" : "errors",
+    route: item.route,
+    url: `${prodOrigin}${item.route}`,
+    source: "production-artifact",
+    ...item,
+  }),
+);
+
+[
+  {
+    route: "/admin/presentes",
+    viewport: { width: 393, height: 852 },
+    theme: "light",
+    state: "visitor-login-guard",
+    expect: { pathPrefix: "/auth/login" },
+  },
+  {
+    route: "/inicio",
+    viewport: { width: 430, height: 932 },
+    theme: "dark",
+    state: "visitor-login-guard",
+    expect: { pathPrefix: "/auth/login" },
+  },
+  {
+    route: "/blog/slug-inexistente",
+    viewport: { width: 834, height: 1194 },
+    theme: "dark",
+    state: "blog-not-found",
+    expect: { status: 404, path: "/blog/slug-inexistente", publicShell: true, noAuthShell: true },
+  },
+].forEach((item) =>
+  items.push({
+    category: "security",
+    route: item.route,
+    url: `${prodOrigin}${item.route}`,
+    source: "production-artifact",
+    motion: "normal",
+    ...item,
   }),
 );
 nativeRoutes.forEach((routeValue, index) =>
