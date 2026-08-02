@@ -59,7 +59,10 @@ import { SaldoTab } from "@/components/SaldoTab";
 import { recomputeMyBadges } from "@/lib/recomputeBadges";
 import commitmentRing from "@/assets/commitment-ring.webp";
 import { getActiveCommitmentByUser, type RelationshipCommitment } from "@/lib/commitments";
-import { ProfileAdvancedForm, type ProfileAdvancedFormHandle } from "@/components/ProfileAdvancedForm";
+import {
+  ProfileAdvancedForm,
+  type ProfileAdvancedFormHandle,
+} from "@/components/ProfileAdvancedForm";
 import { NumericInput } from "@/components/ui/NumericInput";
 import { ProfileAdvancedView } from "@/components/ProfileAdvancedView";
 import { ProfilePhotosManager } from "@/components/ProfilePhotosManager";
@@ -73,6 +76,9 @@ import { PetProfileCard } from "@/components/PetProfileCard";
 import { EquippedPetSidekick } from "@/components/EquippedPetSidekick";
 import { prefetchPetEssentials } from "@/lib/petQueries";
 import { useQueryClient } from "@tanstack/react-query";
+import { useNativeShellRuntime } from "@/components/native-shell/NativeShellRuntimeContext";
+import { NativeProfileTabs } from "@/components/profile/native/NativeProfileTabs";
+import "@/styles/native-profile.css";
 
 export const Route = createFileRoute("/perfil")({
   component: PerfilPage,
@@ -88,8 +94,7 @@ export const Route = createFileRoute("/perfil")({
       "role",
     ]);
     const tab = typeof rawTab === "string" && allowed.has(rawTab) ? rawTab : undefined;
-    const edit =
-      search.edit === 1 || search.edit === "1" || search.edit === true ? 1 : undefined;
+    const edit = search.edit === 1 || search.edit === "1" || search.edit === true ? 1 : undefined;
     return { tab, edit } as { tab?: string; edit?: 1 };
   },
   head: () => ({
@@ -128,6 +133,7 @@ function PerfilPage() {
   const { isOnline } = useNetworkStatus();
   const search = Route.useSearch();
   const queryClient = useQueryClient();
+  const { active: nativeShellActive } = useNativeShellRuntime();
 
   // Pré-aquece os dados do pet/cenário assim que o /perfil monta — ao
   // navegar para /meu-pet (ou aos cards de pet no próprio perfil) a UI
@@ -270,7 +276,6 @@ function PerfilPage() {
         }, 80);
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search?.tab, search?.edit]);
   const [status, setStatus] = useState<"pending" | "approved" | "rejected" | "banned" | null>(null);
   const [activeCommitment, setActiveCommitment] = useState<RelationshipCommitment | null>(null);
@@ -686,15 +691,35 @@ function PerfilPage() {
       ? [{ value: "role", label: "Meu papel", icon: Briefcase, hint: "Badge e visibilidade" }]
       : []),
   ];
+  const nativeTabItems = tabItems.map(({ value }) => ({
+    value,
+    label:
+      value === "profile"
+        ? "Perfil"
+        : value === "prefs"
+          ? "Preferências"
+          : value === "saldo"
+            ? "Moedas"
+            : value === "missions"
+              ? "Conquistas"
+              : value === "role"
+                ? "Meu papel"
+                : value === "customizacao"
+                  ? "Visual"
+                  : "Presentes",
+  }));
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-background">
-      <Header />
-      <MobileAppHeader title="Perfil" subtitle="Sua conta e seu visual" />
-      <main className="relative mx-auto max-w-[1440px] px-4 py-6 sm:px-6 lg:px-8 lg:py-10">
+    <div
+      data-vdn-native-profile={nativeShellActive ? "" : undefined}
+      className="min-h-screen overflow-x-hidden bg-background"
+    >
+      {!nativeShellActive && <Header />}
+      {!nativeShellActive && <MobileAppHeader title="Perfil" subtitle="Sua conta e seu visual" />}
+      <main className="native-profile__main relative mx-auto max-w-[1440px] px-4 py-6 sm:px-6 lg:px-8 lg:py-10">
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[520px] bg-white dark:bg-[linear-gradient(120deg,rgba(10,16,34,0.98),rgba(17,31,63,0.82)_34%,rgba(18,44,82,0.78)_70%,rgba(42,35,22,0.44))]"
+          className="native-profile__ambient pointer-events-none absolute inset-x-0 top-0 -z-10 h-[520px] bg-white dark:bg-[linear-gradient(120deg,rgba(10,16,34,0.98),rgba(17,31,63,0.82)_34%,rgba(18,44,82,0.78)_70%,rgba(42,35,22,0.44))]"
         />
         <AdminWarningBanner />
         {!isOnline && profileMainQuery.data && (
@@ -711,9 +736,9 @@ function PerfilPage() {
             />
           </div>
         )}
-        <section className="animate-fade-up overflow-hidden rounded-[2.25rem] border border-border/70 bg-card/75 shadow-[0_26px_90px_rgba(31,41,55,0.10)] backdrop-blur dark:bg-card/72 dark:shadow-[0_28px_90px_rgba(0,0,0,0.42)]">
+        <section className="native-profile__identity animate-fade-up overflow-hidden rounded-[2.25rem] border border-border/70 bg-card/75 shadow-[0_26px_90px_rgba(31,41,55,0.10)] backdrop-blur dark:bg-card/72 dark:shadow-[0_28px_90px_rgba(0,0,0,0.42)]">
           <div className="grid w-full min-w-0 gap-0 lg:grid-cols-[380px_minmax(0,1fr)]">
-            <div className="relative w-full min-w-0 overflow-hidden min-h-[320px] bg-[linear-gradient(145deg,#fff7ed,#fdf2f8_45%,#eff6ff)] p-4 dark:bg-[linear-gradient(145deg,rgba(49,22,38,0.88),rgba(20,20,34,0.94)_46%,rgba(15,35,58,0.88))] sm:p-8">
+            <div className="native-profile__identity-media relative w-full min-w-0 overflow-hidden min-h-[320px] bg-[linear-gradient(145deg,#fff7ed,#fdf2f8_45%,#eff6ff)] p-4 dark:bg-[linear-gradient(145deg,rgba(49,22,38,0.88),rgba(20,20,34,0.94)_46%,rgba(15,35,58,0.88))] sm:p-8">
               <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-card/80 to-transparent" />
               <div className="relative z-10 flex h-full flex-col justify-between gap-8">
                 <div className="flex items-center justify-between gap-3">
@@ -725,37 +750,37 @@ function PerfilPage() {
 
                 <div className="flex w-full min-w-0 flex-col items-center text-center">
                   <div className="relative inline-block">
-                  <button
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    aria-label="Trocar foto de perfil"
-                    className="app-pressable group relative h-36 w-36 max-w-full cursor-pointer overflow-hidden rounded-[2rem] border border-border/70 bg-background/70 p-2 shadow-[0_22px_60px_rgba(15,23,42,0.18)] transition hover:-translate-y-1 hover:shadow-[0_28px_70px_rgba(15,23,42,0.22)] dark:shadow-[0_24px_70px_rgba(0,0,0,0.45)] sm:h-44 sm:w-44"
-                  >
-                    <span className="block h-full w-full overflow-hidden rounded-[1.55rem] bg-card">
-                      {photoPreview ? (
-                        <PhotoImg
-                          src={photoPreview}
-                          alt=""
-                          className="pointer-events-none h-full w-full object-cover"
-                        />
-                      ) : (
-                        <span className="pointer-events-none flex h-full w-full flex-col items-center justify-center text-muted-foreground">
-                          <Camera className="h-7 w-7" />
-                          <span className="mt-2 text-sm">Adicionar foto</span>
-                        </span>
-                      )}
-                    </span>
-                    <span className="absolute bottom-4 right-4 flex h-11 w-11 items-center justify-center rounded-full bg-[var(--rose)] text-white shadow-lg">
-                      <Camera className="h-5 w-5" />
-                    </span>
-                  </button>
-                  {user && (
-                    <EquippedPetSidekick
-                      userId={user.id}
-                      size={95}
-                      className="-right-14 bottom-2 sm:-right-16 sm:bottom-3"
-                    />
-                  )}
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      aria-label="Trocar foto de perfil"
+                      className="native-profile__avatar app-pressable group relative h-36 w-36 max-w-full cursor-pointer overflow-hidden rounded-[2rem] border border-border/70 bg-background/70 p-2 shadow-[0_22px_60px_rgba(15,23,42,0.18)] transition hover:-translate-y-1 hover:shadow-[0_28px_70px_rgba(15,23,42,0.22)] dark:shadow-[0_24px_70px_rgba(0,0,0,0.45)] sm:h-44 sm:w-44"
+                    >
+                      <span className="block h-full w-full overflow-hidden rounded-[1.55rem] bg-card">
+                        {photoPreview ? (
+                          <PhotoImg
+                            src={photoPreview}
+                            alt=""
+                            className="pointer-events-none h-full w-full object-cover"
+                          />
+                        ) : (
+                          <span className="pointer-events-none flex h-full w-full flex-col items-center justify-center text-muted-foreground">
+                            <Camera className="h-7 w-7" />
+                            <span className="mt-2 text-sm">Adicionar foto</span>
+                          </span>
+                        )}
+                      </span>
+                      <span className="absolute bottom-4 right-4 flex h-11 w-11 items-center justify-center rounded-full bg-[var(--rose)] text-white shadow-lg">
+                        <Camera className="h-5 w-5" />
+                      </span>
+                    </button>
+                    {user && (
+                      <EquippedPetSidekick
+                        userId={user.id}
+                        size={95}
+                        className="-right-14 bottom-2 sm:-right-16 sm:bottom-3"
+                      />
+                    )}
                   </div>
                   <input
                     ref={fileInputRef}
@@ -781,7 +806,9 @@ function PerfilPage() {
 
                 <div className="grid w-full min-w-0 grid-cols-3 gap-2 text-center">
                   <div className="min-w-0 rounded-2xl bg-background/70 p-2 shadow-soft backdrop-blur dark:bg-background/35 sm:p-3">
-                    <p className="truncate text-base font-semibold text-foreground sm:text-lg">{profile.age || "--"}</p>
+                    <p className="truncate text-base font-semibold text-foreground sm:text-lg">
+                      {profile.age || "--"}
+                    </p>
                     <p className="truncate text-[10px] uppercase tracking-wide text-muted-foreground sm:text-[11px]">
                       anos
                     </p>
@@ -809,7 +836,9 @@ function PerfilPage() {
             <div className="min-w-0 p-4 sm:p-8 lg:p-10">
               <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
                 <div className="min-w-0 w-full">
-                  <p className="hidden text-sm font-medium text-[var(--rose)] sm:block">Perfil pessoal</p>
+                  <p className="hidden text-sm font-medium text-[var(--rose)] sm:block">
+                    Perfil pessoal
+                  </p>
                   <h1 className="mt-2 break-words text-2xl font-black tracking-tight text-foreground sm:text-4xl lg:text-5xl [overflow-wrap:anywhere]">
                     <GradientName
                       name={profile.full_name}
@@ -854,7 +883,14 @@ function PerfilPage() {
               )}
               <div className="mt-5 -mx-2 flex gap-2 overflow-x-auto px-2 pb-1 sm:hidden [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                 {[
-                  { label: "Editar", icon: Eye, onClick: () => { setActiveTab("profile"); setEditingProfile(true); } },
+                  {
+                    label: "Editar",
+                    icon: Eye,
+                    onClick: () => {
+                      setActiveTab("profile");
+                      setEditingProfile(true);
+                    },
+                  },
                   { label: "Visual", icon: Sparkles, onClick: () => setActiveTab("customizacao") },
                   { label: "Saldo", icon: Store, onClick: () => setActiveTab("saldo") },
                   { label: "Presentes", icon: Heart, onClick: () => setActiveTab("presentes") },
@@ -991,60 +1027,75 @@ function PerfilPage() {
         )}
         <div id="perfil-tabs" />
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-8">
-          <div className="grid gap-6 lg:grid-cols-[292px_minmax(0,1fr)]">
-            <aside className="hidden lg:block">
-              <div className="sticky top-24 rounded-[2rem] border border-border/70 bg-card/80 p-3 shadow-[0_18px_60px_rgba(31,41,55,0.08)] backdrop-blur dark:shadow-[0_22px_70px_rgba(0,0,0,0.36)]">
-                <div className="px-3 py-3">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                    Editar perfil
-                  </p>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    Escolha uma area para ajustar.
-                  </p>
-                </div>
-                <div className="space-y-1.5">
-                  {tabItems.map(({ value, label, hint, icon: Icon }) => {
-                    const active = activeTab === value;
-                    return (
-                      <button
-                        type="button"
-                        key={value}
-                        onClick={() => setActiveTab(value)}
-                        className={`flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-left transition ${
-                          active
-                            ? "bg-[var(--rose)] text-white shadow-[0_12px_30px_rgba(190,18,60,0.22)]"
-                            : "text-muted-foreground hover:bg-rose-50 hover:text-foreground dark:hover:bg-rose-400/10"
-                        }`}
-                      >
-                        <span
-                          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
-                            active ? "bg-white/20" : "bg-background"
+          {nativeShellActive && (
+            <NativeProfileTabs
+              activeTab={activeTab}
+              items={nativeTabItems}
+              onTabChange={setActiveTab}
+            />
+          )}
+          <div
+            className={`grid gap-6 ${
+              nativeShellActive ? "" : "lg:grid-cols-[292px_minmax(0,1fr)]"
+            }`}
+          >
+            {!nativeShellActive && (
+              <aside className="hidden lg:block">
+                <div className="sticky top-24 rounded-[2rem] border border-border/70 bg-card/80 p-3 shadow-[0_18px_60px_rgba(31,41,55,0.08)] backdrop-blur dark:shadow-[0_22px_70px_rgba(0,0,0,0.36)]">
+                  <div className="px-3 py-3">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                      Editar perfil
+                    </p>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      Escolha uma area para ajustar.
+                    </p>
+                  </div>
+                  <div className="space-y-1.5">
+                    {tabItems.map(({ value, label, hint, icon: Icon }) => {
+                      const active = activeTab === value;
+                      return (
+                        <button
+                          type="button"
+                          key={value}
+                          onClick={() => setActiveTab(value)}
+                          className={`flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-left transition ${
+                            active
+                              ? "bg-[var(--rose)] text-white shadow-[0_12px_30px_rgba(190,18,60,0.22)]"
+                              : "text-muted-foreground hover:bg-rose-50 hover:text-foreground dark:hover:bg-rose-400/10"
                           }`}
                         >
-                          <Icon className="h-5 w-5" />
-                        </span>
-                        <span className="min-w-0">
-                          <span className="block text-sm font-semibold">{label}</span>
                           <span
-                            className={`block truncate text-xs ${active ? "text-white/80" : "text-muted-foreground"}`}
+                            className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
+                              active ? "bg-white/20" : "bg-background"
+                            }`}
                           >
-                            {hint}
+                            <Icon className="h-5 w-5" />
                           </span>
-                        </span>
-                      </button>
-                    );
-                  })}
+                          <span className="min-w-0">
+                            <span className="block text-sm font-semibold">{label}</span>
+                            <span
+                              className={`block truncate text-xs ${active ? "text-white/80" : "text-muted-foreground"}`}
+                            >
+                              {hint}
+                            </span>
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
-            </aside>
+              </aside>
+            )}
 
             <div className="min-w-0">
-              <ProfileActionHub
-                activeTab={activeTab}
-                isStaff={isStaff}
-                onSelect={handleHubSelect}
-                onOpenResource={handleHubResource}
-              />
+              {!nativeShellActive && (
+                <ProfileActionHub
+                  activeTab={activeTab}
+                  isStaff={isStaff}
+                  onSelect={handleHubSelect}
+                  onOpenResource={handleHubResource}
+                />
+              )}
 
               {/* Profile tab */}
               <TabsContent value="profile" className="mt-6 lg:mt-0">
@@ -1327,7 +1378,11 @@ function PerfilPage() {
                         size="lg"
                         className="w-full"
                         disabled={savingProfile || !isOnline}
-                        title={!isOnline ? "Disponível online. Reconecte-se para salvar alterações." : undefined}
+                        title={
+                          !isOnline
+                            ? "Disponível online. Reconecte-se para salvar alterações."
+                            : undefined
+                        }
                       >
                         <Save className="mr-2 h-4 w-4" />{" "}
                         {!isOnline
@@ -1530,7 +1585,10 @@ function PerfilPage() {
                           variant="looking_for"
                           current={prefs.looking_for_bio}
                           onApply={(starter: string) =>
-                            setPrefs({ ...prefs, looking_for_bio: starter + (prefs.looking_for_bio ?? "") })
+                            setPrefs({
+                              ...prefs,
+                              looking_for_bio: starter + (prefs.looking_for_bio ?? ""),
+                            })
                           }
                         />
                         <Textarea
@@ -1557,7 +1615,11 @@ function PerfilPage() {
                         size="lg"
                         className="w-full"
                         disabled={savingPrefs || !isOnline}
-                        title={!isOnline ? "Disponível online. Reconecte-se para salvar alterações." : undefined}
+                        title={
+                          !isOnline
+                            ? "Disponível online. Reconecte-se para salvar alterações."
+                            : undefined
+                        }
                       >
                         <Save className="mr-2 h-4 w-4" />{" "}
                         {!isOnline
