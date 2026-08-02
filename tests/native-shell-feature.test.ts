@@ -58,7 +58,6 @@ describe("native shell primary rollout", () => {
   it.each([
     "/conversas/abc",
     "/conversas/comunidade",
-    "/devocional",
     "/",
     "/admin",
     "/v2",
@@ -89,6 +88,10 @@ describe("native shell primary rollout", () => {
       "support-ticket",
       "public-manual",
       "public-terms",
+      "app-devotional",
+      "app-news",
+      "app-prayers",
+      "app-bible-quiz",
     ]);
     expect(isNativeShellEligibleDestination(getDestinationBehavior("/conta"))).toBe(true);
     expect(isNativeShellEligibleDestination(getDestinationBehavior("/notificacoes"))).toBe(true);

@@ -128,7 +128,7 @@ describe("app destination registry", () => {
     ]).toEqual(["home", "community", "explore", "messages", "profile"]);
     expect(getFuturePrimaryTab("/conversas/comunidade")).toBe("messages");
     expect(getFuturePrimaryTab("/conversas/abc")).toBe("messages");
-    expect(getFuturePrimaryTab("/devocional")).toBeUndefined();
+    expect(getFuturePrimaryTab("/devocional")).toBe("explore");
   });
 
   it("detects duplicate, unreachable, conflicting and incompatible rules", () => {

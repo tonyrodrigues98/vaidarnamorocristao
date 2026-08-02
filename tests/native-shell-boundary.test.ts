@@ -48,7 +48,6 @@ describe("NativeShellRuntimeBoundary decision", () => {
   it.each([
     "/conversas/abc",
     "/conversas/comunidade",
-    "/devocional",
     "/admin",
     "/",
     "/v2",

@@ -98,7 +98,12 @@ export const appDestinations: readonly AppDestination[] = [
   exact("public-install", "/instalar", publicDefaults),
   exact("public-blog", "/blog", publicDefaults),
   prefix("public-blog-post", "/blog", publicDefaults),
-  exact("public-news", "/noticias", publicDefaults),
+  exact("app-news", "/noticias", {
+    ...mobileAppDefaults,
+    access: "approved",
+    futureTab: "community",
+    footer: false,
+  }),
 
   prefix("auth", "/auth", { ...publicDefaults, footer: false }),
   prefix("onboarding", "/onboarding", {
@@ -120,6 +125,7 @@ export const appDestinations: readonly AppDestination[] = [
   exact("app-devotional", "/devocional", {
     ...mobileAppDefaults,
     currentTab: "devocional",
+    futureTab: "explore",
   }),
   exact("app-conversations", "/conversas", {
     ...mobileAppDefaults,
@@ -180,7 +186,11 @@ export const appDestinations: readonly AppDestination[] = [
   exact("app-matches", "/matches", { ...mobileAppDefaults, futureTab: "explore" }),
   prefix("app-gifts", "/presentes", { ...mobileAppDefaults, footer: false }),
   exact("app-anonymous-notes", "/recados", { ...mobileAppDefaults, futureTab: "explore" }),
-  exact("app-prayers", "/oracoes", { ...mobileAppDefaults, footer: false }),
+  exact("app-prayers", "/oracoes", {
+    ...mobileAppDefaults,
+    futureTab: "community",
+    footer: false,
+  }),
   exact("app-account", "/conta", {
     ...mobileAppDefaults,
     futureTab: "profile",
@@ -214,7 +224,7 @@ export const appDestinations: readonly AppDestination[] = [
     ...appDefaults,
     futureTab: "explore",
   }),
-  exact("app-bible-quiz", "/quiz-biblico", appDefaults),
+  exact("app-bible-quiz", "/quiz-biblico", { ...appDefaults, futureTab: "explore" }),
 
   exact("support-root", "/suporte", {
     ...appDefaults,

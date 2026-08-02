@@ -4,7 +4,14 @@ export type NativeSecondaryDestinationChrome = {
   destinationId: string;
   title: string;
   parentTab: FuturePrimaryTab;
-  parentPath: "/inicio" | "/explorar" | "/conversas" | "/perfil" | "/pretendentes" | "/suporte";
+  parentPath:
+    | "/inicio"
+    | "/comunidade"
+    | "/explorar"
+    | "/conversas"
+    | "/perfil"
+    | "/pretendentes"
+    | "/suporte";
 };
 
 export const nativeSecondaryDestinations = [
@@ -121,6 +128,30 @@ export const nativeSecondaryDestinations = [
     title: "Termos",
     parentTab: "profile",
     parentPath: "/perfil",
+  },
+  {
+    destinationId: "app-devotional",
+    title: "Devocional",
+    parentTab: "explore",
+    parentPath: "/explorar",
+  },
+  {
+    destinationId: "app-news",
+    title: "Notícias",
+    parentTab: "community",
+    parentPath: "/comunidade",
+  },
+  {
+    destinationId: "app-prayers",
+    title: "Orações",
+    parentTab: "community",
+    parentPath: "/comunidade",
+  },
+  {
+    destinationId: "app-bible-quiz",
+    title: "Quiz Bíblico",
+    parentTab: "explore",
+    parentPath: "/explorar",
   },
 ] as const satisfies readonly NativeSecondaryDestinationChrome[];
 
