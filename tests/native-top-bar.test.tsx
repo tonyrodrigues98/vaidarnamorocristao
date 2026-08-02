@@ -41,7 +41,11 @@ describe("NativeTopBar", () => {
 
   it("renders official identity and only real, named actions", () => {
     const markup = renderToStaticMarkup(
-      <NativeTopBar activeTab="home" userLabel="antonio.rodrigues@example.com" />,
+      <NativeTopBar
+        activeTab="home"
+        destinationId="app-home"
+        userLabel="antonio.rodrigues@example.com"
+      />,
     );
 
     expect(markup).toContain(brand.assets.icon192);
@@ -60,7 +64,9 @@ describe("NativeTopBar", () => {
     expect(getNativeUserInitials("Antonio Rodrigues Silva")).toBe("AR");
     expect(getNativeUserInitials("antonio@example.com")).toBe("AN");
     theme.resolvedTheme = "dark";
-    const markup = renderToStaticMarkup(<NativeTopBar activeTab="profile" userLabel="" />);
+    const markup = renderToStaticMarkup(
+      <NativeTopBar activeTab="profile" destinationId="app-profile" userLabel="" />,
+    );
     expect(markup).toContain('aria-label="Usar tema claro"');
     expect(markup).toContain("VD");
     theme.resolvedTheme = "light";

@@ -26,13 +26,23 @@ export const nativeShellPrimaryDestinationIds = [
 
 export const nativeShellInitialDestinationIds = nativeShellPrimaryDestinationIds;
 
+export const nativeShellSecondaryDestinationIds = ["app-account"] as const;
+
 type NativeShellPrimaryDestinationId = (typeof nativeShellPrimaryDestinationIds)[number];
 
 const nativeShellPrimaryDestinationIdSet: ReadonlySet<string> =
   new Set<NativeShellPrimaryDestinationId>(nativeShellPrimaryDestinationIds);
 
+type NativeShellSecondaryDestinationId = (typeof nativeShellSecondaryDestinationIds)[number];
+
+const nativeShellSecondaryDestinationIdSet: ReadonlySet<string> =
+  new Set<NativeShellSecondaryDestinationId>(nativeShellSecondaryDestinationIds);
+
 export function isNativeShellEligibleDestination(behavior: DestinationBehavior): boolean {
-  return nativeShellPrimaryDestinationIdSet.has(behavior.destinationId);
+  return (
+    nativeShellPrimaryDestinationIdSet.has(behavior.destinationId) ||
+    nativeShellSecondaryDestinationIdSet.has(behavior.destinationId)
+  );
 }
 
 export type NativeShellRuntimeDecision = {

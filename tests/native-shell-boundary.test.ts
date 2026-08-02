@@ -39,12 +39,17 @@ describe("NativeShellRuntimeBoundary decision", () => {
     },
   );
 
+  it("uses the contextual native shell for authenticated account settings", () => {
+    expect(decide("/conta")).toBe(true);
+    expect(decide("/conta", { featureEnabled: false })).toBe(false);
+    expect(getDestinationBehavior("/conta").futureTab).toBe("profile");
+  });
+
   it.each([
     "/conversas/abc",
     "/conversas/comunidade",
     "/devocional",
     "/pretendentes",
-    "/conta",
     "/admin",
     "/",
     "/v2",

@@ -1,9 +1,19 @@
 import type { FuturePrimaryTab } from "@/config/app-destinations";
 import { brand } from "@/config/brand";
 import { nativePrimaryNavigation } from "@/config/native-primary-navigation";
+import { getNativeSecondaryDestinationChrome } from "@/config/native-secondary-destinations";
 
 export function getNativeTopBarTitle(tab: FuturePrimaryTab): string {
   return nativePrimaryNavigation.find((item) => item.id === tab)!.label;
+}
+
+export function getNativeDestinationTitle(
+  destinationId: string,
+  activeTab: FuturePrimaryTab,
+): string {
+  return (
+    getNativeSecondaryDestinationChrome(destinationId)?.title ?? getNativeTopBarTitle(activeTab)
+  );
 }
 
 export function getNativeUserInitials(userLabel: string): string {

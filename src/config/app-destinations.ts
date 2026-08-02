@@ -165,7 +165,11 @@ export const appDestinations: readonly AppDestination[] = [
   prefix("app-gifts", "/presentes", { ...mobileAppDefaults, footer: false }),
   exact("app-anonymous-notes", "/recados", mobileAppDefaults),
   exact("app-prayers", "/oracoes", { ...mobileAppDefaults, footer: false }),
-  exact("app-account", "/conta", { ...mobileAppDefaults, footer: false }),
+  exact("app-account", "/conta", {
+    ...mobileAppDefaults,
+    futureTab: "profile",
+    footer: false,
+  }),
   exact("app-blocked-users", "/bloqueados", { ...mobileAppDefaults, footer: false }),
   exact("app-verification", "/verificacao", { ...mobileAppDefaults, footer: false }),
   prefix("app-purpose", "/proposito", mobileAppDefaults),

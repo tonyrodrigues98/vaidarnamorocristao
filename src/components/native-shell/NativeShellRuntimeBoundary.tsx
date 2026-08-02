@@ -46,7 +46,13 @@ export function NativeShellRuntimeBoundary({ children }: NativeShellRuntimeBound
               hash={location.hash}
             />
           }
-          topBar={<NativeTopBar activeTab={activeTab} userLabel={userLabel} />}
+          topBar={
+            <NativeTopBar
+              activeTab={activeTab}
+              destinationId={behavior.destinationId}
+              userLabel={userLabel}
+            />
+          }
           bottomNavigation={
             <NativeBottomNavigation
               activeTab={activeTab}

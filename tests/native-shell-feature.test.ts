@@ -6,6 +6,7 @@ import {
   isNativeShellEligibleDestination,
   nativeShellInitialDestinationIds,
   nativeShellPrimaryDestinationIds,
+  nativeShellSecondaryDestinationIds,
   parseNativeShellFeatureFlag,
   resolveNativeShellFeatureFlag,
   shouldExposeNativeRootDestination,
@@ -59,7 +60,6 @@ describe("native shell primary rollout", () => {
     "/conversas/comunidade",
     "/devocional",
     "/pretendentes",
-    "/conta",
     "/",
     "/admin",
     "/v2",
@@ -67,6 +67,12 @@ describe("native shell primary rollout", () => {
     "/rota-desconhecida",
   ])("does not enable %s", (pathname) => {
     expect(isNativeShellEligibleDestination(getDestinationBehavior(pathname))).toBe(false);
+  });
+
+  it("keeps secondary rollout separate from the five primary destinations", () => {
+    expect(nativeShellSecondaryDestinationIds).toEqual(["app-account"]);
+    expect(isNativeShellEligibleDestination(getDestinationBehavior("/conta"))).toBe(true);
+    expect(nativeShellPrimaryDestinationIds).toHaveLength(5);
   });
 
   it.each(["/inicio", "/comunidade", "/explorar", "/conversas", "/perfil"])(

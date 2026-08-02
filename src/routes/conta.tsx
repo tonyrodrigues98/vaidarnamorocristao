@@ -5,6 +5,8 @@ import { Header } from "@/components/layout/Header";
 import { MobileAppHeader } from "@/components/mobile/MobileAppHeader";
 import { AccountDangerZone } from "@/components/AccountDangerZone";
 import { ThemePreferenceControl } from "@/components/settings/ThemePreferenceControl";
+import { NativeAccountView } from "@/components/settings/native/NativeAccountView";
+import { useNativeShellRuntime } from "@/components/native-shell/NativeShellRuntimeContext";
 import { useAuth } from "@/lib/auth";
 import { useTheme } from "@/lib/theme";
 import { useNetworkStatus } from "@/hooks/useNetworkStatus";
@@ -34,6 +36,7 @@ export const Route = createFileRoute("/conta")({
         content:
           "Ajustes da sua conta: perfil, segurança, notificações, privacidade, suporte e exclusão.",
       },
+      { name: "robots", content: "noindex, nofollow" },
     ],
   }),
   component: ContaPage,
@@ -133,6 +136,7 @@ function ContaPage() {
   const { user, signOut, role } = useAuth();
   const { preference, resolvedTheme, setTheme } = useTheme();
   const { isOnline } = useNetworkStatus();
+  const { active: nativeShellActive } = useNativeShellRuntime();
   const isStaff = role !== "user";
   const [signingOut, setSigningOut] = useState(false);
 
@@ -160,6 +164,30 @@ function ContaPage() {
     metadata.full_name || metadata.display_name || metadata.name || user?.email?.split("@")[0];
   const avatar = metadata.avatar_url || metadata.picture;
   const initial = (displayName || user?.email || "?").charAt(0).toUpperCase();
+  const dangerZone = <AccountDangerZone />;
+
+  if (nativeShellActive) {
+    return (
+      <NativeAccountView
+        displayName={displayName}
+        email={user?.email}
+        avatar={avatar}
+        initial={initial}
+        isStaff={isStaff}
+        isOnline={isOnline}
+        signingOut={signingOut}
+        onSignOut={handleSignOut}
+        themeControl={
+          <ThemePreferenceControl
+            preference={preference}
+            resolvedTheme={resolvedTheme}
+            onChange={setTheme}
+          />
+        }
+        dangerZone={dangerZone}
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[var(--app-bg,theme(colors.background))]">
@@ -298,7 +326,7 @@ function ContaPage() {
                 aria-disabled={!isOnline}
                 className={!isOnline ? "pointer-events-none opacity-60" : undefined}
               >
-                <AccountDangerZone />
+                {dangerZone}
               </div>
             </div>
           </section>
