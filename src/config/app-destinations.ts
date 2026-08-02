@@ -147,9 +147,17 @@ export const appDestinations: readonly AppDestination[] = [
     visualViewport: true,
     routeTransition: false,
   }),
-  prefix("app-dating", "/pretendentes", {
+  exact("app-dating", "/pretendentes", {
     ...mobileAppDefaults,
     currentTab: "pretendentes",
+    futureTab: "explore",
+    footer: false,
+  }),
+  prefix("app-dating-profile", "/pretendentes", {
+    ...mobileAppDefaults,
+    currentTab: "pretendentes",
+    futureTab: "explore",
+    footer: false,
   }),
   exact("app-profile", "/perfil", {
     ...mobileAppDefaults,
@@ -168,10 +176,10 @@ export const appDestinations: readonly AppDestination[] = [
     footer: false,
   }),
   exact("app-dashboard", "/dashboard", mobileAppDefaults),
-  exact("app-interests", "/interesses", mobileAppDefaults),
-  exact("app-matches", "/matches", mobileAppDefaults),
+  exact("app-interests", "/interesses", { ...mobileAppDefaults, futureTab: "explore" }),
+  exact("app-matches", "/matches", { ...mobileAppDefaults, futureTab: "explore" }),
   prefix("app-gifts", "/presentes", { ...mobileAppDefaults, footer: false }),
-  exact("app-anonymous-notes", "/recados", mobileAppDefaults),
+  exact("app-anonymous-notes", "/recados", { ...mobileAppDefaults, futureTab: "explore" }),
   exact("app-prayers", "/oracoes", { ...mobileAppDefaults, footer: false }),
   exact("app-account", "/conta", {
     ...mobileAppDefaults,

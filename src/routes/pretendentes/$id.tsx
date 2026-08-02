@@ -67,6 +67,7 @@ import {
   type CompatProfile,
 } from "@/lib/purposeCompatibility";
 import { Handshake, MessageSquareHeart } from "lucide-react";
+import { NativeDatingNavigation } from "@/components/dating/native/NativeDatingNavigation";
 
 type Full = {
   id: string;
@@ -412,6 +413,7 @@ function Detail() {
       <div className="min-h-screen bg-background">
         <Header />
         <main className="mx-auto max-w-[1440px] px-4 py-10 sm:px-6 lg:px-8">
+          <NativeDatingNavigation />
           <div className="mt-6 grid gap-8 md:grid-cols-[2fr_3fr]">
             <ProfileSkeleton />
             <ProfileSkeleton />
@@ -424,6 +426,7 @@ function Detail() {
       <div className="min-h-screen bg-background">
         <Header />
         <main className="mx-auto max-w-3xl px-4 py-12">
+          <NativeDatingNavigation />
           <AppEmptyState
             icon={<UserX className="h-6 w-6" />}
             title="Perfil não encontrado"
@@ -440,6 +443,7 @@ function Detail() {
       <div className="min-h-screen bg-background">
         <Header />
         <main className="mx-auto max-w-md px-4 py-20 text-center">
+          <NativeDatingNavigation />
           <div className="rounded-[2rem] border border-border/70 bg-card/85 p-8 shadow-[0_20px_70px_rgba(31,41,55,0.08)] backdrop-blur dark:bg-card/80 dark:shadow-[0_24px_80px_rgba(0,0,0,0.35)]">
             <Ban className="mx-auto h-10 w-10 text-muted-foreground" />
             <h1 className="mt-4 text-2xl font-semibold">Perfil bloqueado</h1>
@@ -503,6 +507,7 @@ function Detail() {
       )}
 
       <main className="relative z-10 mx-auto max-w-[1440px] px-4 pb-24 pt-4 sm:px-6 lg:px-8">
+        <NativeDatingNavigation />
         {/* Voltar */}
         <Link
           to="/pretendentes"
@@ -545,60 +550,60 @@ function Detail() {
               <div className="relative overflow-visible rounded-[1.65rem] p-0">
                 <div className="relative z-10 flex min-h-[170px] items-center justify-center overflow-visible py-0 sm:min-h-[220px] lg:min-h-[245px]">
                   <div className="relative inline-block">
-                  <div className="sm:hidden">
-                    <EquippedPetSidekick
-                      userId={profile.id}
-                      size={120}
-                      className="-right-3 -bottom-1"
-                    />
-                  </div>
-                  <div className="hidden sm:block lg:hidden">
-                    <EquippedPetSidekick
-                      userId={profile.id}
-                      size={150}
-                      className="-right-4 -bottom-1"
-                    />
-                  </div>
-                  <div className="hidden lg:block">
-                    <EquippedPetSidekick
-                      userId={profile.id}
-                      size={160}
-                      className="-right-5 -bottom-1"
-                    />
-                  </div>
-                  <div className="sm:hidden">
-                    <DecoratedAvatar
-                      photoUrl={profile.photo_url}
-                      fallback={profile.full_name.charAt(0)}
-                      alt={profile.full_name}
-                      size={122}
-                      frameId={profile.equipped_frame_id ?? null}
-                      auraId={profile.equipped_aura_id ?? null}
-                      isCommitted={profileCommitted}
-                    />
-                  </div>
-                  <div className="hidden sm:block lg:hidden">
-                    <DecoratedAvatar
-                      photoUrl={profile.photo_url}
-                      fallback={profile.full_name.charAt(0)}
-                      alt={profile.full_name}
-                      size={154}
-                      frameId={profile.equipped_frame_id ?? null}
-                      auraId={profile.equipped_aura_id ?? null}
-                      isCommitted={profileCommitted}
-                    />
-                  </div>
-                  <div className="hidden lg:block">
-                    <DecoratedAvatar
-                      photoUrl={profile.photo_url}
-                      fallback={profile.full_name.charAt(0)}
-                      alt={profile.full_name}
-                      size={162}
-                      frameId={profile.equipped_frame_id ?? null}
-                      auraId={profile.equipped_aura_id ?? null}
-                      isCommitted={profileCommitted}
-                    />
-                  </div>
+                    <div className="sm:hidden">
+                      <EquippedPetSidekick
+                        userId={profile.id}
+                        size={120}
+                        className="-right-3 -bottom-1"
+                      />
+                    </div>
+                    <div className="hidden sm:block lg:hidden">
+                      <EquippedPetSidekick
+                        userId={profile.id}
+                        size={150}
+                        className="-right-4 -bottom-1"
+                      />
+                    </div>
+                    <div className="hidden lg:block">
+                      <EquippedPetSidekick
+                        userId={profile.id}
+                        size={160}
+                        className="-right-5 -bottom-1"
+                      />
+                    </div>
+                    <div className="sm:hidden">
+                      <DecoratedAvatar
+                        photoUrl={profile.photo_url}
+                        fallback={profile.full_name.charAt(0)}
+                        alt={profile.full_name}
+                        size={122}
+                        frameId={profile.equipped_frame_id ?? null}
+                        auraId={profile.equipped_aura_id ?? null}
+                        isCommitted={profileCommitted}
+                      />
+                    </div>
+                    <div className="hidden sm:block lg:hidden">
+                      <DecoratedAvatar
+                        photoUrl={profile.photo_url}
+                        fallback={profile.full_name.charAt(0)}
+                        alt={profile.full_name}
+                        size={154}
+                        frameId={profile.equipped_frame_id ?? null}
+                        auraId={profile.equipped_aura_id ?? null}
+                        isCommitted={profileCommitted}
+                      />
+                    </div>
+                    <div className="hidden lg:block">
+                      <DecoratedAvatar
+                        photoUrl={profile.photo_url}
+                        fallback={profile.full_name.charAt(0)}
+                        alt={profile.full_name}
+                        size={162}
+                        frameId={profile.equipped_frame_id ?? null}
+                        auraId={profile.equipped_aura_id ?? null}
+                        isCommitted={profileCommitted}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -678,18 +683,32 @@ function Detail() {
                 <div className={actionCardClass}>
                   <div className="grid gap-3 sm:grid-cols-2">
                     {profileCommitted ? (
-                      <Button size="lg" className="app-pressable w-full sm:col-span-2" disabled variant="outline">
+                      <Button
+                        size="lg"
+                        className="app-pressable w-full sm:col-span-2"
+                        disabled
+                        variant="outline"
+                      >
                         <Gem className="mr-2 h-4 w-4" />
                         Usuario em Proposito
                       </Button>
                     ) : matchId ? (
-                      <Button size="lg" className="app-pressable w-full shadow-glow sm:col-span-2" asChild>
+                      <Button
+                        size="lg"
+                        className="app-pressable w-full shadow-glow sm:col-span-2"
+                        asChild
+                      >
                         <Link to="/conversas/$matchId" params={{ matchId }}>
                           <MessageCircle className="mr-2 h-4 w-4" /> Conversar
                         </Link>
                       </Button>
                     ) : interestSent ? (
-                      <Button size="lg" variant="outline" className="app-pressable w-full sm:col-span-2" disabled>
+                      <Button
+                        size="lg"
+                        variant="outline"
+                        className="app-pressable w-full sm:col-span-2"
+                        disabled
+                      >
                         <Check className="mr-2 h-4 w-4" /> Interesse enviado
                       </Button>
                     ) : (
@@ -1027,7 +1046,11 @@ function Detail() {
           <div className="flex gap-2">
             <Dialog open={reportOpen} onOpenChange={setReportOpen}>
               <DialogTrigger asChild>
-                <Button variant="ghost" size="sm" className="app-pressable flex-1 text-muted-foreground">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="app-pressable flex-1 text-muted-foreground"
+                >
                   <Flag className="mr-1 h-4 w-4" /> Denunciar
                 </Button>
               </DialogTrigger>

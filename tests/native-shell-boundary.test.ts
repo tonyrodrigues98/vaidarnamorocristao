@@ -49,7 +49,6 @@ describe("NativeShellRuntimeBoundary decision", () => {
     "/conversas/abc",
     "/conversas/comunidade",
     "/devocional",
-    "/pretendentes",
     "/admin",
     "/",
     "/v2",
@@ -58,6 +57,14 @@ describe("NativeShellRuntimeBoundary decision", () => {
   ])("keeps the legacy path for %s", (pathname) => {
     expect(decide(pathname)).toBe(false);
   });
+
+  it.each(["/pretendentes", "/pretendentes/teste", "/interesses", "/matches", "/recados"])(
+    "uses the contextual native shell for dating destination %s",
+    (pathname) => {
+      expect(decide(pathname)).toBe(true);
+      expect(decide(pathname, { featureEnabled: false })).toBe(false);
+    },
+  );
 
   it("renders mutually exclusive shell branches without redirects or persistence", () => {
     const source = readFileSync(

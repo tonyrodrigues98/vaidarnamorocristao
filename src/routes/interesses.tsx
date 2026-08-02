@@ -15,6 +15,7 @@ import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { markSeen } from "@/lib/lastSeen";
 import { CommitmentPauseCard } from "@/components/commitment/CommitmentPauseCard";
 import { getActiveCommitmentByUser, type RelationshipCommitment } from "@/lib/commitments";
+import { NativeDatingNavigation } from "@/components/dating/native/NativeDatingNavigation";
 
 type ProfileLite = {
   id: string;
@@ -52,10 +53,7 @@ async function fetchInterests(userId: string): Promise<InterestsPayload> {
       .select("id, created_at, receiver_id")
       .eq("sender_id", userId)
       .order("created_at", { ascending: false }),
-    supabase
-      .from("matches")
-      .select("user_a, user_b")
-      .or(`user_a.eq.${userId},user_b.eq.${userId}`),
+    supabase.from("matches").select("user_a, user_b").or(`user_a.eq.${userId},user_b.eq.${userId}`),
   ]);
   const ids = Array.from(
     new Set<string>([
@@ -168,6 +166,7 @@ function Page() {
     <div className="min-h-screen">
       <Header />
       <main className="mx-auto max-w-5xl px-4 py-10">
+        <NativeDatingNavigation />
         <div className="animate-fade-up">
           <h1 className="text-4xl font-semibold">Interesses</h1>
           <p className="mt-1 text-muted-foreground">

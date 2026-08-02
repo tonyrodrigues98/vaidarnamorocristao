@@ -59,7 +59,6 @@ describe("native shell primary rollout", () => {
     "/conversas/abc",
     "/conversas/comunidade",
     "/devocional",
-    "/pretendentes",
     "/",
     "/admin",
     "/v2",
@@ -76,12 +75,24 @@ describe("native shell primary rollout", () => {
       "app-store",
       "app-pet",
       "app-pet-arcade",
+      "app-dating",
+      "app-dating-profile",
+      "app-interests",
+      "app-matches",
+      "app-anonymous-notes",
     ]);
     expect(isNativeShellEligibleDestination(getDestinationBehavior("/conta"))).toBe(true);
     expect(isNativeShellEligibleDestination(getDestinationBehavior("/notificacoes"))).toBe(true);
     expect(isNativeShellEligibleDestination(getDestinationBehavior("/loja"))).toBe(true);
     expect(isNativeShellEligibleDestination(getDestinationBehavior("/meu-pet"))).toBe(true);
     expect(isNativeShellEligibleDestination(getDestinationBehavior("/pet-arcade"))).toBe(true);
+    expect(isNativeShellEligibleDestination(getDestinationBehavior("/pretendentes"))).toBe(true);
+    expect(isNativeShellEligibleDestination(getDestinationBehavior("/pretendentes/teste"))).toBe(
+      true,
+    );
+    expect(isNativeShellEligibleDestination(getDestinationBehavior("/interesses"))).toBe(true);
+    expect(isNativeShellEligibleDestination(getDestinationBehavior("/matches"))).toBe(true);
+    expect(isNativeShellEligibleDestination(getDestinationBehavior("/recados"))).toBe(true);
     expect(nativeShellPrimaryDestinationIds).toHaveLength(5);
   });
 

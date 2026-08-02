@@ -32,6 +32,11 @@ export const nativeShellSecondaryDestinationIds = [
   "app-store",
   "app-pet",
   "app-pet-arcade",
+  "app-dating",
+  "app-dating-profile",
+  "app-interests",
+  "app-matches",
+  "app-anonymous-notes",
 ] as const;
 
 type NativeShellPrimaryDestinationId = (typeof nativeShellPrimaryDestinationIds)[number];

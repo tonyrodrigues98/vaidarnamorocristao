@@ -43,6 +43,8 @@ import { AppEmptyState } from "@/components/ui/AppEmptyState";
 import { PullToRefresh } from "@/components/mobile/PullToRefresh";
 import { OfflineState } from "@/components/ui/OfflineState";
 import { useNetworkStatus } from "@/hooks/useNetworkStatus";
+import { NativeDatingNavigation } from "@/components/dating/native/NativeDatingNavigation";
+import { useNativeShellRuntime } from "@/components/native-shell/NativeShellRuntimeContext";
 
 type Profile = {
   id: string;
@@ -128,19 +130,14 @@ async function fetchPretendentes(userId: string, isSuperAdmin: boolean): Promise
       supabase.rpc("get_hidden_staff_ids"),
       supabase.from("user_roles").select("user_id, role, badge_color").neq("role", "user"),
       supabase.from("profile_advanced").select("*").eq("user_id", userId).maybeSingle(),
-      supabase
-        .from("relationship_commitments")
-        .select("user_a,user_b")
-        .eq("status", "active"),
+      supabase.from("relationship_commitments").select("user_a,user_b").eq("status", "active"),
     ]);
 
   const hidden = new Set<string>([
     ...(blocksRes.data ?? []).map((b: any) => b.blocked_id),
     ...(blockedByRes.data ?? []).map((b: any) => b.blocker_id),
     ...(((hiddenRes as any).data ?? []) as any[])
-      .map((x: any) =>
-        typeof x === "string" ? x : (x.get_hidden_staff_ids ?? x.user_id ?? ""),
-      )
+      .map((x: any) => (typeof x === "string" ? x : (x.get_hidden_staff_ids ?? x.user_id ?? "")))
       .filter(Boolean),
   ]);
 
@@ -224,6 +221,7 @@ export const Route = createFileRoute("/pretendentes/")({
 
 function List() {
   const { user, loading, role, rolesLoaded } = useAuth();
+  const { active: nativeShellActive } = useNativeShellRuntime();
   const search = Route.useSearch();
   const navigate = useNavigate({ from: "/pretendentes/" });
   const { isOnline } = useNetworkStatus();
@@ -246,9 +244,9 @@ function List() {
     enabled: queryEnabled,
     staleTime: 60_000,
   });
-  const profiles = data?.profiles ?? [];
+  const profiles = useMemo(() => data?.profiles ?? [], [data?.profiles]);
   const staffMap = data?.staffMap ?? {};
-  const advancedMap = data?.advancedMap ?? {};
+  const advancedMap = useMemo(() => data?.advancedMap ?? {}, [data?.advancedMap]);
   const extraPhotos = data?.extraPhotos ?? {};
   const myAdvanced = data?.myAdvanced ?? null;
   const myStatus = data?.myStatus ?? null;
@@ -367,7 +365,19 @@ function List() {
   // Reset explore index whenever the visible list changes (filters, data load)
   useEffect(() => {
     setExploreIndex(0);
-  }, [filtered.length, search.q, search.state, search.marital, search.ageMin, search.ageMax, search.church, search.ministry, search.loveLang, search.verified, search.sort]);
+  }, [
+    filtered.length,
+    search.q,
+    search.state,
+    search.marital,
+    search.ageMin,
+    search.ageMax,
+    search.church,
+    search.ministry,
+    search.loveLang,
+    search.verified,
+    search.sort,
+  ]);
 
   const nearbyProfiles = useMemo(() => {
     return filtered.filter((p) => p.state === myPrefs.state).slice(0, 10);
@@ -409,6 +419,7 @@ function List() {
       <div className="min-h-screen bg-gradient-to-b from-rose-50/70 via-background to-background dark:from-rose-950/10 dark:via-background dark:to-background">
         <Header />
         <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+          <NativeDatingNavigation />
           <PretendentesSkeleton cards={3} />
         </main>
       </div>
@@ -420,435 +431,469 @@ function List() {
       <Header />
       <MobileAppHeader title="Pretendentes" subtitle="Conheça pessoas com propósito" />
       <PullToRefresh onRefresh={handlePullRefresh} disabled={!user || !rolesLoaded || !isOnline}>
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <section className="relative overflow-hidden rounded-3xl border border-white/70 bg-white/75 p-6 shadow-soft backdrop-blur-xl dark:border-white/10 dark:bg-card/70 sm:p-8 lg:p-10">
-          <div className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full bg-rose-300/25 blur-3xl dark:bg-rose-700/20" />
-          <div className="pointer-events-none absolute -bottom-28 left-10 h-72 w-72 rounded-full bg-emerald-200/25 blur-3xl dark:bg-emerald-800/20" />
-          <div className="relative grid gap-8 lg:grid-cols-[1fr_auto] lg:items-end">
-            <div className="max-w-3xl animate-fade-up">
-              <div className="inline-flex items-center gap-2 rounded-full border border-rose-200/70 bg-rose-50/80 px-3 py-1 text-xs font-semibold text-rose-700 dark:border-rose-800/50 dark:bg-rose-950/30 dark:text-rose-200">
-                <Heart className="h-3.5 w-3.5" />
-                Encontros com propósito
+        <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+          <NativeDatingNavigation />
+          <section className="relative overflow-hidden rounded-3xl border border-white/70 bg-white/75 p-6 shadow-soft backdrop-blur-xl dark:border-white/10 dark:bg-card/70 sm:p-8 lg:p-10">
+            <div className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full bg-rose-300/25 blur-3xl dark:bg-rose-700/20" />
+            <div className="pointer-events-none absolute -bottom-28 left-10 h-72 w-72 rounded-full bg-emerald-200/25 blur-3xl dark:bg-emerald-800/20" />
+            <div className="relative grid gap-8 lg:grid-cols-[1fr_auto] lg:items-end">
+              <div className="max-w-3xl animate-fade-up">
+                <div className="inline-flex items-center gap-2 rounded-full border border-rose-200/70 bg-rose-50/80 px-3 py-1 text-xs font-semibold text-rose-700 dark:border-rose-800/50 dark:bg-rose-950/30 dark:text-rose-200">
+                  <Heart className="h-3.5 w-3.5" />
+                  Encontros com propósito
+                </div>
+                <h1 className="mt-4 text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
+                  Pretendentes
+                </h1>
+                <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">
+                  {audienceLabel} com perfis cristãos aprovados na plataforma, organizados por
+                  afinidade, região e detalhes do perfil para ajudar você a conhecer alguém com
+                  calma e segurança.
+                </p>
               </div>
-              <h1 className="mt-4 text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
-                Pretendentes
-              </h1>
-              <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">
-                {audienceLabel} com perfis cristãos aprovados na plataforma, organizados por
-                afinidade, região e detalhes do perfil para ajudar você a conhecer alguém com calma
-                e segurança.
-              </p>
-            </div>
-            {canBrowsePretendentes && (
-              <div className="grid grid-cols-2 gap-3 rounded-3xl border border-border/60 bg-background/70 p-4 text-center shadow-sm backdrop-blur md:min-w-[280px]">
-                <div>
-                  <p className="text-2xl font-semibold">{filtered.length}</p>
-                  <p className="text-xs text-muted-foreground">perfis visíveis</p>
+              {canBrowsePretendentes && (
+                <div className="grid grid-cols-2 gap-3 rounded-3xl border border-border/60 bg-background/70 p-4 text-center shadow-sm backdrop-blur md:min-w-[280px]">
+                  <div>
+                    <p className="text-2xl font-semibold">{filtered.length}</p>
+                    <p className="text-xs text-muted-foreground">perfis visíveis</p>
+                  </div>
+                  <div>
+                    <p className="text-2xl font-semibold">{topMatches.length}</p>
+                    <p className="text-xs text-muted-foreground">destaques</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-2xl font-semibold">{topMatches.length}</p>
-                  <p className="text-xs text-muted-foreground">destaques</p>
-                </div>
-              </div>
-            )}
-          </div>
-        </section>
-
-        {activeCommitment && !isSuperAdmin ? (
-          <section className="mx-auto mt-8 max-w-3xl overflow-hidden rounded-3xl border border-emerald-200/60 bg-gradient-to-br from-emerald-50 via-white to-rose-50 p-8 text-center shadow-soft backdrop-blur dark:border-emerald-800/40 dark:from-emerald-950/30 dark:via-background dark:to-rose-950/20 sm:p-12">
-            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br from-emerald-400/20 via-white to-rose-400/20 shadow-inner dark:via-white/10">
-              <Gem className="h-10 w-10 text-emerald-600 dark:text-emerald-300" />
-            </div>
-
-            <h2 className="mt-6 text-3xl font-semibold tracking-tight">Propósito Firmado</h2>
-
-            <p className="mx-auto mt-3 max-w-xl text-muted-foreground">
-              Você está em um propósito ativo. Por isso, a área de pretendentes fica pausada
-              enquanto esse compromisso estiver firmado.
-            </p>
-
-            <Button asChild size="lg" className="mt-7 rounded-full px-6">
-              <Link
-                to="/proposito/$matchId"
-                params={{
-                  matchId: activeCommitment.match_id,
-                }}
-              >
-                Ver Página do Casal
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
-
-            <div className="mt-6 inline-flex items-center gap-2 rounded-full border border-emerald-200/70 bg-white/60 px-4 py-2 text-xs font-medium text-emerald-700 dark:border-emerald-800/50 dark:bg-white/5 dark:text-emerald-200">
-              <Lock className="h-3.5 w-3.5" />
-              Pretendentes pausados durante o compromisso
-            </div>
-          </section>
-        ) : myStatus !== "approved" ? (
-          <section className="mt-8 rounded-3xl border border-border/70 bg-card/80 p-8 text-center shadow-soft backdrop-blur">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-muted">
-              <ShieldCheck className="h-7 w-7 text-muted-foreground" />
-            </div>
-            <p className="mt-4 text-muted-foreground">
-              Você precisa ter o perfil aprovado para ver os pretendentes.
-            </p>
-          </section>
-        ) : (
-          <>
-            <div className="mt-6 rounded-3xl border border-border/70 bg-card/80 p-4 shadow-soft backdrop-blur">
-              <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
-                <Input
-                  placeholder="Buscar por nome ou cidade..."
-                  value={search.q}
-                  onChange={(e) => update("q", e.target.value)}
-                  className="h-11 rounded-2xl bg-background/80 lg:max-w-sm"
-                />
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="rounded-full"
-                  onClick={() => setFiltersOpen((o) => !o)}
-                >
-                  <SlidersHorizontal className="mr-1 h-4 w-4" /> Filtros
-                </Button>
-                {hasFilters && (
-                  <Button variant="ghost" size="sm" className="rounded-full" onClick={clearAll}>
-                    <X className="mr-1 h-4 w-4" /> Limpar
-                  </Button>
-                )}
-                <Button
-                  variant={search.verified ? "default" : "outline"}
-                  size="sm"
-                  className="rounded-full"
-                  onClick={() => update("verified", !search.verified)}
-                >
-                  <ShieldCheck className="mr-1 h-4 w-4" /> Verificados
-                </Button>
-                <div className="flex flex-1 items-center gap-2 lg:justify-end">
-                  <Select value={search.sort} onValueChange={(v) => update("sort", v as any)}>
-                    <SelectTrigger className="h-11 rounded-2xl bg-background/80 sm:w-[190px]">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="affinity">Afinidade</SelectItem>
-                      <SelectItem value="recent">Mais recentes</SelectItem>
-                      <SelectItem value="geographic">Mais próximos</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <span className="rounded-full bg-muted px-3 py-2 text-sm text-muted-foreground">
-                    {filtered.length}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {filtersOpen && (
-              <div className="mt-4 grid gap-3 rounded-3xl border border-border/60 bg-background/65 p-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-                <div>
-                  <label className="text-xs text-muted-foreground">Estado</label>
-                  <Select value={search.state} onValueChange={(v) => update("state", v)}>
-                    <SelectTrigger className="mt-1 rounded-2xl">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todos</SelectItem>
-                      {BR_STATES.map((s) => (
-                        <SelectItem key={s} value={s}>
-                          {s}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <label className="text-xs text-muted-foreground">Estado civil</label>
-                  <Select value={search.marital} onValueChange={(v) => update("marital", v as any)}>
-                    <SelectTrigger className="mt-1 rounded-2xl">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todos</SelectItem>
-                      <SelectItem value="solteiro">Solteiro(a)</SelectItem>
-                      <SelectItem value="divorciado">Divorciado(a)</SelectItem>
-                      <SelectItem value="viuvo">Viúvo(a)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <label className="text-xs text-muted-foreground">Idade mín.</label>
-                  <Input
-                    type="text"
-                    inputMode="numeric"
-                    pattern="[0-9]*"
-                    maxLength={3}
-                    placeholder="18"
-                    value={ageMinInput}
-                    className="mt-1 rounded-2xl"
-                    onChange={(e) => commitAge("ageMin", e.target.value)}
-                    onBlur={() => {
-                      if (ageMinInput === "") return;
-                      const n = Number(ageMinInput);
-                      if (!Number.isFinite(n) || n < 18 || n > 110) {
-                        setAgeMinInput("");
-                        update("ageMin", undefined);
-                      }
-                    }}
-                  />
-                </div>
-                <div>
-                  <label className="text-xs text-muted-foreground">Idade máx.</label>
-                  <Input
-                    type="text"
-                    inputMode="numeric"
-                    pattern="[0-9]*"
-                    maxLength={3}
-                    placeholder="110"
-                    value={ageMaxInput}
-                    className="mt-1 rounded-2xl"
-                    onChange={(e) => commitAge("ageMax", e.target.value)}
-                    onBlur={() => {
-                      if (ageMaxInput === "") return;
-                      const n = Number(ageMaxInput);
-                      if (!Number.isFinite(n) || n < 18 || n > 110) {
-                        setAgeMaxInput("");
-                        update("ageMax", undefined);
-                      }
-                    }}
-                  />
-                </div>
-                <div>
-                  <label className="text-xs text-muted-foreground">Igreja</label>
-                  <Input
-                    value={search.church}
-                    onChange={(e) => update("church", e.target.value)}
-                    placeholder="Ex: Batista"
-                    className="mt-1 rounded-2xl"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs text-muted-foreground">Ministério</label>
-                  <Select value={search.ministry} onValueChange={(v) => update("ministry", v)}>
-                    <SelectTrigger className="mt-1 rounded-2xl">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todos</SelectItem>
-                      {MINISTRY.map((m) => (
-                        <SelectItem key={m.v} value={m.v}>
-                          {m.l}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <label className="text-xs text-muted-foreground">Linguagem do amor</label>
-                  <Select value={search.loveLang} onValueChange={(v) => update("loveLang", v)}>
-                    <SelectTrigger className="mt-1 rounded-2xl">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todas</SelectItem>
-                      {LOVE_LANGUAGE.map((m) => (
-                        <SelectItem key={m.v} value={m.v}>
-                          {m.l}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            )}
-          </>
-        )}
-
-        {canBrowsePretendentes &&
-          (loadingList ? (
-            <div className="mt-8">
-              <PretendentesSkeleton cards={3} />
-            </div>
-          ) : filtered.length === 0 ? (
-            <div className="mt-8">
-              {!isOnline ? (
-                <OfflineState />
-              ) : (
-              <AppEmptyState
-                icon={<SearchX className="h-6 w-6" />}
-                title={hasFilters ? "Filtros muito específicos" : "Nenhum pretendente encontrado"}
-                description={
-                  hasFilters
-                    ? "Tente ampliar sua busca para encontrar mais pessoas compatíveis."
-                    : "Volte amanhã: novos perfis podem aparecer conforme a comunidade cresce. Você também pode completar seu perfil para aparecer melhor."
-                }
-                actionLabel={hasFilters ? "Limpar filtros" : "Completar perfil"}
-                onAction={hasFilters ? clearAll : undefined}
-                actionTo={hasFilters ? undefined : "/perfil"}
-              />
               )}
             </div>
+          </section>
+
+          {activeCommitment && !isSuperAdmin ? (
+            <section className="mx-auto mt-8 max-w-3xl overflow-hidden rounded-3xl border border-emerald-200/60 bg-gradient-to-br from-emerald-50 via-white to-rose-50 p-8 text-center shadow-soft backdrop-blur dark:border-emerald-800/40 dark:from-emerald-950/30 dark:via-background dark:to-rose-950/20 sm:p-12">
+              <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br from-emerald-400/20 via-white to-rose-400/20 shadow-inner dark:via-white/10">
+                <Gem className="h-10 w-10 text-emerald-600 dark:text-emerald-300" />
+              </div>
+
+              <h2 className="mt-6 text-3xl font-semibold tracking-tight">Propósito Firmado</h2>
+
+              <p className="mx-auto mt-3 max-w-xl text-muted-foreground">
+                Você está em um propósito ativo. Por isso, a área de pretendentes fica pausada
+                enquanto esse compromisso estiver firmado.
+              </p>
+
+              <Button asChild size="lg" className="mt-7 rounded-full px-6">
+                <Link
+                  to="/proposito/$matchId"
+                  params={{
+                    matchId: activeCommitment.match_id,
+                  }}
+                >
+                  Ver Página do Casal
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
+
+              <div className="mt-6 inline-flex items-center gap-2 rounded-full border border-emerald-200/70 bg-white/60 px-4 py-2 text-xs font-medium text-emerald-700 dark:border-emerald-800/50 dark:bg-white/5 dark:text-emerald-200">
+                <Lock className="h-3.5 w-3.5" />
+                Pretendentes pausados durante o compromisso
+              </div>
+            </section>
+          ) : myStatus !== "approved" ? (
+            <section className="mt-8 rounded-3xl border border-border/70 bg-card/80 p-8 text-center shadow-soft backdrop-blur">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-muted">
+                <ShieldCheck className="h-7 w-7 text-muted-foreground" />
+              </div>
+              <p className="mt-4 text-muted-foreground">
+                Você precisa ter o perfil aprovado para ver os pretendentes.
+              </p>
+            </section>
           ) : (
             <>
-              {/* Mobile-only Explorar com Propósito */}
-              <div className="mt-6 md:hidden">
-                <div className="mb-4 flex items-center justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="inline-flex items-center gap-1.5 rounded-full bg-rose-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-rose-700 dark:bg-rose-950/40 dark:text-rose-200">
-                      <Sparkles className="h-3 w-3" /> Explorar com propósito
-                    </p>
-                    <p className="mt-1.5 text-sm text-muted-foreground">
-                      Veja perfis com calma e escolha com intenção.
-                    </p>
-                  </div>
-                  <div
-                    role="tablist"
-                    aria-label="Modo de visualização"
-                    className="inline-flex shrink-0 rounded-full border border-border bg-background p-1 text-xs font-semibold"
+              <div className="mt-6 rounded-3xl border border-border/70 bg-card/80 p-4 shadow-soft backdrop-blur">
+                <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
+                  <Input
+                    placeholder="Buscar por nome ou cidade..."
+                    value={search.q}
+                    onChange={(e) => update("q", e.target.value)}
+                    className="h-11 rounded-2xl bg-background/80 lg:max-w-sm"
+                  />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="rounded-full"
+                    onClick={() => setFiltersOpen((o) => !o)}
                   >
-                    <button
-                      type="button"
-                      role="tab"
-                      aria-selected={mobileMode === "explore"}
-                      onClick={() => setMobileMode("explore")}
-                      className={`app-pressable rounded-full px-3 py-1.5 transition-colors ${
-                        mobileMode === "explore"
-                          ? "bg-foreground text-background"
-                          : "text-muted-foreground"
-                      }`}
-                    >
-                      Explorar
-                    </button>
-                    <button
-                      type="button"
-                      role="tab"
-                      aria-selected={mobileMode === "list"}
-                      onClick={() => setMobileMode("list")}
-                      className={`app-pressable rounded-full px-3 py-1.5 transition-colors ${
-                        mobileMode === "list"
-                          ? "bg-foreground text-background"
-                          : "text-muted-foreground"
-                      }`}
-                    >
-                      Lista
-                    </button>
+                    <SlidersHorizontal className="mr-1 h-4 w-4" /> Filtros
+                  </Button>
+                  {hasFilters && (
+                    <Button variant="ghost" size="sm" className="rounded-full" onClick={clearAll}>
+                      <X className="mr-1 h-4 w-4" /> Limpar
+                    </Button>
+                  )}
+                  <Button
+                    variant={search.verified ? "default" : "outline"}
+                    size="sm"
+                    className="rounded-full"
+                    onClick={() => update("verified", !search.verified)}
+                  >
+                    <ShieldCheck className="mr-1 h-4 w-4" /> Verificados
+                  </Button>
+                  <div className="flex flex-1 items-center gap-2 lg:justify-end">
+                    <Select value={search.sort} onValueChange={(v) => update("sort", v as any)}>
+                      <SelectTrigger className="h-11 rounded-2xl bg-background/80 sm:w-[190px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="affinity">Afinidade</SelectItem>
+                        <SelectItem value="recent">Mais recentes</SelectItem>
+                        <SelectItem value="geographic">Mais próximos</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <span className="rounded-full bg-muted px-3 py-2 text-sm text-muted-foreground">
+                      {filtered.length}
+                    </span>
                   </div>
                 </div>
+              </div>
 
-                {mobileMode === "explore" &&
-                  (() => {
-                    const idx = Math.min(exploreIndex, filtered.length - 1);
-                    const p = filtered[idx];
-                    if (!p) return null;
-                    const chips = affinityByProfile[p.id] ?? [];
-                    const score =
-                      maxScore > 0 ? Math.min(99, Math.round((chips.length / maxScore) * 100)) : 0;
-                    const showScore = chips.length >= 3 && score >= 50 && !!myAdvanced;
-                    return (
-                      <ExploreProfileCard
-                        key={p.id}
-                        profile={p}
-                        photos={[
-                          ...(p.photo_url ? [p.photo_url] : []),
-                          ...(extraPhotos[p.id] ?? []),
-                        ]}
-                        chips={chips}
-                        score={score}
-                        showScore={showScore}
-                        isSuggestion={isSuggestion(p)}
-                        staff={staffMap[p.id]}
-                        index={idx}
-                        total={filtered.length}
-                        canPrev={idx > 0}
-                        canNext={idx < filtered.length - 1}
-                        onPrev={() => setExploreIndex((i) => Math.max(0, i - 1))}
-                        onNext={() =>
-                          setExploreIndex((i) => Math.min(filtered.length - 1, i + 1))
+              {filtersOpen && (
+                <div className="mt-4 grid gap-3 rounded-3xl border border-border/60 bg-background/65 p-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                  <div>
+                    <label className="text-xs text-muted-foreground">Estado</label>
+                    <Select value={search.state} onValueChange={(v) => update("state", v)}>
+                      <SelectTrigger className="mt-1 rounded-2xl">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Todos</SelectItem>
+                        {BR_STATES.map((s) => (
+                          <SelectItem key={s} value={s}>
+                            {s}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <label className="text-xs text-muted-foreground">Estado civil</label>
+                    <Select
+                      value={search.marital}
+                      onValueChange={(v) => update("marital", v as any)}
+                    >
+                      <SelectTrigger className="mt-1 rounded-2xl">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Todos</SelectItem>
+                        <SelectItem value="solteiro">Solteiro(a)</SelectItem>
+                        <SelectItem value="divorciado">Divorciado(a)</SelectItem>
+                        <SelectItem value="viuvo">Viúvo(a)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <label className="text-xs text-muted-foreground">Idade mín.</label>
+                    <Input
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      maxLength={3}
+                      placeholder="18"
+                      value={ageMinInput}
+                      className="mt-1 rounded-2xl"
+                      onChange={(e) => commitAge("ageMin", e.target.value)}
+                      onBlur={() => {
+                        if (ageMinInput === "") return;
+                        const n = Number(ageMinInput);
+                        if (!Number.isFinite(n) || n < 18 || n > 110) {
+                          setAgeMinInput("");
+                          update("ageMin", undefined);
                         }
-                      />
-                    );
-                  })()}
-              </div>
-
-              <div
-                className={
-                  isMobile && mobileMode === "explore" ? "hidden md:block" : "block"
-                }
-              >
-              <div className="mt-8 overflow-hidden rounded-3xl border border-rose-200/60 bg-gradient-to-r from-rose-500 via-pink-500 to-purple-500 p-8 text-white shadow-elegant dark:border-rose-900/40">
-                <div className="max-w-2xl">
-                  <p className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-white/90">
-                    <Sparkles className="h-3.5 w-3.5" />
-                    Descobertas
-                  </p>
-
-                  <h2 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">
-                    Pessoas compatíveis com você
-                  </h2>
-
-                  <p className="mt-3 text-white/90">
-                    Baseado na sua fé, afinidade, localização e interesses.
-                  </p>
-                </div>
-              </div>
-              <PretendenteCarousel
-                title="Mais compatíveis"
-                subtitle="Perfis com maior afinidade"
-                profiles={topMatches}
-                affinityByProfile={affinityByProfile}
-                maxScore={maxScore}
-                myAdvanced={myAdvanced}
-                extraPhotos={extraPhotos}
-                staffMap={staffMap}
-                isSuggestion={isSuggestion}
-              />
-
-              <PretendenteCarousel
-                title="Perto de você"
-                subtitle="Pessoas da mesma região"
-                profiles={nearbyProfiles}
-                affinityByProfile={affinityByProfile}
-                maxScore={maxScore}
-                myAdvanced={myAdvanced}
-                extraPhotos={extraPhotos}
-                staffMap={staffMap}
-                isSuggestion={isSuggestion}
-              />
-
-              <PretendenteCarousel
-                title="Novos na plataforma"
-                subtitle="Perfis adicionados recentemente"
-                profiles={newestProfiles}
-                affinityByProfile={affinityByProfile}
-                maxScore={maxScore}
-                myAdvanced={myAdvanced}
-                extraPhotos={extraPhotos}
-                staffMap={staffMap}
-                isSuggestion={isSuggestion}
-              />
-              <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                {filtered.map((p, i) => {
-                  const chips = affinityByProfile[p.id] ?? [];
-                  const score =
-                    maxScore > 0 ? Math.min(99, Math.round((chips.length / maxScore) * 100)) : 0;
-                  const showScore = chips.length >= 3 && score >= 50 && !!myAdvanced;
-                  return (
-                    <PretendenteFeaturedCard
-                      key={p.id}
-                      profile={p}
-                      photos={[...(p.photo_url ? [p.photo_url] : []), ...(extraPhotos[p.id] ?? [])]}
-                      score={score}
-                      showScore={showScore}
-                      chips={chips}
-                      eager={i < 3}
-                      isSuggestion={isSuggestion(p)}
-                      staff={staffMap[p.id]}
+                      }}
                     />
-                  );
-                })}
-              </div>
-              </div>
+                  </div>
+                  <div>
+                    <label className="text-xs text-muted-foreground">Idade máx.</label>
+                    <Input
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      maxLength={3}
+                      placeholder="110"
+                      value={ageMaxInput}
+                      className="mt-1 rounded-2xl"
+                      onChange={(e) => commitAge("ageMax", e.target.value)}
+                      onBlur={() => {
+                        if (ageMaxInput === "") return;
+                        const n = Number(ageMaxInput);
+                        if (!Number.isFinite(n) || n < 18 || n > 110) {
+                          setAgeMaxInput("");
+                          update("ageMax", undefined);
+                        }
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-muted-foreground">Igreja</label>
+                    <Input
+                      value={search.church}
+                      onChange={(e) => update("church", e.target.value)}
+                      placeholder="Ex: Batista"
+                      className="mt-1 rounded-2xl"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-muted-foreground">Ministério</label>
+                    <Select value={search.ministry} onValueChange={(v) => update("ministry", v)}>
+                      <SelectTrigger className="mt-1 rounded-2xl">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Todos</SelectItem>
+                        {MINISTRY.map((m) => (
+                          <SelectItem key={m.v} value={m.v}>
+                            {m.l}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <label className="text-xs text-muted-foreground">Linguagem do amor</label>
+                    <Select value={search.loveLang} onValueChange={(v) => update("loveLang", v)}>
+                      <SelectTrigger className="mt-1 rounded-2xl">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Todas</SelectItem>
+                        {LOVE_LANGUAGE.map((m) => (
+                          <SelectItem key={m.v} value={m.v}>
+                            {m.l}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              )}
             </>
-          ))}
-      </main>
+          )}
+
+          {canBrowsePretendentes &&
+            (loadingList ? (
+              <div className="mt-8">
+                <PretendentesSkeleton cards={3} />
+              </div>
+            ) : filtered.length === 0 ? (
+              <div className="mt-8">
+                {!isOnline ? (
+                  <OfflineState />
+                ) : (
+                  <AppEmptyState
+                    icon={<SearchX className="h-6 w-6" />}
+                    title={
+                      hasFilters ? "Filtros muito específicos" : "Nenhum pretendente encontrado"
+                    }
+                    description={
+                      hasFilters
+                        ? "Tente ampliar sua busca para encontrar mais pessoas compatíveis."
+                        : "Volte amanhã: novos perfis podem aparecer conforme a comunidade cresce. Você também pode completar seu perfil para aparecer melhor."
+                    }
+                    actionLabel={hasFilters ? "Limpar filtros" : "Completar perfil"}
+                    onAction={hasFilters ? clearAll : undefined}
+                    actionTo={hasFilters ? undefined : "/perfil"}
+                  />
+                )}
+              </div>
+            ) : (
+              <>
+                {/* Mobile-only Explorar com Propósito */}
+                {nativeShellActive ? (
+                  <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                    {filtered.map((profile, index) => (
+                      <PretendenteFeaturedCard
+                        key={profile.id}
+                        profile={profile}
+                        photos={[
+                          ...(profile.photo_url ? [profile.photo_url] : []),
+                          ...(extraPhotos[profile.id] ?? []),
+                        ]}
+                        score={0}
+                        showScore={false}
+                        chips={affinityByProfile[profile.id] ?? []}
+                        eager={index < 3}
+                        isSuggestion={isSuggestion(profile)}
+                        staff={staffMap[profile.id]}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <>
+                    <div className="mt-6 md:hidden">
+                      <div className="mb-4 flex items-center justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="inline-flex items-center gap-1.5 rounded-full bg-rose-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-rose-700 dark:bg-rose-950/40 dark:text-rose-200">
+                            <Sparkles className="h-3 w-3" /> Explorar com propósito
+                          </p>
+                          <p className="mt-1.5 text-sm text-muted-foreground">
+                            Veja perfis com calma e escolha com intenção.
+                          </p>
+                        </div>
+                        <div
+                          role="tablist"
+                          aria-label="Modo de visualização"
+                          className="inline-flex shrink-0 rounded-full border border-border bg-background p-1 text-xs font-semibold"
+                        >
+                          <button
+                            type="button"
+                            role="tab"
+                            aria-selected={mobileMode === "explore"}
+                            onClick={() => setMobileMode("explore")}
+                            className={`app-pressable rounded-full px-3 py-1.5 transition-colors ${
+                              mobileMode === "explore"
+                                ? "bg-foreground text-background"
+                                : "text-muted-foreground"
+                            }`}
+                          >
+                            Explorar
+                          </button>
+                          <button
+                            type="button"
+                            role="tab"
+                            aria-selected={mobileMode === "list"}
+                            onClick={() => setMobileMode("list")}
+                            className={`app-pressable rounded-full px-3 py-1.5 transition-colors ${
+                              mobileMode === "list"
+                                ? "bg-foreground text-background"
+                                : "text-muted-foreground"
+                            }`}
+                          >
+                            Lista
+                          </button>
+                        </div>
+                      </div>
+
+                      {mobileMode === "explore" &&
+                        (() => {
+                          const idx = Math.min(exploreIndex, filtered.length - 1);
+                          const p = filtered[idx];
+                          if (!p) return null;
+                          const chips = affinityByProfile[p.id] ?? [];
+                          const score =
+                            maxScore > 0
+                              ? Math.min(99, Math.round((chips.length / maxScore) * 100))
+                              : 0;
+                          const showScore = chips.length >= 3 && score >= 50 && !!myAdvanced;
+                          return (
+                            <ExploreProfileCard
+                              key={p.id}
+                              profile={p}
+                              photos={[
+                                ...(p.photo_url ? [p.photo_url] : []),
+                                ...(extraPhotos[p.id] ?? []),
+                              ]}
+                              chips={chips}
+                              score={score}
+                              showScore={showScore}
+                              isSuggestion={isSuggestion(p)}
+                              staff={staffMap[p.id]}
+                              index={idx}
+                              total={filtered.length}
+                              canPrev={idx > 0}
+                              canNext={idx < filtered.length - 1}
+                              onPrev={() => setExploreIndex((i) => Math.max(0, i - 1))}
+                              onNext={() =>
+                                setExploreIndex((i) => Math.min(filtered.length - 1, i + 1))
+                              }
+                            />
+                          );
+                        })()}
+                    </div>
+
+                    <div
+                      className={isMobile && mobileMode === "explore" ? "hidden md:block" : "block"}
+                    >
+                      <div className="mt-8 overflow-hidden rounded-3xl border border-rose-200/60 bg-gradient-to-r from-rose-500 via-pink-500 to-purple-500 p-8 text-white shadow-elegant dark:border-rose-900/40">
+                        <div className="max-w-2xl">
+                          <p className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-white/90">
+                            <Sparkles className="h-3.5 w-3.5" />
+                            Descobertas
+                          </p>
+
+                          <h2 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">
+                            Pessoas compatíveis com você
+                          </h2>
+
+                          <p className="mt-3 text-white/90">
+                            Baseado na sua fé, afinidade, localização e interesses.
+                          </p>
+                        </div>
+                      </div>
+                      <PretendenteCarousel
+                        title="Mais compatíveis"
+                        subtitle="Perfis com maior afinidade"
+                        profiles={topMatches}
+                        affinityByProfile={affinityByProfile}
+                        maxScore={maxScore}
+                        myAdvanced={myAdvanced}
+                        extraPhotos={extraPhotos}
+                        staffMap={staffMap}
+                        isSuggestion={isSuggestion}
+                      />
+
+                      <PretendenteCarousel
+                        title="Perto de você"
+                        subtitle="Pessoas da mesma região"
+                        profiles={nearbyProfiles}
+                        affinityByProfile={affinityByProfile}
+                        maxScore={maxScore}
+                        myAdvanced={myAdvanced}
+                        extraPhotos={extraPhotos}
+                        staffMap={staffMap}
+                        isSuggestion={isSuggestion}
+                      />
+
+                      <PretendenteCarousel
+                        title="Novos na plataforma"
+                        subtitle="Perfis adicionados recentemente"
+                        profiles={newestProfiles}
+                        affinityByProfile={affinityByProfile}
+                        maxScore={maxScore}
+                        myAdvanced={myAdvanced}
+                        extraPhotos={extraPhotos}
+                        staffMap={staffMap}
+                        isSuggestion={isSuggestion}
+                      />
+                      <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                        {filtered.map((p, i) => {
+                          const chips = affinityByProfile[p.id] ?? [];
+                          const score =
+                            maxScore > 0
+                              ? Math.min(99, Math.round((chips.length / maxScore) * 100))
+                              : 0;
+                          const showScore = chips.length >= 3 && score >= 50 && !!myAdvanced;
+                          return (
+                            <PretendenteFeaturedCard
+                              key={p.id}
+                              profile={p}
+                              photos={[
+                                ...(p.photo_url ? [p.photo_url] : []),
+                                ...(extraPhotos[p.id] ?? []),
+                              ]}
+                              score={score}
+                              showScore={showScore}
+                              chips={chips}
+                              eager={i < 3}
+                              isSuggestion={isSuggestion(p)}
+                              staff={staffMap[p.id]}
+                            />
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </>
+                )}
+              </>
+            ))}
+        </main>
       </PullToRefresh>
     </div>
   );

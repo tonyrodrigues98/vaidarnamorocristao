@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
 import { RequireApproved } from "@/components/RequireApproved";
+import { NativeDatingNavigation } from "@/components/dating/native/NativeDatingNavigation";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -103,28 +104,41 @@ type Hint = {
   requested_at: string;
 };
 
-const STATUS_MAP: Record<string, { icon: React.ReactNode; label: string; tone: "neutral" | "accent" | "success" | "muted" }> = {
+const STATUS_MAP: Record<
+  string,
+  { icon: React.ReactNode; label: string; tone: "neutral" | "accent" | "success" | "muted" }
+> = {
   pending: { icon: <Send className="h-3 w-3" />, label: "Aguardando", tone: "neutral" },
   hint_requested: { icon: <Eye className="h-3 w-3" />, label: "Dica solicitada", tone: "neutral" },
   hint_sent: { icon: <Lightbulb className="h-3 w-3" />, label: "Dica enviada", tone: "accent" },
   replied: { icon: <Reply className="h-3 w-3" />, label: "Respondido", tone: "accent" },
-  reveal_requested: { icon: <Unlock className="h-3 w-3" />, label: "Revelação pedida", tone: "accent" },
+  reveal_requested: {
+    icon: <Unlock className="h-3 w-3" />,
+    label: "Revelação pedida",
+    tone: "accent",
+  },
   revealed: { icon: <HeartHandshake className="h-3 w-3" />, label: "Revelado", tone: "success" },
   expired: { icon: <Clock className="h-3 w-3" />, label: "Expirado", tone: "muted" },
 };
 
 function StatusPill({ status }: { status: string }) {
-  const it = STATUS_MAP[status] ?? { icon: <Sparkles className="h-3 w-3" />, label: status, tone: "neutral" as const };
+  const it = STATUS_MAP[status] ?? {
+    icon: <Sparkles className="h-3 w-3" />,
+    label: status,
+    tone: "neutral" as const,
+  };
   const toneClass =
     it.tone === "success"
       ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 ring-emerald-500/20"
       : it.tone === "accent"
-      ? "bg-foreground/[0.06] text-foreground ring-foreground/10"
-      : it.tone === "muted"
-      ? "bg-muted/60 text-muted-foreground ring-border/40"
-      : "bg-foreground/[0.04] text-foreground/70 ring-foreground/10";
+        ? "bg-foreground/[0.06] text-foreground ring-foreground/10"
+        : it.tone === "muted"
+          ? "bg-muted/60 text-muted-foreground ring-border/40"
+          : "bg-foreground/[0.04] text-foreground/70 ring-foreground/10";
   return (
-    <span className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-medium ring-1 ring-inset ${toneClass}`}>
+    <span
+      className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-medium ring-1 ring-inset ${toneClass}`}
+    >
       {it.icon}
       {it.label}
     </span>
@@ -272,7 +286,9 @@ function RecadosPage() {
       inbox.filter((m) => m.status === "revealed").length +
       outbox.filter((m) => m.status === "revealed").length;
     const repliedCount = inbox.filter((m) => !!m.reply_text).length;
-    const pendingInbox = inbox.filter((m) => ["pending", "hint_sent", "hint_requested"].includes(m.status)).length;
+    const pendingInbox = inbox.filter((m) =>
+      ["pending", "hint_sent", "hint_requested"].includes(m.status),
+    ).length;
     return { revealedCount, repliedCount, pendingInbox };
   }, [inbox, outbox]);
 
@@ -282,6 +298,7 @@ function RecadosPage() {
       <RevealCeremony target={reveal} onClose={() => setReveal(null)} />
 
       <main className="mx-auto max-w-2xl px-4 pb-28 pt-4">
+        <NativeDatingNavigation />
         {/* Apple-style large title */}
         <div className="flex items-start justify-between pt-2">
           <div className="min-w-0">
@@ -326,8 +343,10 @@ function RecadosPage() {
                       Como funcionam os recados
                     </h2>
                     <p className="mt-1 text-[13px] leading-relaxed text-muted-foreground">
-                      Mensagens 100% anônimas. Você pode pedir até <span className="font-medium text-foreground/80">2 dicas</span> e
-                      responder sem revelar. A identidade só aparece se <span className="font-medium text-foreground/80">ambos aceitarem</span>.
+                      Mensagens 100% anônimas. Você pode pedir até{" "}
+                      <span className="font-medium text-foreground/80">2 dicas</span> e responder
+                      sem revelar. A identidade só aparece se{" "}
+                      <span className="font-medium text-foreground/80">ambos aceitarem</span>.
                     </p>
                   </div>
                 </div>
@@ -379,9 +398,7 @@ function RecadosPage() {
                     subtitle="Recados que você ocultar aparecem aqui. Você pode desocultar a qualquer momento."
                   />
                 ) : (
-                  hidden.map((m) => (
-                    <HiddenCard key={m.id} m={m} onChange={load} />
-                  ))
+                  hidden.map((m) => <HiddenCard key={m.id} m={m} onChange={load} />)
                 )
               ) : tab === "inbox" ? (
                 inbox.length === 0 ? (
@@ -1107,7 +1124,10 @@ function OutboxCard({ m, hints, onChange }: { m: OutboxRow; hints: Hint[]; onCha
             {loadingPool ? (
               <div className="flex flex-wrap gap-2">
                 {[0, 1, 2].map((i) => (
-                  <div key={i} className="h-9 w-40 animate-pulse rounded-full bg-foreground/[0.06]" />
+                  <div
+                    key={i}
+                    className="h-9 w-40 animate-pulse rounded-full bg-foreground/[0.06]"
+                  />
                 ))}
               </div>
             ) : shown.length === 0 ? (

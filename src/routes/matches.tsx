@@ -24,6 +24,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { NativeDatingNavigation } from "@/components/dating/native/NativeDatingNavigation";
 
 type MatchItem = {
   matchId: string;
@@ -130,7 +131,7 @@ function MatchesPage() {
     },
     onError: (err: Error) => toast.error(err.message),
   });
-  const busy = unmatchMut.isPending ? unmatchMut.variables ?? null : null;
+  const busy = unmatchMut.isPending ? (unmatchMut.variables ?? null) : null;
 
   if (!loading && !user) return <Navigate to="/auth/login" />;
 
@@ -140,6 +141,7 @@ function MatchesPage() {
     <div className="min-h-screen">
       <Header />
       <main className="mx-auto max-w-6xl px-4 py-10">
+        <NativeDatingNavigation />
         <div className="animate-fade-up flex flex-wrap items-end justify-between gap-3">
           <div>
             <h1 className="text-3xl font-semibold sm:text-4xl">Seus matches</h1>
