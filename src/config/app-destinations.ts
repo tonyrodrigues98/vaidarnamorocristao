@@ -138,6 +138,7 @@ export const appDestinations: readonly AppDestination[] = [
     shell: "focused",
     currentTab: "conversas",
     futureTab: "messages",
+    mobileBottomNav: false,
     footer: false,
     visualViewport: true,
     routeTransition: false,

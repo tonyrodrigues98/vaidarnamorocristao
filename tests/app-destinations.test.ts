@@ -22,7 +22,7 @@ const expectedBehavior = {
   "/devocional": ["app", true, "contextual", true, false, true, "active"],
   "/conversas": ["app", true, "contextual", false, false, true, "active"],
   "/conversas/abc": ["focused", false, "contextual", false, true, false, "active"],
-  "/conversas/comunidade": ["focused", true, "contextual", false, true, false, "active"],
+  "/conversas/comunidade": ["focused", false, "contextual", false, true, false, "active"],
   "/perfil": ["app", true, "contextual", false, false, true, "active"],
   "/loja": ["app", true, "contextual", false, false, true, "active"],
   "/conta": ["app", true, "contextual", false, false, true, "active"],
