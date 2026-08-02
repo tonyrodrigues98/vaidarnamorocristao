@@ -5,6 +5,7 @@ import {
   HeadContent,
   Scripts,
   useLocation,
+  useRouterState,
 } from "@tanstack/react-router";
 import { QueryClientProvider } from "@tanstack/react-query";
 import type { AppRouterContext } from "@/v2/app/router-context";
@@ -40,23 +41,36 @@ import { PublicShell } from "@/components/shells/PublicShell";
 import { getDestinationBehavior } from "@/config/app-destinations";
 import { AdminShellRuntimeBoundary } from "@/components/admin-shell/AdminShellRuntimeBoundary";
 import { AdminRouteAccessBoundary } from "@/components/admin-shell/AdminRouteAccessBoundary";
+import { isGlobalRouterNotFound } from "@/config/router-not-found";
 
 function NotFoundComponent() {
   return (
     <PublicShell>
       <main className="flex min-h-[60dvh] items-center justify-center bg-background px-4">
         <div className="max-w-md text-center">
+          <img
+            src={brand.assets.icon192}
+            alt=""
+            aria-hidden="true"
+            className="mx-auto h-16 w-16 object-contain"
+          />
           <h1 className="text-7xl font-bold text-foreground">404</h1>
-          <h2 className="mt-4 text-xl font-semibold text-foreground">Page not found</h2>
+          <h2 className="mt-4 text-xl font-semibold text-foreground">Página não encontrada</h2>
           <p className="mt-2 text-sm text-muted-foreground">
-            The page you're looking for doesn't exist or has been moved.
+            O endereço que você tentou acessar não existe ou foi movido.
           </p>
-          <div className="mt-6">
+          <div className="mt-6 flex flex-col items-stretch justify-center gap-3 sm:flex-row">
             <Link
               to="/"
-              className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+              className="inline-flex min-h-11 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
             >
-              Go home
+              Voltar ao início
+            </Link>
+            <Link
+              to="/auth/login"
+              className="inline-flex min-h-11 items-center justify-center rounded-md border border-border bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted"
+            >
+              Entrar
             </Link>
           </div>
         </div>
@@ -234,6 +248,9 @@ html.dark #app-splash .app-splash-loader-bar,html[data-theme="dark"] #app-splash
 
 function RootComponent() {
   const location = useLocation();
+  const globalNotFound = useRouterState({
+    select: (state) => isGlobalRouterNotFound(state.matches),
+  });
   const { queryClient } = Route.useRouteContext();
   const destination = getDestinationBehavior(location.pathname);
   const showFooter = shouldShowFooter(location.pathname) && destination.shell !== "public";
@@ -259,60 +276,66 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        <SupabaseRuntimeBoundary>
-          <AuthProvider>
-            <V2AwareRouteBoundary>
-              <AuthenticatedProviderBoundary>
-                <AdminRouteAccessBoundary>
-                  <AdminShellRuntimeBoundary>
-                    <NativeShellRuntimeBoundary>
-                      {isHome ? (
-                        <Outlet />
-                      ) : (
-                        <div
-                          className={
-                            chatRoute
-                              ? "flex h-[var(--app-visual-height,100dvh)] flex-col overflow-hidden"
-                              : "flex min-h-screen flex-col"
-                          }
-                        >
-                          <div className={chatRoute ? "min-h-0 flex-1 overflow-hidden" : "flex-1"}>
-                            <MobileRouteTransition disabled={chatRoute}>
-                              <Outlet />
-                            </MobileRouteTransition>
+        {globalNotFound ? (
+          <Outlet />
+        ) : (
+          <SupabaseRuntimeBoundary>
+            <AuthProvider>
+              <V2AwareRouteBoundary>
+                <AuthenticatedProviderBoundary>
+                  <AdminRouteAccessBoundary>
+                    <AdminShellRuntimeBoundary>
+                      <NativeShellRuntimeBoundary>
+                        {isHome ? (
+                          <Outlet />
+                        ) : (
+                          <div
+                            className={
+                              chatRoute
+                                ? "flex h-[var(--app-visual-height,100dvh)] flex-col overflow-hidden"
+                                : "flex min-h-screen flex-col"
+                            }
+                          >
+                            <div
+                              className={chatRoute ? "min-h-0 flex-1 overflow-hidden" : "flex-1"}
+                            >
+                              <MobileRouteTransition disabled={chatRoute}>
+                                <Outlet />
+                              </MobileRouteTransition>
+                            </div>
+                            {showFooter && (
+                              <footer className="mt-8 border-t border-border/40 bg-card/60 py-4 text-muted-foreground">
+                                <div className="mx-auto flex max-w-7xl items-center justify-end gap-4 px-4 text-xs text-muted-foreground">
+                                  <Link
+                                    to="/termos"
+                                    className="hover:text-[var(--rose)] hover:underline"
+                                  >
+                                    Termos e Condições
+                                  </Link>
+                                  <span aria-hidden className="opacity-40">
+                                    •
+                                  </span>
+                                  <Link
+                                    to="/manual"
+                                    className="hover:text-[var(--rose)] hover:underline"
+                                  >
+                                    Manual do Usuário
+                                  </Link>
+                                  <SupportFooterButton />
+                                </div>
+                              </footer>
+                            )}
                           </div>
-                          {showFooter && (
-                            <footer className="mt-8 border-t border-border/40 bg-card/60 py-4 text-muted-foreground">
-                              <div className="mx-auto flex max-w-7xl items-center justify-end gap-4 px-4 text-xs text-muted-foreground">
-                                <Link
-                                  to="/termos"
-                                  className="hover:text-[var(--rose)] hover:underline"
-                                >
-                                  Termos e Condições
-                                </Link>
-                                <span aria-hidden className="opacity-40">
-                                  •
-                                </span>
-                                <Link
-                                  to="/manual"
-                                  className="hover:text-[var(--rose)] hover:underline"
-                                >
-                                  Manual do Usuário
-                                </Link>
-                                <SupportFooterButton />
-                              </div>
-                            </footer>
-                          )}
-                        </div>
-                      )}
-                    </NativeShellRuntimeBoundary>
-                  </AdminShellRuntimeBoundary>
-                </AdminRouteAccessBoundary>
-              </AuthenticatedProviderBoundary>
-            </V2AwareRouteBoundary>
-            <Toaster richColors position="top-right" />
-          </AuthProvider>
-        </SupabaseRuntimeBoundary>
+                        )}
+                      </NativeShellRuntimeBoundary>
+                    </AdminShellRuntimeBoundary>
+                  </AdminRouteAccessBoundary>
+                </AuthenticatedProviderBoundary>
+              </V2AwareRouteBoundary>
+              <Toaster richColors position="top-right" />
+            </AuthProvider>
+          </SupabaseRuntimeBoundary>
+        )}
       </ThemeProvider>
     </QueryClientProvider>
   );
