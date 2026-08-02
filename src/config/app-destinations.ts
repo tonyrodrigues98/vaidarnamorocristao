@@ -190,7 +190,10 @@ export const appDestinations: readonly AppDestination[] = [
     futureTab: "explore",
     footer: false,
   }),
-  exact("app-pet-arcade", "/pet-arcade", appDefaults),
+  exact("app-pet-arcade", "/pet-arcade", {
+    ...appDefaults,
+    futureTab: "explore",
+  }),
   exact("app-bible-quiz", "/quiz-biblico", appDefaults),
 
   prefix("support", "/suporte", {

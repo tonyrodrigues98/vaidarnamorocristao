@@ -30,6 +30,8 @@ import {
 } from "lucide-react";
 
 import { Header } from "@/components/layout/Header";
+import { NativeArcadeHeader } from "@/components/pet/arcade/native/NativeArcadeHeader";
+import { useNativeShellRuntime } from "@/components/native-shell/NativeShellRuntimeContext";
 import { CoinIcon } from "@/components/icons/CoinIcon";
 import { PetImg } from "@/components/pet/PetImg";
 import { TreasureAdventure } from "@/components/pet/arcade/TreasureAdventure";
@@ -284,6 +286,7 @@ const CARE_LABELS: Record<string, string> = {
 function PetArcadePage() {
   const { user, loading } = useAuth();
   const queryClient = useQueryClient();
+  const { active: nativeShellActive } = useNativeShellRuntime();
   const [selectedGame, setSelectedGame] = useState<ArcadeGameType | null>(null);
   const [filter, setFilter] = useState<"all" | ArcadeCategory>("all");
   const [balance, setBalance] = useState(0);
@@ -401,26 +404,46 @@ function PetArcadePage() {
     activeQuery.isLoading;
 
   return (
-    <div className="min-h-screen max-w-full overflow-x-clip bg-[radial-gradient(circle_at_top,_rgba(251,113,133,0.12),_transparent_32%),radial-gradient(circle_at_100%_0,_rgba(125,211,252,0.12),_transparent_30%),linear-gradient(180deg,rgba(255,251,251,1),rgba(255,255,255,1),rgba(247,250,255,1))] text-neutral-950">
+    <div
+      className={cn(
+        "min-h-screen max-w-full overflow-x-clip",
+        nativeShellActive
+          ? "bg-background text-foreground"
+          : "bg-[radial-gradient(circle_at_top,_rgba(251,113,133,0.12),_transparent_32%),radial-gradient(circle_at_100%_0,_rgba(125,211,252,0.12),_transparent_30%),linear-gradient(180deg,rgba(255,251,251,1),rgba(255,255,255,1),rgba(247,250,255,1))] text-neutral-950",
+      )}
+      data-vdn-native-arcade={nativeShellActive || undefined}
+      data-vdn-native-arcade-playing={nativeShellActive && selectedGame ? true : undefined}
+    >
       <Header />
       <main className="mx-auto w-full min-w-0 max-w-6xl px-4 pb-28 pt-5 sm:px-6 sm:pb-12 sm:pt-8">
-        <div className="mb-5 grid grid-cols-[44px_minmax(0,1fr)_auto] items-center gap-2 sm:gap-3">
-          <Link
-            to="/meu-pet"
-            className="app-pressable grid size-11 place-items-center rounded-full border border-neutral-200 bg-white text-neutral-700 shadow-sm"
-            aria-label="Voltar para Meu Pet"
-          >
-            <ArrowLeft className="size-5" />
-          </Link>
-          <div className="min-w-0 flex-1 text-center">
-            <p className="text-[10px] font-semibold uppercase text-rose-500">Aventuras do pet</p>
-            <h1 className="truncate text-xl font-black">Pet Arcade</h1>
+        {nativeShellActive ? (
+          <NativeArcadeHeader
+            balance={balance}
+            petName={pet?.custom_name}
+            petImage={petImage}
+            careScore={careScore}
+            usedToday={usage?.total_used}
+            dailyLimit={catalog?.settings.daily_play_limit}
+          />
+        ) : (
+          <div className="mb-5 grid grid-cols-[44px_minmax(0,1fr)_auto] items-center gap-2 sm:gap-3">
+            <Link
+              to="/meu-pet"
+              className="app-pressable grid size-11 place-items-center rounded-full border border-neutral-200 bg-white text-neutral-700 shadow-sm"
+              aria-label="Voltar para Meu Pet"
+            >
+              <ArrowLeft className="size-5" />
+            </Link>
+            <div className="min-w-0 flex-1 text-center">
+              <p className="text-[10px] font-semibold uppercase text-rose-500">Aventuras do pet</p>
+              <h1 className="truncate text-xl font-black">Pet Arcade</h1>
+            </div>
+            <div className="inline-flex h-11 max-w-28 shrink-0 items-center gap-2 rounded-full border border-amber-200 bg-white px-3 shadow-sm">
+              <CoinIcon className="size-5" />
+              <span className="truncate font-black">{balance}</span>
+            </div>
           </div>
-          <div className="inline-flex h-11 max-w-28 shrink-0 items-center gap-2 rounded-full border border-amber-200 bg-white px-3 shadow-sm">
-            <CoinIcon className="size-5" />
-            <span className="truncate font-black">{balance}</span>
-          </div>
-        </div>
+        )}
 
         <section className="relative mb-6 min-h-[310px] overflow-hidden rounded-[34px] border border-white/80 bg-neutral-950 shadow-[0_28px_80px_rgba(99,68,40,0.22)] sm:min-h-[360px]">
           <img

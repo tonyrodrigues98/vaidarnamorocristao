@@ -32,6 +32,12 @@ export const nativeSecondaryDestinations = [
     parentTab: "explore",
     parentPath: "/explorar",
   },
+  {
+    destinationId: "app-pet-arcade",
+    title: "Arcade",
+    parentTab: "explore",
+    parentPath: "/explorar",
+  },
 ] as const satisfies readonly NativeSecondaryDestinationChrome[];
 
 export function getNativeSecondaryDestinationChrome(

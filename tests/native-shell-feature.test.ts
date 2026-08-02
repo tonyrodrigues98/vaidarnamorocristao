@@ -75,11 +75,13 @@ describe("native shell primary rollout", () => {
       "app-notifications",
       "app-store",
       "app-pet",
+      "app-pet-arcade",
     ]);
     expect(isNativeShellEligibleDestination(getDestinationBehavior("/conta"))).toBe(true);
     expect(isNativeShellEligibleDestination(getDestinationBehavior("/notificacoes"))).toBe(true);
     expect(isNativeShellEligibleDestination(getDestinationBehavior("/loja"))).toBe(true);
     expect(isNativeShellEligibleDestination(getDestinationBehavior("/meu-pet"))).toBe(true);
+    expect(isNativeShellEligibleDestination(getDestinationBehavior("/pet-arcade"))).toBe(true);
     expect(nativeShellPrimaryDestinationIds).toHaveLength(5);
   });
 
