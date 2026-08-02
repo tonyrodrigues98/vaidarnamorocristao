@@ -14,7 +14,8 @@ export function resolveNativeShellFeatureFlag(
   return parseNativeShellFeatureFlag(environment[NATIVE_SHELL_FEATURE_ENV]);
 }
 
-export const nativeShellFeatureEnabled = resolveNativeShellFeatureFlag();
+// Ephemeral acceptance-preview override. This branch must never be merged.
+export const nativeShellFeatureEnabled = true;
 
 export const nativeShellPrimaryDestinationIds = [
   "app-home",
