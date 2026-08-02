@@ -21,7 +21,7 @@ describe("native account center", () => {
       parentPath: "/perfil",
     });
     expect(getNativeDestinationTitle(behavior.destinationId, "profile")).toBe("Configurações");
-    expect(nativeSecondaryDestinations).toHaveLength(1);
+    expect(nativeSecondaryDestinations).toContainEqual(chrome);
   });
 
   it("keeps state and effects in ContaPage and the native view presentational", () => {

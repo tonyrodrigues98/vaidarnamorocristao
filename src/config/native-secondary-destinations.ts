@@ -14,6 +14,12 @@ export const nativeSecondaryDestinations = [
     parentTab: "profile",
     parentPath: "/perfil",
   },
+  {
+    destinationId: "app-notifications",
+    title: "Notificações",
+    parentTab: "home",
+    parentPath: "/inicio",
+  },
 ] as const satisfies readonly NativeSecondaryDestinationChrome[];
 
 export function getNativeSecondaryDestinationChrome(

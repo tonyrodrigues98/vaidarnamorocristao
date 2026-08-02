@@ -26,7 +26,7 @@ export const nativeShellPrimaryDestinationIds = [
 
 export const nativeShellInitialDestinationIds = nativeShellPrimaryDestinationIds;
 
-export const nativeShellSecondaryDestinationIds = ["app-account"] as const;
+export const nativeShellSecondaryDestinationIds = ["app-account", "app-notifications"] as const;
 
 type NativeShellPrimaryDestinationId = (typeof nativeShellPrimaryDestinationIds)[number];
 

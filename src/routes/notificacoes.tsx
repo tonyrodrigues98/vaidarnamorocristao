@@ -47,6 +47,9 @@ import {
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { EnableNotificationsCard } from "@/components/EnableNotificationsCard";
+import { NativeNotificationsView } from "@/components/notifications/native/NativeNotificationsView";
+import { useNativeShellRuntime } from "@/components/native-shell/NativeShellRuntimeContext";
+import { rewriteNotificationLink } from "@/config/notification-links";
 
 export const Route = createFileRoute("/notificacoes")({
   head: () => ({
@@ -70,15 +73,6 @@ export const Route = createFileRoute("/notificacoes")({
 const EMOJI_RE =
   /\p{Extended_Pictographic}|\u{1F3FB}|\u{1F3FC}|\u{1F3FD}|\u{1F3FE}|\u{1F3FF}|\u{FE0F}|\u200D/gu;
 const stripEmoji = (s: string) => s.replace(EMOJI_RE, "").replace(/\s+/g, " ").trim();
-
-// Rewrite legacy / removed internal routes to current ones. Keeps existing
-// notifications useful after route renames; safe no-op for unknown links.
-function rewriteNotificationLink(link: string | null): string | null {
-  if (!link) return link;
-  // /dashboard is a valid live route (Analytics Center). Do not rewrite it.
-  if (link === "/comunidade" || link.startsWith("/comunidade/")) return "/conversas";
-  return link;
-}
 
 function iconMeta(type: string): { icon: React.ReactNode; bg: string; fg: string } {
   switch (type) {
@@ -176,6 +170,7 @@ function NotificacoesPage() {
   const [hidden, setHidden] = useState<Set<string>>(new Set());
   const pendingTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
   const { isOnline } = useNetworkStatus();
+  const { active: nativeShellActive } = useNativeShellRuntime();
   const [filter, setFilter] = useState<"all" | "unread">("all");
   const [markingAll, setMarkingAll] = useState(false);
 
@@ -246,7 +241,7 @@ function NotificacoesPage() {
 
   const onClick = async (n: AppNotification) => {
     if (!n.read_at && isOnline) await markRead(n.id);
-    const target = rewriteNotificationLink(n.link);
+    const target = rewriteNotificationLink(n.link, nativeShellActive);
     if (target) {
       try {
         router.history.push(target);
@@ -256,144 +251,161 @@ function NotificacoesPage() {
     }
   };
 
+  if (nativeShellActive) {
+    return (
+      <NativeNotificationsView
+        visibleCount={visible.length}
+        unreadCount={visibleUnread}
+        loading={loading}
+        isOnline={isOnline}
+        markingAll={markingAll}
+        filter={filter}
+        groups={GROUP_ORDER.map((label) => ({ label, items: grouped[label] }))}
+        onFilterChange={setFilter}
+        onMarkAll={() => void handleMarkAll()}
+        onOpen={(notification) => void onClick(notification)}
+        onDelete={handleDelete}
+        onRefresh={reload}
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen">
       <Header />
       <MobileAppHeader title="Atividades" subtitle="Suas novidades no VaiDarNamoro" />
       <PullToRefresh onRefresh={reload} disabled={!isOnline}>
-      <main className="mx-auto w-full max-w-2xl px-4 py-6 sm:py-8">
-        {!isOnline && visible.length > 0 && (
-          <StaleDataNotice
-            className="mb-4"
-            message="Você está offline. Mostrando atividades carregadas anteriormente."
-          />
-        )}
-        {/* Summary panel */}
-        <div className="mb-4 rounded-2xl border border-[var(--rose)]/20 bg-gradient-to-br from-[var(--petal)]/60 via-white to-white p-4 shadow-sm">
-          <div className="flex items-center gap-3">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/80 text-[var(--rose)] shadow-sm">
-              {visibleUnread > 0 ? (
-                <BellRing className="h-5 w-5" />
-              ) : (
-                <Bell className="h-5 w-5" />
+        <main className="mx-auto w-full max-w-2xl px-4 py-6 sm:py-8">
+          {!isOnline && visible.length > 0 && (
+            <StaleDataNotice
+              className="mb-4"
+              message="Você está offline. Mostrando atividades carregadas anteriormente."
+            />
+          )}
+          {/* Summary panel */}
+          <div className="mb-4 rounded-2xl border border-[var(--rose)]/20 bg-gradient-to-br from-[var(--petal)]/60 via-white to-white p-4 shadow-sm">
+            <div className="flex items-center gap-3">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/80 text-[var(--rose)] shadow-sm">
+                {visibleUnread > 0 ? (
+                  <BellRing className="h-5 w-5" />
+                ) : (
+                  <Bell className="h-5 w-5" />
+                )}
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-semibold text-foreground">
+                  {visibleUnread > 0
+                    ? `Você tem ${visibleUnread} novidade${visibleUnread > 1 ? "s" : ""}`
+                    : "Tudo em dia"}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {visibleUnread > 0
+                    ? "Toque para abrir e responder."
+                    : "Você já viu tudo por aqui."}
+                </p>
+              </div>
+              {visibleUnread > 0 && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleMarkAll}
+                  disabled={markingAll || !isOnline}
+                  className="app-pressable shrink-0"
+                >
+                  <CheckCheck className="mr-1 h-4 w-4" />
+                  <span className="hidden sm:inline">Marcar todas</span>
+                  <span className="sm:hidden">Lidas</span>
+                </Button>
               )}
-            </span>
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold text-foreground">
-                {visibleUnread > 0
-                  ? `Você tem ${visibleUnread} novidade${visibleUnread > 1 ? "s" : ""}`
-                  : "Tudo em dia"}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {visibleUnread > 0
-                  ? "Toque para abrir e responder."
-                  : "Você já viu tudo por aqui."}
-              </p>
             </div>
-            {visibleUnread > 0 && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleMarkAll}
-                disabled={markingAll || !isOnline}
-                className="app-pressable shrink-0"
-              >
-                <CheckCheck className="mr-1 h-4 w-4" />
-                <span className="hidden sm:inline">Marcar todas</span>
-                <span className="sm:hidden">Lidas</span>
-              </Button>
-            )}
           </div>
-        </div>
 
-        {/* Filter chips */}
-        <div className="mb-4 flex items-center gap-2">
-          {(
-            [
+          {/* Filter chips */}
+          <div className="mb-4 flex items-center gap-2">
+            {[
               { id: "all" as const, label: "Todas", count: visible.length },
               { id: "unread" as const, label: "Não lidas", count: visibleUnread },
-            ]
-          ).map((chip) => {
-            const active = filter === chip.id;
-            return (
-              <button
-                key={chip.id}
-                type="button"
-                onClick={() => setFilter(chip.id)}
-                className={`app-pressable inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
-                  active
-                    ? "border-[var(--rose)] bg-[var(--rose)] text-white shadow-sm"
-                    : "border-border bg-card text-muted-foreground hover:text-foreground"
-                }`}
-                aria-pressed={active}
-              >
-                {chip.label}
-                <span
-                  className={`rounded-full px-1.5 text-[10px] ${
-                    active ? "bg-white/20 text-white" : "bg-muted text-muted-foreground"
-                  }`}
-                >
-                  {chip.count}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-
-        <EnableNotificationsCard />
-
-        {loading ? (
-          <NotificationSkeleton rows={6} />
-        ) : visible.length === 0 && !isOnline ? (
-          <OfflineState actionLabel="Tentar novamente" onAction={() => reload()} />
-        ) : visible.length === 0 ? (
-          <AppEmptyState
-            icon={<BellOff className="h-5 w-5" />}
-            title="Nenhuma notificação por enquanto"
-            description="Quando alguém interagir com você, suas novidades aparecerão aqui."
-            actionLabel="Explorar pretendentes"
-            actionTo="/pretendentes"
-          />
-        ) : filtered.length === 0 ? (
-          <AppEmptyState
-            icon={<CheckCheck className="h-5 w-5" />}
-            title="Tudo em dia"
-            description="Você já viu todas as suas novidades."
-          />
-        ) : (
-          <div className="space-y-5">
-            {GROUP_ORDER.map((group) => {
-              const list = grouped[group];
-              if (!list || list.length === 0) return null;
+            ].map((chip) => {
+              const active = filter === chip.id;
               return (
-                <section key={group}>
-                  <h2 className="mb-2 px-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                    {group}
-                  </h2>
-                  <ul className="space-y-2">
-                    <AnimatePresence initial={false}>
-                      {list.map((n) => (
-                        <NotificationRow
-                          key={n.id}
-                          n={n}
-                          onOpen={onClick}
-                          onDelete={handleDelete}
-                        />
-                      ))}
-                    </AnimatePresence>
-                  </ul>
-                </section>
+                <button
+                  key={chip.id}
+                  type="button"
+                  onClick={() => setFilter(chip.id)}
+                  className={`app-pressable inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
+                    active
+                      ? "border-[var(--rose)] bg-[var(--rose)] text-white shadow-sm"
+                      : "border-border bg-card text-muted-foreground hover:text-foreground"
+                  }`}
+                  aria-pressed={active}
+                >
+                  {chip.label}
+                  <span
+                    className={`rounded-full px-1.5 text-[10px] ${
+                      active ? "bg-white/20 text-white" : "bg-muted text-muted-foreground"
+                    }`}
+                  >
+                    {chip.count}
+                  </span>
+                </button>
               );
             })}
           </div>
-        )}
 
-        <div className="mt-6 text-center">
-          <Link to="/inicio" className="text-sm text-muted-foreground hover:underline">
-            Voltar ao início
-          </Link>
-        </div>
-      </main>
+          <EnableNotificationsCard />
+
+          {loading ? (
+            <NotificationSkeleton rows={6} />
+          ) : visible.length === 0 && !isOnline ? (
+            <OfflineState actionLabel="Tentar novamente" onAction={() => reload()} />
+          ) : visible.length === 0 ? (
+            <AppEmptyState
+              icon={<BellOff className="h-5 w-5" />}
+              title="Nenhuma notificação por enquanto"
+              description="Quando alguém interagir com você, suas novidades aparecerão aqui."
+              actionLabel="Explorar pretendentes"
+              actionTo="/pretendentes"
+            />
+          ) : filtered.length === 0 ? (
+            <AppEmptyState
+              icon={<CheckCheck className="h-5 w-5" />}
+              title="Tudo em dia"
+              description="Você já viu todas as suas novidades."
+            />
+          ) : (
+            <div className="space-y-5">
+              {GROUP_ORDER.map((group) => {
+                const list = grouped[group];
+                if (!list || list.length === 0) return null;
+                return (
+                  <section key={group}>
+                    <h2 className="mb-2 px-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                      {group}
+                    </h2>
+                    <ul className="space-y-2">
+                      <AnimatePresence initial={false}>
+                        {list.map((n) => (
+                          <NotificationRow
+                            key={n.id}
+                            n={n}
+                            onOpen={onClick}
+                            onDelete={handleDelete}
+                          />
+                        ))}
+                      </AnimatePresence>
+                    </ul>
+                  </section>
+                );
+              })}
+            </div>
+          )}
+
+          <div className="mt-6 text-center">
+            <Link to="/inicio" className="text-sm text-muted-foreground hover:underline">
+              Voltar ao início
+            </Link>
+          </div>
+        </main>
       </PullToRefresh>
     </div>
   );
