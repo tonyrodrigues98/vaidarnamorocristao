@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
-import { Header } from "@/components/layout/Header";
+import { OnboardingShell } from "@/components/shells/OnboardingShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -106,8 +106,7 @@ function Etapa2() {
     }));
 
   return (
-    <div className="min-h-screen">
-      <Header />
+    <OnboardingShell>
       <main className="mx-auto max-w-2xl px-4 py-10">
         <div className="mb-6 animate-fade-up">
           <p className="text-xs uppercase tracking-[0.2em] text-[var(--rose)]">Etapa 2 de 2</p>
@@ -123,7 +122,8 @@ function Etapa2() {
             <div className="space-y-2">
               <Label>Idade mínima</Label>
               <Input
-                type="text" inputMode="decimal"
+                type="text"
+                inputMode="decimal"
                 min={18}
                 max={110}
                 value={form.age_min}
@@ -134,7 +134,8 @@ function Etapa2() {
             <div className="space-y-2">
               <Label>Idade máxima</Label>
               <Input
-                type="text" inputMode="decimal"
+                type="text"
+                inputMode="decimal"
                 min={18}
                 max={110}
                 value={form.age_max}
@@ -231,6 +232,6 @@ function Etapa2() {
           </Button>
         </form>
       </main>
-    </div>
+    </OnboardingShell>
   );
 }

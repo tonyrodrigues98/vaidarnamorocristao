@@ -44,6 +44,8 @@ export const nativeShellSecondaryDestinationIds = [
   "support-root",
   "support-help",
   "support-ticket",
+  "public-manual",
+  "public-terms",
 ] as const;
 
 type NativeShellPrimaryDestinationId = (typeof nativeShellPrimaryDestinationIds)[number];

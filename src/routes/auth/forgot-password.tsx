@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Header } from "@/components/layout/Header";
+import { AuthShell } from "@/components/shells/AuthShell";
 
 export const Route = createFileRoute("/auth/forgot-password")({ component: Forgot });
 
@@ -30,8 +30,7 @@ function Forgot() {
   }
 
   return (
-    <div className="min-h-screen">
-      <Header />
+    <AuthShell>
       <main className="mx-auto flex max-w-md flex-col px-4 py-12">
         <div className="glass animate-fade-up rounded-3xl p-8 shadow-elegant">
           <h1 className="text-3xl font-semibold">Recuperar senha</h1>
@@ -66,6 +65,6 @@ function Forgot() {
           </p>
         </div>
       </main>
-    </div>
+    </AuthShell>
   );
 }

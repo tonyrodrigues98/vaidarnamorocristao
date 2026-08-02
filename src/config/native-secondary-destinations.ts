@@ -110,6 +110,18 @@ export const nativeSecondaryDestinations = [
     parentTab: "profile",
     parentPath: "/suporte",
   },
+  {
+    destinationId: "public-manual",
+    title: "Manual",
+    parentTab: "profile",
+    parentPath: "/perfil",
+  },
+  {
+    destinationId: "public-terms",
+    title: "Termos",
+    parentTab: "profile",
+    parentPath: "/perfil",
+  },
 ] as const satisfies readonly NativeSecondaryDestinationChrome[];
 
 export function getNativeSecondaryDestinationChrome(

@@ -1,4 +1,5 @@
 import { createFileRoute, Navigate, useNavigate } from "@tanstack/react-router";
+import { OnboardingShell } from "@/components/shells/OnboardingShell";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowLeft,
@@ -49,13 +50,33 @@ const TOTAL_STEPS = 12;
 const WELCOME_STEP: Step = 13;
 
 const UF_NAMES: Record<string, string> = {
-  AC: "Acre", AL: "Alagoas", AP: "Amapá", AM: "Amazonas", BA: "Bahia",
-  CE: "Ceará", DF: "Distrito Federal", ES: "Espírito Santo", GO: "Goiás",
-  MA: "Maranhão", MT: "Mato Grosso", MS: "Mato Grosso do Sul", MG: "Minas Gerais",
-  PA: "Pará", PB: "Paraíba", PR: "Paraná", PE: "Pernambuco", PI: "Piauí",
-  RJ: "Rio de Janeiro", RN: "Rio Grande do Norte", RS: "Rio Grande do Sul",
-  RO: "Rondônia", RR: "Roraima", SC: "Santa Catarina", SP: "São Paulo",
-  SE: "Sergipe", TO: "Tocantins",
+  AC: "Acre",
+  AL: "Alagoas",
+  AP: "Amapá",
+  AM: "Amazonas",
+  BA: "Bahia",
+  CE: "Ceará",
+  DF: "Distrito Federal",
+  ES: "Espírito Santo",
+  GO: "Goiás",
+  MA: "Maranhão",
+  MT: "Mato Grosso",
+  MS: "Mato Grosso do Sul",
+  MG: "Minas Gerais",
+  PA: "Pará",
+  PB: "Paraíba",
+  PR: "Paraná",
+  PE: "Pernambuco",
+  PI: "Piauí",
+  RJ: "Rio de Janeiro",
+  RN: "Rio Grande do Norte",
+  RS: "Rio Grande do Sul",
+  RO: "Rondônia",
+  RR: "Roraima",
+  SC: "Santa Catarina",
+  SP: "São Paulo",
+  SE: "Sergipe",
+  TO: "Tocantins",
 };
 const UF_LIST = Object.keys(UF_NAMES).sort();
 
@@ -81,12 +102,8 @@ function OnboardingFlow() {
   const [photoPreview, setPhotoPreview] = useState<string>(draft.photoPreview);
   const [city, setCity] = useState(draft.city);
   const [stateUF, setStateUF] = useState(draft.state);
-  const [heightCm, setHeightCm] = useState<string>(
-    draft.height_cm ? String(draft.height_cm) : "",
-  );
-  const [marital, setMarital] = useState<"solteiro" | "divorciado" | "viuvo" | "">(
-    draft.marital,
-  );
+  const [heightCm, setHeightCm] = useState<string>(draft.height_cm ? String(draft.height_cm) : "");
+  const [marital, setMarital] = useState<"solteiro" | "divorciado" | "viuvo" | "">(draft.marital);
 
   const [saving, setSaving] = useState(false);
   const [welcomeName, setWelcomeName] = useState<string>("");
@@ -105,8 +122,9 @@ function OnboardingFlow() {
   const [prefAgeMin, setPrefAgeMin] = useState<string>("");
   const [prefAgeMax, setPrefAgeMax] = useState<string>("");
   const [acceptsChildren, setAcceptsChildren] = useState<"" | "sim" | "nao">("");
-  const [existingPrefScope, setExistingPrefScope] =
-    useState<"regiao" | "brasil" | "mundo" | "personalizado">("brasil");
+  const [existingPrefScope, setExistingPrefScope] = useState<
+    "regiao" | "brasil" | "mundo" | "personalizado"
+  >("brasil");
   const [existingPrefCustomStates, setExistingPrefCustomStates] = useState<string[]>([]);
 
   // Detect existing complete profile -> skip to welcome.
@@ -136,8 +154,14 @@ function OnboardingFlow() {
       ]);
       if (p) {
         const requiredOk =
-          p.full_name && p.age && p.sex && p.photo_url &&
-          p.city && p.state && p.height_cm && p.marital;
+          p.full_name &&
+          p.age &&
+          p.sex &&
+          p.photo_url &&
+          p.city &&
+          p.state &&
+          p.height_cm &&
+          p.marital;
         if (p.full_name) setName(p.full_name);
         if (p.sex) setSex(p.sex as "masculino" | "feminino");
         if (p.city) setCity(p.city);
@@ -291,7 +315,10 @@ function OnboardingFlow() {
     const trimmed = bio.trim();
     if (trimmed.length === 0) return true;
     const { error } = await supabase.from("profiles").update({ bio: trimmed }).eq("id", user.id);
-    if (error) { toast.error(error.message); return false; }
+    if (error) {
+      toast.error(error.message);
+      return false;
+    }
     return true;
   }
 
@@ -305,7 +332,10 @@ function OnboardingFlow() {
     }
     if (Object.keys(profilePatch).length > 0) {
       const { error } = await supabase.from("profiles").update(profilePatch).eq("id", user.id);
-      if (error) { toast.error(error.message); return false; }
+      if (error) {
+        toast.error(error.message);
+        return false;
+      }
     }
     const advPatch: Record<string, unknown> = {};
     if (faithMoment) advPatch.faith_moment = faithMoment;
@@ -314,7 +344,10 @@ function OnboardingFlow() {
       const { error } = await supabase
         .from("profile_advanced")
         .upsert({ user_id: user.id, ...advPatch });
-      if (error) { toast.error(error.message); return false; }
+      if (error) {
+        toast.error(error.message);
+        return false;
+      }
     }
     return true;
   }
@@ -328,7 +361,10 @@ function OnboardingFlow() {
     const { error } = await supabase
       .from("profile_advanced")
       .upsert({ user_id: user.id, ...advPatch });
-    if (error) { toast.error(error.message); return false; }
+    if (error) {
+      toast.error(error.message);
+      return false;
+    }
     return true;
   }
 
@@ -342,7 +378,10 @@ function OnboardingFlow() {
     const { error } = await supabase
       .from("profile_advanced")
       .upsert({ user_id: user.id, ...advPatch });
-    if (error) { toast.error(error.message); return false; }
+    if (error) {
+      toast.error(error.message);
+      return false;
+    }
     return true;
   }
 
@@ -352,9 +391,18 @@ function OnboardingFlow() {
     const max = Number(prefAgeMax);
     const hasAge = prefAgeMin && prefAgeMax;
     if (hasAge) {
-      if (min < 18) { toast.error("Idade mínima deve ser ao menos 18."); return false; }
-      if (max > 110) { toast.error("Idade máxima deve ser no máximo 110."); return false; }
-      if (max < min) { toast.error("Idade máxima deve ser maior que a mínima."); return false; }
+      if (min < 18) {
+        toast.error("Idade mínima deve ser ao menos 18.");
+        return false;
+      }
+      if (max > 110) {
+        toast.error("Idade máxima deve ser no máximo 110.");
+        return false;
+      }
+      if (max < min) {
+        toast.error("Idade máxima deve ser maior que a mínima.");
+        return false;
+      }
     }
     if (!hasAge && !acceptsChildren) return true;
     const payload = {
@@ -366,7 +414,10 @@ function OnboardingFlow() {
       custom_states: existingPrefCustomStates,
     };
     const { error } = await supabase.from("profile_preferences").upsert(payload);
-    if (error) { toast.error(error.message); return false; }
+    if (error) {
+      toast.error(error.message);
+      return false;
+    }
     return true;
   }
 
@@ -387,10 +438,7 @@ function OnboardingFlow() {
   }
 
   return (
-    <div
-      className="relative flex min-h-[100dvh] flex-col overflow-x-hidden bg-background text-foreground"
-      style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
-    >
+    <OnboardingShell>
       {step <= TOTAL_STEPS && (
         <header className="flex items-center justify-between px-4 pt-[max(env(safe-area-inset-top),0.75rem)] pb-3">
           <button
@@ -405,7 +453,8 @@ function OnboardingFlow() {
           <div className="flex-1 px-3">
             <ProgressBar value={(step / TOTAL_STEPS) * 100} />
             <p className="mt-1 text-center text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-              {step <= REQUIRED_STEPS ? "Perfil básico" : "Complete se quiser"} · Etapa {step} de {TOTAL_STEPS}
+              {step <= REQUIRED_STEPS ? "Perfil básico" : "Complete se quiser"} · Etapa {step} de{" "}
+              {TOTAL_STEPS}
             </p>
           </div>
           <div className="h-10 w-10" aria-hidden />
@@ -433,19 +482,10 @@ function OnboardingFlow() {
           />
         )}
         {hydrated && step === 5 && (
-          <StepLocation
-            city={city}
-            stateUF={stateUF}
-            onCity={setCity}
-            onState={setStateUF}
-          />
+          <StepLocation city={city} stateUF={stateUF} onCity={setCity} onState={setStateUF} />
         )}
-        {hydrated && step === 6 && (
-          <StepHeight value={heightCm} onChange={setHeightCm} />
-        )}
-        {hydrated && step === 7 && (
-          <StepMarital value={marital} onChange={setMarital} />
-        )}
+        {hydrated && step === 6 && <StepHeight value={heightCm} onChange={setHeightCm} />}
+        {hydrated && step === 7 && <StepMarital value={marital} onChange={setMarital} />}
         {hydrated && step === 8 && (
           <StepBio
             value={bio}
@@ -528,7 +568,7 @@ function OnboardingFlow() {
           </Button>
         </footer>
       )}
-    </div>
+    </OnboardingShell>
   );
 }
 
@@ -545,19 +585,36 @@ function ProgressBar({ value }: { value: number }) {
 
 /* --- Step 1: Name --- */
 function StepName({
-  name, onChange, onSubmit,
-}: { name: string; onChange: (v: string) => void; onSubmit: () => void }) {
+  name,
+  onChange,
+  onSubmit,
+}: {
+  name: string;
+  onChange: (v: string) => void;
+  onSubmit: () => void;
+}) {
   return (
     <div className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center py-6">
       <h1 className="text-3xl font-semibold leading-tight">Como você quer aparecer no app?</h1>
       <p className="mt-3 text-sm text-muted-foreground">
         Use seu nome real ou o nome pelo qual as pessoas te conhecem.
       </p>
-      <form onSubmit={(e) => { e.preventDefault(); onSubmit(); }} className="mt-8">
-        <label className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Seu nome</label>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          onSubmit();
+        }}
+        className="mt-8"
+      >
+        <label className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
+          Seu nome
+        </label>
         <Input
-          autoFocus value={name} onChange={(e) => onChange(e.target.value)}
-          maxLength={100} placeholder="Ex.: Maria Silva"
+          autoFocus
+          value={name}
+          onChange={(e) => onChange(e.target.value)}
+          maxLength={100}
+          placeholder="Ex.: Maria Silva"
           className="mt-2 h-14 rounded-2xl border-border bg-card/60 px-4 text-lg"
         />
       </form>
@@ -574,11 +631,15 @@ function computeAge(y: number, m: number, d: number) {
   if (mDiff < 0 || (mDiff === 0 && today.getDate() < d)) age--;
   return age;
 }
-const MONTHS = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
-function daysInMonth(y: number, m: number) { return new Date(y, m, 0).getDate(); }
+const MONTHS = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+function daysInMonth(y: number, m: number) {
+  return new Date(y, m, 0).getDate();
+}
 
 function StepBirth({
-  birth, onChange, ageFromBirth,
+  birth,
+  onChange,
+  ageFromBirth,
 }: {
   birth: { d: number; m: number; y: number };
   onChange: (b: { d: number; m: number; y: number }) => void;
@@ -612,12 +673,21 @@ function StepBirth({
       </p>
       <div className="mt-8 grid grid-cols-3 gap-2 rounded-3xl border border-border bg-card/40 p-3 shadow-soft">
         <Wheel items={days} value={birth.d} onChange={(d) => setPart({ d })} ariaLabel="Dia" />
-        <Wheel items={months} value={birth.m} onChange={(m) => setPart({ m })}
-          format={(v) => MONTHS[v - 1]} ariaLabel="Mês" />
+        <Wheel
+          items={months}
+          value={birth.m}
+          onChange={(m) => setPart({ m })}
+          format={(v) => MONTHS[v - 1]}
+          ariaLabel="Mês"
+        />
         <Wheel items={years} value={birth.y} onChange={(y) => setPart({ y })} ariaLabel="Ano" />
       </div>
-      <p className={cn("mt-4 text-center text-sm",
-        tooYoung ? "text-destructive" : "text-muted-foreground")}>
+      <p
+        className={cn(
+          "mt-4 text-center text-sm",
+          tooYoung ? "text-destructive" : "text-muted-foreground",
+        )}
+      >
         {tooYoung ? "Você precisa ter pelo menos 18 anos." : `Você tem ${ageFromBirth} anos.`}
       </p>
     </div>
@@ -625,10 +695,17 @@ function StepBirth({
 }
 
 function Wheel({
-  items, value, onChange, format, ariaLabel,
+  items,
+  value,
+  onChange,
+  format,
+  ariaLabel,
 }: {
-  items: number[]; value: number; onChange: (v: number) => void;
-  format?: (v: number) => string; ariaLabel: string;
+  items: number[];
+  value: number;
+  onChange: (v: number) => void;
+  format?: (v: number) => string;
+  ariaLabel: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const ITEM_H = 40;
@@ -657,7 +734,11 @@ function Wheel({
 
   function vibrate() {
     if (typeof navigator !== "undefined" && "vibrate" in navigator) {
-      try { navigator.vibrate(8); } catch { /* noop */ }
+      try {
+        navigator.vibrate(8);
+      } catch {
+        /* noop */
+      }
     }
   }
 
@@ -682,7 +763,10 @@ function Wheel({
     idleRef.current = window.setTimeout(() => {
       const el3 = ref.current;
       if (!el3) return;
-      const idx = Math.max(0, Math.min(itemsRef.current.length - 1, Math.round(el3.scrollTop / ITEM_H)));
+      const idx = Math.max(
+        0,
+        Math.min(itemsRef.current.length - 1, Math.round(el3.scrollTop / ITEM_H)),
+      );
       const target = idx * ITEM_H;
       if (Math.abs(el3.scrollTop - target) > 0.5) {
         el3.scrollTo({ top: target, behavior: "smooth" });
@@ -774,8 +858,12 @@ function Wheel({
 
 /* --- Step 3: Sex --- */
 function StepSex({
-  value, onChange,
-}: { value: "masculino" | "feminino" | ""; onChange: (v: "masculino" | "feminino") => void }) {
+  value,
+  onChange,
+}: {
+  value: "masculino" | "feminino" | "";
+  onChange: (v: "masculino" | "feminino") => void;
+}) {
   const options: Array<{ v: "masculino" | "feminino"; label: string; Icon: typeof UserIcon }> = [
     { v: "masculino", label: "Homem", Icon: UserIcon },
     { v: "feminino", label: "Mulher", Icon: UsersIcon },
@@ -790,12 +878,26 @@ function StepSex({
         {options.map(({ v, label, Icon }) => {
           const active = value === v;
           return (
-            <button key={v} type="button" onClick={() => onChange(v)}
-              className={cn("app-card-interactive flex aspect-square flex-col items-center justify-center gap-3 rounded-3xl border-2 bg-card/60 p-4 transition",
-                active ? "border-[var(--rose)] bg-[var(--rose)]/10 shadow-elegant"
-                       : "border-border hover:border-[var(--rose-soft)]")}>
-              <Icon className={cn("h-9 w-9", active ? "text-[var(--rose)]" : "text-muted-foreground")} />
-              <span className={cn("text-base font-medium", active ? "text-foreground" : "text-foreground/80")}>
+            <button
+              key={v}
+              type="button"
+              onClick={() => onChange(v)}
+              className={cn(
+                "app-card-interactive flex aspect-square flex-col items-center justify-center gap-3 rounded-3xl border-2 bg-card/60 p-4 transition",
+                active
+                  ? "border-[var(--rose)] bg-[var(--rose)]/10 shadow-elegant"
+                  : "border-border hover:border-[var(--rose-soft)]",
+              )}
+            >
+              <Icon
+                className={cn("h-9 w-9", active ? "text-[var(--rose)]" : "text-muted-foreground")}
+              />
+              <span
+                className={cn(
+                  "text-base font-medium",
+                  active ? "text-foreground" : "text-foreground/80",
+                )}
+              >
                 {label}
               </span>
             </button>
@@ -808,23 +910,36 @@ function StepSex({
 
 /* --- Step 4: Photo --- */
 function StepPhoto({
-  preview, onPick,
-}: { preview: string; onPick: (file: File, url: string) => void }) {
+  preview,
+  onPick,
+}: {
+  preview: string;
+  onPick: (file: File, url: string) => void;
+}) {
   const inputRef = useRef<HTMLInputElement>(null);
   async function handle(e: React.ChangeEvent<HTMLInputElement>) {
-    const raw = e.target.files?.[0]; if (!raw) return;
+    const raw = e.target.files?.[0];
+    if (!raw) return;
     const nm = (raw.name || "").toLowerCase();
     const looksHeic = nm.endsWith(".heic") || nm.endsWith(".heif");
     if (!raw.type.startsWith("image/") && !looksHeic) {
       toast.error("Selecione um arquivo de imagem (JPG, PNG, WEBP, HEIC).");
       return;
     }
-    if (raw.size > 10 * 1024 * 1024) { toast.error("Foto muito grande (máx. 10MB)."); return; }
+    if (raw.size > 10 * 1024 * 1024) {
+      toast.error("Foto muito grande (máx. 10MB).");
+      return;
+    }
     const t = toast.loading("Preparando sua foto...");
     let f = raw;
-    try { f = await normalizeImageFile(raw); } finally { toast.dismiss(t); }
+    try {
+      f = await normalizeImageFile(raw);
+    } finally {
+      toast.dismiss(t);
+    }
     if (f.size > 8 * 1024 * 1024) {
-      toast.error("Foto até 8MB após conversão. Tente uma imagem menor."); return;
+      toast.error("Foto até 8MB após conversão. Tente uma imagem menor.");
+      return;
     }
     onPick(f, URL.createObjectURL(f));
   }
@@ -834,8 +949,11 @@ function StepPhoto({
       <p className="mt-3 self-start text-sm text-muted-foreground">
         Escolha uma foto nítida, com seu rosto visível.
       </p>
-      <button type="button" onClick={() => inputRef.current?.click()}
-        className="app-pressable mt-8 flex h-48 w-48 items-center justify-center overflow-hidden rounded-full border-2 border-dashed border-[var(--rose-soft)] bg-card/60 shadow-soft transition hover:border-[var(--rose)]">
+      <button
+        type="button"
+        onClick={() => inputRef.current?.click()}
+        className="app-pressable mt-8 flex h-48 w-48 items-center justify-center overflow-hidden rounded-full border-2 border-dashed border-[var(--rose-soft)] bg-card/60 shadow-soft transition hover:border-[var(--rose)]"
+      >
         {preview ? (
           <PhotoImg src={preview} alt="" className="h-full w-full object-cover" />
         ) : (
@@ -845,8 +963,15 @@ function StepPhoto({
           </div>
         )}
       </button>
-      <input ref={inputRef} type="file" accept="image/*,image/heic,image/heif"
-        onChange={handle} className="sr-only" tabIndex={-1} aria-hidden />
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*,image/heic,image/heif"
+        onChange={handle}
+        className="sr-only"
+        tabIndex={-1}
+        aria-hidden
+      />
       <p className="mt-6 max-w-xs text-center text-xs text-muted-foreground">
         Evite documentos, prints e imagens sem você.
       </p>
@@ -856,10 +981,15 @@ function StepPhoto({
 
 /* --- Step 5: Location --- */
 function StepLocation({
-  city, stateUF, onCity, onState,
+  city,
+  stateUF,
+  onCity,
+  onState,
 }: {
-  city: string; stateUF: string;
-  onCity: (v: string) => void; onState: (v: string) => void;
+  city: string;
+  stateUF: string;
+  onCity: (v: string) => void;
+  onState: (v: string) => void;
 }) {
   const [phase, setPhase] = useState<"ask" | "loading" | "auto" | "manual">(
     city && stateUF ? "auto" : "ask",
@@ -872,17 +1002,24 @@ function StepLocation({
 
   async function loadCities(uf: string) {
     if (!uf) return;
-    if (cityCache.current[uf]) { setCities(cityCache.current[uf]); return; }
-    setLoadingCities(true); setCityError(false);
+    if (cityCache.current[uf]) {
+      setCities(cityCache.current[uf]);
+      return;
+    }
+    setLoadingCities(true);
+    setCityError(false);
     try {
-      const r = await fetch(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${uf}/municipios`);
+      const r = await fetch(
+        `https://servicodados.ibge.gov.br/api/v1/localidades/estados/${uf}/municipios`,
+      );
       if (!r.ok) throw new Error("ibge");
       const data = (await r.json()) as Array<{ nome: string }>;
       const names = data.map((x) => x.nome).sort((a, b) => a.localeCompare(b, "pt-BR"));
       cityCache.current[uf] = names;
       setCities(names);
     } catch {
-      setCityError(true); setCities([]);
+      setCityError(true);
+      setCities([]);
     } finally {
       setLoadingCities(false);
     }
@@ -893,7 +1030,10 @@ function StepLocation({
   }, [phase, stateUF]);
 
   function detect() {
-    if (!("geolocation" in navigator)) { setPhase("manual"); return; }
+    if (!("geolocation" in navigator)) {
+      setPhase("manual");
+      return;
+    }
     setPhase("loading");
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
@@ -904,15 +1044,23 @@ function StepLocation({
           );
           if (!r.ok) throw new Error("geo");
           const data = (await r.json()) as {
-            city?: string; locality?: string; principalSubdivisionCode?: string;
+            city?: string;
+            locality?: string;
+            principalSubdivisionCode?: string;
           };
           const detectedCity = data.city || data.locality || "";
           const sub = data.principalSubdivisionCode || ""; // e.g. "BR-SP"
           const uf = sub.startsWith("BR-") ? sub.slice(3) : "";
           if (detectedCity && uf && UF_NAMES[uf]) {
-            onCity(detectedCity); onState(uf); setPhase("auto");
-          } else { setPhase("manual"); }
-        } catch { setPhase("manual"); }
+            onCity(detectedCity);
+            onState(uf);
+            setPhase("auto");
+          } else {
+            setPhase("manual");
+          }
+        } catch {
+          setPhase("manual");
+        }
       },
       () => setPhase("manual"),
       { timeout: 8000, maximumAge: 60000 },
@@ -934,13 +1082,20 @@ function StepLocation({
 
       {phase === "ask" && (
         <div className="mt-8 space-y-3">
-          <Button type="button" onClick={detect} size="lg"
-            className="app-pressable h-14 w-full rounded-2xl text-base font-semibold">
+          <Button
+            type="button"
+            onClick={detect}
+            size="lg"
+            className="app-pressable h-14 w-full rounded-2xl text-base font-semibold"
+          >
             <MapPin className="mr-2 h-5 w-5" />
             Usar minha localização
           </Button>
-          <button type="button" onClick={() => setPhase("manual")}
-            className="app-pressable w-full rounded-2xl py-3 text-sm font-medium text-muted-foreground underline-offset-4 hover:underline">
+          <button
+            type="button"
+            onClick={() => setPhase("manual")}
+            className="app-pressable w-full rounded-2xl py-3 text-sm font-medium text-muted-foreground underline-offset-4 hover:underline"
+          >
             Preencher manualmente
           </button>
         </div>
@@ -956,9 +1111,14 @@ function StepLocation({
       {phase === "auto" && (
         <div className="mt-8 rounded-3xl border border-[var(--rose-soft)] bg-[var(--rose)]/5 p-5">
           <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Encontramos</p>
-          <p className="mt-1 text-xl font-semibold">{city} — {stateUF}</p>
-          <button type="button" onClick={() => setPhase("manual")}
-            className="app-pressable mt-4 text-sm font-medium text-[var(--rose)] underline-offset-4 hover:underline">
+          <p className="mt-1 text-xl font-semibold">
+            {city} — {stateUF}
+          </p>
+          <button
+            type="button"
+            onClick={() => setPhase("manual")}
+            className="app-pressable mt-4 text-sm font-medium text-[var(--rose)] underline-offset-4 hover:underline"
+          >
             Alterar manualmente
           </button>
         </div>
@@ -967,24 +1127,40 @@ function StepLocation({
       {phase === "manual" && (
         <div className="mt-6 space-y-4">
           <div>
-            <label className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Estado</label>
-            <Select value={stateUF} onValueChange={(v) => { onState(v); onCity(""); setSearch(""); }}>
+            <label className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
+              Estado
+            </label>
+            <Select
+              value={stateUF}
+              onValueChange={(v) => {
+                onState(v);
+                onCity("");
+                setSearch("");
+              }}
+            >
               <SelectTrigger className="mt-2 h-14 rounded-2xl bg-card/60">
                 <SelectValue placeholder="Selecione seu estado" />
               </SelectTrigger>
               <SelectContent>
                 {UF_LIST.map((uf) => (
-                  <SelectItem key={uf} value={uf}>{uf} — {UF_NAMES[uf]}</SelectItem>
+                  <SelectItem key={uf} value={uf}>
+                    {uf} — {UF_NAMES[uf]}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
           {stateUF && (
             <div>
-              <label className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Cidade</label>
+              <label className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
+                Cidade
+              </label>
               <Input
                 value={city || search}
-                onChange={(e) => { setSearch(e.target.value); onCity(""); }}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  onCity("");
+                }}
                 placeholder={loadingCities ? "Carregando cidades..." : "Buscar sua cidade"}
                 className="mt-2 h-14 rounded-2xl border-border bg-card/60 px-4 text-base"
               />
@@ -1004,17 +1180,29 @@ function StepLocation({
                     </p>
                   )}
                   {filteredCities.map((c) => (
-                    <button key={c} type="button"
-                      onClick={() => { onCity(c); setSearch(""); }}
-                      className="block w-full px-4 py-2.5 text-left text-sm hover:bg-muted/60">
+                    <button
+                      key={c}
+                      type="button"
+                      onClick={() => {
+                        onCity(c);
+                        setSearch("");
+                      }}
+                      className="block w-full px-4 py-2.5 text-left text-sm hover:bg-muted/60"
+                    >
                       {c}
                     </button>
                   ))}
                 </div>
               )}
               {city && (
-                <button type="button" onClick={() => { onCity(""); setSearch(""); }}
-                  className="mt-2 text-xs text-muted-foreground underline-offset-4 hover:underline">
+                <button
+                  type="button"
+                  onClick={() => {
+                    onCity("");
+                    setSearch("");
+                  }}
+                  className="mt-2 text-xs text-muted-foreground underline-offset-4 hover:underline"
+                >
                   Alterar cidade
                 </button>
               )}
@@ -1035,12 +1223,17 @@ function StepHeight({ value, onChange }: { value: string; onChange: (v: string) 
         Essa informação ajuda a deixar seu perfil mais completo.
       </p>
       <div className="mt-8">
-        <label className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Altura (cm)</label>
+        <label className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
+          Altura (cm)
+        </label>
         <div className="relative mt-2">
           <Ruler className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
           <NumericInput
-            autoFocus value={value} onChange={onChange}
-            placeholder="175" maxLength={3}
+            autoFocus
+            value={value}
+            onChange={onChange}
+            placeholder="175"
+            maxLength={3}
             className="h-14 rounded-2xl border-border bg-card/60 pl-12 pr-4 text-lg"
           />
         </div>
@@ -1052,7 +1245,8 @@ function StepHeight({ value, onChange }: { value: string; onChange: (v: string) 
 
 /* --- Step 7: Marital --- */
 function StepMarital({
-  value, onChange,
+  value,
+  onChange,
 }: {
   value: "solteiro" | "divorciado" | "viuvo" | "";
   onChange: (v: "solteiro" | "divorciado" | "viuvo") => void;
@@ -1072,12 +1266,26 @@ function StepMarital({
         {options.map(({ v, label }) => {
           const active = value === v;
           return (
-            <button key={v} type="button" onClick={() => onChange(v)}
-              className={cn("app-card-interactive flex w-full items-center gap-3 rounded-2xl border-2 bg-card/60 px-5 py-4 text-left transition",
-                active ? "border-[var(--rose)] bg-[var(--rose)]/10 shadow-elegant"
-                       : "border-border hover:border-[var(--rose-soft)]")}>
-              <Heart className={cn("h-5 w-5", active ? "text-[var(--rose)]" : "text-muted-foreground")} />
-              <span className={cn("text-base font-medium", active ? "text-foreground" : "text-foreground/80")}>
+            <button
+              key={v}
+              type="button"
+              onClick={() => onChange(v)}
+              className={cn(
+                "app-card-interactive flex w-full items-center gap-3 rounded-2xl border-2 bg-card/60 px-5 py-4 text-left transition",
+                active
+                  ? "border-[var(--rose)] bg-[var(--rose)]/10 shadow-elegant"
+                  : "border-border hover:border-[var(--rose-soft)]",
+              )}
+            >
+              <Heart
+                className={cn("h-5 w-5", active ? "text-[var(--rose)]" : "text-muted-foreground")}
+              />
+              <span
+                className={cn(
+                  "text-base font-medium",
+                  active ? "text-foreground" : "text-foreground/80",
+                )}
+              >
                 {label}
               </span>
             </button>
@@ -1090,9 +1298,15 @@ function StepMarital({
 
 /* --- Optional helpers --- */
 function OptionalFooter({
-  saving, onSkip, onSave, saveLabel = "Salvar e continuar",
+  saving,
+  onSkip,
+  onSave,
+  saveLabel = "Salvar e continuar",
 }: {
-  saving: boolean; onSkip: () => void; onSave: () => void; saveLabel?: string;
+  saving: boolean;
+  onSkip: () => void;
+  onSave: () => void;
+  saveLabel?: string;
 }) {
   return (
     <div className="mt-8 space-y-2">
@@ -1117,7 +1331,9 @@ function OptionalFooter({
 }
 
 function ChipGroup({
-  options, value, onChange,
+  options,
+  value,
+  onChange,
 }: {
   options: Array<{ v: string; l: string }>;
   value: string;
@@ -1148,7 +1364,9 @@ function ChipGroup({
 }
 
 function ChipMultiGroup({
-  options, values, onChange,
+  options,
+  values,
+  onChange,
 }: {
   options: Array<{ v: string; l: string }>;
   values: string[];
@@ -1184,10 +1402,17 @@ function ChipMultiGroup({
 
 /* --- Step 8: Bio --- */
 function StepBio({
-  value, onChange, saving, onSkip, onSave,
+  value,
+  onChange,
+  saving,
+  onSkip,
+  onSave,
 }: {
-  value: string; onChange: (v: string) => void;
-  saving: boolean; onSkip: () => void; onSave: () => void;
+  value: string;
+  onChange: (v: string) => void;
+  saving: boolean;
+  onSkip: () => void;
+  onSave: () => void;
 }) {
   return (
     <div className="mx-auto flex w-full max-w-md flex-1 flex-col py-6">
@@ -1196,10 +1421,7 @@ function StepBio({
         Uma frase sincera já ajuda as pessoas certas a te conhecerem melhor.
       </p>
       <div className="mt-4">
-        <BioPromptChips
-          current={value}
-          onApply={(starter: string) => onChange(starter + value)}
-        />
+        <BioPromptChips current={value} onApply={(starter: string) => onChange(starter + value)} />
       </div>
       <textarea
         value={value}
@@ -1217,15 +1439,29 @@ function StepBio({
 
 /* --- Step 9: Faith --- */
 function StepFaith({
-  church, onChurch, years, onYears,
-  faithMoment, onFaithMoment, churchFrequency, onChurchFrequency,
-  saving, onSkip, onSave,
+  church,
+  onChurch,
+  years,
+  onYears,
+  faithMoment,
+  onFaithMoment,
+  churchFrequency,
+  onChurchFrequency,
+  saving,
+  onSkip,
+  onSave,
 }: {
-  church: string; onChurch: (v: string) => void;
-  years: string; onYears: (v: string) => void;
-  faithMoment: string; onFaithMoment: (v: string) => void;
-  churchFrequency: string; onChurchFrequency: (v: string) => void;
-  saving: boolean; onSkip: () => void; onSave: () => void;
+  church: string;
+  onChurch: (v: string) => void;
+  years: string;
+  onYears: (v: string) => void;
+  faithMoment: string;
+  onFaithMoment: (v: string) => void;
+  churchFrequency: string;
+  onChurchFrequency: (v: string) => void;
+  saving: boolean;
+  onSkip: () => void;
+  onSave: () => void;
 }) {
   return (
     <div className="mx-auto flex w-full max-w-md flex-1 flex-col py-6">
@@ -1235,7 +1471,9 @@ function StepFaith({
       </p>
       <div className="mt-6 space-y-5">
         <div>
-          <label className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Igreja</label>
+          <label className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
+            Igreja
+          </label>
           <Input
             value={church}
             onChange={(e) => onChurch(e.target.value)}
@@ -1245,7 +1483,9 @@ function StepFaith({
           />
         </div>
         <div>
-          <label className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Anos de batismo</label>
+          <label className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
+            Anos de batismo
+          </label>
           <NumericInput
             value={years}
             onChange={onYears}
@@ -1255,15 +1495,23 @@ function StepFaith({
           />
         </div>
         <div>
-          <label className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Momento de fé</label>
+          <label className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
+            Momento de fé
+          </label>
           <div className="mt-2">
             <ChipGroup options={FAITH_MOMENT} value={faithMoment} onChange={onFaithMoment} />
           </div>
         </div>
         <div>
-          <label className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Frequência na igreja</label>
+          <label className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
+            Frequência na igreja
+          </label>
           <div className="mt-2">
-            <ChipGroup options={CHURCH_FREQUENCY} value={churchFrequency} onChange={onChurchFrequency} />
+            <ChipGroup
+              options={CHURCH_FREQUENCY}
+              value={churchFrequency}
+              onChange={onChurchFrequency}
+            />
           </div>
         </div>
       </div>
@@ -1274,12 +1522,21 @@ function StepFaith({
 
 /* --- Step 10: Routine --- */
 function StepRoutine({
-  routine, onRoutine, worship, onWorship,
-  saving, onSkip, onSave,
+  routine,
+  onRoutine,
+  worship,
+  onWorship,
+  saving,
+  onSkip,
+  onSave,
 }: {
-  routine: string[]; onRoutine: (v: string[]) => void;
-  worship: string; onWorship: (v: string) => void;
-  saving: boolean; onSkip: () => void; onSave: () => void;
+  routine: string[];
+  onRoutine: (v: string[]) => void;
+  worship: string;
+  onWorship: (v: string) => void;
+  saving: boolean;
+  onSkip: () => void;
+  onSave: () => void;
 }) {
   return (
     <div className="mx-auto flex w-full max-w-md flex-1 flex-col py-6">
@@ -1289,13 +1546,17 @@ function StepRoutine({
       </p>
       <div className="mt-6 space-y-5">
         <div>
-          <label className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Rotina espiritual</label>
+          <label className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
+            Rotina espiritual
+          </label>
           <div className="mt-2">
             <ChipMultiGroup options={SPIRITUAL_ROUTINE} values={routine} onChange={onRoutine} />
           </div>
         </div>
         <div>
-          <label className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Estilo de culto</label>
+          <label className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
+            Estilo de culto
+          </label>
           <div className="mt-2">
             <ChipGroup options={WORSHIP_STYLE} value={worship} onChange={onWorship} />
           </div>
@@ -1308,13 +1569,25 @@ function StepRoutine({
 
 /* --- Step 11: Seeking --- */
 function StepSeeking({
-  seeking, onSeeking, pace, onPace, quality, onQuality,
-  saving, onSkip, onSave,
+  seeking,
+  onSeeking,
+  pace,
+  onPace,
+  quality,
+  onQuality,
+  saving,
+  onSkip,
+  onSave,
 }: {
-  seeking: string; onSeeking: (v: string) => void;
-  pace: string; onPace: (v: string) => void;
-  quality: string; onQuality: (v: string) => void;
-  saving: boolean; onSkip: () => void; onSave: () => void;
+  seeking: string;
+  onSeeking: (v: string) => void;
+  pace: string;
+  onPace: (v: string) => void;
+  quality: string;
+  onQuality: (v: string) => void;
+  saving: boolean;
+  onSkip: () => void;
+  onSave: () => void;
 }) {
   return (
     <div className="mx-auto flex w-full max-w-md flex-1 flex-col py-6">
@@ -1324,7 +1597,9 @@ function StepSeeking({
       </p>
       <div className="mt-6 space-y-5">
         <div>
-          <label className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Intenção</label>
+          <label className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
+            Intenção
+          </label>
           <div className="mt-2">
             <ChipGroup options={SEEKING} value={seeking} onChange={onSeeking} />
           </div>
@@ -1336,7 +1611,9 @@ function StepSeeking({
           </div>
         </div>
         <div>
-          <label className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Qualidade essencial</label>
+          <label className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
+            Qualidade essencial
+          </label>
           <Input
             value={quality}
             onChange={(e) => onQuality(e.target.value)}
@@ -1353,13 +1630,25 @@ function StepSeeking({
 
 /* --- Step 12: Basic prefs --- */
 function StepPrefs({
-  min, onMin, max, onMax, accepts, onAccepts,
-  saving, onSkip, onSave,
+  min,
+  onMin,
+  max,
+  onMax,
+  accepts,
+  onAccepts,
+  saving,
+  onSkip,
+  onSave,
 }: {
-  min: string; onMin: (v: string) => void;
-  max: string; onMax: (v: string) => void;
-  accepts: "" | "sim" | "nao"; onAccepts: (v: "sim" | "nao") => void;
-  saving: boolean; onSkip: () => void; onSave: () => void;
+  min: string;
+  onMin: (v: string) => void;
+  max: string;
+  onMax: (v: string) => void;
+  accepts: "" | "sim" | "nao";
+  onAccepts: (v: "sim" | "nao") => void;
+  saving: boolean;
+  onSkip: () => void;
+  onSave: () => void;
 }) {
   return (
     <div className="mx-auto flex w-full max-w-md flex-1 flex-col py-6">
@@ -1368,7 +1657,9 @@ function StepPrefs({
       <div className="mt-6 space-y-5">
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Idade mínima</label>
+            <label className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
+              Idade mínima
+            </label>
             <NumericInput
               value={min}
               onChange={onMin}
@@ -1378,7 +1669,9 @@ function StepPrefs({
             />
           </div>
           <div>
-            <label className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Idade máxima</label>
+            <label className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
+              Idade máxima
+            </label>
             <NumericInput
               value={max}
               onChange={onMax}
@@ -1389,7 +1682,9 @@ function StepPrefs({
           </div>
         </div>
         <div>
-          <label className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Aceita pessoa com filhos?</label>
+          <label className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
+            Aceita pessoa com filhos?
+          </label>
           <div className="mt-2 flex gap-2">
             {(["sim", "nao"] as const).map((v) => {
               const active = accepts === v;
@@ -1419,17 +1714,31 @@ function StepPrefs({
 
 /* --- Final: Welcome --- */
 function StepWelcome({
-  name, onContinue, onCompletePerfil,
-}: { name: string; onContinue: () => void; onCompletePerfil: () => void }) {
+  name,
+  onContinue,
+  onCompletePerfil,
+}: {
+  name: string;
+  onContinue: () => void;
+  onCompletePerfil: () => void;
+}) {
   const firstName = (name || "").split(" ")[0];
   return (
-    <div className="absolute inset-0 flex flex-col items-center justify-between overflow-hidden text-white"
+    <div
+      className="absolute inset-0 flex flex-col items-center justify-between overflow-hidden text-white"
       style={{
         background:
           "radial-gradient(120% 80% at 50% 0%, #ff9aa0 0%, #ff6b8a 35%, #d8456b 75%, #8b1f4a 100%)",
-      }}>
-      <div className="pointer-events-none absolute -top-20 -left-20 h-80 w-80 rounded-full bg-white/30 blur-3xl" aria-hidden />
-      <div className="pointer-events-none absolute -bottom-32 -right-16 h-96 w-96 rounded-full bg-[#ffd2c2]/40 blur-3xl" aria-hidden />
+      }}
+    >
+      <div
+        className="pointer-events-none absolute -top-20 -left-20 h-80 w-80 rounded-full bg-white/30 blur-3xl"
+        aria-hidden
+      />
+      <div
+        className="pointer-events-none absolute -bottom-32 -right-16 h-96 w-96 rounded-full bg-[#ffd2c2]/40 blur-3xl"
+        aria-hidden
+      />
       <div className="pointer-events-none absolute inset-0 backdrop-blur-[2px]" aria-hidden />
 
       <div className="relative z-10 flex flex-1 flex-col items-center justify-center px-8 text-center">
@@ -1439,19 +1748,27 @@ function StepWelcome({
         </h1>
         {firstName && <h2 className="mt-2 text-4xl font-light text-white/95">{firstName}</h2>}
         <p className="mt-6 max-w-sm text-base text-white/90">
-          Seu perfil já começou. Você pode entrar no app agora ou completar mais
-          detalhes para aumentar suas chances.
+          Seu perfil já começou. Você pode entrar no app agora ou completar mais detalhes para
+          aumentar suas chances.
         </p>
       </div>
 
-      <div className="relative z-10 flex w-full max-w-md flex-col gap-3 px-6 pb-8"
-        style={{ paddingBottom: "max(env(safe-area-inset-bottom), 1.5rem)" }}>
-        <Button onClick={onContinue} size="lg"
-          className="app-pressable h-14 rounded-2xl bg-white text-base font-semibold text-[var(--rose)] hover:bg-white/90">
+      <div
+        className="relative z-10 flex w-full max-w-md flex-col gap-3 px-6 pb-8"
+        style={{ paddingBottom: "max(env(safe-area-inset-bottom), 1.5rem)" }}
+      >
+        <Button
+          onClick={onContinue}
+          size="lg"
+          className="app-pressable h-14 rounded-2xl bg-white text-base font-semibold text-[var(--rose)] hover:bg-white/90"
+        >
           Continuar
         </Button>
-        <button type="button" onClick={onCompletePerfil}
-          className="app-pressable h-12 rounded-2xl text-sm font-medium text-white/90 underline-offset-4 hover:underline">
+        <button
+          type="button"
+          onClick={onCompletePerfil}
+          className="app-pressable h-12 rounded-2xl text-sm font-medium text-white/90 underline-offset-4 hover:underline"
+        >
           Completar perfil
         </button>
       </div>

@@ -6,10 +6,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Header } from "@/components/layout/Header";
 import { CURRENT_TERMS_VERSION } from "@/lib/terms";
 import { SocialAuthButtons } from "@/components/SocialAuthButtons";
-import { AuthBrand } from "@/components/auth/AuthBrand";
+import { AuthShell } from "@/components/shells/AuthShell";
 
 const schema = z.object({
   email: z.string().trim().email("Email inválido").max(255),
@@ -58,10 +57,8 @@ function Signup() {
   }
 
   return (
-    <div className="min-h-screen">
-      <Header />
+    <AuthShell>
       <main className="mx-auto flex max-w-md flex-col px-4 py-12">
-        <AuthBrand className="mb-6" />
         <div className="glass animate-fade-up rounded-3xl p-8 shadow-elegant">
           <h1 className="text-3xl font-semibold">Criar conta</h1>
           <p className="mt-1 text-sm text-muted-foreground">Comece sua jornada em poucos passos.</p>
@@ -123,6 +120,6 @@ function Signup() {
           </p>
         </div>
       </main>
-    </div>
+    </AuthShell>
   );
 }

@@ -87,6 +87,8 @@ describe("native shell primary rollout", () => {
       "support-root",
       "support-help",
       "support-ticket",
+      "public-manual",
+      "public-terms",
     ]);
     expect(isNativeShellEligibleDestination(getDestinationBehavior("/conta"))).toBe(true);
     expect(isNativeShellEligibleDestination(getDestinationBehavior("/notificacoes"))).toBe(true);

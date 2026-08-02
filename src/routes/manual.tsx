@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Header } from "@/components/layout/Header";
+import { DocumentShell } from "@/components/shells/DocumentShell";
 import { Input } from "@/components/ui/input";
 import {
   Home,
@@ -64,37 +64,27 @@ const SECTIONS: SectionDef[] = [
   },
   {
     id: "inicio",
-    title: "Página Inicial — Dashboard",
+    title: "Início — painel pessoal",
     icon: Home,
     color: "from-rose-500/15 to-pink-500/10 text-rose-600 dark:text-rose-300",
     blocks: [
       {
         kind: "p",
-        text: "A aba “Início” funciona como seu painel principal da plataforma. Nela você poderá acompanhar diversas informações importantes sobre seu perfil e sua movimentação dentro da comunidade.",
+        text: "A aba “Início” é seu painel pessoal. Ela reúne a palavra do dia, a próxima ação útil, atalhos, progresso real e avisos importantes, sem transformar a Home em um feed.",
       },
-      { kind: "h", text: "Pessoas que visitaram seu perfil" },
+      { kind: "h", text: "O que aparece no Início" },
       {
         kind: "ul",
         items: [
-          "quantidade de visitas",
-          "crescimento de visualizações",
-          "movimentação recente no seu perfil",
-        ],
-      },
-      { kind: "h", text: "Estatísticas de visitantes" },
-      { kind: "p", text: "O sistema mostrará informações estimadas como:" },
-      {
-        kind: "ul",
-        items: [
-          "cidades que mais visitam seu perfil",
-          "estados com maior interesse",
-          "faixa etária predominante",
-          "perfil de público que mais acessa você",
+          "palavra e devocional do dia, quando disponíveis",
+          "prioridades reais da conta e do perfil",
+          "atalhos para Comunidade, Explorar, Conversas e Perfil",
+          "missões, progresso e avisos carregados da sua conta",
         ],
       },
       {
         kind: "p",
-        text: "Esses dados ajudam você a entender melhor quem está interagindo com seu perfil.",
+        text: "As métricas detalhadas ficam em Insights, uma área secundária do Perfil. O Início não exibe estimativas inventadas.",
       },
       { kind: "h", text: "Novidades e avisos" },
       {
@@ -102,7 +92,6 @@ const SECTIONS: SectionDef[] = [
         items: [
           "comunicados da plataforma",
           "novidades",
-          "eventos",
           "textos importantes",
           "regras atualizadas",
           "mensagens administrativas",
@@ -112,8 +101,6 @@ const SECTIONS: SectionDef[] = [
       {
         kind: "ul",
         items: [
-          "quantidade de interesses recebidos",
-          "quantidade de matches",
           "mensagens novas",
           "notificações recentes",
           "streak/presença diária",
@@ -178,24 +165,22 @@ const SECTIONS: SectionDef[] = [
     blocks: [
       {
         kind: "p",
-        text: "A aba “Comunidade” funciona como um espaço público de interação entre todos os usuários da plataforma.",
+        text: "A aba “Comunidade” reúne entradas reais para o Chat geral, Orações, Notícias e Devocional.",
       },
       { kind: "h", text: "O que você pode fazer" },
       {
         kind: "ul",
         items: [
-          "publicar mensagens",
-          "comentar",
-          "conversar publicamente",
-          "interagir com a comunidade",
-          "compartilhar opiniões respeitosas",
-          "participar das discussões",
+          "entrar no Chat geral",
+          "acompanhar Notícias",
+          "participar de Orações",
+          "abrir o Devocional",
         ],
       },
       { kind: "h", text: "Como funciona" },
       {
         kind: "p",
-        text: "Seu comentário aparecerá com sua foto, seu nome e horário da publicação. As mensagens são atualizadas em tempo real.",
+        text: "O Chat geral é uma conversa coletiva, não um feed. Novos espaços temáticos só aparecem quando possuem contrato e dados reais.",
       },
       { kind: "h", text: "Importante" },
       {
@@ -230,11 +215,14 @@ const SECTIONS: SectionDef[] = [
   },
   {
     id: "pretendentes",
-    title: "Aba Pretendentes",
+    title: "Relacionamento opcional em Explorar",
     icon: Gem,
     color: "from-amber-500/15 to-yellow-500/10 text-amber-600 dark:text-amber-300",
     blocks: [
-      { kind: "p", text: "A aba “Pretendentes” mostra todos os perfis disponíveis na plataforma." },
+      {
+        kind: "p",
+        text: "O modo de relacionamento é opcional e fica dentro de Explorar. Pretendentes não é uma aba principal da plataforma.",
+      },
       { kind: "h", text: "O que aparece nessa lista" },
       {
         kind: "ul",
@@ -250,7 +238,7 @@ const SECTIONS: SectionDef[] = [
       { kind: "h", text: "Visualização completa" },
       {
         kind: "p",
-        text: "Ao entrar no perfil de alguém, você poderá visualizar informações detalhadas, conhecer melhor a pessoa, analisar compatibilidade e demonstrar interesse.",
+        text: "Ao entrar no perfil de alguém, você poderá visualizar informações reais compartilhadas pela pessoa e demonstrar interesse. A experiência não usa swipe nem percentual de compatibilidade.",
       },
       { kind: "h", text: "Demonstrar interesse" },
       {
@@ -368,14 +356,16 @@ const SECTIONS: SectionDef[] = [
   },
   {
     id: "tema",
-    title: "Tema Claro e Tema Escuro",
+    title: "Tema Sistema, Claro e Escuro",
     icon: Sun,
     color: "from-orange-500/15 to-amber-500/10 text-orange-600 dark:text-orange-300",
     blocks: [
       {
         kind: "p",
-        text: "A plataforma possui modo claro e modo escuro. Você poderá alternar entre eles a qualquer momento.",
+        text: "A plataforma possui as preferências Sistema, Claro e Escuro. Você poderá alternar entre elas a qualquer momento.",
       },
+      { kind: "h", text: "Tema Sistema" },
+      { kind: "p", text: "Acompanha a preferência aplicada pelo dispositivo." },
       { kind: "h", text: "Tema Claro" },
       { kind: "p", text: "Ideal para ambientes iluminados e leitura durante o dia." },
       { kind: "h", text: "Tema Escuro" },
@@ -529,8 +519,7 @@ function ManualPage() {
   const filtered = useMemo(() => SECTIONS.filter((s) => sectionMatches(s, q)), [q]);
 
   return (
-    <div className="min-h-screen">
-      <Header />
+    <DocumentShell>
       <main className="mx-auto max-w-4xl px-4 py-10">
         <div className="glass rounded-3xl p-6 md:p-10 shadow-elegant">
           <h1 className="text-3xl md:text-4xl font-extrabold text-gradient">
@@ -590,6 +579,6 @@ function ManualPage() {
           </div>
         </div>
       </main>
-    </div>
+    </DocumentShell>
   );
 }

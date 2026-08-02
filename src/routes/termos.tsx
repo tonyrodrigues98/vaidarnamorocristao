@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Header } from "@/components/layout/Header";
+import { DocumentShell } from "@/components/shells/DocumentShell";
 
 export const Route = createFileRoute("/termos")({
   head: () => ({
@@ -46,8 +46,7 @@ function List({ items }: { items: string[] }) {
 
 function TermosPage() {
   return (
-    <div className="min-h-screen">
-      <Header />
+    <DocumentShell>
       <main className="mx-auto max-w-3xl px-4 py-10">
         <div className="glass rounded-3xl p-6 md:p-10 shadow-elegant">
           <h1 className="text-3xl md:text-4xl font-extrabold text-gradient">
@@ -346,6 +345,6 @@ function TermosPage() {
           </Section>
         </div>
       </main>
-    </div>
+    </DocumentShell>
   );
 }
