@@ -179,6 +179,17 @@
 [data-vdn-admin-shell] :where(table) {
   max-width: 100%;
 }
+[data-vdn-admin-shell] [data-vdn-admin-page] {
+  min-width: 0;
+}
+[data-vdn-admin-shell] [data-vdn-admin-page] :where([role="tablist"]) {
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+[data-vdn-admin-shell] [data-vdn-admin-page] :where(table) {
+  white-space: nowrap;
+}
 [data-vdn-admin-shell] :where([role="dialog"]) {
   max-height: calc(100dvh - 2rem);
 }
