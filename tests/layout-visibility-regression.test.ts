@@ -42,7 +42,7 @@ const legacyParityFixture = [
     path: "/conversas/comunidade",
     footer: false,
     mobile: true,
-    bottom: true,
+    bottom: false,
     chat: true,
   },
   {
@@ -92,8 +92,8 @@ describe("layout visibility compatibility wrappers", () => {
     expect(isChatRoute(fixture.path)).toBe(fixture.chat);
   });
 
-  it("keeps the community chat exception and private chat focus", () => {
-    expect(chatRouteHasBottomNav("/conversas/comunidade")).toBe(true);
+  it("keeps focused chats free from bottom navigation", () => {
+    expect(chatRouteHasBottomNav("/conversas/comunidade")).toBe(false);
     expect(chatRouteHasBottomNav("/conversas/abc")).toBe(false);
     expect(isChatRoute("/conversas")).toBe(false);
     expect(isChatRoute("/conversas/comunidade")).toBe(true);
