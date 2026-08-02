@@ -1,5 +1,6 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { PublicNav } from "@/components/PublicNav";
+import { PublicShell } from "@/components/shells/PublicShell";
+import { brand } from "@/config/brand";
 import { BLOG_POSTS, getPostBySlug } from "@/data/blog-posts";
 import { Clock, ArrowLeft } from "lucide-react";
 
@@ -13,7 +14,7 @@ export const Route = createFileRoute("/blog/$slug")({
   head: ({ loaderData }) => {
     if (!loaderData) return { meta: [{ title: "Artigo não encontrado" }] };
     const { post } = loaderData;
-    const url = `https://vaidarnamoro.com/blog/${post.slug}`;
+    const url = `${brand.origin}/blog/${post.slug}`;
     return {
       meta: [
         { title: `${post.title} | Blog VaiDarNamoro` },
@@ -39,7 +40,7 @@ export const Route = createFileRoute("/blog/$slug")({
             publisher: {
               "@type": "Organization",
               name: "VaiDarNamoro",
-              logo: { "@type": "ImageObject", url: "https://vaidarnamoro.com/og-image.jpg" },
+              logo: { "@type": "ImageObject", url: `${brand.origin}${brand.assets.socialImage}` },
             },
             mainEntityOfPage: url,
           }),
@@ -48,15 +49,14 @@ export const Route = createFileRoute("/blog/$slug")({
     };
   },
   notFoundComponent: () => (
-    <div className="min-h-screen bg-background">
-      <PublicNav />
+    <PublicShell>
       <div className="mx-auto max-w-2xl px-6 py-24 text-center">
         <h1 className="text-3xl font-bold">Artigo não encontrado</h1>
         <Link to="/blog" className="mt-6 inline-block text-[var(--rose)] underline">
           Voltar ao blog
         </Link>
       </div>
-    </div>
+    </PublicShell>
   ),
 });
 
@@ -65,8 +65,7 @@ function BlogPost() {
   const related = BLOG_POSTS.filter((p) => p.slug !== post.slug).slice(0, 2);
 
   return (
-    <div className="min-h-screen bg-background">
-      <PublicNav />
+    <PublicShell>
       <main className="mx-auto max-w-3xl px-6 py-12 md:py-16">
         <Link
           to="/blog"
@@ -132,6 +131,6 @@ function BlogPost() {
           </section>
         )}
       </main>
-    </div>
+    </PublicShell>
   );
 }

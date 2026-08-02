@@ -94,7 +94,7 @@ describe("brand metadata contract", () => {
 
   it("preserves the four sampled route contracts", () => {
     expect(entry(liveHomeMetadata, "title")).toEqual({
-      title: "Caren | Vai Dar Namoro Cristão",
+      title: "VaiDarNamoro — Comunidade cristã 18+",
     });
     expect(liveHomeMetadata.links).toContainEqual({
       rel: "canonical",

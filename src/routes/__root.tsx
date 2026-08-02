@@ -5,7 +5,6 @@ import {
   HeadContent,
   Scripts,
   useLocation,
-  Navigate,
 } from "@tanstack/react-router";
 import { QueryClientProvider } from "@tanstack/react-query";
 import type { AppRouterContext } from "@/v2/app/router-context";
@@ -25,8 +24,6 @@ import { MobileRouteTransition } from "@/components/mobile/MobileRouteTransition
 import { isChatRoute, shouldShowFooter } from "@/lib/layoutVisibility";
 import { RouteProtectionBoundary } from "@/v2/app/routing/RouteProtectionBoundary";
 import { shouldMountPrivateProviders } from "@/v2/app/routing/route-access";
-import { v2FeatureFlags } from "@/v2/platform/feature-flags";
-import { isV2RuntimePath, V2RuntimeState } from "@/v2/integration";
 import {
   configureSupabaseRuntime,
   hasSupabaseRuntimeConfig,
@@ -39,26 +36,30 @@ import { useEffect, useState } from "react";
 import { registerAppServiceWorker } from "@/lib/registerSW";
 import { brand } from "@/config/brand";
 import { rootMetadata } from "@/config/route-metadata";
+import { PublicShell } from "@/components/shells/PublicShell";
+import { getDestinationBehavior } from "@/config/app-destinations";
 
 function NotFoundComponent() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="max-w-md text-center">
-        <h1 className="text-7xl font-bold text-foreground">404</h1>
-        <h2 className="mt-4 text-xl font-semibold text-foreground">Page not found</h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          The page you're looking for doesn't exist or has been moved.
-        </p>
-        <div className="mt-6">
-          <Link
-            to="/"
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-          >
-            Go home
-          </Link>
+    <PublicShell>
+      <main className="flex min-h-[60dvh] items-center justify-center bg-background px-4">
+        <div className="max-w-md text-center">
+          <h1 className="text-7xl font-bold text-foreground">404</h1>
+          <h2 className="mt-4 text-xl font-semibold text-foreground">Page not found</h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            The page you're looking for doesn't exist or has been moved.
+          </p>
+          <div className="mt-6">
+            <Link
+              to="/"
+              className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            >
+              Go home
+            </Link>
+          </div>
         </div>
-      </div>
-    </div>
+      </main>
+    </PublicShell>
   );
 }
 
@@ -232,10 +233,10 @@ html.dark #app-splash .app-splash-loader-bar,html[data-theme="dark"] #app-splash
 function RootComponent() {
   const location = useLocation();
   const { queryClient } = Route.useRouteContext();
-  const showFooter = shouldShowFooter(location.pathname);
+  const destination = getDestinationBehavior(location.pathname);
+  const showFooter = shouldShowFooter(location.pathname) && destination.shell !== "public";
   const chatRoute = isChatRoute(location.pathname);
   const isHome = location.pathname === "/";
-  const isV2Route = isV2RuntimePath(location.pathname);
 
   useEffect(() => {
     registerAppServiceWorker();
@@ -258,7 +259,7 @@ function RootComponent() {
       <ThemeProvider>
         <SupabaseRuntimeBoundary>
           <AuthProvider>
-            <V2AwareRouteBoundary isV2Route={isV2Route}>
+            <V2AwareRouteBoundary>
               <AuthenticatedProviderBoundary>
                 <NativeShellRuntimeBoundary>
                   {isHome ? (
@@ -375,32 +376,12 @@ function SupabaseRuntimeBoundary({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-function V2AwareRouteBoundary({
-  children,
-  isV2Route,
-}: {
-  children: React.ReactNode;
-  isV2Route: boolean;
-}) {
-  if (isV2Route && !v2FeatureFlags.appShell) return <Navigate to="/inicio" replace />;
-
+function V2AwareRouteBoundary({ children }: { children: React.ReactNode }) {
   return (
-    <RouteProtectionBoundary
-      waitingFallback={isV2Route ? <V2RuntimeState kind="loading" /> : undefined}
-      recoverableErrorFallback={
-        isV2Route ? (
-          <V2RuntimeState
-            kind="session-error"
-            onRetry={() => {
-              if (typeof window !== "undefined") window.location.reload();
-            }}
-          />
-        ) : undefined
-      }
-    >
+    <RouteProtectionBoundary>
       <NetworkStatusBanner />
       <InstallPromptBanner />
-      {isV2Route ? <Outlet /> : children}
+      {children}
     </RouteProtectionBoundary>
   );
 }

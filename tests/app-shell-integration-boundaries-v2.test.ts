@@ -47,24 +47,25 @@ describe("V2 runtime integration boundaries", () => {
     expect(adapter).not.toContain("VITE_");
   });
 
-  it("creates real child routes without intercepting the legacy router", () => {
+  it("keeps route count while tombstoning V2 behind safe redirects", () => {
     const parent = readFileSync(join(projectRoot, "src", "routes", "v2.tsx"), "utf8");
     const index = readFileSync(join(projectRoot, "src", "routes", "v2.index.tsx"), "utf8");
     const child = readFileSync(join(projectRoot, "src", "routes", "v2.$section.tsx"), "utf8");
     expect(parent).toContain('createFileRoute("/v2")');
     expect(index).toContain('createFileRoute("/v2/")');
-    expect(index).toContain('section: "inicio"');
+    expect(index).toContain('<Navigate to="/inicio" replace />');
     expect(child).toContain('createFileRoute("/v2/$section")');
+    expect(child).toContain("getLegacyV2Redirect");
+    expect(child).toContain("replace />");
     expect(child).not.toMatch(/\b(fetch|supabase)\b/i);
   });
 
-  it("gates /v2 at the root while preserving the canonical auth boundary", () => {
+  it("does not mount V2 visual runtime at the root and preserves the auth boundary", () => {
     const root = readFileSync(join(projectRoot, "src", "routes", "__root.tsx"), "utf8");
-    expect(root).toContain("isV2RuntimePath(location.pathname)");
-    expect(root).toContain("!v2FeatureFlags.appShell");
-    expect(root).toContain('<Navigate to="/inicio" replace />');
     expect(root).toContain("<RouteProtectionBoundary");
-    expect(root).toMatch(/isV2Route\s*\?\s*<Outlet\s*\/>/);
+    expect(root).not.toContain("V2RuntimeState");
+    expect(root).not.toContain("isV2RuntimePath");
+    expect(root).not.toContain("v2FeatureFlags");
     expect(root).not.toContain("VITE_FF_V2_APP_SHELL");
   });
 

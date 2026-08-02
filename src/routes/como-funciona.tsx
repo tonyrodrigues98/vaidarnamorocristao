@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { PublicNav } from "@/components/PublicNav";
+import { PublicShell } from "@/components/shells/PublicShell";
+import { brand } from "@/config/brand";
 import { UserPlus, ShieldCheck, Heart, MessageCircle } from "lucide-react";
 
 const FAQS = [
@@ -9,11 +10,11 @@ const FAQS = [
   },
   {
     q: "Quanto tempo leva para meu perfil ser aprovado?",
-    a: "Nossa equipe revisa cada perfil manualmente. O processo costuma levar até 48 horas.",
+    a: "A equipe analisa o perfil e o resultado aparece na própria conta. O prazo pode variar conforme a fila e as verificações necessárias.",
   },
   {
     q: "Por que aprovação manual?",
-    a: "Para garantir que cada pessoa aqui é real, cristã e está buscando um relacionamento sério. Reduz fakes e aumenta a qualidade dos matches.",
+    a: "A revisão e a moderação ajudam a reduzir riscos, mas não garantem identidade, fé ou intenção e não substituem seus cuidados de segurança.",
   },
   {
     q: "Posso me cadastrar sendo divorciado?",
@@ -29,21 +30,21 @@ export const Route = createFileRoute("/como-funciona")({
   component: ComoFuncionaPage,
   head: () => ({
     meta: [
-      { title: "Como Funciona o VaiDarNamoro — Namoro Seguro" },
+      { title: `Como funciona — ${brand.displayName}` },
       {
         name: "description",
         content:
-          "Em 4 passos: cadastro, aprovação manual, conheça pretendentes verificados e converse com propósito. Saiba como o VaiDarNamoro funciona.",
+          "Crie sua conta, conclua o perfil, entre na comunidade e use as experiências, incluindo relacionamento opcional.",
       },
       { property: "og:title", content: "Como funciona o VaiDarNamoro" },
       {
         property: "og:description",
         content:
-          "Cadastro, aprovação manual, conexões intencionais. Conheça o passo a passo da plataforma cristã de relacionamentos sérios.",
+          "Cadastro, análise de perfil, comunidade cristã e experiências opcionais em um só lugar.",
       },
-      { property: "og:url", content: "https://vaidarnamoro.com/como-funciona" },
+      { property: "og:url", content: `${brand.origin}/como-funciona` },
     ],
-    links: [{ rel: "canonical", href: "https://vaidarnamoro.com/como-funciona" }],
+    links: [{ rel: "canonical", href: `${brand.origin}/como-funciona` }],
     scripts: [
       {
         type: "application/ld+json",
@@ -70,31 +71,30 @@ const STEPS = [
   {
     icon: ShieldCheck,
     title: "2. Aprovação manual",
-    text: "Nossa equipe revisa seu perfil em até 48h. Garantimos um ambiente real e seguro.",
+    text: "A equipe analisa seu perfil. Revisão e moderação reduzem riscos, mas não eliminam todos os riscos.",
   },
   {
     icon: Heart,
-    title: "3. Demonstre interesse",
-    text: "Conheça pretendentes aprovados. Demonstre interesse — sem swipe, sem ansiedade.",
+    title: "3. Entre na comunidade e explore",
+    text: "Converse, leia o Devocional, participe de Orações e conheça Pets, Arcade e personalização.",
   },
   {
     icon: MessageCircle,
-    title: "4. Converse com propósito",
-    text: "Quando o interesse é recíproco, vocês conversam. Cada conexão tem intenção real.",
+    title: "4. Ative o relacionamento se desejar",
+    text: "O modo de relacionamento é opcional e fica dentro de Explorar, sem swipe ou percentual de compatibilidade.",
   },
 ];
 
 function ComoFuncionaPage() {
   return (
-    <div className="min-h-screen bg-background">
-      <PublicNav />
+    <PublicShell>
       <main className="mx-auto max-w-5xl px-6 py-16 md:py-24">
         <header className="text-center">
           <h1 className="text-4xl font-extrabold tracking-tight md:text-6xl">
             Como <span className="text-gradient">funciona</span>
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
-            Quatro passos simples até a sua próxima história começar.
+            Quatro passos para entrar na comunidade e usar as experiências no seu ritmo.
           </p>
         </header>
 
@@ -115,13 +115,12 @@ function ComoFuncionaPage() {
             Por que aprovação manual?
           </h2>
           <p className="mt-4 text-base leading-relaxed text-muted-foreground">
-            Apps tradicionais permitem qualquer pessoa criar perfil em segundos. O resultado: bots,
-            fakes, pessoas que não compartilham os mesmos valores. Nós escolhemos o caminho mais
-            difícil — revisar cada perfil — porque acreditamos que sua confiança vale o esforço.
+            A revisão humana e as ferramentas de moderação ajudam a identificar inconsistências e
+            responder a denúncias. Esses processos reduzem riscos, mas não eliminam todos eles.
           </p>
           <p className="mt-4 text-base leading-relaxed text-muted-foreground">
-            Quando você está aqui, você sabe: cada pessoa do outro lado é real, cristã, e está
-            buscando algo sério. Não é promessa de marketing. É processo.
+            Preserve sua privacidade, use bloqueio e denúncia quando necessário e procure o suporte
+            diante de qualquer comportamento suspeito.
           </p>
         </section>
 
@@ -151,6 +150,6 @@ function ComoFuncionaPage() {
           </Link>
         </section>
       </main>
-    </div>
+    </PublicShell>
   );
 }

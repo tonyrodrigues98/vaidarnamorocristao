@@ -5,23 +5,23 @@ import {
 } from "@/lib/metadata";
 
 export const rootMetadata = createPublicPageMetadata({
-  title: "VaiDarNamoro — Namoro cristão sério com propósito",
+  title: "VaiDarNamoro — Comunidade cristã 18+",
   exactTitle: true,
   description:
-    "VaiDarNamoro é a plataforma cristã de relacionamentos sérios. Conheça pretendentes aprovados manualmente que vivem e compartilham a sua fé.",
-  ogDescription: "Namoro cristão sério com propósito",
+    "Uma comunidade cristã 18+ para amizade, fé, experiências e conversas. O modo de relacionamento é opcional.",
+  ogDescription: "Comunidade cristã para pertencer, conversar e viver boas experiências.",
   path: "/",
   canonical: false,
 });
 
 export const liveHomeMetadata = createPublicPageMetadata({
-  title: "Caren | Vai Dar Namoro Cristão",
+  title: "VaiDarNamoro — Comunidade cristã 18+",
   exactTitle: true,
   description:
-    "Página oficial da live Vai Dar Namoro Cristão da Caren. Uma comunidade real, feita de pessoas reais.",
+    "Comunidade cristã 18+ para amizade, fé, experiências e conversas, com relacionamento opcional e Live pública.",
   ogDescription:
-    "A página oficial da live da Caren no TikTok. Uma comunidade real, feita de pessoas reais.",
-  twitterDescription: "Página oficial da live Vai Dar Namoro Cristão da Caren.",
+    "Comunidade cristã para pertencer, conversar e viver experiências. Relacionamento é opcional.",
+  twitterDescription: "Comunidade cristã 18+ com amizade, fé e experiências.",
   keywords:
     "Caren, Vai Dar Namoro Cristão, live cristã TikTok, comunidade cristã, relacionamento cristão",
   path: "/",

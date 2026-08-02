@@ -1,5 +1,4 @@
 import { Outlet, createFileRoute } from "@tanstack/react-router";
-import { V2RuntimeErrorBoundary } from "@/v2/integration";
 
 export const Route = createFileRoute("/v2")({
   component: V2RouteLayout,
@@ -16,9 +15,5 @@ export const Route = createFileRoute("/v2")({
 });
 
 function V2RouteLayout() {
-  return (
-    <V2RuntimeErrorBoundary>
-      <Outlet />
-    </V2RuntimeErrorBoundary>
-  );
+  return <Outlet />;
 }

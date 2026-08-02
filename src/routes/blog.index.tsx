@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { PublicNav } from "@/components/PublicNav";
+import { PublicShell } from "@/components/shells/PublicShell";
+import { brand } from "@/config/brand";
 import { BLOG_POSTS } from "@/data/blog-posts";
 import { Clock, ArrowRight } from "lucide-react";
 
@@ -19,17 +20,16 @@ export const Route = createFileRoute("/blog/")({
         content:
           "Artigos bíblicos sobre namoro cristão, casamento e relacionamentos com propósito.",
       },
-      { property: "og:url", content: "https://vaidarnamoro.com/blog" },
+      { property: "og:url", content: `${brand.origin}/blog` },
     ],
-    links: [{ rel: "canonical", href: "https://vaidarnamoro.com/blog" }],
+    links: [{ rel: "canonical", href: `${brand.origin}/blog` }],
   }),
 });
 
 function BlogIndex() {
   const sorted = [...BLOG_POSTS].sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
   return (
-    <div className="min-h-screen bg-background">
-      <PublicNav />
+    <PublicShell>
       <main className="mx-auto max-w-4xl px-6 py-16 md:py-24">
         <header className="text-center">
           <h1 className="text-4xl font-extrabold tracking-tight md:text-6xl">
@@ -73,6 +73,6 @@ function BlogIndex() {
           ))}
         </section>
       </main>
-    </div>
+    </PublicShell>
   );
 }
