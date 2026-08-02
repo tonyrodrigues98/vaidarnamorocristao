@@ -196,7 +196,11 @@ export const appDestinations: readonly AppDestination[] = [
     futureTab: "profile",
     footer: false,
   }),
-  prefix("app-purpose", "/proposito", mobileAppDefaults),
+  prefix("app-purpose", "/proposito", {
+    ...mobileAppDefaults,
+    futureTab: "messages",
+    footer: false,
+  }),
 
   prefix("app-avatar", "/avatar", appDefaults),
   exact("app-boxes", "/caixas", appDefaults),

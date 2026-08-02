@@ -4,7 +4,7 @@ export type NativeSecondaryDestinationChrome = {
   destinationId: string;
   title: string;
   parentTab: FuturePrimaryTab;
-  parentPath: "/inicio" | "/explorar" | "/perfil" | "/pretendentes";
+  parentPath: "/inicio" | "/explorar" | "/conversas" | "/perfil" | "/pretendentes";
 };
 
 export const nativeSecondaryDestinations = [
@@ -85,6 +85,12 @@ export const nativeSecondaryDestinations = [
     title: "Insights",
     parentTab: "profile",
     parentPath: "/perfil",
+  },
+  {
+    destinationId: "app-purpose",
+    title: "Propósito",
+    parentTab: "messages",
+    parentPath: "/conversas",
   },
 ] as const satisfies readonly NativeSecondaryDestinationChrome[];
 
