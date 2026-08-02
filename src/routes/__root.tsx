@@ -39,6 +39,7 @@ import { rootMetadata } from "@/config/route-metadata";
 import { PublicShell } from "@/components/shells/PublicShell";
 import { getDestinationBehavior } from "@/config/app-destinations";
 import { AdminShellRuntimeBoundary } from "@/components/admin-shell/AdminShellRuntimeBoundary";
+import { AdminRouteAccessBoundary } from "@/components/admin-shell/AdminRouteAccessBoundary";
 
 function NotFoundComponent() {
   return (
@@ -262,49 +263,51 @@ function RootComponent() {
           <AuthProvider>
             <V2AwareRouteBoundary>
               <AuthenticatedProviderBoundary>
-                <AdminShellRuntimeBoundary>
-                  <NativeShellRuntimeBoundary>
-                    {isHome ? (
-                      <Outlet />
-                    ) : (
-                      <div
-                        className={
-                          chatRoute
-                            ? "flex h-[var(--app-visual-height,100dvh)] flex-col overflow-hidden"
-                            : "flex min-h-screen flex-col"
-                        }
-                      >
-                        <div className={chatRoute ? "min-h-0 flex-1 overflow-hidden" : "flex-1"}>
-                          <MobileRouteTransition disabled={chatRoute}>
-                            <Outlet />
-                          </MobileRouteTransition>
+                <AdminRouteAccessBoundary>
+                  <AdminShellRuntimeBoundary>
+                    <NativeShellRuntimeBoundary>
+                      {isHome ? (
+                        <Outlet />
+                      ) : (
+                        <div
+                          className={
+                            chatRoute
+                              ? "flex h-[var(--app-visual-height,100dvh)] flex-col overflow-hidden"
+                              : "flex min-h-screen flex-col"
+                          }
+                        >
+                          <div className={chatRoute ? "min-h-0 flex-1 overflow-hidden" : "flex-1"}>
+                            <MobileRouteTransition disabled={chatRoute}>
+                              <Outlet />
+                            </MobileRouteTransition>
+                          </div>
+                          {showFooter && (
+                            <footer className="mt-8 border-t border-border/40 bg-card/60 py-4 text-muted-foreground">
+                              <div className="mx-auto flex max-w-7xl items-center justify-end gap-4 px-4 text-xs text-muted-foreground">
+                                <Link
+                                  to="/termos"
+                                  className="hover:text-[var(--rose)] hover:underline"
+                                >
+                                  Termos e Condições
+                                </Link>
+                                <span aria-hidden className="opacity-40">
+                                  •
+                                </span>
+                                <Link
+                                  to="/manual"
+                                  className="hover:text-[var(--rose)] hover:underline"
+                                >
+                                  Manual do Usuário
+                                </Link>
+                                <SupportFooterButton />
+                              </div>
+                            </footer>
+                          )}
                         </div>
-                        {showFooter && (
-                          <footer className="mt-8 border-t border-border/40 bg-card/60 py-4 text-muted-foreground">
-                            <div className="mx-auto flex max-w-7xl items-center justify-end gap-4 px-4 text-xs text-muted-foreground">
-                              <Link
-                                to="/termos"
-                                className="hover:text-[var(--rose)] hover:underline"
-                              >
-                                Termos e Condições
-                              </Link>
-                              <span aria-hidden className="opacity-40">
-                                •
-                              </span>
-                              <Link
-                                to="/manual"
-                                className="hover:text-[var(--rose)] hover:underline"
-                              >
-                                Manual do Usuário
-                              </Link>
-                              <SupportFooterButton />
-                            </div>
-                          </footer>
-                        )}
-                      </div>
-                    )}
-                  </NativeShellRuntimeBoundary>
-                </AdminShellRuntimeBoundary>
+                      )}
+                    </NativeShellRuntimeBoundary>
+                  </AdminShellRuntimeBoundary>
+                </AdminRouteAccessBoundary>
               </AuthenticatedProviderBoundary>
             </V2AwareRouteBoundary>
             <Toaster richColors position="top-right" />

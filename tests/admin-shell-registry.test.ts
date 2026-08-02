@@ -27,11 +27,9 @@ describe("role-aware admin shell registry", () => {
     expect(getAdminNavigationForRole("user")).toEqual([]);
     expect(getAdminNavigationForRole("moderador").map((item) => item.id)).toEqual([
       "admin-overview",
-      "admin-gifts",
     ]);
     expect(getAdminNavigationForRole("apresentador").map((item) => item.id)).toEqual([
       "admin-overview",
-      "admin-gifts",
     ]);
     expect(getAdminNavigationForRole("admin").some((item) => item.id === "admin-avatar")).toBe(
       false,

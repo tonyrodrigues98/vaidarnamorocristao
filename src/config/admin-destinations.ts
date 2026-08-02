@@ -77,7 +77,7 @@ export const adminDestinations = [
     shortLabel: "Presentes",
     group: "content",
     icon: "gifts",
-    allowedRoles: allStaff,
+    allowedRoles: administrators,
   },
   {
     id: "admin-stickers",
