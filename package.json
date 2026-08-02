@@ -13,6 +13,7 @@
     "lint:global": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "release:qualify": "node scripts/release/qualify-native-shell.mjs",
     "format:check:changed": "node scripts/native-shell/format-check-changed.mjs",
     "test": "vitest run",
     "test:unit": "vitest run --exclude tests/starter-bundle.test.ts --exclude tests/moderation-rls.test.ts --exclude tests/chat-e2e.test.ts --exclude tests/realtime-messages.test.ts --exclude tests/messages-rls.test.ts",
