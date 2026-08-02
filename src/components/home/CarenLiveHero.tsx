@@ -3,7 +3,7 @@ import { ArrowRight, Clock, Heart, Music2, Radio } from "lucide-react";
 
 import { InstallAppButton } from "@/components/InstallAppButton";
 import { Button } from "@/components/ui/button";
-import carenHeroAsset from "@/assets/caren-hero.jpeg.asset.json";
+import carenHeroAsset from "@/assets/public/caren-hero.jpeg";
 
 export const TIKTOK_LIVE_URL = "https://www.tiktok.com/@carenlayane6?_r=1&_t=ZS-96w3ETPtTl3";
 export const COMMUNITY_AUTH_ROUTE = "/inicio";
@@ -12,7 +12,7 @@ export function CarenLiveHero() {
   return (
     <section className="relative isolate flex min-h-dvh flex-col overflow-hidden px-4 pb-8 pt-24 sm:px-6 lg:px-10">
       <img
-        src={carenHeroAsset.url}
+        src={carenHeroAsset}
         alt="Caren"
         className="pointer-events-none absolute inset-0 -z-30 h-full w-full object-cover object-[50%_30%] sm:object-[50%_25%]"
         loading="eager"
