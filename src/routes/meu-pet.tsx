@@ -17,6 +17,8 @@ import {
 
 import { useAuth } from "@/lib/auth";
 import { Header } from "@/components/layout/Header";
+import { NativePetRoot } from "@/components/pet/native/NativePetRoot";
+import { useNativeShellRuntime } from "@/components/native-shell/NativeShellRuntimeContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -39,9 +41,17 @@ import type {
   UserPetV2Full,
 } from "@/types/petCatalog";
 import { cn } from "@/lib/utils";
-import { ADULT_PET_UNLOCK_COST, isAdultPetUnlocked, unlockAdultPetWithCoins } from "@/lib/petEvolution";
+import {
+  ADULT_PET_UNLOCK_COST,
+  isAdultPetUnlocked,
+  unlockAdultPetWithCoins,
+} from "@/lib/petEvolution";
 import { CoinIcon } from "@/components/icons/CoinIcon";
-import { PetBackgroundLayer, PetSceneryPanel, usePetScenery } from "@/components/pet/PetSceneryPanel";
+import {
+  PetBackgroundLayer,
+  PetSceneryPanel,
+  usePetScenery,
+} from "@/components/pet/PetSceneryPanel";
 import { usePetDayNight } from "@/lib/petDayNight";
 import { PetNeedsHud } from "@/components/pet/PetNeedsHud";
 import { PetBuffsHud } from "@/components/pet/PetBuffsHud";
@@ -150,13 +160,7 @@ function PetArtwork({
   );
 }
 
-type StepKey =
-  | "category"
-  | "type"
-  | "stage"
-  | "name"
-  | "personality"
-  | "confirm";
+type StepKey = "category" | "type" | "stage" | "name" | "personality" | "confirm";
 
 type Selection = {
   category: PetCategory | null;
@@ -189,6 +193,7 @@ function resolvePetImage(sel: Selection): string | null {
 function MeuPetPage() {
   const { user, loading } = useAuth();
   const queryClient = useQueryClient();
+  const { active: nativeShellActive } = useNativeShellRuntime();
   const petQuery = useQuery(myPetV2QueryOptions(user?.id));
   const existing = petQuery.data ?? null;
   const [wizardOverride, setWizardOverride] = useState<boolean | null>(null);
@@ -209,6 +214,18 @@ function MeuPetPage() {
   if (loading) return null;
   if (!user) return <Navigate to="/auth/login" />;
 
+  const petContent = reloading ? (
+    <PetShowcaseSkeleton />
+  ) : wizard ? (
+    <Wizard onCancel={existing ? () => setWizardOverride(false) : undefined} onDone={reload} />
+  ) : existing ? (
+    <Showcase pet={existing} onChange={() => setWizardOverride(true)} onUpdated={reload} />
+  ) : null;
+
+  if (nativeShellActive) {
+    return <NativePetRoot>{petContent}</NativePetRoot>;
+  }
+
   return (
     <div className="min-h-screen bg-white text-neutral-900 antialiased [font-feature-settings:'ss01','cv11']">
       <Header />
@@ -226,20 +243,7 @@ function MeuPetPage() {
           </p>
         </header>
 
-        {reloading ? (
-          <PetShowcaseSkeleton />
-        ) : wizard ? (
-          <Wizard
-            onCancel={existing ? () => setWizardOverride(false) : undefined}
-            onDone={reload}
-          />
-        ) : existing ? (
-          <Showcase
-            pet={existing}
-            onChange={() => setWizardOverride(true)}
-            onUpdated={reload}
-          />
-        ) : null}
+        {petContent}
       </main>
     </div>
   );
@@ -321,7 +325,11 @@ function Showcase({
       showAwayToast(k);
       return;
     }
-    try { recordLastAction(pet.id, k); } catch { /* ignore */ }
+    try {
+      recordLastAction(pet.id, k);
+    } catch {
+      /* ignore */
+    }
     setActionKind(k);
   }
 
@@ -415,7 +423,11 @@ function Showcase({
   // Snapshot otimista das stats no navegador — evita "flash" ao recarregar.
   useEffect(() => {
     if (careStates.length === 0) return;
-    try { saveCareSnapshot(pet.id, careValues); } catch { /* ignore */ }
+    try {
+      saveCareSnapshot(pet.id, careValues);
+    } catch {
+      /* ignore */
+    }
   }, [careValues, careStates.length, pet.id]);
 
   const longPress = useLongPress(() => setRadialOpen(true), 350);
@@ -444,62 +456,254 @@ function Showcase({
 
   return (
     <div className="space-y-4">
-    {viewMode === "scene" ? (
-      <div className="fixed inset-0 z-50 overflow-hidden bg-neutral-950">
-        <PetLivingRoom
-          pet={pet}
-          petImage={image}
-          careValues={careValues}
-          isAway={isAway}
-          awayLabel={isAway ? `Volta em ${awayRemaining}` : undefined}
-          xpRefresh={xpRefresh}
-          scenery={scenery}
-          onCareAction={requestAction}
-          onSwitchToList={() => setViewModeAndPersist("list")}
-          onOpenProfile={() => setProfileOpen(true)}
-          onCareChanged={() => {
-            setXpRefresh((n) => n + 1);
-            void reloadCare();
-            void reloadActiveExpedition();
-          }}
-          onEvolved={() => {
-            setXpRefresh((n) => n + 1);
-            onUpdated();
-          }}
-          babyImage={
-            resolvePetDisplayImage(pet.variant, "baby") ||
-            resolvePetDisplayImage(pet.species, "baby") ||
-            null
-          }
-          adultImage={
-            resolvePetDisplayImage(pet.variant, "adult") ||
-            resolvePetDisplayImage(pet.species, "adult") ||
-            null
-          }
-        />
-        {/* Perfil — XP + nome + visibilidade + trocar pet — em sheet pra não poluir a cena */}
-        <Sheet open={profileOpen} onOpenChange={setProfileOpen}>
-          <SheetContent side="bottom" className="max-h-[80vh] overflow-y-auto rounded-t-3xl">
-            <SheetHeader className="text-left">
-              <SheetTitle>Perfil do pet</SheetTitle>
-              <SheetDescription>XP, nome, visibilidade e trocar de pet.</SheetDescription>
-            </SheetHeader>
-            <div className="mt-4 space-y-4">
-              <PetXpBar refreshKey={xpRefresh} />
-              <div className="flex flex-wrap items-center gap-2">
+      {viewMode === "scene" ? (
+        <div className="fixed inset-0 z-50 overflow-hidden bg-neutral-950">
+          <PetLivingRoom
+            pet={pet}
+            petImage={image}
+            careValues={careValues}
+            isAway={isAway}
+            awayLabel={isAway ? `Volta em ${awayRemaining}` : undefined}
+            xpRefresh={xpRefresh}
+            scenery={scenery}
+            onCareAction={requestAction}
+            onSwitchToList={() => setViewModeAndPersist("list")}
+            onOpenProfile={() => setProfileOpen(true)}
+            onCareChanged={() => {
+              setXpRefresh((n) => n + 1);
+              void reloadCare();
+              void reloadActiveExpedition();
+            }}
+            onEvolved={() => {
+              setXpRefresh((n) => n + 1);
+              onUpdated();
+            }}
+            babyImage={
+              resolvePetDisplayImage(pet.variant, "baby") ||
+              resolvePetDisplayImage(pet.species, "baby") ||
+              null
+            }
+            adultImage={
+              resolvePetDisplayImage(pet.variant, "adult") ||
+              resolvePetDisplayImage(pet.species, "adult") ||
+              null
+            }
+          />
+          {/* Perfil — XP + nome + visibilidade + trocar pet — em sheet pra não poluir a cena */}
+          <Sheet open={profileOpen} onOpenChange={setProfileOpen}>
+            <SheetContent side="bottom" className="max-h-[80vh] overflow-y-auto rounded-t-3xl">
+              <SheetHeader className="text-left">
+                <SheetTitle>Perfil do pet</SheetTitle>
+                <SheetDescription>XP, nome, visibilidade e trocar de pet.</SheetDescription>
+              </SheetHeader>
+              <div className="mt-4 space-y-4">
+                <PetXpBar refreshKey={xpRefresh} />
+                <div className="flex flex-wrap items-center gap-2">
+                  {renaming ? (
+                    <div className="flex flex-1 items-center gap-2">
+                      <Input
+                        autoFocus
+                        maxLength={30}
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        className="h-9 rounded-lg border-neutral-200 bg-white text-sm focus-visible:ring-neutral-900/10"
+                      />
+                      <Button
+                        size="sm"
+                        onClick={() => void saveName()}
+                        className="h-9 rounded-lg bg-neutral-900 px-3 text-white hover:bg-neutral-800"
+                      >
+                        <Check className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setRenaming(true)}
+                      className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-[12px] font-medium text-neutral-700 transition hover:border-neutral-300"
+                    >
+                      <Pencil className="h-3.5 w-3.5" /> Renomear
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => void toggleVisibility()}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-[12px] font-medium text-neutral-700 transition hover:border-neutral-300"
+                  >
+                    {pet.visibility === "public" ? (
+                      <>
+                        <Eye className="h-3.5 w-3.5" /> Público
+                      </>
+                    ) : (
+                      <>
+                        <EyeOff className="h-3.5 w-3.5" /> Privado
+                      </>
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={onChange}
+                    className="ml-auto inline-flex items-center gap-1.5 rounded-full bg-neutral-900 px-3 py-1.5 text-[12px] font-medium text-white transition hover:bg-neutral-800"
+                  >
+                    Trocar pet
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+                <RouterLink
+                  to="/pet-arcade"
+                  className="app-pressable flex h-11 w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-rose-500 to-amber-500 text-sm font-bold text-white shadow-lg shadow-rose-100"
+                >
+                  <Gamepad2 className="h-4 w-4" />
+                  Abrir Pet Arcade
+                </RouterLink>
+              </div>
+            </SheetContent>
+          </Sheet>
+        </div>
+      ) : null}
+      {viewMode === "list" ? (
+        <>
+          <div className="flex justify-end">
+            <button
+              type="button"
+              onClick={() => setViewModeAndPersist("scene")}
+              className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-[11px] font-medium text-neutral-700 transition hover:border-neutral-300 hover:bg-neutral-50"
+              aria-label="Voltar para o Quarto Vivo"
+            >
+              Voltar para o quarto
+            </button>
+          </div>
+          <section className="overflow-hidden rounded-3xl border border-neutral-200/80 bg-white shadow-[0_1px_0_rgba(0,0,0,0.02),0_24px_60px_-30px_rgba(0,0,0,0.12)]">
+            {/* HUD full-width no desktop para barras legíveis */}
+            <div className="hidden border-b border-neutral-100 bg-neutral-50/60 p-4 sm:block">
+              <PetMoodLine name={pet.custom_name} mood={mood} />
+              <PetNeedsHud values={careValues} onPick={requestAction} />
+              <PetBuffsHud mods={runtimeMods} className="mt-3" />
+            </div>
+            <div className="grid gap-0 sm:grid-cols-[260px_1fr]">
+              {/* Visual */}
+              <div className="relative flex flex-col items-stretch justify-center overflow-hidden border-b border-neutral-100 bg-gradient-to-b from-neutral-50 to-white pt-4 sm:border-b-0 sm:border-r sm:pt-6">
+                {/* HUD compacto apenas no mobile */}
+                <div className="relative z-20 mb-3 px-4 sm:hidden">
+                  <PetMoodLine name={pet.custom_name} mood={mood} className="mb-2" />
+                  <PetNeedsHud values={careValues} onPick={requestAction} />
+                  <PetBuffsHud mods={runtimeMods} className="mt-2" />
+                </div>
+                <div className="relative flex min-h-[240px] flex-1 items-center justify-center">
+                  <PetBackgroundLayer background={scenery.equipped} />
+                  <div
+                    aria-hidden
+                    className="absolute inset-x-10 bottom-10 h-2 rounded-full bg-neutral-900/10 blur-2xl"
+                  />
+                  <button
+                    type="button"
+                    {...(isAway ? {} : longPress)}
+                    onContextMenu={(e) => {
+                      e.preventDefault();
+                      openRadial();
+                    }}
+                    onDoubleClick={() => openRadial()}
+                    className={`relative z-10 cursor-pointer select-none touch-none rounded-3xl outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 ${
+                      isAway ? "pointer-events-none" : ""
+                    }`}
+                    aria-label={
+                      isAway ? "Pet em expedição" : "Segure para abrir a central de ações"
+                    }
+                    aria-disabled={isAway}
+                  >
+                    <div
+                      className={
+                        isAway
+                          ? "opacity-50 transition duration-500 [filter:grayscale(1)_blur(8px)_brightness(0.8)]"
+                          : ""
+                      }
+                    >
+                      {image ? (
+                        <PetArtwork
+                          src={image}
+                          alt={pet.custom_name}
+                          hasBackground={!!scenery.equipped}
+                        />
+                      ) : (
+                        <PawPrint className="h-20 w-20 text-neutral-300" />
+                      )}
+                    </div>
+                  </button>
+                  {isAway && activeExpedition ? (
+                    <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center px-4">
+                      <div className="pointer-events-auto flex flex-col items-center gap-1 rounded-2xl border border-neutral-900/10 bg-white/95 px-4 py-2.5 text-center shadow-[0_8px_24px_-12px_rgba(0,0,0,0.35)] backdrop-blur">
+                        <div className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-700">
+                          <Compass className="size-3.5" />
+                          Em expedição
+                        </div>
+                        <div className="line-clamp-1 text-xs font-medium text-neutral-900">
+                          {activeExpedition.title}
+                        </div>
+                        <div className="inline-flex items-center gap-1 text-[11px] text-neutral-500">
+                          <Clock className="size-3" />
+                          Volta em {awayRemaining}
+                        </div>
+                      </div>
+                    </div>
+                  ) : null}
+                  <PetRadialMenu
+                    open={radialOpen}
+                    values={careValues}
+                    onClose={() => setRadialOpen(false)}
+                    onPick={(k) => {
+                      setRadialOpen(false);
+                      requestAction(k);
+                    }}
+                  />
+                  <PetEffectsLayer
+                    hygiene={careValues.hygiene ?? 100}
+                    happiness={careValues.play ?? 100}
+                    affection={careValues.affection ?? 100}
+                    nocturnal={(pet.species as { nocturnal?: boolean } | null)?.nocturnal ?? false}
+                  />
+                  <PetConfessionBubble
+                    triggerKey={confessionTrigger}
+                    personalitySlug={pet.personality?.slug ?? null}
+                  />
+                </div>
+                <div className="relative z-10 mt-2 flex items-center justify-center gap-3 px-4 pb-4 sm:pb-6">
+                  <p className="text-[10px] uppercase tracking-wider text-neutral-400">
+                    Segure no pet para abrir as ações
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setConfessionTrigger((n) => n + 1)}
+                    className="inline-flex items-center gap-1 rounded-full border border-neutral-200 bg-white px-2 py-1 text-[10px] font-medium text-neutral-500 transition hover:border-sky-300 hover:text-sky-600"
+                    aria-label="O que meu pet está pensando?"
+                  >
+                    <MessageCircle className="size-3" />
+                    Pensamento
+                  </button>
+                </div>
+              </div>
+
+              {/* Info */}
+              <div className="flex flex-col justify-center gap-4 p-6 sm:p-8">
+                <div className="flex items-center gap-2 text-[10px] font-medium uppercase tracking-[0.18em] text-neutral-400">
+                  <PawPrint className="h-3 w-3" aria-hidden />
+                  {[pet.category?.name, pet.species?.name, pet.variant?.name]
+                    .filter(Boolean)
+                    .join(" · ")}
+                </div>
+
                 {renaming ? (
-                  <div className="flex flex-1 items-center gap-2">
+                  <div className="flex items-center gap-2">
                     <Input
                       autoFocus
                       maxLength={30}
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      className="h-9 rounded-lg border-neutral-200 bg-white text-sm focus-visible:ring-neutral-900/10"
+                      className="h-10 rounded-xl border-neutral-200 bg-white text-lg font-semibold focus-visible:ring-neutral-900/10"
                     />
                     <Button
                       size="sm"
                       onClick={() => void saveName()}
-                      className="h-9 rounded-lg bg-neutral-900 px-3 text-white hover:bg-neutral-800"
+                      className="h-10 rounded-xl bg-neutral-900 px-3 text-white hover:bg-neutral-800"
                     >
                       <Check className="h-4 w-4" />
                     </Button>
@@ -508,346 +712,166 @@ function Showcase({
                   <button
                     type="button"
                     onClick={() => setRenaming(true)}
-                    className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-[12px] font-medium text-neutral-700 transition hover:border-neutral-300"
+                    className="group inline-flex items-center gap-2 text-left"
                   >
-                    <Pencil className="h-3.5 w-3.5" /> Renomear
+                    <h2 className="text-3xl font-semibold tracking-tight text-neutral-950">
+                      {pet.custom_name}
+                    </h2>
+                    <Pencil className="h-4 w-4 text-neutral-400 opacity-0 transition group-hover:opacity-100" />
                   </button>
                 )}
-                <button
-                  type="button"
-                  onClick={() => void toggleVisibility()}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-[12px] font-medium text-neutral-700 transition hover:border-neutral-300"
-                >
-                  {pet.visibility === "public" ? (
-                    <><Eye className="h-3.5 w-3.5" /> Público</>
-                  ) : (
-                    <><EyeOff className="h-3.5 w-3.5" /> Privado</>
+
+                <div className="flex flex-wrap gap-1.5 text-[11px]">
+                  {pet.life_stage && (
+                    <span className="rounded-full border border-neutral-200 bg-white px-2.5 py-1 font-medium text-neutral-600">
+                      {pet.life_stage.name}
+                    </span>
                   )}
-                </button>
-                <button
-                  type="button"
-                  onClick={onChange}
-                  className="ml-auto inline-flex items-center gap-1.5 rounded-full bg-neutral-900 px-3 py-1.5 text-[12px] font-medium text-white transition hover:bg-neutral-800"
-                >
-                  Trocar pet
-                  <ArrowRight className="h-3.5 w-3.5" />
-                </button>
+                  {pet.personality && (
+                    <span className="rounded-full border border-neutral-200 bg-white px-2.5 py-1 font-medium text-neutral-600">
+                      {pet.personality.name}
+                    </span>
+                  )}
+                  {pet.benefit && (
+                    <span className="inline-flex items-center gap-1 rounded-full border border-neutral-900/10 bg-neutral-900 px-2.5 py-1 font-medium text-white">
+                      <Sparkles className="h-3 w-3" /> {pet.benefit.name}
+                    </span>
+                  )}
+                </div>
+
+                <div className="mt-2 flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => void toggleVisibility()}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-3.5 py-1.5 text-xs font-medium text-neutral-700 transition hover:border-neutral-300 hover:bg-neutral-50"
+                  >
+                    {pet.visibility === "public" ? (
+                      <>
+                        <Eye className="h-3.5 w-3.5" /> Público
+                      </>
+                    ) : (
+                      <>
+                        <EyeOff className="h-3.5 w-3.5" /> Privado
+                      </>
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={onChange}
+                    className="inline-flex items-center gap-1.5 rounded-full bg-neutral-900 px-3.5 py-1.5 text-xs font-medium text-white transition hover:bg-neutral-800"
+                  >
+                    Trocar pet
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </button>
+                </div>
               </div>
-              <RouterLink
-                to="/pet-arcade"
-                className="app-pressable flex h-11 w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-rose-500 to-amber-500 text-sm font-bold text-white shadow-lg shadow-rose-100"
-              >
-                <Gamepad2 className="h-4 w-4" />
-                Abrir Pet Arcade
-              </RouterLink>
             </div>
-          </SheetContent>
-        </Sheet>
-      </div>
-    ) : null}
-    {viewMode === "list" ? (
-    <>
-    <div className="flex justify-end">
-      <button
-        type="button"
-        onClick={() => setViewModeAndPersist("scene")}
-        className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-[11px] font-medium text-neutral-700 transition hover:border-neutral-300 hover:bg-neutral-50"
-        aria-label="Voltar para o Quarto Vivo"
-      >
-        Voltar para o quarto
-      </button>
-    </div>
-    <section className="overflow-hidden rounded-3xl border border-neutral-200/80 bg-white shadow-[0_1px_0_rgba(0,0,0,0.02),0_24px_60px_-30px_rgba(0,0,0,0.12)]">
-      {/* HUD full-width no desktop para barras legíveis */}
-      <div className="hidden border-b border-neutral-100 bg-neutral-50/60 p-4 sm:block">
-        <PetMoodLine name={pet.custom_name} mood={mood} />
-        <PetNeedsHud values={careValues} onPick={requestAction} />
-        <PetBuffsHud mods={runtimeMods} className="mt-3" />
-      </div>
-      <div className="grid gap-0 sm:grid-cols-[260px_1fr]">
-        {/* Visual */}
-        <div className="relative flex flex-col items-stretch justify-center overflow-hidden border-b border-neutral-100 bg-gradient-to-b from-neutral-50 to-white pt-4 sm:border-b-0 sm:border-r sm:pt-6">
-          {/* HUD compacto apenas no mobile */}
-          <div className="relative z-20 mb-3 px-4 sm:hidden">
-            <PetMoodLine name={pet.custom_name} mood={mood} className="mb-2" />
-            <PetNeedsHud values={careValues} onPick={requestAction} />
-            <PetBuffsHud mods={runtimeMods} className="mt-2" />
-          </div>
-          <div className="relative flex min-h-[240px] flex-1 items-center justify-center">
-          <PetBackgroundLayer background={scenery.equipped} />
-          <div
-            aria-hidden
-            className="absolute inset-x-10 bottom-10 h-2 rounded-full bg-neutral-900/10 blur-2xl"
+            {/* Barra de XP — full-width dentro do bloco do pet */}
+            <div className="border-t border-neutral-100 bg-white p-3 sm:p-4">
+              <PetXpBar refreshKey={xpRefresh} />
+            </div>
+          </section>
+          <MissionsTodayCard
+            refreshKey={xpRefresh}
+            onCompletedChange={() => setXpRefresh((n) => n + 1)}
           />
+          <ExpeditionsCard
+            userPetId={pet.id}
+            petImage={image}
+            petName={pet.custom_name}
+            onChanged={() => {
+              setXpRefresh((n) => n + 1);
+              void reloadCare();
+              void reloadActiveExpedition();
+            }}
+          />
+          <PetArcadeEntryCard />
+          <PetCaixasEntryCard />
+          <PetStreakCard refreshKey={xpRefresh} />
+          <PetWeeklyChestCard refreshKey={xpRefresh} onClaimed={() => setXpRefresh((n) => n + 1)} />
+          <PetEvolutionCard
+            refreshKey={xpRefresh}
+            petName={pet.custom_name}
+            babyImage={
+              resolvePetDisplayImage(pet.variant, "baby") ||
+              resolvePetDisplayImage(pet.species, "baby") ||
+              null
+            }
+            adultImage={
+              resolvePetDisplayImage(pet.variant, "adult") ||
+              resolvePetDisplayImage(pet.species, "adult") ||
+              null
+            }
+            onEvolved={() => {
+              setXpRefresh((n) => n + 1);
+              onUpdated();
+            }}
+          />
+          <PetProgressionCard refreshKey={xpRefresh} onChanged={() => setXpRefresh((n) => n + 1)} />
           <button
             type="button"
-            {...(isAway ? {} : longPress)}
-            onContextMenu={(e) => {
-              e.preventDefault();
-              openRadial();
-            }}
-            onDoubleClick={() => openRadial()}
-            className={`relative z-10 cursor-pointer select-none touch-none rounded-3xl outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 ${
-              isAway ? "pointer-events-none" : ""
-            }`}
-            aria-label={isAway ? "Pet em expedição" : "Segure para abrir a central de ações"}
-            aria-disabled={isAway}
+            onClick={() => setHistoryOpen(true)}
+            className="group flex w-full items-center gap-3 rounded-2xl border border-neutral-200 bg-white p-4 text-left transition hover:border-neutral-300 hover:shadow-sm"
           >
-            <div
-              className={
-                isAway
-                  ? "opacity-50 transition duration-500 [filter:grayscale(1)_blur(8px)_brightness(0.8)]"
-                  : ""
-              }
-            >
-              {image ? (
-                <PetArtwork src={image} alt={pet.custom_name} hasBackground={!!scenery.equipped} />
-              ) : (
-                <PawPrint className="h-20 w-20 text-neutral-300" />
-              )}
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-neutral-100 text-neutral-700">
+              <Clock className="size-5" />
             </div>
-          </button>
-          {isAway && activeExpedition ? (
-            <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center px-4">
-              <div className="pointer-events-auto flex flex-col items-center gap-1 rounded-2xl border border-neutral-900/10 bg-white/95 px-4 py-2.5 text-center shadow-[0_8px_24px_-12px_rgba(0,0,0,0.35)] backdrop-blur">
-                <div className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-700">
-                  <Compass className="size-3.5" />
-                  Em expedição
-                </div>
-                <div className="line-clamp-1 text-xs font-medium text-neutral-900">
-                  {activeExpedition.title}
-                </div>
-                <div className="inline-flex items-center gap-1 text-[11px] text-neutral-500">
-                  <Clock className="size-3" />
-                  Volta em {awayRemaining}
-                </div>
+            <div className="min-w-0 flex-1">
+              <div className="text-sm font-semibold text-neutral-900">Histórico de cuidado</div>
+              <div className="text-[12px] text-neutral-500">
+                Veja as ações dos últimos 7 dias, filtradas por dia
               </div>
             </div>
-          ) : null}
-          <PetRadialMenu
-            open={radialOpen}
-            values={careValues}
-            onClose={() => setRadialOpen(false)}
-            onPick={(k) => {
-              setRadialOpen(false);
-              requestAction(k);
-            }}
-          />
-          <PetEffectsLayer
-            hygiene={careValues.hygiene ?? 100}
-            happiness={careValues.play ?? 100}
-            affection={careValues.affection ?? 100}
-            nocturnal={(pet.species as { nocturnal?: boolean } | null)?.nocturnal ?? false}
-          />
-          <PetConfessionBubble
-            triggerKey={confessionTrigger}
-            personalitySlug={pet.personality?.slug ?? null}
-          />
-          </div>
-          <div className="relative z-10 mt-2 flex items-center justify-center gap-3 px-4 pb-4 sm:pb-6">
-            <p className="text-[10px] uppercase tracking-wider text-neutral-400">
-              Segure no pet para abrir as ações
-            </p>
-            <button
-              type="button"
-              onClick={() => setConfessionTrigger((n) => n + 1)}
-              className="inline-flex items-center gap-1 rounded-full border border-neutral-200 bg-white px-2 py-1 text-[10px] font-medium text-neutral-500 transition hover:border-sky-300 hover:text-sky-600"
-              aria-label="O que meu pet está pensando?"
-            >
-              <MessageCircle className="size-3" />
-              Pensamento
-            </button>
-          </div>
-        </div>
-
-        {/* Info */}
-        <div className="flex flex-col justify-center gap-4 p-6 sm:p-8">
-          <div className="flex items-center gap-2 text-[10px] font-medium uppercase tracking-[0.18em] text-neutral-400">
-            <PawPrint className="h-3 w-3" aria-hidden />
-            {[pet.category?.name, pet.species?.name, pet.variant?.name]
-              .filter(Boolean)
-              .join(" · ")}
-          </div>
-
-          {renaming ? (
-            <div className="flex items-center gap-2">
-              <Input
-                autoFocus
-                maxLength={30}
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="h-10 rounded-xl border-neutral-200 bg-white text-lg font-semibold focus-visible:ring-neutral-900/10"
-              />
-              <Button
-                size="sm"
-                onClick={() => void saveName()}
-                className="h-10 rounded-xl bg-neutral-900 px-3 text-white hover:bg-neutral-800"
-              >
-                <Check className="h-4 w-4" />
-              </Button>
+            <ArrowRight className="size-4 text-neutral-300 transition group-hover:text-neutral-500" />
+          </button>
+          <PetCareHistorySheet open={historyOpen} onOpenChange={setHistoryOpen} />
+          <PetOnboardingTour />
+          <RouterLink
+            to="/quiz-biblico"
+            className="group flex items-center gap-3 rounded-2xl border border-neutral-200 bg-white p-4 transition hover:border-sky-300 hover:shadow-sm"
+          >
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-sky-50 text-sky-600">
+              <BookOpen className="size-5" />
             </div>
-          ) : (
-            <button
-              type="button"
-              onClick={() => setRenaming(true)}
-              className="group inline-flex items-center gap-2 text-left"
-            >
-              <h2 className="text-3xl font-semibold tracking-tight text-neutral-950">
-                {pet.custom_name}
-              </h2>
-              <Pencil className="h-4 w-4 text-neutral-400 opacity-0 transition group-hover:opacity-100" />
-            </button>
+            <div className="min-w-0 flex-1">
+              <div className="text-sm font-semibold text-neutral-900">Quiz Bíblico do dia</div>
+              <div className="text-[12px] text-neutral-500">
+                3 perguntas · até +30 XP e +15 moedas
+              </div>
+            </div>
+            <ArrowRight className="size-4 text-neutral-300 transition group-hover:text-sky-500" />
+          </RouterLink>
+          {pet.category?.id && (
+            <PetSceneryPanel
+              categoryId={pet.category.id}
+              speciesId={pet.species?.id ?? null}
+              list={scenery.list}
+              unlocks={scenery.unlocks}
+              equipped={scenery.equipped}
+              level={scenery.level}
+              loading={scenery.loading}
+              onChanged={scenery.reload}
+            />
           )}
-
-          <div className="flex flex-wrap gap-1.5 text-[11px]">
-            {pet.life_stage && (
-              <span className="rounded-full border border-neutral-200 bg-white px-2.5 py-1 font-medium text-neutral-600">
-                {pet.life_stage.name}
-              </span>
-            )}
-            {pet.personality && (
-              <span className="rounded-full border border-neutral-200 bg-white px-2.5 py-1 font-medium text-neutral-600">
-                {pet.personality.name}
-              </span>
-            )}
-            {pet.benefit && (
-              <span className="inline-flex items-center gap-1 rounded-full border border-neutral-900/10 bg-neutral-900 px-2.5 py-1 font-medium text-white">
-                <Sparkles className="h-3 w-3" /> {pet.benefit.name}
-              </span>
-            )}
-          </div>
-
-          <div className="mt-2 flex flex-wrap gap-2">
-            <button
-              type="button"
-              onClick={() => void toggleVisibility()}
-              className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-3.5 py-1.5 text-xs font-medium text-neutral-700 transition hover:border-neutral-300 hover:bg-neutral-50"
-            >
-              {pet.visibility === "public" ? (
-                <><Eye className="h-3.5 w-3.5" /> Público</>
-              ) : (
-                <><EyeOff className="h-3.5 w-3.5" /> Privado</>
-              )}
-            </button>
-            <button
-              type="button"
-              onClick={onChange}
-              className="inline-flex items-center gap-1.5 rounded-full bg-neutral-900 px-3.5 py-1.5 text-xs font-medium text-white transition hover:bg-neutral-800"
-            >
-              Trocar pet
-              <ArrowRight className="h-3.5 w-3.5" />
-            </button>
-          </div>
-        </div>
-      </div>
-      {/* Barra de XP — full-width dentro do bloco do pet */}
-      <div className="border-t border-neutral-100 bg-white p-3 sm:p-4">
-        <PetXpBar refreshKey={xpRefresh} />
-      </div>
-    </section>
-    <MissionsTodayCard
-      refreshKey={xpRefresh}
-      onCompletedChange={() => setXpRefresh((n) => n + 1)}
-    />
-    <ExpeditionsCard
-      userPetId={pet.id}
-      petImage={image}
-      petName={pet.custom_name}
-      onChanged={() => {
-        setXpRefresh((n) => n + 1);
-        void reloadCare();
-        void reloadActiveExpedition();
-      }}
-    />
-    <PetArcadeEntryCard />
-    <PetCaixasEntryCard />
-    <PetStreakCard refreshKey={xpRefresh} />
-    <PetWeeklyChestCard refreshKey={xpRefresh} onClaimed={() => setXpRefresh((n) => n + 1)} />
-    <PetEvolutionCard
-      refreshKey={xpRefresh}
-      petName={pet.custom_name}
-      babyImage={
-        resolvePetDisplayImage(pet.variant, "baby") ||
-        resolvePetDisplayImage(pet.species, "baby") ||
-        null
-      }
-      adultImage={
-        resolvePetDisplayImage(pet.variant, "adult") ||
-        resolvePetDisplayImage(pet.species, "adult") ||
-        null
-      }
-      onEvolved={() => {
-        setXpRefresh((n) => n + 1);
-        onUpdated();
-      }}
-    />
-    <PetProgressionCard refreshKey={xpRefresh} onChanged={() => setXpRefresh((n) => n + 1)} />
-    <button
-      type="button"
-      onClick={() => setHistoryOpen(true)}
-      className="group flex w-full items-center gap-3 rounded-2xl border border-neutral-200 bg-white p-4 text-left transition hover:border-neutral-300 hover:shadow-sm"
-    >
-      <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-neutral-100 text-neutral-700">
-        <Clock className="size-5" />
-      </div>
-      <div className="min-w-0 flex-1">
-        <div className="text-sm font-semibold text-neutral-900">
-          Histórico de cuidado
-        </div>
-        <div className="text-[12px] text-neutral-500">
-          Veja as ações dos últimos 7 dias, filtradas por dia
-        </div>
-      </div>
-      <ArrowRight className="size-4 text-neutral-300 transition group-hover:text-neutral-500" />
-    </button>
-    <PetCareHistorySheet open={historyOpen} onOpenChange={setHistoryOpen} />
-    <PetOnboardingTour />
-    <RouterLink
-      to="/quiz-biblico"
-      className="group flex items-center gap-3 rounded-2xl border border-neutral-200 bg-white p-4 transition hover:border-sky-300 hover:shadow-sm"
-    >
-      <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-sky-50 text-sky-600">
-        <BookOpen className="size-5" />
-      </div>
-      <div className="min-w-0 flex-1">
-        <div className="text-sm font-semibold text-neutral-900">Quiz Bíblico do dia</div>
-        <div className="text-[12px] text-neutral-500">
-          3 perguntas · até +30 XP e +15 moedas
-        </div>
-      </div>
-      <ArrowRight className="size-4 text-neutral-300 transition group-hover:text-sky-500" />
-    </RouterLink>
-    {pet.category?.id && (
-      <PetSceneryPanel
-        categoryId={pet.category.id}
-        speciesId={pet.species?.id ?? null}
-        list={scenery.list}
-        unlocks={scenery.unlocks}
-        equipped={scenery.equipped}
-        level={scenery.level}
-        loading={scenery.loading}
-        onChanged={scenery.reload}
-      />
-    )}
-    </>
-    ) : null}
-    {pet.category?.id && (
-      <PetCareActionSheet
-        open={actionKind !== null}
-        kind={actionKind}
-        userPetId={pet.id}
-        categoryId={pet.category.id}
-        speciesId={pet.species?.id ?? null}
-        currentValue={actionKind ? careValues[actionKind] ?? 0 : 0}
-        onClose={() => setActionKind(null)}
+        </>
+      ) : null}
+      {pet.category?.id && (
+        <PetCareActionSheet
+          open={actionKind !== null}
+          kind={actionKind}
+          userPetId={pet.id}
+          categoryId={pet.category.id}
+          speciesId={pet.species?.id ?? null}
+          currentValue={actionKind ? (careValues[actionKind] ?? 0) : 0}
+          onClose={() => setActionKind(null)}
           onApplied={() => {
             void reloadCare();
             setXpRefresh((n) => n + 1);
           }}
           onRandomEvent={(ev) => setRandomEvent(ev)}
-      />
-    )}
-    <PetRandomEventModal event={randomEvent} onClose={() => setRandomEvent(null)} />
+        />
+      )}
+      <PetRandomEventModal event={randomEvent} onClose={() => setRandomEvent(null)} />
     </div>
   );
 }
@@ -888,7 +912,9 @@ function Wizard({ onCancel, onDone }: { onCancel?: () => void; onDone: () => voi
   // Load species when category chosen
   useEffect(() => {
     if (!sel.category) return;
-    listSpeciesByCategory(sel.category.id).then(setSpecies).catch((e) => toast.error(e.message));
+    listSpeciesByCategory(sel.category.id)
+      .then(setSpecies)
+      .catch((e) => toast.error(e.message));
   }, [sel.category]);
 
   // Load variants when species or category chosen
@@ -964,8 +990,7 @@ function Wizard({ onCancel, onDone }: { onCancel?: () => void; onDone: () => voi
         life_stage_id: sel.stage.id,
         personality_id: sel.personality.id,
         // Benefício é atrelado à espécie/variação no admin — derivado automaticamente.
-        benefit_id:
-          sel.variant?.benefit_id ?? sel.species?.benefit_id ?? null,
+        benefit_id: sel.variant?.benefit_id ?? sel.species?.benefit_id ?? null,
         custom_name: sel.name.trim().slice(0, 30),
         visibility: "public",
       });
@@ -978,7 +1003,9 @@ function Wizard({ onCancel, onDone }: { onCancel?: () => void; onDone: () => voi
     }
   }
 
-  function Grid<T extends { id: string; name: string; description: string | null; image_url: string | null }>({
+  function Grid<
+    T extends { id: string; name: string; description: string | null; image_url: string | null },
+  >({
     items,
     selectedId,
     onPick,
@@ -1066,11 +1093,17 @@ function Wizard({ onCancel, onDone }: { onCancel?: () => void; onDone: () => voi
         it.image_url_baby ??
         it.image_url,
     }));
-    return <Grid items={mapped} selectedId={selectedId} onPick={(picked) => {
-      // find original (with both image fields preserved)
-      const orig = items.find((x) => x.id === picked.id) ?? picked;
-      onPick(orig);
-    }} />;
+    return (
+      <Grid
+        items={mapped}
+        selectedId={selectedId}
+        onPick={(picked) => {
+          // find original (with both image fields preserved)
+          const orig = items.find((x) => x.id === picked.id) ?? picked;
+          onPick(orig);
+        }}
+      />
+    );
   }
 
   const stepTitles: Record<StepKey, string> = {
@@ -1139,8 +1172,8 @@ function Wizard({ onCancel, onDone }: { onCancel?: () => void; onDone: () => voi
           }}
         />
       )}
-      {step === "type" && (
-        variants.length > 0 ? (
+      {step === "type" &&
+        (variants.length > 0 ? (
           <StageAwareGrid
             items={variants}
             stageKind={sel.stage?.kind ?? null}
@@ -1162,8 +1195,7 @@ function Wizard({ onCancel, onDone }: { onCancel?: () => void; onDone: () => voi
               go("confirm");
             }}
           />
-        )
-      )}
+        ))}
       {step === "stage" && (
         <div className="space-y-4">
           {stages.length === 0 ? (
@@ -1213,7 +1245,9 @@ function Wizard({ onCancel, onDone }: { onCancel?: () => void; onDone: () => voi
                           )}
                         />
                       ) : (
-                        <PawPrint className={cn("h-10 w-10 text-neutral-300", locked && "grayscale")} />
+                        <PawPrint
+                          className={cn("h-10 w-10 text-neutral-300", locked && "grayscale")}
+                        />
                       )}
                       {locked && (
                         <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 bg-white/30 backdrop-blur-[1px]">
@@ -1247,7 +1281,8 @@ function Wizard({ onCancel, onDone }: { onCancel?: () => void; onDone: () => voi
               <div className="space-y-1.5 text-[12px] leading-relaxed text-amber-900">
                 <p>
                   Seu <strong>primeiro pet</strong> nasce filhote: você acompanha o crescimento,
-                  sobe de nível com ele e, quando ele cresce, o adulto fica liberado pros próximos pets.
+                  sobe de nível com ele e, quando ele cresce, o adulto fica liberado pros próximos
+                  pets.
                 </p>
                 <p>
                   Quer pular essa fase agora? Desbloqueie o adulto por{" "}
@@ -1343,11 +1378,7 @@ function Wizard({ onCancel, onDone }: { onCancel?: () => void; onDone: () => voi
             onClick={() => void finish()}
             className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-neutral-900 px-6 py-4 text-sm font-semibold text-white transition hover:bg-neutral-800 disabled:bg-neutral-300"
           >
-            {busy ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Check className="h-4 w-4" />
-            )}
+            {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
             Criar meu pet
           </button>
         </div>

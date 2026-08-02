@@ -74,10 +74,12 @@ describe("native shell primary rollout", () => {
       "app-account",
       "app-notifications",
       "app-store",
+      "app-pet",
     ]);
     expect(isNativeShellEligibleDestination(getDestinationBehavior("/conta"))).toBe(true);
     expect(isNativeShellEligibleDestination(getDestinationBehavior("/notificacoes"))).toBe(true);
     expect(isNativeShellEligibleDestination(getDestinationBehavior("/loja"))).toBe(true);
+    expect(isNativeShellEligibleDestination(getDestinationBehavior("/meu-pet"))).toBe(true);
     expect(nativeShellPrimaryDestinationIds).toHaveLength(5);
   });
 

@@ -185,7 +185,11 @@ export const appDestinations: readonly AppDestination[] = [
   prefix("app-avatar", "/avatar", appDefaults),
   exact("app-boxes", "/caixas", appDefaults),
   exact("app-achievements", "/conquistas", appDefaults),
-  exact("app-pet", "/meu-pet", { ...appDefaults, footer: false }),
+  exact("app-pet", "/meu-pet", {
+    ...appDefaults,
+    futureTab: "explore",
+    footer: false,
+  }),
   exact("app-pet-arcade", "/pet-arcade", appDefaults),
   exact("app-bible-quiz", "/quiz-biblico", appDefaults),
 
