@@ -68,6 +68,24 @@ export const nativeSecondaryDestinations = [
     parentTab: "explore",
     parentPath: "/pretendentes",
   },
+  {
+    destinationId: "app-verification",
+    title: "Verificação",
+    parentTab: "profile",
+    parentPath: "/perfil",
+  },
+  {
+    destinationId: "app-blocked-users",
+    title: "Bloqueados",
+    parentTab: "profile",
+    parentPath: "/perfil",
+  },
+  {
+    destinationId: "app-dashboard",
+    title: "Insights",
+    parentTab: "profile",
+    parentPath: "/perfil",
+  },
 ] as const satisfies readonly NativeSecondaryDestinationChrome[];
 
 export function getNativeSecondaryDestinationChrome(

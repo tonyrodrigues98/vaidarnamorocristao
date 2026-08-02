@@ -175,7 +175,7 @@ export const appDestinations: readonly AppDestination[] = [
     futureTab: "home",
     footer: false,
   }),
-  exact("app-dashboard", "/dashboard", mobileAppDefaults),
+  exact("app-dashboard", "/dashboard", { ...mobileAppDefaults, futureTab: "profile" }),
   exact("app-interests", "/interesses", { ...mobileAppDefaults, futureTab: "explore" }),
   exact("app-matches", "/matches", { ...mobileAppDefaults, futureTab: "explore" }),
   prefix("app-gifts", "/presentes", { ...mobileAppDefaults, footer: false }),
@@ -186,8 +186,16 @@ export const appDestinations: readonly AppDestination[] = [
     futureTab: "profile",
     footer: false,
   }),
-  exact("app-blocked-users", "/bloqueados", { ...mobileAppDefaults, footer: false }),
-  exact("app-verification", "/verificacao", { ...mobileAppDefaults, footer: false }),
+  exact("app-blocked-users", "/bloqueados", {
+    ...mobileAppDefaults,
+    futureTab: "profile",
+    footer: false,
+  }),
+  exact("app-verification", "/verificacao", {
+    ...mobileAppDefaults,
+    futureTab: "profile",
+    footer: false,
+  }),
   prefix("app-purpose", "/proposito", mobileAppDefaults),
 
   prefix("app-avatar", "/avatar", appDefaults),

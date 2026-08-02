@@ -80,6 +80,9 @@ describe("native shell primary rollout", () => {
       "app-interests",
       "app-matches",
       "app-anonymous-notes",
+      "app-verification",
+      "app-blocked-users",
+      "app-dashboard",
     ]);
     expect(isNativeShellEligibleDestination(getDestinationBehavior("/conta"))).toBe(true);
     expect(isNativeShellEligibleDestination(getDestinationBehavior("/notificacoes"))).toBe(true);
