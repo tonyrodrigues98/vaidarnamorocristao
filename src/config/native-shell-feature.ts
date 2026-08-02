@@ -41,6 +41,9 @@ export const nativeShellSecondaryDestinationIds = [
   "app-blocked-users",
   "app-dashboard",
   "app-purpose",
+  "support-root",
+  "support-help",
+  "support-ticket",
 ] as const;
 
 type NativeShellPrimaryDestinationId = (typeof nativeShellPrimaryDestinationIds)[number];

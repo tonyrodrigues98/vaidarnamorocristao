@@ -84,6 +84,9 @@ describe("native shell primary rollout", () => {
       "app-blocked-users",
       "app-dashboard",
       "app-purpose",
+      "support-root",
+      "support-help",
+      "support-ticket",
     ]);
     expect(isNativeShellEligibleDestination(getDestinationBehavior("/conta"))).toBe(true);
     expect(isNativeShellEligibleDestination(getDestinationBehavior("/notificacoes"))).toBe(true);

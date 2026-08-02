@@ -1,4 +1,4 @@
-import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
+import { createFileRoute, Link, Navigate, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
@@ -38,6 +38,7 @@ export const Route = createFileRoute("/suporte/")({
 });
 
 function SuportePage() {
+  const navigate = useNavigate();
   const { user, isAdmin, role, isSupportAgent, loading } = useAuth();
   const isStaff =
     isAdmin ||
@@ -114,7 +115,7 @@ function SuportePage() {
               open={open}
               setOpen={setOpen}
               onCreated={(id) => {
-                window.location.href = `/suporte/${id}`;
+                void navigate({ to: "/suporte/$id", params: { id } });
               }}
             />
           )}

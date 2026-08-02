@@ -216,8 +216,19 @@ export const appDestinations: readonly AppDestination[] = [
   }),
   exact("app-bible-quiz", "/quiz-biblico", appDefaults),
 
-  prefix("support", "/suporte", {
+  exact("support-root", "/suporte", {
     ...appDefaults,
+    futureTab: "profile",
+    footer: false,
+  }),
+  exact("support-help", "/suporte/ajuda", {
+    ...appDefaults,
+    futureTab: "profile",
+    footer: false,
+  }),
+  prefix("support-ticket", "/suporte", {
+    ...appDefaults,
+    futureTab: "profile",
     footer: false,
   }),
   prefix("admin", "/admin", {
