@@ -62,10 +62,9 @@ Logs do Wrangler confirmaram os cinco requests e nenhum erro server-side.
 - Script local `npm run preview`: **BLOQUEADO POR INCOMPATIBILIDADE DE OUTPUT**.
 - Nenhuma alteração de runtime foi feita para contornar o resultado.
 
-## Rebuild do preview (2026-08-02)
+## Rebuild isolado do preview Lovable (2026-08-02)
 
-O worker bundle do preview do commit `6b4eb6a4` não existia no armazenamento do
-runtime (`Worker bundle not found: ...:6b4eb6a4:_worker_bundle.json`), embora o
-`vite build --mode development` local tenha passado. Esta nota documental existe
-apenas para disparar um novo build de preview; nenhum código funcional,
-migration ou branch foi alterado.
+O sandbox confirmou o build de cliente e SSR com exit code 0, mas o bundle do
+preview do commit `6b4eb6a4` não havia sido persistido pela pipeline do Lovable.
+Esta nota existe apenas para disparar uma nova compilação da branch temporária
+de aceitação; não altera código funcional, dependências, banco ou produção.
