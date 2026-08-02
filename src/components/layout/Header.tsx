@@ -44,6 +44,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { brand } from "@/config/brand";
 import { useNativeShellRuntime } from "@/components/native-shell/NativeShellRuntimeContext";
+import { useAdminShellRuntime } from "@/components/admin-shell/AdminShellRuntimeContext";
 
 async function shareSite() {
   const url = typeof window !== "undefined" ? window.location.origin : brand.origin;
@@ -71,9 +72,10 @@ async function shareSite() {
 }
 
 export function Header() {
-  const { active } = useNativeShellRuntime();
+  const { active: nativeActive } = useNativeShellRuntime();
+  const { active: adminActive } = useAdminShellRuntime();
 
-  if (active) return null;
+  if (nativeActive || adminActive) return null;
 
   return <LegacyHeader />;
 }

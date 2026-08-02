@@ -80,7 +80,8 @@ describe("legacy Header suppression", () => {
     const legacy = source.slice(source.indexOf("function LegacyHeader"));
 
     expect(wrapper).toContain("useNativeShellRuntime()");
-    expect(wrapper).toContain("if (active) return null");
+    expect(wrapper).toContain("useAdminShellRuntime()");
+    expect(wrapper).toContain("if (nativeActive || adminActive) return null");
     expect(wrapper).not.toMatch(/useAuth|useEffect|useNotifications|supabase/);
     expect(legacy).toContain('channel("hdr-counters")');
     expect(legacy).toContain('to="/inicio"');

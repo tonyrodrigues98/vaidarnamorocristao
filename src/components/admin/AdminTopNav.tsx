@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { useAdminShellRuntime } from "@/components/admin-shell/AdminShellRuntimeContext";
 
 type AdminNavItem = {
   to: string;
@@ -59,6 +60,14 @@ type AdminTopNavProps = {
  * disconnected pages. Hides on the marketing/social experience.
  */
 export function AdminTopNav({ eyebrow, compact = false }: AdminTopNavProps) {
+  const { active } = useAdminShellRuntime();
+
+  if (active) return null;
+
+  return <LegacyAdminTopNav eyebrow={eyebrow} compact={compact} />;
+}
+
+function LegacyAdminTopNav({ eyebrow, compact = false }: AdminTopNavProps) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   return (
