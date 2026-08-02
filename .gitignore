@@ -20,6 +20,9 @@ dist-ssr
 # Wrangler / Cloudflare
 .wrangler/
 .dev.vars
+artifacts/
+.tmp/
+scripts/release/t47-visual-harness/dist/
 
 # Editor directories and files
 .vscode/*
