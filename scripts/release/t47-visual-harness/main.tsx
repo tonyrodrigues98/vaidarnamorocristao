@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components -- standalone QA entry, never hot-reloaded in production */
 import { createRoot } from "react-dom/client";
 import {
   createMemoryHistory,
