@@ -32,6 +32,7 @@ import {
   Clock,
   AlertCircle,
   PanelLeft,
+  ArrowLeft,
 } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { markSeen } from "@/lib/lastSeen";
@@ -60,6 +61,9 @@ import { spendCoin } from "@/lib/coins";
 import { TypingIndicator, useTypingBroadcaster } from "@/components/TypingIndicator";
 import { GradientName } from "@/components/GradientName";
 import { ConversationDrawer } from "@/components/conversations/ConversationDrawer";
+import { nativeShellFeatureEnabled } from "@/config/native-shell-feature";
+import { shouldUseNativeFocusedChat } from "@/config/native-focused-chat";
+import "@/styles/native-focused-chat.css";
 
 const COOLDOWN_MS = 10_000;
 
@@ -99,6 +103,10 @@ export const Route = createFileRoute("/conversas/comunidade")({
 });
 
 function Comunidade() {
+  const nativeFocusedChat = shouldUseNativeFocusedChat(
+    "/conversas/comunidade",
+    nativeShellFeatureEnabled,
+  );
   const { user, isAdmin, role, loading } = useAuth();
   const canModerateMessages = isAdmin || role === "moderador";
   const canFlagMessages = isAdmin || role === "moderador" || role === "apresentador";
@@ -125,7 +133,7 @@ function Comunidade() {
     Record<string, { role: AppRole; color: RoleColor | null }>
   >({});
   const [contribIds, setContribIds] = useState<Set<string>>(new Set());
-  const restrictedWords = useRestrictedWords();
+  useRestrictedWords();
   const [warning, setWarning] = useState<string | null>(null);
   const [flaggedIds, setFlaggedIds] = useState<Set<string>>(new Set());
   const [myFlags, setMyFlags] = useState<Record<string, { id: string; reason: string }>>({});
@@ -474,9 +482,7 @@ function Comunidade() {
     setHasMoreOlder((data?.length ?? 0) === PAGE_SIZE);
     if (olds.length) {
       await loadProfiles(Array.from(new Set(olds.map((m) => m.sender_id))));
-      const sIds = Array.from(
-        new Set(olds.map((m) => m.sticker_id).filter(Boolean) as string[]),
-      );
+      const sIds = Array.from(new Set(olds.map((m) => m.sticker_id).filter(Boolean) as string[]));
       if (sIds.length) loadStickersByIds(sIds);
     }
     setLoadingOlder(false);
@@ -540,9 +546,7 @@ function Comunidade() {
         .select()
         .single();
       if (error || !data) {
-        setMessages((prev) =>
-          prev.map((m) => (m.id === tempId ? { ...m, _status: "failed" } : m)),
-        );
+        setMessages((prev) => prev.map((m) => (m.id === tempId ? { ...m, _status: "failed" } : m)));
         toast.error(friendlyError(error ?? new Error("Falha ao enviar")));
         return false;
       }
@@ -554,7 +558,7 @@ function Comunidade() {
       });
       return true;
     },
-    [user, restrictedWords, replyTo],
+    [user, replyTo],
   );
 
   const sendSticker = useCallback(
@@ -693,45 +697,61 @@ function Comunidade() {
 
   return (
     <div
-      data-has-bottom-nav="true"
+      data-has-bottom-nav={nativeFocusedChat ? "false" : "true"}
+      data-vdn-native-focused-chat={nativeFocusedChat ? "" : undefined}
       className="mobile-chat-screen flex min-h-screen flex-col bg-background md:min-h-screen"
     >
-      <div className="hidden md:block">
-        <Header />
-      </div>
-      <MobileAppHeader
-        title="Comunidade"
-        subtitle="Chat global em tempo real"
-        rightAction={
-          <>
-            <Link
-              to="/oracoes"
-              aria-label="Orações"
-              className="tap inline-flex h-9 items-center gap-1.5 rounded-full border border-border bg-card/60 px-3 text-xs font-medium text-foreground/80 transition hover:bg-accent"
-            >
-              <HandHeart className="h-4 w-4" />
-              <span>Orações</span>
-            </Link>
-            <button
-              type="button"
-              onClick={() => setDrawerOpen(true)}
-              aria-label="Abrir outras conversas"
-              className="tap inline-flex h-9 w-9 items-center justify-center rounded-full border border-border bg-card/60 text-foreground/80 transition hover:bg-accent"
-            >
-              <PanelLeft className="h-4 w-4" />
-            </button>
-          </>
-        }
-      />
-      <div className="glass mx-auto hidden w-full max-w-3xl items-center gap-3 px-3 py-3 shadow-soft md:flex md:px-4">
+      {!nativeFocusedChat && (
+        <div className="hidden md:block">
+          <Header />
+        </div>
+      )}
+      {!nativeFocusedChat && (
+        <MobileAppHeader
+          title="Comunidade"
+          subtitle="Chat global em tempo real"
+          rightAction={
+            <>
+              <Link
+                to="/oracoes"
+                aria-label="Orações"
+                className="tap inline-flex h-9 items-center gap-1.5 rounded-full border border-border bg-card/60 px-3 text-xs font-medium text-foreground/80 transition hover:bg-accent"
+              >
+                <HandHeart className="h-4 w-4" />
+                <span>Orações</span>
+              </Link>
+              <button
+                type="button"
+                onClick={() => setDrawerOpen(true)}
+                aria-label="Abrir outras conversas"
+                className="tap inline-flex h-9 w-9 items-center justify-center rounded-full border border-border bg-card/60 text-foreground/80 transition hover:bg-accent"
+              >
+                <PanelLeft className="h-4 w-4" />
+              </button>
+            </>
+          }
+        />
+      )}
+      <div
+        className={`native-focused-chat__header glass mx-auto w-full max-w-3xl items-center gap-3 px-3 py-3 shadow-soft md:px-4 ${
+          nativeFocusedChat ? "flex" : "hidden md:flex"
+        }`}
+      >
+        {nativeFocusedChat && (
+          <Link
+            to="/conversas"
+            aria-label="Voltar para conversas"
+            className="inline-flex items-center justify-center rounded-full text-muted-foreground hover:text-foreground"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </Link>
+        )}
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-love shadow-glow">
           <Users className="h-5 w-5 text-white" />
         </div>
         <div className="min-w-0 flex-1">
           <h1 className="truncate text-base font-semibold leading-tight md:text-lg">Chat Global</h1>
-          <p className="truncate text-[11px] text-muted-foreground">
-            Chat global em tempo real
-          </p>
+          <p className="truncate text-[11px] text-muted-foreground">Chat global em tempo real</p>
         </div>
         <Link
           to="/oracoes"
@@ -753,290 +773,283 @@ function Comunidade() {
 
       {pinnedMessages.length > 0 && (
         <div className="mx-auto w-full max-w-3xl border-b border-primary/20 bg-primary/5">
-            <div className="space-y-2 border-b border-primary/20 bg-primary/5 p-3">
-              <div className="flex items-center gap-2 text-xs font-semibold text-primary">
-                <Pin className="h-3.5 w-3.5" /> Mensagens fixadas
-              </div>
-              {pinnedMessages.map((m) => {
-                const p = profiles[m.sender_id];
-                const name = p?.full_name?.split(" ")[0] ?? "Alguém";
-                const senderStaff = staffMap[m.sender_id];
-                return (
-                  <div
-                    key={`pin-${m.id}`}
-                    className="flex items-stretch gap-2 rounded-lg bg-background/60 px-2 py-1.5 text-xs"
+          <div className="space-y-2 border-b border-primary/20 bg-primary/5 p-3">
+            <div className="flex items-center gap-2 text-xs font-semibold text-primary">
+              <Pin className="h-3.5 w-3.5" /> Mensagens fixadas
+            </div>
+            {pinnedMessages.map((m) => {
+              const p = profiles[m.sender_id];
+              const name = p?.full_name?.split(" ")[0] ?? "Alguém";
+              const senderStaff = staffMap[m.sender_id];
+              return (
+                <div
+                  key={`pin-${m.id}`}
+                  className="flex items-stretch gap-2 rounded-lg bg-background/60 px-2 py-1.5 text-xs"
+                >
+                  <button
+                    type="button"
+                    onClick={() => jumpToMessage(m.id)}
+                    className="flex flex-1 items-stretch gap-2 text-left hover:opacity-80"
                   >
+                    <span className="w-0.5 shrink-0 rounded bg-primary" />
+                    <span className="min-w-0 flex-1">
+                      <span className="flex items-center gap-1 font-semibold text-foreground">
+                        <GradientName name={name} gradient={p?.name_gradient} />
+                        {p?.verified && <VerifiedBadge size="sm" />}
+                        {senderStaff && (
+                          <RoleBadge role={senderStaff.role} color={senderStaff.color} />
+                        )}
+                      </span>
+                      <span className="line-clamp-2 text-muted-foreground">{m.content}</span>
+                    </span>
+                  </button>
+                  {isAdmin && (
                     <button
                       type="button"
-                      onClick={() => jumpToMessage(m.id)}
-                      className="flex flex-1 items-stretch gap-2 text-left hover:opacity-80"
+                      onClick={() => togglePin(m)}
+                      aria-label="Desafixar"
+                      className="shrink-0 self-start rounded-full p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
                     >
-                      <span className="w-0.5 shrink-0 rounded bg-primary" />
-                      <span className="min-w-0 flex-1">
-                        <span className="flex items-center gap-1 font-semibold text-foreground">
-                          <GradientName name={name} gradient={p?.name_gradient} />
-                          {p?.verified && <VerifiedBadge size="sm" />}
-                          {senderStaff && (
-                            <RoleBadge role={senderStaff.role} color={senderStaff.color} />
-                          )}
-                        </span>
-                        <span className="line-clamp-2 text-muted-foreground">{m.content}</span>
-                      </span>
+                      <PinOff className="h-3.5 w-3.5" />
                     </button>
-                    {isAdmin && (
-                      <button
-                        type="button"
-                        onClick={() => togglePin(m)}
-                        aria-label="Desafixar"
-                        className="shrink-0 self-start rounded-full p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
-                      >
-                        <PinOff className="h-3.5 w-3.5" />
-                      </button>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
 
       <main
         ref={scrollRef}
-        className="mobile-chat-scroll mx-auto min-h-0 w-full max-w-3xl flex-1 space-y-4 overflow-y-auto px-3 py-4 md:space-y-5 md:px-4 md:py-6"
+        className="native-focused-chat__messages mobile-chat-scroll mx-auto min-h-0 w-full max-w-3xl flex-1 space-y-4 overflow-y-auto px-3 py-4 md:space-y-5 md:px-4 md:py-6"
         onPointerDown={(event) => {
           const target = event.target as HTMLElement;
           if (target.closest("button,a,input,textarea,[role='dialog']")) return;
           blurComposer();
         }}
       >
-            {loadingOlder && (
-              <div className="flex justify-center py-2 text-muted-foreground">
-                <Loader2 className="h-4 w-4 animate-spin" />
-              </div>
-            )}
-            {!hasMoreOlder && messages.length >= PAGE_SIZE && (
-              <p className="text-center text-[11px] text-muted-foreground/70">
-                Início do chat
-              </p>
-            )}
-            {messages.length === 0 ? (
-              !initialLoaded ? (
-                <ChatSkeleton bubbles={8} />
-              ) : (
-                <div className="flex h-full items-center justify-center">
-                  <AppEmptyState
-                    compact
-                    icon={<UsersRound className="h-5 w-5" />}
-                    title="Seja o primeiro a falar hoje"
-                    description="Compartilhe uma mensagem leve, respeitosa e edificante com a comunidade."
-                  />
-                </div>
-              )
-            ) : (
-              visibleMessages.map((m) => {
-                const p = profiles[m.sender_id];
-                const mine = user && m.sender_id === user.id;
-                const canDelete = mine || canModerateMessages;
-                const canEdit = mine;
-                const isEditing = editingId === m.id;
-                const name = p?.full_name?.split(" ")[0] ?? "Alguém";
-                const showActions = actionsOpenId === m.id;
-                const replied = m.reply_to_id ? (messagesById.get(m.reply_to_id) ?? null) : null;
-                const repliedName = replied
-                  ? (profiles[replied.sender_id]?.full_name?.split(" ")[0] ?? "Alguém")
-                  : "";
-                const isFlash = highlightId === m.id;
-                const senderStaff = staffMap[m.sender_id];
-                const senderIsAdmin =
-                  !!senderStaff &&
-                  (senderStaff.role === "admin" || senderStaff.role === "super_admin") &&
-                  (senderStaff.color ?? "gold") === "gold";
-                const senderIsStaff = !!senderStaff;
-                const senderContribOn =
-                  !senderIsAdmin &&
-                  contribIds.has(m.sender_id) &&
-                  p?.contributor_highlight !== false;
-                const isFlagged = flaggedIds.has(m.id);
-                const myFlag = myFlags[m.id];
-                return (
+        {loadingOlder && (
+          <div className="flex justify-center py-2 text-muted-foreground">
+            <Loader2 className="h-4 w-4 animate-spin" />
+          </div>
+        )}
+        {!hasMoreOlder && messages.length >= PAGE_SIZE && (
+          <p className="text-center text-[11px] text-muted-foreground/70">Início do chat</p>
+        )}
+        {messages.length === 0 ? (
+          !initialLoaded ? (
+            <ChatSkeleton bubbles={8} />
+          ) : (
+            <div className="flex h-full items-center justify-center">
+              <AppEmptyState
+                compact
+                icon={<UsersRound className="h-5 w-5" />}
+                title="Seja o primeiro a falar hoje"
+                description="Compartilhe uma mensagem leve, respeitosa e edificante com a comunidade."
+              />
+            </div>
+          )
+        ) : (
+          visibleMessages.map((m) => {
+            const p = profiles[m.sender_id];
+            const mine = user && m.sender_id === user.id;
+            const canDelete = mine || canModerateMessages;
+            const canEdit = mine;
+            const isEditing = editingId === m.id;
+            const name = p?.full_name?.split(" ")[0] ?? "Alguém";
+            const showActions = actionsOpenId === m.id;
+            const replied = m.reply_to_id ? (messagesById.get(m.reply_to_id) ?? null) : null;
+            const repliedName = replied
+              ? (profiles[replied.sender_id]?.full_name?.split(" ")[0] ?? "Alguém")
+              : "";
+            const isFlash = highlightId === m.id;
+            const senderStaff = staffMap[m.sender_id];
+            const senderIsAdmin =
+              !!senderStaff &&
+              (senderStaff.role === "admin" || senderStaff.role === "super_admin") &&
+              (senderStaff.color ?? "gold") === "gold";
+            const senderIsStaff = !!senderStaff;
+            const senderContribOn =
+              !senderIsAdmin && contribIds.has(m.sender_id) && p?.contributor_highlight !== false;
+            const isFlagged = flaggedIds.has(m.id);
+            const myFlag = myFlags[m.id];
+            return (
+              <div
+                key={m.id}
+                ref={(el) => {
+                  messageRefs.current[m.id] = el;
+                }}
+                className={`group relative flex scroll-mt-24 items-start gap-3 rounded-xl transition-colors duration-500 ${isFlash ? "bg-primary/10" : ""} ${isFlagged && isStaffViewer ? "bg-destructive/5 ring-1 ring-destructive/30 px-2 py-1" : ""}`}
+              >
+                {mine ? (
                   <div
-                    key={m.id}
-                    ref={(el) => {
-                      messageRefs.current[m.id] = el;
-                    }}
-                    className={`group relative flex scroll-mt-24 items-start gap-3 rounded-xl transition-colors duration-500 ${isFlash ? "bg-primary/10" : ""} ${isFlagged && isStaffViewer ? "bg-destructive/5 ring-1 ring-destructive/30 px-2 py-1" : ""}`}
+                    className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${senderIsAdmin ? "ring-2 ring-[var(--gold)] ring-offset-2 ring-offset-background" : senderContribOn ? "ring-2 ring-emerald-500 ring-offset-2 ring-offset-background" : senderIsStaff ? "ring-2 ring-primary/40 ring-offset-2 ring-offset-background" : ""}`}
                   >
+                    <DecoratedAvatar
+                      photoUrl={p?.photo_url ?? null}
+                      fallback={name.charAt(0).toUpperCase()}
+                      size={36}
+                      frameId={p?.equipped_frame_id ?? null}
+                      auraId={p?.equipped_aura_id ?? null}
+                      isCommitted={p?.committed}
+                    />
+                  </div>
+                ) : (
+                  <Link
+                    to="/pretendentes/$id"
+                    params={{ id: m.sender_id }}
+                    className={`relative flex h-9 w-9 shrink-0 items-center justify-center overflow-visible rounded-full transition hover:ring-2 hover:ring-primary/40 ${senderIsAdmin ? "ring-2 ring-[var(--gold)] ring-offset-2 ring-offset-background" : senderContribOn ? "ring-2 ring-emerald-500 ring-offset-2 ring-offset-background" : senderIsStaff ? "ring-2 ring-primary/40 ring-offset-2 ring-offset-background" : "ring-0"}`}
+                    aria-label={`Ver perfil de ${name}`}
+                  >
+                    <DecoratedAvatar
+                      photoUrl={p?.photo_url ?? null}
+                      fallback={name.charAt(0).toUpperCase()}
+                      size={36}
+                      frameId={p?.equipped_frame_id ?? null}
+                      auraId={p?.equipped_aura_id ?? null}
+                      isCommitted={p?.committed}
+                    />
+                    <span className="absolute -bottom-0.5 -right-0.5">
+                      <OnlineDot userId={m.sender_id} size="xs" />
+                    </span>
+                  </Link>
+                )}
+                <BubbleWrap
+                  highlighted={showActions || isFlash}
+                  isAdmin={senderIsAdmin}
+                  isContributor={senderContribOn}
+                >
+                  <div className="flex items-baseline gap-2">
                     {mine ? (
-                      <div
-                        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${senderIsAdmin ? "ring-2 ring-[var(--gold)] ring-offset-2 ring-offset-background" : senderContribOn ? "ring-2 ring-emerald-500 ring-offset-2 ring-offset-background" : senderIsStaff ? "ring-2 ring-primary/40 ring-offset-2 ring-offset-background" : ""}`}
-                      >
-                        <DecoratedAvatar
-                          photoUrl={p?.photo_url ?? null}
-                          fallback={name.charAt(0).toUpperCase()}
-                          size={36}
-                          frameId={p?.equipped_frame_id ?? null}
-                          auraId={p?.equipped_aura_id ?? null}
-                          isCommitted={p?.committed}
-                        />
-                      </div>
+                      <span className="flex items-center gap-1 text-sm font-semibold">
+                        <GradientName name={name} gradient={p?.name_gradient} />
+                        {p?.verified && <VerifiedBadge size="sm" />}
+                        {senderStaff &&
+                          (senderIsAdmin ? (
+                            <ShieldCheck
+                              className="admin-icon-sparkle h-3.5 w-3.5 shrink-0"
+                              aria-label="Admin"
+                            />
+                          ) : (
+                            <RoleBadge role={senderStaff.role} color={senderStaff.color} />
+                          ))}
+                      </span>
                     ) : (
                       <Link
                         to="/pretendentes/$id"
                         params={{ id: m.sender_id }}
-                        className={`relative flex h-9 w-9 shrink-0 items-center justify-center overflow-visible rounded-full transition hover:ring-2 hover:ring-primary/40 ${senderIsAdmin ? "ring-2 ring-[var(--gold)] ring-offset-2 ring-offset-background" : senderContribOn ? "ring-2 ring-emerald-500 ring-offset-2 ring-offset-background" : senderIsStaff ? "ring-2 ring-primary/40 ring-offset-2 ring-offset-background" : "ring-0"}`}
-                        aria-label={`Ver perfil de ${name}`}
+                        className="flex items-center gap-1 text-sm font-semibold text-foreground hover:text-primary hover:underline"
                       >
-                        <DecoratedAvatar
-                          photoUrl={p?.photo_url ?? null}
-                          fallback={name.charAt(0).toUpperCase()}
-                          size={36}
-                          frameId={p?.equipped_frame_id ?? null}
-                          auraId={p?.equipped_aura_id ?? null}
-                          isCommitted={p?.committed}
-                        />
-                        <span className="absolute -bottom-0.5 -right-0.5">
-                          <OnlineDot userId={m.sender_id} size="xs" />
-                        </span>
+                        <GradientName name={name} gradient={p?.name_gradient} />
+                        {p?.verified && <VerifiedBadge size="sm" />}
+                        {senderStaff &&
+                          (senderIsAdmin ? (
+                            <ShieldCheck
+                              className="admin-icon-sparkle h-3.5 w-3.5 shrink-0"
+                              aria-label="Admin"
+                            />
+                          ) : (
+                            <RoleBadge role={senderStaff.role} color={senderStaff.color} />
+                          ))}
                       </Link>
                     )}
-                    <BubbleWrap
-                      highlighted={showActions || isFlash}
-                      isAdmin={senderIsAdmin}
-                      isContributor={senderContribOn}
-                    >
-                      <div className="flex items-baseline gap-2">
-                        {mine ? (
-                          <span className="flex items-center gap-1 text-sm font-semibold">
-                            <GradientName name={name} gradient={p?.name_gradient} />
-                            {p?.verified && <VerifiedBadge size="sm" />}
-                            {senderStaff &&
-                              (senderIsAdmin ? (
-                                <ShieldCheck
-                                  className="admin-icon-sparkle h-3.5 w-3.5 shrink-0"
-                                  aria-label="Admin"
-                                />
-                              ) : (
-                                <RoleBadge role={senderStaff.role} color={senderStaff.color} />
-                              ))}
-                          </span>
-                        ) : (
-                          <Link
-                            to="/pretendentes/$id"
-                            params={{ id: m.sender_id }}
-                            className="flex items-center gap-1 text-sm font-semibold text-foreground hover:text-primary hover:underline"
-                          >
-                            <GradientName name={name} gradient={p?.name_gradient} />
-                            {p?.verified && <VerifiedBadge size="sm" />}
-                            {senderStaff &&
-                              (senderIsAdmin ? (
-                                <ShieldCheck
-                                  className="admin-icon-sparkle h-3.5 w-3.5 shrink-0"
-                                  aria-label="Admin"
-                                />
-                              ) : (
-                                <RoleBadge role={senderStaff.role} color={senderStaff.color} />
-                              ))}
-                          </Link>
-                        )}
-                        <UserBadges userId={m.sender_id} size="xs" max={2} />
-                        <span className="text-[11px] text-muted-foreground">
-                          {new Date(m.created_at).toLocaleTimeString("pt-BR", {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                          {m.edited_at ? " · editado" : ""}
-                        </span>
-                        {mine && m._status === "sending" && (
-                          <Clock
-                            className="h-3 w-3 text-muted-foreground"
-                            aria-label="Enviando"
-                          />
-                        )}
-                        {mine && m._status === "failed" && (
-                          <AlertCircle
-                            className="h-3 w-3 text-destructive"
-                            aria-label="Falha ao enviar"
-                          />
-                        )}
-                      </div>
-                      {replied && !isEditing && (
-                        <button
-                          type="button"
-                          onClick={() => jumpToMessage(replied.id)}
-                          className="mt-1 flex w-full items-stretch gap-2 rounded-md bg-foreground/5 px-2 py-1 text-left text-xs hover:bg-foreground/10"
-                        >
-                          <span className="w-0.5 shrink-0 rounded bg-primary" />
-                          <span className="min-w-0 flex-1">
-                            <span className="block font-semibold text-primary">{repliedName}</span>
-                            {replied.sticker_id && stickerCache[replied.sticker_id] ? (
-                              <span className="text-muted-foreground">Sticker</span>
-                            ) : (
-                              <span className="line-clamp-2 text-muted-foreground">
-                                {replied.content}
-                              </span>
-                            )}
-                          </span>
-                          {replied.sticker_id && stickerCache[replied.sticker_id] && (
-                            <img
-                              src={stickerCache[replied.sticker_id].public_url}
-                              alt=""
-                              className="h-10 w-10 shrink-0 select-none object-contain"
-                              draggable={false}
-                            />
-                          )}
-                        </button>
-                      )}
-                      {isEditing ? (
-                        <div className="mt-1 flex flex-col gap-2">
-                          <textarea
-                            value={editText}
-                            onChange={(e) => setEditText(e.target.value)}
-                            rows={2}
-                            maxLength={2000}
-                            autoFocus
-                            className="w-full resize-none rounded-md border border-border bg-background p-2 text-sm outline-none focus:ring-2 focus:ring-primary/50"
-                          />
-                          <div className="flex gap-2">
-                            <Button type="button" size="sm" onClick={() => saveEdit(m.id)}>
-                              <Check className="mr-1 h-3.5 w-3.5" /> Salvar
-                            </Button>
-                            <Button type="button" size="sm" variant="outline" onClick={cancelEdit}>
-                              <X className="mr-1 h-3.5 w-3.5" /> Cancelar
-                            </Button>
-                          </div>
-                        </div>
-                      ) : m.sticker_id ? (
-                        stickerCache[m.sticker_id] ? (
-                          <StickerMessage
-                            url={stickerCache[m.sticker_id].public_url}
-                            alt={stickerCache[m.sticker_id].name}
-                          />
-                        ) : (
-                          <div className="mt-1 h-32 w-32 animate-pulse rounded-xl bg-muted/40" />
-                        )
-                      ) : (
-                        <p className="mt-0.5 whitespace-pre-wrap break-words text-sm text-foreground/90">
-                          {m.content}
-                        </p>
-                      )}
-                    </BubbleWrap>
-                    {!isEditing && (
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setActionsOpenId(m.id);
-                        }}
-                        aria-label="Mais opções"
-                        className="flex h-8 w-8 shrink-0 items-center justify-center self-start rounded-full text-muted-foreground transition-opacity hover:bg-accent hover:text-foreground md:opacity-0 md:group-hover:opacity-100 md:focus:opacity-100"
-                      >
-                        <MoreHorizontal className="h-4 w-4" />
-                      </button>
+                    <UserBadges userId={m.sender_id} size="xs" max={2} />
+                    <span className="text-[11px] text-muted-foreground">
+                      {new Date(m.created_at).toLocaleTimeString("pt-BR", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                      {m.edited_at ? " · editado" : ""}
+                    </span>
+                    {mine && m._status === "sending" && (
+                      <Clock className="h-3 w-3 text-muted-foreground" aria-label="Enviando" />
+                    )}
+                    {mine && m._status === "failed" && (
+                      <AlertCircle
+                        className="h-3 w-3 text-destructive"
+                        aria-label="Falha ao enviar"
+                      />
                     )}
                   </div>
-                );
-              })
-            )}
+                  {replied && !isEditing && (
+                    <button
+                      type="button"
+                      onClick={() => jumpToMessage(replied.id)}
+                      className="mt-1 flex w-full items-stretch gap-2 rounded-md bg-foreground/5 px-2 py-1 text-left text-xs hover:bg-foreground/10"
+                    >
+                      <span className="w-0.5 shrink-0 rounded bg-primary" />
+                      <span className="min-w-0 flex-1">
+                        <span className="block font-semibold text-primary">{repliedName}</span>
+                        {replied.sticker_id && stickerCache[replied.sticker_id] ? (
+                          <span className="text-muted-foreground">Sticker</span>
+                        ) : (
+                          <span className="line-clamp-2 text-muted-foreground">
+                            {replied.content}
+                          </span>
+                        )}
+                      </span>
+                      {replied.sticker_id && stickerCache[replied.sticker_id] && (
+                        <img
+                          src={stickerCache[replied.sticker_id].public_url}
+                          alt=""
+                          className="h-10 w-10 shrink-0 select-none object-contain"
+                          draggable={false}
+                        />
+                      )}
+                    </button>
+                  )}
+                  {isEditing ? (
+                    <div className="mt-1 flex flex-col gap-2">
+                      <textarea
+                        value={editText}
+                        onChange={(e) => setEditText(e.target.value)}
+                        rows={2}
+                        maxLength={2000}
+                        autoFocus
+                        className="w-full resize-none rounded-md border border-border bg-background p-2 text-sm outline-none focus:ring-2 focus:ring-primary/50"
+                      />
+                      <div className="flex gap-2">
+                        <Button type="button" size="sm" onClick={() => saveEdit(m.id)}>
+                          <Check className="mr-1 h-3.5 w-3.5" /> Salvar
+                        </Button>
+                        <Button type="button" size="sm" variant="outline" onClick={cancelEdit}>
+                          <X className="mr-1 h-3.5 w-3.5" /> Cancelar
+                        </Button>
+                      </div>
+                    </div>
+                  ) : m.sticker_id ? (
+                    stickerCache[m.sticker_id] ? (
+                      <StickerMessage
+                        url={stickerCache[m.sticker_id].public_url}
+                        alt={stickerCache[m.sticker_id].name}
+                      />
+                    ) : (
+                      <div className="mt-1 h-32 w-32 animate-pulse rounded-xl bg-muted/40" />
+                    )
+                  ) : (
+                    <p className="mt-0.5 whitespace-pre-wrap break-words text-sm text-foreground/90">
+                      {m.content}
+                    </p>
+                  )}
+                </BubbleWrap>
+                {!isEditing && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setActionsOpenId(m.id);
+                    }}
+                    aria-label="Mais opções"
+                    className="flex h-8 w-8 shrink-0 items-center justify-center self-start rounded-full text-muted-foreground transition-opacity hover:bg-accent hover:text-foreground md:opacity-0 md:group-hover:opacity-100 md:focus:opacity-100"
+                  >
+                    <MoreHorizontal className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
+            );
+          })
+        )}
       </main>
 
       {showNewBadge && (
@@ -1052,18 +1065,18 @@ function Comunidade() {
       )}
 
       <ChatComposer
-            approved={!!approved}
-            userId={user?.id ?? null}
-            replyTo={replyTo}
-            replyToName={
-              replyTo ? (profiles[replyTo.sender_id]?.full_name?.split(" ")[0] ?? "Alguém") : ""
-            }
-            replyToStickerUrl={
-              replyTo?.sticker_id ? (stickerCache[replyTo.sticker_id]?.public_url ?? null) : null
-            }
-            onCancelReply={() => setReplyTo(null)}
-            onSend={sendMessage}
-            onSendSticker={sendSticker}
+        approved={!!approved}
+        userId={user?.id ?? null}
+        replyTo={replyTo}
+        replyToName={
+          replyTo ? (profiles[replyTo.sender_id]?.full_name?.split(" ")[0] ?? "Alguém") : ""
+        }
+        replyToStickerUrl={
+          replyTo?.sticker_id ? (stickerCache[replyTo.sticker_id]?.public_url ?? null) : null
+        }
+        onCancelReply={() => setReplyTo(null)}
+        onSend={sendMessage}
+        onSendSticker={sendSticker}
       />
       <RestrictedWordDialog word={warning} onClose={() => setWarning(null)} />
       <ActionsSheet
@@ -1145,11 +1158,7 @@ function Comunidade() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      <ConversationDrawer
-        open={drawerOpen}
-        onOpenChange={setDrawerOpen}
-        currentType="community"
-      />
+      <ConversationDrawer open={drawerOpen} onOpenChange={setDrawerOpen} currentType="community" />
     </div>
   );
 }
@@ -1405,7 +1414,7 @@ const ChatComposer = memo(function ChatComposer({
   return (
     <form
       onSubmit={handleSubmit}
-      className="mobile-chat-composer flex flex-col gap-0 border-t border-border bg-background/88 backdrop-blur-xl"
+      className="native-focused-chat__composer mobile-chat-composer flex flex-col gap-0 border-t border-border bg-background/88 backdrop-blur-xl"
     >
       <TypingIndicator selfId={userId} />
       <div className="flex flex-col gap-2 px-3 pb-3 pt-2">

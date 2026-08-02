@@ -2,11 +2,7 @@ import { friendlyError } from "@/lib/errors";
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { RequireApproved } from "@/components/RequireApproved";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-  useInfiniteQuery,
-  useQueryClient,
-  type InfiniteData,
-} from "@tanstack/react-query";
+import { useInfiniteQuery, useQueryClient, type InfiniteData } from "@tanstack/react-query";
 import { getActiveCommitmentByUser, type RelationshipCommitment } from "@/lib/commitments";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -54,6 +50,9 @@ import {
   type FirstMessagePartnerProfile,
 } from "@/lib/firstMessageSuggestions";
 import { Sparkles } from "lucide-react";
+import { nativeShellFeatureEnabled } from "@/config/native-shell-feature";
+import { shouldUseNativeFocusedChat } from "@/config/native-focused-chat";
+import "@/styles/native-focused-chat.css";
 
 type Msg = {
   id: string;
@@ -111,6 +110,10 @@ export const Route = createFileRoute("/conversas/$matchId")({
 
 function Chat() {
   const { matchId } = Route.useParams();
+  const nativeFocusedChat = shouldUseNativeFocusedChat(
+    `/conversas/${matchId}`,
+    nativeShellFeatureEnabled,
+  );
   const { user, loading } = useAuth();
   const qc = useQueryClient();
   const [partner, setPartner] = useState<Partner | null>(null);
@@ -156,7 +159,7 @@ function Chat() {
     initialPageParam: null,
     queryFn: ({ pageParam }) => fetchMessagesPage(matchId, pageParam),
     getPreviousPageParam: (firstPage) =>
-      firstPage.length === PAGE_SIZE ? firstPage[0]?.created_at ?? null : undefined,
+      firstPage.length === PAGE_SIZE ? (firstPage[0]?.created_at ?? null) : undefined,
     getNextPageParam: () => undefined,
     staleTime: 60_000,
     refetchOnWindowFocus: false,
@@ -229,7 +232,9 @@ function Chat() {
       qc.setQueryData<MessagesPages>(queryKey, (old) => {
         if (!old) return old;
         const pages = old.pages.map((p) =>
-          p.some((m) => m.id === msg.id) ? p.map((m) => (m.id === msg.id ? { ...m, ...msg } : m)) : p,
+          p.some((m) => m.id === msg.id)
+            ? p.map((m) => (m.id === msg.id ? { ...m, ...msg } : m))
+            : p,
         );
         return { ...old, pages };
       });
@@ -353,13 +358,13 @@ function Chat() {
       .filter((m) => m.sender_id !== user.id && !m.read_at && !seen.has(m.id));
     if (unread.length === 0) return;
     for (const m of unread) seen.add(m.id);
-    Promise.all(
-      unread.map((m) => supabase.rpc("mark_message_read", { _message_id: m.id })),
-    ).catch(() => {
-      // On failure, allow a retry on the next trigger.
-      for (const m of unread) seen.delete(m.id);
-    });
-  }, [pagesData, user?.id]);
+    Promise.all(unread.map((m) => supabase.rpc("mark_message_read", { _message_id: m.id }))).catch(
+      () => {
+        // On failure, allow a retry on the next trigger.
+        for (const m of unread) seen.delete(m.id);
+      },
+    );
+  }, [pagesData, user]);
 
   // Trigger when pages change (initial load, realtime INSERT appended to cache,
   // realtime UPDATE patching read_at).
@@ -445,7 +450,7 @@ function Chat() {
   if (authorized === false)
     return (
       <div className="min-h-screen">
-        <Header />
+        {!nativeFocusedChat && <Header />}
         <main className="mx-auto max-w-md px-4 py-20 text-center">
           <p>Conversa não encontrada.</p>
           <Button asChild variant="outline" className="mt-4">
@@ -457,7 +462,7 @@ function Chat() {
   if (pausedByCommitment && currentCommitment)
     return (
       <div className="min-h-screen">
-        <Header />
+        {!nativeFocusedChat && <Header />}
         <main className="mx-auto max-w-3xl px-4 py-10">
           <Button asChild variant="ghost" className="mb-6">
             <Link to="/conversas">
@@ -512,9 +517,7 @@ function Chat() {
       .single();
     setSending(false);
     if (error || !data) {
-      setPending((prev) =>
-        prev.map((m) => (m.id === tempId ? { ...m, _status: "failed" } : m)),
-      );
+      setPending((prev) => prev.map((m) => (m.id === tempId ? { ...m, _status: "failed" } : m)));
       toast.error(friendlyError(error ?? new Error("Falha ao enviar")));
       return;
     }
@@ -526,9 +529,7 @@ function Chat() {
   async function retrySend(tempId: string) {
     const msg = pending.find((m) => m.id === tempId);
     if (!msg || !user) return;
-    setPending((prev) =>
-      prev.map((m) => (m.id === tempId ? { ...m, _status: "sending" } : m)),
-    );
+    setPending((prev) => prev.map((m) => (m.id === tempId ? { ...m, _status: "sending" } : m)));
     const { data, error } = await supabase
       .from("messages")
       .insert({
@@ -540,9 +541,7 @@ function Chat() {
       .select()
       .single();
     if (error || !data) {
-      setPending((prev) =>
-        prev.map((m) => (m.id === tempId ? { ...m, _status: "failed" } : m)),
-      );
+      setPending((prev) => prev.map((m) => (m.id === tempId ? { ...m, _status: "failed" } : m)));
       toast.error(friendlyError(error ?? new Error("Falha ao reenviar")));
       return;
     }
@@ -604,11 +603,16 @@ function Chat() {
   }
 
   return (
-    <div className="mobile-chat-screen flex min-h-screen flex-col bg-background md:min-h-screen">
-      <div className="hidden md:block">
-        <Header />
-      </div>
-      <div className="glass mx-auto flex w-full max-w-3xl items-center gap-3 px-3 py-3 shadow-soft md:px-4">
+    <div
+      data-vdn-native-focused-chat={nativeFocusedChat ? "" : undefined}
+      className="mobile-chat-screen flex min-h-screen flex-col bg-background md:min-h-screen"
+    >
+      {!nativeFocusedChat && (
+        <div className="hidden md:block">
+          <Header />
+        </div>
+      )}
+      <div className="native-focused-chat__header glass mx-auto flex w-full max-w-3xl items-center gap-3 px-3 py-3 shadow-soft md:px-4">
         <Link to="/conversas" className="text-muted-foreground hover:text-foreground">
           <ArrowLeft className="h-5 w-5" />
         </Link>
@@ -691,7 +695,7 @@ function Chat() {
 
       <main
         ref={scrollRef}
-        className="mobile-chat-scroll mx-auto min-h-0 w-full max-w-3xl flex-1 space-y-4 overflow-y-auto px-3 py-4 md:space-y-5 md:px-4 md:py-8"
+        className="native-focused-chat__messages mobile-chat-scroll mx-auto min-h-0 w-full max-w-3xl flex-1 space-y-4 overflow-y-auto px-3 py-4 md:space-y-5 md:px-4 md:py-8"
         onPointerDown={(event) => {
           const target = event.target as HTMLElement;
           if (target.closest("button,a,input,textarea,[role='dialog']")) return;
@@ -705,13 +709,9 @@ function Chat() {
           </div>
         )}
         {!hasMoreOlder && messages.length >= PAGE_SIZE && (
-          <p className="text-center text-[11px] text-muted-foreground/70">
-            Início da conversa
-          </p>
+          <p className="text-center text-[11px] text-muted-foreground/70">Início da conversa</p>
         )}
-        {authorized === null && messages.length === 0 && (
-          <ChatSkeleton bubbles={8} />
-        )}
+        {authorized === null && messages.length === 0 && <ChatSkeleton bubbles={8} />}
         {authorized === true && messages.length === 0 && (
           <div className="mt-10 flex flex-col items-center gap-5">
             <AppEmptyState
@@ -867,7 +867,8 @@ function Chat() {
                             <AlertCircle className="h-3 w-3" /> tentar
                           </button>
                         )}
-                        {mine && !m._status &&
+                        {mine &&
+                          !m._status &&
                           (m.read_at ? (
                             <span
                               className="ml-0.5 inline-flex items-center gap-0.5"
@@ -964,7 +965,7 @@ function Chat() {
 
       <form
         onSubmit={send}
-        className="mobile-chat-composer border-t border-border bg-background/88 px-3 py-3 backdrop-blur-xl"
+        className="native-focused-chat__composer mobile-chat-composer border-t border-border bg-background/88 px-3 py-3 backdrop-blur-xl"
       >
         <div className="mx-auto flex max-w-3xl flex-col gap-2">
           {replyTo && (
