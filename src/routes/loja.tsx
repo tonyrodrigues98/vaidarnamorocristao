@@ -76,6 +76,8 @@ import {
 } from "@/lib/freebies";
 import { Gift } from "lucide-react";
 import { lojaMetadata } from "@/config/route-metadata";
+import { NativeStoreHeader } from "@/components/store/native/NativeStoreHeader";
+import { useNativeShellRuntime } from "@/components/native-shell/NativeShellRuntimeContext";
 
 export const Route = createFileRoute("/loja")({
   component: LojaPage,
@@ -111,6 +113,7 @@ function LojaPage() {
   const { user, loading: authLoading } = useAuth();
   const queryClient = useQueryClient();
   const { isOnline } = useNetworkStatus();
+  const { active: nativeShellActive } = useNativeShellRuntime();
   const [busyId, setBusyId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<CategoryKey>("all");
   const [confirm, setConfirm] = useState<Decoration | null>(null);
@@ -515,124 +518,138 @@ function LojaPage() {
       <Header />
       <MobileAppHeader title="Loja" subtitle="Personalize sua experiência" />
       <PullToRefresh onRefresh={handlePullRefresh} disabled={!user || !isOnline}>
-        {/* Mobile compact balance widget */}
-        <section className="md:hidden border-b border-border/60 bg-background">
-          <div className="px-4 py-4">
-            <div
-              className="relative overflow-hidden rounded-2xl border border-border/60 px-4 py-3 shadow-soft"
-              style={{
-                background:
-                  "linear-gradient(120deg, color-mix(in oklab, var(--rose) 14%, var(--card)) 0%, color-mix(in oklab, #f59e0b 12%, var(--card)) 100%)",
-              }}
-            >
-              <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-100 text-amber-700">
-                    <CoinIcon className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <p className="text-[10px] uppercase tracking-wide text-muted-foreground">
-                      Seu saldo
-                    </p>
-                    <p className="text-lg font-semibold leading-none">
-                      {balanceKnown ? balance : "—"}
-                      <span className="ml-1 text-xs font-normal text-muted-foreground">
-                        {balanceKnown ? "moedas" : "saldo indisponível offline"}
-                      </span>
-                    </p>
-                  </div>
-                </div>
-                <span className="inline-flex items-center gap-1 rounded-full bg-background/80 px-2.5 py-1 text-[10px] font-medium text-muted-foreground backdrop-blur">
-                  <Gem className="h-3 w-3 text-[var(--rose)]" /> Loja do App
-                </span>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Hero (desktop) */}
-        <section className="relative overflow-hidden border-b hidden md:block">
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-0 -z-10"
-            style={{
-              background:
-                "radial-gradient(60% 80% at 20% 0%, color-mix(in oklab, var(--rose) 22%, transparent), transparent 60%), radial-gradient(50% 70% at 90% 10%, color-mix(in oklab, var(--lilac, #c4b5fd) 22%, transparent), transparent 60%)",
-            }}
+        {nativeShellActive ? (
+          <NativeStoreHeader
+            balance={balance}
+            balanceKnown={balanceKnown}
+            categories={CATEGORIES}
+            activeCategory={activeTab}
+            onCategoryChange={setActiveTab}
           />
-          <div
-            aria-hidden
-            className="pointer-events-none absolute -top-20 right-10 h-64 w-64 rounded-full opacity-40 blur-3xl"
-            style={{ background: "color-mix(in oklab, var(--rose) 50%, transparent)" }}
-          />
-          <div
-            aria-hidden
-            className="pointer-events-none absolute -bottom-24 -left-10 h-72 w-72 rounded-full opacity-30 blur-3xl"
-            style={{ background: "color-mix(in oklab, var(--lilac, #c4b5fd) 60%, transparent)" }}
-          />
-
-          <div className="mx-auto max-w-5xl px-4 py-10 sm:py-14">
-            <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
-              <div className="max-w-xl">
-                <div className="inline-flex items-center gap-2 rounded-full border border-[var(--rose-soft)]/40 bg-background/70 px-3 py-1 text-xs font-medium text-[var(--rose)] backdrop-blur">
-                  <Gem className="h-3.5 w-3.5" /> Loja da Plataforma
-                </div>
-                <h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
-                  Personalize seu perfil
-                </h1>
-                <p className="mt-2 text-sm text-muted-foreground sm:text-base">
-                  Use suas moedas para desbloquear molduras, auras e itens exclusivos. Toda compra
-                  fica salva permanentemente na sua conta.
-                </p>
-              </div>
-
-              {/* Balance */}
-              <div className="inline-flex items-center gap-3 self-start rounded-2xl border bg-card/80 px-4 py-3 shadow-soft backdrop-blur sm:self-end">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-100 text-amber-700">
-                  <CoinIcon className="h-5 w-5" />
-                </div>
-                <div>
-                  <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
-                    Seu saldo
-                  </p>
-                  <p className="text-lg font-semibold leading-none">
-                    {balanceKnown ? balance : "—"}
-                    <span className="ml-1 text-xs font-normal text-muted-foreground">
-                      {balanceKnown ? "moedas" : "saldo indisponível offline"}
+        ) : (
+          <>
+            {/* Mobile compact balance widget */}
+            <section className="md:hidden border-b border-border/60 bg-background">
+              <div className="px-4 py-4">
+                <div
+                  className="relative overflow-hidden rounded-2xl border border-border/60 px-4 py-3 shadow-soft"
+                  style={{
+                    background:
+                      "linear-gradient(120deg, color-mix(in oklab, var(--rose) 14%, var(--card)) 0%, color-mix(in oklab, #f59e0b 12%, var(--card)) 100%)",
+                  }}
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-100 text-amber-700">
+                        <CoinIcon className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                          Seu saldo
+                        </p>
+                        <p className="text-lg font-semibold leading-none">
+                          {balanceKnown ? balance : "—"}
+                          <span className="ml-1 text-xs font-normal text-muted-foreground">
+                            {balanceKnown ? "moedas" : "saldo indisponível offline"}
+                          </span>
+                        </p>
+                      </div>
+                    </div>
+                    <span className="inline-flex items-center gap-1 rounded-full bg-background/80 px-2.5 py-1 text-[10px] font-medium text-muted-foreground backdrop-blur">
+                      <Gem className="h-3 w-3 text-[var(--rose)]" /> Loja do App
                     </span>
-                  </p>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* Hero (desktop) */}
+            <section className="relative overflow-hidden border-b hidden md:block">
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-0 -z-10"
+                style={{
+                  background:
+                    "radial-gradient(60% 80% at 20% 0%, color-mix(in oklab, var(--rose) 22%, transparent), transparent 60%), radial-gradient(50% 70% at 90% 10%, color-mix(in oklab, var(--lilac, #c4b5fd) 22%, transparent), transparent 60%)",
+                }}
+              />
+              <div
+                aria-hidden
+                className="pointer-events-none absolute -top-20 right-10 h-64 w-64 rounded-full opacity-40 blur-3xl"
+                style={{ background: "color-mix(in oklab, var(--rose) 50%, transparent)" }}
+              />
+              <div
+                aria-hidden
+                className="pointer-events-none absolute -bottom-24 -left-10 h-72 w-72 rounded-full opacity-30 blur-3xl"
+                style={{
+                  background: "color-mix(in oklab, var(--lilac, #c4b5fd) 60%, transparent)",
+                }}
+              />
+
+              <div className="mx-auto max-w-5xl px-4 py-10 sm:py-14">
+                <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+                  <div className="max-w-xl">
+                    <div className="inline-flex items-center gap-2 rounded-full border border-[var(--rose-soft)]/40 bg-background/70 px-3 py-1 text-xs font-medium text-[var(--rose)] backdrop-blur">
+                      <Gem className="h-3.5 w-3.5" /> Loja da Plataforma
+                    </div>
+                    <h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
+                      Personalize seu perfil
+                    </h1>
+                    <p className="mt-2 text-sm text-muted-foreground sm:text-base">
+                      Use suas moedas para desbloquear molduras, auras e itens exclusivos. Toda
+                      compra fica salva permanentemente na sua conta.
+                    </p>
+                  </div>
+
+                  {/* Balance */}
+                  <div className="inline-flex items-center gap-3 self-start rounded-2xl border bg-card/80 px-4 py-3 shadow-soft backdrop-blur sm:self-end">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-100 text-amber-700">
+                      <CoinIcon className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
+                        Seu saldo
+                      </p>
+                      <p className="text-lg font-semibold leading-none">
+                        {balanceKnown ? balance : "—"}
+                        <span className="ml-1 text-xs font-normal text-muted-foreground">
+                          {balanceKnown ? "moedas" : "saldo indisponível offline"}
+                        </span>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* Categorias horizontais */}
+            <div className="sticky top-[calc(env(safe-area-inset-top,0px)+3.25rem)] z-20 -mb-2 bg-background/95 backdrop-blur md:static md:top-auto md:z-auto md:mb-0 md:bg-transparent md:backdrop-blur-0">
+              <div className="mx-auto max-w-5xl px-4 pt-4 md:pt-6">
+                <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-3 md:mx-0 md:flex-wrap md:overflow-visible md:px-0 md:pb-0 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+                  {CATEGORIES.map((c) => {
+                    const active = activeTab === c.key;
+                    const Icon = c.icon;
+                    return (
+                      <button
+                        key={c.key}
+                        type="button"
+                        onClick={() => setActiveTab(c.key)}
+                        className={`app-pressable inline-flex shrink-0 items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition ${
+                          active
+                            ? "bg-foreground text-background shadow-soft"
+                            : "border bg-card text-foreground hover:border-[var(--rose-soft)]"
+                        }`}
+                      >
+                        <Icon className="h-3.5 w-3.5" />
+                        {c.label}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             </div>
-          </div>
-        </section>
-
-        {/* Categorias horizontais */}
-        <div className="sticky top-[calc(env(safe-area-inset-top,0px)+3.25rem)] z-20 -mb-2 bg-background/95 backdrop-blur md:static md:top-auto md:z-auto md:mb-0 md:bg-transparent md:backdrop-blur-0">
-          <div className="mx-auto max-w-5xl px-4 pt-4 md:pt-6">
-            <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-3 md:mx-0 md:flex-wrap md:overflow-visible md:px-0 md:pb-0 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-              {CATEGORIES.map((c) => {
-                const active = activeTab === c.key;
-                const Icon = c.icon;
-                return (
-                  <button
-                    key={c.key}
-                    type="button"
-                    onClick={() => setActiveTab(c.key)}
-                    className={`app-pressable inline-flex shrink-0 items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition ${
-                      active
-                        ? "bg-foreground text-background shadow-soft"
-                        : "border bg-card text-foreground hover:border-[var(--rose-soft)]"
-                    }`}
-                  >
-                    <Icon className="h-3.5 w-3.5" />
-                    {c.label}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </div>
+          </>
+        )}
 
         {/* Content */}
         <main className="mx-auto max-w-5xl px-4 pb-24 pt-6">

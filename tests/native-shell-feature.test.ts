@@ -70,9 +70,14 @@ describe("native shell primary rollout", () => {
   });
 
   it("keeps secondary rollout separate from the five primary destinations", () => {
-    expect(nativeShellSecondaryDestinationIds).toEqual(["app-account", "app-notifications"]);
+    expect(nativeShellSecondaryDestinationIds).toEqual([
+      "app-account",
+      "app-notifications",
+      "app-store",
+    ]);
     expect(isNativeShellEligibleDestination(getDestinationBehavior("/conta"))).toBe(true);
     expect(isNativeShellEligibleDestination(getDestinationBehavior("/notificacoes"))).toBe(true);
+    expect(isNativeShellEligibleDestination(getDestinationBehavior("/loja"))).toBe(true);
     expect(nativeShellPrimaryDestinationIds).toHaveLength(5);
   });
 

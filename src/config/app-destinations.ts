@@ -157,7 +157,11 @@ export const appDestinations: readonly AppDestination[] = [
     futureTab: "profile",
     footer: false,
   }),
-  exact("app-store", "/loja", { ...mobileAppDefaults, footer: false }),
+  exact("app-store", "/loja", {
+    ...mobileAppDefaults,
+    futureTab: "explore",
+    footer: false,
+  }),
   exact("app-notifications", "/notificacoes", {
     ...mobileAppDefaults,
     futureTab: "home",
