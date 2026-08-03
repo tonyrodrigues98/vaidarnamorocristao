@@ -1,11 +1,12 @@
 # T49 — E2E autenticado no preview HTTPS
 
-Status: **BLOCKED**
+Status: **AUTHENTICATED_E2E_PASSED_WITH_ACCEPTED_P2**
 
-O bloqueio remanescente é de limpeza: o chamado de suporte foi fechado e a conta
-temporária foi excluída, mas o chamado e seu attachment privado continuam visíveis para
-staff porque o produto não oferece uma operação segura de exclusão. Nenhuma exclusão
-direta em Storage, SQL ou uso de service role foi improvisada.
+O P2 remanescente foi conscientemente aceito pelo responsável do produto. O chamado de
+suporte está fechado e permanece visível somente para staff; seu attachment continua
+privado e acessível apenas por signed URL temporária. A conta temporária foi excluída e
+não houve vazamento. Nenhuma exclusão insegura por Storage, SQL direto ou service role
+será executada apenas para zerar o checklist.
 
 Este resultado não autoriza produção. O preview testado foi
 `https://potentially-tournament-pad-luis.trycloudflare.com`, com Native Shell ativa.
@@ -151,6 +152,8 @@ Foi criada uma imagem neutra 256×256, sem rosto ou dados pessoais, fora do repo
 - Security findings: nenhum vazamento entre contas, bypass administrativo, service role
   no cliente ou acesso público ao attachment foi observado.
 
-O próximo gate é a remoção operacional segura do chamado e attachment de teste por um
-fluxo autorizado que preserve RLS, Storage e trilha de auditoria. Até isso ocorrer, o
-status permanece **BLOCKED**, apesar da matriz funcional autenticada ter passado.
+A matriz de papéis, o realtime e reconnect, o upload privado e a signed URL passaram; a
+conta temporária foi excluída. Criar um fluxo seguro de retenção, exclusão ou anonimização
+de chamados e attachments de suporte é backlog operacional, não gate deste candidato.
+O status é **AUTHENTICATED_E2E_PASSED_WITH_ACCEPTED_P2**. Produção continua não
+autorizada e depende dos gates de release posteriores.
