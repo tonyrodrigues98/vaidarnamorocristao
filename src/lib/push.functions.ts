@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { resolvePushPublicKey } from "@/lib/pushPublicKey.server";
 
 type SubscribePayload = {
   endpoint: string;
@@ -9,8 +10,10 @@ type SubscribePayload = {
 };
 
 export const getPushPublicKey = createServerFn({ method: "GET" }).handler(async () => {
-  const { getPushVapidDetails } = await import("@/lib/pushKeys.server");
-  const { publicKey } = await getPushVapidDetails();
+  const publicKey = await resolvePushPublicKey(async () => {
+    const { getPushVapidDetails } = await import("@/lib/pushKeys.server");
+    return getPushVapidDetails();
+  });
   return { publicKey };
 });
 
