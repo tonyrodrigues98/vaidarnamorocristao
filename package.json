@@ -13,6 +13,7 @@
     "lint:global": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "ops:smoke": "node scripts/ops/smoke-url.mjs",
     "release:qualify": "node scripts/release/qualify-native-shell.mjs",
     "format:check:changed": "node scripts/native-shell/format-check-changed.mjs",
     "test": "vitest run",
