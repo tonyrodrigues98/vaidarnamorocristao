@@ -519,12 +519,12 @@ function LojaPage() {
       <MobileAppHeader title="Loja" subtitle="Personalize sua experiência" />
       <PullToRefresh onRefresh={handlePullRefresh} disabled={!user || !isOnline}>
         {nativeShellActive ? (
-          <NativeStoreHeader
+          <NativeStoreHeader<CategoryKey>
             balance={balance}
             balanceKnown={balanceKnown}
             categories={CATEGORIES}
             activeCategory={activeTab}
-            onCategoryChange={setActiveTab}
+            onCategoryChange={(category) => setActiveTab(category)}
           />
         ) : (
           <>
