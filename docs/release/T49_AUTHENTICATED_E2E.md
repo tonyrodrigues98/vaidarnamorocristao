@@ -2,118 +2,155 @@
 
 Status: **BLOCKED**
 
-Este resultado não significa liberação para produção. O preview testado foi
+O bloqueio remanescente é de limpeza: o chamado de suporte foi fechado e a conta
+temporária foi excluída, mas o chamado e seu attachment privado continuam visíveis para
+staff porque o produto não oferece uma operação segura de exclusão. Nenhuma exclusão
+direta em Storage, SQL ou uso de service role foi improvisada.
+
+Este resultado não autoriza produção. O preview testado foi
 `https://potentially-tournament-pad-luis.trycloudflare.com`, com Native Shell ativa.
 
-## Identificação
+## Identificação e segurança
 
 - Branch: `integration/native-shell-v1`
-- SHA inicial: `376ff76f327ee7e5046ae008e832450a783a704c`
-- Correções T49:
-  - `397d49124fa8e02e96268773bb6dd2f8f7883f35`
-  - `86d69d663e31fdc2d2ee11257d742d80a7b06d57`
-- Conta anonimizada: `acct-A`
-- Papel confirmado: `super_admin`
-- Credenciais, tokens, URLs assinadas e identificadores pessoais: não registrados
+- Base da continuação T49.1: `fdb203d949634aa590408cd277fab0707ac45f4e`
+- Contas anonimizadas: `acct-A` e `acct-B`
+- `acct-A`: conta autorizada com papel `super_admin`
+- `acct-B`: conta temporária criada para esta execução e posteriormente excluída
+- Credenciais, emails completos, tokens, URLs assinadas e IDs pessoais: não registrados
+- Service role, migrations, schema, RLS, policies e buckets: não alterados
+- Wrangler e Quick Tunnel: mantidos em execução
 
-## Autenticação e sessão
+## Autenticação, sessão e troca de conta
 
-- Login por email/senha: passou.
-- Retorno seguro para `/inicio`: passou.
-- Sessão após reload: passou.
-- Sessão em segunda aba do mesmo perfil: passou.
-- Back/forward: passou.
-- Logout: passou.
-- Segunda aba após logout: voltou ao AuthShell e não reteve dados privados.
-- Visitante em `/admin/presentes`: redirecionado ao login sem montar AdminShell.
-- Troca real entre duas contas: `NOT_TESTED`.
-- Refresh token forçado/expirado: `NOT_TESTED`.
+- Criação, onboarding mínimo e aprovação da `acct-B`: passaram.
+- Login e sessão persistida após reload: passaram.
+- Cinco raízes autenticadas: passaram.
+- Logout em uma aba removeu o acesso privado da segunda aba: passou.
+- Troca `acct-B → acct-A` no mesmo perfil temporário não exibiu dados residuais de B.
+- Retorno para B por novo login não foi repetido porque as credenciais não estavam mais
+  disponíveis; a conta já havia sido identificada pelo ID mascarado, restaurada para
+  `user` e excluída pelo fluxo administrativo.
+- Expiração forçada de refresh token: `NOT_TESTED`.
 
-## Native App Shell e dados reais
+## Cinco áreas principais
 
-As cinco raízes carregaram queries reais, sem Header legado, sem sexta aba e na ordem
-`Início · Comunidade · Explorar · Conversas · Perfil`.
+Com `acct-B` no papel `user`, as rotas `/inicio`, `/comunidade`, `/explorar`,
+`/conversas` e `/perfil` carregaram dados reais no Native App Shell. A ordem observada
+foi exatamente `Início · Comunidade · Explorar · Conversas · Perfil`, sem Header legado
+e sem sexta aba.
 
-Também foram abertas com dados reais, sem mutation intencional: Notícias, Devocional,
-Orações, Quiz Bíblico, Notificações, Bloqueados, Loja, Presentes, Caixas, Avatar, Meu Pet,
-Pet Arcade, Suporte e Verificação.
+## Matriz administrativa
 
-Sinais reais observados incluíram notificações, conversas, saldo de moedas, perfil,
-catálogo da loja, avatar hidratado, pet, cuidado e catálogo do Arcade. Nenhum saldo,
-inventário, avatar, pet ou conteúdo foi alterado.
+A mesma conta temporária foi alterada exclusivamente pelo painel real da `acct-A`, com
+novo carregamento dos claims entre os papéis:
 
-## Chats e realtime
+- `user`: todas as 13 rotas administrativas negadas antes de montar AdminShell ou dados.
+- `moderador`: `/admin` permitido; as 12 ferramentas especializadas negadas.
+- `apresentador`: `/admin` permitido com as tabs internas previstas; ferramentas
+  especializadas, presentes, stickers e avatar negados.
+- `admin`: permitidos painel, verificações, fotos, presentes, fundos, molduras, auras,
+  gradientes de nome, pets, economia e equipe da Live; stickers e avatar negados.
+- `super_admin`: as 13 rotas já haviam sido comprovadas em leitura na T49.
 
-- Chat privado existente: abriu no Focused Messaging Shell, somente leitura.
-- Chat comunitário: abriu no Focused Messaging Shell, somente leitura.
-- Correção P1: a navegação móvel legada que cobria o composer comunitário foi suprimida.
-- Teste de envio/reply/edit/delete/unread/reconnect com duas contas: `NOT_TESTED`.
-- Motivo: não havia segunda conta consentida e as conversas existentes envolvem pessoas
-  que não foram autorizadas a receber mensagens de teste.
-- Nenhuma mensagem `[T49 TESTE — remover]` foi criada.
+O menu e o acesso direto respeitaram a mesma matriz. Não foi observada leitura de dados
+administrativos antes da autorização. Nenhuma mutation administrativa de domínio foi
+executada.
 
-## Perfil, uploads, suporte e verificação
+## Realtime e conversas
 
-- Leitura do perfil: passou.
-- Verificação já aprovada: estado real carregado.
-- Edição reversível, foto, documento, attachment e chamado de teste: `NOT_EXECUTED`.
-- Motivo: a única conta disponível continha dados existentes e não havia isolamento
-  suficiente para criar arquivos ou conteúdo sem risco de impacto real.
-- Signed URLs privadas não foram copiadas nem registradas.
+No chat comunitário, usando dois contextos isolados:
 
-## Administração
+- `acct-B → acct-A`: recebimento sem reload passou.
+- `acct-A → acct-B`: recebimento sem reload passou.
+- ordem e timestamps: passaram.
+- offline simulado por CDP exibiu o estado offline e não entregou a tentativa de envio.
+- reconexão: a mensagem de teste chegou exatamente uma vez ao contexto A.
+- duplicação após reconnect: não observada.
+- navegação inferior ausente no focused chat e composer descoberto: passaram.
+- mensagens e replies de teste: removidos ao final.
+- unread: não comprovado de forma conclusiva.
+- chat privado: `PRIVATE_CHAT_NOT_EXECUTED`, pois não havia criação e remoção segura de
+  match sem risco de deixar estado residual.
 
-Como `super_admin`, as 13 rotas administrativas carregaram com AdminShell, sem Header,
-AdminTopNav ou bottom navigation legados. Foram validados por leitura: painel,
-verificações, fotos, presentes, stickers, fundos, molduras, auras, gradientes de nome,
-avatar, pets, economia e equipe da Live.
+## Upload privado, suporte e verificação
 
-- URL administrativa como visitante: negada antes da montagem do conteúdo.
-- `user`, `moderador`, `apresentador` e `admin`: `NOT_TESTED` por falta de contas.
-- Nenhuma role foi criada ou promovida.
-- Nenhuma mutation administrativa foi executada.
+Foi criada uma imagem neutra 256×256, sem rosto ou dados pessoais, fora do repositório.
 
-## Segurança, rede e console
+- chamado `[T49 TESTE — remover]`: criado e aberto no detalhe.
+- attachment PNG: upload passou.
+- URL assinada privada: HTTPS, `image/png`, temporária e não registrada neste documento.
+- cache público: nenhum header público de cache foi observado.
+- chamado: fechado por staff.
+- exclusão de chamado/attachment: indisponível na UI; ambos permanecem como resíduo
+  fechado após a exclusão da conta.
+- foto extra de perfil: `NOT_EXECUTED`.
+- verificação: UI, tipos de arquivo, limite e contrato privado conferidos; nenhum
+  documento ou selfie foi enviado.
 
-- Runtime config expõe somente `supabaseUrl` e `publishableKey`.
-- Service role, push private key e dispatch secret não foram encontrados no bundle público.
-- Nenhum vazamento entre contas foi observado, mas a troca real de conta ficou pendente.
-- Nenhum erro RLS inesperado foi observado nas leituras executadas.
-- P2: duas decorações de avatar ainda referenciam `__l5e/assets-v1` e retornam 404.
-- P2: a página de Notificações registra erro de chave pública de push ausente no preview.
-  O push dispatch permanece desativado e nenhum secret foi adicionado.
-- Offline, rede lenta, abort e reconexão realtime: `NOT_TESTED` porque o controle disponível
-  do Chrome não expôs emulação de rede sem interromper o tunnel ativo.
+## Limpeza da conta temporária
 
-## Correção realizada
+- mensagens de realtime e reconnect: removidas.
+- papel de `acct-B`: restaurado para `user`.
+- identificação antes do hard delete: nome de teste, ID mascarado, status aprovado e
+  papel `user` conferidos novamente.
+- conta temporária: excluída pelo fluxo administrativo existente.
+- card da conta: ausente após a exclusão.
+- perfis temporários do Chrome: removidos ao final.
+- resíduo: chamado fechado e attachment privado, sem operação segura de exclusão.
 
-`397d49124fa8e02e96268773bb6dd2f8f7883f35` —
-`fix(e2e): suppress legacy nav in community chat`.
+## Achados e correções
 
-`86d69d663e31fdc2d2ee11257d742d80a7b06d57` —
-`fix(e2e): align focused chat regression contract`.
+### Focused chat
 
-A correção define `mobileBottomNav: false` para `/conversas/comunidade`, possui teste de
-registry e passou build isolado com `VITE_FF_NATIVE_SHELL=true`. O artefato foi copiado
-para o diretório servido sem encerrar Wrangler ou Quick Tunnel e o cenário foi repetido
-com sucesso.
+- `397d49124fa8e02e96268773bb6dd2f8f7883f35` —
+  `fix(e2e): suppress legacy nav in community chat`
+- `86d69d663e31fdc2d2ee11257d742d80a7b06d57` —
+  `fix(e2e): align focused chat regression contract`
 
-## Dados de teste e limpeza
+### Assets decorativos
 
-- Dados criados: nenhum.
-- Mensagens, attachments, chamados, fotos e documentos de teste: nenhum.
-- Preferência, perfil, avatar, pet, saldo e inventário: não alterados.
-- Sessão: encerrada nas duas abas.
-- Abas de automação: finalizadas.
+- `cf8b878e4207b8ea3f4d082f817255c63e310f8c` —
+  `fix(assets): bundle remaining public decorations`
+- origens autorizadas e verificáveis: assets correspondentes no ambiente público atual
+- PNG 500×500, 230471 bytes, SHA-256
+  `2dddd302963a2731ea49acd78f3f7dd1dcd505780993f584470311c1f2d10735`
+- PNG 1024×1024, 740925 bytes, SHA-256
+  `73f34612165348921fd9f79ae0268ba96295caa60c72660fbf98127eda00b3b4`
+- ambos os assets autocontidos responderam HTTP 200 no preview atualizado.
+
+### Chave pública de push
+
+- `d787816` — `fix(push): serve public key in secretless preview`
+- quando `WEB_PUSH_PRIVATE_KEY` não está configurada, o endpoint devolve apenas a chave
+  VAPID pública já versionada.
+- erros não relacionados continuam sendo propagados.
+- nenhuma chave privada foi criada, copiada ou exposta.
+- push dispatch permanece desativado no preview sem a configuração privada.
+
+## Gates finais
+
+- Build flag off: passou.
+- Build flag on: passou.
+- Testes flag off: 68 arquivos, 485 testes passaram.
+- Testes flag on: 68 arquivos, 485 testes passaram.
+- Lint global: zero erros; 31 warnings preexistentes inventariados.
+- Format check global: passou.
+- Release qualify: 69 rotas, PWA e residue guards passaram.
+- Migrações novas: zero.
+- Dependências novas: zero.
+- Feature flag padrão no repositório: `false`.
+- Main e produção: inalteradas.
 
 ## Classificação
 
 - P0: 0
-- P1: 0 após a correção e repetição do chat comunitário
-- P2: 2 (assets decorativos `__l5e`; chave pública de push ausente no preview)
+- P1: 0
+- P2: 1 — resíduo do chamado/attachment de suporte sem exclusão segura pela UI
 - P3: 0
+- Security findings: nenhum vazamento entre contas, bypass administrativo, service role
+  no cliente ou acesso público ao attachment foi observado.
 
-O status permanece **BLOCKED** porque realtime entre duas contas, matriz completa de
-papéis, troca real de conta, uploads/signed URLs e recuperação de rede não foram
-executados. O próximo gate é fornecer contas de teste consentidas e isoladas para cada
-papel e um segundo participante de chat.
+O próximo gate é a remoção operacional segura do chamado e attachment de teste por um
+fluxo autorizado que preserve RLS, Storage e trilha de auditoria. Até isso ocorrer, o
+status permanece **BLOCKED**, apesar da matriz funcional autenticada ter passado.
