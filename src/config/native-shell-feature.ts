@@ -1,6 +1,7 @@
 import type { DestinationBehavior } from "@/config/app-destinations";
 
 export const NATIVE_SHELL_FEATURE_ENV = "VITE_FF_NATIVE_SHELL";
+export const NATIVE_SHELL_RELEASE_DEFAULT = true;
 
 export type NativeShellFeatureEnvironment = Readonly<Record<string, string | boolean | undefined>>;
 
@@ -11,7 +12,13 @@ export function parseNativeShellFeatureFlag(value: string | boolean | undefined)
 export function resolveNativeShellFeatureFlag(
   environment: NativeShellFeatureEnvironment = import.meta.env,
 ): boolean {
-  return parseNativeShellFeatureFlag(environment[NATIVE_SHELL_FEATURE_ENV]);
+  const configuredValue = environment[NATIVE_SHELL_FEATURE_ENV];
+
+  if (configuredValue === undefined) {
+    return NATIVE_SHELL_RELEASE_DEFAULT;
+  }
+
+  return parseNativeShellFeatureFlag(configuredValue);
 }
 
 export const nativeShellFeatureEnabled = resolveNativeShellFeatureFlag();
