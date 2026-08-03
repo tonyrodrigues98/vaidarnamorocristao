@@ -12,7 +12,7 @@ import {
 } from "@/config/native-shell-feature";
 import { createPrivatePageMetadata } from "@/lib/metadata";
 import { useRedesignRuntime } from "@/components/redesign-total/RedesignRuntimeContext";
-import { RedesignCommunityView } from "@/components/redesign-total/community/RedesignCommunityView";
+import { VisualZeroCommunity } from "@/components/redesign-zero/community/VisualZeroCommunity";
 
 export const Route = createFileRoute("/comunidade")({
   component: CommunityRoute,
@@ -38,7 +38,7 @@ function CommunityRoute() {
   if (totalRedesignActive) {
     return (
       <RequireApproved>
-        <RedesignCommunityView activeTab={tab} />
+        <VisualZeroCommunity activeTab={tab} />
       </RequireApproved>
     );
   }

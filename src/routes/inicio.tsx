@@ -49,13 +49,12 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { inicioMetadata } from "@/config/route-metadata";
-import {
-  NativeInicioView,
-  type NativeInicioViewModel,
-} from "@/components/home/native/NativeInicioView";
+import { NativeInicioView } from "@/components/home/native/NativeInicioView";
+import type { NativeInicioViewModel } from "@/components/home/native/native-inicio-model";
 import { useNativeShellRuntime } from "@/components/native-shell/NativeShellRuntimeContext";
 import { useRedesignRuntime } from "@/components/redesign-total/RedesignRuntimeContext";
-import { RedesignInicioView } from "@/components/redesign-total/home/RedesignInicioView";
+import { VisualZeroInicio } from "@/components/redesign-zero/home/VisualZeroInicio";
+import { VisualZeroLoading, VisualZeroScreen } from "@/components/redesign-zero/primitives";
 
 export const Route = createFileRoute("/inicio")({
   component: InicioRoute,
@@ -63,6 +62,16 @@ export const Route = createFileRoute("/inicio")({
 });
 
 function InicioLoadingState() {
+  const { active: totalRedesignActive } = useRedesignRuntime();
+
+  if (totalRedesignActive) {
+    return (
+      <VisualZeroScreen>
+        <VisualZeroLoading rows={6} label="Carregando Início" />
+      </VisualZeroScreen>
+    );
+  }
+
   return (
     <div className="min-h-[100dvh] bg-background">
       <Header />
@@ -699,7 +708,7 @@ function InicioPage({ user }: { user: User }) {
     };
 
     return totalRedesignActive ? (
-      <RedesignInicioView model={nativeModel} />
+      <VisualZeroInicio model={nativeModel} />
     ) : (
       <NativeInicioView model={nativeModel} />
     );
