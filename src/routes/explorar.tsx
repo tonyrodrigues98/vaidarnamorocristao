@@ -11,7 +11,7 @@ import {
 } from "@/config/native-shell-feature";
 import { createPrivatePageMetadata } from "@/lib/metadata";
 import { useRedesignRuntime } from "@/components/redesign-total/RedesignRuntimeContext";
-import { RedesignExploreView } from "@/components/redesign-total/explore/RedesignExploreView";
+import { VisualZeroExplore } from "@/components/redesign-zero/explore/VisualZeroExplore";
 
 export const Route = createFileRoute("/explorar")({
   component: ExploreRoute,
@@ -36,7 +36,7 @@ function ExploreRoute() {
   if (totalRedesignActive) {
     return (
       <RequireApproved>
-        <RedesignExploreView items={nativeExploreRegistry} />
+        <VisualZeroExplore items={nativeExploreRegistry} />
       </RequireApproved>
     );
   }

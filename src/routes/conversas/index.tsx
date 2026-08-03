@@ -17,14 +17,12 @@ import { PullToRefresh } from "@/components/mobile/PullToRefresh";
 import { OfflineState } from "@/components/ui/OfflineState";
 import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 import { useNativeShellRuntime } from "@/components/native-shell/NativeShellRuntimeContext";
-import {
-  NativeConversationsView,
-  type NativeConversationsViewModel,
-} from "@/components/conversations/native/NativeConversationsView";
+import { NativeConversationsView } from "@/components/conversations/native/NativeConversationsView";
+import type { NativeConversationsViewModel } from "@/components/conversations/native/native-conversations-model";
 import type { ConversationItem } from "@/hooks/useConversationsList";
 import type { RelationshipCommitment } from "@/lib/commitments";
 import { useRedesignRuntime } from "@/components/redesign-total/RedesignRuntimeContext";
-import { RedesignConversationsView } from "@/components/redesign-total/conversations/RedesignConversationsView";
+import { VisualZeroConversations } from "@/components/redesign-zero/conversations/VisualZeroConversations";
 
 export const Route = createFileRoute("/conversas/")({
   component: () => (
@@ -72,7 +70,7 @@ function List() {
     };
 
     return totalRedesignActive ? (
-      <RedesignConversationsView model={model} />
+      <VisualZeroConversations model={model} />
     ) : (
       <NativeConversationsView model={model} />
     );

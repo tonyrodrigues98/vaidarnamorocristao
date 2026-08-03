@@ -5,24 +5,12 @@ import { PullToRefresh } from "@/components/mobile/PullToRefresh";
 import { AppEmptyState } from "@/components/ui/AppEmptyState";
 import { ConversationListSkeleton } from "@/components/ui/AppSkeletons";
 import { OfflineState } from "@/components/ui/OfflineState";
-import type { ConversationItem } from "@/hooks/useConversationsList";
-import type { RelationshipCommitment } from "@/lib/commitments";
+import type { NativeConversationsViewModel } from "./native-conversations-model";
 
 import { NativeCommunityConversationRow } from "./NativeCommunityConversationRow";
 import { NativeConversationRow } from "./NativeConversationRow";
 
-export type NativeConversationsViewModel = {
-  query: string;
-  items: ConversationItem[];
-  filteredItems: ConversationItem[];
-  showCommunity: boolean;
-  loading: boolean;
-  refreshing: boolean;
-  online: boolean;
-  activeCommitment: RelationshipCommitment | null;
-  onQueryChange(value: string): void;
-  onRefresh(): Promise<void> | void;
-};
+export type { NativeConversationsViewModel } from "./native-conversations-model";
 
 export type NativeConversationsViewProps = {
   model: NativeConversationsViewModel;
