@@ -81,6 +81,7 @@ import { NativeProfileTabs } from "@/components/profile/native/NativeProfileTabs
 import { useRedesignRuntime } from "@/components/redesign-total/RedesignRuntimeContext";
 import { RedesignProfileHero } from "@/components/redesign-total/profile/RedesignProfileHero";
 import { RedesignProfileTabs } from "@/components/redesign-total/profile/RedesignProfileTabs";
+import { VisualZeroProfile } from "@/components/redesign-zero/profile/VisualZeroProfile";
 import "@/styles/native-profile.css";
 
 export const Route = createFileRoute("/perfil")({
@@ -713,6 +714,51 @@ function PerfilPage() {
                   ? "Visual"
                   : "Presentes",
   }));
+
+  if (totalRedesignActive) {
+    return (
+      <VisualZeroProfile
+        userId={user?.id}
+        profile={profile}
+        preferences={prefs}
+        photoUrl={photoPreview}
+        nameGradient={profileNameGradient}
+        status={status}
+        activeTab={activeTab}
+        online={isOnline}
+        loading={profileMainQuery.isLoading}
+        stale={!isOnline && Boolean(profileMainQuery.data)}
+        savingProfile={savingProfile}
+        savingPreferences={savingPrefs}
+        commitment={
+          activeCommitment
+            ? { matchId: activeCommitment.match_id, partner: commitmentPartner }
+            : null
+        }
+        isStaff={isStaff}
+        roleLabel={roleCfg.label}
+        roleColor={localColor ?? roleCfg.defaultColor}
+        availableRoleColors={roleCfg.availableColors}
+        publicListing={localPublic}
+        savingRole={savingRole}
+        contributor={hasContributorBadge}
+        contributorHighlight={contribHighlight}
+        savingContributor={savingContrib}
+        onTabChange={setActiveTab}
+        onProfileFieldChange={setP}
+        onPreferenceFieldChange={(key, value) =>
+          setPrefs((current) => ({ ...current, [key]: value }))
+        }
+        onPhotoChange={handlePhoto}
+        onSaveProfile={saveProfile}
+        onSavePreferences={savePrefs}
+        onRoleColorChange={setLocalColor}
+        onPublicListingChange={(value) => void togglePublicListing(value)}
+        onSaveRole={() => void saveRoleSettings()}
+        onContributorHighlightChange={(value) => void toggleContribHighlight(value)}
+      />
+    );
+  }
 
   return (
     <div
