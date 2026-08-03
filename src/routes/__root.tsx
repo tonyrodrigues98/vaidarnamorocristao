@@ -43,6 +43,8 @@ import { AdminShellRuntimeBoundary } from "@/components/admin-shell/AdminShellRu
 import { AdminRouteAccessBoundary } from "@/components/admin-shell/AdminRouteAccessBoundary";
 import { isGlobalRouterNotFound } from "@/config/router-not-found";
 
+import "@/styles/redesign-total.tokens.css";
+
 function NotFoundComponent() {
   return (
     <PublicShell>
