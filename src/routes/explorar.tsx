@@ -10,6 +10,8 @@ import {
   shouldExposeNativeRootDestination,
 } from "@/config/native-shell-feature";
 import { createPrivatePageMetadata } from "@/lib/metadata";
+import { useRedesignRuntime } from "@/components/redesign-total/RedesignRuntimeContext";
+import { RedesignExploreView } from "@/components/redesign-total/explore/RedesignExploreView";
 
 export const Route = createFileRoute("/explorar")({
   component: ExploreRoute,
@@ -22,12 +24,22 @@ export const Route = createFileRoute("/explorar")({
 });
 
 function ExploreRoute() {
+  const { active: totalRedesignActive } = useRedesignRuntime();
+
   if (!shouldExposeNativeRootDestination("/explorar", nativeShellFeatureEnabled)) {
     return <Navigate to="/inicio" replace />;
   }
 
   const experiences = nativeExploreRegistry.filter((item) => item.category === "experiences");
   const discoveries = nativeExploreRegistry.filter((item) => item.category === "discoveries");
+
+  if (totalRedesignActive) {
+    return (
+      <RequireApproved>
+        <RedesignExploreView items={nativeExploreRegistry} />
+      </RequireApproved>
+    );
+  }
 
   return (
     <RequireApproved>

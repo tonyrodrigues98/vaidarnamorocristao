@@ -54,6 +54,8 @@ import {
   type NativeInicioViewModel,
 } from "@/components/home/native/NativeInicioView";
 import { useNativeShellRuntime } from "@/components/native-shell/NativeShellRuntimeContext";
+import { useRedesignRuntime } from "@/components/redesign-total/RedesignRuntimeContext";
+import { RedesignInicioView } from "@/components/redesign-total/home/RedesignInicioView";
 
 export const Route = createFileRoute("/inicio")({
   component: InicioRoute,
@@ -273,6 +275,7 @@ function actionSearch(id: string): Record<string, unknown> | undefined {
 
 function InicioPage({ user }: { user: User }) {
   const { active: nativeShellActive } = useNativeShellRuntime();
+  const { active: totalRedesignActive } = useRedesignRuntime();
   const [profile, setProfile] = useState<Profile | null | undefined>(undefined);
   const [advanced, setAdvanced] = useState<StrengthAdvanced>(null);
   const [prefs, setPrefs] = useState<StrengthPreferences>(null);
@@ -695,7 +698,11 @@ function InicioPage({ user }: { user: User }) {
       onSubmitAppeal: submitAppeal,
     };
 
-    return <NativeInicioView model={nativeModel} />;
+    return totalRedesignActive ? (
+      <RedesignInicioView model={nativeModel} />
+    ) : (
+      <NativeInicioView model={nativeModel} />
+    );
   }
 
   return (

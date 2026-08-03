@@ -11,6 +11,8 @@ import {
   shouldExposeNativeRootDestination,
 } from "@/config/native-shell-feature";
 import { createPrivatePageMetadata } from "@/lib/metadata";
+import { useRedesignRuntime } from "@/components/redesign-total/RedesignRuntimeContext";
+import { RedesignCommunityView } from "@/components/redesign-total/community/RedesignCommunityView";
 
 export const Route = createFileRoute("/comunidade")({
   component: CommunityRoute,
@@ -27,9 +29,18 @@ export const Route = createFileRoute("/comunidade")({
 
 function CommunityRoute() {
   const { tab } = Route.useSearch();
+  const { active: totalRedesignActive } = useRedesignRuntime();
 
   if (!shouldExposeNativeRootDestination("/comunidade", nativeShellFeatureEnabled)) {
     return <Navigate to="/conversas/comunidade" replace />;
+  }
+
+  if (totalRedesignActive) {
+    return (
+      <RequireApproved>
+        <RedesignCommunityView activeTab={tab} />
+      </RequireApproved>
+    );
   }
 
   return (

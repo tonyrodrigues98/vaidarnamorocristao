@@ -23,6 +23,8 @@ import {
 } from "@/components/conversations/native/NativeConversationsView";
 import type { ConversationItem } from "@/hooks/useConversationsList";
 import type { RelationshipCommitment } from "@/lib/commitments";
+import { useRedesignRuntime } from "@/components/redesign-total/RedesignRuntimeContext";
+import { RedesignConversationsView } from "@/components/redesign-total/conversations/RedesignConversationsView";
 
 export const Route = createFileRoute("/conversas/")({
   component: () => (
@@ -44,6 +46,7 @@ function List() {
   const [query, setQuery] = useState("");
   const { isOnline } = useNetworkStatus();
   const { active: nativeShellActive } = useNativeShellRuntime();
+  const { active: totalRedesignActive } = useRedesignRuntime();
 
   if (!loading && !user) return <Navigate to="/auth/login" />;
 
@@ -68,7 +71,11 @@ function List() {
       onRefresh: refetch,
     };
 
-    return <NativeConversationsView model={model} />;
+    return totalRedesignActive ? (
+      <RedesignConversationsView model={model} />
+    ) : (
+      <NativeConversationsView model={model} />
+    );
   }
 
   return (

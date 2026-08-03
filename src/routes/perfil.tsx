@@ -78,6 +78,9 @@ import { prefetchPetEssentials } from "@/lib/petQueries";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNativeShellRuntime } from "@/components/native-shell/NativeShellRuntimeContext";
 import { NativeProfileTabs } from "@/components/profile/native/NativeProfileTabs";
+import { useRedesignRuntime } from "@/components/redesign-total/RedesignRuntimeContext";
+import { RedesignProfileHero } from "@/components/redesign-total/profile/RedesignProfileHero";
+import { RedesignProfileTabs } from "@/components/redesign-total/profile/RedesignProfileTabs";
 import "@/styles/native-profile.css";
 
 export const Route = createFileRoute("/perfil")({
@@ -134,6 +137,7 @@ function PerfilPage() {
   const search = Route.useSearch();
   const queryClient = useQueryClient();
   const { active: nativeShellActive } = useNativeShellRuntime();
+  const { active: totalRedesignActive } = useRedesignRuntime();
 
   // Pré-aquece os dados do pet/cenário assim que o /perfil monta — ao
   // navegar para /meu-pet (ou aos cards de pet no próprio perfil) a UI
@@ -646,8 +650,9 @@ function PerfilPage() {
         : [...p.custom_states, s],
     }));
 
-  const panelClass =
-    "rounded-[2rem] border border-border/70 bg-card/85 p-5 shadow-[0_20px_70px_rgba(31,41,55,0.08)] backdrop-blur sm:p-6 dark:bg-card/80 dark:shadow-[0_24px_80px_rgba(0,0,0,0.35)]";
+  const panelClass = totalRedesignActive
+    ? "rd-profile-panel"
+    : "rounded-[2rem] border border-border/70 bg-card/85 p-5 shadow-[0_20px_70px_rgba(31,41,55,0.08)] backdrop-blur sm:p-6 dark:bg-card/80 dark:shadow-[0_24px_80px_rgba(0,0,0,0.35)]";
 
   const scrollToTabs = () => {
     if (typeof window === "undefined") return;
@@ -712,6 +717,7 @@ function PerfilPage() {
   return (
     <div
       data-vdn-native-profile={nativeShellActive ? "" : undefined}
+      data-vdn-total-redesign-profile={totalRedesignActive ? "" : undefined}
       className="min-h-screen overflow-x-hidden bg-background"
     >
       {!nativeShellActive && <Header />}
@@ -736,248 +742,326 @@ function PerfilPage() {
             />
           </div>
         )}
-        <section className="native-profile__identity animate-fade-up overflow-hidden rounded-[2.25rem] border border-border/70 bg-card/75 shadow-[0_26px_90px_rgba(31,41,55,0.10)] backdrop-blur dark:bg-card/72 dark:shadow-[0_28px_90px_rgba(0,0,0,0.42)]">
-          <div className="grid w-full min-w-0 gap-0 lg:grid-cols-[380px_minmax(0,1fr)]">
-            <div className="native-profile__identity-media relative w-full min-w-0 overflow-hidden min-h-[320px] bg-[linear-gradient(145deg,#fff7ed,#fdf2f8_45%,#eff6ff)] p-4 dark:bg-[linear-gradient(145deg,rgba(49,22,38,0.88),rgba(20,20,34,0.94)_46%,rgba(15,35,58,0.88))] sm:p-8">
-              <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-card/80 to-transparent" />
-              <div className="relative z-10 flex h-full flex-col justify-between gap-8">
-                <div className="flex items-center justify-between gap-3">
-                  <span className="rounded-full border border-border/70 bg-background/70 px-3 py-1 text-xs font-medium text-muted-foreground shadow-soft backdrop-blur">
-                    Meu espaco
-                  </span>
-                  <StatusPill status={status} />
-                </div>
-
-                <div className="flex w-full min-w-0 flex-col items-center text-center">
-                  <div className="relative inline-block">
-                    <button
-                      type="button"
-                      onClick={() => fileInputRef.current?.click()}
-                      aria-label="Trocar foto de perfil"
-                      className="native-profile__avatar app-pressable group relative h-36 w-36 max-w-full cursor-pointer overflow-hidden rounded-[2rem] border border-border/70 bg-background/70 p-2 shadow-[0_22px_60px_rgba(15,23,42,0.18)] transition hover:-translate-y-1 hover:shadow-[0_28px_70px_rgba(15,23,42,0.22)] dark:shadow-[0_24px_70px_rgba(0,0,0,0.45)] sm:h-44 sm:w-44"
-                    >
-                      <span className="block h-full w-full overflow-hidden rounded-[1.55rem] bg-card">
-                        {photoPreview ? (
-                          <PhotoImg
-                            src={photoPreview}
-                            alt=""
-                            className="pointer-events-none h-full w-full object-cover"
-                          />
-                        ) : (
-                          <span className="pointer-events-none flex h-full w-full flex-col items-center justify-center text-muted-foreground">
-                            <Camera className="h-7 w-7" />
-                            <span className="mt-2 text-sm">Adicionar foto</span>
-                          </span>
-                        )}
-                      </span>
-                      <span className="absolute bottom-4 right-4 flex h-11 w-11 items-center justify-center rounded-full bg-[var(--rose)] text-white shadow-lg">
-                        <Camera className="h-5 w-5" />
-                      </span>
-                    </button>
-                    {user && (
-                      <EquippedPetSidekick
-                        userId={user.id}
-                        size={95}
-                        className="-right-14 bottom-2 sm:-right-16 sm:bottom-3"
-                      />
-                    )}
-                  </div>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*,image/heic,image/heif"
-                    onChange={handlePhoto}
-                    className="sr-only"
-                    tabIndex={-1}
-                    aria-hidden="true"
-                  />
-
-                  <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
-                    {isStaff && (
-                      <RoleBadge role={role} color={localColor ?? roleCfg.defaultColor} size="sm" />
-                    )}
-                    {hasContributorBadge && (
-                      <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-200">
-                        Contribuidor
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                <div className="grid w-full min-w-0 grid-cols-3 gap-2 text-center">
-                  <div className="min-w-0 rounded-2xl bg-background/70 p-2 shadow-soft backdrop-blur dark:bg-background/35 sm:p-3">
-                    <p className="truncate text-base font-semibold text-foreground sm:text-lg">
-                      {profile.age || "--"}
-                    </p>
-                    <p className="truncate text-[10px] uppercase tracking-wide text-muted-foreground sm:text-[11px]">
-                      anos
-                    </p>
-                  </div>
-                  <div className="min-w-0 rounded-2xl bg-background/70 p-2 shadow-soft backdrop-blur dark:bg-background/35 sm:p-3">
-                    <p className="truncate text-base font-semibold text-foreground sm:text-lg">
-                      {profile.state || "--"}
-                    </p>
-                    <p className="truncate text-[10px] uppercase tracking-wide text-muted-foreground sm:text-[11px]">
-                      estado
-                    </p>
-                  </div>
-                  <div className="min-w-0 rounded-2xl bg-background/70 p-2 shadow-soft backdrop-blur dark:bg-background/35 sm:p-3">
-                    <p className="truncate text-base font-semibold text-foreground sm:text-lg">
-                      {prefs.age_min}-{prefs.age_max}
-                    </p>
-                    <p className="truncate text-[10px] uppercase tracking-wide text-muted-foreground sm:text-[11px]">
-                      busca
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="min-w-0 p-4 sm:p-8 lg:p-10">
-              <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-                <div className="min-w-0 w-full">
-                  <p className="hidden text-sm font-medium text-[var(--rose)] sm:block">
-                    Perfil pessoal
-                  </p>
-                  <h1 className="mt-2 break-words text-2xl font-black tracking-tight text-foreground sm:text-4xl lg:text-5xl [overflow-wrap:anywhere]">
-                    <GradientName
-                      name={profile.full_name}
-                      gradient={profileNameGradient}
-                      fallback="Meu perfil"
-                    />
-                  </h1>
-                  <p className="mt-3 hidden max-w-2xl text-sm leading-6 text-muted-foreground sm:block sm:text-base">
-                    Organize sua apresentacao, fotos, preferencias e personalizacoes em um painel
-                    mais claro e bonito.
-                  </p>
-                </div>
-
-                <div className="flex w-full min-w-0 flex-wrap gap-2 sm:w-auto sm:flex-nowrap">
-                  {user && (
-                    <Button
-                      asChild
-                      variant="outline"
-                      size="sm"
-                      className="shrink-0 rounded-full bg-background/70 backdrop-blur sm:size-default"
-                    >
-                      <Link to="/pretendentes/$id" params={{ id: user.id }}>
-                        <Eye className="mr-2 h-4 w-4" />
-                        Ver público
-                      </Link>
-                    </Button>
-                  )}
-                  <Button asChild size="sm" className="shrink-0 rounded-full sm:size-default">
-                    <Link to="/loja">
-                      <Store className="mr-2 h-4 w-4" />
-                      Loja
-                    </Link>
-                  </Button>
-                </div>
-              </div>
-
-              {/* MOBILE: quick actions row */}
-              {user && (
-                <div className="mt-4">
-                  <PetProfileCard userId={user.id} linkToManager />
-                </div>
-              )}
-              <div className="mt-5 -mx-2 flex gap-2 overflow-x-auto px-2 pb-1 sm:hidden [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                {[
-                  {
-                    label: "Editar",
-                    icon: Eye,
-                    onClick: () => {
-                      setActiveTab("profile");
-                      setEditingProfile(true);
-                    },
-                  },
-                  { label: "Visual", icon: Sparkles, onClick: () => setActiveTab("customizacao") },
-                  { label: "Saldo", icon: Store, onClick: () => setActiveTab("saldo") },
-                  { label: "Presentes", icon: Heart, onClick: () => setActiveTab("presentes") },
-                ].map((q) => {
-                  const QIcon = q.icon;
-                  return (
-                    <button
-                      key={q.label}
-                      type="button"
-                      onClick={q.onClick}
-                      className="app-pressable flex min-w-[76px] shrink-0 flex-col items-center gap-1.5 rounded-2xl border border-border/60 bg-background/80 px-3 py-2.5 text-center shadow-sm backdrop-blur"
-                    >
-                      <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--petal)] text-[var(--rose)]">
-                        <QIcon className="h-4 w-4" />
-                      </span>
-                      <span className="text-[11px] font-semibold leading-tight text-foreground">
-                        {q.label}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-
-              <div className="mt-6 hidden gap-3 sm:mt-8 sm:grid sm:grid-cols-3">
-                <div className="rounded-2xl border border-rose-100 bg-rose-50/70 p-4 dark:border-rose-400/20 dark:bg-rose-400/10">
-                  <div className="flex items-center gap-2 text-sm font-medium text-rose-700 dark:text-rose-200">
-                    <MapPin className="h-4 w-4" />
-                    Localizacao
-                  </div>
-                  <p className="mt-2 truncate text-sm text-foreground">
-                    {[profile.city, profile.state].filter(Boolean).join(", ") || "Nao informada"}
-                  </p>
-                </div>
-                <div className="rounded-2xl border border-sky-100 bg-sky-50/70 p-4 dark:border-sky-400/20 dark:bg-sky-400/10">
-                  <div className="flex items-center gap-2 text-sm font-medium text-sky-700 dark:text-sky-200">
-                    <Church className="h-4 w-4" />
-                    Igreja
-                  </div>
-                  <p className="mt-2 truncate text-sm text-foreground">
-                    {profile.church || "Nao informada"}
-                  </p>
-                </div>
-                <div className="rounded-2xl border border-amber-100 bg-amber-50/80 p-4 dark:border-amber-400/20 dark:bg-amber-400/10">
-                  <div className="flex items-center gap-2 text-sm font-medium text-amber-700 dark:text-amber-200">
-                    <CalendarHeart className="h-4 w-4" />
-                    Batismo
-                  </div>
-                  <p className="mt-2 text-sm text-foreground">
-                    {profile.years_baptized ? `${profile.years_baptized} ano(s)` : "Nao informado"}
-                  </p>
-                </div>
-              </div>
-
-              {activeCommitment && (
-                <div className="mt-5 rounded-3xl border border-emerald-200 bg-gradient-to-r from-emerald-50 via-card to-teal-50 p-3.5 shadow-soft dark:border-emerald-400/25 dark:from-emerald-500/15 dark:via-card/80 dark:to-teal-500/10 sm:mt-6 sm:p-5">
-                  <div className="flex flex-row items-center gap-3 sm:gap-4">
-                    <img
-                      src={commitmentRing}
-                      alt=""
-                      className="h-11 w-11 shrink-0 object-contain drop-shadow-sm sm:h-14 sm:w-14"
-                    />
-                    <div className="min-w-0 flex-1">
-                      <h2 className="text-sm font-semibold text-emerald-800 dark:text-emerald-200 sm:text-base">
-                        Proposito Firmado
-                      </h2>
-                      <p className="truncate text-xs text-emerald-700 dark:text-emerald-100/80 sm:text-sm">
+        {totalRedesignActive ? (
+          <>
+            <RedesignProfileHero
+              photoUrl={photoPreview}
+              name={
+                <GradientName
+                  name={profile.full_name}
+                  gradient={profileNameGradient}
+                  fallback="Meu perfil"
+                />
+              }
+              status={
+                status === "approved"
+                  ? "Aprovado"
+                  : status === "rejected"
+                    ? "Revisão necessária"
+                    : status === "banned"
+                      ? "Acesso restrito"
+                      : "Em análise"
+              }
+              roleBadge={
+                isStaff ? (
+                  <RoleBadge role={role} color={localColor ?? roleCfg.defaultColor} size="sm" />
+                ) : undefined
+              }
+              contributor={hasContributorBadge}
+              age={profile.age}
+              state={profile.state || null}
+              range={`${prefs.age_min}-${prefs.age_max}`}
+              location={[profile.city, profile.state].filter(Boolean).join(", ")}
+              church={profile.church}
+              baptism={
+                profile.years_baptized ? `${profile.years_baptized} ano(s)` : "Não informado"
+              }
+              userId={user?.id}
+              petCard={user ? <PetProfileCard userId={user.id} linkToManager /> : undefined}
+              commitment={
+                activeCommitment ? (
+                  <div className="rd-profile-hero__commitment">
+                    <img src={commitmentRing} alt="" />
+                    <span>
+                      <strong>Propósito firmado</strong>
+                      <small>
                         {commitmentPartner
-                          ? `Voce esta em proposito com ${commitmentPartner}.`
-                          : "Voce esta em proposito."}
+                          ? `Você está em propósito com ${commitmentPartner}.`
+                          : "Você está em propósito."}
+                      </small>
+                    </span>
+                    <Link to="/proposito/$matchId" params={{ matchId: activeCommitment.match_id }}>
+                      Abrir
+                    </Link>
+                  </div>
+                ) : undefined
+              }
+              onPhotoClick={() => fileInputRef.current?.click()}
+            />
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*,image/heic,image/heif"
+              onChange={handlePhoto}
+              className="sr-only"
+              tabIndex={-1}
+              aria-hidden="true"
+            />
+          </>
+        ) : (
+          <section className="native-profile__identity animate-fade-up overflow-hidden rounded-[2.25rem] border border-border/70 bg-card/75 shadow-[0_26px_90px_rgba(31,41,55,0.10)] backdrop-blur dark:bg-card/72 dark:shadow-[0_28px_90px_rgba(0,0,0,0.42)]">
+            <div className="grid w-full min-w-0 gap-0 lg:grid-cols-[380px_minmax(0,1fr)]">
+              <div className="native-profile__identity-media relative w-full min-w-0 overflow-hidden min-h-[320px] bg-[linear-gradient(145deg,#fff7ed,#fdf2f8_45%,#eff6ff)] p-4 dark:bg-[linear-gradient(145deg,rgba(49,22,38,0.88),rgba(20,20,34,0.94)_46%,rgba(15,35,58,0.88))] sm:p-8">
+                <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-card/80 to-transparent" />
+                <div className="relative z-10 flex h-full flex-col justify-between gap-8">
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="rounded-full border border-border/70 bg-background/70 px-3 py-1 text-xs font-medium text-muted-foreground shadow-soft backdrop-blur">
+                      Meu espaco
+                    </span>
+                    <StatusPill status={status} />
+                  </div>
+
+                  <div className="flex w-full min-w-0 flex-col items-center text-center">
+                    <div className="relative inline-block">
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        aria-label="Trocar foto de perfil"
+                        className="native-profile__avatar app-pressable group relative h-36 w-36 max-w-full cursor-pointer overflow-hidden rounded-[2rem] border border-border/70 bg-background/70 p-2 shadow-[0_22px_60px_rgba(15,23,42,0.18)] transition hover:-translate-y-1 hover:shadow-[0_28px_70px_rgba(15,23,42,0.22)] dark:shadow-[0_24px_70px_rgba(0,0,0,0.45)] sm:h-44 sm:w-44"
+                      >
+                        <span className="block h-full w-full overflow-hidden rounded-[1.55rem] bg-card">
+                          {photoPreview ? (
+                            <PhotoImg
+                              src={photoPreview}
+                              alt=""
+                              className="pointer-events-none h-full w-full object-cover"
+                            />
+                          ) : (
+                            <span className="pointer-events-none flex h-full w-full flex-col items-center justify-center text-muted-foreground">
+                              <Camera className="h-7 w-7" />
+                              <span className="mt-2 text-sm">Adicionar foto</span>
+                            </span>
+                          )}
+                        </span>
+                        <span className="absolute bottom-4 right-4 flex h-11 w-11 items-center justify-center rounded-full bg-[var(--rose)] text-white shadow-lg">
+                          <Camera className="h-5 w-5" />
+                        </span>
+                      </button>
+                      {user && (
+                        <EquippedPetSidekick
+                          userId={user.id}
+                          size={95}
+                          className="-right-14 bottom-2 sm:-right-16 sm:bottom-3"
+                        />
+                      )}
+                    </div>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*,image/heic,image/heif"
+                      onChange={handlePhoto}
+                      className="sr-only"
+                      tabIndex={-1}
+                      aria-hidden="true"
+                    />
+
+                    <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
+                      {isStaff && (
+                        <RoleBadge
+                          role={role}
+                          color={localColor ?? roleCfg.defaultColor}
+                          size="sm"
+                        />
+                      )}
+                      {hasContributorBadge && (
+                        <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-200">
+                          Contribuidor
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="grid w-full min-w-0 grid-cols-3 gap-2 text-center">
+                    <div className="min-w-0 rounded-2xl bg-background/70 p-2 shadow-soft backdrop-blur dark:bg-background/35 sm:p-3">
+                      <p className="truncate text-base font-semibold text-foreground sm:text-lg">
+                        {profile.age || "--"}
+                      </p>
+                      <p className="truncate text-[10px] uppercase tracking-wide text-muted-foreground sm:text-[11px]">
+                        anos
                       </p>
                     </div>
-                    <Button asChild size="sm" className="shrink-0 rounded-full sm:size-default">
-                      <Link
-                        to="/proposito/$matchId"
-                        params={{
-                          matchId: activeCommitment.match_id,
-                        }}
+                    <div className="min-w-0 rounded-2xl bg-background/70 p-2 shadow-soft backdrop-blur dark:bg-background/35 sm:p-3">
+                      <p className="truncate text-base font-semibold text-foreground sm:text-lg">
+                        {profile.state || "--"}
+                      </p>
+                      <p className="truncate text-[10px] uppercase tracking-wide text-muted-foreground sm:text-[11px]">
+                        estado
+                      </p>
+                    </div>
+                    <div className="min-w-0 rounded-2xl bg-background/70 p-2 shadow-soft backdrop-blur dark:bg-background/35 sm:p-3">
+                      <p className="truncate text-base font-semibold text-foreground sm:text-lg">
+                        {prefs.age_min}-{prefs.age_max}
+                      </p>
+                      <p className="truncate text-[10px] uppercase tracking-wide text-muted-foreground sm:text-[11px]">
+                        busca
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="min-w-0 p-4 sm:p-8 lg:p-10">
+                <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+                  <div className="min-w-0 w-full">
+                    <p className="hidden text-sm font-medium text-[var(--rose)] sm:block">
+                      Perfil pessoal
+                    </p>
+                    <h1 className="mt-2 break-words text-2xl font-black tracking-tight text-foreground sm:text-4xl lg:text-5xl [overflow-wrap:anywhere]">
+                      <GradientName
+                        name={profile.full_name}
+                        gradient={profileNameGradient}
+                        fallback="Meu perfil"
+                      />
+                    </h1>
+                    <p className="mt-3 hidden max-w-2xl text-sm leading-6 text-muted-foreground sm:block sm:text-base">
+                      Organize sua apresentacao, fotos, preferencias e personalizacoes em um painel
+                      mais claro e bonito.
+                    </p>
+                  </div>
+
+                  <div className="flex w-full min-w-0 flex-wrap gap-2 sm:w-auto sm:flex-nowrap">
+                    {user && (
+                      <Button
+                        asChild
+                        variant="outline"
+                        size="sm"
+                        className="shrink-0 rounded-full bg-background/70 backdrop-blur sm:size-default"
                       >
-                        Página
+                        <Link to="/pretendentes/$id" params={{ id: user.id }}>
+                          <Eye className="mr-2 h-4 w-4" />
+                          Ver público
+                        </Link>
+                      </Button>
+                    )}
+                    <Button asChild size="sm" className="shrink-0 rounded-full sm:size-default">
+                      <Link to="/loja">
+                        <Store className="mr-2 h-4 w-4" />
+                        Loja
                       </Link>
                     </Button>
                   </div>
                 </div>
-              )}
+
+                {/* MOBILE: quick actions row */}
+                {user && (
+                  <div className="mt-4">
+                    <PetProfileCard userId={user.id} linkToManager />
+                  </div>
+                )}
+                <div className="mt-5 -mx-2 flex gap-2 overflow-x-auto px-2 pb-1 sm:hidden [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                  {[
+                    {
+                      label: "Editar",
+                      icon: Eye,
+                      onClick: () => {
+                        setActiveTab("profile");
+                        setEditingProfile(true);
+                      },
+                    },
+                    {
+                      label: "Visual",
+                      icon: Sparkles,
+                      onClick: () => setActiveTab("customizacao"),
+                    },
+                    { label: "Saldo", icon: Store, onClick: () => setActiveTab("saldo") },
+                    { label: "Presentes", icon: Heart, onClick: () => setActiveTab("presentes") },
+                  ].map((q) => {
+                    const QIcon = q.icon;
+                    return (
+                      <button
+                        key={q.label}
+                        type="button"
+                        onClick={q.onClick}
+                        className="app-pressable flex min-w-[76px] shrink-0 flex-col items-center gap-1.5 rounded-2xl border border-border/60 bg-background/80 px-3 py-2.5 text-center shadow-sm backdrop-blur"
+                      >
+                        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--petal)] text-[var(--rose)]">
+                          <QIcon className="h-4 w-4" />
+                        </span>
+                        <span className="text-[11px] font-semibold leading-tight text-foreground">
+                          {q.label}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div className="mt-6 hidden gap-3 sm:mt-8 sm:grid sm:grid-cols-3">
+                  <div className="rounded-2xl border border-rose-100 bg-rose-50/70 p-4 dark:border-rose-400/20 dark:bg-rose-400/10">
+                    <div className="flex items-center gap-2 text-sm font-medium text-rose-700 dark:text-rose-200">
+                      <MapPin className="h-4 w-4" />
+                      Localizacao
+                    </div>
+                    <p className="mt-2 truncate text-sm text-foreground">
+                      {[profile.city, profile.state].filter(Boolean).join(", ") || "Nao informada"}
+                    </p>
+                  </div>
+                  <div className="rounded-2xl border border-sky-100 bg-sky-50/70 p-4 dark:border-sky-400/20 dark:bg-sky-400/10">
+                    <div className="flex items-center gap-2 text-sm font-medium text-sky-700 dark:text-sky-200">
+                      <Church className="h-4 w-4" />
+                      Igreja
+                    </div>
+                    <p className="mt-2 truncate text-sm text-foreground">
+                      {profile.church || "Nao informada"}
+                    </p>
+                  </div>
+                  <div className="rounded-2xl border border-amber-100 bg-amber-50/80 p-4 dark:border-amber-400/20 dark:bg-amber-400/10">
+                    <div className="flex items-center gap-2 text-sm font-medium text-amber-700 dark:text-amber-200">
+                      <CalendarHeart className="h-4 w-4" />
+                      Batismo
+                    </div>
+                    <p className="mt-2 text-sm text-foreground">
+                      {profile.years_baptized
+                        ? `${profile.years_baptized} ano(s)`
+                        : "Nao informado"}
+                    </p>
+                  </div>
+                </div>
+
+                {activeCommitment && (
+                  <div className="mt-5 rounded-3xl border border-emerald-200 bg-gradient-to-r from-emerald-50 via-card to-teal-50 p-3.5 shadow-soft dark:border-emerald-400/25 dark:from-emerald-500/15 dark:via-card/80 dark:to-teal-500/10 sm:mt-6 sm:p-5">
+                    <div className="flex flex-row items-center gap-3 sm:gap-4">
+                      <img
+                        src={commitmentRing}
+                        alt=""
+                        className="h-11 w-11 shrink-0 object-contain drop-shadow-sm sm:h-14 sm:w-14"
+                      />
+                      <div className="min-w-0 flex-1">
+                        <h2 className="text-sm font-semibold text-emerald-800 dark:text-emerald-200 sm:text-base">
+                          Proposito Firmado
+                        </h2>
+                        <p className="truncate text-xs text-emerald-700 dark:text-emerald-100/80 sm:text-sm">
+                          {commitmentPartner
+                            ? `Voce esta em proposito com ${commitmentPartner}.`
+                            : "Voce esta em proposito."}
+                        </p>
+                      </div>
+                      <Button asChild size="sm" className="shrink-0 rounded-full sm:size-default">
+                        <Link
+                          to="/proposito/$matchId"
+                          params={{
+                            matchId: activeCommitment.match_id,
+                          }}
+                        >
+                          Página
+                        </Link>
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+        )}
         {user && (
           <HomeStarterSection
             userId={user.id}
@@ -1027,13 +1111,20 @@ function PerfilPage() {
         )}
         <div id="perfil-tabs" />
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-8">
-          {nativeShellActive && (
-            <NativeProfileTabs
-              activeTab={activeTab}
-              items={nativeTabItems}
-              onTabChange={setActiveTab}
-            />
-          )}
+          {nativeShellActive &&
+            (totalRedesignActive ? (
+              <RedesignProfileTabs
+                activeTab={activeTab}
+                items={nativeTabItems}
+                onTabChange={setActiveTab}
+              />
+            ) : (
+              <NativeProfileTabs
+                activeTab={activeTab}
+                items={nativeTabItems}
+                onTabChange={setActiveTab}
+              />
+            ))}
           <div
             className={`grid gap-6 ${
               nativeShellActive ? "" : "lg:grid-cols-[292px_minmax(0,1fr)]"

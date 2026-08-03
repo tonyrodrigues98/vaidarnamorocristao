@@ -44,6 +44,7 @@ import { AdminRouteAccessBoundary } from "@/components/admin-shell/AdminRouteAcc
 import { isGlobalRouterNotFound } from "@/config/router-not-found";
 
 import "@/styles/redesign-total.tokens.css";
+import "@/styles/redesign-total.roots.css";
 
 function NotFoundComponent() {
   return (
