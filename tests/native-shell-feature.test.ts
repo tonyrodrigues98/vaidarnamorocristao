@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { getDestinationBehavior } from "../src/config/app-destinations";
 import {
   NATIVE_SHELL_FEATURE_ENV,
+  NATIVE_SHELL_RELEASE_DEFAULT,
   isNativeShellEligibleDestination,
   nativeShellInitialDestinationIds,
   nativeShellPrimaryDestinationIds,
@@ -26,10 +27,14 @@ describe("native shell feature flag", () => {
     expect(parseNativeShellFeatureFlag(value)).toBe(expected);
   });
 
-  it("is disabled by default and reads only its explicit build environment key", () => {
-    expect(resolveNativeShellFeatureFlag({})).toBe(false);
+  it("uses the release default and honors only its explicit build environment key", () => {
+    expect(NATIVE_SHELL_RELEASE_DEFAULT).toBe(true);
+    expect(resolveNativeShellFeatureFlag({})).toBe(true);
     expect(resolveNativeShellFeatureFlag({ [NATIVE_SHELL_FEATURE_ENV]: "true" })).toBe(true);
-    expect(resolveNativeShellFeatureFlag({ VITE_FF_V2_APP_SHELL: "true" })).toBe(false);
+    expect(resolveNativeShellFeatureFlag({ [NATIVE_SHELL_FEATURE_ENV]: true })).toBe(true);
+    expect(resolveNativeShellFeatureFlag({ [NATIVE_SHELL_FEATURE_ENV]: "false" })).toBe(false);
+    expect(resolveNativeShellFeatureFlag({ [NATIVE_SHELL_FEATURE_ENV]: false })).toBe(false);
+    expect(resolveNativeShellFeatureFlag({ VITE_FF_V2_APP_SHELL: "true" })).toBe(true);
   });
 
   it("does not implement storage, query-string, cookie or hidden overrides", async () => {
