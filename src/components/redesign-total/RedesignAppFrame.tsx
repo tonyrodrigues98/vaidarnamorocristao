@@ -10,6 +10,9 @@ import { RedesignDesktopSidebar } from "./RedesignDesktopSidebar";
 import { RedesignMobileTopBar } from "./RedesignMobileTopBar";
 
 import "@/styles/redesign-total.frame.css";
+import "@/styles/redesign-zero.tokens.css";
+import "@/styles/redesign-zero.frame.css";
+import "@/styles/redesign-zero.surfaces.css";
 
 export function RedesignAppFrame({
   children,
@@ -37,6 +40,7 @@ export function RedesignAppFrame({
       className="rd-app-frame"
       data-vdn-native-shell
       data-vdn-redesign-total
+      data-vdn-visual-zero
       data-active-primary-tab={activeTab}
       data-keyboard-open={String(viewportState.keyboardOpen)}
       data-orientation={viewportState.orientation}

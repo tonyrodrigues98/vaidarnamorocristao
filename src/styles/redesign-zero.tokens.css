@@ -1,0 +1,40 @@
+[data-vdn-redesign-total][data-vdn-visual-zero] {
+  --vz-canvas: #f7f7f8;
+  --vz-surface: #ffffff;
+  --vz-surface-inset: #f0f1f3;
+  --vz-surface-strong: #202126;
+  --vz-text: #17181c;
+  --vz-text-secondary: #686b74;
+  --vz-text-tertiary: #92959e;
+  --vz-divider: #e3e4e8;
+  --vz-coral: #eb4f68;
+  --vz-coral-pressed: #d93f59;
+  --vz-coral-soft: #fde8ec;
+  --vz-violet: #6554d9;
+  --vz-violet-soft: #eeeafe;
+  --vz-mint: #dff4ea;
+  --vz-mint-text: #167154;
+  --vz-amber: #fff1cf;
+  --vz-amber-text: #8f5b0b;
+  --vz-danger-soft: #fee9ec;
+  --vz-danger: #bd334a;
+  --vz-on-accent: #ffffff;
+  --vz-radius-sm: 12px;
+  --vz-radius-md: 18px;
+  --vz-radius-lg: 26px;
+  --vz-touch: 44px;
+  --vz-screen-max: 760px;
+  --vz-motion: 180ms;
+}
+
+[data-vdn-redesign-total][data-vdn-visual-zero]
+  :is(button, a, input, textarea, select):focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--vz-violet) 38%, transparent);
+  outline-offset: 2px;
+}
+
+@media (max-width: 47.999rem) {
+  [data-vdn-redesign-total][data-vdn-visual-zero] :is(input, textarea, select) {
+    font-size: 16px;
+  }
+}
