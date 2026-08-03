@@ -117,11 +117,11 @@
   gap: 24px;
   background: var(--rd-text);
   padding: 24px;
-  color: white;
+  color: var(--rd-on-accent);
   box-shadow: var(--rd-shadow-raised);
 }
 [data-vdn-redesign-total] .rd-home__priority .rd-eyebrow {
-  color: #ffb5c1;
+  color: var(--rd-coral-highlight);
 }
 [data-vdn-redesign-total] .rd-home__priority h2 {
   margin: 6px 0 0;
@@ -131,7 +131,7 @@
 [data-vdn-redesign-total] .rd-home__priority p {
   max-width: 640px;
   margin: 6px 0 0;
-  color: rgb(255 255 255 / 72%);
+  color: color-mix(in srgb, var(--rd-on-accent) 72%, transparent);
   font-size: 13px;
   line-height: 1.55;
 }
@@ -139,14 +139,14 @@
   margin-top: 16px;
 }
 [data-vdn-redesign-total] .rd-home__priority .rd-progress__label {
-  color: rgb(255 255 255 / 72%);
+  color: color-mix(in srgb, var(--rd-on-accent) 72%, transparent);
 }
 [data-vdn-redesign-total] .rd-primary-button {
   min-height: 44px;
   flex: none;
   border-radius: var(--rd-radius-full);
   background: var(--rd-coral);
-  color: white;
+  color: var(--rd-on-accent);
 }
 [data-vdn-redesign-total] .rd-primary-button svg {
   width: 17px;
@@ -186,7 +186,7 @@
 [data-vdn-redesign-total] .rd-home__shortcut .rd-badge {
   margin-left: auto;
   background: var(--rd-coral);
-  color: white;
+  color: var(--rd-on-accent);
 }
 
 [data-vdn-redesign-total] .rd-home__summary-grid {
@@ -233,6 +233,7 @@
 }
 [data-vdn-redesign-total] .rd-home__suggestion a {
   display: inline-flex;
+  min-height: var(--rd-touch-target);
   align-items: center;
   gap: 6px;
   color: var(--rd-coral-strong);
@@ -456,10 +457,17 @@
   place-items: center;
   border-radius: var(--rd-radius-full);
   background: var(--rd-coral);
-  color: white;
+  color: var(--rd-on-accent);
 }
 [data-vdn-redesign-total] .rd-conversation-row__community-icon svg {
   width: 21px;
+}
+[data-vdn-redesign-total] .rd-conversation-avatar > div {
+  border-radius: var(--rd-radius-full);
+}
+[data-vdn-redesign-total] .rd-conversation-avatar > div > div {
+  background: var(--rd-coral-soft) !important;
+  color: var(--rd-coral-strong) !important;
 }
 [data-vdn-redesign-total] .rd-conversation-row__content {
   min-width: 0;
@@ -531,6 +539,9 @@
 [data-vdn-redesign-total] .rd-profile-hero__identity > button {
   position: relative;
   flex: none;
+  border: 0;
+  background: transparent;
+  padding: 0;
 }
 [data-vdn-redesign-total] .rd-profile-hero__avatar {
   display: grid;
@@ -560,7 +571,7 @@
   border: 3px solid var(--rd-surface);
   border-radius: 50%;
   background: var(--rd-coral);
-  color: white;
+  color: var(--rd-on-accent);
 }
 [data-vdn-redesign-total] .rd-profile-hero__camera svg {
   width: 15px;

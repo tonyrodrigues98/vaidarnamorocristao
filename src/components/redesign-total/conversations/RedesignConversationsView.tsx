@@ -95,6 +95,7 @@ export function RedesignConversationsView({ model }: { model: NativeConversation
                     frameId={item.partner.equipped_frame_id ?? null}
                     auraId={item.partner.equipped_aura_id ?? null}
                     isCommitted={item.partner.committed}
+                    className="rd-conversation-avatar"
                   />
                   <span className="rd-conversation-row__content">
                     <span>

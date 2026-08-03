@@ -1,36 +1,37 @@
-# Pet Arcade Design QA
+# Design QA — Redesign Total 01
 
-## Reference
+Status: **PASS — ready for human visual review**
 
-- Source: mobile Pet Arcade montage supplied by the user on 2026-06-22.
-- Target: illustrated mobile-first game hub with cinematic cards, compact operational data, distinct art direction per game, warm off-white shell and jewel-tone game stages.
+## Compared sources
 
-## Implemented comparison points
+- Official reference: Vai Dar Namoro — Community Prototype 01.
+- Canonical constraints: `docs/native-shell-integration/12-visual-reference-freeze.md` and `13-token-and-primitives-contract.md`.
+- Implementation captures: eight deterministic screenshots in `artifacts/redesign-total/`.
 
-- The hub now uses a full illustrated hero rather than a generic information card.
-- Mobile game selection now uses a two-column grid, matching the reference density.
-- Every Pet Arcade module has an individual optimized WebP scene.
-- Illustrated cards use a scene-first composition with title overlay and compact entry/usage footer.
-- Voo Estelar, Roda do Biscoito, Album and Maquina de Bolinha reuse their card art inside the real game experience.
-- Existing game animations, backend calls, balances, XP, inventory and signed pet images were preserved.
-
-## Automated capture
-
-- Viewport: iPhone 13 through local Playwright.
-- Route: `/pet-arcade`.
-- Result: the unauthenticated browser was redirected to the login page.
-- No fake account, mock session or authentication bypass was introduced.
+The prototype's structural direction was retained: compact fixed navigation, clear active destination, editorial hierarchy, a prominent current priority, quiet secondary actions, coral accents, and an inbox presented as a continuous list. The prototype's rejected dark treatment was intentionally not copied; this phase uses the approved light canvas and surface tokens.
 
 ## Checks
 
-- Targeted ESLint: passed for changed TypeScript files.
-- Production build: passed.
-- Unit tests: 19 passed.
-- Integration suites: blocked before execution because Supabase test environment keys are not available locally.
+| Area          | Result | Evidence                                                                                  |
+| ------------- | ------ | ----------------------------------------------------------------------------------------- |
+| Mobile frame  | PASS   | Compact top bar, five-item bottom navigation, no legacy header.                           |
+| Tablet frame  | PASS   | 76 px rail, no simultaneous bottom navigation, balanced content gutter.                   |
+| Desktop frame | PASS   | 244 px sidebar, central content width, no horizontal legacy header.                       |
+| Início        | PASS   | Editorial devotional, one dominant priority, clean shortcuts and real summary values.     |
+| Comunidade    | PASS   | Consistent tabs and real destinations; no invented feed.                                  |
+| Explorar      | PASS   | Registry-backed grouped hub; no fake search or feature.                                   |
+| Conversas     | PASS   | Circular avatars, subtle dividers, real unread/time fields, community row differentiated. |
+| Perfil        | PASS   | Circular avatar, real profile facts, progress, tabs and safety/account actions.           |
+| Overflow      | PASS   | `scrollWidth <= clientWidth` in all eight captures.                                       |
+| Touch targets | PASS   | No visible interactive target below 44 × 44 px in the capture matrix.                     |
+| Theme         | PASS   | Redesign scope resolves to light only; no inherited dark visual treatment.                |
 
-## Remaining visual verification
+## Corrections made during visual review
 
-- Authenticated screenshots of the hub and open game states are still required to compare exact spacing, crop and safe-area behavior against the reference.
-- Audio and signed URL behavior require an authenticated runtime session with real data.
+1. Added scoped `box-sizing: border-box` so padded root surfaces cannot be clipped while global legacy CSS is present.
+2. Removed inherited link underlines and normalized form typography only inside the redesign scope.
+3. Restored circular avatar rendering in the conversations harness and removed the legacy gradient fallback.
+4. Removed the native button box around the redesigned profile avatar.
+5. Raised the suggestion action to the 44 px target contract.
 
-final result: blocked
+No P0, P1, P2, or P3 visual issue remains in the required deterministic matrix. Physical device review remains the next gate.

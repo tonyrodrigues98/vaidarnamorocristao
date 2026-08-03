@@ -1,0 +1,39 @@
+html,
+body,
+#root {
+  min-width: 0;
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  background: #fafafa;
+}
+
+.rd-profile-harness {
+  margin: 0 auto;
+  padding: 22px 16px 120px;
+}
+
+.rd-profile-harness .rd-profile-panel {
+  margin-top: 18px;
+}
+
+.rd-profile-harness .rd-profile-panel h2 {
+  margin: 0 0 8px;
+  font-size: 18px;
+}
+
+.rd-profile-harness .rd-profile-panel p {
+  margin: 0;
+  color: var(--rd-text-muted);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+@media (min-width: 48rem) {
+  .rd-profile-harness {
+    max-width: 920px;
+    padding: 36px 30px 70px;
+  }
+}

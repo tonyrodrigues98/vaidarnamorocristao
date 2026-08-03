@@ -97,7 +97,7 @@
   border: 2px solid var(--rd-surface);
   border-radius: var(--rd-radius-full);
   background: var(--rd-coral);
-  color: white;
+  color: var(--rd-on-accent);
   font-size: 9px;
   font-weight: 700;
 }
@@ -111,7 +111,7 @@
   border-top: 1px solid var(--rd-border);
   background: color-mix(in srgb, var(--rd-surface) 96%, transparent);
   padding: 0 var(--rd-safe-right) var(--rd-safe-bottom) var(--rd-safe-left);
-  box-shadow: 0 -8px 28px rgb(20 21 26 / 7%);
+  box-shadow: var(--rd-shadow-subtle);
   backdrop-filter: blur(18px);
 }
 
