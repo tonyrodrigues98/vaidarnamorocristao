@@ -20,6 +20,8 @@ import pomba from "@/assets/decorations/sticker-pomba.webp";
 import cruz from "@/assets/decorations/sticker-cruz-dourada.webp";
 import coracao from "@/assets/decorations/sticker-coracao-sagrado.webp";
 import estrela from "@/assets/decorations/sticker-estrela-belem.webp";
+import legacyDecoration1780541586042 from "@/assets/decorations/legacy-decoration-1780541586042-87676868766.png";
+import legacyConstelacaoAmor from "@/assets/decorations/legacy-constelacao-amor.png";
 
 export type DecorationType = "frame" | "aura" | "sticker";
 export type DecorationRarity = "common" | "rare" | "epic" | "legendary" | "exclusive";
@@ -72,6 +74,10 @@ export const DECORATION_RARITY_STYLE: Record<
 };
 
 export const DECORATION_ASSETS: Record<string, string> = {
+  "/__l5e/assets-v1/30fd65c5-9344-46fd-93c2-5734a3aef67b/1780541586042-87676868766.png":
+    legacyDecoration1780541586042,
+  "/__l5e/assets-v1/78b7eff2-cc7a-474f-8742-c0b39d4837f9/constelacao-amor.png":
+    legacyConstelacaoAmor,
   "frame-alianca-ouro.png": alianca,
   "frame-coroa-espinhos.png": coroa,
   "frame-louros-dourados.png": louros,
