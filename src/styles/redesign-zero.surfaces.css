@@ -823,6 +823,7 @@
 }
 
 [data-vdn-redesign-total][data-vdn-visual-zero] .vz-profile__bio button {
+  min-width: var(--vz-touch);
   min-height: var(--vz-touch);
   margin-top: 8px;
   border: 0;

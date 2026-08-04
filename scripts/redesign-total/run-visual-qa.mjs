@@ -1,11 +1,11 @@
 import { createHash } from "node:crypto";
 import { spawn } from "node:child_process";
-import { access, mkdir, rm, writeFile } from "node:fs/promises";
+import { access, copyFile, mkdir, rm, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
 const root = process.cwd();
-const output = resolve(root, "artifacts/redesign-total");
-const profile = resolve(root, `.tmp/redesign-total-chrome-profile-${process.pid}`);
+const output = resolve(root, "artifacts/redesign-zero");
+const profile = resolve(root, `.tmp/redesign-zero-chrome-profile-${process.pid}`);
 const port = Number(process.env.REDESIGN_HARNESS_PORT || 4181);
 const debugPort = Number(process.env.REDESIGN_CHROME_DEBUG_PORT || 9341);
 const origin = `http://127.0.0.1:${port}`;
@@ -105,9 +105,11 @@ const cases = [
   ["mobile-393x852-explorar.png", "explorar", 393, 852],
   ["mobile-393x852-conversas.png", "conversas", 393, 852],
   ["mobile-393x852-perfil.png", "perfil", 393, 852],
+  ["mobile-430x932-inicio.png", "inicio", 430, 932],
   ["tablet-834x1194-inicio.png", "inicio", 834, 1194],
   ["desktop-1440x900-inicio.png", "inicio", 1440, 900],
   ["desktop-1440x900-conversas.png", "conversas", 1440, 900],
+  ["desktop-1440x900-perfil.png", "perfil", 1440, 900],
 ];
 
 let cdp;
@@ -116,7 +118,7 @@ try {
   start(process.execPath, [
     resolve(root, "node_modules/vite/bin/vite.js"),
     "--config",
-    "scripts/redesign-total/visual-harness/vite.config.mjs",
+    "scripts/redesign-zero/visual-harness/vite.config.mjs",
     "--host",
     "127.0.0.1",
     "--port",
@@ -167,7 +169,7 @@ try {
     while (Date.now() < readyDeadline) {
       const ready = await evaluate(
         cdp,
-        `Boolean(document.querySelector('[data-vdn-redesign-total]'))`,
+        `Boolean(document.querySelector('[data-vdn-redesign-total][data-vdn-visual-zero]'))`,
       );
       if (ready) break;
       await new Promise((resolveDelay) => setTimeout(resolveDelay, 150));
@@ -175,7 +177,7 @@ try {
     await new Promise((resolveDelay) => setTimeout(resolveDelay, 350));
     const state = await evaluate(
       cdp,
-      `(()=>{const all=[...document.querySelectorAll('a,button,input,textarea,select')];const actionable=all.filter(el=>{const r=el.getBoundingClientRect();return r.width>0&&r.height>0});const small=actionable.filter(el=>{const r=el.getBoundingClientRect();return r.width<44||r.height<44}).map(el=>({tag:el.tagName,label:el.getAttribute('aria-label')||el.textContent?.trim().slice(0,40),width:el.getBoundingClientRect().width,height:el.getBoundingClientRect().height}));const avatar=[...document.querySelectorAll('.rd-avatar,.rd-profile-hero__avatar')].find(el=>{const r=el.getBoundingClientRect();return r.width>0&&r.height>0});const avatarStyle=avatar?getComputedStyle(avatar):null;const redesign=document.querySelector('[data-vdn-redesign-total]');return {bodyText:(document.body?.innerText||'').trim().length,redesign:!!redesign,legacyHeader:!!document.querySelector('[data-legacy-header],.mobile-app-header'),bottom:!!document.querySelector('.rd-bottom-nav'),sidebar:!!document.querySelector('.rd-sidebar'),scrollWidth:document.documentElement.scrollWidth,clientWidth:document.documentElement.clientWidth,smallTargets:small,avatar:avatar?{width:avatar.getBoundingClientRect().width,height:avatar.getBoundingClientRect().height,radius:avatarStyle.borderRadius}:null,colorScheme:getComputedStyle(redesign||document.body).colorScheme};})()`,
+      `(()=>{const all=[...document.querySelectorAll('a,button,input,textarea,select')];const actionable=all.filter(el=>{const r=el.getBoundingClientRect();const s=getComputedStyle(el);return r.width>0&&r.height>0&&s.visibility!=='hidden'&&s.display!=='none'&&Number(s.opacity)>0});const small=actionable.filter(el=>{const r=el.getBoundingClientRect();return r.width<44||r.height<44}).map(el=>({tag:el.tagName,label:el.getAttribute('aria-label')||el.textContent?.trim().slice(0,40),width:el.getBoundingClientRect().width,height:el.getBoundingClientRect().height}));const avatar=[...document.querySelectorAll('.vz-avatar__media')].find(el=>{const r=el.getBoundingClientRect();return r.width>0&&r.height>0});const avatarStyle=avatar?getComputedStyle(avatar):null;const redesign=document.querySelector('[data-vdn-redesign-total][data-vdn-visual-zero]');return {bodyText:(document.body?.innerText||'').trim().length,redesign:!!redesign,legacyHeader:!!document.querySelector('[data-legacy-header],.mobile-app-header'),bottom:!!document.querySelector('.rd-bottom-nav'),sidebar:!!document.querySelector('.rd-sidebar'),scrollWidth:document.documentElement.scrollWidth,clientWidth:document.documentElement.clientWidth,smallTargets:small,avatar:avatar?{width:avatar.getBoundingClientRect().width,height:avatar.getBoundingClientRect().height,radius:avatarStyle.borderRadius}:null,colorScheme:getComputedStyle(redesign||document.body).colorScheme};})()`,
     );
     const screenshot = await cdp.send("Page.captureScreenshot", { format: "png" });
     const bytes = Buffer.from(screenshot.data, "base64");
@@ -221,6 +223,38 @@ try {
   await writeFile(
     resolve(output, "index.html"),
     `<!doctype html><meta charset="utf-8"><title>VDN Redesign Total QA</title><style>body{margin:0;background:#f3f3f5;color:#1a1a1d;font:14px system-ui;padding:24px}main{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}article{background:white;border-radius:16px;padding:14px;box-shadow:0 8px 28px #1111}img{display:block;width:100%;height:520px;object-fit:contain;object-position:top;background:#fafafa;border-radius:10px}h2{font-size:16px;margin:12px 0 4px}p{color:#696b73;margin:0}</style><h1>VDN Redesign Total · contato visual</h1><main>${cards}</main>`,
+  );
+  const comparison = resolve(output, "comparison");
+  await mkdir(comparison, { recursive: true });
+  const comparisonRows = [];
+  for (const surface of ["inicio", "comunidade", "explorar", "conversas", "perfil"]) {
+    const prototypeName = `prototype-${surface}.png`;
+    const phaseName = `phase-one-${surface}.png`;
+    const zeroName = `visual-zero-${surface}.png`;
+    await copyFile(
+      resolve(root, `../../artifacts/redesign-reference/desktop-${surface}.png`),
+      resolve(comparison, prototypeName),
+    );
+    await copyFile(
+      resolve(root, `artifacts/redesign-total/mobile-393x852-${surface}.png`),
+      resolve(comparison, phaseName),
+    );
+    await copyFile(
+      resolve(
+        output,
+        ["inicio", "conversas", "perfil"].includes(surface)
+          ? `desktop-1440x900-${surface}.png`
+          : `mobile-393x852-${surface}.png`,
+      ),
+      resolve(comparison, zeroName),
+    );
+    comparisonRows.push(
+      `<section><h2>${surface}</h2><div><figure><img src="${prototypeName}"><figcaption>Prototype 01</figcaption></figure><figure><img src="${phaseName}"><figcaption>Phase 01 rejeitada</figcaption></figure><figure><img src="${zeroName}"><figcaption>Visual Zero</figcaption></figure></div></section>`,
+    );
+  }
+  await writeFile(
+    resolve(comparison, "index.html"),
+    `<!doctype html><meta charset="utf-8"><title>VDN · comparação visual</title><style>body{margin:0;background:#edeef1;color:#191a1e;font:14px system-ui;padding:24px}section{margin:0 0 32px}section>div{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}figure{margin:0;background:white;padding:10px;border-radius:14px}img{width:100%;height:620px;object-fit:contain;object-position:top;background:#f8f8f8}figcaption{font-weight:700;margin-top:8px;text-align:center}@media(max-width:800px){section>div{grid-template-columns:1fr}img{height:auto}}</style><h1>Prototype 01 × Phase 01 × Visual Zero</h1>${comparisonRows.join("")}`,
   );
   if (report.some((item) => item.result !== "pass")) {
     throw new Error("Visual QA found structural issues");

@@ -13,9 +13,12 @@ describe("total redesign functional freeze", () => {
   });
 
   it("keeps the visual runtime free of endpoints, mocks, and direct backend access", () => {
-    const files = readdirSync("src/components/redesign-total", { recursive: true })
-      .filter((entry) => typeof entry === "string" && entry.endsWith(".tsx"))
-      .map((entry) => `src/components/redesign-total/${entry.replaceAll("\\", "/")}`);
+    const roots = ["src/components/redesign-total", "src/components/redesign-zero"];
+    const files = roots.flatMap((root) =>
+      readdirSync(root, { recursive: true })
+        .filter((entry) => typeof entry === "string" && entry.endsWith(".tsx"))
+        .map((entry) => `${root}/${entry.replaceAll("\\", "/")}`),
+    );
     for (const file of files) {
       const source = readFileSync(file, "utf8");
       expect(source).not.toMatch(/src\/routes\/api|\/api\//);
