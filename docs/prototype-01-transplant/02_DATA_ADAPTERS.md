@@ -1,5 +1,9 @@
 # Prototype 01 data adapters
 
+## Runtime boundary
+
+`Prototype01RuntimeContext` is presentation-only and carries no Supabase access. Primary route adapters receive the existing route-owned view models and callbacks. Secondary routes keep their existing data layer and are framed by `Prototype01SecondaryHeader` plus scoped canonical CSS; no data operation is moved into the shell.
+
 The route remains the owner of authentication, queries, mutations, uploads, realtime subscriptions, and navigation. Prototype 01 components are presentational and receive stable view models and callbacks.
 
 | Surface    | Route owner                                             | Adapter contract               | Preserved real sources                                                                      | Runtime fixtures |

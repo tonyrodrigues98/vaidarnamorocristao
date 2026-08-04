@@ -14,3 +14,15 @@ This register distinguishes visual concepts present in the canonical source from
 ## Extension rule
 
 Functional routes absent from the source must be composed from copied Prototype 01 fields, rows, cards, sheets, dialogs, empty states, page frames, and responsive rules. V1, Phase 01, and Visual Zero presentation components are not valid fallbacks.
+
+## Implemented extension surface
+
+All app destinations already classified as Native secondary destinations receive the copied Prototype 01 shell, its contextual top bar, semantic tokens, 44 px interaction contract, 16 px mobile fields, bounded dialogs, internal table overflow, safe-area padding, and the source card geometry. The route remains the sole owner of queries, mutations, uploads, realtime subscriptions, and domain state. This layer introduces no query, mutation, endpoint, route, fixture, or backend contract.
+
+The source-only concepts below remain honest and non-interactive until a real product contract exists:
+
+- persistent Spaces;
+- physical Events;
+- Cinema;
+- demo counters or sample activity;
+- profile showcase modules without stored data.

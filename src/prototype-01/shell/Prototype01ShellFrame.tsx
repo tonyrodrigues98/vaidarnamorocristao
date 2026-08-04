@@ -11,8 +11,11 @@ import {
   resolveNativeTabSelectionAction,
 } from "@/config/native-primary-navigation";
 import type { NativeViewportState } from "@/components/native-shell/useNativeViewportState";
+import { getNativeSecondaryDestinationChrome } from "@/config/native-secondary-destinations";
 
 import vdnLogo from "../assets/vdn-logo.png";
+import { Prototype01SecondaryHeader } from "../components/Prototype01SecondaryHeader";
+import "../styles/functional-extensions.css";
 import "../styles/globals.css";
 
 const icons = {
@@ -31,6 +34,7 @@ type Prototype01ViewportStyle = CSSProperties & {
 
 export type Prototype01ShellFrameProps = {
   activeTab: FuturePrimaryTab;
+  destinationId: string;
   pathname: string;
   search?: string;
   hash?: string;
@@ -86,6 +90,7 @@ function initials(label: string): string {
 
 export function Prototype01ShellFrame({
   activeTab,
+  destinationId,
   pathname,
   search = "",
   hash = "",
@@ -96,6 +101,7 @@ export function Prototype01ShellFrame({
 }: Prototype01ShellFrameProps) {
   const navigate = useNavigate();
   const context = tabContext[activeTab];
+  const secondaryDestination = getNativeSecondaryDestinationChrome(destinationId);
   const viewportHeight = viewportState.visualHeight || viewportState.layoutHeight;
   const style: Prototype01ViewportStyle = {
     "--app-viewport-height": viewportHeight > 0 ? `${viewportHeight}px` : "100dvh",
@@ -187,7 +193,14 @@ export function Prototype01ShellFrame({
 
       <div className="tab-stage">
         <div className="tab-pane active" data-prototype01-scroll>
-          {children}
+          {secondaryDestination ? (
+            <div className="prototype01-secondary-surface" data-prototype01-secondary>
+              <Prototype01SecondaryHeader destinationId={destinationId} />
+              <div className="prototype01-secondary-content">{children}</div>
+            </div>
+          ) : (
+            children
+          )}
         </div>
       </div>
 

@@ -56,6 +56,7 @@ export function NativeShellRuntimeBoundary({ children }: NativeShellRuntimeBound
           <Suspense fallback={null}>
             <Prototype01ShellFrame
               activeTab={activeTab}
+              destinationId={behavior.destinationId}
               pathname={location.pathname}
               search={location.searchStr}
               hash={location.hash}
