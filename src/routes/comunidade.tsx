@@ -1,4 +1,4 @@
-import { createFileRoute, Navigate } from "@tanstack/react-router";
+import { createFileRoute, Navigate, useNavigate } from "@tanstack/react-router";
 import { MessageCircle, Newspaper, Radio, Sparkles } from "lucide-react";
 
 import { NativeCommunityLinkCard } from "@/components/community/native/NativeCommunityLinkCard";
@@ -11,6 +11,13 @@ import {
   shouldExposeNativeRootDestination,
 } from "@/config/native-shell-feature";
 import { createPrivatePageMetadata } from "@/lib/metadata";
+import { prototype01FeatureEnabled } from "@/config/prototype-01-feature";
+import { usePrototype01Runtime } from "@/prototype-01/Prototype01RuntimeContext";
+import { Prototype01ComunidadeScreen } from "@/prototype-01/screens/ComunidadeScreen";
+import {
+  fromPrototype01CommunitySection,
+  toPrototype01CommunitySection,
+} from "@/prototype-01/adapters";
 
 export const Route = createFileRoute("/comunidade")({
   component: CommunityRoute,
@@ -27,9 +34,36 @@ export const Route = createFileRoute("/comunidade")({
 
 function CommunityRoute() {
   const { tab } = Route.useSearch();
+  const prototype01Active = usePrototype01Runtime();
+  const navigate = useNavigate();
+  const nativeRootExposed = shouldExposeNativeRootDestination(
+    "/comunidade",
+    nativeShellFeatureEnabled,
+  );
+  const prototypeRootExposed = shouldExposeNativeRootDestination(
+    "/comunidade",
+    prototype01FeatureEnabled,
+  );
 
-  if (!shouldExposeNativeRootDestination("/comunidade", nativeShellFeatureEnabled)) {
+  if (!nativeRootExposed && !prototypeRootExposed) {
     return <Navigate to="/conversas/comunidade" replace />;
+  }
+
+  if (prototype01Active) {
+    return (
+      <RequireApproved>
+        <Prototype01ComunidadeScreen
+          section={toPrototype01CommunitySection(tab)}
+          onSectionChange={(nextSection) =>
+            void navigate({
+              to: "/comunidade",
+              search: { tab: fromPrototype01CommunitySection(nextSection) },
+            })
+          }
+          onNavigate={(to) => void navigate({ to })}
+        />
+      </RequireApproved>
+    );
   }
 
   return (

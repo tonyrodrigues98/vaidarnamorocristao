@@ -10,6 +10,9 @@ import {
   shouldExposeNativeRootDestination,
 } from "@/config/native-shell-feature";
 import { createPrivatePageMetadata } from "@/lib/metadata";
+import { prototype01FeatureEnabled } from "@/config/prototype-01-feature";
+import { usePrototype01Runtime } from "@/prototype-01/Prototype01RuntimeContext";
+import { Prototype01ExplorarScreen } from "@/prototype-01/screens/ExplorarScreen";
 
 export const Route = createFileRoute("/explorar")({
   component: ExploreRoute,
@@ -22,8 +25,30 @@ export const Route = createFileRoute("/explorar")({
 });
 
 function ExploreRoute() {
-  if (!shouldExposeNativeRootDestination("/explorar", nativeShellFeatureEnabled)) {
+  const prototype01Active = usePrototype01Runtime();
+  const navigate = Route.useNavigate();
+  const nativeRootExposed = shouldExposeNativeRootDestination(
+    "/explorar",
+    nativeShellFeatureEnabled,
+  );
+  const prototypeRootExposed = shouldExposeNativeRootDestination(
+    "/explorar",
+    prototype01FeatureEnabled,
+  );
+
+  if (!nativeRootExposed && !prototypeRootExposed) {
     return <Navigate to="/inicio" replace />;
+  }
+
+  if (prototype01Active) {
+    return (
+      <RequireApproved>
+        <Prototype01ExplorarScreen
+          items={nativeExploreRegistry}
+          onNavigate={(to) => void navigate({ to })}
+        />
+      </RequireApproved>
+    );
   }
 
   const experiences = nativeExploreRegistry.filter((item) => item.category === "experiences");

@@ -78,6 +78,9 @@ import { prefetchPetEssentials } from "@/lib/petQueries";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNativeShellRuntime } from "@/components/native-shell/NativeShellRuntimeContext";
 import { NativeProfileTabs } from "@/components/profile/native/NativeProfileTabs";
+import { usePrototype01Runtime } from "@/prototype-01/Prototype01RuntimeContext";
+import { Prototype01PerfilScreen } from "@/prototype-01/screens/PerfilScreen";
+import { toPrototype01ProfileFields } from "@/prototype-01/adapters";
 import "@/styles/native-profile.css";
 
 export const Route = createFileRoute("/perfil")({
@@ -134,6 +137,8 @@ function PerfilPage() {
   const search = Route.useSearch();
   const queryClient = useQueryClient();
   const { active: nativeShellActive } = useNativeShellRuntime();
+  const prototype01Active = usePrototype01Runtime();
+  const navigate = Route.useNavigate();
 
   // Pré-aquece os dados do pet/cenário assim que o /perfil monta — ao
   // navegar para /meu-pet (ou aos cards de pet no próprio perfil) a UI
@@ -486,8 +491,8 @@ function PerfilPage() {
     setPhotoPreview(URL.createObjectURL(f));
   }
 
-  async function saveProfile(e: React.FormEvent) {
-    e.preventDefault();
+  async function saveProfile(e?: React.FormEvent) {
+    e?.preventDefault();
     if (!user) return;
     if (!isOnline) {
       toast.error("Disponível online. Reconecte-se para salvar alterações.");
@@ -708,6 +713,33 @@ function PerfilPage() {
                   ? "Visual"
                   : "Presentes",
   }));
+
+  if (prototype01Active) {
+    return (
+      <>
+        <Prototype01PerfilScreen
+          fields={toPrototype01ProfileFields(profile)}
+          photoUrl={photoPreview}
+          status={status}
+          verified={Boolean(profileMainQuery.data?.verified)}
+          editing={editingProfile}
+          saving={savingProfile}
+          onEditingChange={setEditingProfile}
+          onFieldChange={setP}
+          onChoosePhoto={() => fileInputRef.current?.click()}
+          onSave={() => void saveProfile()}
+          onNavigate={(to) => void navigate({ to })}
+        />
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*,.heic,.heif"
+          className="sr-only"
+          onChange={(event) => void handlePhoto(event)}
+        />
+      </>
+    );
+  }
 
   return (
     <div

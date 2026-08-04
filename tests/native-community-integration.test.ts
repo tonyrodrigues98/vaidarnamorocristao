@@ -19,9 +19,10 @@ describe("T46-12 native community integration", () => {
   it("preserves the legacy redirect and approved-user boundary", () => {
     expect(routeSource).toContain('<Navigate to="/conversas/comunidade" replace />');
     expect(routeSource).toContain("<RequireApproved>");
-    expect(routeSource).toContain(
-      'shouldExposeNativeRootDestination("/comunidade", nativeShellFeatureEnabled)',
-    );
+    expect(routeSource).toContain("nativeRootExposed");
+    expect(routeSource).toContain("prototypeRootExposed");
+    expect(routeSource).toContain("nativeShellFeatureEnabled");
+    expect(routeSource).toContain("prototype01FeatureEnabled");
   });
 
   it("normalizes tab state without inventing a destination", () => {

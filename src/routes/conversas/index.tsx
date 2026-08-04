@@ -23,6 +23,8 @@ import {
 } from "@/components/conversations/native/NativeConversationsView";
 import type { ConversationItem } from "@/hooks/useConversationsList";
 import type { RelationshipCommitment } from "@/lib/commitments";
+import { usePrototype01Runtime } from "@/prototype-01/Prototype01RuntimeContext";
+import { Prototype01ConversasScreen } from "@/prototype-01/screens/ConversasScreen";
 
 export const Route = createFileRoute("/conversas/")({
   component: () => (
@@ -44,6 +46,8 @@ function List() {
   const [query, setQuery] = useState("");
   const { isOnline } = useNetworkStatus();
   const { active: nativeShellActive } = useNativeShellRuntime();
+  const prototype01Active = usePrototype01Runtime();
+  const navigate = Route.useNavigate();
 
   if (!loading && !user) return <Navigate to="/auth/login" />;
 
@@ -67,6 +71,18 @@ function List() {
       onQueryChange: setQuery,
       onRefresh: refetch,
     };
+
+    if (prototype01Active) {
+      return (
+        <Prototype01ConversasScreen
+          model={model}
+          onOpenCommunity={() => void navigate({ to: "/conversas/comunidade" })}
+          onOpenConversation={(matchId) =>
+            void navigate({ to: "/conversas/$matchId", params: { matchId } })
+          }
+        />
+      );
+    }
 
     return <NativeConversationsView model={model} />;
   }

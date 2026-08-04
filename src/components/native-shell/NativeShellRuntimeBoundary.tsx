@@ -9,6 +9,7 @@ import {
   shouldRenderPrototype01Shell,
 } from "@/config/prototype-01-feature";
 import { useAuth } from "@/lib/auth";
+import { Prototype01RuntimeProvider } from "@/prototype-01/Prototype01RuntimeProvider";
 
 import { NativeShellFrame } from "./NativeShellFrame";
 import { NativeAdaptiveNavigation } from "./NativeAdaptiveNavigation";
@@ -51,18 +52,20 @@ export function NativeShellRuntimeBoundary({ children }: NativeShellRuntimeBound
   if (usePrototype01Shell && activeTab) {
     return (
       <NativeShellRuntimeProvider active activeTab={activeTab}>
-        <Suspense fallback={null}>
-          <Prototype01ShellFrame
-            activeTab={activeTab}
-            pathname={location.pathname}
-            search={location.searchStr}
-            hash={location.hash}
-            userLabel={userLabel}
-            viewportState={viewportState}
-          >
-            {children}
-          </Prototype01ShellFrame>
-        </Suspense>
+        <Prototype01RuntimeProvider>
+          <Suspense fallback={null}>
+            <Prototype01ShellFrame
+              activeTab={activeTab}
+              pathname={location.pathname}
+              search={location.searchStr}
+              hash={location.hash}
+              userLabel={userLabel}
+              viewportState={viewportState}
+            >
+              {children}
+            </Prototype01ShellFrame>
+          </Suspense>
+        </Prototype01RuntimeProvider>
       </NativeShellRuntimeProvider>
     );
   }

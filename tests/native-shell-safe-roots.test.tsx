@@ -43,9 +43,10 @@ describe("NativeRootPlaceholder", () => {
 
 describe("/comunidade safe root", () => {
   it("keeps the legacy replace redirect when the feature is not exposed", () => {
-    expect(communitySource).toContain(
-      'shouldExposeNativeRootDestination("/comunidade", nativeShellFeatureEnabled)',
-    );
+    expect(communitySource).toContain("nativeRootExposed");
+    expect(communitySource).toContain("prototypeRootExposed");
+    expect(communitySource).toContain("nativeShellFeatureEnabled");
+    expect(communitySource).toContain("prototype01FeatureEnabled");
     expect(communitySource).toContain('<Navigate to="/conversas/comunidade" replace />');
   });
 
@@ -75,9 +76,10 @@ describe("/comunidade safe root", () => {
 
 describe("/explorar safe root", () => {
   it("uses a replace fallback to home and the real approval gate when exposed", () => {
-    expect(exploreSource).toContain(
-      'shouldExposeNativeRootDestination("/explorar", nativeShellFeatureEnabled)',
-    );
+    expect(exploreSource).toContain("nativeRootExposed");
+    expect(exploreSource).toContain("prototypeRootExposed");
+    expect(exploreSource).toContain("nativeShellFeatureEnabled");
+    expect(exploreSource).toContain("prototype01FeatureEnabled");
     expect(exploreSource).toContain('<Navigate to="/inicio" replace />');
     expect(exploreSource).toContain("<RequireApproved>");
   });

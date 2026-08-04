@@ -54,6 +54,8 @@ import {
   type NativeInicioViewModel,
 } from "@/components/home/native/NativeInicioView";
 import { useNativeShellRuntime } from "@/components/native-shell/NativeShellRuntimeContext";
+import { usePrototype01Runtime } from "@/prototype-01/Prototype01RuntimeContext";
+import { Prototype01InicioScreen } from "@/prototype-01/screens/InicioScreen";
 
 export const Route = createFileRoute("/inicio")({
   component: InicioRoute,
@@ -273,6 +275,8 @@ function actionSearch(id: string): Record<string, unknown> | undefined {
 
 function InicioPage({ user }: { user: User }) {
   const { active: nativeShellActive } = useNativeShellRuntime();
+  const prototype01Active = usePrototype01Runtime();
+  const navigate = Route.useNavigate();
   const [profile, setProfile] = useState<Profile | null | undefined>(undefined);
   const [advanced, setAdvanced] = useState<StrengthAdvanced>(null);
   const [prefs, setPrefs] = useState<StrengthPreferences>(null);
@@ -694,6 +698,12 @@ function InicioPage({ user }: { user: User }) {
       onResolveRequest: resolveRequest,
       onSubmitAppeal: submitAppeal,
     };
+
+    if (prototype01Active) {
+      return (
+        <Prototype01InicioScreen model={nativeModel} onNavigate={(to) => void navigate({ to })} />
+      );
+    }
 
     return <NativeInicioView model={nativeModel} />;
   }
