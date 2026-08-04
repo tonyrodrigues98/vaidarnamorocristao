@@ -322,7 +322,9 @@ function ActivityContent({
       try {
         const parsed = JSON.parse(saved) as { tab?: ActivityTab; scroll?: number };
         window.setTimeout(() => listRef.current?.scrollTo({ top: parsed.scroll ?? 0 }), 0);
-      } catch {}
+      } catch {
+        // The canonical prototype treats stale local demo state as absent.
+      }
     }
     const timer = window.setTimeout(() => setDemoState("normal"), 520);
     return () => window.clearTimeout(timer);

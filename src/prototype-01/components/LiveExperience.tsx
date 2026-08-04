@@ -269,7 +269,9 @@ function LiveContent({
           const parsed = JSON.parse(saved) as { tab?: LiveTab; minimized?: boolean };
           if (parsed.tab && tabs.includes(parsed.tab)) setTab(parsed.tab);
           if (parsed.minimized) setMinimized(true);
-        } catch {}
+        } catch {
+          // The canonical prototype treats stale local demo state as absent.
+        }
       }
     }, 0);
     return () => window.clearTimeout(restore);

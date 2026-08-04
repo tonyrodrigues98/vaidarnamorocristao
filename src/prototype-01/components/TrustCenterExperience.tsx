@@ -196,7 +196,9 @@ function TrustContent({
           if (parsed.tab && tabs.some((item) => item.id === parsed.tab)) setTab(parsed.tab);
           if (parsed.photoStep) setPhotoStep(parsed.photoStep);
           if (parsed.fixes) setProfileFixes(parsed.fixes);
-        } catch {}
+        } catch {
+          // The canonical prototype treats stale local demo state as absent.
+        }
       }
     }, 0);
     return () => window.clearTimeout(restore);
