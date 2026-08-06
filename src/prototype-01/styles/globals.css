@@ -94,10 +94,16 @@ button:active {
   transform: scale(0.985);
 }
 
-button:focus-visible,
-input:focus-visible {
+button:focus-visible {
   outline: 3px solid rgb(235 79 104 / 28%);
   outline-offset: 2px;
+}
+
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid rgb(23 23 26 / 30%);
+  outline-offset: 0;
 }
 
 @media (pointer: coarse), (max-width: 760px) {
@@ -15524,13 +15530,17 @@ summary {
 button:focus-visible,
 [role="button"]:focus-visible,
 a:focus-visible,
-input:focus-visible,
-textarea:focus-visible,
-select:focus-visible,
 summary:focus-visible,
 [tabindex]:focus-visible {
   outline: 3px solid rgb(235 79 104 / 34%);
   outline-offset: 3px;
+}
+
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid rgb(23 23 26 / 30%);
+  outline-offset: 0;
 }
 
 input::placeholder,
@@ -16349,6 +16359,201 @@ button[aria-pressed="true"],
 .profile-content {
   flex: none;
   padding-top: 24px;
+}
+
+/* The literal profile screen owns a compact mobile layout. These rules keep
+   its data-bound modules and edit sheet in flow instead of inheriting the
+   older profile-studio selectors below. */
+.profile-screen .overview-module > p {
+  margin: 14px 0 0;
+  color: var(--ink-700);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.profile-screen .overview-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.profile-screen .overview-facts span {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+
+.profile-screen .overview-facts strong {
+  overflow: hidden;
+  font-size: 13px;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profile-screen .overview-facts small {
+  color: var(--ink-500);
+  font-size: 9px;
+}
+
+.profile-screen .collection-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.profile-screen .collection-grid button {
+  display: grid;
+  min-width: 0;
+  min-height: 58px;
+  place-items: center;
+  gap: 5px;
+  padding: 6px 2px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--ink-700);
+  font: inherit;
+}
+
+.profile-screen .collection-grid button:hover {
+  background: var(--surface-warm);
+}
+
+.profile-screen .collection-grid span {
+  overflow: hidden;
+  max-width: 100%;
+  font-size: 9px;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profile-screen .activity-button {
+  display: grid;
+  width: 100%;
+  min-height: 64px;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  margin-top: 20px;
+  padding: 12px 16px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--surface);
+  color: var(--ink-900);
+  text-align: left;
+}
+
+.profile-screen .activity-button > svg:first-child {
+  color: var(--coral-500);
+}
+
+.profile-screen .activity-button span {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.profile-screen .activity-button strong,
+.profile-screen .activity-button small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profile-screen .activity-button strong {
+  font-size: 12px;
+}
+
+.profile-screen .activity-button small {
+  color: var(--ink-500);
+  font-size: 10px;
+}
+
+.profile-screen .sheet-medium {
+  display: flex;
+  min-height: 0;
+  flex-direction: column;
+}
+
+.profile-screen .profile-customizer {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  padding: 6px 0 4px;
+}
+
+.profile-screen .profile-customizer label {
+  display: grid;
+  min-width: 0;
+  gap: 6px;
+  color: var(--ink-700);
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.profile-screen .profile-customizer label:first-child,
+.profile-screen .profile-customizer label:last-of-type,
+.profile-screen .profile-customizer > button {
+  grid-column: 1 / -1;
+}
+
+.profile-screen .profile-customizer input,
+.profile-screen .profile-customizer textarea {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--canvas);
+  color: var(--ink-900);
+  font: inherit;
+  font-size: 16px;
+  line-height: 1.35;
+}
+
+.profile-screen .profile-customizer input {
+  min-height: 44px;
+  padding: 10px 12px;
+}
+
+.profile-screen .profile-customizer textarea {
+  min-height: 104px;
+  resize: vertical;
+  padding: 11px 12px;
+}
+
+.profile-screen .profile-customizer input:focus-visible,
+.profile-screen .profile-customizer textarea:focus-visible {
+  border-color: var(--ink-500);
+  outline: 2px solid rgb(23 23 26 / 22%);
+}
+
+.profile-screen .profile-customizer > .primary-button {
+  min-height: 48px;
+  margin-top: 4px;
+}
+
+@media (max-width: 640px) {
+  .profile-screen .collection-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .profile-screen .profile-customizer {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 13px;
+    padding-bottom: 10px;
+  }
+
+  .profile-screen .profile-customizer label,
+  .profile-screen .profile-customizer label:first-child,
+  .profile-screen .profile-customizer label:last-of-type,
+  .profile-screen .profile-customizer > button {
+    grid-column: auto;
+  }
 }
 
 .profile-modules {
