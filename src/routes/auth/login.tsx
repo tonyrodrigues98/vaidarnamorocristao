@@ -46,7 +46,7 @@ function Login() {
 
   return (
     <AuthShell>
-      <main className="mx-auto flex w-full max-w-md flex-col px-1 py-4 sm:px-4 sm:py-12">
+      <main className="mx-auto flex w-full max-w-md flex-col px-1 pb-4 pt-6 sm:px-4 sm:pb-8 sm:pt-8">
         <div className="glass animate-fade-up rounded-3xl p-5 shadow-elegant sm:p-8">
           <h1 className="text-2xl font-semibold sm:text-3xl">Bem-vindo de volta</h1>
           <p className="mt-1 text-sm text-muted-foreground">Entre para continuar sua jornada.</p>

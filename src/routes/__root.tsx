@@ -44,6 +44,7 @@ import { AdminShellRuntimeBoundary } from "@/components/admin-shell/AdminShellRu
 import { AdminRouteAccessBoundary } from "@/components/admin-shell/AdminRouteAccessBoundary";
 import { isGlobalRouterNotFound } from "@/config/router-not-found";
 import { BrandLogo } from "@/components/brand/BrandLogo";
+import { Triangle } from "lucide-react";
 
 function NotFoundComponent() {
   return (
@@ -217,12 +218,17 @@ function RootShell({ children }: { children: React.ReactNode }) {
 #app-splash{position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#ffffff;transition:opacity .35s ease;}
 html.dark #app-splash,html[data-theme="dark"] #app-splash{background:${brand.theme.canvasDark};}
 #app-splash.is-hiding{opacity:0;pointer-events:none;}
-#app-splash .app-splash-logo{width:min(70vw,280px);filter:drop-shadow(0 8px 24px rgba(0,0,0,.08));}
+#app-splash .app-splash-logo{width:min(70vw,280px);filter:blur(12px) drop-shadow(0 8px 24px rgba(0,0,0,.08));animation:app-splash-reveal .3s cubic-bezier(.22,1,.36,1) .1s forwards;opacity:0;transform:translateY(8px);}
 @media (min-width:768px){#app-splash .app-splash-logo{width:320px;}}
+#app-splash .app-splash-words{display:flex;align-items:center;gap:10px;margin-top:16px;color:rgba(0,0,0,.55);font:600 10px/1 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;letter-spacing:.16em;text-transform:uppercase;filter:blur(8px);animation:app-splash-reveal .3s cubic-bezier(.22,1,.36,1) .18s forwards;opacity:0;transform:translateY(8px);}
+html.dark #app-splash .app-splash-words,html[data-theme="dark"] #app-splash .app-splash-words{color:rgba(255,255,255,.64);}
+#app-splash .app-splash-words svg{width:8px;height:8px;fill:currentColor;stroke:none;opacity:.65;}
 #app-splash .app-splash-loader{margin-top:32px;width:160px;height:3px;background:rgba(0,0,0,.08);border-radius:999px;overflow:hidden;}
 html.dark #app-splash .app-splash-loader,html[data-theme="dark"] #app-splash .app-splash-loader{background:rgba(255,255,255,.14);}
 #app-splash .app-splash-loader-bar{display:block;height:100%;width:0%;background:#000;border-radius:999px;transition:width .35s cubic-bezier(.22,.61,.36,1);}
 html.dark #app-splash .app-splash-loader-bar,html[data-theme="dark"] #app-splash .app-splash-loader-bar{background:#fff;}
+@keyframes app-splash-reveal{to{filter:blur(0) drop-shadow(0 8px 24px rgba(0,0,0,.08));opacity:1;transform:translateY(0);}}
+@media (prefers-reduced-motion:reduce){#app-splash .app-splash-logo,#app-splash .app-splash-words{animation:none;filter:none;opacity:1;transform:none;}}
 `,
           }}
         />
@@ -230,6 +236,13 @@ html.dark #app-splash .app-splash-loader-bar,html[data-theme="dark"] #app-splash
       <body>
         <div id="app-splash" aria-hidden="true">
           <BrandLogo className="app-splash-logo" />
+          <div className="app-splash-words">
+            <span>Conheça</span>
+            <Triangle aria-hidden="true" />
+            <span>Conecte-se</span>
+            <Triangle aria-hidden="true" />
+            <span>Pertença</span>
+          </div>
           <div className="app-splash-loader">
             <span className="app-splash-loader-bar" suppressHydrationWarning />
           </div>
@@ -269,7 +282,7 @@ function RootComponent() {
     const t = window.setTimeout(() => {
       el.classList.add("is-hiding");
       window.setTimeout(() => el.remove(), 400);
-    }, 280);
+    }, 720);
     return () => window.clearTimeout(t);
   }, []);
 
