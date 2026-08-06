@@ -46,9 +46,9 @@ function Login() {
 
   return (
     <AuthShell>
-      <main className="mx-auto flex max-w-md flex-col px-4 py-12">
-        <div className="glass animate-fade-up rounded-3xl p-8 shadow-elegant">
-          <h1 className="text-3xl font-semibold">Bem-vindo de volta</h1>
+      <main className="mx-auto flex w-full max-w-md flex-col px-1 py-4 sm:px-4 sm:py-12">
+        <div className="glass animate-fade-up rounded-3xl p-5 shadow-elegant sm:p-8">
+          <h1 className="text-2xl font-semibold sm:text-3xl">Bem-vindo de volta</h1>
           <p className="mt-1 text-sm text-muted-foreground">Entre para continuar sua jornada.</p>
           <form onSubmit={handleSubmit} className="mt-6 space-y-4">
             <div className="space-y-2">

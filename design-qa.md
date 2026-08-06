@@ -2,6 +2,7 @@
 
 - source visual truth: `Foto 1.jpg` and `Foto 2.jpg` from the user attachment
 - implementation screenshot: `artifacts/brand-identity/auth-light.png`
+- corrected mobile screenshot: `artifacts/brand-identity/auth-mobile-fixed-393x640.png`
 - comparison: `artifacts/brand-identity/comparison-light.png`
 - viewport: 1920 × 963 CSS pixels, device scale factor 1
 - source pixels: 1280 × 853 each
@@ -34,6 +35,8 @@ The logo region was inspected at original resolution in both supplied files and 
 - Initial extraction of the dark source used an overly broad white matte and removed too much of the cream fill.
 - The matte thresholds were corrected against the original source before integration.
 - The final browser capture confirms correct crop, scale, alpha and placement for the light wordmark.
+- A physical iPhone capture exposed excessive vertical spacing around the mobile login card. The Auth shell was changed to use the small viewport unit, guaranteed vertical overflow, a smaller mobile lockup, compact mobile padding and responsive heading size.
+- The corrected production build was captured at 393 × 852 and at a reduced 393 × 640 Safari-like viewport. The complete login form remains visible at 393 × 640, horizontal overflow is absent, and the document remains scroll-safe when browser chrome further reduces usable height.
 
 ## Implementation checklist
 
