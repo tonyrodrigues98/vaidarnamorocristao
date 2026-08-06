@@ -56,10 +56,11 @@ describe("Prototype 01 canonical presentation boundary", () => {
     }
   });
 
-  it("uses one independent feature flag with an off default", () => {
+  it("uses one independent feature flag with an isolated review default", () => {
     const source = readFileSync("src/config/prototype-01-feature.ts", "utf8");
     expect(source).toContain("VITE_FF_PROTOTYPE01_UI");
-    expect(source).toContain("parsePrototype01FeatureFlag(environment");
+    expect(source).toContain("PROTOTYPE_01_REVIEW_DEFAULT = true");
+    expect(source).toContain("if (configured === undefined)");
     expect(source).not.toContain("VITE_FF_TOTAL_REDESIGN");
   });
 });

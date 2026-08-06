@@ -36,6 +36,7 @@ import coinPng from "@/assets/coin.webp";
 import { useEffect, useState } from "react";
 import { registerAppServiceWorker } from "@/lib/registerSW";
 import { brand } from "@/config/brand";
+import { prototype01FeatureEnabled } from "@/config/prototype-01-feature";
 import { rootMetadata } from "@/config/route-metadata";
 import { PublicShell } from "@/components/shells/PublicShell";
 import { getDestinationBehavior } from "@/config/app-destinations";
@@ -97,6 +98,9 @@ export const Route = createRootRouteWithContext<AppRouterContext>()({
       { name: "msapplication-TileColor", content: brand.theme.action },
       { name: "vdn-build-commit", content: appBuildInfo.commit },
       { name: "vdn-build-channel", content: appBuildInfo.channel },
+      ...(prototype01FeatureEnabled
+        ? [{ name: "vdn-ui-channel", content: "prototype-01-literal-transplant" }]
+        : []),
       {
         name: "google-site-verification",
         content: "PXzDRZhAILyhetuReW3wOrUOPfeN11JyBmm0bVeO0Hg",

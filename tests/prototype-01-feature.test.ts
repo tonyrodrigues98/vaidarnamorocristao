@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { getDestinationBehavior } from "../src/config/app-destinations";
 import {
   PROTOTYPE_01_FEATURE_ENV,
+  PROTOTYPE_01_REVIEW_DEFAULT,
   parsePrototype01FeatureFlag,
   resolvePrototype01FeatureFlag,
   shouldRenderPrototype01Shell,
@@ -21,12 +22,13 @@ describe("Prototype 01 feature flag", () => {
     expect(parsePrototype01FeatureFlag(value)).toBe(expected);
   });
 
-  it("uses only the dedicated flag and defaults to false", () => {
-    expect(resolvePrototype01FeatureFlag({})).toBe(false);
+  it("uses only the dedicated flag and defaults to the isolated review channel", () => {
+    expect(PROTOTYPE_01_REVIEW_DEFAULT).toBe(true);
+    expect(resolvePrototype01FeatureFlag({})).toBe(true);
     expect(resolvePrototype01FeatureFlag({ [PROTOTYPE_01_FEATURE_ENV]: "true" })).toBe(true);
     expect(resolvePrototype01FeatureFlag({ [PROTOTYPE_01_FEATURE_ENV]: true })).toBe(true);
     expect(resolvePrototype01FeatureFlag({ [PROTOTYPE_01_FEATURE_ENV]: "false" })).toBe(false);
-    expect(resolvePrototype01FeatureFlag({ VITE_FF_TOTAL_REDESIGN: "true" })).toBe(false);
+    expect(resolvePrototype01FeatureFlag({ VITE_FF_TOTAL_REDESIGN: "true" })).toBe(true);
   });
 
   it("requires an authenticated eligible destination", () => {

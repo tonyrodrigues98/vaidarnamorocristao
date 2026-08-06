@@ -172,6 +172,8 @@ export function Prototype01ShellFrame({
       }`}
       style={style}
       data-vdn-prototype01
+      data-prototype-01-ui="active"
+      data-prototype-01-source="literal-transplant"
       data-active-tab={activeTab}
       data-keyboard-open={String(viewportState.keyboardOpen)}
       data-orientation={viewportState.orientation}
