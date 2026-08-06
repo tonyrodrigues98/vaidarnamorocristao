@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Compass, Home, MessageCircle, UserRound, UsersRound } from "lucide-react";
 
+import { LiquidGlassCard } from "@/components/godui/liquid-glass-card";
 import { useNativePrimaryTabSelection } from "@/components/native-shell/useNativePrimaryTabSelection";
 import type { FuturePrimaryTab } from "@/config/app-destinations";
 import {
@@ -37,7 +38,16 @@ export function NativeBottomNavigation({
   });
 
   return (
-    <div className="vdn-native-bottom-navigation" data-native-bottom-navigation>
+    <LiquidGlassCard
+      className="vdn-native-bottom-navigation"
+      radius={28}
+      blur={24}
+      strength={36}
+      dispersion={0.08}
+      saturation={1.35}
+      sheen={0.35}
+      data-native-bottom-navigation
+    >
       <ul className="vdn-native-bottom-navigation__list">
         {nativePrimaryNavigation.map((item) => {
           const Icon = navigationIcons[item.icon];
@@ -65,6 +75,6 @@ export function NativeBottomNavigation({
           );
         })}
       </ul>
-    </div>
+    </LiquidGlassCard>
   );
 }

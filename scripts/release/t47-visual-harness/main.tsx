@@ -50,6 +50,11 @@ const surface = params.get("surface") ?? "native";
 const route = params.get("route") ?? "/inicio";
 const role = (params.get("role") ?? "admin") as AppRole;
 
+function getNativeHarnessHref(path: string, title: string) {
+  const search = new URLSearchParams({ surface: "native", route: path, title });
+  return `?${search.toString()}#main`;
+}
+
 function getActiveTab() {
   return route.includes("conversa") || route.includes("proposito")
     ? "messages"
@@ -78,7 +83,7 @@ function HarnessNavigation({ compact = false }: { compact?: boolean }) {
       {!compact && (
         <a
           className="vdn-native-adaptive-navigation__brand"
-          href="#main"
+          href={getNativeHarnessHref("/inicio", "Início")}
           aria-label={brand.displayName}
         >
           <img
@@ -107,7 +112,7 @@ function HarnessNavigation({ compact = false }: { compact?: boolean }) {
               }
             >
               <a
-                href="#main"
+                href={getNativeHarnessHref(item.path, item.label)}
                 aria-current={selected ? "page" : undefined}
                 data-active={String(selected)}
                 data-native-primary-tab={item.id}

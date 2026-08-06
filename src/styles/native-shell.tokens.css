@@ -1,38 +1,38 @@
 [data-vdn-native-shell] {
-  --vdn-native-brand-action: #eb4f68;
-  --vdn-native-brand-action-strong: #d93f59;
-  --vdn-native-brand-action-soft: #fde8ec;
-  --vdn-native-violet-strong: #6554d9;
-  --vdn-native-violet: #7462e8;
-  --vdn-native-violet-soft: #eeeafe;
-  --vdn-native-canvas: #fafafa;
+  --vdn-native-brand-action: #007aff;
+  --vdn-native-brand-action-strong: #0065d1;
+  --vdn-native-brand-action-soft: #e5f1ff;
+  --vdn-native-violet-strong: #007aff;
+  --vdn-native-violet: #007aff;
+  --vdn-native-violet-soft: #e5f1ff;
+  --vdn-native-canvas: #f2f2f7;
   --vdn-native-surface-primary: #ffffff;
-  --vdn-native-surface-secondary: #f6f6f6;
-  --vdn-native-surface-soft: #f8f8f8;
-  --vdn-native-text-primary: #1a1a1d;
-  --vdn-native-text-secondary: #696b73;
-  --vdn-native-border: #e6e7ea;
+  --vdn-native-surface-secondary: #e9e9ee;
+  --vdn-native-surface-soft: #f2f2f7;
+  --vdn-native-text-primary: #111114;
+  --vdn-native-text-secondary: #636366;
+  --vdn-native-border: rgb(60 60 67 / 0.18);
   --vdn-native-motion-touch: 100ms;
   --vdn-native-motion-simple: 190ms;
   --vdn-native-motion-depth: 260ms;
   --vdn-native-motion-sheet: 280ms;
   --vdn-native-ease-enter: cubic-bezier(0.22, 1, 0.36, 1);
   --vdn-native-ease-exit: cubic-bezier(0.4, 0, 1, 1);
-  --vdn-native-sidebar-width: 244px;
+  --vdn-native-sidebar-width: 272px;
   --vdn-native-context-panel-width: 300px;
   --vdn-native-touch-target: 44px;
   --vdn-native-mobile-input-font: 16px;
 }
 
 [data-vdn-native-shell][data-theme="dark"] {
-  --vdn-native-brand-action: #eb4f68;
-  --vdn-native-brand-action-strong: #d93f59;
-  --vdn-native-brand-action-soft: #3a2028;
-  --vdn-native-canvas: #101114;
-  --vdn-native-surface-primary: #17181c;
-  --vdn-native-surface-secondary: #1e2025;
-  --vdn-native-surface-soft: #24262c;
-  --vdn-native-text-primary: #f4f4f5;
-  --vdn-native-text-secondary: #b7b9c0;
-  --vdn-native-border: #30323a;
+  --vdn-native-brand-action: #0a84ff;
+  --vdn-native-brand-action-strong: #409cff;
+  --vdn-native-brand-action-soft: #15395f;
+  --vdn-native-canvas: #000000;
+  --vdn-native-surface-primary: #1c1c1e;
+  --vdn-native-surface-secondary: #2c2c2e;
+  --vdn-native-surface-soft: #1c1c1e;
+  --vdn-native-text-primary: #f5f5f7;
+  --vdn-native-text-secondary: #aeaeb2;
+  --vdn-native-border: rgb(84 84 88 / 0.65);
 }

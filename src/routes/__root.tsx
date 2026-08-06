@@ -108,8 +108,6 @@ export const Route = createRootRouteWithContext<AppRouterContext>()({
     ],
     links: [
       { rel: "preload", as: "image", href: coinPng },
-      { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       // Preconnect to Supabase host so the first signed-URL image (avatars,
       // photos, etc.) doesn't pay DNS + TLS on the critical path.
       {
@@ -189,10 +187,6 @@ export const Route = createRootRouteWithContext<AppRouterContext>()({
         href: "/splash/splash-640x1136.png",
         media:
           "(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)",
-      },
-      {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap",
       },
       {
         rel: "stylesheet",
