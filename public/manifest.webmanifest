@@ -1,45 +1,9 @@
 {
   "name": "VaiDarNamoro",
-  "short_name": "VaiDarNamoro",
-  "description": "Plataforma crista de relacionamentos com proposito.",
-  "start_url": "/inicio",
+  "short_name": "VDN",
+  "description": "Fundação estrutural VDN.",
+  "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "orientation": "portrait",
-  "background_color": "#fff7f8",
-  "theme_color": "#ff4f68",
-  "lang": "pt-BR",
-  "categories": ["lifestyle", "social"],
-  "icons": [
-    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" },
-    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
-    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
-  ],
-  "shortcuts": [
-    {
-      "name": "Pretendentes",
-      "short_name": "Pretendentes",
-      "url": "/pretendentes",
-      "icons": [{ "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" }]
-    },
-    {
-      "name": "Conversas",
-      "short_name": "Conversas",
-      "url": "/conversas",
-      "icons": [{ "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" }]
-    },
-    {
-      "name": "Devocional",
-      "short_name": "Devocional",
-      "url": "/devocional",
-      "icons": [{ "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" }]
-    },
-    {
-      "name": "Notificações",
-      "short_name": "Notificações",
-      "url": "/notificacoes",
-      "icons": [{ "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" }]
-    }
-  ]
+  "lang": "pt-BR"
 }

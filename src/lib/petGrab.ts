@@ -1,6 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
 import { resolvePetImage } from "@/lib/petCatalog";
-import { assetFor as decorationAssetFor } from "@/lib/decorations";
 import type {
   GrabConfig,
   GrabInventoryItem,
@@ -283,7 +282,7 @@ export async function resolvePrize(kind: string, refId: string | null): Promise<
   if (kind === "xp") {
     return {
       name: "XP",
-      image_url: new URL("../assets/caixas/capsula_xp.png", import.meta.url).href,
+      image_url: null,
       kind,
       rarity: "common",
     };
@@ -326,7 +325,7 @@ export async function resolvePrize(kind: string, refId: string | null): Promise<
     if (!data) return null;
     return {
       name: (data as any).name,
-      image_url: decorationAssetFor({ image_url: (data as any).image_url }),
+      image_url: (data as any).image_url ?? null,
       kind,
       rarity: rarityFromString((data as any).rarity),
     };

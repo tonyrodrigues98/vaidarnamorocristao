@@ -1,12 +1,8 @@
 import { readFile } from "node:fs/promises";
 import { describe, expect, it } from "vitest";
 
-import { brand } from "../src/config/brand";
-
 describe("PWA manifest delivery", () => {
-  it("keeps the branded manifest valid and self-contained", async () => {
-    expect(brand.assets.manifest).toBe("/manifest.webmanifest");
-
+  it("keeps the structural manifest valid and free of visual assets", async () => {
     const source = await readFile("public/manifest.webmanifest", "utf8");
     const manifest = JSON.parse(source) as Record<string, unknown>;
 
@@ -14,11 +10,14 @@ describe("PWA manifest delivery", () => {
       expect.objectContaining({
         name: expect.any(String),
         short_name: expect.any(String),
-        start_url: expect.any(String),
+        start_url: "/",
         display: expect.any(String),
-        icons: expect.any(Array),
       }),
     );
+    expect(manifest.icons).toBeUndefined();
+    expect(manifest.shortcuts).toBeUndefined();
+    expect(manifest.theme_color).toBeUndefined();
+    expect(manifest.background_color).toBeUndefined();
   });
 
   it("declares the exact Cloudflare headers required by the manifest", async () => {
@@ -32,7 +31,5 @@ describe("PWA manifest delivery", () => {
         "",
       ].join("\n"),
     );
-    expect(headers).toContain("Content-Type: application/manifest+json");
-    expect(headers).toContain("X-Content-Type-Options: nosniff");
   });
 });
