@@ -56,8 +56,6 @@ describe("auth, onboarding and document shells", () => {
 
   it("uses the public shell for install with the official brand asset", () => {
     expect(readFileSync("src/routes/instalar.tsx", "utf8")).toContain("<PublicShell>");
-    expect(readFileSync("src/components/shells/AuthShell.tsx", "utf8")).toContain(
-      "brand.assets.icon192",
-    );
+    expect(readFileSync("src/components/shells/AuthShell.tsx", "utf8")).toContain("<BrandLogo");
   });
 });

@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
 
-import { brand } from "@/config/brand";
+import { BrandLogo } from "@/components/brand/BrandLogo";
 
 const publicLinks = [
   { to: "/sobre", label: "Sobre" },
@@ -35,8 +35,7 @@ export function PublicNav() {
           onClick={() => setOpen(false)}
           className="flex min-h-11 items-center gap-2 rounded-xl px-2 font-bold tracking-tight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
-          <img src={brand.assets.icon192} alt="" className="h-8 w-8 rounded-lg" />
-          <span>{brand.displayName}</span>
+          <BrandLogo className="w-32 sm:w-36" />
         </Link>
 
         <div className="hidden items-center gap-5 text-sm font-medium text-muted-foreground md:flex">

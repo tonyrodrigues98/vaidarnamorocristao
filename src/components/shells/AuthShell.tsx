@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 
-import { brand } from "@/config/brand";
+import { BrandLogo } from "@/components/brand/BrandLogo";
 
 export function AuthShell({ children }: { children: ReactNode }) {
   return (
@@ -10,8 +10,7 @@ export function AuthShell({ children }: { children: ReactNode }) {
       data-vdn-auth-shell
     >
       <Link to="/" className="mx-auto flex min-h-11 w-fit items-center gap-3 rounded-xl px-3">
-        <img src={brand.assets.icon192} alt="" className="h-9 w-9 rounded-xl" />
-        <span className="font-semibold">{brand.displayName}</span>
+        <BrandLogo className="w-36" />
       </Link>
       {children}
     </div>

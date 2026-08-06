@@ -12,8 +12,8 @@ import {
 } from "@/config/native-primary-navigation";
 import type { NativeViewportState } from "@/components/native-shell/useNativeViewportState";
 import { getNativeSecondaryDestinationChrome } from "@/config/native-secondary-destinations";
+import { BrandLogo } from "@/components/brand/BrandLogo";
 
-import vdnLogo from "../assets/vdn-logo.png";
 import { Prototype01SecondaryHeader } from "../components/Prototype01SecondaryHeader";
 import "../styles/functional-extensions.css";
 import "../styles/globals.css";
@@ -180,8 +180,7 @@ export function Prototype01ShellFrame({
     >
       <aside className="desktop-sidebar" aria-label="Navegação principal">
         <div className="sidebar-brand">
-          <img src={vdnLogo} alt="" />
-          <span>VaiDarNamoro</span>
+          <BrandLogo className="w-40" />
         </div>
         <nav>{navigation("sidebar-item")}</nav>
         <div className="sidebar-account">

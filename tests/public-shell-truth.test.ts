@@ -6,7 +6,7 @@ const read = (path: string) => readFileSync(path, "utf8");
 describe("truthful public shell", () => {
   it("uses the official asset and an accessible responsive public menu", () => {
     const nav = read("src/components/PublicNav.tsx");
-    expect(nav).toContain("brand.assets.icon192");
+    expect(nav).toContain("<BrandLogo");
     expect(nav).toContain('aria-label="Navegação pública"');
     expect(nav).toContain('event.key === "Escape"');
     expect(nav).toContain("setOpen(false)");

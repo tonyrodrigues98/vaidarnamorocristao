@@ -1,0 +1,41 @@
+.vdn-brand-logo {
+  position: relative;
+  display: inline-block;
+  width: 9rem;
+  aspect-ratio: 3.82 / 1;
+  flex: 0 0 auto;
+  overflow: hidden;
+}
+
+.vdn-brand-logo__image {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 184%;
+  max-width: none;
+  height: auto;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  user-select: none;
+}
+
+.vdn-brand-logo__image--dark {
+  display: none;
+}
+.dark .vdn-brand-logo__image--light,
+[data-theme="dark"] .vdn-brand-logo__image--light {
+  display: none;
+}
+.dark .vdn-brand-logo__image--dark,
+[data-theme="dark"] .vdn-brand-logo__image--dark {
+  display: block;
+}
+
+@media (prefers-color-scheme: dark) {
+  html:not(.light):not([data-theme="light"]) .vdn-brand-logo__image--light {
+    display: none;
+  }
+  html:not(.light):not([data-theme="light"]) .vdn-brand-logo__image--dark {
+    display: block;
+  }
+}

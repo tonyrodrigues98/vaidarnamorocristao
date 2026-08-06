@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Compass, Home, MessageCircle, UserRound, UsersRound } from "lucide-react";
 
 import { useNativePrimaryTabSelection } from "@/components/native-shell/useNativePrimaryTabSelection";
+import { BrandLogo } from "@/components/brand/BrandLogo";
 import type { FuturePrimaryTab } from "@/config/app-destinations";
 import { brand } from "@/config/brand";
 import {
@@ -47,15 +48,7 @@ export function NativeAdaptiveNavigation({
         aria-label={brand.displayName}
         onClick={(event) => handleSelection(event, home)}
       >
-        <img
-          src={brand.assets.icon192}
-          alt=""
-          width="40"
-          height="40"
-          className="vdn-native-adaptive-navigation__brand-icon"
-          aria-hidden="true"
-        />
-        <span className="vdn-native-adaptive-navigation__brand-name">{brand.displayName}</span>
+        <BrandLogo className="w-36" />
       </Link>
 
       <ul className="vdn-native-adaptive-navigation__list">

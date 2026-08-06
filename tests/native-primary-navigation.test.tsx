@@ -18,7 +18,6 @@ vi.mock("@tanstack/react-router", () => ({
 
 import { NativeBottomNavigation } from "../src/components/native-shell/NativeBottomNavigation";
 import { NativeAdaptiveNavigation } from "../src/components/native-shell/NativeAdaptiveNavigation";
-import { brand } from "../src/config/brand";
 import { plannedPrimaryDestinations } from "../src/config/app-destinations";
 import {
   NATIVE_TAB_RESELECT_EVENT,
@@ -75,8 +74,9 @@ describe("native primary navigation configuration", () => {
       <NativeAdaptiveNavigation activeTab="explore" pathname="/explorar" />,
     );
 
-    expect(markup).toContain(`src="${brand.assets.icon192}"`);
-    expect(markup).toContain(brand.displayName);
+    expect(markup).toContain("orha-wordmark-light.png");
+    expect(markup).toContain("orha-wordmark-dark.png");
+    expect(markup).toContain("data-vdn-brand-logo");
     expect(markup.match(/<a /g)).toHaveLength(6);
     expect(markup.match(/aria-current="page"/g)).toHaveLength(1);
     expect(markup).not.toContain("<nav");

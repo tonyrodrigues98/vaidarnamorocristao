@@ -21,7 +21,7 @@ import type {
   AdminIconKey,
   AdminNavigationGroupId,
 } from "@/config/admin-destinations";
-import { brand } from "@/config/brand";
+import { BrandLogo } from "@/components/brand/BrandLogo";
 
 const icons: Record<AdminIconKey, LucideIcon> = {
   dashboard: LayoutDashboard,
@@ -62,9 +62,8 @@ export function AdminSidebar({
   return (
     <div className="vdn-admin-sidebar__inner">
       <Link to="/admin" className="vdn-admin-brand" onClick={onNavigate}>
-        <img src={brand.assets.icon192} alt="" width="36" height="36" />
+        <BrandLogo className="w-36" />
         <span>
-          <strong>{brand.displayName}</strong>
           <small>Administração</small>
         </span>
       </Link>

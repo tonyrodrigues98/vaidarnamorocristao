@@ -25,6 +25,7 @@ import {
   X,
 } from "lucide-react";
 import { Component, type ErrorInfo, type ReactNode, useEffect, useRef, useState } from "react";
+import { BrandLogo } from "@/components/brand/BrandLogo";
 import "../styles/PublicExperience.css";
 
 type AuthView = "login" | "signup" | "recovery" | "recovery-sent" | "new-password";
@@ -143,8 +144,7 @@ function PublicHeader({
   return (
     <header className="public-header">
       <a href="#public-hero" className="public-brand" onClick={() => setOpen(false)}>
-        <img src="/logo-oficial-transparente.png" alt="" />
-        <span>VaiDarNamoro</span>
+        <BrandLogo className="w-36" />
       </a>
       <nav aria-label="Navegação pública">
         {links.map(([id, label]) => (
@@ -214,7 +214,7 @@ function ProductPreview() {
     <div className="public-product-preview" aria-label="Demonstração visual do produto">
       <div className="preview-sidebar">
         <span>
-          <img src="/vdn-logo.png" alt="" /> VaiDarNamoro
+          <BrandLogo className="w-36" />
         </span>
         {items.map((item) => (
           <button
@@ -378,7 +378,7 @@ function AuthPanel({
           >
             <ArrowLeft />
           </button>
-          <img src="/logo-oficial-transparente.png" alt="" />
+          <BrandLogo className="w-40" />
           <button aria-label="Fechar" onClick={onClose}>
             <X />
           </button>
@@ -595,7 +595,7 @@ function PublicLinkPanel({
           </button>
         </header>
         <div className={`public-link-visual ${link}`}>
-          <img src="/vdn-logo.png" alt="" />
+          <BrandLogo className="w-40" />
           <Globe2 />
         </div>
         <small>VAIDARNAMORO · LINK COMPARTILHADO</small>
@@ -1022,8 +1022,7 @@ export default function PublicExperience({
 
           <footer className="public-footer">
             <div>
-              <img src="/logo-oficial-transparente.png" alt="" />
-              <strong>VaiDarNamoro</strong>
+              <BrandLogo className="w-40" />
               <p>Comunidade cristã para amizade, experiências e conexões com propósito.</p>
             </div>
             <nav aria-label="Informações públicas">

@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { BrandLogo } from "@/components/brand/BrandLogo";
 
 type AuthBrandProps = {
   subtitle?: string;
@@ -13,17 +14,8 @@ type AuthBrandProps = {
 export function AuthBrand({ subtitle, className }: AuthBrandProps) {
   return (
     <div className={cn("flex flex-col items-center text-center", className)}>
-      <img
-        src="/icon-192.png"
-        alt="VaiDarNamoro Cristão"
-        width={88}
-        height={88}
-        className="h-20 w-20 rounded-2xl shadow-lg ring-1 ring-black/5 sm:h-22 sm:w-22"
-      />
-      <div className="mt-4 flex flex-col items-center gap-0.5">
-        <p className="text-xl font-bold tracking-tight text-foreground">
-          VaiDarNamoro <span className="text-[var(--rose)]">Cristão</span>
-        </p>
+      <BrandLogo className="w-48 sm:w-56" />
+      <div className="mt-3 flex flex-col items-center gap-0.5">
         {subtitle && (
           <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
             {subtitle}

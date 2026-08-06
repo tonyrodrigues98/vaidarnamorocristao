@@ -1,36 +1,45 @@
-# Pet Arcade Design QA
+# Brand identity design QA
 
-## Reference
+- source visual truth: `Foto 1.jpg` and `Foto 2.jpg` from the user attachment
+- implementation screenshot: `artifacts/brand-identity/auth-light.png`
+- comparison: `artifacts/brand-identity/comparison-light.png`
+- viewport: 1920 × 963 CSS pixels, device scale factor 1
+- source pixels: 1280 × 853 each
+- implementation pixels: 1920 × 963
+- state: public authentication shell, light theme
 
-- Source: mobile Pet Arcade montage supplied by the user on 2026-06-22.
-- Target: illustrated mobile-first game hub with cinematic cards, compact operational data, distinct art direction per game, warm off-white shell and jewel-tone game stages.
+## Full-view comparison evidence
 
-## Implemented comparison points
+The supplied black wordmark is reproduced from the source pixels, with its geometry, texture and proportions preserved. The application crops only the transparent canvas around it and uses `object-fit`-equivalent sizing without stretching. Its scale is intentionally adapted to the navigation/auth slot rather than reproducing the source image's large white artboard.
 
-- The hub now uses a full illustrated hero rather than a generic information card.
-- Mobile game selection now uses a two-column grid, matching the reference density.
-- Every Pet Arcade module has an individual optimized WebP scene.
-- Illustrated cards use a scene-first composition with title overlay and compact entry/usage footer.
-- Voo Estelar, Roda do Biscoito, Album and Maquina de Bolinha reuse their card art inside the real game experience.
-- Existing game animations, backend calls, balances, XP, inventory and signed pet images were preserved.
+## Focused-region comparison evidence
 
-## Automated capture
+The logo region was inspected at original resolution in both supplied files and in the browser-rendered authentication shell. The transparent matte has no visible white rectangle or clipping in the light implementation. The dark asset uses the supplied light/cream artwork and is selected by `.dark`, `[data-theme="dark"]`, or the system color scheme when no explicit light theme exists.
 
-- Viewport: iPhone 13 through local Playwright.
-- Route: `/pet-arcade`.
-- Result: the unauthenticated browser was redirected to the login page.
-- No fake account, mock session or authentication bypass was introduced.
+## Required fidelity surfaces
 
-## Checks
+- Typography: the artwork remains raster source material; no font recreation or text approximation was introduced.
+- Spacing/layout: the wordmark keeps its source aspect ratio and is sized per shell slot without distortion.
+- Colors/tokens: black artwork is used in light mode; the supplied cream artwork is used in dark mode.
+- Image quality: original JPEGs are retained as provenance and production PNGs preserve the supplied geometry with transparent backgrounds.
+- Copy/content: product, legal and accessibility naming remains VaiDarNamoro; only the visual lockup changed.
 
-- Targeted ESLint: passed for changed TypeScript files.
-- Production build: passed.
-- Unit tests: 19 passed.
-- Integration suites: blocked before execution because Supabase test environment keys are not available locally.
+## Findings
 
-## Remaining visual verification
+- No actionable P0/P1/P2 mismatch remains.
+- P3 test gap: the dark selection is covered structurally and by automated tests; the browser-rendered evidence captured in this pass is the light authentication state.
 
-- Authenticated screenshots of the hub and open game states are still required to compare exact spacing, crop and safe-area behavior against the reference.
-- Audio and signed URL behavior require an authenticated runtime session with real data.
+## Comparison history
 
-final result: blocked
+- Initial extraction of the dark source used an overly broad white matte and removed too much of the cream fill.
+- The matte thresholds were corrected against the original source before integration.
+- The final browser capture confirms correct crop, scale, alpha and placement for the light wordmark.
+
+## Implementation checklist
+
+- Shared theme-aware wordmark component: complete.
+- Public, Auth, Native, Admin, Prototype 01 and splash lockups: complete.
+- Automated identity coverage: complete.
+- Square PWA launcher icons: intentionally unchanged because the supplied source is a horizontal wordmark and no square mark was provided.
+
+final result: passed

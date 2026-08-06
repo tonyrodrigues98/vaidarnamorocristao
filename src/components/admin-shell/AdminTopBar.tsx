@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowLeft, Menu, Moon, Sun } from "lucide-react";
 
-import { brand } from "@/config/brand";
+import { BrandLogo } from "@/components/brand/BrandLogo";
 import { ROLE_CONFIG, type AppRole } from "@/lib/roles";
 import { useTheme } from "@/lib/theme";
 
@@ -28,7 +28,7 @@ export function AdminTopBar({
       >
         <Menu aria-hidden />
       </button>
-      <img src={brand.assets.icon192} alt="" className="vdn-admin-topbar__logo" />
+      <BrandLogo className="w-24" decorative />
       <div className="vdn-admin-topbar__title">
         <strong>{title}</strong>
         <span>{ROLE_CONFIG[role].label}</span>

@@ -1,5 +1,7 @@
 "use client";
 
+import { BrandLogo } from "@/components/brand/BrandLogo";
+
 import {
   ArrowLeft,
   Bell,
@@ -87,9 +89,8 @@ class LocalBoundary extends Component<
 function BrandPanel() {
   return (
     <aside className="onboarding-brand-panel" aria-label="VaiDarNamoro">
-      <img src="/logo-oficial-transparente.png" alt="" />
+      <BrandLogo className="w-40" />
       <div>
-        <span>VaiDarNamoro</span>
         <h2>Uma comunidade cristã para pertencer.</h2>
         <p>
           Amizades, fé, experiências e conexões com propósito — namoro é uma possibilidade, não uma
@@ -121,8 +122,7 @@ function AccessView({
   return (
     <div className="entry-card">
       <div className="entry-mobile-logo">
-        <img src="/logo-oficial-transparente.png" alt="" />
-        <strong>VaiDarNamoro</strong>
+        <BrandLogo className="w-40" />
       </div>
       <span className="entry-eyebrow">BEM-VINDO</span>
       <h1>Conexões que fazem sentido na vida real.</h1>
@@ -771,8 +771,7 @@ function OnboardingContent({
   if (splash) {
     return (
       <div className="onboarding-splash" aria-label="Inicializando VaiDarNamoro">
-        <img src="/logo-oficial-transparente.png" alt="" />
-        <strong>VaiDarNamoro</strong>
+        <BrandLogo className="w-40" />
         <span>Inicializando sua comunidade…</span>
       </div>
     );

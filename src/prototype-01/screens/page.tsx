@@ -1,5 +1,7 @@
 "use client";
 
+import { BrandLogo } from "@/components/brand/BrandLogo";
+
 import {
   ArrowLeft,
   Bell,
@@ -192,8 +194,7 @@ function HomeScreen({
       <div className="page-scroll home-page-scroll">
         <header className="topbar home-topbar">
           <div className="brand">
-            <img src="/logo-oficial-transparente.png" alt="" className="brand-logo" />
-            <span>VaiDarNamoro</span>
+            <BrandLogo className="w-36" />
           </div>
           <div className="topbar-actions">
             <IconButton label="Abrir busca" onClick={() => openOverlay("search")}>
@@ -4211,8 +4212,7 @@ export default function App() {
     >
       <aside className="desktop-sidebar" aria-label="Navegação principal">
         <div className="sidebar-brand">
-          <img src="/vdn-logo.png" alt="" />
-          <span>VaiDarNamoro</span>
+          <BrandLogo className="w-40" />
         </div>
         <nav>
           {tabs.map(({ id, label, icon: Icon, badge }) => (

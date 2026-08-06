@@ -17,8 +17,7 @@ import {
   getNativeInicioPriority,
   type NativeInicioViewModel,
 } from "@/components/home/native/NativeInicioView";
-
-import officialLogo from "../assets/logo-oficial-transparente.png";
+import { BrandLogo } from "@/components/brand/BrandLogo";
 
 export type Prototype01InicioScreenProps = {
   model: NativeInicioViewModel;
@@ -50,8 +49,7 @@ export function Prototype01InicioScreen({ model, onNavigate }: Prototype01Inicio
       <div className="page-scroll home-page-scroll">
         <header className="topbar home-topbar">
           <div className="brand">
-            <img src={officialLogo} alt="" className="brand-logo" />
-            <span>VaiDarNamoro</span>
+            <BrandLogo className="w-36 sm:w-40" />
           </div>
           <div className="topbar-actions">
             <button

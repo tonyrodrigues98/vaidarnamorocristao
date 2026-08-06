@@ -24,7 +24,6 @@ vi.mock("@/lib/theme", () => ({
   useTheme: () => theme,
 }));
 
-import { brand } from "../src/config/brand";
 import { getNativeTopBarTitle, getNativeUserInitials } from "../src/config/native-top-bar";
 import { NativeTopBar } from "../src/components/native-shell/NativeTopBar";
 
@@ -48,7 +47,8 @@ describe("NativeTopBar", () => {
       />,
     );
 
-    expect(markup).toContain(brand.assets.icon192);
+    expect(markup).toContain("orha-wordmark-light.png");
+    expect(markup).toContain("orha-wordmark-dark.png");
     expect(markup).toContain("In\u00edcio");
     expect(markup).toContain('aria-label="Usar tema escuro"');
     expect(markup).toContain('href="/notificacoes"');

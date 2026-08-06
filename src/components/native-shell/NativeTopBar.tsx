@@ -2,8 +2,8 @@ import { Link } from "@tanstack/react-router";
 import { ArrowLeft, Bell, Moon, Sun } from "lucide-react";
 
 import { NativeAvatar } from "@/components/native-shell/NativeAvatar";
+import { BrandLogo } from "@/components/brand/BrandLogo";
 import type { FuturePrimaryTab } from "@/config/app-destinations";
-import { brand } from "@/config/brand";
 import { getNativeDestinationTitle, getNativeUserInitials } from "@/config/native-top-bar";
 import { getNativeSecondaryDestinationChrome } from "@/config/native-secondary-destinations";
 import { useTheme } from "@/lib/theme";
@@ -34,14 +34,7 @@ export function NativeTopBar({ activeTab, destinationId, userLabel }: NativeTopB
             <ArrowLeft aria-hidden="true" />
           </Link>
         ) : null}
-        <img
-          src={brand.assets.icon192}
-          alt=""
-          width="32"
-          height="32"
-          className="vdn-native-top-bar__brand-icon"
-          aria-hidden="true"
-        />
+        <BrandLogo className="w-24" decorative />
         <span className="vdn-native-top-bar__title">{title}</span>
       </div>
 

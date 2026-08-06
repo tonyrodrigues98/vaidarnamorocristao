@@ -1,5 +1,7 @@
 "use client";
 
+import { BrandLogo } from "@/components/brand/BrandLogo";
+
 import {
   AlertTriangle,
   Check,
@@ -225,7 +227,7 @@ export default function ResilienceLayer({
     <>
       {coldStart && (
         <div className="resilience-splash" aria-label="Abrindo VaiDarNamoro">
-          <img src="/logo-oficial-transparente.png" alt="" />
+          <BrandLogo className="w-40" />
         </div>
       )}
 

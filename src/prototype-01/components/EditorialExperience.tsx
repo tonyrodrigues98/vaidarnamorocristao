@@ -1,5 +1,7 @@
 "use client";
 
+import { BrandLogo } from "@/components/brand/BrandLogo";
+
 import {
   ArrowLeft,
   BookOpen,
@@ -261,8 +263,7 @@ function EditorialHeader({
         <ArrowLeft />
       </button>
       <button className="editorial-brand" onClick={() => onNavigate("home")}>
-        <img src="/logo-oficial-transparente.png" alt="" />
-        <span>VaiDarNamoro</span>
+        <BrandLogo className="w-36" />
         <small>Editorial</small>
       </button>
       <nav aria-label="Conteúdo editorial">

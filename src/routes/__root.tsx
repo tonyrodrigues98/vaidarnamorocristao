@@ -43,18 +43,14 @@ import { getDestinationBehavior } from "@/config/app-destinations";
 import { AdminShellRuntimeBoundary } from "@/components/admin-shell/AdminShellRuntimeBoundary";
 import { AdminRouteAccessBoundary } from "@/components/admin-shell/AdminRouteAccessBoundary";
 import { isGlobalRouterNotFound } from "@/config/router-not-found";
+import { BrandLogo } from "@/components/brand/BrandLogo";
 
 function NotFoundComponent() {
   return (
     <PublicShell>
       <main className="flex min-h-[60dvh] items-center justify-center bg-background px-4">
         <div className="max-w-md text-center">
-          <img
-            src={brand.assets.icon192}
-            alt=""
-            aria-hidden="true"
-            className="mx-auto h-16 w-16 object-contain"
-          />
+          <BrandLogo className="mx-auto w-44" />
           <h1 className="text-7xl font-bold text-foreground">404</h1>
           <h2 className="mt-4 text-xl font-semibold text-foreground">Página não encontrada</h2>
           <p className="mt-2 text-sm text-muted-foreground">
@@ -221,8 +217,8 @@ function RootShell({ children }: { children: React.ReactNode }) {
 #app-splash{position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#ffffff;transition:opacity .35s ease;}
 html.dark #app-splash,html[data-theme="dark"] #app-splash{background:${brand.theme.canvasDark};}
 #app-splash.is-hiding{opacity:0;pointer-events:none;}
-#app-splash .app-splash-logo{width:min(60vw,200px);height:auto;object-fit:contain;display:block;filter:drop-shadow(0 8px 24px rgba(0,0,0,.08));}
-@media (min-width:768px){#app-splash .app-splash-logo{width:240px;}}
+#app-splash .app-splash-logo{width:min(70vw,280px);filter:drop-shadow(0 8px 24px rgba(0,0,0,.08));}
+@media (min-width:768px){#app-splash .app-splash-logo{width:320px;}}
 #app-splash .app-splash-loader{margin-top:32px;width:160px;height:3px;background:rgba(0,0,0,.08);border-radius:999px;overflow:hidden;}
 html.dark #app-splash .app-splash-loader,html[data-theme="dark"] #app-splash .app-splash-loader{background:rgba(255,255,255,.14);}
 #app-splash .app-splash-loader-bar{display:block;height:100%;width:0%;background:#000;border-radius:999px;transition:width .35s cubic-bezier(.22,.61,.36,1);}
@@ -233,7 +229,7 @@ html.dark #app-splash .app-splash-loader-bar,html[data-theme="dark"] #app-splash
       </head>
       <body>
         <div id="app-splash" aria-hidden="true">
-          <img src={brand.assets.splashLogo} alt={brand.name} className="app-splash-logo" />
+          <BrandLogo className="app-splash-logo" />
           <div className="app-splash-loader">
             <span className="app-splash-loader-bar" suppressHydrationWarning />
           </div>
