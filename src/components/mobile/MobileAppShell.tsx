@@ -21,7 +21,9 @@ export function MobileAppShell({ children }: { children: React.ReactNode }) {
     const viewport = window.visualViewport;
     const setChatHeight = () => {
       const height = viewport?.height ?? window.innerHeight;
+      const offsetTop = viewport?.offsetTop ?? 0;
       root.style.setProperty("--app-visual-height", `${height}px`);
+      root.style.setProperty("--app-visual-offset-top", `${offsetTop}px`);
     };
 
     setChatHeight();
@@ -56,6 +58,7 @@ export function MobileAppShell({ children }: { children: React.ReactNode }) {
       document.removeEventListener("focusin", onFocusIn);
       document.removeEventListener("focusout", onFocusOut);
       root.style.removeProperty("--app-visual-height");
+      root.style.removeProperty("--app-visual-offset-top");
     };
   }, [isChatScreen]);
 

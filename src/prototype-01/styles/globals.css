@@ -10684,6 +10684,28 @@ html[data-reduce-motion="true"] *::after {
   }
 }
 
+/* Runtime integration: the active tab owns vertical document scrolling.
+   Primary page wrappers remain ordinary flow containers so every route,
+   including secondary destinations, can reach its full content. */
+[data-vdn-prototype01] .tab-pane.active {
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+}
+
+[data-vdn-prototype01] .page-scroll {
+  height: auto;
+  min-height: 100%;
+  overflow: visible;
+}
+
+[data-vdn-prototype01] .tab-pane.active:has(.chat-screen) {
+  overflow: hidden;
+  touch-action: auto;
+}
+
 /* Patch 44.1 — uma única aparência global aplicada na raiz */
 html[data-theme="dark"] {
   color-scheme: dark;
