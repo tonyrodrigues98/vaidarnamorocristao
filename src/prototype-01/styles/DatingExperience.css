@@ -1,0 +1,1575 @@
+.dating-experience,
+.dating-activation {
+  position: fixed;
+  inset: 0;
+  z-index: 86;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--canvas);
+  color: var(--ink-900);
+}
+
+.dating-experience.is-hidden {
+  display: none;
+}
+
+.dating-topbar {
+  z-index: 5;
+  display: grid;
+  min-height: calc(60px + env(safe-area-inset-top));
+  flex: 0 0 auto;
+  grid-template-columns: 44px minmax(0, 1fr) 44px;
+  align-items: end;
+  gap: 8px;
+  padding: calc(7px + env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) 7px
+    max(12px, env(safe-area-inset-left));
+  border-bottom: 1px solid var(--line);
+  background: rgb(250 250 250 / 94%);
+  backdrop-filter: blur(18px);
+}
+
+.dating-topbar button,
+.dating-activation header button {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 14px;
+  background: transparent;
+  color: inherit;
+}
+
+.dating-topbar > div {
+  align-self: center;
+  min-width: 0;
+}
+.dating-topbar h1 {
+  margin: 0;
+  font-size: 18px;
+  letter-spacing: -0.03em;
+}
+.dating-topbar > div span {
+  display: block;
+  margin-top: 1px;
+  color: var(--ink-500);
+  font-size: 10px;
+}
+.dating-overline {
+  color: var(--brand-action);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.dating-inactive {
+  width: min(100%, 560px);
+  margin: auto;
+  padding: 30px max(20px, env(safe-area-inset-right)) calc(30px + env(safe-area-inset-bottom))
+    max(20px, env(safe-area-inset-left));
+  text-align: center;
+}
+
+.dating-inactive-symbol {
+  display: grid;
+  width: 76px;
+  height: 76px;
+  place-items: center;
+  margin: 0 auto 22px;
+  border-radius: 26px;
+  background: var(--brand-action-soft);
+  color: var(--brand-action);
+}
+
+.dating-inactive h2 {
+  margin: 8px 0 10px;
+  font-size: clamp(25px, 7vw, 34px);
+  line-height: 1.08;
+  letter-spacing: -0.045em;
+}
+.dating-inactive > p {
+  max-width: 430px;
+  margin: 0 auto;
+  color: var(--ink-500);
+  font-size: 13px;
+  line-height: 1.65;
+}
+.dating-principles {
+  display: grid;
+  gap: 8px;
+  margin: 26px 0 20px;
+  text-align: left;
+}
+.dating-principles > span {
+  display: grid;
+  grid-template-columns: 34px 1fr;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 13px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--surface-primary);
+}
+.dating-principles svg {
+  color: var(--brand-action);
+}
+.dating-principles strong,
+.dating-principles small {
+  display: block;
+}
+.dating-principles strong {
+  font-size: 12px;
+}
+.dating-principles small {
+  margin-top: 2px;
+  color: var(--ink-500);
+  font-size: 10px;
+}
+.dating-primary,
+.activation-primary,
+.romantic-profile > button,
+.anonymous-composer > button {
+  display: flex;
+  min-height: 48px;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: 100%;
+  border: 0;
+  border-radius: 15px;
+  background: var(--brand-action);
+  color: #fff;
+  font-weight: 700;
+}
+.dating-link {
+  min-height: 44px;
+  margin-top: 8px;
+  border: 0;
+  background: transparent;
+  color: var(--ink-600);
+  font-size: 11px;
+}
+.ineligible-state {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 12px;
+  margin: 24px 0;
+  padding: 16px;
+  border-radius: 17px;
+  background: #fff4ee;
+  text-align: left;
+}
+.ineligible-state > div strong,
+.ineligible-state > div span {
+  display: block;
+}
+.ineligible-state > div span {
+  margin-top: 3px;
+  color: var(--ink-500);
+  font-size: 10px;
+  line-height: 1.45;
+}
+.ineligible-state button {
+  grid-column: 1 / -1;
+  min-height: 44px;
+  border: 0;
+  border-radius: 13px;
+  background: var(--brand-action);
+  color: #fff;
+  font-weight: 700;
+}
+
+.dating-activation {
+  z-index: 100;
+  background: var(--surface-primary);
+}
+.dating-activation header {
+  display: grid;
+  min-height: calc(60px + env(safe-area-inset-top));
+  flex: 0 0 auto;
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 8px;
+  padding: calc(7px + env(safe-area-inset-top)) max(14px, env(safe-area-inset-right)) 7px
+    max(14px, env(safe-area-inset-left));
+  border-bottom: 1px solid var(--line);
+}
+.dating-activation header > span {
+  align-self: center;
+  font-size: 14px;
+  font-weight: 700;
+}
+.dating-activation header small {
+  align-self: center;
+  color: var(--ink-500);
+  font-size: 10px;
+}
+.activation-progress {
+  height: 3px;
+  flex: 0 0 auto;
+  background: var(--surface-secondary);
+}
+.activation-progress i {
+  display: block;
+  height: 100%;
+  border-radius: 99px;
+  background: var(--brand-action);
+  transition: width 0.25s ease;
+}
+.dating-activation main {
+  width: min(100%, 620px);
+  flex: 1 1 auto;
+  overflow-y: auto;
+  margin: 0 auto;
+  padding: 32px 20px 24px;
+}
+.dating-activation main h1 {
+  margin: 7px 0 8px;
+  font-size: 28px;
+  letter-spacing: -0.04em;
+}
+.dating-activation main > p {
+  margin: 0 0 24px;
+  color: var(--ink-500);
+  font-size: 12px;
+  line-height: 1.6;
+}
+.dating-activation footer {
+  width: min(100%, 620px);
+  flex: 0 0 auto;
+  margin: 0 auto;
+  padding: 12px 20px calc(12px + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--line);
+  background: var(--surface-primary);
+}
+.dating-activation footer > button:last-child {
+  width: 100%;
+  min-height: 44px;
+  border: 0;
+  background: transparent;
+  color: var(--ink-500);
+}
+.dating-activation footer button:disabled {
+  opacity: 0.45;
+}
+.activation-intro {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  padding: 28px 20px;
+  border-radius: 22px;
+  background: linear-gradient(145deg, #fff3f1, #f7f0ff);
+  text-align: center;
+}
+.activation-intro svg {
+  color: var(--brand-action);
+}
+.activation-intro strong {
+  font-size: 17px;
+}
+.activation-intro span {
+  max-width: 370px;
+  color: var(--ink-600);
+  font-size: 11px;
+  line-height: 1.55;
+}
+.eligibility-list,
+.activation-options,
+.romantic-profile-form,
+.privacy-summary,
+.activation-review {
+  display: grid;
+  gap: 9px;
+}
+.eligibility-list label {
+  position: relative;
+  display: grid;
+  min-height: 56px;
+  grid-template-columns: 44px minmax(0, 1fr);
+  align-items: center;
+  gap: 9px;
+  padding: 6px 13px 6px 7px;
+  border: 1px solid var(--line);
+  border-radius: 15px;
+  background: var(--surface-primary);
+  font-size: 11px;
+  line-height: 1.45;
+  cursor: pointer;
+}
+.eligibility-list input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+.eligibility-list .check-control {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  justify-self: center;
+  border: 1px solid #c9cbd1;
+  border-radius: 10px;
+  background: #f3f4f6;
+  color: #8b8e96;
+}
+.eligibility-list input:checked + .check-control {
+  border-color: var(--brand-action);
+  background: var(--brand-action);
+  color: #fff;
+}
+.eligibility-list input:focus-visible + .check-control {
+  outline: 3px solid rgb(235 79 104 / 34%);
+  outline-offset: 3px;
+}
+.eligibility-list label.is-disabled {
+  border-style: dashed;
+  background: #f4f4f5;
+  cursor: not-allowed;
+  opacity: 0.58;
+}
+.eligibility-list label.is-disabled .check-control {
+  filter: grayscale(0.5);
+}
+.activation-options button {
+  display: grid;
+  min-height: 52px;
+  grid-template-columns: 24px 1fr;
+  align-items: center;
+  gap: 9px;
+  padding: 0 13px;
+  border: 1px solid var(--line);
+  border-radius: 15px;
+  background: var(--surface-primary);
+  color: var(--ink-800);
+  text-align: left;
+  font-size: 12px;
+}
+.activation-options button > span {
+  display: grid;
+  width: 22px;
+  height: 22px;
+  place-items: center;
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+}
+.activation-options button.selected {
+  border-color: var(--brand-action);
+  background: var(--brand-action-soft);
+}
+.activation-options button.selected > span {
+  background: var(--brand-action);
+  color: #fff;
+}
+.romantic-profile-form label {
+  position: relative;
+  display: grid;
+  gap: 6px;
+  color: var(--ink-700);
+  font-size: 10px;
+  font-weight: 700;
+}
+.romantic-profile-form input,
+.romantic-profile-form textarea {
+  min-height: 48px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  outline: 0;
+  background: var(--surface-primary);
+  color: var(--ink-900);
+  font: inherit;
+  font-size: 16px;
+  font-weight: 400;
+}
+.romantic-profile-form textarea {
+  min-height: 112px;
+  resize: none;
+}
+.romantic-profile-form label small {
+  position: absolute;
+  right: 10px;
+  bottom: 8px;
+  color: var(--ink-400);
+  font-size: 9px;
+}
+.privacy-summary {
+  padding: 20px;
+  border-radius: 20px;
+  background: var(--surface-secondary);
+}
+.privacy-summary > svg {
+  color: var(--brand-action);
+}
+.privacy-summary > span {
+  color: var(--ink-500);
+  font-size: 11px;
+  line-height: 1.5;
+}
+.privacy-summary label {
+  display: flex;
+  min-height: 46px;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid var(--line);
+  font-size: 11px;
+}
+.privacy-summary label:first-of-type {
+  margin-top: 8px;
+}
+.privacy-summary input {
+  width: 38px;
+  height: 22px;
+  accent-color: var(--brand-action);
+}
+.activation-review > span {
+  display: grid;
+  min-height: 58px;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  padding: 10px 13px;
+  border: 1px solid var(--line);
+  border-radius: 15px;
+}
+.activation-review strong,
+.activation-review small {
+  display: block;
+}
+.activation-review small {
+  margin-top: 2px;
+  color: var(--ink-500);
+  font-size: 10px;
+}
+.activation-review svg {
+  grid-column: 2;
+  grid-row: 1;
+  color: var(--brand-action);
+}
+
+.age-range-card {
+  padding: 20px 16px 18px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: var(--surface-primary);
+}
+.age-range-heading {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 12px;
+}
+.age-range-heading > div {
+  display: grid;
+  gap: 3px;
+}
+.age-range-heading > div:last-child {
+  text-align: right;
+}
+.age-range-heading span,
+.age-range-limits {
+  color: var(--ink-500);
+  font-size: 10px;
+}
+.age-range-heading strong {
+  font-size: 16px;
+}
+.age-range-card > p {
+  margin: 24px 0 14px;
+  color: var(--ink-900);
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+}
+.dual-range {
+  position: relative;
+  height: 44px;
+}
+.dual-range-track {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  left: 0;
+  height: 6px;
+  border-radius: 999px;
+  background: linear-gradient(
+    to right,
+    #d7d8dd 0 var(--age-min-position),
+    var(--brand-action) var(--age-min-position) var(--age-max-position),
+    #d7d8dd var(--age-max-position) 100%
+  );
+  transform: translateY(-50%);
+}
+.dual-range input[type="range"] {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  width: 100%;
+  height: 44px;
+  margin: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  pointer-events: none;
+  background: transparent;
+}
+.dual-range input[type="range"]:last-child {
+  z-index: 3;
+}
+.dual-range input[type="range"]::-webkit-slider-runnable-track {
+  height: 6px;
+  background: transparent;
+}
+.dual-range input[type="range"]::-webkit-slider-thumb {
+  width: 28px;
+  height: 28px;
+  margin-top: -11px;
+  appearance: none;
+  -webkit-appearance: none;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  background: var(--brand-action);
+  box-shadow:
+    0 0 0 1px rgb(217 63 89 / 36%),
+    0 4px 12px rgb(217 63 89 / 24%);
+  pointer-events: auto;
+}
+.dual-range input[type="range"]::-moz-range-track {
+  height: 6px;
+  background: transparent;
+}
+.dual-range input[type="range"]::-moz-range-thumb {
+  width: 28px;
+  height: 28px;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  background: var(--brand-action);
+  box-shadow:
+    0 0 0 1px rgb(217 63 89 / 36%),
+    0 4px 12px rgb(217 63 89 / 24%);
+  pointer-events: auto;
+}
+.dual-range input[type="range"]:focus-visible {
+  outline: none;
+}
+.dual-range input[type="range"]:focus-visible::-webkit-slider-thumb {
+  outline: 3px solid rgb(235 79 104 / 34%);
+  outline-offset: 4px;
+}
+.dual-range input[type="range"]:focus-visible::-moz-range-thumb {
+  outline: 3px solid rgb(235 79 104 / 34%);
+  outline-offset: 4px;
+}
+.age-range-limits {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 2px;
+}
+
+.dating-tabs {
+  z-index: 4;
+  display: grid;
+  min-height: 48px;
+  flex: 0 0 auto;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  padding-inline: max(12px, env(safe-area-inset-left)) max(12px, env(safe-area-inset-right));
+  border-bottom: 1px solid var(--line);
+  background: var(--surface-primary);
+}
+.dating-tabs button {
+  position: relative;
+  min-width: 0;
+  min-height: 48px;
+  padding: 0 2px;
+  border: 0;
+  background: transparent;
+  color: var(--ink-500);
+  font-size: 10px;
+  font-weight: 650;
+}
+.dating-tabs button.active {
+  color: var(--brand-action);
+}
+.dating-tabs button.active::after {
+  position: absolute;
+  right: 25%;
+  bottom: 0;
+  left: 25%;
+  height: 3px;
+  border-radius: 99px 99px 0 0;
+  background: var(--brand-action);
+  content: "";
+}
+.dating-tabs button i {
+  display: inline-grid;
+  min-width: 16px;
+  height: 16px;
+  place-items: center;
+  margin-left: 4px;
+  border-radius: 99px;
+  background: var(--brand-action-soft);
+  color: var(--brand-action);
+  font-size: 8px;
+  font-style: normal;
+}
+.dating-layout {
+  display: grid;
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
+}
+.dating-main {
+  min-width: 0;
+  overflow-y: auto;
+  padding-bottom: calc(28px + env(safe-area-inset-bottom));
+  overscroll-behavior-y: contain;
+}
+.dating-context-panel {
+  display: none;
+}
+.dating-status-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 16px 0;
+  padding: 11px 13px;
+  border-radius: 14px;
+  background: #fff4dd;
+  color: #765016;
+  font-size: 10px;
+}
+.dating-status-banner.paused {
+  background: #f0edff;
+  color: #554696;
+}
+.dating-discover,
+.dating-interest-view,
+.connections-view,
+.anonymous-view {
+  width: min(100%, 720px);
+  margin-inline: auto;
+  padding: 17px 16px;
+}
+.dating-discover-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 13px;
+}
+.dating-discover-heading h2 {
+  margin: 4px 0 0;
+  font-size: 21px;
+  letter-spacing: -0.035em;
+}
+.dating-discover-heading button {
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  gap: 6px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: var(--surface-primary);
+  font-size: 10px;
+  font-weight: 700;
+}
+.dating-person-card {
+  margin-bottom: 14px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: var(--surface-primary);
+  box-shadow: 0 8px 24px rgb(34 24 47 / 4%);
+}
+.dating-person-card > header {
+  display: grid;
+  grid-template-columns: auto 1fr 40px;
+  align-items: center;
+  gap: 11px;
+}
+.dating-person-card > header h3 {
+  margin: 0;
+  font-size: 16px;
+}
+.dating-person-card > header span,
+.dating-person-card > header small {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  margin-top: 2px;
+  color: var(--ink-500);
+  font-size: 9px;
+}
+.dating-person-card > header small {
+  color: #28745a;
+}
+.dating-person-card > header > button {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--ink-500);
+}
+.dating-avatar {
+  position: relative;
+  display: grid;
+  width: 50px;
+  height: 50px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 17px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+}
+.dating-avatar.large {
+  width: 82px;
+  height: 82px;
+  border-radius: 27px;
+  font-size: 20px;
+}
+.dating-avatar.tone-coral,
+.romantic-cover.tone-coral {
+  background: linear-gradient(145deg, #d96772, #a83e58);
+}
+.dating-avatar.tone-violet,
+.romantic-cover.tone-violet {
+  background: linear-gradient(145deg, #8f76c7, #5a4596);
+}
+.dating-avatar.tone-sage,
+.romantic-cover.tone-sage {
+  background: linear-gradient(145deg, #75a58d, #416e61);
+}
+.dating-person-card > p {
+  margin: 14px 0 10px;
+  color: var(--ink-700);
+  font-size: 11px;
+  line-height: 1.55;
+}
+.dating-person-card blockquote {
+  margin: 0;
+  padding: 11px 12px;
+  border-left: 3px solid var(--brand-action);
+  border-radius: 0 12px 12px 0;
+  background: var(--surface-secondary);
+  font-size: 10px;
+  line-height: 1.5;
+}
+.dating-facts,
+.dating-interests {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 11px;
+}
+.dating-facts span,
+.dating-interests span {
+  padding: 6px 8px;
+  border-radius: 9px;
+  background: var(--surface-secondary);
+  color: var(--ink-600);
+  font-size: 8px;
+}
+.dating-interests span {
+  background: var(--brand-action-soft);
+  color: var(--brand-action);
+}
+.dating-context {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 12px;
+  color: var(--ink-500);
+  font-size: 9px;
+}
+.dating-person-card footer {
+  display: grid;
+  grid-template-columns: 0.72fr 1.28fr;
+  gap: 8px;
+  margin-top: 14px;
+}
+.dating-person-card footer button {
+  display: flex;
+  min-height: 45px;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: var(--surface-primary);
+  color: var(--ink-700);
+  font-size: 10px;
+  font-weight: 700;
+}
+.dating-person-card footer button:last-child {
+  border-color: var(--brand-action);
+  background: var(--brand-action);
+  color: #fff;
+}
+.dating-person-card footer button.sent {
+  border-color: var(--line);
+  background: var(--brand-action-soft);
+  color: var(--brand-action);
+}
+.dating-empty {
+  display: grid;
+  min-height: 300px;
+  place-items: center;
+  align-content: center;
+  gap: 8px;
+  padding: 30px;
+  text-align: center;
+}
+.dating-empty h2,
+.dating-empty p {
+  margin: 0;
+}
+.dating-empty h2 {
+  font-size: 18px;
+}
+.dating-empty p {
+  max-width: 330px;
+  color: var(--ink-500);
+  font-size: 10px;
+  line-height: 1.55;
+}
+.dating-empty button {
+  min-height: 44px;
+  margin-top: 5px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 13px;
+  background: var(--brand-action);
+  color: #fff;
+  font-weight: 700;
+}
+.dating-empty.compact {
+  min-height: 230px;
+}
+.dating-interest-view > nav {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  margin-bottom: 14px;
+  padding: 3px;
+  border-radius: 13px;
+  background: var(--surface-secondary);
+}
+.dating-interest-view > nav button {
+  min-height: 40px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--ink-500);
+  font-size: 10px;
+  font-weight: 700;
+}
+.dating-interest-view > nav button.active {
+  background: var(--surface-primary);
+  color: var(--ink-900);
+  box-shadow: 0 3px 9px rgb(32 20 40 / 7%);
+}
+.received-interest,
+.sent-interest {
+  margin-bottom: 10px;
+  padding: 15px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--surface-primary);
+}
+.received-interest > header {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+.received-interest strong,
+.received-interest span {
+  display: block;
+}
+.received-interest span,
+.sent-interest span {
+  margin-top: 2px;
+  color: var(--ink-500);
+  font-size: 9px;
+}
+.received-interest blockquote {
+  margin: 13px 0;
+  padding: 12px;
+  border-radius: 12px;
+  background: var(--surface-secondary);
+  font-size: 10px;
+}
+.received-interest > div {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 7px;
+}
+.received-interest > div button,
+.sent-interest button {
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface-primary);
+  color: var(--ink-700);
+  font-size: 9px;
+  font-weight: 700;
+}
+.received-interest > div button:first-child {
+  border: 0;
+  background: var(--brand-action);
+  color: #fff;
+}
+.received-interest.expired {
+  opacity: 0.62;
+}
+.received-interest.expired p {
+  color: var(--ink-500);
+  font-size: 10px;
+  line-height: 1.5;
+}
+.sent-interest {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 10px;
+}
+.sent-interest button {
+  padding-inline: 12px;
+}
+.connection-celebration {
+  padding: 26px 20px;
+  border-radius: 22px;
+  background: linear-gradient(145deg, #fff1ef, #f4efff);
+  text-align: center;
+}
+.connection-celebration > svg {
+  color: var(--brand-action);
+}
+.connection-celebration h2 {
+  margin: 7px 0;
+  font-size: 21px;
+  letter-spacing: -0.04em;
+}
+.connection-celebration p {
+  margin: 0;
+  color: var(--ink-500);
+  font-size: 10px;
+  line-height: 1.55;
+}
+.connection-card {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 22px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: var(--surface-primary);
+  text-align: center;
+}
+.connection-card > div strong,
+.connection-card > div span {
+  display: block;
+}
+.connection-card > div span {
+  margin-top: 3px;
+  color: var(--ink-500);
+  font-size: 9px;
+}
+.connection-card > button {
+  display: flex;
+  width: 100%;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: var(--surface-primary);
+  color: var(--ink-700);
+  font-size: 10px;
+  font-weight: 700;
+}
+.connection-card > button:first-of-type {
+  border: 0;
+  background: var(--brand-action);
+  color: #fff;
+}
+.anonymous-view > header {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.anonymous-symbol {
+  display: grid;
+  width: 50px;
+  height: 50px;
+  place-items: center;
+  border-radius: 16px;
+  background: var(--brand-action-soft);
+  color: var(--brand-action);
+}
+.anonymous-view h2,
+.anonymous-view p {
+  margin: 3px 0;
+}
+.anonymous-view > header p {
+  color: var(--ink-500);
+  font-size: 9px;
+  line-height: 1.5;
+}
+.anonymous-thread {
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 19px;
+  background: var(--surface-primary);
+}
+.anonymous-clues {
+  display: grid;
+  gap: 6px;
+}
+.anonymous-clues span {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px;
+  border-radius: 10px;
+  background: var(--surface-secondary);
+  font-size: 9px;
+}
+.anonymous-clues i {
+  display: grid;
+  width: 20px;
+  height: 20px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--brand-action);
+  color: #fff;
+  font-style: normal;
+}
+.anonymous-messages {
+  display: grid;
+  gap: 7px;
+  margin: 14px 0;
+}
+.anonymous-messages p {
+  max-width: 86%;
+  padding: 10px;
+  border-radius: 13px 13px 13px 4px;
+  background: var(--surface-secondary);
+  font-size: 10px;
+  line-height: 1.45;
+}
+.anonymous-messages p.mine {
+  justify-self: end;
+  border-radius: 13px 13px 4px 13px;
+  background: var(--brand-action-soft);
+}
+.anonymous-messages small {
+  display: block;
+  margin-top: 4px;
+  color: var(--ink-500);
+  font-size: 8px;
+}
+.anonymous-thread footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 9px;
+}
+.anonymous-thread footer span {
+  color: var(--ink-500);
+  font-size: 9px;
+}
+.anonymous-thread footer button {
+  min-height: 42px;
+  padding: 0 13px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--brand-action);
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+}
+.reveal-state {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+  padding: 12px;
+  border-radius: 15px;
+  background: #f2effb;
+}
+.reveal-state strong,
+.reveal-state span {
+  display: block;
+}
+.reveal-state span {
+  color: var(--ink-500);
+  font-size: 8px;
+}
+.reveal-state button {
+  min-height: 40px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 11px;
+  background: var(--brand-action);
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+}
+.anonymous-safety {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 14px;
+}
+.anonymous-safety button {
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  gap: 5px;
+  border: 0;
+  background: transparent;
+  color: var(--ink-500);
+  font-size: 9px;
+}
+
+.dating-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 160;
+  display: flex;
+  align-items: end;
+  justify-content: center;
+  padding-top: env(safe-area-inset-top);
+  background: rgb(28 21 36 / 44%);
+  backdrop-filter: blur(4px);
+}
+.dating-sheet {
+  width: min(100%, 620px);
+  max-height: min(88dvh, 820px);
+  overflow-y: auto;
+  padding: 0 18px calc(18px + env(safe-area-inset-bottom));
+  border-radius: 24px 24px 0 0;
+  background: var(--surface-primary);
+  box-shadow: 0 -18px 60px rgb(25 15 34 / 18%);
+}
+.dating-sheet > header {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  min-height: 62px;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--surface-primary);
+}
+.dating-sheet > header h2 {
+  margin: 0;
+  font-size: 17px;
+}
+.dating-sheet > header button {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  border: 0;
+  border-radius: 13px;
+  background: var(--surface-secondary);
+}
+.interest-confirm {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  text-align: center;
+}
+.interest-confirm p {
+  color: var(--ink-500);
+  font-size: 10px;
+}
+.interest-confirm label {
+  display: grid;
+  width: 100%;
+  gap: 6px;
+  color: var(--ink-700);
+  font-size: 10px;
+  font-weight: 700;
+  text-align: left;
+}
+.interest-confirm textarea,
+.anonymous-composer textarea {
+  min-height: 100px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  outline: 0;
+  resize: none;
+  color: var(--ink-900);
+  font: inherit;
+  font-size: 16px;
+  font-weight: 400;
+}
+.interest-confirm > button {
+  width: 100%;
+  min-height: 46px;
+  border: 0;
+  border-radius: 13px;
+  background: var(--brand-action);
+  color: #fff;
+  font-weight: 700;
+}
+.interest-confirm > button:last-child {
+  background: transparent;
+  color: var(--ink-500);
+}
+.dating-profile-sheet {
+  padding-inline: 0;
+}
+.dating-profile-sheet > header,
+.dating-profile-sheet .romantic-profile {
+  padding-inline: 18px;
+}
+.romantic-cover {
+  display: flex;
+  min-height: 150px;
+  align-items: end;
+  justify-content: space-between;
+  padding: 17px;
+  border-radius: 20px;
+  color: #fff;
+}
+.romantic-cover > span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 7px 9px;
+  border-radius: 99px;
+  background: rgb(255 255 255 / 18%);
+  font-size: 8px;
+  backdrop-filter: blur(10px);
+}
+.romantic-profile > h2 {
+  margin: 15px 0 3px;
+}
+.romantic-profile > span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--ink-500);
+  font-size: 9px;
+}
+.romantic-profile > p {
+  color: var(--ink-700);
+  font-size: 11px;
+  line-height: 1.55;
+}
+.romantic-photos {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+.romantic-photos i {
+  aspect-ratio: 4 / 5;
+  border-radius: 12px;
+  background: linear-gradient(145deg, #eadfe8, #c9bbd9);
+}
+.romantic-photos i:nth-child(2) {
+  background: linear-gradient(145deg, #d7e4dc, #9eb5aa);
+}
+.romantic-photos i:nth-child(3) {
+  background: linear-gradient(145deg, #f1ddd2, #c9a696);
+}
+.romantic-photos i:nth-child(4) {
+  background: linear-gradient(145deg, #dce4ee, #a8b5ca);
+}
+.romantic-profile blockquote {
+  margin: 9px 0;
+  padding: 11px;
+  border-radius: 12px;
+  background: var(--surface-secondary);
+  font-size: 10px;
+}
+.romantic-details {
+  display: grid;
+  gap: 7px;
+  margin: 12px 0;
+}
+.romantic-details span {
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  color: var(--ink-600);
+  font-size: 9px;
+}
+.romantic-details strong {
+  display: block;
+  margin-bottom: 3px;
+  color: var(--ink-900);
+}
+.compatibility-list {
+  display: grid;
+  gap: 8px;
+}
+.compatibility-list > span {
+  display: grid;
+  grid-template-columns: 22px 1fr;
+  gap: 8px;
+  padding: 11px;
+  border-radius: 13px;
+  background: var(--surface-secondary);
+}
+.compatibility-list svg {
+  color: var(--brand-action);
+}
+.compatibility-list strong,
+.compatibility-list small {
+  display: block;
+}
+.compatibility-list small {
+  margin-top: 2px;
+  color: var(--ink-500);
+  font-size: 9px;
+  line-height: 1.45;
+}
+.dating-filters {
+  display: grid;
+  gap: 7px;
+}
+.dating-filters > button:not(.dating-primary),
+.pause-actions > button {
+  display: flex;
+  min-height: 48px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 0 11px;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: var(--surface-primary);
+  color: var(--ink-700);
+  text-align: left;
+  font-size: 10px;
+}
+.dating-filters p {
+  color: var(--ink-500);
+  font-size: 9px;
+  line-height: 1.5;
+}
+.pause-actions {
+  display: grid;
+  gap: 8px;
+}
+.pause-actions > button {
+  justify-content: flex-start;
+  padding-block: 10px;
+}
+.pause-actions > button > svg {
+  flex: 0 0 auto;
+  color: var(--brand-action);
+}
+.pause-actions strong,
+.pause-actions span {
+  display: block;
+}
+.pause-actions span {
+  margin-top: 2px;
+  color: var(--ink-500);
+  font-size: 9px;
+  line-height: 1.4;
+}
+.anonymous-composer {
+  display: grid;
+  gap: 9px;
+}
+.anonymous-composer p,
+.anonymous-composer span {
+  margin: 0;
+  color: var(--ink-500);
+  font-size: 9px;
+}
+.purpose-sheet > div {
+  display: grid;
+  justify-items: center;
+  gap: 9px;
+  padding: 16px;
+  border-radius: 20px;
+  background: linear-gradient(145deg, #fff3f1, #f4efff);
+  text-align: center;
+}
+.purpose-sheet > div > svg {
+  color: var(--brand-action);
+}
+.purpose-sheet h3,
+.purpose-sheet p {
+  margin: 0;
+}
+.purpose-sheet p {
+  color: var(--ink-500);
+  font-size: 10px;
+  line-height: 1.5;
+}
+.purpose-sheet > div button {
+  width: 100%;
+  min-height: 44px;
+  border: 0;
+  border-radius: 13px;
+  background: var(--brand-action);
+  color: #fff;
+  font-weight: 700;
+}
+.purpose-sheet > div span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--ink-600);
+  font-size: 9px;
+}
+.purpose-sheet > div small {
+  color: var(--ink-500);
+  font-size: 8px;
+}
+.dating-local-error {
+  position: fixed;
+  inset: 0;
+  z-index: 240;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 10px;
+  padding: 26px;
+  background: var(--canvas);
+  text-align: center;
+}
+.dating-local-error h2,
+.dating-local-error p {
+  margin: 0;
+}
+.dating-local-error p {
+  max-width: 390px;
+  color: var(--ink-500);
+  font-size: 11px;
+  line-height: 1.5;
+}
+.dating-local-error button {
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 210px;
+  border: 0;
+  border-radius: 13px;
+  background: var(--brand-action);
+  color: #fff;
+  font-weight: 700;
+}
+.dating-local-error button.secondary {
+  border: 1px solid var(--line);
+  background: var(--surface-primary);
+  color: var(--ink-700);
+}
+
+@media (min-width: 900px) {
+  .dating-experience,
+  .dating-activation {
+    left: var(--sidebar-width);
+  }
+  .dating-layout {
+    grid-template-columns: minmax(0, 1fr) 310px;
+  }
+  .dating-context-panel {
+    display: block;
+    overflow-y: auto;
+    padding: 34px 24px;
+    border-left: 1px solid var(--line);
+    background: var(--surface-primary);
+    text-align: center;
+  }
+  .dating-context-panel .dating-avatar {
+    margin: auto;
+  }
+  .dating-context-panel h2 {
+    margin: 14px 0 4px;
+  }
+  .dating-context-panel > span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    color: var(--ink-500);
+    font-size: 9px;
+  }
+  .dating-context-panel > p {
+    color: var(--ink-600);
+    font-size: 10px;
+    line-height: 1.55;
+  }
+  .dating-context-panel > div {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 5px;
+  }
+  .dating-context-panel > div span {
+    padding: 6px 8px;
+    border-radius: 9px;
+    background: var(--brand-action-soft);
+    color: var(--brand-action);
+    font-size: 8px;
+  }
+  .dating-context-panel blockquote {
+    margin: 16px 0;
+    padding: 12px;
+    border-radius: 13px;
+    background: var(--surface-secondary);
+    font-size: 10px;
+    line-height: 1.5;
+  }
+  .dating-context-panel button {
+    display: flex;
+    width: 100%;
+    min-height: 44px;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 8px;
+    border: 0;
+    border-radius: 13px;
+    background: var(--brand-action);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+  }
+  .dating-context-panel button.secondary {
+    border: 1px solid var(--line);
+    background: var(--surface-primary);
+    color: var(--ink-700);
+  }
+  .dating-sheet {
+    border-radius: 24px;
+    margin-bottom: 4vh;
+  }
+}
+
+@media (max-width: 350px) {
+  .dating-tabs {
+    padding-inline: max(6px, env(safe-area-inset-left)) max(6px, env(safe-area-inset-right));
+  }
+  .dating-tabs button {
+    font-size: 9px;
+  }
+  .dating-person-card footer {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .activation-progress i {
+    transition: none;
+  }
+}
