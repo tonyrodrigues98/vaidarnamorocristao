@@ -37,6 +37,7 @@ The logo region was inspected at original resolution in both supplied files and 
 - The final browser capture confirms correct crop, scale, alpha and placement for the light wordmark.
 - A physical iPhone capture exposed excessive vertical spacing around the mobile login card. The Auth shell was changed to use the small viewport unit, guaranteed vertical overflow, a smaller mobile lockup, compact mobile padding and responsive heading size.
 - The corrected production build was captured at 393 × 852 and at a reduced 393 × 640 Safari-like viewport. The complete login form remains visible at 393 × 640, horizontal overflow is absent, and the document remains scroll-safe when browser chrome further reduces usable height.
+- The supplied artwork was then compared again with the browser result. The earlier CSS technique enlarged the full canvas to 184% and could clip the letters at narrow sizes. Both transparent assets are now physically trimmed to their alpha bounds with source-safe padding; the component displays each image at `object-fit: contain`, with no overflow clip or scale enlargement.
 
 ## Implementation checklist
 

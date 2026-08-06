@@ -13,6 +13,8 @@ describe("theme-aware brand identity", () => {
     expect(source).toContain("data-vdn-brand-logo");
     expect(styles).toContain(".dark .vdn-brand-logo__image--light");
     expect(styles).toContain(".dark .vdn-brand-logo__image--dark");
+    expect(styles).toContain("object-fit: contain");
+    expect(styles).not.toContain("width: 184%");
   });
 
   it("uses the shared lockup across every active shell", () => {
