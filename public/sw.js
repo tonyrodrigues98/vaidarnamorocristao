@@ -1,15 +1,8 @@
-const CACHE_VERSION = "vaidarnamoro-pwa-v3";
+const CACHE_VERSION = "orha-entry-v1";
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const PET_IMG_CACHE = `${CACHE_VERSION}-pet-images`;
 
-const STATIC_ASSETS = [
-  "/offline.html",
-  "/favicon.ico",
-  "/apple-touch-icon.png",
-  "/manifest.webmanifest",
-  "/icon-192.png",
-  "/icon-512.png",
-];
+const STATIC_ASSETS = ["/offline.html", "/brand/orha-mark-ink.png", "/manifest.webmanifest"];
 
 const SENSITIVE_PATHS = [
   "/admin",
@@ -182,8 +175,8 @@ self.addEventListener("push", (event) => {
   const title = typeof payload.title === "string" ? payload.title : "VaiDarNamoro";
   const options = {
     body: typeof payload.body === "string" ? payload.body : "Voce tem uma nova notificacao.",
-    icon: "/icon-192.png",
-    badge: "/icon-192.png",
+    icon: "/brand/orha-mark-ink.png",
+    badge: "/brand/orha-mark-ink.png",
     data: {
       url:
         payload.data && typeof payload.data.url === "string"

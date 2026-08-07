@@ -1,36 +1,38 @@
 import { useNavigate } from "@tanstack/react-router";
-import { useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
 import { OrhaMark } from "@/components/auth/OrhaMark";
+import { useAuth } from "@/lib/auth";
 
-/** The route advances only from the final animation event, never from a timer. */
+/** The entry route advances only after its three-second visual sequence and session resolution. */
 export function OrhaSplash() {
   const navigate = useNavigate();
+  const { user, loading } = useAuth();
   const advanced = useRef(false);
+  const sequenceComplete = useRef(false);
 
-  function continueToLogin() {
+  const continueToDestination = useCallback(() => {
     if (advanced.current) return;
+    if (loading || !sequenceComplete.current) return;
     advanced.current = true;
-    navigate({ to: "/auth/login", replace: true });
-  }
+    navigate({ to: user ? "/inicio" : "/auth/login", replace: true });
+  }, [loading, navigate, user]);
+
+  useEffect(() => {
+    continueToDestination();
+  }, [continueToDestination]);
 
   return (
-    <main className="orha-splash" aria-label="Inicializando ORHA">
+    <main className="orha-splash" aria-label="Abrindo ORHA">
       <div className="orha-splash__content">
         <OrhaMark size="display" tone="ink" />
-        <p className="orha-splash__words" aria-label="Conexões, presença e propósito">
-          <span>CONEXÕES</span>
-          <i aria-hidden="true">•</i>
-          <span>PRESENÇA</span>
-          <i aria-hidden="true">•</i>
-          <span>PROPÓSITO</span>
-        </p>
         <span
-          className="orha-splash__loader"
-          aria-label="Carregando"
-          role="status"
+          className="orha-splash__completion"
+          aria-hidden="true"
           onAnimationEnd={(event) => {
-            if (event.animationName === "orha-splash-complete") continueToLogin();
+            if (event.animationName !== "orha-splash-complete") return;
+            sequenceComplete.current = true;
+            continueToDestination();
           }}
         />
       </div>

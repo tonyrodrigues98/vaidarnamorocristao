@@ -631,11 +631,6 @@ function computeAge(y: number, m: number, d: number) {
   if (mDiff < 0 || (mDiff === 0 && today.getDate() < d)) age--;
   return age;
 }
-const MONTHS = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
-function daysInMonth(y: number, m: number) {
-  return new Date(y, m, 0).getDate();
-}
-
 function StepBirth({
   birth,
   onChange,
@@ -648,22 +643,15 @@ function StepBirth({
   const now = new Date();
   const yearMax = now.getFullYear() - 18;
   const yearMin = now.getFullYear() - 90;
-  const years = useMemo(() => {
-    const arr: number[] = [];
-    for (let y = yearMax; y >= yearMin; y--) arr.push(y);
-    return arr;
-  }, [yearMax, yearMin]);
-  const months = useMemo(() => Array.from({ length: 12 }, (_, i) => i + 1), []);
-  const days = useMemo(
-    () => Array.from({ length: daysInMonth(birth.y, birth.m) }, (_, i) => i + 1),
-    [birth.y, birth.m],
-  );
   const tooYoung = ageFromBirth < 18;
-  function setPart(p: Partial<typeof birth>) {
-    const next = { ...birth, ...p };
-    const dim = daysInMonth(next.y, next.m);
-    if (next.d > dim) next.d = dim;
-    onChange(next);
+  const selectedDate = `${birth.y}-${String(birth.m).padStart(2, "0")}-${String(birth.d).padStart(2, "0")}`;
+  const maxDate = `${yearMax}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+  const minDate = `${yearMin}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+
+  function handleDateChange(value: string) {
+    const [y, m, d] = value.split("-").map(Number);
+    if (!y || !m || !d) return;
+    onChange({ y, m, d });
   }
   return (
     <div className="mx-auto flex w-full max-w-md flex-1 flex-col py-6">
@@ -671,16 +659,20 @@ function StepBirth({
       <p className="mt-3 text-sm text-muted-foreground">
         Usamos isso para manter a comunidade segura.
       </p>
-      <div className="mt-8 grid grid-cols-3 gap-2 rounded-3xl border border-border bg-card/40 p-3 shadow-soft">
-        <Wheel items={days} value={birth.d} onChange={(d) => setPart({ d })} ariaLabel="Dia" />
-        <Wheel
-          items={months}
-          value={birth.m}
-          onChange={(m) => setPart({ m })}
-          format={(v) => MONTHS[v - 1]}
-          ariaLabel="Mês"
+      <div className="mt-8">
+        <label className="sr-only" htmlFor="birth-date">
+          Data de nascimento
+        </label>
+        <Input
+          id="birth-date"
+          type="date"
+          value={selectedDate}
+          min={minDate}
+          max={maxDate}
+          autoComplete="bday"
+          onChange={(event) => handleDateChange(event.target.value)}
+          className="h-14 w-full rounded-2xl border-border bg-card px-4 text-base [color-scheme:light]"
         />
-        <Wheel items={years} value={birth.y} onChange={(y) => setPart({ y })} ariaLabel="Ano" />
       </div>
       <p
         className={cn(
@@ -690,168 +682,6 @@ function StepBirth({
       >
         {tooYoung ? "Você precisa ter pelo menos 18 anos." : `Você tem ${ageFromBirth} anos.`}
       </p>
-    </div>
-  );
-}
-
-function Wheel({
-  items,
-  value,
-  onChange,
-  format,
-  ariaLabel,
-}: {
-  items: number[];
-  value: number;
-  onChange: (v: number) => void;
-  format?: (v: number) => string;
-  ariaLabel: string;
-}) {
-  const ref = useRef<HTMLDivElement>(null);
-  const ITEM_H = 40;
-  const VISIBLE = 5;
-  const PAD = ITEM_H * Math.floor(VISIBLE / 2);
-  const [activeIdx, setActiveIdx] = useState(() => Math.max(0, items.indexOf(value)));
-  const valueRef = useRef(value);
-  valueRef.current = value;
-  const itemsRef = useRef(items);
-  itemsRef.current = items;
-  const rafRef = useRef(0);
-  const idleRef = useRef<number | null>(null);
-  const lastHapticIdx = useRef(activeIdx);
-
-  // Keep the wheel aligned with the external value when items change
-  // (e.g. day count changes when month/year switch) or value updates.
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const idx = Math.max(0, items.indexOf(value));
-    el.scrollTop = idx * ITEM_H;
-    setActiveIdx(idx);
-    lastHapticIdx.current = idx;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [items.length]);
-
-  function vibrate() {
-    if (typeof navigator !== "undefined" && "vibrate" in navigator) {
-      try {
-        navigator.vibrate(8);
-      } catch {
-        /* noop */
-      }
-    }
-  }
-
-  function handleScroll() {
-    const el = ref.current;
-    if (!el) return;
-    if (rafRef.current) return;
-    rafRef.current = requestAnimationFrame(() => {
-      rafRef.current = 0;
-      const el2 = ref.current;
-      if (!el2) return;
-      const raw = el2.scrollTop / ITEM_H;
-      const idx = Math.max(0, Math.min(itemsRef.current.length - 1, Math.round(raw)));
-      if (idx !== lastHapticIdx.current) {
-        lastHapticIdx.current = idx;
-        vibrate();
-      }
-      setActiveIdx(idx);
-    });
-    // Snap after momentum settles
-    if (idleRef.current) window.clearTimeout(idleRef.current);
-    idleRef.current = window.setTimeout(() => {
-      const el3 = ref.current;
-      if (!el3) return;
-      const idx = Math.max(
-        0,
-        Math.min(itemsRef.current.length - 1, Math.round(el3.scrollTop / ITEM_H)),
-      );
-      const target = idx * ITEM_H;
-      if (Math.abs(el3.scrollTop - target) > 0.5) {
-        el3.scrollTo({ top: target, behavior: "smooth" });
-      }
-      const v = itemsRef.current[idx];
-      if (v !== valueRef.current) onChange(v);
-    }, 110);
-  }
-
-  return (
-    <div
-      className="relative select-none"
-      style={{ height: ITEM_H * VISIBLE }}
-      aria-label={ariaLabel}
-    >
-      {/* Center highlight bar */}
-      <div
-        className="pointer-events-none absolute inset-x-1 top-1/2 z-10 -translate-y-1/2 rounded-xl bg-[var(--rose)]/8 ring-1 ring-inset ring-[var(--rose-soft)]/40"
-        style={{ height: ITEM_H }}
-      />
-      {/* Top & bottom fade for depth (iOS feel) */}
-      <div
-        className="pointer-events-none absolute inset-x-0 top-0 z-20"
-        style={{
-          height: PAD,
-          background:
-            "linear-gradient(to bottom, var(--card) 0%, color-mix(in oklab, var(--card) 80%, transparent) 45%, transparent 100%)",
-        }}
-      />
-      <div
-        className="pointer-events-none absolute inset-x-0 bottom-0 z-20"
-        style={{
-          height: PAD,
-          background:
-            "linear-gradient(to top, var(--card) 0%, color-mix(in oklab, var(--card) 80%, transparent) 45%, transparent 100%)",
-        }}
-      />
-      <div
-        ref={ref}
-        onScroll={handleScroll}
-        className="h-full overflow-y-scroll overscroll-contain snap-y snap-mandatory [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden"
-        style={{
-          perspective: "1000px",
-          WebkitMaskImage:
-            "linear-gradient(to bottom, transparent 0%, #000 25%, #000 75%, transparent 100%)",
-          maskImage:
-            "linear-gradient(to bottom, transparent 0%, #000 25%, #000 75%, transparent 100%)",
-        }}
-      >
-        <div style={{ height: PAD }} />
-        {items.map((it, i) => {
-          const dist = i - activeIdx;
-          const abs = Math.abs(dist);
-          const rot = Math.max(-60, Math.min(60, dist * 18));
-          const opacity = abs === 0 ? 1 : abs === 1 ? 0.65 : abs === 2 ? 0.32 : 0.18;
-          const scale = abs === 0 ? 1 : 0.92;
-          const active = it === value;
-          return (
-            <button
-              type="button"
-              key={it}
-              onClick={() => {
-                const el = ref.current;
-                if (!el) return;
-                el.scrollTo({ top: i * ITEM_H, behavior: "smooth" });
-              }}
-              className={cn(
-                "flex w-full snap-center items-center justify-center text-base tabular-nums transition-[color,font-weight] duration-150",
-                active ? "font-semibold text-foreground" : "text-foreground",
-              )}
-              style={{
-                height: ITEM_H,
-                opacity,
-                transform: `rotateX(${rot}deg) scale(${scale})`,
-                transformOrigin: "center center",
-                transformStyle: "preserve-3d",
-                willChange: "transform, opacity",
-              }}
-            >
-              {format ? format(it) : it}
-            </button>
-          );
-        })}
-        <div style={{ height: PAD }} />
-      </div>
     </div>
   );
 }

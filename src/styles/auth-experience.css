@@ -14,6 +14,25 @@
   background: var(--orha-canvas);
 }
 
+.orha-startup-screen {
+  display: grid;
+  min-height: 100dvh;
+  min-height: 100svh;
+  place-items: center;
+  color: #6c7078;
+  background: #fafafa;
+}
+
+html:has(.orha-auth-shell),
+html:has(.orha-splash),
+html:has([data-vdn-onboarding-shell]),
+body:has(.orha-auth-shell),
+body:has(.orha-splash),
+body:has([data-vdn-onboarding-shell]) {
+  min-height: 100%;
+  background: #fafafa;
+}
+
 .dark .orha-auth-shell,
 .dark .orha-splash,
 .dark [data-vdn-onboarding-shell] {
@@ -26,6 +45,15 @@
   --orha-canvas: #15161a;
   --orha-surface: #1c1d22;
   background: var(--orha-canvas);
+}
+
+html:has(.dark .orha-auth-shell),
+html:has(.dark .orha-splash),
+html:has(.dark [data-vdn-onboarding-shell]),
+body:has(.dark .orha-auth-shell),
+body:has(.dark .orha-splash),
+body:has(.dark [data-vdn-onboarding-shell]) {
+  background: #15161a;
 }
 
 .orha-mark {
@@ -327,62 +355,18 @@ html[data-theme="dark"] .orha-mark__image--light {
   animation: focus-in-contract 950ms cubic-bezier(0.25, 0.46, 0.45, 0.94) 160ms both;
 }
 
-.orha-splash__words {
-  display: flex;
-  gap: 0.55rem;
-  margin: 1.5rem 0 0;
-  color: var(--orha-ink);
-  font-size: clamp(0.58rem, 2.4vw, 0.72rem);
-  font-weight: 700;
-  letter-spacing: 0.14em;
-}
-
-.orha-splash__words span,
-.orha-splash__words i {
-  opacity: 0;
-  font-style: normal;
-  animation: focus-in-expand 650ms cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
-}
-
-.orha-splash__words span:nth-of-type(1) {
-  animation-delay: 1.1s;
-}
-.orha-splash__words i:nth-of-type(1) {
-  animation-delay: 1.26s;
-}
-.orha-splash__words span:nth-of-type(2) {
-  animation-delay: 1.38s;
-}
-.orha-splash__words i:nth-of-type(2) {
-  animation-delay: 1.54s;
-}
-.orha-splash__words span:nth-of-type(3) {
-  animation-delay: 1.66s;
-}
-
-.orha-splash__loader {
-  width: 3.2rem;
-  height: 0.18rem;
-  margin-top: 2rem;
+.orha-splash__completion {
+  position: absolute;
+  width: 1px;
+  height: 1px;
   overflow: hidden;
-  border-radius: 999px;
-  background: #e5e6e8;
-  animation: orha-splash-complete 1ms linear 2.66s both;
-}
-
-.orha-splash__loader::after {
-  display: block;
-  width: 100%;
-  height: 100%;
-  border-radius: inherit;
-  background: var(--orha-ink);
-  content: "";
-  transform: translateX(-108%);
-  animation: orha-loader 760ms var(--ease-ios-out) 1.92s both;
+  opacity: 0;
+  animation: orha-splash-complete 1ms linear 3s both;
 }
 
 [data-vdn-onboarding-shell] {
   min-height: 100dvh;
+  min-height: 100svh;
 }
 
 [data-vdn-onboarding-shell] > header {
@@ -426,26 +410,6 @@ html[data-theme="dark"] .orha-mark__image--light {
   }
 }
 
-@keyframes focus-in-expand {
-  0% {
-    opacity: 0;
-    filter: blur(2px);
-    letter-spacing: 0.38em;
-    transform: scale(0.88);
-  }
-  100% {
-    opacity: 1;
-    filter: blur(0);
-    letter-spacing: 0.14em;
-    transform: scale(1);
-  }
-}
-
-@keyframes orha-loader {
-  to {
-    transform: translateX(0);
-  }
-}
 @keyframes orha-enter {
   from {
     opacity: 0;
@@ -464,10 +428,7 @@ html[data-theme="dark"] .orha-mark__image--light {
 
 @media (prefers-reduced-motion: reduce) {
   .orha-splash .orha-mark,
-  .orha-splash__words span,
-  .orha-splash__words i,
-  .orha-splash__loader,
-  .orha-splash__loader::after,
+  .orha-splash__completion,
   .orha-auth-card {
     animation-duration: 1ms !important;
     animation-delay: 1ms !important;
