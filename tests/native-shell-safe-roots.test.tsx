@@ -124,11 +124,11 @@ describe("/explorar safe root", () => {
 });
 
 describe("generated route coverage", () => {
-  it("contains the generated /explorar route and 66 total full paths", () => {
+  it("contains the generated /explorar route and 64 total full paths", () => {
     const routeTree = readFileSync("src/routeTree.gen.ts", "utf8");
     const fullPaths = [...routeTree.matchAll(/fullPath:\s*'([^']+)'/g)].map((match) => match[1]);
 
     expect(fullPaths).toContain("/explorar");
-    expect(fullPaths).toHaveLength(66);
+    expect(fullPaths).toHaveLength(64);
   });
 });

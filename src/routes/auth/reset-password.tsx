@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AuthShell } from "@/components/shells/AuthShell";
+import { AuthPage } from "@/components/auth/AuthPage";
 
 export const Route = createFileRoute("/auth/reset-password")({ component: Reset });
 
@@ -33,26 +34,28 @@ function Reset() {
 
   return (
     <AuthShell>
-      <main className="mx-auto flex max-w-md flex-col px-4 py-12">
-        <div className="glass animate-fade-up rounded-3xl p-8 shadow-elegant">
-          <h1 className="text-3xl font-semibold">Nova senha</h1>
-          <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="password">Nova senha</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
-            <Button type="submit" className="w-full" size="lg" disabled={loading}>
-              {loading ? "Salvando..." : "Atualizar senha"}
-            </Button>
-          </form>
-        </div>
-      </main>
+      <AuthPage
+        backTo="/auth/login"
+        eyebrow="NOVA SENHA"
+        title="Escolha uma senha nova."
+        description="Use pelo menos oito caracteres e mantenha seu acesso protegido."
+      >
+        <form onSubmit={handleSubmit} className="orha-auth-form">
+          <div className="space-y-2">
+            <Label htmlFor="password">Nova senha</Label>
+            <Input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+          <Button type="submit" className="orha-auth-primary" size="lg" disabled={loading}>
+            {loading ? "Salvando..." : "Atualizar senha"}
+          </Button>
+        </form>
+      </AuthPage>
     </AuthShell>
   );
 }

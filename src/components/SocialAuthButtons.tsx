@@ -4,29 +4,29 @@ import { lovable } from "@/integrations/lovable/index";
 import { Button } from "@/components/ui/button";
 
 /**
- * Botões de login social (Google e Apple).
+ * Botão de login social com Google.
  * Após o redirect, o usuário volta autenticado. Em src/routes/__root.tsx
  * (ou no fluxo pós-login) verificamos se ele já tem perfil e enviamos
  * para /onboarding se não tiver.
  */
 export function SocialAuthButtons({ mode = "login" }: { mode?: "login" | "signup" }) {
-  const [loading, setLoading] = useState<null | "google" | "apple">(null);
+  const [loading, setLoading] = useState(false);
 
-  async function handle(provider: "google" | "apple") {
-    setLoading(provider);
+  async function handleGoogle() {
+    setLoading(true);
     try {
-      const result = await lovable.auth.signInWithOAuth(provider, {
+      const result = await lovable.auth.signInWithOAuth("google", {
         redirect_uri: window.location.origin + "/inicio",
       });
       if (result.error) {
         toast.error("Não foi possível entrar. Tente novamente.");
-        setLoading(null);
+        setLoading(false);
         return;
       }
       // Se result.redirected: o navegador irá redirecionar; nada mais a fazer.
     } catch {
       toast.error("Erro inesperado no login social.");
-      setLoading(null);
+      setLoading(false);
     }
   }
 
@@ -44,21 +44,11 @@ export function SocialAuthButtons({ mode = "login" }: { mode?: "login" | "signup
         variant="outline"
         size="lg"
         className="w-full justify-center gap-2 bg-white text-gray-800 hover:bg-gray-50 border-gray-300"
-        disabled={loading !== null}
-        onClick={() => handle("google")}
+        disabled={loading}
+        onClick={handleGoogle}
       >
         <GoogleIcon />
-        {loading === "google" ? "Conectando..." : `${label} com Google`}
-      </Button>
-      <Button
-        type="button"
-        size="lg"
-        className="w-full justify-center gap-2 bg-black text-white hover:bg-black/90"
-        disabled={loading !== null}
-        onClick={() => handle("apple")}
-      >
-        <AppleIcon />
-        {loading === "apple" ? "Conectando..." : `${label} com Apple`}
+        {loading ? "Conectando..." : `${label} com Google`}
       </Button>
     </div>
   );
@@ -83,14 +73,6 @@ function GoogleIcon() {
         fill="#EA4335"
         d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58A9 9 0 0 0 9 0 9 9 0 0 0 .92 4.96l3.05 2.32C4.68 5.16 6.66 3.58 9 3.58z"
       />
-    </svg>
-  );
-}
-
-function AppleIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <path d="M16.365 1.43c0 1.14-.43 2.13-1.18 2.93-.81.86-1.83 1.36-2.78 1.31-.13-1.07.39-2.16 1.13-2.97.81-.9 2.05-1.51 2.83-1.27zM20.5 17.05c-.36.83-.55 1.21-1.02 1.95-.66 1.04-1.6 2.34-2.76 2.35-1.03.01-1.3-.67-2.7-.66-1.4.01-1.7.67-2.73.66-1.16-.01-2.04-1.18-2.7-2.22-1.85-2.91-2.05-6.34-.91-8.16.81-1.29 2.09-2.05 3.29-2.05 1.22 0 1.99.67 3 .67 1 0 1.6-.67 3.02-.67 1.07 0 2.21.59 3.02 1.6-2.66 1.46-2.22 5.27.49 6.53z" />
     </svg>
   );
 }

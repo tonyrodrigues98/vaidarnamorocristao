@@ -2,6 +2,7 @@
 @source "../src";
 @import "tw-animate-css";
 @import "./styles/ios-liquid-glass.css";
+@import "./styles/auth-experience.css";
 
 @custom-variant dark (&:is(.dark *));
 

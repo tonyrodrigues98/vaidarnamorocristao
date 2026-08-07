@@ -77,10 +77,10 @@ describe("app destination registry", () => {
     },
   );
 
-  it("classifies all 66 generated routes without fallback", () => {
+  it("classifies all generated routes without fallback", () => {
     const routeTree = readFileSync("src/routeTree.gen.ts", "utf8");
     const fullPaths = [...routeTree.matchAll(/fullPath:\s*'([^']+)'/g)].map((match) => match[1]!);
-    expect(fullPaths).toHaveLength(66);
+    expect(fullPaths).toHaveLength(64);
 
     const unclassified = fullPaths
       .map(representativePath)

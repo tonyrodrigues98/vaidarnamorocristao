@@ -32,10 +32,6 @@ describe("auth, onboarding and document shells", () => {
 
   it("keeps onboarding logic inside its specialized shell", () => {
     expect(readFileSync("src/routes/onboarding/index.tsx", "utf8")).toContain("<OnboardingShell>");
-    expect(readFileSync("src/routes/onboarding/etapa-2.tsx", "utf8")).toContain(
-      "<OnboardingShell>",
-    );
-    expect(readFileSync("src/routes/onboarding/etapa-1.tsx", "utf8")).toContain('to="/onboarding"');
   });
 
   it("documents only truthful current navigation and mandatory legal review", () => {
@@ -54,10 +50,10 @@ describe("auth, onboarding and document shells", () => {
     expect(readFileSync("src/routes/termos.tsx", "utf8")).toContain("<DocumentShell>");
   });
 
-  it("uses the public shell for install with the official brand asset", () => {
+  it("uses the public shell for install", () => {
     expect(readFileSync("src/routes/instalar.tsx", "utf8")).toContain("<PublicShell>");
     expect(readFileSync("src/components/shells/AuthShell.tsx", "utf8")).toContain(
-      "brand.assets.icon192",
+      "orha-auth-shell",
     );
   });
 });

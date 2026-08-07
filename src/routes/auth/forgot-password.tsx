@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AuthShell } from "@/components/shells/AuthShell";
+import { AuthPage } from "@/components/auth/AuthPage";
 
 export const Route = createFileRoute("/auth/forgot-password")({ component: Forgot });
 
@@ -31,40 +32,39 @@ function Forgot() {
 
   return (
     <AuthShell>
-      <main className="mx-auto flex max-w-md flex-col px-4 py-12">
-        <div className="glass animate-fade-up rounded-3xl p-8 shadow-elegant">
-          <h1 className="text-3xl font-semibold">Recuperar senha</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Enviaremos um link de redefinição para seu email.
+      <AuthPage
+        backTo="/auth/login"
+        eyebrow="RECUPERAR ACESSO"
+        title="Vamos te trazer de volta."
+        description="Envie seu email e você receberá um link seguro para criar uma nova senha."
+      >
+        {sent ? (
+          <p className="orha-auth-success">
+            Verifique sua caixa de entrada e siga o link recebido.
           </p>
-          {sent ? (
-            <p className="mt-6 rounded-xl bg-accent/50 p-4 text-sm">
-              Verifique sua caixa de entrada e siga o link recebido.
-            </p>
-          ) : (
-            <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
-              </div>
-              <Button type="submit" className="w-full" size="lg" disabled={loading}>
-                {loading ? "Enviando..." : "Enviar link"}
-              </Button>
-            </form>
-          )}
-          <p className="mt-6 text-center text-sm text-muted-foreground">
-            <Link to="/auth/login" className="font-medium text-[var(--rose)] hover:underline">
-              Voltar para login
-            </Link>
-          </p>
-        </div>
-      </main>
+        ) : (
+          <form onSubmit={handleSubmit} className="orha-auth-form">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+            <Button type="submit" className="orha-auth-primary" size="lg" disabled={loading}>
+              {loading ? "Enviando..." : "Enviar link"}
+            </Button>
+          </form>
+        )}
+        <p className="mt-6 text-center text-sm text-muted-foreground">
+          <Link to="/auth/login" className="orha-auth-link">
+            Voltar para login
+          </Link>
+        </p>
+      </AuthPage>
     </AuthShell>
   );
 }

@@ -14,7 +14,6 @@ describe("truthful public shell", () => {
   });
 
   it.each([
-    "index.tsx",
     "sobre.tsx",
     "como-funciona.tsx",
     "depoimentos.tsx",
@@ -25,11 +24,13 @@ describe("truthful public shell", () => {
     expect(read(`src/routes/${route}`)).toContain("<PublicShell>");
   });
 
-  it("positions community first and dating as optional without absolute guarantees", () => {
+  it("uses the entry splash as the root route", () => {
     const home = read("src/routes/index.tsx");
-    expect(home).toContain("Comunidade cristã 18+");
-    expect(home).toContain("modo de relacionamento é opcional");
+    expect(home).toContain("component: OrhaSplash");
+    expect(home).not.toContain("<PublicShell>");
+  });
 
+  it("positions community first and dating as optional without absolute guarantees", () => {
     const about = read("src/routes/sobre.tsx");
     const how = read("src/routes/como-funciona.tsx");
     expect(about).toContain("comunidade cristã 18+");

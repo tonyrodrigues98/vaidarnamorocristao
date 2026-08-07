@@ -64,8 +64,6 @@ import { Route as ConversasMatchIdRouteImport } from './routes/conversas/$matchI
 import { Route as ConversasComunidadeRouteImport } from './routes/conversas/comunidade'
 import { Route as NoticiasIndexRouteImport } from './routes/noticias.index'
 import { Route as OnboardingIndexRouteImport } from './routes/onboarding/index'
-import { Route as OnboardingEtapa1RouteImport } from './routes/onboarding/etapa-1'
-import { Route as OnboardingEtapa2RouteImport } from './routes/onboarding/etapa-2'
 import { Route as PresentesIndexRouteImport } from './routes/presentes/index'
 import { Route as PretendentesIndexRouteImport } from './routes/pretendentes/index'
 import { Route as PretendentesIdRouteImport } from './routes/pretendentes/$id'
@@ -351,16 +349,6 @@ const OnboardingIndexRoute = OnboardingIndexRouteImport.update({
   path: '/onboarding/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const OnboardingEtapa1Route = OnboardingEtapa1RouteImport.update({
-  id: '/onboarding/etapa-1',
-  path: '/onboarding/etapa-1',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const OnboardingEtapa2Route = OnboardingEtapa2RouteImport.update({
-  id: '/onboarding/etapa-2',
-  path: '/onboarding/etapa-2',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const PresentesIndexRoute = PresentesIndexRouteImport.update({
   id: '/presentes/',
   path: '/presentes/',
@@ -459,8 +447,6 @@ export interface FileRoutesByFullPath {
   '/blog/$slug': typeof BlogSlugRoute
   '/conversas/$matchId': typeof ConversasMatchIdRoute
   '/conversas/comunidade': typeof ConversasComunidadeRoute
-  '/onboarding/etapa-1': typeof OnboardingEtapa1Route
-  '/onboarding/etapa-2': typeof OnboardingEtapa2Route
   '/pretendentes/$id': typeof PretendentesIdRoute
   '/proposito/$matchId': typeof PropositoMatchIdRoute
   '/suporte/$id': typeof SuporteIdRoute
@@ -527,8 +513,6 @@ export interface FileRoutesByTo {
   '/blog/$slug': typeof BlogSlugRoute
   '/conversas/$matchId': typeof ConversasMatchIdRoute
   '/conversas/comunidade': typeof ConversasComunidadeRoute
-  '/onboarding/etapa-1': typeof OnboardingEtapa1Route
-  '/onboarding/etapa-2': typeof OnboardingEtapa2Route
   '/pretendentes/$id': typeof PretendentesIdRoute
   '/proposito/$matchId': typeof PropositoMatchIdRoute
   '/suporte/$id': typeof SuporteIdRoute
@@ -596,8 +580,6 @@ export interface FileRoutesById {
   '/blog/$slug': typeof BlogSlugRoute
   '/conversas/$matchId': typeof ConversasMatchIdRoute
   '/conversas/comunidade': typeof ConversasComunidadeRoute
-  '/onboarding/etapa-1': typeof OnboardingEtapa1Route
-  '/onboarding/etapa-2': typeof OnboardingEtapa2Route
   '/pretendentes/$id': typeof PretendentesIdRoute
   '/proposito/$matchId': typeof PropositoMatchIdRoute
   '/suporte/$id': typeof SuporteIdRoute
@@ -666,8 +648,6 @@ export interface FileRouteTypes {
     | '/blog/$slug'
     | '/conversas/$matchId'
     | '/conversas/comunidade'
-    | '/onboarding/etapa-1'
-    | '/onboarding/etapa-2'
     | '/pretendentes/$id'
     | '/proposito/$matchId'
     | '/suporte/$id'
@@ -734,8 +714,6 @@ export interface FileRouteTypes {
     | '/blog/$slug'
     | '/conversas/$matchId'
     | '/conversas/comunidade'
-    | '/onboarding/etapa-1'
-    | '/onboarding/etapa-2'
     | '/pretendentes/$id'
     | '/proposito/$matchId'
     | '/suporte/$id'
@@ -802,8 +780,6 @@ export interface FileRouteTypes {
     | '/blog/$slug'
     | '/conversas/$matchId'
     | '/conversas/comunidade'
-    | '/onboarding/etapa-1'
-    | '/onboarding/etapa-2'
     | '/pretendentes/$id'
     | '/proposito/$matchId'
     | '/suporte/$id'
@@ -870,8 +846,6 @@ export interface RootRouteChildren {
   BlogSlugRoute: typeof BlogSlugRoute
   ConversasMatchIdRoute: typeof ConversasMatchIdRoute
   ConversasComunidadeRoute: typeof ConversasComunidadeRoute
-  OnboardingEtapa1Route: typeof OnboardingEtapa1Route
-  OnboardingEtapa2Route: typeof OnboardingEtapa2Route
   PretendentesIdRoute: typeof PretendentesIdRoute
   PropositoMatchIdRoute: typeof PropositoMatchIdRoute
   SuporteIdRoute: typeof SuporteIdRoute
@@ -1275,20 +1249,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OnboardingIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/onboarding/etapa-1': {
-      id: '/onboarding/etapa-1'
-      path: '/onboarding/etapa-1'
-      fullPath: '/onboarding/etapa-1'
-      preLoaderRoute: typeof OnboardingEtapa1RouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/onboarding/etapa-2': {
-      id: '/onboarding/etapa-2'
-      path: '/onboarding/etapa-2'
-      fullPath: '/onboarding/etapa-2'
-      preLoaderRoute: typeof OnboardingEtapa2RouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/presentes/': {
       id: '/presentes/'
       path: '/presentes'
@@ -1416,8 +1376,6 @@ const rootRouteChildren: RootRouteChildren = {
   BlogSlugRoute: BlogSlugRoute,
   ConversasMatchIdRoute: ConversasMatchIdRoute,
   ConversasComunidadeRoute: ConversasComunidadeRoute,
-  OnboardingEtapa1Route: OnboardingEtapa1Route,
-  OnboardingEtapa2Route: OnboardingEtapa2Route,
   PretendentesIdRoute: PretendentesIdRoute,
   PropositoMatchIdRoute: PropositoMatchIdRoute,
   SuporteIdRoute: SuporteIdRoute,

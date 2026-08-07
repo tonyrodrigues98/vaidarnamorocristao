@@ -1,7 +1,8 @@
 /**
  * Module-level cache for the post-signup onboarding wizard.
  * Persists across client-side navigation (no DB writes here).
- * `etapa-1` hydrates from this draft when a profile row doesn't exist yet.
+ * The unified `/onboarding` route hydrates from this draft when a profile
+ * row does not exist yet.
  */
 export type OnboardingDraft = {
   full_name: string;

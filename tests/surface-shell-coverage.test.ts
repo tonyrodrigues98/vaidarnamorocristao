@@ -8,9 +8,9 @@ function generatedFullPaths(): string[] {
 }
 
 describe("generated route surface coverage", () => {
-  it("classifies all 66 generated routes", () => {
+  it("classifies all generated routes", () => {
     const paths = generatedFullPaths();
-    expect(paths).toHaveLength(66);
+    expect(paths).toHaveLength(64);
     expect(paths.filter((path) => !classifySurfaceShell(path))).toEqual([]);
   });
 
@@ -18,7 +18,7 @@ describe("generated route surface coverage", () => {
     expect(classifySurfaceShell("/admin/economia")).toBe("Admin Shell");
     expect(classifySurfaceShell("/conversas/$matchId")).toBe("Focused Messaging Shell");
     expect(classifySurfaceShell("/auth/login")).toBe("Auth Shell");
-    expect(classifySurfaceShell("/onboarding/etapa-1")).toBe("Onboarding Shell");
+    expect(classifySurfaceShell("/onboarding/")).toBe("Onboarding Shell");
     expect(classifySurfaceShell("/api/photo-repair")).toBe("API/server");
   });
 
