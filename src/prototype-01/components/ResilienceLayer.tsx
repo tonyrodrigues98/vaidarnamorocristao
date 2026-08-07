@@ -51,7 +51,6 @@ export default function ResilienceLayer({
   onOpenSettings: () => void;
   onOpenLogin: () => void;
 }) {
-  const [coldStart, setColdStart] = useState(false);
   const [online, setOnline] = useState(true);
   const [slow, setSlow] = useState(false);
   const [reconnected, setReconnected] = useState(false);
@@ -67,26 +66,6 @@ export default function ResilienceLayer({
   const wasOffline = useRef(false);
   const usefulActions = useRef(0);
   const reconnectTimer = useRef<number | null>(null);
-
-  useEffect(() => {
-    const alreadyBooted = window.sessionStorage.getItem("vdn-shell-booted") === "true";
-    if (!alreadyBooted) {
-      const firstFrame = window.requestAnimationFrame(() => {
-        setColdStart(true);
-        const secondFrame = window.requestAnimationFrame(() => {
-          window.sessionStorage.setItem("vdn-shell-booted", "true");
-          setColdStart(false);
-        });
-        reconnectTimer.current = secondFrame;
-      });
-      return () => {
-        window.cancelAnimationFrame(firstFrame);
-        if (reconnectTimer.current) {
-          window.cancelAnimationFrame(reconnectTimer.current);
-        }
-      };
-    }
-  }, []);
 
   useEffect(() => {
     const deviceNavigator = navigator as NavigatorWithPwa;
@@ -223,12 +202,6 @@ export default function ResilienceLayer({
 
   return (
     <>
-      {coldStart && (
-        <div className="resilience-splash" aria-label="Abrindo VaiDarNamoro">
-          <img src="/logo-oficial-transparente.png" alt="" />
-        </div>
-      )}
-
       {!online && (
         <button className="connectivity-banner offline" onClick={() => setQueueOpen(true)}>
           <WifiOff size={16} />
