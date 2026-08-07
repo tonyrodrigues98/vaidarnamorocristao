@@ -265,7 +265,7 @@ function SupabaseRuntimeBoundary({ children }: { children: React.ReactNode }) {
 
   if (state === "loading") {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-background px-4">
+      <main className="orha-startup-screen">
         <p role="status" className="text-sm text-muted-foreground">
           Carregando sua comunidade...
         </p>
@@ -275,7 +275,7 @@ function SupabaseRuntimeBoundary({ children }: { children: React.ReactNode }) {
 
   if (state === "error") {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-background px-4">
+      <main className="orha-startup-screen px-4">
         <div className="max-w-sm text-center">
           <h1 className="text-xl font-semibold text-foreground">Não foi possível iniciar</h1>
           <p className="mt-2 text-sm text-muted-foreground">
