@@ -61,9 +61,9 @@ function Signup() {
     <AuthShell>
       <AuthPage
         backTo="/auth/login"
-        eyebrow="CHEGUE COMO É"
-        title="Seu espaço começa aqui."
-        description="Crie sua conta. Depois, montamos seu perfil juntos."
+        eyebrow="BEM-VINDO À ORHA"
+        title="Comece do seu jeito."
+        description="Crie a sua conta em poucos segundos. Depois, montamos seu perfil juntos."
         footer={
           <p>
             Já tem uma conta?{" "}
@@ -80,6 +80,7 @@ function Signup() {
               id="email"
               type="email"
               autoComplete="email"
+              placeholder="voce@email.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -91,6 +92,7 @@ function Signup() {
               id="password"
               type="password"
               autoComplete="new-password"
+              placeholder="Crie uma senha"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required

@@ -49,8 +49,8 @@ function Login() {
     <AuthShell>
       <AuthPage
         eyebrow="QUE BOM VER VOCÊ"
-        title="Entre na sua comunidade."
-        description="Continue de onde parou e encontre o que importa para você."
+        title="Que bom te ver por aqui."
+        description="Entre para continuar suas conexões, conversas e momentos na ORHA."
         footer={
           <p>
             Ainda não faz parte?{" "}
@@ -67,6 +67,7 @@ function Login() {
               id="email"
               type="email"
               autoComplete="email"
+              placeholder="voce@email.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -75,10 +76,7 @@ function Login() {
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <Label htmlFor="password">Senha</Label>
-              <Link
-                to="/auth/forgot-password"
-                className="text-xs text-[var(--rose)] hover:underline"
-              >
+              <Link to="/auth/forgot-password" className="orha-auth-utility">
                 Esqueci a senha
               </Link>
             </div>
@@ -86,6 +84,7 @@ function Login() {
               id="password"
               type="password"
               autoComplete="current-password"
+              placeholder="Sua senha"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required

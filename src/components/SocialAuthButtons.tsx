@@ -33,17 +33,17 @@ export function SocialAuthButtons({ mode = "login" }: { mode?: "login" | "signup
   const label = mode === "signup" ? "Continuar" : "Entrar";
 
   return (
-    <div className="space-y-3">
-      <div className="relative my-2 flex items-center">
-        <div className="flex-1 border-t border-border" />
-        <span className="px-3 text-xs uppercase tracking-wide text-muted-foreground">ou</span>
-        <div className="flex-1 border-t border-border" />
+    <div className="orha-social-auth">
+      <div className="orha-social-auth__divider" aria-hidden="true">
+        <span />
+        <small>ou</small>
+        <span />
       </div>
       <Button
         type="button"
         variant="outline"
         size="lg"
-        className="w-full justify-center gap-2 bg-white text-gray-800 hover:bg-gray-50 border-gray-300"
+        className="orha-social-auth__button"
         disabled={loading}
         onClick={handleGoogle}
       >

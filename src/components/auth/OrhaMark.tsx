@@ -4,12 +4,26 @@ type OrhaMarkProps = {
   size?: "compact" | "display";
   className?: string;
   tagLine?: boolean;
+  tone?: "auto" | "ink";
 };
 
 /** Official ORHA wordmark assets. The mirrored R is part of the supplied artwork. */
-export function OrhaMark({ size = "compact", className, tagLine = false }: OrhaMarkProps) {
+export function OrhaMark({
+  size = "compact",
+  className,
+  tagLine = false,
+  tone = "auto",
+}: OrhaMarkProps) {
   return (
-    <div className={cn("orha-mark", `orha-mark--${size}`, className)} aria-label="ORHA">
+    <div
+      className={cn(
+        "orha-mark",
+        `orha-mark--${size}`,
+        tone === "ink" && "orha-mark--ink",
+        className,
+      )}
+      aria-label="ORHA"
+    >
       <img
         src="/brand/orha-mark-ink.png"
         className="orha-mark__image orha-mark__image--ink"

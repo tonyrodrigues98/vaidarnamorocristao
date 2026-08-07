@@ -16,9 +16,8 @@ export function OrhaSplash() {
 
   return (
     <main className="orha-splash" aria-label="Inicializando ORHA">
-      <div className="orha-splash__glow" aria-hidden="true" />
       <div className="orha-splash__content">
-        <OrhaMark size="display" />
+        <OrhaMark size="display" tone="ink" />
         <p className="orha-splash__words" aria-label="Conexões, presença e propósito">
           <span>CONEXÕES</span>
           <i aria-hidden="true">•</i>

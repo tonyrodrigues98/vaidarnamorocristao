@@ -2,34 +2,30 @@
 .orha-auth-shell,
 .orha-splash,
 [data-vdn-onboarding-shell] {
-  --orha-ink: #19181d;
-  --orha-muted: #77757f;
-  --orha-line: rgb(25 24 29 / 0.12);
-  --orha-accent: #705cf6;
-  --orha-accent-strong: #5944ed;
-  --orha-accent-soft: #eeebff;
-  --orha-canvas: #f8f7fb;
+  --orha-ink: #17181c;
+  --orha-muted: #6c7078;
+  --orha-line: #e3e5e8;
+  --orha-accent: #f15d74;
+  --orha-accent-strong: #eb4f68;
+  --orha-accent-soft: #fff0f3;
+  --orha-canvas: #fafafa;
+  --orha-surface: #ffffff;
   color: var(--orha-ink);
-  background:
-    radial-gradient(circle at 10% -12%, rgb(112 92 246 / 0.16), transparent 29rem),
-    radial-gradient(circle at 110% 8%, rgb(255 174 202 / 0.24), transparent 26rem),
-    var(--orha-canvas);
+  background: var(--orha-canvas);
 }
 
 .dark .orha-auth-shell,
 .dark .orha-splash,
 .dark [data-vdn-onboarding-shell] {
-  --orha-ink: #f7f5fc;
-  --orha-muted: #b6b3c0;
-  --orha-line: rgb(247 245 252 / 0.13);
-  --orha-accent: #a89cff;
-  --orha-accent-strong: #9587ff;
-  --orha-accent-soft: #292447;
-  --orha-canvas: #111015;
-  background:
-    radial-gradient(circle at 10% -12%, rgb(140 120 255 / 0.2), transparent 27rem),
-    radial-gradient(circle at 110% 8%, rgb(178 92 126 / 0.16), transparent 26rem),
-    var(--orha-canvas);
+  --orha-ink: #f6f6f6;
+  --orha-muted: #b1b4bc;
+  --orha-line: #303238;
+  --orha-accent: #ff8496;
+  --orha-accent-strong: #f86b82;
+  --orha-accent-soft: #382129;
+  --orha-canvas: #15161a;
+  --orha-surface: #1c1d22;
+  background: var(--orha-canvas);
 }
 
 .orha-mark {
@@ -60,6 +56,14 @@ html[data-theme="dark"] .orha-mark__image--light {
   display: block;
 }
 
+.orha-mark--ink .orha-mark__image--ink {
+  display: block;
+}
+
+.orha-mark--ink .orha-mark__image--light {
+  display: none;
+}
+
 .orha-mark--compact {
   width: 5.6rem;
 }
@@ -77,7 +81,7 @@ html[data-theme="dark"] .orha-mark__image--light {
 
 .orha-auth-page {
   display: flex;
-  width: min(100%, 31rem);
+  width: min(100%, 34rem);
   min-height: 100dvh;
   margin-inline: auto;
   padding: max(1.125rem, env(safe-area-inset-top)) 1.25rem max(1.5rem, env(safe-area-inset-bottom));
@@ -88,7 +92,7 @@ html[data-theme="dark"] .orha-mark__image--light {
   display: grid;
   grid-template-columns: 2.75rem 1fr 2.75rem;
   align-items: center;
-  min-height: 3.25rem;
+  min-height: 3.5rem;
 }
 
 .orha-auth-page__back,
@@ -103,7 +107,7 @@ html[data-theme="dark"] .orha-mark__image--light {
   border: 1px solid var(--orha-line);
   border-radius: 999px;
   color: var(--orha-ink);
-  background: color-mix(in srgb, var(--orha-canvas) 76%, transparent);
+  background: var(--orha-surface);
   transition:
     transform 180ms var(--ease-ios-out),
     background 180ms ease-out;
@@ -116,30 +120,34 @@ html[data-theme="dark"] .orha-mark__image--light {
 .orha-auth-card {
   width: 100%;
   margin: auto 0;
-  padding: clamp(2rem, 8vw, 3rem) 0 1.75rem;
+  padding: clamp(1.6rem, 7vw, 2.5rem);
+  border: 1px solid var(--orha-line);
+  border-radius: 1.75rem;
+  background: var(--orha-surface);
+  box-shadow: 0 20px 50px rgb(23 24 28 / 0.06);
   animation: orha-enter 520ms var(--ease-ios-out) both;
 }
 
 .orha-auth-card__eyebrow {
   margin: 0 0 1rem;
-  color: var(--orha-accent-strong);
-  font-size: 0.6875rem;
+  color: var(--orha-muted);
+  font-size: 0.65rem;
   font-weight: 800;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.16em;
 }
 
 .orha-auth-card__title {
   margin: 0;
   color: var(--orha-ink);
-  font-size: clamp(2.25rem, 9vw, 3.2rem) !important;
+  font-size: clamp(2rem, 8.5vw, 2.8rem) !important;
   font-weight: 780 !important;
-  line-height: 0.98 !important;
-  letter-spacing: -0.065em !important;
+  line-height: 1.02 !important;
+  letter-spacing: -0.055em !important;
 }
 
 .orha-auth-card__description {
   max-width: 29rem;
-  margin: 1rem 0 0;
+  margin: 0.85rem 0 0;
   color: var(--orha-muted);
   font-size: 1rem;
   line-height: 1.55;
@@ -148,7 +156,7 @@ html[data-theme="dark"] .orha-mark__image--light {
 .orha-auth-form {
   display: grid;
   gap: 1rem;
-  margin-top: 2.25rem;
+  margin-top: 2rem;
 }
 
 .orha-auth-shell label:not(.orha-auth-terms) {
@@ -158,12 +166,12 @@ html[data-theme="dark"] .orha-mark__image--light {
 }
 
 .orha-auth-shell input:not([type="checkbox"]) {
-  height: 3.45rem;
+  height: 3.6rem;
   border-color: var(--orha-line);
-  border-radius: 1rem;
+  border-radius: 0.9rem;
   color: var(--orha-ink);
-  background: color-mix(in srgb, var(--orha-canvas) 60%, white 40%);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.35);
+  background: var(--orha-surface);
+  box-shadow: none;
 }
 
 .dark .orha-auth-shell input:not([type="checkbox"]) {
@@ -172,19 +180,19 @@ html[data-theme="dark"] .orha-mark__image--light {
 }
 
 .orha-auth-shell input:not([type="checkbox"]):focus-visible {
-  border-color: var(--orha-accent);
-  outline: 3px solid color-mix(in srgb, var(--orha-accent) 20%, transparent);
+  border-color: var(--orha-accent-strong);
+  outline: 3px solid rgb(235 79 104 / 0.12);
   outline-offset: 1px;
 }
 
 .orha-auth-primary {
   width: 100%;
-  min-height: 3.5rem;
-  margin-top: 0.25rem;
-  border-radius: 1rem;
+  min-height: 3.6rem;
+  margin-top: 0.4rem;
+  border-radius: 0.9rem;
   color: #fff;
   background: var(--orha-accent-strong);
-  box-shadow: 0 12px 24px rgb(89 68 237 / 0.22);
+  box-shadow: 0 10px 20px rgb(235 79 104 / 0.2);
   transition:
     transform 180ms var(--ease-ios-out),
     box-shadow 180ms ease-out,
@@ -193,28 +201,46 @@ html[data-theme="dark"] .orha-mark__image--light {
 
 .orha-auth-primary:hover {
   background: var(--orha-accent);
-  box-shadow: 0 16px 28px rgb(89 68 237 / 0.28);
+  box-shadow: 0 14px 24px rgb(235 79 104 / 0.25);
 }
 
 .orha-auth-primary:active {
   transform: scale(0.98);
 }
 
-.orha-auth-shell [class*="space-y-3"]:has(.orha-auth-primary) {
+.orha-social-auth {
+  display: grid;
+  gap: 1rem;
   margin-top: 1.5rem;
 }
 
-.orha-auth-shell .space-y-3 > .relative {
-  margin: 1.75rem 0 1rem;
+.orha-social-auth__divider {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 0.75rem;
+  align-items: center;
+  color: var(--orha-muted);
 }
 
-.orha-auth-shell .space-y-3 > button[variant="outline"],
-.orha-auth-shell .space-y-3 > button {
+.orha-social-auth__divider span {
+  height: 1px;
+  background: var(--orha-line);
+}
+
+.orha-social-auth__divider small {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.orha-social-auth__button {
   min-height: 3.35rem;
   border-color: var(--orha-line);
-  border-radius: 1rem;
+  border-radius: 0.9rem;
   color: var(--orha-ink);
-  background: color-mix(in srgb, var(--orha-canvas) 64%, white 36%);
+  background: var(--orha-surface);
+  box-shadow: none;
 }
 
 .orha-auth-terms {
@@ -238,6 +264,18 @@ html[data-theme="dark"] .orha-mark__image--light {
   color: var(--orha-accent-strong);
   font-weight: 750;
   text-decoration: none;
+}
+
+.orha-auth-utility {
+  color: var(--orha-accent-strong);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.orha-auth-utility:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
 }
 
 .orha-auth-link:hover {
@@ -270,17 +308,13 @@ html[data-theme="dark"] .orha-mark__image--light {
   overflow: hidden;
   place-items: center;
   isolation: isolate;
-}
-
-.orha-splash__glow {
-  position: absolute;
-  z-index: -1;
-  width: min(76vw, 31rem);
-  aspect-ratio: 1;
-  border-radius: 999px;
-  background: radial-gradient(circle, rgb(112 92 246 / 0.25), transparent 68%);
-  filter: blur(10px);
-  animation: orha-glow 2.4s ease-in-out both;
+  --orha-ink: #17181c;
+  --orha-muted: #6c7078;
+  --orha-line: #e3e5e8;
+  --orha-accent: #17181c;
+  --orha-canvas: #fafafa;
+  color: var(--orha-ink);
+  background: var(--orha-canvas);
 }
 
 .orha-splash__content {
@@ -300,9 +334,9 @@ html[data-theme="dark"] .orha-mark__image--light {
   display: flex;
   gap: 0.55rem;
   margin: 1.5rem 0 0;
-  color: var(--orha-muted);
+  color: var(--orha-ink);
   font-size: clamp(0.58rem, 2.4vw, 0.72rem);
-  font-weight: 750;
+  font-weight: 700;
   letter-spacing: 0.14em;
 }
 
@@ -335,7 +369,7 @@ html[data-theme="dark"] .orha-mark__image--light {
   margin-top: 2rem;
   overflow: hidden;
   border-radius: 999px;
-  background: rgb(112 92 246 / 0.14);
+  background: #e5e6e8;
   animation: orha-splash-complete 1ms linear 2.66s both;
 }
 
@@ -344,7 +378,7 @@ html[data-theme="dark"] .orha-mark__image--light {
   width: 100%;
   height: 100%;
   border-radius: inherit;
-  background: var(--orha-accent);
+  background: var(--orha-ink);
   content: "";
   transform: translateX(-108%);
   animation: orha-loader 760ms var(--ease-ios-out) 1.92s both;
@@ -383,7 +417,7 @@ html[data-theme="dark"] .orha-mark__image--light {
 @keyframes focus-in-contract {
   0% {
     opacity: 0;
-    filter: blur(14px);
+    filter: blur(3px);
     letter-spacing: 0.22em;
     transform: scale(1.12);
   }
@@ -398,7 +432,7 @@ html[data-theme="dark"] .orha-mark__image--light {
 @keyframes focus-in-expand {
   0% {
     opacity: 0;
-    filter: blur(12px);
+    filter: blur(2px);
     letter-spacing: 0.38em;
     transform: scale(0.88);
   }
@@ -413,16 +447,6 @@ html[data-theme="dark"] .orha-mark__image--light {
 @keyframes orha-loader {
   to {
     transform: translateX(0);
-  }
-}
-@keyframes orha-glow {
-  from {
-    opacity: 0;
-    transform: scale(0.64);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
   }
 }
 @keyframes orha-enter {
@@ -445,11 +469,20 @@ html[data-theme="dark"] .orha-mark__image--light {
   .orha-splash .orha-mark,
   .orha-splash__words span,
   .orha-splash__words i,
-  .orha-splash__glow,
   .orha-splash__loader,
   .orha-splash__loader::after,
   .orha-auth-card {
     animation-duration: 1ms !important;
     animation-delay: 1ms !important;
+  }
+}
+
+@media (min-width: 640px) {
+  .orha-auth-page {
+    padding-inline: 2rem;
+  }
+
+  .orha-auth-page__header {
+    margin-bottom: 1rem;
   }
 }
