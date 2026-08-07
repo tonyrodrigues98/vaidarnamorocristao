@@ -34,7 +34,6 @@ describe("native shell feature flag", () => {
     expect(resolveNativeShellFeatureFlag({ [NATIVE_SHELL_FEATURE_ENV]: true })).toBe(true);
     expect(resolveNativeShellFeatureFlag({ [NATIVE_SHELL_FEATURE_ENV]: "false" })).toBe(false);
     expect(resolveNativeShellFeatureFlag({ [NATIVE_SHELL_FEATURE_ENV]: false })).toBe(false);
-    expect(resolveNativeShellFeatureFlag({ VITE_FF_V2_APP_SHELL: "true" })).toBe(true);
   });
 
   it("does not implement storage, query-string, cookie or hidden overrides", async () => {
@@ -43,7 +42,6 @@ describe("native shell feature flag", () => {
     );
 
     expect(source).not.toMatch(/localStorage|sessionStorage|document\.cookie|URLSearchParams/);
-    expect(source).not.toContain("VITE_FF_V2_APP_SHELL");
   });
 });
 
@@ -65,7 +63,6 @@ describe("native shell primary rollout", () => {
     "/conversas/comunidade",
     "/",
     "/admin",
-    "/v2",
     "/api/public/runtime-config",
     "/rota-desconhecida",
   ])("does not enable %s", (pathname) => {

@@ -40,6 +40,6 @@ describe("admin trust and moderation workspaces", () => {
   it("keeps the shared presentation primitive backend-free", () => {
     const source = read("src/components/admin-shell/AdminPage.tsx");
     expect(read("src/components/admin-shell/AdminShellContent.tsx")).toContain("AdminPage");
-    expect(source).not.toMatch(/supabase|\.from\(|\.rpc\(|\.channel\(|@\/v2/);
+    expect(source).not.toMatch(/supabase|\.from\(|\.rpc\(|\.channel\(/);
   });
 });

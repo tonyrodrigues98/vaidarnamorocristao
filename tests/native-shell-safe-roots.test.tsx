@@ -61,7 +61,7 @@ describe("/comunidade safe root", () => {
     expect(communitySource).not.toContain("NativeRootPlaceholder");
   });
 
-  it("has private metadata and no backend or visual V2 dependency", () => {
+  it("has private metadata and no backend dependency", () => {
     const metadata = createPrivatePageMetadata({
       title: "Comunidade",
       description: "Teste",
@@ -70,7 +70,7 @@ describe("/comunidade safe root", () => {
 
     expect(metadata.meta).toContainEqual({ name: "robots", content: "noindex, nofollow" });
     expect(communitySource).toContain("createPrivatePageMetadata");
-    expect(communitySource).not.toMatch(/supabase|fetch\(|@\/v2\//i);
+    expect(communitySource).not.toMatch(/supabase|fetch\(/i);
   });
 });
 
@@ -110,7 +110,7 @@ describe("/explorar safe root", () => {
     expect(links).not.toContain("/pessoas");
   });
 
-  it("has private metadata and no backend or visual V2 dependency", () => {
+  it("has private metadata and no backend dependency", () => {
     const metadata = createPrivatePageMetadata({
       title: "Explorar",
       description: "Teste",
@@ -119,16 +119,16 @@ describe("/explorar safe root", () => {
 
     expect(metadata.meta).toContainEqual({ name: "robots", content: "noindex, nofollow" });
     expect(exploreSource).toContain("createPrivatePageMetadata");
-    expect(exploreSource).not.toMatch(/supabase|fetch\(|@\/v2\//i);
+    expect(exploreSource).not.toMatch(/supabase|fetch\(/i);
   });
 });
 
 describe("generated route coverage", () => {
-  it("contains the generated /explorar route and 69 total full paths", () => {
+  it("contains the generated /explorar route and 66 total full paths", () => {
     const routeTree = readFileSync("src/routeTree.gen.ts", "utf8");
     const fullPaths = [...routeTree.matchAll(/fullPath:\s*'([^']+)'/g)].map((match) => match[1]);
 
     expect(fullPaths).toContain("/explorar");
-    expect(fullPaths).toHaveLength(69);
+    expect(fullPaths).toHaveLength(66);
   });
 });

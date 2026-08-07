@@ -12,8 +12,8 @@ import type {
   PetPerkEffectCategory,
   PetSpecies,
   PetVariant,
-  UserPetV2,
-  UserPetV2Full,
+  ManagedPet,
+  ManagedPetFull,
 } from "@/types/petCatalog";
 
 const BUCKET = "pets";
@@ -280,8 +280,8 @@ export async function listBenefitsFor(opts: {
   return hydrateAll((data ?? []) as unknown as PetBenefit[]);
 }
 
-// ---------- user_pets_v2 ----------
-export async function getMyPetV2(userId: string): Promise<UserPetV2Full | null> {
+// The deployed `user_pets_v2` table name is retained for existing data.
+export async function getManagedPet(userId: string): Promise<ManagedPetFull | null> {
   const { data, error } = await supabase
     .from("user_pets_v2" as any)
     .select(
@@ -294,7 +294,7 @@ export async function getMyPetV2(userId: string): Promise<UserPetV2Full | null> 
     .maybeSingle();
   if (error) throw error;
   if (!data) return null;
-  const row = data as unknown as UserPetV2Full;
+  const row = data as unknown as ManagedPetFull;
   const hydrate = async <T extends { image_url: string | null } | null>(r: T): Promise<T> => {
     if (!r) return r;
     const rr = r as T & {
@@ -326,7 +326,7 @@ export async function getMyPetV2(userId: string): Promise<UserPetV2Full | null> 
   };
 }
 
-export async function createMyPetV2(input: {
+export async function createManagedPet(input: {
   category_id: string;
   species_id: string | null;
   variant_id: string | null;
@@ -335,11 +335,11 @@ export async function createMyPetV2(input: {
   benefit_id: string | null;
   custom_name: string;
   visibility: "public" | "private";
-}): Promise<UserPetV2> {
+}): Promise<ManagedPet> {
   const { data: u } = await supabase.auth.getUser();
   const uid = u.user?.id;
   if (!uid) throw new Error("Você precisa estar logado.");
-  // Apaga pets anteriores do usuário para manter um único pet no v2 (simplificação).
+  // Mantém um único pet gerenciado por usuário.
   await supabase
     .from("user_pets_v2" as any)
     .delete()
@@ -350,12 +350,12 @@ export async function createMyPetV2(input: {
     .select("*")
     .single();
   if (error) throw error;
-  return data as unknown as UserPetV2;
+  return data as unknown as ManagedPet;
 }
 
-export async function updateMyPetV2(
+export async function updateManagedPet(
   id: string,
-  patch: Partial<Pick<UserPetV2, "custom_name" | "visibility">>,
+  patch: Partial<Pick<ManagedPet, "custom_name" | "visibility">>,
 ): Promise<void> {
   const { error } = await supabase
     .from("user_pets_v2" as any)
@@ -388,8 +388,8 @@ export type {
   PetPerkEffect,
   PetSpecies,
   PetVariant,
-  UserPetV2,
-  UserPetV2Full,
+  ManagedPet,
+  ManagedPetFull,
 };
 
 // ---------- Perk Effects ----------

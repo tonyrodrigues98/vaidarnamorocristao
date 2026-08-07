@@ -25,10 +25,6 @@ describe("operational URL smoke", () => {
   it("checks every production contract without logging the publishable key", async () => {
     const publicKey = "public-key-must-not-be-logged";
     const baseUrl = await startServer((request, response) => {
-      if (request.url === "/v2") {
-        response.writeHead(200, { "content-type": "text/html" }).end("tombstone");
-        return;
-      }
       if (request.url === "/rota-inexistente") {
         response.writeHead(404, { "content-type": "text/html" }).end("not found");
         return;
@@ -80,24 +76,9 @@ describe("operational URL smoke", () => {
     await expect(
       runSmoke(baseUrl, {
         logger: { log: () => undefined },
-        routes: [{ path: "/v2", statuses: [302], kind: "tombstone" }],
+        routes: [{ path: "/encaminhada", statuses: [302], kind: "redirect" }],
       }),
     ).rejects.toThrow("redirect escaped the monitored origin");
-  });
-
-  it("rejects the removed V2 visual runtime marker", async () => {
-    const baseUrl = await startServer((_request, response) => {
-      response
-        .writeHead(200, { "content-type": "text/html" })
-        .end('<main data-vdn-v2="true">rejected runtime</main>');
-    });
-
-    await expect(
-      runSmoke(baseUrl, {
-        logger: { log: () => undefined },
-        routes: [{ path: "/v2", statuses: [200], kind: "tombstone" }],
-      }),
-    ).rejects.toThrow("V2 visual runtime marker was rendered");
   });
 
   it("requires HTTPS outside loopback", async () => {

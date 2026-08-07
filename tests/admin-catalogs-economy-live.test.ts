@@ -49,7 +49,7 @@ describe("admin catalogs, economy, pets and live contracts", () => {
   it("keeps the admin shell free of catalog backend access", () => {
     for (const file of ["AdminShellFrame.tsx", "AdminPage.tsx", "AdminShellContent.tsx"]) {
       expect(read(`src/components/admin-shell/${file}`)).not.toMatch(
-        /supabase|\.from\(|\.rpc\(|\.channel\(|@\/v2/,
+        /supabase|\.from\(|\.rpc\(|\.channel\(/,
       );
     }
   });

@@ -1,7 +1,7 @@
 import { createRouter, useRouter } from "@tanstack/react-router";
 import { routeTree } from "./routeTree.gen";
 import { createAppQueryClient } from "./lib/queryClient";
-import type { AppRouterContext } from "@/v2/app/router-context";
+import type { AppRouterContext } from "@/app/router-context";
 
 function DefaultErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   const router = useRouter();

@@ -63,6 +63,6 @@ describe("native storefront", () => {
     }
     expect(view).toContain("balanceKnown");
     expect(view).toContain("aria-pressed={active}");
-    expect(view).not.toMatch(/supabase|useQuery|useMutation|fetch\(|@\/v2/);
+    expect(view).not.toMatch(/supabase|useQuery|useMutation|fetch\(/);
   });
 });

@@ -10,7 +10,7 @@
  * alongside the richer client-side layer model.
  *
  * When the backend is extended (poses, expressions, pets, backgrounds,
- * saved looks v2), the same names below should map 1:1 to the new tables:
+ * saved looks), the same names below should map 1:1 to the new tables:
  *   - avatar_profiles
  *   - avatar_items (extend with layer_key, compatible_poses, ...)
  *   - user_avatar_items (== user_avatar_inventory)

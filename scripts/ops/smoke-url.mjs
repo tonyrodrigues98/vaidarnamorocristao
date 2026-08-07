@@ -6,7 +6,6 @@ export const SMOKE_ROUTES = Object.freeze([
   { path: "/manifest.webmanifest", statuses: [200], kind: "json" },
   { path: "/sw.js", statuses: [200], kind: "javascript" },
   { path: "/rota-inexistente", statuses: [404], kind: "html" },
-  { path: "/v2", statuses: [200, 301, 302, 307, 308], kind: "tombstone" },
   { path: "/api/public/runtime-config", statuses: [200], kind: "runtime-config" },
 ]);
 
@@ -54,21 +53,13 @@ async function validateResponse(baseUrl, route, response) {
     );
   }
 
-  if (route.kind === "redirect" || (route.kind === "tombstone" && response.status !== 200)) {
+  if (route.kind === "redirect") {
     const location = response.headers.get("location");
     if (!location) throw new Error("redirect response is missing Location");
     const redirectUrl = new URL(location, baseUrl);
     if (redirectUrl.origin !== baseUrl.origin) {
       throw new Error(`redirect escaped the monitored origin to ${redirectUrl.origin}`);
     }
-    return;
-  }
-
-  if (route.kind === "tombstone") {
-    assertContentType(response, "html");
-    const html = await response.text();
-    if (!html.trim()) throw new Error("V2 tombstone returned an empty page");
-    if (html.includes("data-vdn-v2")) throw new Error("V2 visual runtime marker was rendered");
     return;
   }
 

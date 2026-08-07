@@ -1,7 +1,7 @@
 import type { AdminDestination } from "@/config/admin-destinations";
 import { canRoleAccessAdminDestination } from "@/config/admin-destinations";
 import type { AppRole } from "@/lib/roles";
-import { sanitizeReturnTo } from "@/v2/app/routing/route-access";
+import { sanitizeReturnTo } from "@/app/routing/route-access";
 
 export type AdminRouteAccessStatus =
   | "initializing"

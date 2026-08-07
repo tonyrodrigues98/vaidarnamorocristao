@@ -54,15 +54,4 @@ describe("truthful public shell", () => {
     expect(post).toContain("brand.origin");
     expect(post).toContain('"@type": "Article"');
   });
-
-  it("tombstones V2 runtime with safe replace redirects and no V2 imports", () => {
-    const layout = read("src/routes/v2.tsx");
-    const index = read("src/routes/v2.index.tsx");
-    const section = read("src/routes/v2.$section.tsx");
-    expect(index).toContain('<Navigate to="/inicio" replace />');
-    for (const target of ["/inicio", "/comunidade", "/explorar", "/conversas", "/perfil"])
-      expect(section).toContain(target);
-    expect(section).toContain("replace />");
-    expect(`${layout}\n${index}\n${section}`).not.toMatch(/@\/v2|src\/v2|V2ShellRuntime/);
-  });
 });

@@ -34,7 +34,7 @@ export type AppDestination = {
   footer: boolean;
   visualViewport: boolean;
   routeTransition: boolean;
-  status: "active" | "redirect" | "api" | "legacy-v2";
+  status: "active" | "redirect" | "api";
 };
 
 export type DestinationBehavior = Omit<AppDestination, "id" | "pattern" | "match" | "priority"> & {
@@ -260,13 +260,6 @@ export const appDestinations: readonly AppDestination[] = [
     footer: false,
     routeTransition: false,
     status: "api",
-  }),
-  prefix("legacy-v2", "/v2", {
-    ...appDefaults,
-    shell: "compatibility",
-    footer: false,
-    routeTransition: false,
-    status: "legacy-v2",
   }),
   exact("compatibility-community", "/comunidade", {
     ...appDefaults,

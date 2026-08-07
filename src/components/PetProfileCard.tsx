@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ChevronRight, PawPrint, Sparkles } from "lucide-react";
 
 import { resolvePetDisplayImage } from "@/lib/petCatalog";
-import { myPetV2QueryOptions, petBenefitsQueryOptions } from "@/lib/petQueries";
+import { managedPetQueryOptions, petBenefitsQueryOptions } from "@/lib/petQueries";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -14,15 +14,15 @@ type Props = {
 };
 
 /**
- * Visual rich card showing the user's equipped pet (v2 system) with a
+ * Visual rich card showing the user's equipped pet with a
  * cutout-style image, neon glow, breed/life-stage line, personality chip,
  * and the list of active benefits resolved from the catalog.
  *
  * Renders nothing when the user has no pet (or, for public viewers, the
- * pet is private — enforced by RLS on user_pets_v2).
+ * pet is private — enforced by RLS on the managed-pet table).
  */
 export function PetProfileCard({ userId, linkToManager = false, className }: Props) {
-  const petQuery = useQuery(myPetV2QueryOptions(userId));
+  const petQuery = useQuery(managedPetQueryOptions(userId));
   const pet = petQuery.data ?? null;
   const benefitsQuery = useQuery(
     petBenefitsQueryOptions({

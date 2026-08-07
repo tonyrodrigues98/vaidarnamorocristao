@@ -1,5 +1,5 @@
-import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
-import { join, relative } from "node:path";
+import { existsSync, readFileSync } from "node:fs";
+import { join } from "node:path";
 
 const root = process.cwd();
 const read = (path) => readFileSync(join(root, path), "utf8");
@@ -9,12 +9,12 @@ const assert = (condition, message) => {
 
 const routeTree = read("src/routeTree.gen.ts");
 const routes = [...routeTree.matchAll(/fullPath: '([^']+)'/g)].map((match) => match[1]);
-assert(routes.length === 69, `expected 69 generated routes, received ${routes.length}`);
+assert(routes.length === 66, `expected 66 generated routes, received ${routes.length}`);
 
 const surfaceCoverage = read("src/config/surface-shell-classification.ts");
 for (const route of routes) {
   const normalized = route.replace(/\/$/, "") || "/";
-  const classifiedByPrefix = ["/admin", "/api/", "/auth/", "/onboarding", "/v2"].some(
+  const classifiedByPrefix = ["/admin", "/api/", "/auth/", "/onboarding"].some(
     (prefix) => normalized === prefix || normalized.startsWith(prefix),
   );
   assert(
@@ -64,45 +64,5 @@ assert(
 );
 assert(serviceWorker.includes("isSensitivePath"), "private path cache guard missing");
 assert(serviceWorker.includes("isSafeStaticRequest"), "static-only cache guard missing");
-
-for (const route of [
-  "src/routes/v2.tsx",
-  "src/routes/v2.index.tsx",
-  "src/routes/v2.$section.tsx",
-]) {
-  const source = read(route);
-  assert(!source.includes("V2Runtime"), `${route} mounts rejected V2 runtime`);
-  const isLayoutOnly = route === "src/routes/v2.tsx" && source.includes("<Outlet />");
-  assert(
-    isLayoutOnly || source.includes("Navigate") || source.includes("redirect"),
-    `${route} is not a tombstone`,
-  );
-}
-
-const allowedFunctionalV2Imports = new Set([
-  "src/config/admin-route-access.ts",
-  "src/lib/auth.tsx",
-  "src/router.tsx",
-  "src/routes/__root.tsx",
-  "src/routes/inicio.tsx",
-]);
-
-function walk(directory) {
-  return readdirSync(directory).flatMap((name) => {
-    const path = join(directory, name);
-    return statSync(path).isDirectory() ? walk(path) : [path];
-  });
-}
-
-const visualV2Import = /@\/v2\/(?:app-shell|design-system|integration)/;
-for (const file of walk(join(root, "src"))) {
-  const path = relative(root, file).replaceAll("\\", "/");
-  if (path.startsWith("src/v2/") || !/\.[cm]?[jt]sx?$/.test(path)) continue;
-  const source = readFileSync(file, "utf8");
-  assert(!visualV2Import.test(source), `rejected visual V2 import outside V2: ${path}`);
-  if (source.includes("@/v2/")) {
-    assert(allowedFunctionalV2Imports.has(path), `unreviewed functional V2 import: ${path}`);
-  }
-}
 
 console.log(`Native shell qualification passed: ${routes.length} routes, PWA and residue guards.`);

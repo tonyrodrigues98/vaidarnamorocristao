@@ -20,7 +20,7 @@ describe("native pet sanctuary", () => {
 
   it("keeps one pet query and one Showcase shared by both presentations", () => {
     const route = readFileSync("src/routes/meu-pet.tsx", "utf8");
-    expect(route.match(/myPetV2QueryOptions\(user\?\.id\)/g)).toHaveLength(1);
+    expect(route.match(/managedPetQueryOptions\(user\?\.id\)/g)).toHaveLength(1);
     expect(route.match(/<Showcase/g)).toHaveLength(1);
     expect(route).toContain("const petContent =");
     expect(route).toContain("nativeShellActive");
@@ -50,6 +50,6 @@ describe("native pet sanctuary", () => {
       expect(route).toContain(contract);
     }
     const root = readFileSync("src/components/pet/native/NativePetRoot.tsx", "utf8");
-    expect(root).not.toMatch(/supabase|useQuery|useMutation|setInterval|setTimeout|@\/v2/);
+    expect(root).not.toMatch(/supabase|useQuery|useMutation|setInterval|setTimeout/);
   });
 });

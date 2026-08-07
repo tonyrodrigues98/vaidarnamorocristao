@@ -67,12 +67,12 @@ describe("native pet arcade", () => {
 
   it("keeps the route as the single data and game-state owner", () => {
     const route = readFileSync("src/routes/pet-arcade.tsx", "utf8");
-    expect(route.match(/myPetV2QueryOptions\(user\?\.id\)/g)).toHaveLength(1);
+    expect(route.match(/managedPetQueryOptions\(user\?\.id\)/g)).toHaveLength(1);
     for (const key of [
       '["pet-arcade", "legacy-config"]',
       '["pet-arcade", "catalog"]',
       '["coins", "mine"]',
-      '["pet-arcade", "history-v2"]',
+      '["pet-arcade", "recent-history"]',
       '["pet-arcade", "usage-today"]',
       '["pet-arcade", "history"]',
       '["pet-arcade", "active"]',
@@ -83,6 +83,6 @@ describe("native pet arcade", () => {
     expect(route).toContain("data-vdn-native-arcade-playing");
 
     const header = readFileSync("src/components/pet/arcade/native/NativeArcadeHeader.tsx", "utf8");
-    expect(header).not.toMatch(/supabase|useQuery|useMutation|fetch\(|@\/v2/);
+    expect(header).not.toMatch(/supabase|useQuery|useMutation|fetch\(/);
   });
 });

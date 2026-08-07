@@ -22,7 +22,7 @@ describe("NativeShellRuntimeContext", () => {
     expect(markup).not.toContain("data-active-tab");
   });
 
-  it("provides the active primary tab without effects, auth, router, backend or V2", async () => {
+  it("provides the active primary tab without effects, auth, router or backend", async () => {
     const markup = renderToStaticMarkup(
       <NativeShellRuntimeProvider active activeTab="community">
         <RuntimeProbe />
@@ -35,7 +35,7 @@ describe("NativeShellRuntimeContext", () => {
     expect(markup).toContain('data-active="true"');
     expect(markup).toContain('data-active-tab="community"');
     expect(source).not.toMatch(
-      /useEffect|useLayoutEffect|useLocation|useAuth|supabase|feature.flag|Header|@\/v2/i,
+      /useEffect|useLayoutEffect|useLocation|useAuth|supabase|feature.flag|Header/i,
     );
   });
 });

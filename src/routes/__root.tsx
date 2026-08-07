@@ -8,8 +8,8 @@ import {
   useRouterState,
 } from "@tanstack/react-router";
 import { QueryClientProvider } from "@tanstack/react-query";
-import type { AppRouterContext } from "@/v2/app/router-context";
-import { appBuildInfo } from "@/v2/app/build-info";
+import type { AppRouterContext } from "@/app/router-context";
+import { appBuildInfo } from "@/app/build-info";
 import { AuthProvider, useAuth } from "@/lib/auth";
 import { Toaster } from "@/components/ui/sonner";
 import { NotificationsBridge } from "@/lib/useRealtimeNotifications";
@@ -23,8 +23,8 @@ import { NetworkStatusBanner } from "@/components/mobile/NetworkStatusBanner";
 import { InstallPromptBanner } from "@/components/InstallPromptBanner";
 import { MobileRouteTransition } from "@/components/mobile/MobileRouteTransition";
 import { isChatRoute, shouldShowFooter } from "@/lib/layoutVisibility";
-import { RouteProtectionBoundary } from "@/v2/app/routing/RouteProtectionBoundary";
-import { shouldMountPrivateProviders } from "@/v2/app/routing/route-access";
+import { RouteProtectionBoundary } from "@/app/routing/RouteProtectionBoundary";
+import { shouldMountPrivateProviders } from "@/app/routing/route-access";
 import {
   configureSupabaseRuntime,
   hasSupabaseRuntimeConfig,
@@ -275,7 +275,7 @@ function RootComponent() {
         ) : (
           <SupabaseRuntimeBoundary>
             <AuthProvider>
-              <V2AwareRouteBoundary>
+              <RouteAwareBoundary>
                 <AuthenticatedProviderBoundary>
                   <AdminRouteAccessBoundary>
                     <AdminShellRuntimeBoundary>
@@ -325,7 +325,7 @@ function RootComponent() {
                     </AdminShellRuntimeBoundary>
                   </AdminRouteAccessBoundary>
                 </AuthenticatedProviderBoundary>
-              </V2AwareRouteBoundary>
+              </RouteAwareBoundary>
               <Toaster richColors position="top-right" />
             </AuthProvider>
           </SupabaseRuntimeBoundary>
@@ -405,7 +405,7 @@ function SupabaseRuntimeBoundary({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-function V2AwareRouteBoundary({ children }: { children: React.ReactNode }) {
+function RouteAwareBoundary({ children }: { children: React.ReactNode }) {
   return (
     <RouteProtectionBoundary>
       <NetworkStatusBanner />

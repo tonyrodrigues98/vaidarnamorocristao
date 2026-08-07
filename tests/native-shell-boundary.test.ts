@@ -50,7 +50,6 @@ describe("NativeShellRuntimeBoundary decision", () => {
     "/conversas/comunidade",
     "/admin",
     "/",
-    "/v2",
     "/api/public/runtime-config",
     "/rota-inexistente",
   ])("keeps the legacy path for %s", (pathname) => {
@@ -128,7 +127,7 @@ describe("root integration contract", () => {
     "ThemeProvider",
     "SupabaseRuntimeBoundary",
     "AuthProvider",
-    "V2AwareRouteBoundary",
+    "RouteAwareBoundary",
     "AuthenticatedProviderBoundary",
     "PresenceProvider",
     "NotificationsBridge",
@@ -141,7 +140,7 @@ describe("root integration contract", () => {
     expect(root).toContain(contract);
   });
 
-  it("does not introduce a visual V2 shell import", () => {
-    expect(root).not.toMatch(/@\/v2\/app-shell|V2AppShell/);
+  it("does not introduce a retired shell import", () => {
+    expect(root).not.toMatch(/@\/app-shell|AppShellRuntime/);
   });
 });

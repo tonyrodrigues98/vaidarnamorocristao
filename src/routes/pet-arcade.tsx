@@ -45,7 +45,7 @@ import { CoinFlipGame, DiceGame } from "@/components/pet/arcade/QuickArcadeGames
 import { PetRaceGame } from "@/components/pet/arcade/PetRaceGame";
 import { MemoryGame } from "@/components/pet/arcade/MemoryGame";
 import { PiggyBankGame } from "@/components/pet/arcade/PiggyBankGame";
-import { ArcadeHistoryV2 } from "@/components/pet/arcade/ArcadeHistoryV2";
+import { RecentArcadeHistory } from "@/components/pet/arcade/RecentArcadeHistory";
 import {
   CapsuleGame,
   DailyMissionsGame,
@@ -57,13 +57,13 @@ import { useAuth } from "@/lib/auth";
 import { getMyCoins } from "@/lib/coins";
 import { deriveCurrentValue, getCareConfig, listCareState } from "@/lib/petCare";
 import { resolvePetDisplayImage } from "@/lib/petCatalog";
-import { myPetV2QueryOptions } from "@/lib/petQueries";
+import { managedPetQueryOptions } from "@/lib/petQueries";
 import {
   getActivePetArcadeRounds,
   getPetArcadeCatalog,
   getPetArcadeConfig,
   getPetArcadeHistory,
-  getPetArcadeHistoryV2,
+  getRecentPetArcadeHistory,
   getPetArcadeUsageToday,
   type ArcadeCategory,
   type ArcadeGameConfig,
@@ -291,7 +291,7 @@ function PetArcadePage() {
   const [filter, setFilter] = useState<"all" | ArcadeCategory>("all");
   const [balance, setBalance] = useState(0);
 
-  const petQuery = useQuery(myPetV2QueryOptions(user?.id));
+  const petQuery = useQuery(managedPetQueryOptions(user?.id));
   const legacyConfigQuery = useQuery({
     queryKey: ["pet-arcade", "legacy-config"],
     queryFn: getPetArcadeConfig,
@@ -310,8 +310,8 @@ function PetArcadePage() {
     enabled: !!user,
   });
   const historyQuery = useQuery({
-    queryKey: ["pet-arcade", "history-v2"],
-    queryFn: () => getPetArcadeHistoryV2(30),
+    queryKey: ["pet-arcade", "recent-history"],
+    queryFn: () => getRecentPetArcadeHistory(30),
     enabled: !!user,
   });
   const usageQuery = useQuery({
@@ -618,7 +618,7 @@ function PetArcadePage() {
                   </div>
                 </div>
               </div>
-              <ArcadeHistoryV2 items={history} />
+              <RecentArcadeHistory items={history} />
             </div>
           </div>
         )}

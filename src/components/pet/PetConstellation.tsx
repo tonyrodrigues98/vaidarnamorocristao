@@ -18,7 +18,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { ArrowDownLeft } from "lucide-react";
 import skyAsset from "@/assets/pet-kingdom/constellation-sky.png.asset.json";
 import type { PetCareKind } from "@/types/petCare";
-import type { UserPetV2Full } from "@/types/petCatalog";
+import type { ManagedPetFull } from "@/types/petCatalog";
 import { loadDiaryLog } from "@/lib/petDiary";
 
 import { PetEvolutionCard } from "./PetEvolutionCard";
@@ -82,7 +82,7 @@ const LINES: [StarId, StarId][] = [
 ];
 
 type Props = {
-  pet: UserPetV2Full;
+  pet: ManagedPetFull;
   careValues: Partial<Record<PetCareKind, number>>;
   isAway: boolean;
   xpRefresh: number;

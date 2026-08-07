@@ -64,9 +64,9 @@ describe("native primary navigation configuration", () => {
     }
   });
 
-  it("has no data, portal, profile fetch, Supabase or V2 dependency", () => {
+  it("has no data, portal, profile fetch or Supabase dependency", () => {
     const source = readFileSync("src/components/native-shell/NativeBottomNavigation.tsx", "utf8");
-    expect(source).not.toMatch(/supabase|createPortal|avatar|badge|useQuery|@\/v2/i);
+    expect(source).not.toMatch(/supabase|createPortal|avatar|badge|useQuery/i);
     expect(source).not.toMatch(/from\s+["'][^"']*(profile|perfil)[^"']*["']/i);
   });
 
@@ -86,7 +86,7 @@ describe("native primary navigation configuration", () => {
     }
   });
 
-  it("shares one selection hook without backend, avatar, badge, portal or V2 imports", () => {
+  it("shares one selection hook without backend, avatar, badge or portal imports", () => {
     const bottom = readFileSync("src/components/native-shell/NativeBottomNavigation.tsx", "utf8");
     const adaptive = readFileSync(
       "src/components/native-shell/NativeAdaptiveNavigation.tsx",
@@ -102,9 +102,7 @@ describe("native primary navigation configuration", () => {
     expect(bottom).not.toContain("window.scrollTo");
     expect(adaptive).not.toContain("window.scrollTo");
     expect(selection.match(/window\.scrollTo/g)).toHaveLength(1);
-    expect(`${adaptive}\n${selection}`).not.toMatch(
-      /supabase|createPortal|avatar|badge|useQuery|@\/v2/i,
-    );
+    expect(`${adaptive}\n${selection}`).not.toMatch(/supabase|createPortal|avatar|badge|useQuery/i);
   });
 });
 

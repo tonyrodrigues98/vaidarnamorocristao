@@ -6,8 +6,7 @@ export type SurfaceShellClassification =
   | "Onboarding Shell"
   | "Document Shell"
   | "Public Shell"
-  | "API/server"
-  | "V2 tombstone redirect";
+  | "API/server";
 
 const publicPaths = new Set([
   "/",
@@ -55,7 +54,6 @@ const nativeAppPaths = new Set([
 
 export function classifySurfaceShell(pathname: string): SurfaceShellClassification | undefined {
   if (pathname.startsWith("/api/")) return "API/server";
-  if (pathname === "/v2" || pathname.startsWith("/v2/")) return "V2 tombstone redirect";
   if (pathname === "/admin/" || pathname.startsWith("/admin/")) return "Admin Shell";
   if (pathname.startsWith("/auth/")) return "Auth Shell";
   if (pathname === "/onboarding/" || pathname.startsWith("/onboarding/")) {

@@ -75,7 +75,7 @@ export type PetPerkEffect = {
   updated_at: string;
 };
 
-export type UserPetV2 = {
+export type ManagedPet = {
   id: string;
   user_id: string;
   category_id: string;
@@ -91,7 +91,7 @@ export type UserPetV2 = {
   updated_at: string;
 };
 
-export type UserPetV2Full = UserPetV2 & {
+export type ManagedPetFull = ManagedPet & {
   category: PetCategory | null;
   species: PetSpecies | null;
   variant: PetVariant | null;

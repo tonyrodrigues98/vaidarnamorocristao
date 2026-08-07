@@ -30,15 +30,9 @@ describe("native shell release qualification", () => {
     );
   });
 
-  it("keeps public, auth, onboarding, API and V2 surfaces isolated", () => {
+  it("keeps public, auth, onboarding and API surfaces isolated", () => {
     const coverage = read("src/config/surface-shell-classification.ts");
-    for (const shell of [
-      "Public Shell",
-      "Auth Shell",
-      "Onboarding Shell",
-      "API/server",
-      "V2 tombstone redirect",
-    ]) {
+    for (const shell of ["Public Shell", "Auth Shell", "Onboarding Shell", "API/server"]) {
       expect(coverage).toContain(shell);
     }
   });

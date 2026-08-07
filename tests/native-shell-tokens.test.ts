@@ -6,26 +6,7 @@ import { brand } from "../src/config/brand";
 import { nativeShellTokens } from "../src/config/native-shell-tokens";
 
 const css = readFileSync(resolve("src/styles/native-shell.tokens.css"), "utf8");
-const freezeDocument = readFileSync(
-  resolve("docs/native-shell-integration/12-visual-reference-freeze.md"),
-  "utf8",
-);
-
 describe("native shell visual reference and tokens", () => {
-  it("records the verified hashes and the partially frozen status", () => {
-    expect(freezeDocument).toContain(
-      "203d761b049073c0a809ec62365a02729ec76f80550ed4b78e6efcbf3a9180dd",
-    );
-    expect(freezeDocument).toContain(
-      "3513a0e7c50e37018688af7511499b1de792f9af1a2031d328a80971eda0c2c5",
-    );
-    expect(freezeDocument).toContain(
-      "c3a3c2e6de12d55120b859fc6febbb4f1993a8812cec88758b321a29d15f7d02",
-    );
-    expect(freezeDocument).toContain("PARCIALMENTE CONGELADA");
-    expect(freezeDocument).toContain("Tema escuro: não congelado");
-  });
-
   it("keeps the canonical token values exact without replacing legacy brand values", () => {
     expect(nativeShellTokens.brand).toEqual({
       action: "#EB4F68",

@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/sheet";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import type { PetCareKind } from "@/types/petCare";
-import type { UserPetV2Full } from "@/types/petCatalog";
+import type { ManagedPetFull } from "@/types/petCatalog";
 
 import { MapBackground } from "./MapBackground";
 import { MapClouds } from "./MapClouds";
@@ -21,7 +21,7 @@ import { PetCaixasEntryCard } from "./grab/PetCaixasEntryCard";
 type SheetKind = null | "expeditions" | "caixas" | "weekly";
 
 type Props = {
-  pet: UserPetV2Full;
+  pet: ManagedPetFull;
   petImage: string | null;
   careValues: Partial<Record<PetCareKind, number>>;
   isAway: boolean;

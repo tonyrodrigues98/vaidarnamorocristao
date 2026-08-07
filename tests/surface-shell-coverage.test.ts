@@ -8,9 +8,9 @@ function generatedFullPaths(): string[] {
 }
 
 describe("generated route surface coverage", () => {
-  it("classifies all 69 generated routes", () => {
+  it("classifies all 66 generated routes", () => {
     const paths = generatedFullPaths();
-    expect(paths).toHaveLength(69);
+    expect(paths).toHaveLength(66);
     expect(paths.filter((path) => !classifySurfaceShell(path))).toEqual([]);
   });
 
@@ -20,7 +20,6 @@ describe("generated route surface coverage", () => {
     expect(classifySurfaceShell("/auth/login")).toBe("Auth Shell");
     expect(classifySurfaceShell("/onboarding/etapa-1")).toBe("Onboarding Shell");
     expect(classifySurfaceShell("/api/photo-repair")).toBe("API/server");
-    expect(classifySurfaceShell("/v2/$section")).toBe("V2 tombstone redirect");
   });
 
   it("does not give public pages private navigation", () => {

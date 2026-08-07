@@ -44,7 +44,7 @@ describe("role-aware admin shell registry", () => {
     expect(canRoleAccessAdminDestination("admin", avatar)).toBe(false);
   });
 
-  it("keeps shell components free from backend and V2 visual imports", () => {
+  it("keeps shell components free from backend imports", () => {
     for (const file of [
       "AdminShellRuntimeContext.tsx",
       "AdminShellRuntimeBoundary.tsx",
@@ -55,7 +55,7 @@ describe("role-aware admin shell registry", () => {
       "AdminShellContent.tsx",
     ]) {
       const source = readFileSync(`src/components/admin-shell/${file}`, "utf8");
-      expect(source).not.toMatch(/supabase|\.from\(|\.rpc\(|\.channel\(|@\/v2/);
+      expect(source).not.toMatch(/supabase|\.from\(|\.rpc\(|\.channel\(/);
     }
   });
 

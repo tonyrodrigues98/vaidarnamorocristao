@@ -29,7 +29,7 @@ export default defineConfig({
   vite: {
     define: {
       __VDN_BUILD_COMMIT__: JSON.stringify(resolveBuildCommit()),
-      __VDN_BUILD_CHANNEL__: JSON.stringify("community-platform-v2"),
+      __VDN_BUILD_CHANNEL__: JSON.stringify("community-platform"),
     },
   },
 });

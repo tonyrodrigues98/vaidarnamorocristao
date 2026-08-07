@@ -22,15 +22,15 @@ import { useNativeShellRuntime } from "@/components/native-shell/NativeShellRunt
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
-  createMyPetV2,
+  createManagedPet,
   listActive,
   resolvePetDisplayImage,
   listSpeciesByCategory,
   listVariantsFor,
-  updateMyPetV2,
+  updateManagedPet,
 } from "@/lib/petCatalog";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { myPetV2QueryOptions, petKeys } from "@/lib/petQueries";
+import { managedPetQueryOptions, petKeys } from "@/lib/petQueries";
 import type {
   PetCategory,
   PetLifeStage,
@@ -38,7 +38,7 @@ import type {
   PetPersonality,
   PetSpecies,
   PetVariant,
-  UserPetV2Full,
+  ManagedPetFull,
 } from "@/types/petCatalog";
 import { cn } from "@/lib/utils";
 import {
@@ -194,7 +194,7 @@ function MeuPetPage() {
   const { user, loading } = useAuth();
   const queryClient = useQueryClient();
   const { active: nativeShellActive } = useNativeShellRuntime();
-  const petQuery = useQuery(myPetV2QueryOptions(user?.id));
+  const petQuery = useQuery(managedPetQueryOptions(user?.id));
   const existing = petQuery.data ?? null;
   const [wizardOverride, setWizardOverride] = useState<boolean | null>(null);
   const wizard = wizardOverride ?? (petQuery.isSuccess && !existing);
@@ -204,7 +204,7 @@ function MeuPetPage() {
   const reload = () => {
     if (!user) return;
     setWizardOverride(null);
-    void queryClient.invalidateQueries({ queryKey: petKeys.myV2(user.id) });
+    void queryClient.invalidateQueries({ queryKey: petKeys.managed(user.id) });
   };
 
   useEffect(() => {
@@ -254,7 +254,7 @@ function Showcase({
   onChange,
   onUpdated,
 }: {
-  pet: UserPetV2Full;
+  pet: ManagedPetFull;
   onChange: () => void;
   onUpdated: () => void;
 }) {
@@ -434,7 +434,7 @@ function Showcase({
 
   async function saveName() {
     try {
-      await updateMyPetV2(pet.id, { custom_name: name.trim().slice(0, 30) || pet.custom_name });
+      await updateManagedPet(pet.id, { custom_name: name.trim().slice(0, 30) || pet.custom_name });
       toast.success("Nome atualizado");
       setRenaming(false);
       onUpdated();
@@ -446,7 +446,7 @@ function Showcase({
   async function toggleVisibility() {
     const next = pet.visibility === "public" ? "private" : "public";
     try {
-      await updateMyPetV2(pet.id, { visibility: next });
+      await updateManagedPet(pet.id, { visibility: next });
       toast.success(next === "public" ? "Pet visível no perfil" : "Pet apenas para você");
       onUpdated();
     } catch (e) {
@@ -983,7 +983,7 @@ function Wizard({ onCancel, onDone }: { onCancel?: () => void; onDone: () => voi
     }
     setBusy(true);
     try {
-      await createMyPetV2({
+      await createManagedPet({
         category_id: sel.category.id,
         species_id: sel.species?.id ?? null,
         variant_id: sel.variant?.id ?? null,

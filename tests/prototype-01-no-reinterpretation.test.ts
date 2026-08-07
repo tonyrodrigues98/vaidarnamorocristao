@@ -22,7 +22,6 @@ const rejectedVisualImports = [
   "@/components/redesign-zero/",
   "@/components/layout/Header",
   "@/components/mobile/MobileAppHeader",
-  "@/v2/",
 ] as const;
 
 describe("Prototype 01 canonical presentation boundary", () => {

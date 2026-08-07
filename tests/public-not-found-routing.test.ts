@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 import { isGlobalRouterNotFound } from "../src/config/router-not-found";
-import { classifyRoute } from "../src/v2/app/routing/route-access";
+import { classifyRoute } from "../src/app/routing/route-access";
 
 describe("public global not-found handling", () => {
   it("distinguishes a genuinely unmatched URL from valid route matches", () => {
@@ -16,7 +16,7 @@ describe("public global not-found handling", () => {
     expect(classifyRoute("/conversas/desconhecido")).toBe("authenticated");
     expect(classifyRoute("/pretendentes/desconhecido")).toBe("authenticated");
     expect(classifyRoute("/blog/desconhecido")).toBe("public");
-    expect(classifyRoute("/v2/desconhecido")).toBe("authenticated");
+    expect(classifyRoute("/area-privada-desconhecida")).toBe("authenticated");
     expect(classifyRoute("/api/desconhecido")).toBe("server-endpoint");
   });
 

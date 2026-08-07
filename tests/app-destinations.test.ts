@@ -33,7 +33,6 @@ const expectedBehavior = {
   "/auth/login": ["public", false, "global", false, false, true, "active"],
   "/onboarding": ["app", false, "global", false, false, true, "active"],
   "/comunidade": ["compatibility", false, "global", true, false, true, "redirect"],
-  "/v2": ["compatibility", false, "global", false, false, false, "legacy-v2"],
   "/api/public/runtime-config": ["api", false, "hidden", false, false, false, "api"],
   "/rota-inexistente": ["public", false, "global", false, false, true, "active"],
 } as const;
@@ -67,7 +66,6 @@ describe("app destination registry", () => {
     expect(matchDestination("/conversas/comunidade").id).toBe("app-community-chat");
     expect(matchDestination("/admin/pets").id).toBe("admin");
     expect(matchDestination("/api/public/runtime-config").id).toBe("api");
-    expect(matchDestination("/v2/inicio").id).toBe("legacy-v2");
     expect(matchDestination("/comunidade").id).toBe("compatibility-community");
     expect(matchDestination("/sem-registro")).toBe(unknownDestination);
   });
@@ -79,10 +77,10 @@ describe("app destination registry", () => {
     },
   );
 
-  it("classifies all 69 generated routes without fallback", () => {
+  it("classifies all 66 generated routes without fallback", () => {
     const routeTree = readFileSync("src/routeTree.gen.ts", "utf8");
     const fullPaths = [...routeTree.matchAll(/fullPath:\s*'([^']+)'/g)].map((match) => match[1]!);
-    expect(fullPaths).toHaveLength(69);
+    expect(fullPaths).toHaveLength(66);
 
     const unclassified = fullPaths
       .map(representativePath)

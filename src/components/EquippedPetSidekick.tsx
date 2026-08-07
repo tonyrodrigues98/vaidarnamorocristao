@@ -2,7 +2,7 @@ import { Heart } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 
 import { resolvePetDisplayImage } from "@/lib/petCatalog";
-import { myPetV2QueryOptions } from "@/lib/petQueries";
+import { managedPetQueryOptions } from "@/lib/petQueries";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -26,7 +26,7 @@ export function EquippedPetSidekick({
   showHeartBubble = true,
   className,
 }: Props) {
-  const { data: pet } = useQuery(myPetV2QueryOptions(userId));
+  const { data: pet } = useQuery(managedPetQueryOptions(userId));
 
   const stageKind = pet?.life_stage?.kind ?? null;
   const image =

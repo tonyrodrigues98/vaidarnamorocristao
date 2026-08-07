@@ -19,7 +19,7 @@ import {
 import { cn } from "@/lib/utils";
 import { usePetDayNight } from "@/lib/petDayNight";
 import type { PetCareKind } from "@/types/petCare";
-import type { UserPetV2Full } from "@/types/petCatalog";
+import type { ManagedPetFull } from "@/types/petCatalog";
 
 import { RoomHotspot } from "./RoomHotspot";
 import { StatsHUD } from "./StatsHUD";
@@ -39,7 +39,7 @@ type SceneryHook = ReturnType<typeof usePetScenery>;
 type SheetKind = null | "missions" | "streak" | "scenery";
 
 type Props = {
-  pet: UserPetV2Full;
+  pet: ManagedPetFull;
   petImage: string | null;
   careValues: Partial<Record<PetCareKind, number>>;
   isAway: boolean;

@@ -53,7 +53,7 @@ describe("native optional dating mode", () => {
     );
     expect(component).toContain('aria-current={selected ? "page" : undefined}');
     expect(component).toContain("min-h-11");
-    expect(component).not.toMatch(/supabase|useQuery|useMutation|fetch\(|badge|@\/v2/);
+    expect(component).not.toMatch(/supabase|useQuery|useMutation|fetch\(|badge/);
   });
 
   it("mounts the local navigation without adding a second data layer", () => {

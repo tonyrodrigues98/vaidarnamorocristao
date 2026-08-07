@@ -1,6 +1,6 @@
 import { queryOptions, type QueryClient } from "@tanstack/react-query";
 
-import { getMyPetV2, listBenefitsFor } from "@/lib/petCatalog";
+import { getManagedPet, listBenefitsFor } from "@/lib/petCatalog";
 import {
   getEquippedBackground,
   listCompatibleBackgroundsForPet,
@@ -19,7 +19,7 @@ import { getMyXpState } from "@/lib/xp";
  */
 export const petKeys = {
   all: ["pet"] as const,
-  myV2: (userId: string | null | undefined) => ["pet", "my-v2", userId ?? null] as const,
+  managed: (userId: string | null | undefined) => ["pet", "managed", userId ?? null] as const,
   benefits: (categoryId: string | null, speciesId: string | null, variantId: string | null) =>
     ["pet", "benefits", categoryId, speciesId, variantId] as const,
   equippedV1: (userId: string | null | undefined) =>
@@ -34,13 +34,13 @@ export const petKeys = {
 const PET_STALE_LONG = 5 * 60_000;
 const PET_STALE_MED = 2 * 60_000;
 
-export const myPetV2QueryOptions = (userId: string | null | undefined) =>
+export const managedPetQueryOptions = (userId: string | null | undefined) =>
   queryOptions({
-    queryKey: petKeys.myV2(userId),
+    queryKey: petKeys.managed(userId),
     enabled: !!userId,
     staleTime: PET_STALE_LONG,
     gcTime: 30 * 60_000,
-    queryFn: () => getMyPetV2(userId!),
+    queryFn: () => getManagedPet(userId!),
   });
 
 export const petBenefitsQueryOptions = (opts: {
@@ -122,7 +122,7 @@ export async function prefetchPetEssentials(
 ): Promise<void> {
   if (!userId) return;
   // 1. Garante o pet do usuário em cache.
-  const pet = await qc.ensureQueryData(myPetV2QueryOptions(userId));
+  const pet = await qc.ensureQueryData(managedPetQueryOptions(userId));
   if (!pet?.category) return;
   // 2. Benefícios + cenário compatível em paralelo (não bloqueia o caller).
   void qc.prefetchQuery(

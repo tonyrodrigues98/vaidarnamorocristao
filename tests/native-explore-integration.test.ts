@@ -125,7 +125,7 @@ describe("T46-13 native explore integration", () => {
     expect(cardSource).toContain("recordNativeExploreRecent");
     expect(cardSource).toContain("<Link");
     expect(routeSource + cardSource + continueSource).not.toMatch(
-      /supabase|\.from\(|\.rpc\(|\.channel\(|fetch\(|@\/v2|src\/v2|https?:\/\/|mock/i,
+      /supabase|\.from\(|\.rpc\(|\.channel\(|fetch\(|https?:\/\/|mock/i,
     );
   });
 

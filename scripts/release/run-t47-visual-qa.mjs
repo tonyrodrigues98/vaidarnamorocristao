@@ -369,8 +369,6 @@ const publicRoutes = [
   "/auth/signup",
   "/auth/forgot-password",
   "/rota-inexistente",
-  "/v2",
-  "/v2/home",
 ];
 const nativeRoutes = [
   "/inicio",

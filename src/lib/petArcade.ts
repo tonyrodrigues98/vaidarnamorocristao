@@ -188,7 +188,7 @@ export type ArcadeGameResult = ArcadeVerification & {
   [key: string]: unknown;
 };
 
-export type ArcadeHistoryV2Item = {
+export type RecentArcadeHistoryItem = {
   id: string;
   game_type: ArcadeGameType;
   status: ArcadeRoundStatus;
@@ -279,8 +279,8 @@ export function getPetArcadeCatalog() {
   return callRpc<ArcadeCatalog>("get_pet_arcade_catalog");
 }
 
-export function getPetArcadeHistoryV2(limit = 30) {
-  return callRpc<ArcadeHistoryV2Item[]>("get_pet_arcade_history_v2", { _limit: limit });
+export function getRecentPetArcadeHistory(limit = 30) {
+  return callRpc<RecentArcadeHistoryItem[]>("get_pet_arcade_history_v2", { _limit: limit });
 }
 
 export function getPetArcadeHistory(limit = 20) {

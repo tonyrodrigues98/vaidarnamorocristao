@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
-import { AuthenticatedRouteGate } from "@/v2/app/AuthenticatedRouteGate";
+import { AuthenticatedRouteGate } from "@/app/AuthenticatedRouteGate";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";

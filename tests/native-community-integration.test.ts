@@ -51,9 +51,9 @@ describe("T46-12 native community integration", () => {
     expect(routeSource).not.toMatch(/cinema|endereço|ingresso|presença|mapa/i);
   });
 
-  it("adds no backend, fetch, mocks, V2, or placeholder dependency", () => {
+  it("adds no backend, fetch, mocks or placeholder dependency", () => {
     expect(routeSource + componentsSource).not.toMatch(
-      /supabase|\.from\(|\.rpc\(|\.channel\(|fetch\(|NativeRootPlaceholder|src\/v2|@\/v2|mock/i,
+      /supabase|\.from\(|\.rpc\(|\.channel\(|fetch\(|NativeRootPlaceholder|mock/i,
     );
   });
 

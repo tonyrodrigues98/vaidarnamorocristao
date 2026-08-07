@@ -18,7 +18,7 @@ import {
   type AuthSessionSnapshot,
   type AuthSessionStatus,
   type SanitizedAuthError,
-} from "@/v2/app/auth/session-state";
+} from "@/app/auth/session-state";
 import { isolatePrivateQueryCache } from "@/lib/privateSessionCache";
 
 type ProfileStatus = "pending" | "approved" | "rejected" | "banned" | null;

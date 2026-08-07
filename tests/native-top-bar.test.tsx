@@ -72,13 +72,13 @@ describe("NativeTopBar", () => {
     theme.resolvedTheme = "light";
   });
 
-  it("has no fake search, counters, backend, fetch, portal or V2 dependency", async () => {
+  it("has no fake search, counters, backend, fetch or portal dependency", async () => {
     const source = await import("node:fs/promises").then(({ readFile }) =>
       readFile("src/components/native-shell/NativeTopBar.tsx", "utf8"),
     );
 
     expect(source).not.toMatch(
-      /search|badge|counter|supabase|fetch\(|createPortal|@\/v2|useNotifications|profiles/i,
+      /search|badge|counter|supabase|fetch\(|createPortal|useNotifications|profiles/i,
     );
   });
 });
