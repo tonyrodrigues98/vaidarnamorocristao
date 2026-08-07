@@ -9,7 +9,7 @@ export const brand = {
     action: "#ff4f68",
     actionStrong: "#e6415b",
     actionSoft: "#fff0f3",
-    canvasLight: "#fff7f8",
+    canvasLight: "#fafafa",
     canvasDark: "#0b0b0d",
   },
   positioning: {
@@ -18,10 +18,10 @@ export const brand = {
     live: "Uma comunidade real, feita de pessoas reais.",
   },
   assets: {
-    favicon: "/favicon.ico",
-    appleTouchIcon: "/apple-touch-icon.png",
-    icon192: "/icon-192.png",
-    icon512: "/icon-512.png",
+    favicon: "/brand/orha-mark-ink.png",
+    appleTouchIcon: "/brand/orha-mark-ink.png",
+    icon192: "/brand/orha-mark-ink.png",
+    icon512: "/brand/orha-mark-ink.png",
     socialImage: "/og-image.jpg",
     manifest: "/manifest.webmanifest",
   },
