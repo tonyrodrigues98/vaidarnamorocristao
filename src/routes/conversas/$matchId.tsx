@@ -1,0 +1,1078 @@
+import { friendlyError } from "@/lib/errors";
+import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
+import { RequireApproved } from "@/components/RequireApproved";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useInfiniteQuery, useQueryClient, type InfiniteData } from "@tanstack/react-query";
+import { getActiveCommitmentByUser, type RelationshipCommitment } from "@/lib/commitments";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/lib/auth";
+import { Header } from "@/components/layout/Header";
+import { DecoratedAvatar } from "@/components/DecoratedAvatar";
+import { ChatSkeleton } from "@/components/ui/AppSkeletons";
+import { AppEmptyState } from "@/components/ui/AppEmptyState";
+import { Button } from "@/components/ui/button";
+import {
+  ArrowLeft,
+  ArrowDown,
+  Send,
+  Trash2,
+  Pencil,
+  Check,
+  X,
+  Reply,
+  MoreHorizontal,
+  CheckCheck,
+  PanelLeft,
+  Clock,
+  AlertCircle,
+  Loader2,
+} from "lucide-react";
+import { useLongPress } from "@/hooks/use-long-press";
+import { useRestrictedWords, findRestrictedWord } from "@/lib/profanity";
+import { ShieldAlert } from "lucide-react";
+import { MessageCircle } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { VerifiedBadge } from "@/components/VerifiedBadge";
+import { OnlineDot } from "@/components/OnlineDot";
+import { CommitmentProgressCard } from "@/components/commitment/CommitmentProgressCard";
+import { CommitmentPauseCard } from "@/components/commitment/CommitmentPauseCard";
+import { ConversationDrawer } from "@/components/conversations/ConversationDrawer";
+import { useNetworkStatus } from "@/hooks/useNetworkStatus";
+import {
+  getFirstMessageSuggestions,
+  type FirstMessagePartnerProfile,
+} from "@/lib/firstMessageSuggestions";
+import { Sparkles } from "lucide-react";
+import { nativeShellFeatureEnabled } from "@/config/native-shell-feature";
+import { shouldUseNativeFocusedChat } from "@/config/native-focused-chat";
+import "@/styles/native-focused-chat.css";
+
+type Msg = {
+  id: string;
+  sender_id: string;
+  content: string;
+  created_at: string;
+  read_at: string | null;
+  edited_at?: string | null;
+  reply_to_id?: string | null;
+};
+type LocalMsg = Msg & {
+  _tempId?: string;
+  _status?: "sending" | "sent" | "failed";
+};
+
+type MessagesPages = InfiniteData<Msg[], string | null>;
+const PAGE_SIZE = 50;
+
+function chatQueryKey(matchId: string, userId: string | undefined) {
+  return ["chat-messages", matchId, userId] as const;
+}
+
+async function fetchMessagesPage(matchId: string, before: string | null): Promise<Msg[]> {
+  let q = supabase
+    .from("messages")
+    .select("*")
+    .eq("match_id", matchId)
+    .order("created_at", { ascending: false })
+    .limit(PAGE_SIZE);
+  if (before) q = q.lt("created_at", before);
+  const { data } = await q;
+  // Return chronological-ascending so concatenated pages render top→bottom oldest→newest.
+  return ((data ?? []) as Msg[]).slice().reverse();
+}
+
+type Partner = {
+  id: string;
+  full_name: string;
+  photo_url: string | null;
+  verified?: boolean | null;
+  equipped_frame_id?: string | null;
+  equipped_aura_id?: string | null;
+  city?: string | null;
+  church?: string | null;
+  bio?: string | null;
+};
+
+export const Route = createFileRoute("/conversas/$matchId")({
+  component: () => (
+    <RequireApproved>
+      <Chat />
+    </RequireApproved>
+  ),
+});
+
+function Chat() {
+  const { matchId } = Route.useParams();
+  const nativeFocusedChat = shouldUseNativeFocusedChat(
+    `/conversas/${matchId}`,
+    nativeShellFeatureEnabled,
+  );
+  const { user, loading } = useAuth();
+  const qc = useQueryClient();
+  const [partner, setPartner] = useState<Partner | null>(null);
+  const [partnerCommitted, setPartnerCommitted] = useState(false);
+  const [partnerCommitmentMatchId, setPartnerCommitmentMatchId] = useState<string | null>(null);
+  const [currentCommitment, setCurrentCommitment] = useState<RelationshipCommitment | null>(null);
+  const [pausedByCommitment, setPausedByCommitment] = useState(false);
+  const [pending, setPending] = useState<LocalMsg[]>([]);
+  const [showNewBadge, setShowNewBadge] = useState(false);
+  const nearBottomRef = useRef(true);
+  const initializedScrollRef = useRef(false);
+  const prevLenRef = useRef(0);
+  const [input, setInput] = useState("");
+  const [sending, setSending] = useState(false);
+  const [authorized, setAuthorized] = useState<boolean | null>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editText, setEditText] = useState("");
+  const [actionsOpenId, setActionsOpenId] = useState<string | null>(null);
+  const [replyTo, setReplyTo] = useState<Msg | null>(null);
+  const [highlightId, setHighlightId] = useState<string | null>(null);
+  const messageRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const restrictedWords = useRestrictedWords();
+  const [warning, setWarning] = useState<string | null>(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const { isOnline } = useNetworkStatus();
+  // IDs already marked as read in this session — prevents duplicate RPC calls
+  // when pagesData changes (older page loaded, realtime UPDATE, etc.).
+  const markedReadRef = useRef<Set<string>>(new Set());
+
+  const queryKey = chatQueryKey(matchId, user?.id);
+  const enableMessagesQuery = !!user && authorized === true && !pausedByCommitment;
+
+  const {
+    data: pagesData,
+    fetchPreviousPage,
+    hasPreviousPage,
+    isFetchingPreviousPage,
+  } = useInfiniteQuery<Msg[], Error, MessagesPages, typeof queryKey, string | null>({
+    queryKey,
+    enabled: enableMessagesQuery,
+    initialPageParam: null,
+    queryFn: ({ pageParam }) => fetchMessagesPage(matchId, pageParam),
+    getPreviousPageParam: (firstPage) =>
+      firstPage.length === PAGE_SIZE ? (firstPage[0]?.created_at ?? null) : undefined,
+    getNextPageParam: () => undefined,
+    staleTime: 60_000,
+    refetchOnWindowFocus: false,
+  });
+
+  // Flat chronological-ascending view of server messages, then optimistic temps.
+  const serverMessages = useMemo<LocalMsg[]>(
+    () => (pagesData ? pagesData.pages.flat() : []),
+    [pagesData],
+  );
+  const messages = useMemo<LocalMsg[]>(
+    () => (pending.length ? [...serverMessages, ...pending] : serverMessages),
+    [serverMessages, pending],
+  );
+  const firstMessageSuggestions = useMemo<string[]>(() => {
+    if (messages.length !== 0) return [];
+    if (!partner) return [];
+    const profile: FirstMessagePartnerProfile = {
+      full_name: partner.full_name,
+      city: partner.city ?? null,
+      church: partner.church ?? null,
+      bio: partner.bio ?? null,
+    };
+    return getFirstMessageSuggestions(profile);
+  }, [messages.length, partner]);
+
+  function applySuggestion(text: string) {
+    setInput((prev) => {
+      if (prev.trim().length === 0) return text;
+      const ok =
+        typeof window !== "undefined" &&
+        window.confirm(
+          "Substituir o texto atual pela sugestão? Você poderá editar antes de enviar.",
+        );
+      return ok ? text : prev;
+    });
+    requestAnimationFrame(() => {
+      const el = inputRef.current;
+      if (el) {
+        el.focus();
+        const len = el.value.length;
+        try {
+          el.setSelectionRange(len, len);
+        } catch {
+          // some browsers throw on certain input types — safe to ignore
+        }
+      }
+    });
+  }
+  const loadingOlder = isFetchingPreviousPage;
+  const hasMoreOlder = hasPreviousPage;
+
+  // Cache mutators — used by realtime + send/edit/delete to keep server-truth in Query.
+  const appendToCache = useCallback(
+    (msg: Msg) => {
+      qc.setQueryData<MessagesPages>(queryKey, (old) => {
+        if (!old) return old;
+        const exists = old.pages.some((p) => p.some((m) => m.id === msg.id));
+        if (exists) return old;
+        const lastIdx = old.pages.length - 1;
+        if (lastIdx < 0) return old;
+        const pages = old.pages.map((p, i) => (i === lastIdx ? [...p, msg] : p));
+        return { ...old, pages };
+      });
+    },
+    [qc, queryKey],
+  );
+  const patchInCache = useCallback(
+    (msg: Msg) => {
+      qc.setQueryData<MessagesPages>(queryKey, (old) => {
+        if (!old) return old;
+        const pages = old.pages.map((p) =>
+          p.some((m) => m.id === msg.id)
+            ? p.map((m) => (m.id === msg.id ? { ...m, ...msg } : m))
+            : p,
+        );
+        return { ...old, pages };
+      });
+    },
+    [qc, queryKey],
+  );
+  const removeFromCache = useCallback(
+    (id: string) => {
+      qc.setQueryData<MessagesPages>(queryKey, (old) => {
+        if (!old) return old;
+        const pages = old.pages.map((p) => p.filter((m) => m.id !== id));
+        return { ...old, pages };
+      });
+    },
+    [qc, queryKey],
+  );
+
+  useEffect(() => {
+    if (!user) return;
+    // Reset scroll initialization for the new conversation.
+    initializedScrollRef.current = false;
+    nearBottomRef.current = true;
+    setPending([]);
+    (async () => {
+      const { data: m } = await supabase
+        .from("matches")
+        .select("user_a, user_b")
+        .eq("id", matchId)
+        .maybeSingle();
+      if (!m || (m.user_a !== user.id && m.user_b !== user.id)) {
+        setAuthorized(false);
+        return;
+      }
+      const partnerId = m.user_a === user.id ? m.user_b : m.user_a;
+      const { data: blk } = await supabase
+        .from("blocks")
+        .select("id")
+        .eq("blocker_id", user.id)
+        .eq("blocked_id", partnerId)
+        .maybeSingle();
+      if (blk) {
+        setAuthorized(false);
+        return;
+      }
+      const myActiveCommitment = await getActiveCommitmentByUser(user.id);
+      setCurrentCommitment(myActiveCommitment);
+      if (myActiveCommitment && myActiveCommitment.match_id !== matchId) {
+        setPausedByCommitment(true);
+        setAuthorized(true);
+        return;
+      }
+      setPausedByCommitment(false);
+      setAuthorized(true);
+      const { data: p } = await supabase
+        .from("profiles")
+        .select(
+          "id,full_name,photo_url,verified,equipped_frame_id,equipped_aura_id,city,church,bio",
+        )
+        .eq("id", partnerId)
+        .maybeSingle();
+      setPartner(p as Partner | null);
+      if (partnerId) {
+        const active = await getActiveCommitmentByUser(partnerId);
+
+        setPartnerCommitted(!!active);
+
+        setPartnerCommitmentMatchId(active?.match_id ?? null);
+      }
+      // useInfiniteQuery handles message fetching now; mark-as-read runs in a
+      // dedicated effect below once the first page is in cache.
+    })();
+    // Reset per-conversation dedupe.
+    markedReadRef.current = new Set();
+
+    const ch = supabase
+      .channel(`chat-${matchId}`)
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "messages", filter: `match_id=eq.${matchId}` },
+        (payload) => {
+          const incoming = payload.new as Msg;
+          appendToCache(incoming);
+          // mark-as-read runs in a dedicated effect — only mark when the user
+          // is actually looking at the bottom of the conversation.
+        },
+      )
+      .on(
+        "postgres_changes",
+        { event: "DELETE", schema: "public", table: "messages", filter: `match_id=eq.${matchId}` },
+        (payload) => {
+          const removed = payload.old as { id: string };
+          removeFromCache(removed.id);
+        },
+      )
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "messages", filter: `match_id=eq.${matchId}` },
+        (payload) => {
+          patchInCache(payload.new as Msg);
+        },
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(ch);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [matchId, user?.id]);
+
+  // Mark unread received messages as read. Runs only when the document is
+  // visible AND the user is near the bottom (i.e. actually viewing new
+  // messages). Deduped via markedReadRef so loading older pages or realtime
+  // UPDATE events do not re-fire the RPC, and pending optimistic temps are
+  // never touched (they live outside pagesData).
+  const runMarkRead = useCallback(() => {
+    if (!user || !pagesData) return;
+    if (typeof document !== "undefined" && document.visibilityState !== "visible") return;
+    if (!nearBottomRef.current && initializedScrollRef.current) return;
+    const seen = markedReadRef.current;
+    const unread = pagesData.pages
+      .flat()
+      .filter((m) => m.sender_id !== user.id && !m.read_at && !seen.has(m.id));
+    if (unread.length === 0) return;
+    for (const m of unread) seen.add(m.id);
+    Promise.all(unread.map((m) => supabase.rpc("mark_message_read", { _message_id: m.id }))).catch(
+      () => {
+        // On failure, allow a retry on the next trigger.
+        for (const m of unread) seen.delete(m.id);
+      },
+    );
+  }, [pagesData, user]);
+
+  // Trigger when pages change (initial load, realtime INSERT appended to cache,
+  // realtime UPDATE patching read_at).
+  useEffect(() => {
+    runMarkRead();
+  }, [runMarkRead]);
+
+  // Trigger when the tab becomes visible again.
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const onVis = () => {
+      if (document.visibilityState === "visible") runMarkRead();
+    };
+    document.addEventListener("visibilitychange", onVis);
+    return () => document.removeEventListener("visibilitychange", onVis);
+  }, [runMarkRead]);
+
+  // Smart scroll: instant jump on first load; smooth on own send or when
+  // the user was already near the bottom. Otherwise show a "new message" pill.
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const len = messages.length;
+    const prev = prevLenRef.current;
+    prevLenRef.current = len;
+    if (len === 0) return;
+    if (!initializedScrollRef.current) {
+      el.scrollTop = el.scrollHeight;
+      initializedScrollRef.current = true;
+      nearBottomRef.current = true;
+      return;
+    }
+    if (len <= prev) return;
+    const last = messages[len - 1];
+    const mine = last?.sender_id === user?.id;
+    if (mine || nearBottomRef.current) {
+      el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+      setShowNewBadge(false);
+    } else {
+      setShowNewBadge(true);
+    }
+  }, [messages, user?.id]);
+
+  // Track scroll position + trigger older page when near the top.
+  const loadOlder = useCallback(async () => {
+    if (isFetchingPreviousPage || !hasPreviousPage) return;
+    const el = scrollRef.current;
+    if (!el) return;
+    const prevHeight = el.scrollHeight;
+    const prevTop = el.scrollTop;
+    await fetchPreviousPage();
+    requestAnimationFrame(() => {
+      if (!el) return;
+      el.scrollTop = prevTop + (el.scrollHeight - prevHeight);
+    });
+  }, [isFetchingPreviousPage, hasPreviousPage, fetchPreviousPage]);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const onScroll = () => {
+      const dist = el.scrollHeight - el.scrollTop - el.clientHeight;
+      const wasNearBottom = nearBottomRef.current;
+      nearBottomRef.current = dist < 80;
+      if (nearBottomRef.current && showNewBadge) setShowNewBadge(false);
+      // When the user scrolls into the bottom zone, mark visible unread as read.
+      if (nearBottomRef.current && !wasNearBottom) runMarkRead();
+      if (el.scrollTop < 80) void loadOlder();
+    };
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => el.removeEventListener("scroll", onScroll);
+  }, [loadOlder, showNewBadge, runMarkRead]);
+
+  function scrollToBottom() {
+    const el = scrollRef.current;
+    if (!el) return;
+    el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+    nearBottomRef.current = true;
+    setShowNewBadge(false);
+  }
+
+  if (!loading && !user) return <Navigate to="/auth/login" />;
+  if (authorized === false)
+    return (
+      <div className="min-h-screen">
+        {!nativeFocusedChat && <Header />}
+        <main className="mx-auto max-w-md px-4 py-20 text-center">
+          <p>Conversa não encontrada.</p>
+          <Button asChild variant="outline" className="mt-4">
+            <Link to="/conversas">Voltar</Link>
+          </Button>
+        </main>
+      </div>
+    );
+  if (pausedByCommitment && currentCommitment)
+    return (
+      <div className="min-h-screen">
+        {!nativeFocusedChat && <Header />}
+        <main className="mx-auto max-w-3xl px-4 py-10">
+          <Button asChild variant="ghost" className="mb-6">
+            <Link to="/conversas">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Voltar
+            </Link>
+          </Button>
+          <CommitmentPauseCard
+            matchId={currentCommitment.match_id}
+            description="Você está em um propósito ativo. Por isso, conversas fora desse compromisso ficam arquivadas até o propósito ser interrompido."
+          />
+        </main>
+      </div>
+    );
+
+  async function send(e: React.FormEvent) {
+    e.preventDefault();
+    if (!user || !input.trim()) return;
+    const content = input.trim().slice(0, 2000);
+    const hit = await findRestrictedWord(content);
+    if (hit) {
+      setWarning(hit);
+      return;
+    }
+    const replyId = replyTo?.id ?? null;
+    const tempId = `temp-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    const optimistic: LocalMsg = {
+      id: tempId,
+      _tempId: tempId,
+      _status: "sending",
+      sender_id: user.id,
+      content,
+      created_at: new Date().toISOString(),
+      read_at: null,
+      reply_to_id: replyId,
+    };
+    setPending((prev) => [...prev, optimistic]);
+    setInput("");
+    setReplyTo(null);
+    if (inputRef.current) inputRef.current.style.height = "auto";
+    nearBottomRef.current = true;
+    setSending(true);
+    const { data, error } = await supabase
+      .from("messages")
+      .insert({
+        match_id: matchId,
+        sender_id: user.id,
+        content,
+        reply_to_id: replyId,
+      })
+      .select()
+      .single();
+    setSending(false);
+    if (error || !data) {
+      setPending((prev) => prev.map((m) => (m.id === tempId ? { ...m, _status: "failed" } : m)));
+      toast.error(friendlyError(error ?? new Error("Falha ao enviar")));
+      return;
+    }
+    const real = data as Msg;
+    appendToCache(real);
+    setPending((prev) => prev.filter((m) => m.id !== tempId));
+  }
+
+  async function retrySend(tempId: string) {
+    const msg = pending.find((m) => m.id === tempId);
+    if (!msg || !user) return;
+    setPending((prev) => prev.map((m) => (m.id === tempId ? { ...m, _status: "sending" } : m)));
+    const { data, error } = await supabase
+      .from("messages")
+      .insert({
+        match_id: matchId,
+        sender_id: user.id,
+        content: msg.content,
+        reply_to_id: msg.reply_to_id ?? null,
+      })
+      .select()
+      .single();
+    if (error || !data) {
+      setPending((prev) => prev.map((m) => (m.id === tempId ? { ...m, _status: "failed" } : m)));
+      toast.error(friendlyError(error ?? new Error("Falha ao reenviar")));
+      return;
+    }
+    const real = data as Msg;
+    appendToCache(real);
+    setPending((prev) => prev.filter((m) => m.id !== tempId));
+  }
+
+  async function handleDelete(messageId: string) {
+    if (!confirm("Apagar esta mensagem? Essa ação não pode ser desfeita.")) return;
+    // Snapshot the cache so we can restore on failure.
+    const snapshot = qc.getQueryData<MessagesPages>(queryKey);
+    removeFromCache(messageId);
+    const { error } = await supabase.from("messages").delete().eq("id", messageId);
+    if (error) {
+      if (snapshot) qc.setQueryData<MessagesPages>(queryKey, snapshot);
+      toast.error("Não foi possível apagar a mensagem.");
+    }
+  }
+
+  function startEdit(m: Msg) {
+    setEditingId(m.id);
+    setEditText(m.content);
+  }
+
+  function cancelEdit() {
+    setEditingId(null);
+    setEditText("");
+  }
+
+  async function saveEdit(messageId: string) {
+    const content = editText.trim().slice(0, 2000);
+    if (!content) return;
+    const original = messages.find((m) => m.id === messageId);
+    if (original && original.content === content) {
+      cancelEdit();
+      return;
+    }
+    const { error } = await supabase.from("messages").update({ content }).eq("id", messageId);
+    if (error) {
+      toast.error("Não foi possível editar.");
+      return;
+    }
+    cancelEdit();
+  }
+
+  function jumpToMessage(id: string) {
+    const el = messageRefs.current[id];
+    if (!el) return;
+    el.scrollIntoView({ behavior: "smooth", block: "center" });
+    setHighlightId(id);
+    setTimeout(() => setHighlightId((cur) => (cur === id ? null : cur)), 1600);
+  }
+
+  function blurComposer() {
+    if (typeof document === "undefined") return;
+    const active = document.activeElement;
+    if (active instanceof HTMLElement) active.blur();
+  }
+
+  return (
+    <div
+      data-vdn-native-focused-chat={nativeFocusedChat ? "" : undefined}
+      className="mobile-chat-screen flex min-h-screen flex-col bg-background md:min-h-screen"
+    >
+      {!nativeFocusedChat && (
+        <div className="hidden md:block">
+          <Header />
+        </div>
+      )}
+      <div className="native-focused-chat__header glass mx-auto flex w-full max-w-3xl items-center gap-3 px-3 py-3 shadow-soft md:px-4">
+        <Link to="/conversas" className="text-muted-foreground hover:text-foreground">
+          <ArrowLeft className="h-5 w-5" />
+        </Link>
+        {partner ? (
+          <Link
+            to="/pretendentes/$id"
+            params={{ id: partner.id }}
+            className="flex flex-1 items-center gap-3 rounded-lg -mx-1 px-1 py-1 transition hover:bg-accent/50"
+          >
+            <div className="flex shrink-0 items-center justify-center">
+              <DecoratedAvatar
+                photoUrl={partner.photo_url}
+                fallback={partner.full_name?.charAt(0) ?? "?"}
+                size={32}
+                frameId={partner.equipped_frame_id ?? null}
+                auraId={partner.equipped_aura_id ?? null}
+                isCommitted={partnerCommitted}
+              />
+            </div>
+            <div className="flex-1">
+              <h2 className="flex items-center gap-1.5 font-semibold leading-none hover:underline">
+                {partner.full_name?.split(" ")[0] ?? "—"}
+
+                {partner.verified && <VerifiedBadge size="sm" />}
+              </h2>
+
+              {partnerCommitted ? (
+                <div className="mt-1 flex items-center gap-2">
+                  <span className="text-[11px] font-medium text-emerald-600">Em Propósito</span>
+
+                  {partnerCommitmentMatchId && (
+                    <Link
+                      to="/proposito/$matchId"
+                      params={{
+                        matchId: partnerCommitmentMatchId,
+                      }}
+                      className="
+            text-[11px]
+            text-primary
+            hover:underline
+          "
+                    >
+                      Ver Página do Casal
+                    </Link>
+                  )}
+                </div>
+              ) : (
+                <p className="text-[11px] text-muted-foreground">ver perfil</p>
+              )}
+            </div>
+          </Link>
+        ) : (
+          <div className="flex flex-1 items-center gap-3">
+            <div className="h-10 w-10 rounded-full bg-muted" />
+            <div className="flex-1">
+              <h2 className="font-semibold leading-none">—</h2>
+              <p className="text-[11px] text-muted-foreground">match com propósito</p>
+            </div>
+          </div>
+        )}
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          onClick={() => setDrawerOpen(true)}
+          className="shrink-0 rounded-full"
+          aria-label="Abrir outras conversas"
+        >
+          <PanelLeft className="h-5 w-5" />
+        </Button>
+      </div>
+
+      {actionsOpenId && (
+        <div
+          className="fixed inset-0 z-30"
+          onClick={() => setActionsOpenId(null)}
+          aria-hidden="true"
+        />
+      )}
+
+      <main
+        ref={scrollRef}
+        className="native-focused-chat__messages mobile-chat-scroll mx-auto min-h-0 w-full max-w-3xl flex-1 space-y-4 overflow-y-auto px-3 py-4 md:space-y-5 md:px-4 md:py-8"
+        onPointerDown={(event) => {
+          const target = event.target as HTMLElement;
+          if (target.closest("button,a,input,textarea,[role='dialog']")) return;
+          blurComposer();
+        }}
+      >
+        <CommitmentProgressCard matchId={matchId} />
+        {loadingOlder && (
+          <div className="flex justify-center py-2 text-muted-foreground">
+            <Loader2 className="h-4 w-4 animate-spin" />
+          </div>
+        )}
+        {!hasMoreOlder && messages.length >= PAGE_SIZE && (
+          <p className="text-center text-[11px] text-muted-foreground/70">Início da conversa</p>
+        )}
+        {authorized === null && messages.length === 0 && <ChatSkeleton bubbles={8} />}
+        {authorized === true && messages.length === 0 && (
+          <div className="mt-10 flex flex-col items-center gap-5">
+            <AppEmptyState
+              compact
+              icon={<MessageCircle className="h-5 w-5" />}
+              title="Comece a conversa com propósito"
+              description="Envie uma mensagem respeitosa e verdadeira para iniciar esse diálogo."
+            />
+            {firstMessageSuggestions.length > 0 && (
+              <div className="w-full max-w-md rounded-2xl border border-border/60 bg-card/70 p-4 shadow-sm backdrop-blur-sm">
+                <div className="mb-1 flex items-center gap-2 text-sm font-semibold text-foreground">
+                  <Sparkles className="h-4 w-4 text-primary" />
+                  Comece com leveza
+                </div>
+                <p className="mb-3 text-xs text-muted-foreground">
+                  Escolha uma sugestão ou escreva do seu jeito.
+                </p>
+                <div className="flex flex-col gap-2">
+                  {firstMessageSuggestions.map((s) => (
+                    <button
+                      key={s}
+                      type="button"
+                      onClick={() => applySuggestion(s)}
+                      disabled={!isOnline}
+                      className="app-pressable w-full rounded-xl border border-border/60 bg-background px-3 py-2 text-left text-sm leading-snug text-foreground transition hover:border-primary/50 hover:bg-accent/60 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
+                {!isOnline && (
+                  <p className="mt-3 text-[11px] text-muted-foreground">
+                    Conecte-se para enviar a primeira mensagem.
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+        {messages.map((m) => {
+          const mine = m.sender_id === user?.id;
+          const isEditing = editingId === m.id;
+          const showActions = actionsOpenId === m.id;
+          const replied = m.reply_to_id ? messages.find((x) => x.id === m.reply_to_id) : null;
+          const isFlash = highlightId === m.id;
+          return (
+            <div
+              key={m.id}
+              ref={(el) => {
+                messageRefs.current[m.id] = el;
+              }}
+              className={`flex scroll-mt-24 transition-colors duration-500 ${mine ? "justify-end" : "justify-start"} ${isFlash ? "rounded-xl bg-primary/10" : ""}`}
+            >
+              <div
+                className={`group relative flex max-w-[75%] items-end gap-1 ${showActions ? "z-40" : ""} ${mine ? "flex-row-reverse" : "flex-row"}`}
+              >
+                <BubbleContent
+                  mine={mine}
+                  isMine={!!mine}
+                  enableLongPress={!isEditing}
+                  onLongPress={() => setActionsOpenId(m.id)}
+                  highlighted={showActions || isFlash}
+                >
+                  {replied && (
+                    <button
+                      type="button"
+                      onClick={() => jumpToMessage(replied.id)}
+                      className={`mb-1 flex w-full items-stretch gap-2 rounded-md px-2 py-1 text-left text-xs transition ${
+                        mine
+                          ? "bg-white/15 hover:bg-white/25"
+                          : "bg-foreground/5 hover:bg-foreground/10"
+                      }`}
+                    >
+                      <span
+                        className={`w-0.5 shrink-0 rounded ${mine ? "bg-white/70" : "bg-primary"}`}
+                      />
+                      <span className="min-w-0 flex-1">
+                        <span
+                          className={`block font-semibold ${mine ? "text-white/90" : "text-primary"}`}
+                        >
+                          {replied.sender_id === user?.id
+                            ? "Você"
+                            : (partner?.full_name?.split(" ")[0] ?? "")}
+                        </span>
+                        <span
+                          className={`line-clamp-2 ${mine ? "text-white/80" : "text-muted-foreground"}`}
+                        >
+                          {replied.content}
+                        </span>
+                      </span>
+                    </button>
+                  )}
+                  {isEditing ? (
+                    <div className="flex flex-col gap-2">
+                      <textarea
+                        value={editText}
+                        onChange={(e) => setEditText(e.target.value)}
+                        rows={2}
+                        maxLength={2000}
+                        autoFocus
+                        className={`w-full resize-none rounded-md bg-white/20 p-1.5 text-sm outline-none ring-1 ring-white/40 ${mine ? "text-white placeholder:text-white/60" : "text-foreground bg-background ring-border"}`}
+                      />
+                      <div className="flex justify-end gap-1">
+                        <button
+                          type="button"
+                          onClick={cancelEdit}
+                          aria-label="Cancelar"
+                          className="rounded-full p-1 hover:bg-white/20"
+                        >
+                          <X className="h-3.5 w-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => saveEdit(m.id)}
+                          aria-label="Salvar"
+                          className="rounded-full p-1 hover:bg-white/20"
+                        >
+                          <Check className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <p className="whitespace-pre-wrap break-words">{m.content}</p>
+                      <p
+                        className={`mt-1 flex items-center gap-1 text-[10px] ${mine ? "text-white/70" : "text-muted-foreground"}`}
+                      >
+                        <span>
+                          {new Date(m.created_at).toLocaleTimeString("pt-BR", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                          {m.edited_at ? " · editado" : ""}
+                        </span>
+                        {mine && m._status === "sending" && (
+                          <span
+                            className="ml-0.5 inline-flex items-center gap-0.5"
+                            title="Enviando..."
+                          >
+                            <Clock className="h-3 w-3" />
+                          </span>
+                        )}
+                        {mine && m._status === "failed" && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              retrySend(m.id);
+                            }}
+                            className="ml-0.5 inline-flex items-center gap-0.5 text-destructive hover:underline"
+                            title="Falha ao enviar — tocar para tentar novamente"
+                          >
+                            <AlertCircle className="h-3 w-3" /> tentar
+                          </button>
+                        )}
+                        {mine &&
+                          !m._status &&
+                          (m.read_at ? (
+                            <span
+                              className="ml-0.5 inline-flex items-center gap-0.5"
+                              title={`Visto ${new Date(m.read_at).toLocaleString("pt-BR")}`}
+                            >
+                              <CheckCheck className="h-3 w-3" /> Visto
+                            </span>
+                          ) : (
+                            <Check className="ml-0.5 h-3 w-3" aria-label="Enviada" />
+                          ))}
+                      </p>
+                    </>
+                  )}
+                </BubbleContent>
+                {!isEditing && !showActions && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setActionsOpenId(m.id);
+                    }}
+                    aria-label="Mais opções"
+                    className="hidden md:flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-muted-foreground opacity-0 transition-opacity hover:bg-accent hover:text-foreground group-hover:opacity-100 focus:opacity-100"
+                  >
+                    <MoreHorizontal className="h-4 w-4" />
+                  </button>
+                )}
+                {!isEditing && showActions && (
+                  <div
+                    className={`absolute z-50 flex items-center gap-1 rounded-full border border-border bg-popover px-1 py-1 shadow-lg ${
+                      mine ? "right-0" : "left-0"
+                    } -top-10`}
+                    onClick={(e) => e.stopPropagation()}
+                    onTouchStart={(e) => e.stopPropagation()}
+                    role="menu"
+                    style={{ touchAction: "manipulation", pointerEvents: "auto" }}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setReplyTo(m);
+                        setActionsOpenId(null);
+                      }}
+                      aria-label="Responder"
+                      className="flex items-center gap-1 rounded-full px-2 py-1 text-xs text-foreground hover:bg-accent active:bg-accent/80 [touch-action:manipulation]"
+                    >
+                      <Reply className="h-4 w-4" /> Responder
+                    </button>
+                    {mine && (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setActionsOpenId(null);
+                            startEdit(m);
+                          }}
+                          aria-label="Editar mensagem"
+                          className="flex items-center gap-1 rounded-full px-2 py-1 text-xs text-foreground hover:bg-accent active:bg-accent/80 [touch-action:manipulation]"
+                        >
+                          <Pencil className="h-4 w-4" /> Editar
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setActionsOpenId(null);
+                            handleDelete(m.id);
+                          }}
+                          aria-label="Apagar mensagem"
+                          className="flex items-center gap-1 rounded-full px-2 py-1 text-xs text-destructive hover:bg-destructive/10 active:bg-destructive/20 [touch-action:manipulation]"
+                        >
+                          <Trash2 className="h-4 w-4" /> Excluir
+                        </button>
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </main>
+
+      {showNewBadge && (
+        <div className="pointer-events-none flex justify-center">
+          <button
+            type="button"
+            onClick={scrollToBottom}
+            className="pointer-events-auto -mt-2 mb-2 inline-flex items-center gap-1.5 rounded-full bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground shadow-lg"
+          >
+            <ArrowDown className="h-3.5 w-3.5" /> Nova mensagem
+          </button>
+        </div>
+      )}
+
+      <form
+        onSubmit={send}
+        className="native-focused-chat__composer mobile-chat-composer border-t border-border bg-background/88 px-3 py-3 backdrop-blur-xl"
+      >
+        <div className="mx-auto flex max-w-3xl flex-col gap-2">
+          {replyTo && (
+            <div className="flex items-stretch gap-2 rounded-lg border border-border bg-muted/40 px-3 py-2">
+              <span className="w-1 shrink-0 rounded bg-primary" />
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-semibold text-primary">
+                  Respondendo a{" "}
+                  {replyTo.sender_id === user?.id
+                    ? "você"
+                    : (partner?.full_name?.split(" ")[0] ?? "")}
+                </p>
+                <p className="line-clamp-1 text-xs text-muted-foreground">{replyTo.content}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setReplyTo(null)}
+                className="rounded-full p-1 text-muted-foreground hover:text-foreground"
+                aria-label="Cancelar resposta"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          )}
+          <div className="flex min-h-11 min-w-0 items-end gap-2 rounded-[1.4rem] border border-border/80 bg-card px-3 py-2 shadow-sm focus-within:border-primary/60 focus-within:ring-2 focus-within:ring-primary/15">
+            <textarea
+              ref={inputRef}
+              value={input}
+              onChange={(e) => {
+                setInput(e.target.value);
+                const el = e.target as HTMLTextAreaElement;
+                el.style.height = "auto";
+                el.style.height = Math.min(el.scrollHeight, 144) + "px";
+              }}
+              placeholder="Escreva uma mensagem..."
+              maxLength={2000}
+              rows={1}
+              cols={1}
+              className="block max-h-36 min-h-[28px] w-full min-w-0 flex-1 resize-none overflow-y-auto bg-transparent py-1 text-base leading-6 outline-none placeholder:text-muted-foreground"
+            />
+            <Button
+              type="submit"
+              disabled={sending || !input.trim()}
+              size="icon"
+              className="tap h-8 w-8 shrink-0 rounded-full"
+            >
+              <Send className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      </form>
+
+      <ConversationDrawer
+        open={drawerOpen}
+        onOpenChange={setDrawerOpen}
+        currentMatchId={matchId}
+        currentType="private"
+      />
+
+      <Dialog open={!!warning} onOpenChange={(o) => !o && setWarning(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-destructive/10">
+              <ShieldAlert className="h-7 w-7 text-destructive" />
+            </div>
+            <DialogTitle className="text-center">Mensagem bloqueada</DialogTitle>
+            <DialogDescription className="text-center">
+              A palavra <span className="font-semibold text-foreground">"{warning}"</span> fere as
+              diretrizes da comunidade. Por favor, reescreva sua mensagem com respeito e cuidado.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-center pt-2">
+            <Button onClick={() => setWarning(null)}>Entendi</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+function BubbleContent({
+  mine,
+  enableLongPress,
+  onLongPress,
+  highlighted,
+  children,
+}: {
+  mine: boolean;
+  isMine: boolean;
+  enableLongPress: boolean;
+  onLongPress: () => void;
+  highlighted: boolean;
+  children: React.ReactNode;
+}) {
+  const { pressing, handlers } = useLongPress(onLongPress, 450);
+  const bound = enableLongPress ? handlers : {};
+  return (
+    <div
+      {...bound}
+      className={`relative rounded-2xl px-4 py-2 text-sm shadow-soft transition-all duration-200 ${
+        mine ? "bg-gradient-love text-white" : "glass text-foreground"
+      } ${enableLongPress ? "select-none md:select-text touch-none" : ""} ${
+        pressing ? "scale-[0.97] ring-2 ring-primary/40" : ""
+      } ${highlighted ? "ring-2 ring-primary shadow-glow" : ""}`}
+      style={enableLongPress ? { WebkitUserSelect: "none", WebkitTouchCallout: "none" } : undefined}
+    >
+      {children}
+    </div>
+  );
+}

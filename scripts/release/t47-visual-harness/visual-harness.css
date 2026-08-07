@@ -1,0 +1,203 @@
+* {
+  box-sizing: border-box;
+}
+html,
+body,
+#root {
+  min-height: 100%;
+  margin: 0;
+}
+body {
+  font-family:
+    -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", sans-serif;
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+}
+button,
+a,
+input,
+textarea,
+select,
+[contenteditable] {
+  min-height: 44px;
+}
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+.harness-content {
+  width: min(100%, 880px);
+  margin: 0 auto;
+  padding: 1.25rem;
+}
+.harness-content h1,
+.harness-admin h1 {
+  margin: 0.25rem 0 0.5rem;
+  font-size: clamp(1.7rem, 4vw, 2.5rem);
+}
+.harness-eyebrow {
+  color: var(--vdn-native-text-secondary, hsl(var(--muted-foreground)));
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.harness-grid {
+  display: grid;
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+.harness-grid article,
+.harness-form,
+.harness-table-wrap {
+  padding: 1rem;
+  border: 1px solid var(--vdn-native-border, hsl(var(--border)));
+  border-radius: 1rem;
+  background: var(--vdn-native-surface-primary, hsl(var(--card)));
+}
+.harness-grid h2,
+.harness-form h2 {
+  margin-top: 0;
+  font-size: 1.05rem;
+}
+.harness-grid button,
+.harness-grid a,
+.harness-form input,
+.harness-form textarea,
+.harness-form select,
+.harness-form [contenteditable] {
+  border: 1px solid var(--vdn-native-border, hsl(var(--border)));
+  border-radius: 0.75rem;
+  padding: 0.7rem 0.85rem;
+  background: var(--vdn-native-surface-secondary, hsl(var(--muted)));
+  color: inherit;
+}
+.harness-form {
+  display: grid;
+  gap: 0.8rem;
+}
+.harness-form label {
+  display: grid;
+  gap: 0.3rem;
+}
+.harness-form input,
+.harness-form textarea,
+.harness-form select,
+.harness-form [contenteditable] {
+  width: 100%;
+  font-size: 16px;
+}
+.harness-pill {
+  display: inline-flex;
+  padding: 0.4rem 0.7rem;
+  border-radius: 999px;
+  color: var(--vdn-native-brand-action);
+  background: var(--vdn-native-brand-action-soft);
+}
+.harness-long {
+  margin-block: 2rem;
+}
+.harness-admin {
+  min-width: 0;
+  padding: 1rem;
+}
+.harness-tabs {
+  display: flex;
+  max-width: 100%;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding-block: 0.5rem;
+}
+.harness-tabs button,
+table button {
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.7rem;
+  padding-inline: 0.8rem;
+  background: hsl(var(--card));
+  color: inherit;
+}
+.harness-table-wrap {
+  max-width: 100%;
+  overflow-x: auto;
+}
+table {
+  width: 100%;
+  min-width: 720px;
+  border-collapse: collapse;
+}
+th,
+td {
+  padding: 0.75rem;
+  border-bottom: 1px solid hsl(var(--border));
+  text-align: left;
+}
+.restricted {
+  min-height: 100dvh;
+  display: grid;
+  place-content: center;
+  padding: 2rem;
+  text-align: center;
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+}
+.restricted a {
+  display: inline-grid;
+  place-items: center;
+  border-radius: 0.75rem;
+  background: #ff6f61;
+  color: white;
+}
+[data-vdn-native-focused-chat] {
+  min-height: 100dvh;
+}
+.native-focused-chat__header {
+  display: flex;
+  justify-content: space-between;
+}
+.native-focused-chat__header > div {
+  display: grid;
+  text-align: center;
+}
+.native-focused-chat__messages {
+  display: flex;
+  min-height: 0;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+.bubble {
+  width: fit-content;
+  max-width: 80%;
+  padding: 0.75rem 1rem;
+  border-radius: 1rem;
+  background: hsl(var(--muted));
+}
+.bubble.sent {
+  align-self: flex-end;
+  color: white;
+  background: #ff6f61;
+}
+.native-focused-chat__composer {
+  display: flex;
+  gap: 0.5rem;
+}
+.native-focused-chat__composer textarea {
+  flex: 1;
+  min-width: 0;
+}
+.native-focused-chat__composer button {
+  width: 44px;
+  border: 0;
+  border-radius: 999px;
+  background: #ff6f61;
+  color: white;
+}
+@media (min-width: 48rem) {
+  .harness-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .harness-admin {
+    padding: 1.5rem;
+  }
+}
