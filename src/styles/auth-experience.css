@@ -36,31 +36,36 @@
   display: inline-flex;
   flex-direction: column;
   align-items: center;
-  color: var(--orha-ink, #19181d);
   line-height: 1;
   user-select: none;
 }
 
-.orha-mark__word {
-  display: inline-flex;
-  align-items: baseline;
-  font-family: "Arial Rounded MT Bold", "Avenir Next", var(--font-display), sans-serif;
-  font-weight: 900;
-  letter-spacing: -0.105em;
+.orha-mark__image {
+  display: block;
+  width: 100%;
+  height: auto;
 }
 
-.orha-mark__reversed-r {
-  display: inline-block;
-  margin-inline: 0.012em 0.045em;
-  transform: scaleX(-1);
+.orha-mark__image--light {
+  display: none;
 }
 
-.orha-mark--compact .orha-mark__word {
-  font-size: 1.5rem;
+.dark .orha-mark__image--ink,
+html[data-theme="dark"] .orha-mark__image--ink {
+  display: none;
 }
 
-.orha-mark--display .orha-mark__word {
-  font-size: clamp(4rem, 20vw, 7.5rem);
+.dark .orha-mark__image--light,
+html[data-theme="dark"] .orha-mark__image--light {
+  display: block;
+}
+
+.orha-mark--compact {
+  width: 5.6rem;
+}
+
+.orha-mark--display {
+  width: min(72vw, 25rem);
 }
 
 .orha-mark__tagline {
