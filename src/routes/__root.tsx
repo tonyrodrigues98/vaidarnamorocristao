@@ -29,7 +29,7 @@ import {
   configureSupabaseRuntime,
   hasSupabaseRuntimeConfig,
   type PublicSupabaseRuntimeConfig,
-} from "@/integrations/supabase/client";
+} from "@/integrations/supabase/runtime-config";
 
 import appCss from "../styles.css?url";
 import coinPng from "@/assets/coin.webp";
