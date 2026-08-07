@@ -1,38 +1,33 @@
 import { useNavigate } from "@tanstack/react-router";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
-import { OrhaMark } from "@/components/auth/OrhaMark";
+import { useAuth } from "@/lib/auth";
 
-/** The route advances only from the final animation event, never from a timer. */
+/** The public entry route: official logo, one complete three-second animation, then redirect. */
 export function OrhaSplash() {
   const navigate = useNavigate();
+  const { user, initialResolutionFinished } = useAuth();
+  const [animationFinished, setAnimationFinished] = useState(false);
   const advanced = useRef(false);
 
-  function continueToLogin() {
-    if (advanced.current) return;
+  useEffect(() => {
+    const timer = window.setTimeout(() => setAnimationFinished(true), 3_000);
+    return () => window.clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    if (!animationFinished || !initialResolutionFinished || advanced.current) return;
     advanced.current = true;
-    navigate({ to: "/auth/login", replace: true });
-  }
+    navigate({ to: user ? "/inicio" : "/auth/login", replace: true });
+  }, [animationFinished, initialResolutionFinished, navigate, user]);
 
   return (
     <main className="orha-splash" aria-label="Inicializando ORHA">
-      <div className="orha-splash__glow" aria-hidden="true" />
       <div className="orha-splash__content">
-        <OrhaMark size="display" />
-        <p className="orha-splash__words" aria-label="Conexões, presença e propósito">
-          <span>CONEXÕES</span>
-          <i aria-hidden="true">•</i>
-          <span>PRESENÇA</span>
-          <i aria-hidden="true">•</i>
-          <span>PROPÓSITO</span>
-        </p>
-        <span
-          className="orha-splash__loader"
-          aria-label="Carregando"
-          role="status"
-          onAnimationEnd={(event) => {
-            if (event.animationName === "orha-splash-complete") continueToLogin();
-          }}
+        <img
+          src="/brand/orha-mark-ink.png"
+          alt="ORHA"
+          className="orha-splash__logo"
         />
       </div>
     </main>
