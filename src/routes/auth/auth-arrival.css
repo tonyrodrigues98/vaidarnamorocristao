@@ -1,0 +1,193 @@
+.auth-arrival {
+  position: relative;
+  display: flex;
+  width: min(100%, 46rem);
+  min-height: 100svh;
+  align-items: stretch;
+  justify-content: center;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.auth-arrival__landscape {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  pointer-events: none;
+  user-select: none;
+}
+
+.auth-arrival__content {
+  display: flex;
+  width: min(100%, 42rem);
+  min-height: 100%;
+  flex-direction: column;
+  padding: max(4.5rem, env(safe-area-inset-top)) 1.5rem max(1.5rem, env(safe-area-inset-bottom));
+}
+
+.auth-arrival__heading {
+  text-align: center;
+}
+
+.auth-arrival__heading h1 {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2em;
+  margin: 0;
+  color: #12121a;
+  font-size: clamp(1.6rem, 7.2vw, 4.6rem);
+  font-weight: 750;
+  line-height: 1.08;
+  letter-spacing: -0.06em;
+  white-space: nowrap;
+}
+
+.auth-arrival__heading h1 > span:last-child {
+  color: var(--rose);
+}
+
+.auth-arrival__wordmark {
+  width: clamp(4.9rem, 24vw, 15.5rem);
+  transform: translateY(0.06em);
+}
+
+.auth-arrival__heading p {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  margin: 1.1rem 0 0;
+  color: #73737c;
+  font-size: clamp(1.1rem, 5vw, 1.75rem);
+  letter-spacing: -0.035em;
+}
+
+.auth-arrival__heading b {
+  color: var(--rose);
+  font-size: 0.7em;
+}
+
+.auth-arrival__form {
+  width: 100%;
+  margin-top: auto;
+  padding-top: clamp(15rem, 38svh, 23rem);
+}
+
+.auth-arrival__form label {
+  color: #1d1d25;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.auth-arrival__form input {
+  min-height: 5.15rem;
+  border-color: rgb(18 18 26 / 10%);
+  border-radius: 1.35rem;
+  background: rgb(255 255 255 / 78%);
+  box-shadow: 0 1px 3px rgb(18 18 26 / 3%);
+  color: #1d1d25;
+  font-size: 1.25rem;
+}
+
+.auth-arrival__form input::placeholder {
+  color: #888891;
+}
+
+.auth-arrival__form input:focus-visible {
+  border-color: rgb(18 18 26 / 32%);
+  outline: 2px solid rgb(18 18 26 / 16%);
+  outline-offset: 1px;
+}
+
+.auth-arrival__form form > button[type="submit"] {
+  min-height: 5.15rem;
+  border-radius: 1.35rem;
+  background: var(--rose);
+  box-shadow: 0 14px 28px rgb(235 79 104 / 20%);
+  font-size: 1.25rem;
+  font-weight: 750;
+}
+
+.auth-arrival__form form > button[type="submit"]:hover {
+  background: color-mix(in srgb, var(--rose) 90%, #000);
+}
+
+.auth-arrival__form form + div {
+  margin-top: 1.75rem;
+}
+
+.auth-arrival__form form + div > div:first-child {
+  margin: 0.25rem 0 1.75rem;
+}
+
+.auth-arrival__form form + div > div:first-child span {
+  background: transparent;
+  color: #74747d;
+  font-size: 1rem;
+  font-weight: 700;
+  text-transform: lowercase;
+}
+
+.auth-arrival__form form + div > button {
+  min-height: 5.15rem;
+  border-color: rgb(18 18 26 / 10%);
+  border-radius: 1.35rem;
+  background: rgb(255 255 255 / 78%);
+  box-shadow: 0 1px 3px rgb(18 18 26 / 3%);
+  font-size: 1.18rem;
+  font-weight: 650;
+}
+
+.auth-arrival__form > p {
+  margin-top: 2.25rem;
+  color: #888891;
+  font-size: 1.05rem;
+}
+
+.dark .auth-arrival__landscape,
+[data-theme="dark"] .auth-arrival__landscape {
+  opacity: 0.14;
+  filter: grayscale(1) brightness(0.5);
+}
+
+.dark .auth-arrival__heading h1,
+.dark .auth-arrival__form label,
+.dark .auth-arrival__form input,
+[data-theme="dark"] .auth-arrival__heading h1,
+[data-theme="dark"] .auth-arrival__form label,
+[data-theme="dark"] .auth-arrival__form input {
+  color: var(--foreground);
+}
+
+.dark .auth-arrival__heading p,
+[data-theme="dark"] .auth-arrival__heading p {
+  color: var(--muted-foreground);
+}
+
+.dark .auth-arrival__form input,
+.dark .auth-arrival__form form + div > button,
+[data-theme="dark"] .auth-arrival__form input,
+[data-theme="dark"] .auth-arrival__form form + div > button {
+  border-color: rgb(255 255 255 / 12%);
+  background: rgb(17 31 63 / 76%);
+}
+
+@media (min-width: 640px) {
+  .auth-arrival__content {
+    padding-right: 2.5rem;
+    padding-left: 2.5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-arrival * {
+    animation: none !important;
+    transition: none !important;
+  }
+}

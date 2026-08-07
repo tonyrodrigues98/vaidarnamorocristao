@@ -7,8 +7,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SocialAuthButtons } from "@/components/SocialAuthButtons";
 import { AuthShell } from "@/components/shells/AuthShell";
+import { BrandLogo } from "@/components/brand/BrandLogo";
 import { useAuth } from "@/lib/auth";
 import { readSafeReturnTo } from "@/lib/safeRedirect";
+import arrivalLandscape from "@/assets/auth/orha-arrival-landscape.png";
+
+import "./auth-arrival.css";
 
 const schema = z.object({
   email: z.string().trim().email("Email inválido").max(255),
@@ -45,53 +49,65 @@ function Login() {
   if (!authLoading && user) return <Navigate to={returnTo} replace />;
 
   return (
-    <AuthShell>
-      <main className="mx-auto flex w-full max-w-md flex-col px-1 pb-4 pt-6 sm:px-4 sm:pb-8 sm:pt-8">
-        <div className="glass animate-fade-up rounded-3xl p-5 shadow-elegant sm:p-8">
-          <h1 className="text-2xl font-semibold sm:text-3xl">Bem-vindo de volta</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Entre para continuar sua jornada.</p>
-          <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                autoComplete="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password">Senha</Label>
-                <Link
-                  to="/auth/forgot-password"
-                  className="text-xs text-[var(--rose)] hover:underline"
-                >
-                  Esqueci a senha
-                </Link>
+    <AuthShell showBrand={false}>
+      <main className="auth-arrival" data-auth-arrival>
+        <img className="auth-arrival__landscape" src={arrivalLandscape} alt="" aria-hidden="true" />
+        <div className="auth-arrival__content">
+          <header className="auth-arrival__heading">
+            <h1>
+              Você chegou à <BrandLogo className="auth-arrival__wordmark" decorative />
+              <span aria-hidden="true">.</span>
+            </h1>
+            <p>
+              Fé <b aria-hidden="true">•</b> Comunidade <b aria-hidden="true">•</b> Conexões
+            </p>
+          </header>
+          <section className="auth-arrival__form" aria-label="Entrar na sua conta">
+            <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  autoComplete="email"
+                  placeholder="voce@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
               </div>
-              <Input
-                id="password"
-                type="password"
-                autoComplete="current-password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
-            <Button type="submit" className="w-full" size="lg" disabled={loading}>
-              {loading ? "Entrando..." : "Entrar"}
-            </Button>
-          </form>
-          <SocialAuthButtons mode="login" />
-          <p className="mt-6 text-center text-sm text-muted-foreground">
-            Novo por aqui?{" "}
-            <Link to="/auth/signup" className="font-medium text-[var(--rose)] hover:underline">
-              Criar conta
-            </Link>
-          </p>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="password">Senha</Label>
+                  <Link
+                    to="/auth/forgot-password"
+                    className="text-xs text-[var(--rose)] hover:underline"
+                  >
+                    Esqueci a senha
+                  </Link>
+                </div>
+                <Input
+                  id="password"
+                  type="password"
+                  autoComplete="current-password"
+                  placeholder="Sua senha"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </div>
+              <Button type="submit" className="w-full" size="lg" disabled={loading}>
+                {loading ? "Entrando..." : "Entrar"}
+              </Button>
+            </form>
+            <SocialAuthButtons mode="login" providers={["google"]} />
+            <p className="mt-6 text-center text-sm text-muted-foreground">
+              Ainda não faz parte?{" "}
+              <Link to="/auth/signup" className="font-semibold text-[var(--rose)] hover:underline">
+                Criar conta
+              </Link>
+            </p>
+          </section>
         </div>
       </main>
     </AuthShell>

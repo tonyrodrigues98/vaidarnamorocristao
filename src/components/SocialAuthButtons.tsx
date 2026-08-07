@@ -9,7 +9,13 @@ import { Button } from "@/components/ui/button";
  * (ou no fluxo pós-login) verificamos se ele já tem perfil e enviamos
  * para /onboarding se não tiver.
  */
-export function SocialAuthButtons({ mode = "login" }: { mode?: "login" | "signup" }) {
+export function SocialAuthButtons({
+  mode = "login",
+  providers = ["google", "apple"],
+}: {
+  mode?: "login" | "signup";
+  providers?: Array<"google" | "apple">;
+}) {
   const [loading, setLoading] = useState<null | "google" | "apple">(null);
 
   async function handle(provider: "google" | "apple") {
@@ -39,27 +45,31 @@ export function SocialAuthButtons({ mode = "login" }: { mode?: "login" | "signup
         <span className="px-3 text-xs uppercase tracking-wide text-muted-foreground">ou</span>
         <div className="flex-1 border-t border-border" />
       </div>
-      <Button
-        type="button"
-        variant="outline"
-        size="lg"
-        className="w-full justify-center gap-2 bg-white text-gray-800 hover:bg-gray-50 border-gray-300"
-        disabled={loading !== null}
-        onClick={() => handle("google")}
-      >
-        <GoogleIcon />
-        {loading === "google" ? "Conectando..." : `${label} com Google`}
-      </Button>
-      <Button
-        type="button"
-        size="lg"
-        className="w-full justify-center gap-2 bg-black text-white hover:bg-black/90"
-        disabled={loading !== null}
-        onClick={() => handle("apple")}
-      >
-        <AppleIcon />
-        {loading === "apple" ? "Conectando..." : `${label} com Apple`}
-      </Button>
+      {providers.includes("google") ? (
+        <Button
+          type="button"
+          variant="outline"
+          size="lg"
+          className="w-full justify-center gap-2 bg-white text-gray-800 hover:bg-gray-50 border-gray-300"
+          disabled={loading !== null}
+          onClick={() => handle("google")}
+        >
+          <GoogleIcon />
+          {loading === "google" ? "Conectando..." : `${label} com Google`}
+        </Button>
+      ) : null}
+      {providers.includes("apple") ? (
+        <Button
+          type="button"
+          size="lg"
+          className="w-full justify-center gap-2 bg-black text-white hover:bg-black/90"
+          disabled={loading !== null}
+          onClick={() => handle("apple")}
+        >
+          <AppleIcon />
+          {loading === "apple" ? "Conectando..." : `${label} com Apple`}
+        </Button>
+      ) : null}
     </div>
   );
 }
