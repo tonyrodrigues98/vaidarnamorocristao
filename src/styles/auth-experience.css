@@ -350,7 +350,10 @@ html[data-theme="dark"] .orha-mark__image--light {
   text-align: center;
 }
 
-.orha-splash .orha-mark {
+.orha-splash__logo {
+  display: block;
+  width: min(72vw, 25rem);
+  height: auto;
   opacity: 0;
   animation: focus-in-contract 950ms cubic-bezier(0.25, 0.46, 0.45, 0.94) 160ms both;
 }
@@ -427,7 +430,7 @@ html[data-theme="dark"] .orha-mark__image--light {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .orha-splash .orha-mark,
+  .orha-splash__logo,
   .orha-splash__completion,
   .orha-auth-card {
     animation-duration: 1ms !important;
