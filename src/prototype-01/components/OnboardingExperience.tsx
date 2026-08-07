@@ -19,7 +19,7 @@ import {
   WifiOff,
   X,
 } from "lucide-react";
-import { Component, type ReactNode, useEffect, useMemo, useState } from "react";
+import { Component, type ReactNode, useMemo, useState } from "react";
 import "../styles/OnboardingExperience.css";
 
 type EntryView =
@@ -718,14 +718,8 @@ function OnboardingContent({
   onClose: () => void;
   showToast: (message: string) => void;
 }) {
-  const [splash, setSplash] = useState(true);
   const [view, setView] = useState<EntryView>("access");
   const [firstAccess, setFirstAccess] = useState(false);
-
-  useEffect(() => {
-    const timer = window.setTimeout(() => setSplash(false), 620);
-    return () => window.clearTimeout(timer);
-  }, []);
 
   const viewContent = useMemo(() => {
     if (firstAccess)
@@ -767,16 +761,6 @@ function OnboardingContent({
     if (view === "session") return <SessionStates setView={setView} showToast={showToast} />;
     return <StatusView view={view} setView={setView} onClose={onClose} showToast={showToast} />;
   }, [firstAccess, onClose, showToast, view]);
-
-  if (splash) {
-    return (
-      <div className="onboarding-splash" aria-label="Inicializando VaiDarNamoro">
-        <img src="/logo-oficial-transparente.png" alt="" />
-        <strong>VaiDarNamoro</strong>
-        <span>Inicializando sua comunidade…</span>
-      </div>
-    );
-  }
 
   return (
     <section className="onboarding-experience" aria-label="Acesso ao VaiDarNamoro">
