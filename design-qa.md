@@ -39,6 +39,14 @@ The logo region was inspected at original resolution in both supplied files and 
 - The corrected production build was captured at 393 × 852 and at a reduced 393 × 640 Safari-like viewport. The complete login form remains visible at 393 × 640, horizontal overflow is absent, and the document remains scroll-safe when browser chrome further reduces usable height.
 - The supplied artwork was then compared again with the browser result. The earlier CSS technique enlarged the full canvas to 184% and could clip the letters at narrow sizes. Both transparent assets are now physically trimmed to their alpha bounds with source-safe padding; the component displays each image at `object-fit: contain`, with no overflow clip or scale enlargement.
 
+## Arrival login update
+
+- New visual source: the supplied `/auth/login` arrival screen with the message “Você chegou à ORHA.”, the faith/community/connections subtitle, a pale horizon, and the single Google sign-in option.
+- Implemented surface: `/auth/login` now uses the literal arrival composition rather than the former centered card: inline dark ORHA wordmark, coral punctuation, horizon artwork, large rounded fields, coral primary action and Google-only social action.
+- Functional boundary: existing password authentication, Google authentication, validation, safe return target, forgot-password route and account-creation route remain unchanged.
+- Responsive treatment: the art is a local bundled asset positioned behind the actual form; the form can scroll on constrained small viewports instead of clipping its controls.
+- Motion/accessibility: the page keeps the existing reduced-motion behavior, semantic labels and native form controls. Dark mode reduces the bright arrival artwork rather than changing the auth flow.
+
 ## Implementation checklist
 
 - Shared theme-aware wordmark component: complete.
