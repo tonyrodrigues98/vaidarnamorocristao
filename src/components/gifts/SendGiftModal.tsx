@@ -1,0 +1,256 @@
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { CoinIcon } from "@/components/icons/CoinIcon";
+import { GiftMedia } from "./GiftMedia";
+import { sendGift, type VirtualGift, RARITY_STYLE } from "@/lib/gifts";
+import { friendlyError } from "@/lib/errors";
+import { supabase } from "@/integrations/supabase/client";
+import { PhotoAvatarImage } from "@/components/PhotoImg";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Send, X, Heart, Gift, Sparkles } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+type Receiver = { id: string; full_name: string; photo_url: string | null };
+
+type Props = {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  gift: VirtualGift | null;
+  receiverId: string | null;
+  balance: number;
+  onSent?: (giftName: string) => void;
+};
+
+export function SendGiftModal({ open, onOpenChange, gift, receiverId, balance, onSent }: Props) {
+  const [msg, setMsg] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [receiver, setReceiver] = useState<Receiver | null>(null);
+
+  useEffect(() => {
+    if (!open) {
+      setMsg("");
+      setBusy(false);
+    }
+  }, [open]);
+
+  useEffect(() => {
+    if (!receiverId) {
+      setReceiver(null);
+      return;
+    }
+    let alive = true;
+    (async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("id, full_name, photo_url")
+        .eq("id", receiverId)
+        .maybeSingle();
+      if (alive) setReceiver((data ?? null) as Receiver | null);
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [receiverId]);
+
+  if (!gift) return null;
+  const insufficient = balance < gift.price_coins;
+  const r = RARITY_STYLE[gift.rarity];
+
+  async function handleSend() {
+    if (!gift || !receiverId) return;
+    setBusy(true);
+    try {
+      await sendGift(receiverId, gift.id, msg.trim() || undefined);
+      toast.success("🎁 Presente enviado!");
+      onSent?.(gift.name);
+      onOpenChange(false);
+    } catch (err) {
+      toast.error(friendlyError(err));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent
+        className="
+    max-w-md
+    overflow-hidden
+    rounded-3xl
+    border
+    border-zinc-200
+    bg-white
+    p-0
+    text-zinc-900
+    shadow-2xl
+    dark:border-zinc-800
+    dark:bg-zinc-900
+    dark:text-white
+  "
+      >
+        {/* gradient header */}
+        <div
+          className="relative overflow-hidden border-b px-6 pb-5 pt-7"
+          style={{
+            background: "linear-gradient(135deg, #FFF4F8 25%, #F8F1FF 50%, #EEF6FF 100%)",
+          }}
+        >
+          <div className="pointer-events-none absolute inset-0 overflow-hidden">
+            <Gift className="absolute left-6 top-6 h-5 w-5 text-violet-300/20" />
+
+            <Heart className="absolute right-10 top-8 h-4 w-4 text-pink-300/20" />
+
+            <Gift className="absolute left-16 bottom-8 h-4 w-4 text-fuchsia-300/15" />
+
+            <Heart className="absolute right-20 bottom-10 h-5 w-5 text-rose-300/15" />
+
+            <Sparkles className="absolute left-1/2 top-6 h-4 w-4 text-violet-300/15" />
+          </div>
+          <DialogHeader className="relative">
+            <DialogTitle className="text-center text-xl font-bold text-zinc-900 dark:text-white">
+              Enviar presente
+            </DialogTitle>
+          </DialogHeader>
+          <div className="relative mt-3 flex flex-col items-center gap-2">
+            <GiftMedia
+              emoji={gift.emoji}
+              imageUrl={gift.image_url}
+              rarity={gift.rarity}
+              size="xl"
+              floating
+            />
+            <h3 className="mt-2 text-lg font-semibold text-zinc-900 dark:text-white">
+              {gift.name}
+            </h3>
+            <div
+              className="
+  inline-flex
+  items-center
+  gap-2
+  rounded-full
+  border
+  border-amber-200
+  bg-amber-50
+  px-4
+  py-1.5
+  text-sm
+  font-semibold
+  text-amber-700
+"
+            >
+              <CoinIcon className="h-4 w-4" />
+              {gift.price_coins} moedas
+            </div>
+          </div>
+        </div>
+
+        <div className="relative space-y-4 p-6">
+          {receiver && (
+            <div
+              className="
+  flex
+  items-center
+  gap-3
+  rounded-2xl
+  border
+  border-zinc-200
+  bg-zinc-50
+  p-3
+"
+            >
+              <Avatar className="h-10 w-10 ring-2 ring-white/60">
+                <PhotoAvatarImage src={receiver.photo_url} alt={receiver.full_name} />
+                <AvatarFallback>{receiver.full_name?.charAt(0) ?? "?"}</AvatarFallback>
+              </Avatar>
+              <div className="min-w-0">
+                <p className="text-xs text-zinc-500">Para</p>
+                <p className="truncate font-semibold text-zinc-900 dark:text-white">
+                  {receiver.full_name}
+                </p>
+              </div>
+            </div>
+          )}
+
+          <div>
+            <label className="text-xs font-medium text-white/90">Mensagem (opcional)</label>
+            <Textarea
+              rows={2}
+              maxLength={120}
+              value={msg}
+              onChange={(e) => setMsg(e.target.value)}
+              placeholder="Escreva algo carinhoso..."
+              className="mt-1.5 border-zinc-200 bg-zinc-50 text-zinc-900 placeholder:text-zinc-400"
+            />
+            <p className="mt-1 text-right text-[11px] text-white/80">{msg.length}/120</p>
+          </div>
+
+          <div
+            className="
+  flex
+  items-center
+  justify-between
+  rounded-2xl
+  border
+  border-zinc-200
+  bg-zinc-50
+  px-4
+  py-3
+"
+          >
+            <span className="text-xs font-semibold text-zinc-900/80">Saldo atual</span>
+            <span
+              className={cn(
+                "inline-flex items-center gap-1 font-bold text-zinc-900",
+                insufficient && "text-red-700",
+              )}
+            >
+              <CoinIcon className="h-4 w-4" /> {balance}
+            </span>
+          </div>
+
+          {insufficient && (
+            <p className="rounded-lg bg-red-500/30 px-3 py-2 text-center text-sm font-medium text-white ring-1 ring-red-300/60">
+              Moedas insuficientes para este presente.
+            </p>
+          )}
+
+          <div className="flex gap-2 pt-1">
+            <Button
+              variant="outline"
+              className="
+  flex-1
+  rounded-2xl
+  border-zinc-300
+  bg-white
+  text-zinc-700
+"
+              onClick={() => onOpenChange(false)}
+              disabled={busy}
+            >
+              <X className="mr-1 h-4 w-4" /> Cancelar
+            </Button>
+            <Button
+              className="
+  flex-1
+  rounded-2xl
+  bg-gradient-to-r
+  from-violet-500
+  to-fuchsia-500
+  font-semibold
+  text-white
+"
+              disabled={busy || insufficient || !receiverId}
+              onClick={handleSend}
+            >
+              <Send className="mr-1 h-4 w-4" /> {busy ? "Enviando..." : "Enviar"}
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}

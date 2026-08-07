@@ -1,0 +1,20 @@
+{
+  "name": "VaiDarNamoro",
+  "short_name": "VDN",
+  "description": "Uma comunidade cristã para amizades, conversas e experiências compartilhadas.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "any",
+  "background_color": "#fafafa",
+  "theme_color": "#fafafa",
+  "icons": [
+    {
+      "src": "/vdn-logo.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

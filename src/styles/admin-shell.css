@@ -1,0 +1,318 @@
+[data-vdn-admin-shell] {
+  --vdn-admin-rail: 72px;
+  --vdn-admin-sidebar: 272px;
+  display: grid;
+  min-height: 100dvh;
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr);
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+}
+
+[data-vdn-admin-shell] .vdn-admin-primary {
+  display: none;
+}
+[data-vdn-admin-shell] .vdn-admin-workspace,
+[data-vdn-admin-shell] .vdn-admin-content {
+  min-width: 0;
+}
+[data-vdn-admin-shell] .vdn-admin-header {
+  position: sticky;
+  top: 0;
+  z-index: 25;
+}
+[data-vdn-admin-shell] .vdn-admin-topbar {
+  min-height: calc(64px + env(safe-area-inset-top));
+  padding: env(safe-area-inset-top) max(1rem, env(safe-area-inset-right)) 0
+    max(1rem, env(safe-area-inset-left));
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border-bottom: 1px solid hsl(var(--border));
+  background: hsl(var(--background) / 0.96);
+  backdrop-filter: blur(14px);
+}
+[data-vdn-admin-shell] .vdn-admin-topbar__logo {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+}
+[data-vdn-admin-shell] .vdn-admin-topbar__title {
+  min-width: 0;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+[data-vdn-admin-shell] .vdn-admin-topbar__title strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+[data-vdn-admin-shell] .vdn-admin-topbar__title span {
+  font-size: 0.72rem;
+  color: hsl(var(--muted-foreground));
+}
+[data-vdn-admin-shell] .vdn-admin-topbar__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+[data-vdn-admin-shell] .vdn-admin-topbar__action,
+[data-vdn-admin-shell] .vdn-admin-topbar__back,
+[data-vdn-admin-shell] .vdn-admin-drawer__close {
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.75rem;
+  border: 1px solid hsl(var(--border));
+}
+[data-vdn-admin-shell] .vdn-admin-topbar__action svg,
+[data-vdn-admin-shell] .vdn-admin-topbar__back svg {
+  width: 20px;
+  height: 20px;
+}
+[data-vdn-admin-shell] .vdn-admin-topbar__back {
+  gap: 0.5rem;
+  padding-inline: 0.75rem;
+}
+[data-vdn-admin-shell] .vdn-admin-topbar__back span {
+  display: none;
+}
+[data-vdn-admin-shell] .vdn-admin-content {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}
+[data-vdn-admin-shell] .vdn-admin-sidebar__inner {
+  min-height: 100%;
+  padding: max(1rem, env(safe-area-inset-top)) 0.75rem max(1rem, env(safe-area-inset-bottom));
+}
+[data-vdn-admin-shell] .vdn-admin-brand {
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border-radius: 0.875rem;
+  padding: 0.5rem;
+}
+[data-vdn-admin-shell] .vdn-admin-brand img {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+}
+[data-vdn-admin-shell] .vdn-admin-brand span {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+}
+[data-vdn-admin-shell] .vdn-admin-brand small {
+  color: hsl(var(--muted-foreground));
+}
+[data-vdn-admin-shell] .vdn-admin-nav {
+  margin-top: 1rem;
+}
+[data-vdn-admin-shell] .vdn-admin-nav__group {
+  margin-top: 1rem;
+}
+[data-vdn-admin-shell] .vdn-admin-nav__group h2 {
+  padding-inline: 0.75rem;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: hsl(var(--muted-foreground));
+}
+[data-vdn-admin-shell] .vdn-admin-nav__item {
+  min-height: 44px;
+  margin-top: 0.25rem;
+  padding: 0.6rem 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border-radius: 0.75rem;
+  color: hsl(var(--muted-foreground));
+}
+[data-vdn-admin-shell] .vdn-admin-nav__item svg {
+  width: 20px;
+  height: 20px;
+  flex: none;
+}
+[data-vdn-admin-shell] .vdn-admin-nav__item[aria-current="page"] {
+  background: var(--coral-500, #ff6f61);
+  color: white;
+  font-weight: 700;
+}
+[data-vdn-admin-shell] .vdn-admin-nav__item:focus-visible,
+[data-vdn-admin-shell] .vdn-admin-topbar__action:focus-visible,
+[data-vdn-admin-shell] .vdn-admin-topbar__back:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+[data-vdn-admin-shell] .vdn-admin-drawer {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+}
+[data-vdn-admin-shell] .vdn-admin-drawer__backdrop {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  background: rgb(0 0 0 / 0.55);
+}
+[data-vdn-admin-shell] .vdn-admin-drawer__panel {
+  position: relative;
+  width: min(88vw, 340px);
+  height: 100%;
+  overflow-y: auto;
+  background: hsl(var(--background));
+  box-shadow: 20px 0 60px rgb(0 0 0 / 0.25);
+}
+[data-vdn-admin-shell] .vdn-admin-drawer__close {
+  position: absolute;
+  top: max(0.75rem, env(safe-area-inset-top));
+  right: 0.75rem;
+  z-index: 1;
+  background: hsl(var(--background));
+}
+[data-vdn-admin-shell] :where(input, textarea, select) {
+  font-size: max(16px, 1em);
+}
+[data-vdn-admin-shell] :where(table) {
+  max-width: 100%;
+}
+[data-vdn-admin-shell] [data-vdn-admin-page] {
+  min-width: 0;
+}
+[data-vdn-admin-shell] [data-vdn-admin-page] :where([role="tablist"]) {
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+[data-vdn-admin-shell] [data-vdn-admin-page] :where(table) {
+  white-space: nowrap;
+}
+[data-vdn-admin-shell] :where([role="dialog"]) {
+  max-height: calc(100dvh - 2rem);
+}
+
+@media (min-width: 48rem) {
+  [data-vdn-admin-shell] {
+    grid-template-columns: var(--vdn-admin-rail) minmax(0, 1fr);
+  }
+  [data-vdn-admin-shell] .vdn-admin-primary {
+    display: block;
+    position: sticky;
+    top: 0;
+    align-self: start;
+    height: 100dvh;
+    overflow-y: auto;
+    border-right: 1px solid hsl(var(--border));
+  }
+  [data-vdn-admin-shell] .vdn-admin-primary .vdn-admin-brand span,
+  [data-vdn-admin-shell] .vdn-admin-primary .vdn-admin-nav__group h2,
+  [data-vdn-admin-shell] .vdn-admin-primary .vdn-admin-nav__item span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+  [data-vdn-admin-shell] .vdn-admin-primary .vdn-admin-brand,
+  [data-vdn-admin-shell] .vdn-admin-primary .vdn-admin-nav__item {
+    justify-content: center;
+    padding-inline: 0;
+  }
+  [data-vdn-admin-shell] .vdn-admin-topbar__menu {
+    display: none;
+  }
+  [data-vdn-admin-shell] .vdn-admin-topbar__back span {
+    display: inline;
+  }
+}
+
+@media (min-width: 80rem) {
+  [data-vdn-admin-shell] {
+    grid-template-columns: var(--vdn-admin-sidebar) minmax(0, 1fr);
+  }
+  [data-vdn-admin-shell] .vdn-admin-primary .vdn-admin-brand span,
+  [data-vdn-admin-shell] .vdn-admin-primary .vdn-admin-nav__item span {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip: auto;
+  }
+  [data-vdn-admin-shell] .vdn-admin-primary .vdn-admin-nav__group h2 {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip: auto;
+  }
+  [data-vdn-admin-shell] .vdn-admin-primary .vdn-admin-brand,
+  [data-vdn-admin-shell] .vdn-admin-primary .vdn-admin-nav__item {
+    justify-content: flex-start;
+    padding-inline: 0.75rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-vdn-admin-shell] * {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* iPad-style administrative sidebar and Liquid Glass toolbar. */
+[data-vdn-admin-shell] {
+  font-family:
+    -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", system-ui, sans-serif;
+  color: var(--foreground);
+  background: var(--background);
+}
+
+[data-vdn-admin-shell] .vdn-admin-topbar {
+  border-bottom-color: var(--border);
+  background: var(--ios-glass, rgb(248 248 252 / 0.72));
+  box-shadow: inset 0 -1px 0 var(--border);
+  backdrop-filter: blur(28px) saturate(1.45);
+  -webkit-backdrop-filter: blur(28px) saturate(1.45);
+}
+
+[data-vdn-admin-shell] .vdn-admin-primary {
+  border-right-color: var(--border);
+  background: color-mix(in srgb, var(--card) 92%, transparent);
+}
+
+[data-vdn-admin-shell] .vdn-admin-nav__item {
+  min-height: 44px;
+  border-radius: 0.75rem;
+}
+
+[data-vdn-admin-shell] .vdn-admin-nav__item[aria-current="page"] {
+  color: white;
+  background: var(--primary);
+}
+
+[data-vdn-admin-shell] [data-vdn-admin-page] {
+  padding: clamp(1rem, 3vw, 2.25rem);
+}
+
+[data-vdn-admin-shell] [data-vdn-admin-page] :where(h1) {
+  font-size: clamp(2rem, 6vw, 2.75rem);
+  font-weight: 750;
+  letter-spacing: -0.045em;
+}
+
+[data-vdn-admin-shell] [data-vdn-admin-page] :where(table) {
+  border: 1px solid var(--border);
+  border-radius: 1.25rem;
+  background: var(--card);
+  box-shadow: var(--shadow-grouped);
+}
+
+[data-vdn-admin-shell] [data-vdn-admin-page] :where([role="tablist"]) {
+  padding: 3px;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  background: var(--secondary);
+}
