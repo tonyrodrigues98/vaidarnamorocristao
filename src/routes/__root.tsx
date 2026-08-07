@@ -205,36 +205,10 @@ function RootShell({ children }: { children: React.ReactNode }) {
       <head>
         <HeadContent />
         <script dangerouslySetInnerHTML={{ __html: getThemeBootstrapScript() }} />
-        <style
-          dangerouslySetInnerHTML={{
-            __html: `
-#app-splash{position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#ffffff;transition:opacity .35s ease;}
-html.dark #app-splash,html[data-theme="dark"] #app-splash{background:${brand.theme.canvasDark};}
-#app-splash.is-hiding{opacity:0;pointer-events:none;}
-#app-splash .app-splash-logo{width:min(60vw,200px);height:auto;object-fit:contain;display:block;filter:drop-shadow(0 8px 24px rgba(0,0,0,.08));}
-@media (min-width:768px){#app-splash .app-splash-logo{width:240px;}}
-#app-splash .app-splash-loader{margin-top:32px;width:160px;height:3px;background:rgba(0,0,0,.08);border-radius:999px;overflow:hidden;}
-html.dark #app-splash .app-splash-loader,html[data-theme="dark"] #app-splash .app-splash-loader{background:rgba(255,255,255,.14);}
-#app-splash .app-splash-loader-bar{display:block;height:100%;width:0%;background:#000;border-radius:999px;transition:width .35s cubic-bezier(.22,.61,.36,1);}
-html.dark #app-splash .app-splash-loader-bar,html[data-theme="dark"] #app-splash .app-splash-loader-bar{background:#fff;}
-`,
-          }}
-        />
       </head>
       <body>
-        <div id="app-splash" aria-hidden="true">
-          <img src={brand.assets.splashLogo} alt={brand.name} className="app-splash-logo" />
-          <div className="app-splash-loader">
-            <span className="app-splash-loader-bar" suppressHydrationWarning />
-          </div>
-        </div>
         {children}
         <Scripts />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `(function(){var b=document.querySelector('#app-splash .app-splash-loader-bar');if(!b)return;var p=5;b.style.width=p+'%';var tick=setInterval(function(){if(p<90){p+=Math.max(.4,(90-p)*0.04);b.style.width=p+'%';}},120);function set(v){if(v>p){p=v;b.style.width=p+'%';}}window.__splashSet=set;document.addEventListener('DOMContentLoaded',function(){set(35);});window.addEventListener('load',function(){set(70);});window.__splashDone=function(){clearInterval(tick);b.style.width='100%';};})();`,
-          }}
-        />
       </body>
     </html>
   );
@@ -253,18 +227,6 @@ function RootComponent() {
 
   useEffect(() => {
     registerAppServiceWorker();
-  }, []);
-
-  useEffect(() => {
-    const el = document.getElementById("app-splash");
-    if (!el) return;
-    const done = (window as unknown as { __splashDone?: () => void }).__splashDone;
-    if (done) done();
-    const t = window.setTimeout(() => {
-      el.classList.add("is-hiding");
-      window.setTimeout(() => el.remove(), 400);
-    }, 280);
-    return () => window.clearTimeout(t);
   }, []);
 
   return (
