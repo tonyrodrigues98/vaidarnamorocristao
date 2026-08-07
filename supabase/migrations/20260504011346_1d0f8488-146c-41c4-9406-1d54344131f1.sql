@@ -1,1 +1,0 @@
-DROP POLICY IF EXISTS "authenticated can subscribe" ON public.messages;

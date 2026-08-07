@@ -465,3 +465,10 @@ html[data-theme="dark"] .orha-mark__image--light {
     margin-top: 1.5rem;
   }
 }
+
+.orha-auth-page__brand-placeholder { width: 1px; height: 1px; }
+.orha-auth-welcome { margin-bottom: 1.65rem; text-align: center; }
+.orha-auth-welcome__title { margin: 0; color: var(--orha-ink); font-size: clamp(1.65rem, 7.4vw, 2.25rem); font-weight: 760; line-height: 1.12; letter-spacing: -0.045em; }
+.orha-auth-welcome__title span { display: inline-block; transform: scaleX(-1); }
+.orha-auth-welcome__pillars { display: flex; justify-content: center; gap: 0.65rem; margin: 0.8rem 0 0; color: var(--orha-muted); font-size: 0.69rem; font-weight: 750; letter-spacing: 0.09em; text-transform: uppercase; }
+.orha-auth-welcome__pillars i { width: 3px; height: 3px; margin-block: auto; border-radius: 50%; background: var(--orha-accent-strong); }

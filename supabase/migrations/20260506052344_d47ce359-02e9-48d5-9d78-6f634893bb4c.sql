@@ -1,1 +1,0 @@
-REVOKE EXECUTE ON FUNCTION public.run_reactivation_reminders() FROM anon, authenticated;

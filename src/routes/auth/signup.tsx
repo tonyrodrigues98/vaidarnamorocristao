@@ -61,8 +61,7 @@ function Signup() {
     <AuthShell>
       <AuthPage
         backTo="/auth/login"
-        title="Crie sua conta."
-        description="Leva menos de um minuto."
+        brandWelcome
         footer={
           <p>
             Já tem uma conta?{" "}

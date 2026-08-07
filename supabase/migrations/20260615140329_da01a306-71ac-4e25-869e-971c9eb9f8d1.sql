@@ -1,1 +1,0 @@
-DROP FUNCTION IF EXISTS public.track_achievement(uuid, text, integer);

@@ -1,1 +1,0 @@
-ALTER TABLE public.user_coins DROP CONSTRAINT IF EXISTS balance_max_500;

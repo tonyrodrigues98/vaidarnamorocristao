@@ -1,1 +1,0 @@
-ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS contributor_highlight boolean NOT NULL DEFAULT true;

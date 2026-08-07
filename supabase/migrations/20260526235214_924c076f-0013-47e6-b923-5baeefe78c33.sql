@@ -1,2 +1,0 @@
-REVOKE EXECUTE ON FUNCTION public.send_anonymous_hint_text(uuid, anonymous_hint_category, text) FROM PUBLIC;
-REVOKE EXECUTE ON FUNCTION public.send_anonymous_hint_text(uuid, anonymous_hint_category, text) FROM anon;

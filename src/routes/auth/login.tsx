@@ -48,8 +48,7 @@ function Login() {
   return (
     <AuthShell>
       <AuthPage
-        title="Bem-vindo de volta."
-        description="Entre para continuar na ORHA."
+        brandWelcome
         footer={
           <p>
             Ainda não faz parte?{" "}
