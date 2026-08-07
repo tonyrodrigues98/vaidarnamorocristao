@@ -23,7 +23,6 @@ export const brand = {
     icon192: "/icon-192.png",
     icon512: "/icon-512.png",
     socialImage: "/og-image.jpg",
-    splashLogo: "/splash-logo.png",
     manifest: "/manifest.webmanifest",
   },
 } as const;

@@ -119,7 +119,7 @@ html[data-theme="dark"] .orha-mark__image--light {
 
 .orha-auth-card {
   width: 100%;
-  margin: clamp(1.25rem, 3.5vh, 2rem) 0 0;
+  margin: clamp(2.75rem, 8svh, 4.5rem) 0 0;
   padding: 0;
   background: transparent;
   animation: orha-enter 520ms var(--ease-ios-out) both;
@@ -496,5 +496,11 @@ html[data-theme="dark"] .orha-mark__image--light {
   .orha-auth-page__footer {
     margin-top: auto;
     padding-top: 1rem;
+  }
+}
+
+@media (max-height: 43rem) {
+  .orha-auth-card {
+    margin-top: 1.5rem;
   }
 }

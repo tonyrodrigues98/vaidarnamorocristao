@@ -2,7 +2,7 @@
   "name": "VaiDarNamoro",
   "short_name": "VaiDarNamoro",
   "description": "Plataforma crista de relacionamentos com proposito.",
-  "start_url": "/inicio",
+  "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",

@@ -166,12 +166,13 @@ describe("theme system contract", () => {
     expect(target.meta.content).toBe(brand.theme.canvasLight);
   });
 
-  it("keeps the bootstrap before the body and gives the legacy splash a dark canvas", () => {
+  it("keeps the theme bootstrap before the body without reintroducing a legacy splash", () => {
     const rootSource = readFileSync("src/routes/__root.tsx", "utf8");
     expect(rootSource.indexOf("getThemeBootstrapScript()")).toBeLessThan(
       rootSource.indexOf("<body>"),
     );
-    expect(rootSource).toContain('html.dark #app-splash,html[data-theme="dark"] #app-splash');
+    expect(rootSource).not.toContain("app-splash");
+    expect(rootSource).not.toContain("apple-touch-startup-image");
     expect(rootSource.match(/name: "theme-color"/g)).toHaveLength(1);
   });
 });
