@@ -61,9 +61,8 @@ function Signup() {
     <AuthShell>
       <AuthPage
         backTo="/auth/login"
-        eyebrow="BEM-VINDO À ORHA"
-        title="Comece do seu jeito."
-        description="Crie a sua conta em poucos segundos. Depois, montamos seu perfil juntos."
+        title="Crie sua conta."
+        description="Leva menos de um minuto."
         footer={
           <p>
             Já tem uma conta?{" "}

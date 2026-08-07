@@ -48,9 +48,8 @@ function Login() {
   return (
     <AuthShell>
       <AuthPage
-        eyebrow="QUE BOM VER VOCÊ"
-        title="Que bom te ver por aqui."
-        description="Entre para continuar suas conexões, conversas e momentos na ORHA."
+        title="Bem-vindo de volta."
+        description="Entre para continuar na ORHA."
         footer={
           <p>
             Ainda não faz parte?{" "}
