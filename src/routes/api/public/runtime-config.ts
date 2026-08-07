@@ -8,9 +8,16 @@ const RESPONSE_HEADERS = {
 };
 
 function getPublicSupabaseRuntimeConfig() {
-  const supabaseUrl = process.env.SUPABASE_URL ?? process.env.VITE_SUPABASE_URL;
+  // process.env is only populated for bound runtime secrets in the Worker;
+  // import.meta.env values are inlined at build time and survive there.
+  const supabaseUrl =
+    process.env.SUPABASE_URL ??
+    process.env.VITE_SUPABASE_URL ??
+    import.meta.env.VITE_SUPABASE_URL;
   const publishableKey =
-    process.env.SUPABASE_PUBLISHABLE_KEY ?? process.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+    process.env.SUPABASE_PUBLISHABLE_KEY ??
+    process.env.VITE_SUPABASE_PUBLISHABLE_KEY ??
+    import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
   return supabaseUrl && publishableKey ? { supabaseUrl, publishableKey } : undefined;
 }
