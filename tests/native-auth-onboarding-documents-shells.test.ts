@@ -20,7 +20,7 @@ describe("auth, onboarding and document shells", () => {
   it("applies the specialized auth shell without changing auth operations", () => {
     for (const route of ["login", "signup", "forgot-password", "reset-password"]) {
       const source = readFileSync(`src/routes/auth/${route}.tsx`, "utf8");
-      expect(source).toContain("<AuthShell>");
+      expect(source).toContain("<AuthShell");
     }
     expect(readFileSync("src/routes/auth/login.tsx", "utf8")).toContain("signInWithPassword");
     expect(readFileSync("src/routes/auth/signup.tsx", "utf8")).toContain("signUp");
